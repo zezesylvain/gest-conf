@@ -14,3 +14,4 @@ cryptography==50.0.2          # chiffrement du secret TOTP (MultiFernet) ; versi
 fido2==2.2.1                  # importé par allauth.mfa même sans WebAuthn ; version vérifiée par V03
 tzdata==2026.5                # fuseaux IANA pour zoneinfo (saisie des échéances, D13), pur Python
 Pillow==12.3.0                # réencodage des images publiques (E4, plan L2) ; roue binaire vérifiée par V28
+pypdf==6.19.0                 # contrôle et nettoyage des PDF déposés (F2, plan L3), pur Python
