@@ -2,11 +2,13 @@ import logging
 import secrets
 import threading
 import time
+from datetime import timedelta
 
 from django.conf import settings
 from django.core.cache import caches
 from django.db import DatabaseError, connection
 from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.views.decorators.csrf import csrf_exempt
 from drf_spectacular.utils import extend_schema
@@ -19,7 +21,8 @@ from apps.core.authentication import CsrfFailed
 from apps.core.errors import ErrorCode
 from apps.core.exceptions import error_payload
 from apps.core.http import client_ip
-from apps.core.serializers import HealthSerializer, HealthStatus, ServiceStatus
+from apps.core.models import CronHeartbeat
+from apps.core.serializers import HealthSerializer, HealthStatus, JobsStatus, ServiceStatus
 from apps.core.throttling import THROTTLE_CACHE_ALIAS
 
 logger = logging.getLogger(__name__)
@@ -96,6 +99,28 @@ def reset_cache_probe() -> None:
         _cache_probe = None
 
 
+# Nombre d'intervalles du cron sans passage réussi de run_jobs au-delà duquel la file
+# est déclarée en retard (plan L1 §8.4).
+JOBS_LATE_INTERVALS = 3
+
+
+def jobs_status() -> JobsStatus:
+    """État de la file d'après le battement de cœur de ``run_jobs``."""
+    try:
+        last_success = (
+            CronHeartbeat.objects.filter(name="run_jobs")
+            .values_list("last_success_at", flat=True)
+            .first()
+        )
+    except DatabaseError:
+        logger.exception("Battement de cœur de run_jobs illisible")
+        return JobsStatus.UNKNOWN
+    if last_success is None:
+        return JobsStatus.UNKNOWN
+    late_after = timedelta(seconds=JOBS_LATE_INTERVALS * settings.GESTCONF_CRON_INTERVAL_SECONDS)
+    return JobsStatus.LATE if timezone.now() - last_success > late_after else JobsStatus.OK
+
+
 class HealthView(APIView):
     """Sonde de disponibilité (supervision externe et tests de fumée du déploiement)."""
 
@@ -115,6 +140,7 @@ class HealthView(APIView):
             "status": HealthStatus.OK if healthy else HealthStatus.DEGRADED,
             "database": ServiceStatus.OK if db_ok else ServiceStatus.ERROR,
             "cache": ServiceStatus.OK if cache_ok else ServiceStatus.ERROR,
+            "jobs": jobs_status() if db_ok else JobsStatus.UNKNOWN,
             "secure": request.is_secure(),
             "release": settings.GESTCONF_RELEASE,
         }

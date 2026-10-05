@@ -1,0 +1,2 @@
+{% autoescape off %}Bonjour {{ display_name }}, voici un message ordinaire.
+{% endautoescape %}

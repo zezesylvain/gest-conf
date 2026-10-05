@@ -25,7 +25,10 @@ composants communs) : `web/projects/shared`, importé sous le nom `@gestconf/sha
 backend/            Django 5.2 LTS + DRF (sans admin Django)
   config/           réglages (base, dev, test, prod), urls, wsgi, montage /api
   apps/core/        socle : santé, erreurs (catalogue ErrorCode, DomainError), CSRF,
-                    Actor, pagination, IP du client, middlewares, modèle horodaté
+                    Actor, pagination, IP du client, middlewares, modèle horodaté,
+                    journal d'audit (RG-17), file de tâches (Job, run_jobs), commandes
+                    cron verrouillées (LockedCommand), alertes aux opérateurs
+  apps/communications/  registre d'envoi des e-mails (OutboxEmail), gabarits FR/EN
   apps/accounts/    utilisateur (identifié par e-mail)
   locale/           catalogue « en » des messages de l'API (.po et .mo versionnés)
   requirements/     *.in (sources) → *.txt verrouillés avec empreintes (pip-tools)
@@ -56,6 +59,11 @@ python manage.py createcachetable   # table du cache partagé (gestconf_cache)
 python manage.py runserver    # http://localhost:8000/api/v1/health
 ```
 
+Les e-mails passent par une file (table `Job`) que vide `python manage.py run_jobs`, lancée
+par cron en production. En développement, lancer `run_jobs` à la main : les e-mails
+s'affichent dans le terminal (backend `console`). Seuls les e-mails de la « voie rapide »
+(vérification d'adresse, invitations…) partent pendant la requête.
+
 Le cache partagé (limites de débit, sonde `/health`) est une table en base : sans
 `createcachetable`, `/api/v1/health` répond 503 avec `"cache": "error"`. La commande est
 sans effet si la table existe déjà ; elle se relance après chaque `migrate` (déploiement compris).
@@ -82,6 +90,8 @@ Les deux serveurs de développement relaient `/api` vers `runserver` (`web/proxy
 | Couverture backend | `pytest --cov` (`--cov-report=html` pour le détail ; configuration dans `pyproject.toml`) |
 | Qualité backend | `ruff check . ../deploy && ruff format --check . ../deploy` |
 | Cache partagé | `python manage.py createcachetable` (après chaque `migrate`) |
+| File de tâches | `python manage.py run_jobs` (cron en production : `deploy/cron.sh`) |
+| E-mails | `python manage.py send_test_email <adresse>` puis `run_jobs` ; suivi : `python manage.py outbox [--status failed] [--retry ID]` |
 | Schéma OpenAPI | `python manage.py spectacular --file schema.yml --validate --fail-on-warn` |
 | Traductions de l'API | voir ci-dessous |
 | Dépendances Python | `requirements/compile.sh` — voir ci-dessous |

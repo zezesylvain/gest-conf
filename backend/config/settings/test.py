@@ -16,3 +16,11 @@ DATABASES = {"default": database_from_env(default="sqlite://:memory:")}
 
 # Hachage rapide : les tests créent beaucoup d'utilisateurs.
 PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
+
+EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
+DEFAULT_FROM_EMAIL = "GEST-CONF <no-reply@conference.test>"
+GESTCONF_CRON_INTERVAL_SECONDS = 300
+ADMINS = []
+
+# Gabarits d'e-mails propres aux tests (tests/templates).
+TEMPLATES[0]["DIRS"] = [BASE_DIR / "tests" / "templates"]

@@ -2200,7 +2200,7 @@ Ces mises à jour seront livrées par une PR de documentation en L1.8, **après 
 
 ---
 
-## 16. Écarts constatés pendant l'implémentation (L1.0, L1.1)
+## 16. Écarts constatés pendant l'implémentation (L1.0 à L1.2)
 
 Consignés ici pour ne pas dériver en silence (CLAUDE.md). Les écarts marqués **à valider** attendent
 l'accord du commanditaire ; les autres sont des précisions sans effet sur les décisions D1 à D18.
@@ -2253,3 +2253,66 @@ Ils seront repris dans la PR de documentation de L1.8 (§15).
     `python manage.py createcachetable` après `migrate`, `requirements/compile.sh` (verrouillage
     avec empreintes), `locale/check.sh` (traductions de l'API) et `deploy/check-o2switch.sh`
     (vérifications de l'hébergement, lecture seule).
+
+### Étape L1.2 (audit, file, e-mails, cron)
+
+11. **§3.5, `CronHeartbeat`.** Deux colonnes s'ajoutent : `last_success_at` (date du dernier
+    passage **réussi**, sur laquelle `/health` calcule `jobs: late`, alors que `last_finished_at`
+    couvre aussi les échecs) et `last_error` (nature de l'erreur seulement).
+12. **§7.2, `record`.** Le paramètre `edition` et l'index (`edition`, `at`) arrivent en L1.5 avec
+    la FK (§3.8). Les garde-fous sur `before`/`after` sont appliqués **à chaque écriture**, et non
+    seulement par un test : clé interdite (`password`, `secret`, `token`, `key`, `otp`,
+    `totp_secret`, à toute profondeur) ou adresse e-mail en clair dans une valeur →
+    `AuditDataError`. Seule la forme masquée `x***@domaine` (`mask_email`) passe. Un modèle
+    photographié par `snapshot` doit déclarer `AUDIT_FIELDS`, sinon `TypeError`.
+13. **§8.3, gabarits.** Registre `register_email_template(code, sensitive=…, fast_path=…)` :
+    `is_sensitive`, la priorité du job (0 si sensible ou voie rapide) et la liste blanche
+    `FAST_PATH_TEMPLATES` (calculée, `fast_path_templates()`) **découlent du gabarit**, jamais de
+    l'appelant. Un gabarit non déclaré est refusé. Le code d'un gabarit est le préfixe de ses
+    fichiers (`account/email/email_confirmation`), à la manière d'allauth, et non une forme pointée
+    (`account.email_confirmation`). Le test `test_subject_templates_have_no_personal_data` parcourt
+    **tous** les gabarits déclarés, y compris ceux des lots suivants.
+14. **§8.3, plafond de la voie rapide.** Le budget de 3 envois par requête est porté par un
+    middleware dédié, `EmailFastPathMiddleware` (variable de contexte), et non par
+    `RequestIdMiddleware` : hors requête (commandes, cron), aucun budget, donc aucune voie rapide.
+15. **§8.2 et §3.6, `last_error`.** Seule la **nature** de l'erreur est conservée (classe de
+    l'exception), jamais son message, qui peut contenir l'adresse du destinataire (refus du
+    fournisseur). Le détail va dans le journal du serveur.
+16. **§8.4, `/health` (à valider).** `jobs: late` ne fait pas passer `status` à `degraded` ni la
+    réponse à 503 : un cron arrêté n'empêche pas l'API de répondre. Le test de fumée exige en
+    revanche `jobs: ok` ; il échoue donc au tout premier déploiement, tant que la crontab n'a pas
+    tourné une fois (documenté dans `deploy/README.md`). Le retrait de l'empreinte de commit de
+    `/health`, proposé au §8.4, n'est pas fait (toujours à valider).
+17. **§8.4, `cleanup`.** Les purges sont déclarées par chaque application
+    (`register_retention_task`, `apps/core/retention.py`) : `core` ne dépend d'aucune application
+    métier. Une purge **imposée par la sécurité** (corps d'e-mails à jeton non envoyés après 24 h,
+    §3.6) s'applique toujours ; les durées de D15 restent en simulation tant que
+    `GESTCONF_RETENTION_ENFORCED` est faux. `cleanup`, lancée par le cron, est journalisée sous
+    l'acteur `Actor.system("cron:cleanup")` : préfixe `cron:`, à côté de `cli:` et `job:`.
+    `check_integrity` reste en L1.8 (§13) : `deploy/cron.sh` n'accepte pour l'instant que
+    `run_jobs` et `cleanup`, la troisième ligne de cron arrive avec elle.
+18. **§8.4, `deploy/cron.sh`.** Liste fermée de commandes ; sorties dans
+    `logs/cron-<commande>.log` (rotation à 5 Mio), rien sur la sortie standard. Le chemin du venv
+    cPanel (V22) n'est pas codé en dur : `deploy.sh` l'écrit dans `VENV_ACTIVATE`, à côté de
+    `RELEASE`, et le script est extrait du commit déployé (`git show`), comme le code Django.
+19. **D17, mécanisme précisé.** `apps.core.alerts.OperatorAlertHandler`, branché sur
+    `django.request` (erreurs 5xx), n'envoie que le type d'exception, le **motif de route
+    résolu** (jamais le chemin brut, qui pourrait porter un jeton), la méthode, le statut et
+    l'identifiant de requête. Envoi direct (`mail_admins`), hors file, pour qu'une alerte parte
+    même base ou file en panne ; plafond de 10 par heure (`GESTCONF_OPERATOR_ALERTS_PER_HOUR`).
+    Les opérateurs sont lus dans `GESTCONF_OPERATORS` (liste d'adresses), qui alimente `ADMINS`.
+    Les mêmes alertes signalent une tâche en échec définitif et une commande cron en erreur.
+20. **D10, dépendances.** `django-anymail==15.2` (sans extra : ceux de Brevo et Mailjet
+    n'ajoutent rien) apporte `requests`, `urllib3`, `certifi`, `idna` et `charset-normalizer`,
+    tous en roues pures. Vérifié dans le code installé : classes
+    `anymail.backends.brevo.EmailBackend` et `anymail.backends.mailjet.EmailBackend` ; délai
+    réseau par `ANYMAIL["REQUESTS_TIMEOUT"]` (30 s par défaut), réglé à (3,05 s ; 10 s). En
+    production, `GESTCONF_EMAIL_BACKEND` et `DEFAULT_FROM_EMAIL` sont obligatoires.
+21. **`outbox --retry`.** Le job existant (`dedup_key` unique) est remis en attente, tentatives
+    à zéro, plutôt que d'en créer un second. Un e-mail dont le corps à jeton a été purgé ne peut
+    pas être renvoyé : le destinataire doit le redemander.
+22. **Critère de fin de L1.2 (J-tech).** Vérifié en local : `send_test_email` met en file,
+    `deploy/cron.sh run_jobs` (réglages de production, venv lu dans `VENV_ACTIVATE`) envoie, le
+    battement de cœur donne `jobs: ok`, les verrous et l'exclusivité sont testés (y compris
+    `GET_LOCK` sur MariaDB 10.11). **Reste à faire sur o2switch**, avec un accès au compte : la
+    crontab, le fournisseur (D10, clé et domaine SPF/DKIM) et la réception réelle de l'e-mail.

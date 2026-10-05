@@ -138,3 +138,31 @@ def test_o2switch_check_controls_innodb_row_format():
     code = CHECK_SCRIPT.read_text(encoding="utf-8")
     assert "@@innodb_default_row_format" in code
     assert "@@innodb_page_size" in code
+
+
+# --- Commandes planifiées (étape L1.2, plan §8.4) ----------------------------------------
+
+CRON_SCRIPT = REPO_DIR / "deploy" / "cron.sh"
+
+
+def test_deploy_ships_the_cron_script_from_the_commit():
+    """deploy/cron.sh est extrait du commit déployé, comme le code Django, et le chemin du
+    venv de Passenger est écrit pour lui (VENV_ACTIVATE), puis protégé du rsync --delete."""
+    code = shell_code(DEPLOY_SCRIPT)
+    assert 'git -C "$ROOT" show "$RELEASE:deploy/cron.sh"' in code
+    assert "> VENV_ACTIVATE" in code
+    assert "--exclude '/VENV_ACTIVATE'" in code
+    assert "--exclude '/logs/'" in code
+
+
+def test_cron_script_only_runs_scheduled_commands():
+    """Liste fermée : le script cron n'est pas un accès générique à manage.py."""
+    code = shell_code(CRON_SCRIPT)
+    assert re.search(r"^\s*run_jobs \| cleanup\)", code, re.M)
+    assert "config.settings.prod" in code
+    assert CRON_SCRIPT.stat().st_mode & 0o111
+
+
+def test_smoke_test_checks_the_job_queue():
+    code = shell_code(REPO_DIR / "deploy" / "smoke-test.sh")
+    assert 'json_has "$health" jobs \'"ok"\'' in code

@@ -1,0 +1,2 @@
+{% autoescape off %}Lien : {{ activate_url }}
+{% endautoescape %}

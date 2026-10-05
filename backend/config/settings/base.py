@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "apps.core",
     "apps.accounts",
+    "apps.communications",
 ]
 
 MIDDLEWARE = [
@@ -50,6 +51,8 @@ MIDDLEWARE = [
     # celles produites par les middlewares suivants (refus CSRF, par exemple).
     "apps.core.middleware.RequestIdMiddleware",
     "apps.core.middleware.RobotsTagMiddleware",
+    # Plafond des envois immédiats d'e-mails par requête (voie rapide, plan L1 §8.3).
+    "apps.communications.middleware.EmailFastPathMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     # Langue de la requête (en-tête Accept-Language) : messages d'erreur FR/EN.
@@ -68,7 +71,7 @@ WSGI_APPLICATION = "config.wsgi.application"
 # pas de redirection automatique, qui casserait les requêtes POST.
 APPEND_SLASH = False
 
-# Seuls les gabarits des bibliothèques (page Swagger en développement) sont utilisés.
+# Gabarits des applications : e-mails (apps/*/templates) et page Swagger en développement.
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -241,6 +244,7 @@ SPECTACULAR_SETTINGS = {
     "ENUM_NAME_OVERRIDES": {
         "HealthStatus": "apps.core.serializers.HealthStatus",
         "ServiceStatus": "apps.core.serializers.ServiceStatus",
+        "JobsStatus": "apps.core.serializers.JobsStatus",
         "ErrorCode": "apps.core.errors.ErrorCode",
     },
     "POSTPROCESSING_HOOKS": [
@@ -249,6 +253,56 @@ SPECTACULAR_SETTINGS = {
         "drf_spectacular.hooks.postprocess_schema_enums",
     ],
 }
+
+# --- E-mails (plan L1 §8.3, décision D10) ------------------------------------------------
+# Nom affiché dans les gabarits (objet et corps) ; fixe, jamais saisi par un utilisateur.
+GESTCONF_SITE_NAME = env.str("GESTCONF_SITE_NAME", default="GEST-CONF")
+# Backend : console en développement, locmem en test (test.py), fournisseur par API en
+# production via django-anymail, par exemple « anymail.backends.brevo.EmailBackend » ou
+# « anymail.backends.mailjet.EmailBackend » (classes vérifiées dans anymail 15.2).
+EMAIL_BACKEND = env.str(
+    "GESTCONF_EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend"
+)
+DEFAULT_FROM_EMAIL = env.str("DEFAULT_FROM_EMAIL", default="GEST-CONF <no-reply@localhost>")
+SERVER_EMAIL = env.str("SERVER_EMAIL", default=DEFAULT_FROM_EMAIL)
+# Clés du fournisseur : seules celles définies sont transmises à anymail, qui refuse de
+# démarrer si la clé du backend choisi manque. Délai réseau borné (connexion, lecture) :
+# la voie rapide envoie pendant la requête HTTP, au plus 3 fois (plan L1 §8.3).
+ANYMAIL = {
+    name: value
+    for name, value in {
+        "BREVO_API_KEY": env.str("BREVO_API_KEY", default=""),
+        "MAILJET_API_KEY": env.str("MAILJET_API_KEY", default=""),
+        "MAILJET_SECRET_KEY": env.str("MAILJET_SECRET_KEY", default=""),
+    }.items()
+    if value
+}
+ANYMAIL["REQUESTS_TIMEOUT"] = (
+    env.float("GESTCONF_EMAIL_CONNECT_TIMEOUT", default=3.05),
+    env.float("GESTCONF_EMAIL_READ_TIMEOUT", default=10.0),
+)
+# Plafond global d'envoi par heure (plan L1 §8.3, D16) : au-delà, les e-mails restent en
+# file. À aligner sur le quota du fournisseur retenu (D10, à vérifier).
+GESTCONF_EMAIL_MAX_PER_HOUR = env.int("GESTCONF_EMAIL_MAX_PER_HOUR", default=200)
+
+# --- Opérateurs et alertes (décision D17) ---------------------------------------------
+# Adresses des opérateurs, séparées par des virgules. Alertes minimales seulement
+# (apps.core.alerts) : jamais le détail d'une requête.
+ADMINS = [(address, address) for address in env.list("GESTCONF_OPERATORS", default=[])]
+EMAIL_SUBJECT_PREFIX = "[GEST-CONF] "
+GESTCONF_OPERATOR_ALERTS_PER_HOUR = env.int("GESTCONF_OPERATOR_ALERTS_PER_HOUR", default=10)
+
+# --- Tâches planifiées (règle n° 9, plan L1 §8.2 et §8.4) -----------------------------
+# Intervalle du cron de run_jobs, en secondes (décision d'hébergement H-6, contrôle M01) :
+# /health signale « late » après trois intervalles sans passage réussi.
+GESTCONF_CRON_INTERVAL_SECONDS = env.int("GESTCONF_CRON_INTERVAL_SECONDS", default=300)
+# Verrou des commandes cron (décision H-5) : « flock » (fichier dans GESTCONF_LOCK_DIR)
+# ou « database » (GET_LOCK de MariaDB).
+GESTCONF_COMMAND_LOCK = env.str("GESTCONF_COMMAND_LOCK", default="flock")
+GESTCONF_LOCK_DIR = Path(env.str("GESTCONF_LOCK_DIR", default=str(BASE_DIR / "tmp")))
+# Durées de conservation de D15 : simulation seule tant qu'elles ne sont pas validées
+# par le commanditaire (les purges imposées par la sécurité s'appliquent toujours).
+GESTCONF_RETENTION_ENFORCED = env.bool("GESTCONF_RETENTION_ENFORCED", default=False)
 
 # --- Sécurité (valeurs communes ; durcies dans prod.py) ------------------------
 SESSION_COOKIE_HTTPONLY = True
@@ -272,9 +326,16 @@ LOGGING = {
     },
     "handlers": {
         "console": {"class": "logging.StreamHandler", "formatter": "simple"},
+        # Erreurs 5xx : alerte minimale aux opérateurs (D17), sans détail de la requête.
+        "operators": {"()": "apps.core.alerts.OperatorAlertHandler"},
     },
     "root": {"handlers": ["console"], "level": "INFO"},
     "loggers": {
         "django": {"handlers": ["console"], "level": "INFO", "propagate": False},
+        "django.request": {
+            "handlers": ["console", "operators"],
+            "level": "INFO",
+            "propagate": False,
+        },
     },
 }

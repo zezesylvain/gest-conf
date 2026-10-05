@@ -74,12 +74,16 @@ step "Envoi du code Django vers ~/$DEPLOY_APP_DIR (version $RELEASE)"
 # ignoré par git présent sur le poste (.coverage, htmlcov/, .env.local, db.sqlite3...)
 # ne peut partir sur le serveur.
 git -C "$ROOT" archive --format=tar "$RELEASE" backend | tar -x -C "$STAGING"
+# Script des commandes planifiées (crontab cPanel), versionné lui aussi : extrait du commit.
+mkdir -p "$STAGING/backend/deploy"
+git -C "$ROOT" show "$RELEASE:deploy/cron.sh" >"$STAGING/backend/deploy/cron.sh"
+chmod 755 "$STAGING/backend/deploy/cron.sh"
 # --delete évite qu'une migration supprimée du dépôt reste sur le serveur ; les
 # exclusions protègent ce qui n'appartient qu'au serveur (.env, journaux, fichiers cPanel).
 rsync -az --delete \
   --exclude '.venv/' --exclude '__pycache__/' --exclude '.pytest_cache/' --exclude '.ruff_cache/' \
   --exclude '/.env' --exclude '/db.sqlite3' --exclude '/tmp/' --exclude '/RELEASE' \
-  --exclude '/public/' --exclude '*.log' \
+  --exclude '/VENV_ACTIVATE' --exclude '/logs/' --exclude '/public/' --exclude '*.log' \
   "$STAGING/backend/" "$DEPLOY_SSH:$DEPLOY_APP_DIR/"
 
 step "Dépendances, migrations, table de cache, contrôles, redémarrage de Passenger"
@@ -113,6 +117,8 @@ python manage.py migrate --noinput
 # Elles ne sont pas créées par une migration ; la commande est sans effet si elles existent.
 python manage.py createcachetable
 echo "$release" > RELEASE
+# Chemin du venv lu par deploy/cron.sh : le cron charge le même environnement que Passenger.
+printf '%s\n' "$venv_activate" > VENV_ACTIVATE
 mkdir -p tmp && touch tmp/restart.txt
 REMOTE
 
