@@ -14,12 +14,16 @@ DirectoryIndex index.html
   RewriteCond %{REQUEST_URI} ^/(api|gestion)(/|$)
   RewriteRule ^ - [L]
 
-  # 2. Fichier ou dossier existant (dont les pages pré-rendues) : servi tel quel.
+  # 2. Racine : le portail est en /fr/ et /en/ (lot L2, E2). Redirection temporaire (302),
+  #    la page « / » pré-rendue (meta refresh) restant un repli.
+  RewriteRule ^$ /fr/ [R=302,L]
+
+  # 3. Fichier ou dossier existant (dont les pages pré-rendues) : servi tel quel.
   RewriteCond %{REQUEST_FILENAME} -f [OR]
   RewriteCond %{REQUEST_FILENAME} -d
   RewriteRule ^ - [L]
 
-  # 3. Sinon : coquille Angular rendue dans le navigateur (repli SPA).
+  # 4. Sinon : coquille Angular rendue dans le navigateur (repli SPA).
   RewriteRule ^ /index.csr.html [L]
 </IfModule>
 

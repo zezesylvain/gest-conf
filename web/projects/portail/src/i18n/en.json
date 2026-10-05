@@ -6,12 +6,6 @@
       "myAccount": "My account",
       "signIn": "Sign in"
     },
-    "home": {
-      "title": "Home",
-      "heading": "Scientific conference",
-      "lead": "Call for papers, programme and registration.",
-      "managementLink": "Go to the management area"
-    },
     "notFound": {
       "title": "Page not found",
       "heading": "This page does not exist.",
@@ -281,6 +275,41 @@
         "confirmationHint": "Type {{email}} to confirm.",
         "understood": "I understand that this operation is permanent.",
         "anonymize": "Permanently anonymize my account"
+      }
+    },
+    "site": {
+      "loading": "Loading…",
+      "backHome": "Back to home",
+      "errorTitle": "Page temporarily unavailable",
+      "errorLead": "The content of this page could not be loaded. Please try again in a moment.",
+      "toCall": "Call for papers",
+      "toDates": "Important dates",
+      "callLead": "Accepted formats, deadlines and document templates. Proposals will be submitted in the author area once the call opens.",
+      "formats": "Presentation formats",
+      "deadlines": "Deadlines",
+      "templates": "Templates and documents",
+      "comingSoon": "This page will be completed soon.",
+      "committeeSoon": "The committee membership will be published soon.",
+      "datesRange": "From {{start}} to {{end}}",
+      "timezone": "Times shown in the conference time zone ({{zone}}).",
+      "noDates": "Dates will be announced soon.",
+      "noDocuments": "No documents yet.",
+      "duration": "{{minutes}} min",
+      "abstractWords": "abstract of up to {{words}} words",
+      "countdown": "{{days}} days to go",
+      "keyDates": {
+        "call_open": "Call opens",
+        "call_close": "Call closes",
+        "review_deadline": "End of reviews",
+        "notification": "Notification of decisions",
+        "camera_ready": "Camera-ready version",
+        "registration_open": "Registration opens",
+        "early_bird_end": "End of early-bird rate",
+        "registration_close": "Registration closes"
+      },
+      "nav": {
+        "header": "Main navigation",
+        "footer": "Footer links"
       }
     }
   }

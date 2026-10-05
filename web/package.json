@@ -10,7 +10,7 @@
     "ng": "ng",
     "start:portail": "ng serve portail",
     "start:gestion": "ng serve gestion",
-    "build": "ng build portail && ng build gestion && node scripts/inject-csp.mjs dist/portail/browser dist/gestion/browser",
+    "build": "ng build portail && node scripts/check-prerender.mjs dist/portail/browser && ng build gestion && node scripts/inject-csp.mjs dist/portail/browser dist/gestion/browser",
     "test": "node --test 'scripts/*.test.mjs' && ng test shared --watch=false && ng test portail --watch=false && ng test gestion --watch=false",
     "lint": "ng lint",
     "format": "prettier --write .",

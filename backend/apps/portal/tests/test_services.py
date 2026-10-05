@@ -329,3 +329,26 @@ def test_pending_since_is_the_oldest_pending_change():
     rich(edition, code="b")
     times = AuditLog.objects.filter(action="portal.section_created").values_list("at", flat=True)
     assert services.publication_status(edition)["pending_since"] == min(times)
+
+
+def test_site_pages_are_identical_in_the_portal():
+    """``SITE_PAGES`` est recopiée pour Angular (routes statiques du portail) : les deux
+    listes doivent rester identiques (adresses figées des pages du site)."""
+    import json
+    from pathlib import Path
+
+    from django.conf import settings
+
+    path = Path(settings.BASE_DIR).parent / "web/projects/portail/src/app/site/site-pages.json"
+    expected = [
+        {
+            "slug": page.slug,
+            "fr": page.path_fr,
+            "en": page.path_en,
+            "title_fr": page.title_fr,
+            "title_en": page.title_en,
+            "coming_soon": page.coming_soon,
+        }
+        for page in SITE_PAGES
+    ]
+    assert json.loads(path.read_text(encoding="utf-8")) == expected

@@ -39,11 +39,15 @@ has_meta_csp() {
 # has_header <en-têtes> <nom> <motif ERE de la valeur> : insensible à la casse.
 has_header() { grep -Eiq "^$2:[[:space:]]*.*$3" <<<"$1"; }
 
-body=$("${CURL[@]}" "$BASE_URL/")
-check "portail : / renvoie la page pré-rendue" "$([[ "$body" == *"<portail-root"* && "$body" == *"<h1"* ]] && echo 1)"
-check "portail : CSP à empreintes en <meta> sur /" "$(has_meta_csp "$body" && echo 1)"
-
 headers=$("${CURL[@]}" -D - -o /dev/null "$BASE_URL/")
+check "portail : / redirige vers /fr/ (302, lot L2)" \
+  "$(grep -Eq '^HTTP/[0-9.]+ 302' <<<"$headers" && has_header "$headers" location '/fr/' && echo 1)"
+
+body=$("${CURL[@]}" "$BASE_URL/fr/")
+check "portail : /fr/ renvoie le portail" "$([[ "$body" == *"<portail-root"* ]] && echo 1)"
+check "portail : CSP à empreintes en <meta> sur /fr/" "$(has_meta_csp "$body" && echo 1)"
+
+headers=$("${CURL[@]}" -D - -o /dev/null "$BASE_URL/fr/")
 check "portail : en-tête CSP présent" "$(has_header "$headers" content-security-policy 'frame-ancestors' && echo 1)"
 
 body=$("${CURL[@]}" "$BASE_URL/une-page-qui-n-existe-pas")

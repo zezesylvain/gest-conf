@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from apps.conferences.models import Edition, EditionStatus, KeyDate, SubmissionType, Track
@@ -182,14 +183,17 @@ class PublicEditionSerializer(serializers.ModelSerializer):
         )
         read_only_fields = fields
 
+    @extend_schema_field(PublicTrackSerializer(many=True))
     def get_tracks(self, edition: Edition) -> list[dict]:
         return PublicTrackSerializer(edition.tracks.filter(is_active=True), many=True).data
 
+    @extend_schema_field(PublicSubmissionTypeSerializer(many=True))
     def get_submission_types(self, edition: Edition) -> list[dict]:
         return PublicSubmissionTypeSerializer(
             edition.submission_types.filter(is_active=True), many=True
         ).data
 
+    @extend_schema_field(PublicKeyDateSerializer(many=True))
     def get_key_dates(self, edition: Edition) -> list[dict]:
         return PublicKeyDateSerializer(
             edition.key_dates.filter(is_public=True).select_related("edition"), many=True

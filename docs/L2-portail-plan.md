@@ -538,3 +538,54 @@ base, nettoyage, repli sans Pillow) ; `GESTCONF_FILES_DIR` dans `.env.example`.
   - image posée dans une section ;
   - photo de profil réduite à 800×533 ; lien `http` refusé ; consentement « photo » accordé ;
   - aucune erreur dans la console.
+
+## 16. Bilan de L2.5 (5 octobre 2026)
+
+**Livré** :
+
+- **Routes FR/EN** générées depuis `SITE_PAGES` (`/fr/appel`, `/en/call`, …) et `/:lang/p/:slug`
+  pour les pages libres ; `/` redirige vers `/fr/` (302 dans le `.htaccess`, page de repli
+  pré-rendue). La table `site-pages.json` du portail est une copie de `apps/portal/site.py`,
+  contrôlée par un test backend (`test_site_pages_are_identical_in_the_portal`).
+- **Rendu des pages** : composition lue sur `/v1/public/portal/pages/<slug>`, rendu par type de
+  section (texte riche réassaini côté client sans DOM, image et texte, dates, thématiques, types
+  de soumission, documents, compte à rebours, appel à l'action), gabarits propres aux pages du
+  site, titre et description de la page, états chargement / prête / absente / erreur.
+- **Menus** d'en-tête et de pied lus sur l'API, avec menu de repli ; liens de langue vers la
+  page équivalente.
+- **Pré-rendu** : avec `GESTCONF_PRERENDER_API_ORIGIN`, toutes les pages du site et les pages
+  libres (`getPrerenderParams` sur `/v1/public/portal/routes`) sont pré-rendues ; un
+  `HttpBackend` côté serveur conserve le cache de transfert (aucun appel API au chargement
+  hormis la session). Sans la variable (CI, développement), rendu navigateur.
+- **Contrôle de complétude** `scripts/check-prerender.mjs`, branché dans `npm run build` : chaque
+  route annoncée par l'API doit avoir sa page portant le marqueur `data-gc-rendered`, sinon le
+  build échoue.
+- **Backend** : listes publiques typées (`PublicKeyDate`, `PublicTrack`,
+  `PublicSubmissionType`) dans le schéma, client régénéré.
+- **Test de fumée** : redirection de `/` et réponse de `/fr/`.
+
+**Vérifications** :
+
+- **Backend** : 1 333 tests sous SQLite, 1 339 sous MariaDB ; ruff ; schéma validé.
+- **Front** : portail 79 (dont assainisseur, routes, widgets), gestion 74, shared 76 ; lint,
+  format ; tests des scripts de build.
+- **Build contre l'API locale** : 31 routes pré-rendues ; contrôle de complétude au vert
+  (30 routes annoncées).
+- **Dans Chromium** :
+  - `/` redirige vers `/fr/` ;
+  - pages FR et EN correctes ; navigation client qui ne lit que la composition ;
+  - page libre inconnue : « page introuvable » ;
+  - aucun débordement à 375 px ;
+  - console limitée aux 401 (session anonyme) et 404 attendus.
+
+**Points à trancher ou à reprendre** :
+
+- **Budget du portail (décision du commanditaire)** : le bundle initial pèse 371,4 kB pour un
+  seuil d'avertissement à 365 kB (seuil d'erreur : 380 kB). Les optimisations à faible coût ont
+  été faites (pas de `RouterLinkActive` ni de liaison des entrées par le routeur, services
+  scindés). Proposition : relever l'avertissement à 375 kB, ou accepter l'avertissement
+  jusqu'à L2.7. Le build n'est pas bloqué.
+- **Barre finale des adresses** : les pages pré-rendues sont des dossiers
+  (`fr/appel/index.html`) ; Apache redirige `/fr/appel` vers `/fr/appel/`. Les liens internes
+  du routeur restent sans barre (navigation client, sans effet). Les adresses canoniques avec
+  barre finale sont traitées en L2.6 (référencement).

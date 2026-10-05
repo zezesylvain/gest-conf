@@ -3942,20 +3942,17 @@ components:
         tracks:
           type: array
           items:
-            type: object
-            additionalProperties: {}
+            $ref: '#/components/schemas/PublicTrack'
           readOnly: true
         submission_types:
           type: array
           items:
-            type: object
-            additionalProperties: {}
+            $ref: '#/components/schemas/PublicSubmissionType'
           readOnly: true
         key_dates:
           type: array
           items:
-            type: object
-            additionalProperties: {}
+            $ref: '#/components/schemas/PublicKeyDate'
           readOnly: true
       required:
       - city
@@ -4125,6 +4122,37 @@ components:
       - url
       - uuid
       - width
+    PublicKeyDate:
+      type: object
+      description: 'Lecture : ``at`` (UTC) et ``at_local`` (heure de l''édition, sans
+        fuseau).'
+      properties:
+        code:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Date (UTC)
+        at_local:
+          type: string
+          readOnly: true
+        label_fr:
+          type: string
+          readOnly: true
+          title: Libellé (FR)
+        label_en:
+          type: string
+          readOnly: true
+          title: Libellé (EN)
+      required:
+      - at
+      - at_local
+      - code
+      - label_en
+      - label_fr
     PublicMenuItem:
       type: object
       properties:
@@ -4324,6 +4352,75 @@ components:
       - documents
       - edition
       - poster
+    PublicSubmissionType:
+      type: object
+      properties:
+        code:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        label_fr:
+          type: string
+          readOnly: true
+          title: Libellé (FR)
+        label_en:
+          type: string
+          readOnly: true
+          title: Libellé (EN)
+        description_fr:
+          type: string
+          readOnly: true
+          title: Description (FR)
+        description_en:
+          type: string
+          readOnly: true
+          title: Description (EN)
+        default_duration_min:
+          type: integer
+          readOnly: true
+          nullable: true
+          title: Durée par défaut (min)
+        abstract_max_words:
+          type: integer
+          readOnly: true
+          title: Mots maximum du résumé
+      required:
+      - abstract_max_words
+      - code
+      - default_duration_min
+      - description_en
+      - description_fr
+      - label_en
+      - label_fr
+    PublicTrack:
+      type: object
+      properties:
+        code:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        name_fr:
+          type: string
+          readOnly: true
+          title: Nom (FR)
+        name_en:
+          type: string
+          readOnly: true
+          title: Nom (EN)
+        description_fr:
+          type: string
+          readOnly: true
+          title: Description (FR)
+        description_en:
+          type: string
+          readOnly: true
+          title: Description (EN)
+      required:
+      - code
+      - description_en
+      - description_fr
+      - name_en
+      - name_fr
     PublicationStatus:
       type: object
       properties:

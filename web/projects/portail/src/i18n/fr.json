@@ -6,12 +6,6 @@
       "myAccount": "Mon compte",
       "signIn": "Connexion"
     },
-    "home": {
-      "title": "Accueil",
-      "heading": "Conférence scientifique",
-      "lead": "Appel à communications, programme et inscriptions.",
-      "managementLink": "Accéder à l'espace de gestion"
-    },
     "notFound": {
       "title": "Page introuvable",
       "heading": "Cette page n'existe pas.",
@@ -281,6 +275,41 @@
         "confirmationHint": "Saisissez {{email}} pour confirmer.",
         "understood": "Je comprends que cette opération est définitive.",
         "anonymize": "Anonymiser définitivement mon compte"
+      }
+    },
+    "site": {
+      "loading": "Chargement…",
+      "backHome": "Retour à l'accueil",
+      "errorTitle": "Page momentanément indisponible",
+      "errorLead": "Le contenu de cette page n'a pas pu être chargé. Réessayez dans quelques instants.",
+      "toCall": "Appel à communications",
+      "toDates": "Dates importantes",
+      "callLead": "Formats acceptés, échéances et modèles de documents. Le dépôt des propositions se fera dans l'espace auteur, dès l'ouverture de l'appel.",
+      "formats": "Formats de communication",
+      "deadlines": "Échéances",
+      "templates": "Modèles et documents",
+      "comingSoon": "Cette page sera complétée prochainement.",
+      "committeeSoon": "La composition du comité sera publiée prochainement.",
+      "datesRange": "Du {{start}} au {{end}}",
+      "timezone": "Heures indiquées dans le fuseau de la conférence ({{zone}}).",
+      "noDates": "Les dates seront annoncées prochainement.",
+      "noDocuments": "Aucun document pour le moment.",
+      "duration": "{{minutes}} min",
+      "abstractWords": "résumé de {{words}} mots au plus",
+      "countdown": "J-{{days}}",
+      "keyDates": {
+        "call_open": "Ouverture de l'appel",
+        "call_close": "Clôture de l'appel",
+        "review_deadline": "Fin des évaluations",
+        "notification": "Notification des décisions",
+        "camera_ready": "Version définitive",
+        "registration_open": "Ouverture des inscriptions",
+        "early_bird_end": "Fin du tarif préférentiel",
+        "registration_close": "Clôture des inscriptions"
+      },
+      "nav": {
+        "header": "Navigation principale",
+        "footer": "Liens de pied de page"
       }
     }
   }

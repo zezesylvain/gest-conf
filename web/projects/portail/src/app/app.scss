@@ -19,13 +19,19 @@
 }
 
 .site-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+  display: grid;
+  gap: 0.75rem;
   padding: 1rem clamp(1rem, 4vw, 3rem);
   background: var(--gc-primary);
   color: var(--gc-on-primary);
+}
+
+.header-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
 }
 
 .header-tools {
