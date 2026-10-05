@@ -3,16 +3,22 @@ par défaut) ; CSRF contrôlé par ``apps.core.authentication.SessionAuthenticat
 
 from __future__ import annotations
 
-from django.http import Http404, HttpRequest
-from drf_spectacular.utils import extend_schema
+from django.contrib.auth import logout
+from django.http import Http404, HttpRequest, HttpResponse
+from django.utils.translation import gettext_lazy as _
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import OpenApiResponse, extend_schema
+from rest_framework import serializers, status
+from rest_framework.parsers import MultiPartParser
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.accounts import services
 from apps.accounts.models import Consent
-from apps.accounts.permissions import session_has_mfa
+from apps.accounts.permissions import RecentAuthRequired, session_has_mfa
 from apps.accounts.serializers import (
+    AnonymizationSerializer,
     ConsentCreateSerializer,
     ConsentRecordSerializer,
     ConsentsSerializer,
@@ -22,10 +28,13 @@ from apps.accounts.serializers import (
     TotpQrSerializer,
     consent_states,
 )
+from apps.accounts.services import profile as profile_services
 from apps.accounts.services.access import editions_with_roles
 from apps.accounts.services.invitations import pending_for_user
 from apps.accounts.services.mfa import mfa_enabled, totp_qr_data_url
+from apps.accounts.services.personal_data import anonymize_user, export_user_data
 from apps.core.actor import Actor
+from apps.core.errors import Invalid
 
 
 def me_payload(user, request: Request | HttpRequest) -> dict:
@@ -99,6 +108,57 @@ class ProfileView(APIView):
         return Response(ProfileSerializer(profile).data)
 
 
+class PhotoUploadSerializer(serializers.Serializer):
+    file = serializers.FileField(help_text="PNG, JPEG ou WebP, 5 Mio au plus.")
+
+
+class ProfilePhotoView(APIView):
+    """``PUT``/``DELETE /v1/me/photo`` : photo du profil (E12), réencodée sans métadonnées.
+    Publiée sur le portail seulement avec le consentement ``photo_publication``."""
+
+    parser_classes = (MultiPartParser,)
+    throttle_scope = "portal_upload"
+
+    @extend_schema(
+        operation_id="me_photo_update",
+        request={"multipart/form-data": PhotoUploadSerializer},
+        responses={200: ProfileSerializer},
+    )
+    def put(self, request: Request) -> Response:
+        serializer = PhotoUploadSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        upload = serializer.validated_data["file"]
+        profile = profile_services.set_photo(
+            request.user, data=upload.read(), name=upload.name, actor=Actor.from_request(request)
+        )
+        return Response(ProfileSerializer(profile).data)
+
+    @extend_schema(
+        operation_id="me_photo",
+        responses={(200, "application/octet-stream"): OpenApiTypes.BINARY},
+    )
+    def get(self, request: Request) -> HttpResponse:
+        """Sa propre photo, même sans consentement de publication (aperçu de l'espace compte)."""
+        profile = services.get_profile(request.user)
+        if profile._state.adding or profile.photo_id is None:
+            raise Http404
+        from apps.core import public_files
+
+        try:
+            data = public_files.read(profile.photo)
+        except FileNotFoundError as exc:
+            raise Http404 from exc
+        response = HttpResponse(data, content_type=profile.photo.content_type)
+        response["Cache-Control"] = "private, no-store"
+        response["X-Content-Type-Options"] = "nosniff"
+        return response
+
+    @extend_schema(operation_id="me_photo_delete", responses={200: ProfileSerializer})
+    def delete(self, request: Request) -> Response:
+        profile = profile_services.remove_photo(request.user, actor=Actor.from_request(request))
+        return Response(ProfileSerializer(profile).data)
+
+
 class ConsentsView(APIView):
     @extend_schema(operation_id="me_consents", responses={200: ConsentsSerializer})
     def get(self, request: Request) -> Response:
@@ -143,3 +203,53 @@ class TotpQrView(APIView):
         response = Response(TotpQrSerializer({"qr_code": qr_code}).data)
         response["Cache-Control"] = "no-store"
         return response
+
+
+class DataExportView(APIView):
+    """``GET /v1/me/data-export`` : toutes ses données en JSON (plan L1 §4.9), sans secret.
+    Réauthentification récente, limite ``data_export``, audit ``account.exported``."""
+
+    permission_classes = (*APIView.permission_classes, RecentAuthRequired)
+    throttle_scope = "data_export"
+
+    @extend_schema(
+        operation_id="me_data_export",
+        responses={200: OpenApiResponse(OpenApiTypes.OBJECT, description="Export JSON.")},
+    )
+    def get(self, request: Request) -> Response:
+        data = export_user_data(request.user, actor=Actor.from_request(request))
+        response = Response(data)
+        response["Content-Disposition"] = (
+            f'attachment; filename="gestconf-donnees-{request.user.pk}.json"'
+        )
+        response["Cache-Control"] = "no-store"
+        return response
+
+
+class AnonymizationView(APIView):
+    """``POST /v1/me/anonymization`` : anonymisation immédiate et définitive (plan §4.9).
+
+    Réauthentification récente, adresse du compte saisie pour confirmer, limite
+    ``account_deletion``. Refusée (409 ``account_has_active_duties``) tant que des rôles
+    de gestion sont actifs. La session est fermée.
+    """
+
+    permission_classes = (*APIView.permission_classes, RecentAuthRequired)
+    throttle_scope = "account_deletion"
+
+    @extend_schema(
+        operation_id="me_anonymization",
+        request=AnonymizationSerializer,
+        responses={204: None},
+    )
+    def post(self, request: Request) -> Response:
+        serializer = AnonymizationSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        confirmation = serializer.validated_data["confirmation"].strip().lower()
+        if confirmation != request.user.email.lower():
+            raise Invalid(
+                fields={"confirmation": [_("Saisissez exactement l'adresse de votre compte.")]}
+            )
+        anonymize_user(request.user, actor=Actor.from_request(request))
+        logout(request._request)
+        return Response(status=status.HTTP_204_NO_CONTENT)

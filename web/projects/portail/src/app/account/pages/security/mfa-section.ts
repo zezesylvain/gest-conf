@@ -157,7 +157,7 @@ type MfaStep = 'loading' | 'disabled' | 'setup' | 'enabled';
                 {{ 'portail.account.security.disableConfirm' | translate }}
               </button>
               <button mat-button type="button" (click)="confirmingDisable.set(false)">
-                {{ 'portail.account.reauth.cancel' | translate }}
+                {{ 'portail.account.security.cancel' | translate }}
               </button>
             </div>
           } @else {

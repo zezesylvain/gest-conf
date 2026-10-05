@@ -6,12 +6,6 @@
       "myAccount": "My account",
       "signIn": "Sign in"
     },
-    "home": {
-      "title": "Home",
-      "heading": "Scientific conference",
-      "lead": "Call for papers, programme and registration.",
-      "managementLink": "Go to the management area"
-    },
     "notFound": {
       "title": "Page not found",
       "heading": "This page does not exist.",
@@ -23,7 +17,9 @@
         "home": "Home",
         "profile": "Profile",
         "logout": "Sign out",
-        "security": "Security"
+        "security": "Security",
+        "privacy": "Privacy",
+        "myData": "My data"
       },
       "fields": {
         "email": "Email address",
@@ -84,7 +80,11 @@
         "management": "Go to the management area",
         "mfaEnabled": "Two-factor authentication: enabled.",
         "mfaDisabled": "Two-factor authentication: not enabled.",
-        "security": "Manage account security"
+        "security": "Manage account security",
+        "pendingTitle": "Pending invitations",
+        "pendingHint": "To respond, open the link you received by email.",
+        "editionsTitle": "My editions",
+        "open": "Open in management"
       },
       "profile": {
         "title": "Profile",
@@ -97,7 +97,10 @@
           "department": "Department, laboratory",
           "country": "Country",
           "orcid": "ORCID iD",
-          "bio": "Biography"
+          "bio": "Biography",
+          "website": "Website",
+          "scholar_url": "Google Scholar profile",
+          "linkedin_url": "LinkedIn profile"
         },
         "titles": {
           "none": "None",
@@ -110,7 +113,17 @@
         "orcidFormat": "Expected format: 0000-0000-0000-000X.",
         "bioHint": "Plain text, 2,000 characters at most.",
         "languageTitle": "Language",
-        "languageLead": "The language chosen with the selector at the top of the page is saved in your account: it is also used for emails."
+        "languageLead": "The language chosen with the selector at the top of the page is saved in your account: it is also used for emails.",
+        "linkFormat": "A complete https:// address is expected.",
+        "photoTitle": "Photo",
+        "photoLead": "PNG, JPEG or WebP, 5 MB at most. It is resized to 800 pixels and stripped of its metadata (including GPS position). It is only published with your agreement (Privacy page).",
+        "photoAlt": "Your profile photo",
+        "photoChoose": "Choose a photo",
+        "photoRemove": "Remove the photo",
+        "photoSaved": "Photo saved.",
+        "photoRemoved": "Photo removed.",
+        "linksTitle": "Public links",
+        "linksLead": "Optional: shown in the committee directory if you appear in it."
       },
       "notice": {
         "summary": "Privacy notice on your data (provisional version)",
@@ -128,14 +141,6 @@
         "codeHint": "6-digit code, or 8-digit recovery code.",
         "submit": "Verify",
         "backToLogin": "Back to sign in"
-      },
-      "reauth": {
-        "title": "Confirm your identity",
-        "lead": "This is a sensitive operation: confirm your password to continue.",
-        "useCode": "Use a two-factor authentication code instead",
-        "usePassword": "Use my password instead",
-        "submit": "Confirm",
-        "cancel": "Cancel"
       },
       "security": {
         "title": "Security",
@@ -181,7 +186,157 @@
         "addEmail": "Add the address",
         "added": "Address added: a verification link has been sent to it.",
         "removed": "Address removed.",
-        "primaryChanged": "Primary address changed."
+        "primaryChanged": "Primary address changed.",
+        "cancel": "Cancel"
+      },
+      "invitation": {
+        "title": "Invitation",
+        "missing": "Open the link you received by email to see your invitation.",
+        "notFound": "This invitation cannot be found: the link is incomplete, or the invitation was replaced by a newer one.",
+        "summary": "{{inviter}} invites you to join the edition “{{edition}}” ({{code}}) as {{role}}.",
+        "address": "Invited address: {{email}}",
+        "expires": "Valid until {{date}}.",
+        "message": "Message from the inviter:",
+        "signInFirst": "To accept, sign in with an account that holds the invited address, or create one.",
+        "signupHint": "After creating an account and verifying your address, open the invitation link again.",
+        "accept": "Accept the invitation",
+        "decline": "Decline the invitation",
+        "otherAddress": "Your account does not hold the invited address ({{email}}), or it is not verified. To accept with this account, receive a confirmation link at that address.",
+        "sendLink": "Receive a confirmation link at the invited address",
+        "linkHint": "The link is valid for one hour and must be opened from this account; you may be asked for your password again.",
+        "linkSent": "A confirmation link was sent to the invited address. Open it from this account within the hour.",
+        "linkLead": "You asked to link the invited address to your account. Confirm to add it (verified) and accept the invitation.",
+        "confirmLink": "Confirm the address and accept",
+        "reauthHint": "If you last confirmed your password more than 5 minutes ago, you will be asked again.",
+        "linkSignIn": "Sign in with the account that requested this link, then open it again.",
+        "declined": "Invitation declined.",
+        "accepted": "Welcome! You now have the role “{{role}}”.",
+        "mfaReminder": "Management roles require two-factor authentication: enable it under “Security” if you have not already.",
+        "notPending": {
+          "pending": "Pending.",
+          "accepted": "This invitation has already been accepted.",
+          "declined": "This invitation was declined.",
+          "cancelled": "This invitation was cancelled.",
+          "expired": "This invitation has expired: ask the organisers for a new one."
+        },
+        "roles": {
+          "ADMIN": "edition administrator",
+          "CHAIR": "conference chair",
+          "OC_MEMBER": "organising committee member",
+          "SC_CHAIR": "scientific committee chair",
+          "SC_MEMBER": "scientific committee member",
+          "AUTHOR": "author",
+          "SPEAKER": "speaker",
+          "SESSION_CHAIR": "session chair",
+          "ATTENDEE": "attendee",
+          "SPONSOR": "sponsor",
+          "VOLUNTEER": "volunteer"
+        }
+      },
+      "privacy": {
+        "title": "Privacy",
+        "withdraw": "Withdraw my consent",
+        "saved": "Your choice has been saved.",
+        "historyTitle": "History of your choices",
+        "kinds": {
+          "privacy_notice": "Privacy notice (acknowledged)",
+          "directory_listing": "Public directory",
+          "photo_publication": "Photo publication"
+        },
+        "yes": "yes",
+        "no": "no",
+        "optional": {
+          "directory_listing": {
+            "title": "Public committee directory",
+            "lead": "Optional: if you agree, your name, institution, country and public links may appear in the conference's public list of committees. You can withdraw your agreement at any time.",
+            "granted": "You agreed to appear in the directory.",
+            "notGranted": "You do not appear in the directory.",
+            "grant": "Appear in the directory"
+          },
+          "photo_publication": {
+            "title": "Publishing your photo",
+            "lead": "Optional: if you agree, your profile photo may accompany your name on the portal (committee directory). Without this agreement, only you can see it. Withdrawal takes effect immediately for the photo.",
+            "granted": "You agreed to the publication of your photo.",
+            "notGranted": "Your photo is not published.",
+            "grant": "Publish my photo"
+          }
+        }
+      },
+      "myData": {
+        "title": "My data",
+        "exportTitle": "Download my data",
+        "exportLead": "JSON file with your account, profile, addresses, two-factor authentication status (without any secret), roles, invitations, consents, emails received and your actions over the last 12 months.",
+        "download": "Download (JSON)",
+        "downloaded": "Export downloaded.",
+        "anonymizeTitle": "Anonymize my account",
+        "anonymizeLead": "Immediate and permanent: your address, profile, two-factor authentication and sessions are erased, your roles revoked, and you will no longer be able to sign in.",
+        "anonymizeKept": "The action log and the history of your consents are kept as evidence, without your address or name. If you have an active management role, hand it over first.",
+        "confirmation": "Account email address",
+        "confirmationHint": "Type {{email}} to confirm.",
+        "understood": "I understand that this operation is permanent.",
+        "anonymize": "Permanently anonymize my account"
+      }
+    },
+    "site": {
+      "loading": "Loading…",
+      "backHome": "Back to home",
+      "errorTitle": "Page temporarily unavailable",
+      "errorLead": "The content of this page could not be loaded. Please try again in a moment.",
+      "toCall": "Call for papers",
+      "toDates": "Important dates",
+      "callLead": "Accepted formats, deadlines and document templates. Proposals will be submitted in the author area once the call opens.",
+      "formats": "Presentation formats",
+      "deadlines": "Deadlines",
+      "templates": "Templates and documents",
+      "comingSoon": "This page will be completed soon.",
+      "committeeSoon": "The committee membership will be published soon.",
+      "datesRange": "From {{start}} to {{end}}",
+      "timezone": "Times shown in the conference time zone ({{zone}}).",
+      "noDates": "Dates will be announced soon.",
+      "noDocuments": "No documents yet.",
+      "duration": "{{minutes}} min",
+      "abstractWords": "abstract of up to {{words}} words",
+      "countdown": "{{days}} days to go",
+      "keyDates": {
+        "call_open": "Call opens",
+        "call_close": "Call closes",
+        "review_deadline": "End of reviews",
+        "notification": "Notification of decisions",
+        "camera_ready": "Camera-ready version",
+        "registration_open": "Registration opens",
+        "early_bird_end": "End of early-bird rate",
+        "registration_close": "Registration closes"
+      },
+      "nav": {
+        "header": "Main navigation",
+        "footer": "Footer links"
+      },
+      "scientificCommittee": "Scientific committee",
+      "organizingCommittee": "Organising committee",
+      "chair": "Chair",
+      "othersOne": "and 1 other member",
+      "othersMany": "and {{count}} other members",
+      "membersOne": "1 member",
+      "membersMany": "{{count}} members",
+      "titles": {
+        "dr": "Dr",
+        "pr": "Prof.",
+        "mr": "Mr",
+        "ms": "Ms"
+      },
+      "functions": {
+        "finance": "Finance",
+        "program": "Programme",
+        "logistics": "Logistics",
+        "communication": "Communication",
+        "external_relations": "External relations",
+        "volunteers": "Volunteers",
+        "secretariat": "Secretariat"
+      },
+      "links": {
+        "website": "Website",
+        "scholar": "Google Scholar",
+        "linkedin": "LinkedIn"
       }
     }
   }

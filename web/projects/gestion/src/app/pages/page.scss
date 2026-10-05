@@ -1,0 +1,101 @@
+:host {
+  display: block;
+}
+
+.card {
+  margin: 0 0 1.5rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--gc-border);
+  border-radius: 0.5rem;
+}
+
+h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1.2rem;
+}
+
+form {
+  display: grid;
+  gap: 0.25rem;
+  max-width: 48rem;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  // Espace vertical : les aides sous les champs ne chevauchent pas la ligne suivante.
+  gap: 1rem 1rem;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.notice {
+  margin: 0 0 1rem;
+  padding: 0.75rem 1rem;
+  border-left: 0.35rem solid var(--gc-primary);
+  background: var(--gc-surface-muted);
+}
+
+.muted {
+  color: var(--gc-muted);
+}
+
+.badge {
+  font-size: 0.85rem;
+  padding: 0.1rem 0.5rem;
+  border: 1px solid var(--gc-border);
+  border-radius: 1rem;
+  white-space: nowrap;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--gc-border);
+  vertical-align: top;
+}
+
+.checklist {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.ok {
+  color: var(--gc-success);
+}
+
+.ko {
+  color: var(--gc-danger);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

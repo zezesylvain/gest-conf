@@ -5,6 +5,7 @@
 /**
  * * `privacy_notice` - notice d'information
  * * `directory_listing` - annuaire public
+ * * `photo_publication` - publication de la photo
  */
-export type ConsentKind = 'privacy_notice' | 'directory_listing';
+export type ConsentKind = 'privacy_notice' | 'directory_listing' | 'photo_publication';
 

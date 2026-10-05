@@ -573,6 +573,800 @@ paths:
       responses:
         '204':
           description: No response body
+  /v1/manage/editions/{edition_id}/portal/files:
+    get:
+      operationId: manage_editions_portal_files_list
+      description: |-
+        Documents et images de l'édition : téléversement (multipart), titres, ordre,
+        publication ; suppression refusée tant que le fichier est utilisé (409 ``in_use``).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: kind
+        schema:
+          type: string
+          enum:
+          - document
+          - image
+      - name: ordering
+        required: false
+        in: query
+        description: Quel champ utiliser pour classer les résultats.
+        schema:
+          type: string
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PublicFile'
+          description: ''
+    post:
+      operationId: manage_editions_portal_files_create
+      description: |-
+        Documents et images de l'édition : téléversement (multipart), titres, ordre,
+        publication ; suppression refusée tant que le fichier est utilisé (409 ``in_use``).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FileUploadRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicFile'
+          description: ''
+  /v1/manage/editions/{edition_id}/portal/files/{item_id}:
+    get:
+      operationId: manage_editions_portal_files_retrieve
+      description: |-
+        Documents et images de l'édition : téléversement (multipart), titres, ordre,
+        publication ; suppression refusée tant que le fichier est utilisé (409 ``in_use``).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicFile'
+          description: ''
+    patch:
+      operationId: manage_editions_portal_files_partial_update
+      description: |-
+        Documents et images de l'édition : téléversement (multipart), titres, ordre,
+        publication ; suppression refusée tant que le fichier est utilisé (409 ``in_use``).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPublicFileRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPublicFileRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicFile'
+          description: ''
+    delete:
+      operationId: manage_editions_portal_files_destroy
+      description: |-
+        Documents et images de l'édition : téléversement (multipart), titres, ordre,
+        publication ; suppression refusée tant que le fichier est utilisé (409 ``in_use``).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /v1/manage/editions/{edition_id}/portal/files/{item_id}/content:
+    get:
+      operationId: manage_portal_files_content
+      description: Aperçu dans la gestion, publié ou non (la lecture de l'édition
+        suffit).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  /v1/manage/editions/{edition_id}/portal/menu:
+    get:
+      operationId: manage_editions_portal_menu_list
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: location
+        schema:
+          type: string
+          enum:
+          - footer
+          - header
+      - name: ordering
+        required: false
+        in: query
+        description: Quel champ utiliser pour classer les résultats.
+        schema:
+          type: string
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MenuItem'
+          description: ''
+    post:
+      operationId: manage_editions_portal_menu_create
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MenuItemRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MenuItem'
+          description: ''
+  /v1/manage/editions/{edition_id}/portal/menu/{item_id}:
+    get:
+      operationId: manage_editions_portal_menu_retrieve
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MenuItem'
+          description: ''
+    patch:
+      operationId: manage_editions_portal_menu_partial_update
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedMenuItemRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MenuItem'
+          description: ''
+    delete:
+      operationId: manage_editions_portal_menu_destroy
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /v1/manage/editions/{edition_id}/portal/menu/reorder:
+    post:
+      operationId: manage_portal_menu_reorder
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - name: ordering
+        required: false
+        in: query
+        description: Quel champ utiliser pour classer les résultats.
+        schema:
+          type: string
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MenuOrderRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MenuItem'
+          description: ''
+  /v1/manage/editions/{edition_id}/portal/pages:
+    get:
+      operationId: manage_editions_portal_pages_list
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - name: ordering
+        required: false
+        in: query
+        description: Quel champ utiliser pour classer les résultats.
+        schema:
+          type: string
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Page'
+          description: ''
+    post:
+      operationId: manage_editions_portal_pages_create
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PageRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Page'
+          description: ''
+  /v1/manage/editions/{edition_id}/portal/pages/{item_id}:
+    get:
+      operationId: manage_editions_portal_pages_retrieve
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Page'
+          description: ''
+    patch:
+      operationId: manage_editions_portal_pages_partial_update
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPageRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Page'
+          description: ''
+    delete:
+      operationId: manage_editions_portal_pages_destroy
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /v1/manage/editions/{edition_id}/portal/pages/{item_id}/attach:
+    post:
+      operationId: manage_portal_pages_attach
+      description: Pose une section (à la fin, ou à ``position``) ; composition relue.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SectionRefRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Page'
+          description: ''
+  /v1/manage/editions/{edition_id}/portal/pages/{item_id}/detach:
+    post:
+      operationId: manage_portal_pages_detach
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SectionRefRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Page'
+          description: ''
+  /v1/manage/editions/{edition_id}/portal/pages/{item_id}/reorder:
+    post:
+      operationId: manage_portal_pages_reorder
+      description: Ordre en liste complète des sections posées, sinon 400.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SectionOrderRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Page'
+          description: ''
+  /v1/manage/editions/{edition_id}/portal/poster:
+    get:
+      operationId: manage_portal_poster
+      description: '``…/portal/poster`` : affiche de l''édition (image Open Graph,
+        E7).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Poster'
+          description: ''
+    put:
+      operationId: manage_portal_poster_update
+      description: '``…/portal/poster`` : affiche de l''édition (image Open Graph,
+        E7).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PosterRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Poster'
+          description: ''
+  /v1/manage/editions/{edition_id}/portal/sections:
+    get:
+      operationId: manage_editions_portal_sections_list
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - name: ordering
+        required: false
+        in: query
+        description: Quel champ utiliser pour classer les résultats.
+        schema:
+          type: string
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Section'
+          description: ''
+    post:
+      operationId: manage_editions_portal_sections_create
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SectionWriteRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Section'
+          description: ''
+  /v1/manage/editions/{edition_id}/portal/sections/{item_id}:
+    get:
+      operationId: manage_editions_portal_sections_retrieve
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Section'
+          description: ''
+    patch:
+      operationId: manage_editions_portal_sections_partial_update
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSectionWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Section'
+          description: ''
+    delete:
+      operationId: manage_editions_portal_sections_destroy
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /v1/manage/editions/{edition_id}/portal/sections/preview:
+    post:
+      operationId: manage_portal_sections_preview
+      description: Aperçu du HTML tel qu'il sera enregistré (assaini), sans rien écrire.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PreviewRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Preview'
+          description: ''
+  /v1/manage/editions/{edition_id}/portal/status:
+    get:
+      operationId: manage_portal_status
+      description: '``GET …/portal/status`` : dernière mise en ligne, modifications
+        non publiées (E1).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicationStatus'
+          description: ''
   /v1/manage/editions/{edition_id}/roles:
     get:
       operationId: manage_members_list
@@ -951,6 +1745,28 @@ paths:
               schema:
                 $ref: '#/components/schemas/Me'
           description: ''
+  /v1/me/anonymization:
+    post:
+      operationId: me_anonymization
+      description: |-
+        ``POST /v1/me/anonymization`` : anonymisation immédiate et définitive (plan §4.9).
+
+        Réauthentification récente, adresse du compte saisie pour confirmer, limite
+        ``account_deletion``. Refusée (409 ``account_has_active_duties``) tant que des rôles
+        de gestion sont actifs. La session est fermée.
+      tags:
+      - me
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnonymizationRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
   /v1/me/consents:
     get:
       operationId: me_consents
@@ -983,6 +1799,79 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ConsentRecord'
+          description: ''
+  /v1/me/data-export:
+    get:
+      operationId: me_data_export
+      description: |-
+        ``GET /v1/me/data-export`` : toutes ses données en JSON (plan L1 §4.9), sans secret.
+        Réauthentification récente, limite ``data_export``, audit ``account.exported``.
+      tags:
+      - me
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Export JSON.
+  /v1/me/photo:
+    get:
+      operationId: me_photo
+      description: Sa propre photo, même sans consentement de publication (aperçu
+        de l'espace compte).
+      tags:
+      - me
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+          description: ''
+    put:
+      operationId: me_photo_update
+      description: |-
+        ``PUT``/``DELETE /v1/me/photo`` : photo du profil (E12), réencodée sans métadonnées.
+        Publiée sur le portail seulement avec le consentement ``photo_publication``.
+      tags:
+      - me
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PhotoUploadRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+          description: ''
+    delete:
+      operationId: me_photo_delete
+      description: |-
+        ``PUT``/``DELETE /v1/me/photo`` : photo du profil (E12), réencodée sans métadonnées.
+        Publiée sur le portail seulement avec le consentement ``photo_publication``.
+      tags:
+      - me
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
           description: ''
   /v1/me/preferences:
     patch:
@@ -1070,6 +1959,110 @@ paths:
               schema:
                 $ref: '#/components/schemas/PublicEdition'
           description: ''
+  /v1/public/files/{uuid}/{name}:
+    get:
+      operationId: public_file
+      description: |-
+        ``GET /v1/public/files/<uuid>/<nom>`` : fichier public, s'il est publié et dans un
+        contexte public (``services.is_publicly_served``), sinon 404 (rien n'est révélé).
+
+        Jamais servi par Apache (stockage hors racine web). ``nosniff`` ; documents en
+        ``attachment`` ; CSP ``sandbox`` ; cache public court, ETag = empreinte SHA-256.
+      parameters:
+      - in: path
+        name: name
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - public
+      responses:
+        '200':
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  /v1/public/portal/menu:
+    get:
+      operationId: public_portal_menu
+      description: Entrées publiées d'un menu ; une entrée vers une page non publiée
+        est omise.
+      parameters:
+      - in: query
+        name: location
+        schema:
+          type: string
+          enum:
+          - footer
+          - header
+        required: true
+      tags:
+      - public
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PublicMenuItem'
+          description: ''
+  /v1/public/portal/pages/{slug}:
+    get:
+      operationId: public_portal_page
+      description: |-
+        Page publiée et ses sections publiées, dans l'ordre ; 404 si inconnue (le gabarit
+        d'une page du site s'affiche alors seul).
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - public
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicComposition'
+          description: ''
+  /v1/public/portal/routes:
+    get:
+      operationId: public_portal_routes
+      description: Routes à pré-rendre et leur **nombre attendu** (vérifié au build,
+        plan L2 §2.2).
+      tags:
+      - public
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicRoutes'
+          description: ''
+  /v1/public/portal/site:
+    get:
+      operationId: public_portal_site
+      description: Données des gabarits des pages du site, en un appel.
+      tags:
+      - public
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicSite'
+          description: ''
 components:
   schemas:
     AcceptRequest:
@@ -1105,6 +2098,18 @@ components:
         * `user` - utilisateur
         * `command` - commande
         * `system` - système
+    AnonymizationRequest:
+      type: object
+      description: 'Confirmation explicite : l''adresse du compte, saisie à nouveau
+        (plan L1 §4.9).'
+      properties:
+        confirmation:
+          type: string
+          minLength: 1
+          description: Adresse e-mail du compte, saisie pour confirmer.
+          maxLength: 254
+      required:
+      - confirmation
     ApiError:
       type: object
       description: 'Format de toute réponse d''erreur de l''API : {code, message,
@@ -1196,6 +2201,7 @@ components:
       - members.read
       - members.manage
       - audit.read
+      - portal.write
       type: string
       description: |-
         * `edition.read` - edition.read
@@ -1205,8 +2211,11 @@ components:
         * `members.read` - members.read
         * `members.manage` - members.manage
         * `audit.read` - audit.read
+        * `portal.write` - portal.write
     Confidentiality:
       type: object
+      description: 'RG-19 : réglages gelés (lecture) et motif d''un changement forcé
+        par un ADMIN.'
       properties:
         double_blind:
           type: boolean
@@ -1216,6 +2225,14 @@ components:
           maximum: 10
           minimum: 1
           title: Relecteurs par soumission
+        frozen_fields:
+          type: array
+          items:
+            type: string
+          readOnly: true
+          description: Réglages gelés depuis la première soumission (RG-19).
+      required:
+      - frozen_fields
     ConsentCreateRequest:
       type: object
       properties:
@@ -1234,10 +2251,12 @@ components:
       enum:
       - privacy_notice
       - directory_listing
+      - photo_publication
       type: string
       description: |-
         * `privacy_notice` - notice d'information
         * `directory_listing` - annuaire public
+        * `photo_publication` - publication de la photo
     ConsentRecord:
       type: object
       properties:
@@ -1313,6 +2332,8 @@ components:
       - states
     Edition:
       type: object
+      description: 'RG-19 : réglages gelés (lecture) et motif d''un changement forcé
+        par un ADMIN.'
       properties:
         id:
           type: integer
@@ -1389,9 +2410,16 @@ components:
           readOnly: true
           nullable: true
           title: Archivée le
+        frozen_fields:
+          type: array
+          items:
+            type: string
+          readOnly: true
+          description: Réglages gelés depuis la première soumission (RG-19).
       required:
       - archived_at
       - code
+      - frozen_fields
       - id
       - published_at
       - slug
@@ -1494,6 +2522,10 @@ components:
       - edition_archived
       - invalid_transition
       - edition_incomplete
+      - account_has_active_duties
+      - submission_incomplete
+      - call_closed
+      - setting_frozen
       type: string
       description: |-
         * `validation_error` - Validation Error
@@ -1524,6 +2556,30 @@ components:
         * `edition_archived` - Edition Archived
         * `invalid_transition` - Invalid Transition
         * `edition_incomplete` - Edition Incomplete
+        * `account_has_active_duties` - Account Has Active Duties
+        * `submission_incomplete` - Submission Incomplete
+        * `call_closed` - Call Closed
+        * `setting_frozen` - Setting Frozen
+    FileUploadRequest:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+          description: 'Document : PDF, DOCX, ODT, ZIP ; image : PNG, JPEG, WebP.'
+        kind:
+          $ref: '#/components/schemas/PortalFileKind'
+        title_fr:
+          type: string
+          default: ''
+          maxLength: 255
+        title_en:
+          type: string
+          default: ''
+          maxLength: 255
+      required:
+      - file
+      - kind
     Health:
       type: object
       properties:
@@ -1987,6 +3043,110 @@ components:
       - source
       - status
       - user_id
+    MenuItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        location:
+          allOf:
+          - $ref: '#/components/schemas/MenuLocation'
+          title: Emplacement
+        label_fr:
+          type: string
+          title: Libellé (FR)
+          maxLength: 120
+        label_en:
+          type: string
+          title: Libellé (EN)
+          maxLength: 120
+        page:
+          type: integer
+          nullable: true
+        page_ref:
+          allOf:
+          - $ref: '#/components/schemas/PageRef'
+          readOnly: true
+          nullable: true
+        url:
+          type: string
+          title: Adresse
+          maxLength: 500
+        new_tab:
+          type: boolean
+          title: Nouvel onglet
+        position:
+          type: integer
+          maximum: 65535
+          minimum: 0
+          title: Ordre
+        published:
+          type: boolean
+          title: Publiée
+      required:
+      - id
+      - label_fr
+      - location
+      - page_ref
+    MenuItemRequest:
+      type: object
+      properties:
+        location:
+          allOf:
+          - $ref: '#/components/schemas/MenuLocation'
+          title: Emplacement
+        label_fr:
+          type: string
+          minLength: 1
+          title: Libellé (FR)
+          maxLength: 120
+        label_en:
+          type: string
+          title: Libellé (EN)
+          maxLength: 120
+        page:
+          type: integer
+          nullable: true
+        url:
+          type: string
+          title: Adresse
+          maxLength: 500
+        new_tab:
+          type: boolean
+          title: Nouvel onglet
+        position:
+          type: integer
+          maximum: 65535
+          minimum: 0
+          title: Ordre
+        published:
+          type: boolean
+          title: Publiée
+      required:
+      - label_fr
+      - location
+    MenuLocation:
+      enum:
+      - header
+      - footer
+      type: string
+      description: |-
+        * `header` - en-tête
+        * `footer` - pied de page
+    MenuOrderRequest:
+      type: object
+      properties:
+        location:
+          $ref: '#/components/schemas/MenuLocation'
+        items:
+          type: array
+          items:
+            type: integer
+            minimum: 1
+      required:
+      - items
+      - location
     OcFunction:
       enum:
       - finance
@@ -2006,6 +3166,139 @@ components:
         * `external_relations` - relations extérieures
         * `volunteers` - bénévoles
         * `secretariat` - secrétariat
+    Page:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        slug:
+          type: string
+          title: Identifiant d'URL
+          maxLength: 64
+          pattern: ^[-a-zA-Z0-9_]+$
+        is_system:
+          type: boolean
+          readOnly: true
+          title: Page du site
+        title_fr:
+          type: string
+          title: Titre (FR)
+          maxLength: 255
+        title_en:
+          type: string
+          title: Titre (EN)
+          maxLength: 255
+        description_fr:
+          type: string
+          title: Description (FR)
+          maxLength: 300
+        description_en:
+          type: string
+          title: Description (EN)
+          maxLength: 300
+        published:
+          type: boolean
+          title: Publiée
+        paths:
+          allOf:
+          - $ref: '#/components/schemas/PagePaths'
+          readOnly: true
+        sections:
+          type: array
+          items:
+            $ref: '#/components/schemas/Placement'
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - id
+      - is_system
+      - paths
+      - sections
+      - slug
+      - title_fr
+      - updated_at
+    PagePaths:
+      type: object
+      properties:
+        fr:
+          type: string
+        en:
+          type: string
+      required:
+      - en
+      - fr
+    PagePathsRequest:
+      type: object
+      properties:
+        fr:
+          type: string
+          minLength: 1
+        en:
+          type: string
+          minLength: 1
+      required:
+      - en
+      - fr
+    PageRef:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        slug:
+          type: string
+          readOnly: true
+          title: Identifiant d'URL
+          pattern: ^[-a-zA-Z0-9_]+$
+        title_fr:
+          type: string
+          readOnly: true
+          title: Titre (FR)
+        is_system:
+          type: boolean
+          readOnly: true
+          title: Page du site
+      required:
+      - id
+      - is_system
+      - slug
+      - title_fr
+    PageRequest:
+      type: object
+      properties:
+        slug:
+          type: string
+          minLength: 1
+          title: Identifiant d'URL
+          maxLength: 64
+          pattern: ^[-a-zA-Z0-9_]+$
+        title_fr:
+          type: string
+          minLength: 1
+          title: Titre (FR)
+          maxLength: 255
+        title_en:
+          type: string
+          title: Titre (EN)
+          maxLength: 255
+        description_fr:
+          type: string
+          title: Description (FR)
+          maxLength: 300
+        description_en:
+          type: string
+          title: Description (EN)
+          maxLength: 300
+        published:
+          type: boolean
+          title: Publiée
+      required:
+      - slug
+      - title_fr
     PaginatedAuditEntryList:
       type: object
       required:
@@ -2054,6 +3347,8 @@ components:
             $ref: '#/components/schemas/InvitationWithEmail'
     PatchedConfidentialityRequest:
       type: object
+      description: 'RG-19 : réglages gelés (lecture) et motif d''un changement forcé
+        par un ADMIN.'
       properties:
         double_blind:
           type: boolean
@@ -2063,8 +3358,16 @@ components:
           maximum: 10
           minimum: 1
           title: Relecteurs par soumission
+        reason:
+          type: string
+          writeOnly: true
+          default: ''
+          description: Motif, obligatoire pour qu'un ADMIN change un réglage gelé
+            (RG-19).
     PatchedEditionRequest:
       type: object
+      description: 'RG-19 : réglages gelés (lecture) et motif d''un changement forcé
+        par un ADMIN.'
       properties:
         code:
           type: string
@@ -2125,6 +3428,12 @@ components:
           minLength: 1
           title: Fuseau horaire
           maxLength: 64
+        reason:
+          type: string
+          writeOnly: true
+          default: ''
+          description: Motif, obligatoire pour qu'un ADMIN change un réglage gelé
+            (RG-19).
     PatchedKeyDateWriteRequest:
       type: object
       description: Saisie à l'heure de l'édition (D13), convertie en UTC par le serveur.
@@ -2150,6 +3459,69 @@ components:
           type: integer
           maximum: 32767
           minimum: 0
+    PatchedMenuItemRequest:
+      type: object
+      properties:
+        location:
+          allOf:
+          - $ref: '#/components/schemas/MenuLocation'
+          title: Emplacement
+        label_fr:
+          type: string
+          minLength: 1
+          title: Libellé (FR)
+          maxLength: 120
+        label_en:
+          type: string
+          title: Libellé (EN)
+          maxLength: 120
+        page:
+          type: integer
+          nullable: true
+        url:
+          type: string
+          title: Adresse
+          maxLength: 500
+        new_tab:
+          type: boolean
+          title: Nouvel onglet
+        position:
+          type: integer
+          maximum: 65535
+          minimum: 0
+          title: Ordre
+        published:
+          type: boolean
+          title: Publiée
+    PatchedPageRequest:
+      type: object
+      properties:
+        slug:
+          type: string
+          minLength: 1
+          title: Identifiant d'URL
+          maxLength: 64
+          pattern: ^[-a-zA-Z0-9_]+$
+        title_fr:
+          type: string
+          minLength: 1
+          title: Titre (FR)
+          maxLength: 255
+        title_en:
+          type: string
+          title: Titre (EN)
+          maxLength: 255
+        description_fr:
+          type: string
+          title: Description (FR)
+          maxLength: 300
+        description_en:
+          type: string
+          title: Description (EN)
+          maxLength: 300
+        published:
+          type: boolean
+          title: Publiée
     PatchedPreferencesRequest:
       type: object
       properties:
@@ -2187,6 +3559,102 @@ components:
           type: string
           description: Texte brut.
           maxLength: 2000
+        website:
+          type: string
+          maxLength: 300
+        scholar_url:
+          type: string
+          maxLength: 300
+        linkedin_url:
+          type: string
+          maxLength: 300
+    PatchedPublicFileRequest:
+      type: object
+      description: Gestion des fichiers de l'édition (documents et images).
+      properties:
+        title_fr:
+          type: string
+          title: Titre (FR)
+          maxLength: 255
+        title_en:
+          type: string
+          title: Titre (EN)
+          maxLength: 255
+        position:
+          type: integer
+          maximum: 65535
+          minimum: 0
+          title: Ordre
+        published:
+          type: boolean
+          title: Publié
+    PatchedSectionWriteRequest:
+      type: object
+      description: 'Écriture : les contrôles métier (HTML, liens, configuration) sont
+        dans le service.'
+      properties:
+        code:
+          type: string
+          minLength: 1
+          maxLength: 64
+          pattern: ^[-a-zA-Z0-9_]+$
+        section_type:
+          allOf:
+          - $ref: '#/components/schemas/SectionType'
+          title: Type
+        title_fr:
+          type: string
+          title: Titre (FR)
+          maxLength: 255
+        title_en:
+          type: string
+          title: Titre (EN)
+          maxLength: 255
+        subtitle_fr:
+          type: string
+          title: Sous-titre (FR)
+          maxLength: 500
+        subtitle_en:
+          type: string
+          title: Sous-titre (EN)
+          maxLength: 500
+        body_fr:
+          type: string
+          title: Corps (FR)
+        body_en:
+          type: string
+          title: Corps (EN)
+        cta_label_fr:
+          type: string
+          title: Bouton 1 (FR)
+          maxLength: 120
+        cta_label_en:
+          type: string
+          title: Bouton 1 (EN)
+          maxLength: 120
+        cta_url:
+          type: string
+          title: Lien du bouton 1
+          maxLength: 500
+        cta2_label_fr:
+          type: string
+          title: Bouton 2 (FR)
+          maxLength: 120
+        cta2_label_en:
+          type: string
+          title: Bouton 2 (EN)
+          maxLength: 120
+        cta2_url:
+          type: string
+          title: Lien du bouton 2
+          maxLength: 500
+        image:
+          type: integer
+          nullable: true
+        config: {}
+        published:
+          type: boolean
+          title: Publiée
     PatchedSubmissionTypeRequest:
       type: object
       properties:
@@ -2212,9 +3680,8 @@ components:
           title: Description (EN)
         default_duration_min:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 65535
           minimum: 0
-          format: int64
           nullable: true
           title: Durée par défaut (min)
         abstract_max_words:
@@ -2224,9 +3691,8 @@ components:
           title: Mots maximum du résumé
         position:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 65535
           minimum: 0
-          format: int64
           title: Ordre
         is_active:
           type: boolean
@@ -2256,13 +3722,118 @@ components:
           title: Description (EN)
         position:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 65535
           minimum: 0
-          format: int64
           title: Ordre
         is_active:
           type: boolean
           title: Actif
+    PhotoUploadRequest:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+          description: PNG, JPEG ou WebP, 5 Mio au plus.
+      required:
+      - file
+    PlacedSection:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        code:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        section_type:
+          allOf:
+          - $ref: '#/components/schemas/SectionType'
+          readOnly: true
+          title: Type
+        title_fr:
+          type: string
+          readOnly: true
+          title: Titre (FR)
+        title_en:
+          type: string
+          readOnly: true
+          title: Titre (EN)
+        published:
+          type: boolean
+          readOnly: true
+          title: Publiée
+      required:
+      - code
+      - id
+      - published
+      - section_type
+      - title_en
+      - title_fr
+    Placement:
+      type: object
+      properties:
+        position:
+          type: integer
+          readOnly: true
+        section:
+          allOf:
+          - $ref: '#/components/schemas/PlacedSection'
+          readOnly: true
+      required:
+      - position
+      - section
+    PortalFileKind:
+      enum:
+      - document
+      - image
+      type: string
+      description: |-
+        * `document` - document
+        * `image` - image
+    Poster:
+      type: object
+      properties:
+        file:
+          type: integer
+          nullable: true
+          description: Image de l'édition, ou null.
+        poster:
+          allOf:
+          - $ref: '#/components/schemas/PublicFileRef'
+          readOnly: true
+          nullable: true
+      required:
+      - file
+      - poster
+    PosterRequest:
+      type: object
+      properties:
+        file:
+          type: integer
+          nullable: true
+          description: Image de l'édition, ou null.
+      required:
+      - file
+    Preview:
+      type: object
+      properties:
+        body_fr:
+          type: string
+          default: ''
+        body_en:
+          type: string
+          default: ''
+    PreviewRequest:
+      type: object
+      properties:
+        body_fr:
+          type: string
+          default: ''
+        body_en:
+          type: string
+          default: ''
     Profile:
       type: object
       properties:
@@ -2295,11 +3866,27 @@ components:
           type: string
           description: Texte brut.
           maxLength: 2000
+        website:
+          type: string
+          maxLength: 300
+        scholar_url:
+          type: string
+          maxLength: 300
+        linkedin_url:
+          type: string
+          maxLength: 300
+        photo_url:
+          type: string
+          nullable: true
+          readOnly: true
+          description: Adresse de la photo (publique seulement avec le consentement
+            « photo »).
         is_complete:
           type: boolean
           readOnly: true
       required:
       - is_complete
+      - photo_url
     ProfileTitle:
       enum:
       - dr
@@ -2313,6 +3900,95 @@ components:
         * `pr` - Pr
         * `mr` - M.
         * `ms` - Mme
+    PublicCommittee:
+      type: object
+      properties:
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicCommitteeMember'
+        others:
+          type: integer
+          description: Membres sans consentement à l'annuaire.
+      required:
+      - members
+      - others
+    PublicCommitteeMember:
+      type: object
+      description: 'Fiche publique d''un membre consentant (E5) : jamais d''adresse
+        e-mail.'
+      properties:
+        title:
+          oneOf:
+          - $ref: '#/components/schemas/ProfileTitle'
+          - $ref: '#/components/schemas/BlankEnum'
+        name:
+          type: string
+        chair:
+          type: boolean
+          description: Présidence (CHAIR ou SC_CHAIR).
+        function:
+          description: |-
+            Fonction au CO, vide hors CO.
+
+            * `` - aucune
+            * `finance` - finances
+            * `program` - programme
+            * `logistics` - logistique
+            * `communication` - communication
+            * `external_relations` - relations extérieures
+            * `volunteers` - bénévoles
+            * `secretariat` - secrétariat
+          oneOf:
+          - $ref: '#/components/schemas/OcFunction'
+          - $ref: '#/components/schemas/BlankEnum'
+        institution:
+          type: string
+        country:
+          type: string
+          description: Code ISO 3166-1 alpha-2 ou vide.
+        website:
+          type: string
+        scholar_url:
+          type: string
+        linkedin_url:
+          type: string
+        photo_url:
+          type: string
+          nullable: true
+      required:
+      - chair
+      - country
+      - function
+      - institution
+      - linkedin_url
+      - name
+      - photo_url
+      - scholar_url
+      - title
+      - website
+    PublicCommittees:
+      type: object
+      properties:
+        scientific:
+          $ref: '#/components/schemas/PublicCommittee'
+        organizing:
+          $ref: '#/components/schemas/PublicCommittee'
+      required:
+      - organizing
+      - scientific
+    PublicComposition:
+      type: object
+      properties:
+        page:
+          $ref: '#/components/schemas/PublicPage'
+        sections:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicSection'
+      required:
+      - page
+      - sections
     PublicEdition:
       type: object
       description: 'Édition courante publiée (§9.3) : tracks et types actifs, dates
@@ -2377,20 +4053,17 @@ components:
         tracks:
           type: array
           items:
-            type: object
-            additionalProperties: {}
+            $ref: '#/components/schemas/PublicTrack'
           readOnly: true
         submission_types:
           type: array
           items:
-            type: object
-            additionalProperties: {}
+            $ref: '#/components/schemas/PublicSubmissionType'
           readOnly: true
         key_dates:
           type: array
           items:
-            type: object
-            additionalProperties: {}
+            $ref: '#/components/schemas/PublicKeyDate'
           readOnly: true
       required:
       - city
@@ -2409,6 +4082,474 @@ components:
       - tracks
       - venue
       - year
+    PublicFile:
+      type: object
+      description: Gestion des fichiers de l'édition (documents et images).
+      properties:
+        preview_url:
+          type: string
+          readOnly: true
+          description: Aperçu dans la gestion (authentifié), publié ou non.
+        id:
+          type: integer
+          readOnly: true
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+          title: Identifiant public
+        kind:
+          allOf:
+          - $ref: '#/components/schemas/PublicFileKind'
+          readOnly: true
+          title: Nature
+        original_name:
+          type: string
+          readOnly: true
+          title: Nom d'origine
+        url:
+          type: string
+          readOnly: true
+        title_fr:
+          type: string
+          title: Titre (FR)
+          maxLength: 255
+        title_en:
+          type: string
+          title: Titre (EN)
+          maxLength: 255
+        extension:
+          type: string
+          readOnly: true
+        content_type:
+          type: string
+          readOnly: true
+          title: Type de contenu
+        size:
+          type: integer
+          readOnly: true
+          title: Taille (octets)
+        width:
+          type: integer
+          readOnly: true
+          nullable: true
+          title: Largeur
+        height:
+          type: integer
+          readOnly: true
+          nullable: true
+          title: Hauteur
+        position:
+          type: integer
+          maximum: 65535
+          minimum: 0
+          title: Ordre
+        published:
+          type: boolean
+          title: Publié
+        uses:
+          type: array
+          items:
+            type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - content_type
+      - created_at
+      - extension
+      - height
+      - id
+      - kind
+      - original_name
+      - preview_url
+      - size
+      - url
+      - uses
+      - uuid
+      - width
+    PublicFileKind:
+      enum:
+      - document
+      - image
+      - photo
+      type: string
+      description: |-
+        * `document` - document
+        * `image` - image
+        * `photo` - photo de profil
+    PublicFileRef:
+      type: object
+      description: 'Fichier public tel que le voient les pages : adresse, dimensions,
+        titre.'
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+          title: Identifiant public
+        url:
+          type: string
+          readOnly: true
+        title_fr:
+          type: string
+          readOnly: true
+          title: Titre (FR)
+        title_en:
+          type: string
+          readOnly: true
+          title: Titre (EN)
+        extension:
+          type: string
+          readOnly: true
+        content_type:
+          type: string
+          readOnly: true
+          title: Type de contenu
+        size:
+          type: integer
+          readOnly: true
+          title: Taille (octets)
+        width:
+          type: integer
+          readOnly: true
+          nullable: true
+          title: Largeur
+        height:
+          type: integer
+          readOnly: true
+          nullable: true
+          title: Hauteur
+      required:
+      - content_type
+      - extension
+      - height
+      - size
+      - title_en
+      - title_fr
+      - url
+      - uuid
+      - width
+    PublicKeyDate:
+      type: object
+      description: 'Lecture : ``at`` (UTC) et ``at_local`` (heure de l''édition, sans
+        fuseau).'
+      properties:
+        code:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Date (UTC)
+        at_local:
+          type: string
+          readOnly: true
+        label_fr:
+          type: string
+          readOnly: true
+          title: Libellé (FR)
+        label_en:
+          type: string
+          readOnly: true
+          title: Libellé (EN)
+      required:
+      - at
+      - at_local
+      - code
+      - label_en
+      - label_fr
+    PublicMenuItem:
+      type: object
+      properties:
+        label_fr:
+          type: string
+        label_en:
+          type: string
+        href_fr:
+          type: string
+        href_en:
+          type: string
+        new_tab:
+          type: boolean
+        page:
+          type: string
+          nullable: true
+          description: Slug de la page visée, sinon null.
+      required:
+      - href_en
+      - href_fr
+      - label_en
+      - label_fr
+      - new_tab
+      - page
+    PublicPage:
+      type: object
+      properties:
+        slug:
+          type: string
+          readOnly: true
+          title: Identifiant d'URL
+          pattern: ^[-a-zA-Z0-9_]+$
+        is_system:
+          type: boolean
+          readOnly: true
+          title: Page du site
+        title_fr:
+          type: string
+          readOnly: true
+          title: Titre (FR)
+        title_en:
+          type: string
+          readOnly: true
+          title: Titre (EN)
+        description_fr:
+          type: string
+          readOnly: true
+          title: Description (FR)
+        description_en:
+          type: string
+          readOnly: true
+          title: Description (EN)
+        paths:
+          allOf:
+          - $ref: '#/components/schemas/PagePaths'
+          readOnly: true
+      required:
+      - description_en
+      - description_fr
+      - is_system
+      - paths
+      - slug
+      - title_en
+      - title_fr
+    PublicRoutes:
+      type: object
+      properties:
+        routes:
+          type: array
+          items:
+            type: string
+        expected:
+          type: integer
+          description: Nombre de routes à pré-rendre, vérifié au build.
+        pages:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicPage'
+      required:
+      - expected
+      - pages
+      - routes
+    PublicSection:
+      type: object
+      description: 'Section publiée : habillage, contenu assaini, et données pour
+        les types « données ».'
+      properties:
+        code:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        section_type:
+          allOf:
+          - $ref: '#/components/schemas/SectionType'
+          readOnly: true
+          title: Type
+        title_fr:
+          type: string
+          readOnly: true
+          title: Titre (FR)
+        title_en:
+          type: string
+          readOnly: true
+          title: Titre (EN)
+        subtitle_fr:
+          type: string
+          readOnly: true
+          title: Sous-titre (FR)
+        subtitle_en:
+          type: string
+          readOnly: true
+          title: Sous-titre (EN)
+        body_fr:
+          type: string
+          readOnly: true
+          title: Corps (FR)
+        body_en:
+          type: string
+          readOnly: true
+          title: Corps (EN)
+        cta_label_fr:
+          type: string
+          readOnly: true
+          title: Bouton 1 (FR)
+        cta_label_en:
+          type: string
+          readOnly: true
+          title: Bouton 1 (EN)
+        cta_url:
+          type: string
+          readOnly: true
+          title: Lien du bouton 1
+        cta2_label_fr:
+          type: string
+          readOnly: true
+          title: Bouton 2 (FR)
+        cta2_label_en:
+          type: string
+          readOnly: true
+          title: Bouton 2 (EN)
+        cta2_url:
+          type: string
+          readOnly: true
+          title: Lien du bouton 2
+        image:
+          allOf:
+          - $ref: '#/components/schemas/PublicFileRef'
+          nullable: true
+          readOnly: true
+        config:
+          readOnly: true
+          title: Configuration
+        data:
+          description: Données des types « données » (null pour les autres), voir
+            le portail.
+          readOnly: true
+      required:
+      - body_en
+      - body_fr
+      - code
+      - config
+      - cta2_label_en
+      - cta2_label_fr
+      - cta2_url
+      - cta_label_en
+      - cta_label_fr
+      - cta_url
+      - data
+      - image
+      - section_type
+      - subtitle_en
+      - subtitle_fr
+      - title_en
+      - title_fr
+    PublicSite:
+      type: object
+      properties:
+        edition:
+          $ref: '#/components/schemas/PublicEdition'
+        poster:
+          allOf:
+          - $ref: '#/components/schemas/PublicFileRef'
+          nullable: true
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicFileRef'
+        committees:
+          $ref: '#/components/schemas/PublicCommittees'
+        site_url:
+          type: string
+          description: Origine publique du portail, sans barre finale.
+      required:
+      - committees
+      - documents
+      - edition
+      - poster
+      - site_url
+    PublicSubmissionType:
+      type: object
+      properties:
+        code:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        label_fr:
+          type: string
+          readOnly: true
+          title: Libellé (FR)
+        label_en:
+          type: string
+          readOnly: true
+          title: Libellé (EN)
+        description_fr:
+          type: string
+          readOnly: true
+          title: Description (FR)
+        description_en:
+          type: string
+          readOnly: true
+          title: Description (EN)
+        default_duration_min:
+          type: integer
+          readOnly: true
+          nullable: true
+          title: Durée par défaut (min)
+        abstract_max_words:
+          type: integer
+          readOnly: true
+          title: Mots maximum du résumé
+      required:
+      - abstract_max_words
+      - code
+      - default_duration_min
+      - description_en
+      - description_fr
+      - label_en
+      - label_fr
+    PublicTrack:
+      type: object
+      properties:
+        code:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        name_fr:
+          type: string
+          readOnly: true
+          title: Nom (FR)
+        name_en:
+          type: string
+          readOnly: true
+          title: Nom (EN)
+        description_fr:
+          type: string
+          readOnly: true
+          title: Description (FR)
+        description_en:
+          type: string
+          readOnly: true
+          title: Description (EN)
+      required:
+      - code
+      - description_en
+      - description_fr
+      - name_en
+      - name_fr
+    PublicationStatus:
+      type: object
+      properties:
+        last_published_at:
+          type: string
+          format: date-time
+          nullable: true
+        release:
+          type: string
+        pending_changes:
+          type: integer
+        pending_since:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - last_published_at
+      - pending_changes
+      - pending_since
+      - release
     RevokeRequest:
       type: object
       properties:
@@ -2454,6 +4595,213 @@ components:
         * `invitation` - invitation
         * `command` - commande
         * `system` - système
+    Section:
+      type: object
+      description: Section avec les pages qui la portent (« posée sur »).
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        code:
+          type: string
+          maxLength: 64
+          pattern: ^[-a-zA-Z0-9_]+$
+        section_type:
+          allOf:
+          - $ref: '#/components/schemas/SectionType'
+          title: Type
+        title_fr:
+          type: string
+          title: Titre (FR)
+          maxLength: 255
+        title_en:
+          type: string
+          title: Titre (EN)
+          maxLength: 255
+        subtitle_fr:
+          type: string
+          title: Sous-titre (FR)
+          maxLength: 500
+        subtitle_en:
+          type: string
+          title: Sous-titre (EN)
+          maxLength: 500
+        body_fr:
+          type: string
+          title: Corps (FR)
+        body_en:
+          type: string
+          title: Corps (EN)
+        cta_label_fr:
+          type: string
+          title: Bouton 1 (FR)
+          maxLength: 120
+        cta_label_en:
+          type: string
+          title: Bouton 1 (EN)
+          maxLength: 120
+        cta_url:
+          type: string
+          title: Lien du bouton 1
+          maxLength: 500
+        cta2_label_fr:
+          type: string
+          title: Bouton 2 (FR)
+          maxLength: 120
+        cta2_label_en:
+          type: string
+          title: Bouton 2 (EN)
+          maxLength: 120
+        cta2_url:
+          type: string
+          title: Lien du bouton 2
+          maxLength: 500
+        image:
+          type: integer
+          nullable: true
+        config:
+          title: Configuration
+        published:
+          type: boolean
+          title: Publiée
+        image_ref:
+          allOf:
+          - $ref: '#/components/schemas/PublicFileRef'
+          readOnly: true
+          nullable: true
+        is_data:
+          type: boolean
+          readOnly: true
+        pages:
+          type: array
+          items:
+            $ref: '#/components/schemas/PageRef'
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - code
+      - id
+      - image_ref
+      - is_data
+      - pages
+      - section_type
+      - updated_at
+    SectionOrderRequest:
+      type: object
+      properties:
+        sections:
+          type: array
+          items:
+            type: integer
+            minimum: 1
+      required:
+      - sections
+    SectionRefRequest:
+      type: object
+      properties:
+        section:
+          type: integer
+          minimum: 1
+        position:
+          type: integer
+          minimum: 0
+      required:
+      - section
+    SectionType:
+      enum:
+      - rich_text
+      - cta_banner
+      - image_text
+      - edition_hero
+      - key_dates
+      - tracks
+      - submission_types
+      - documents
+      - committee
+      type: string
+      description: |-
+        * `rich_text` - texte riche
+        * `cta_banner` - bandeau d'appel à l'action
+        * `image_text` - image et texte
+        * `edition_hero` - en-tête de l'édition
+        * `key_dates` - dates clés
+        * `tracks` - thématiques
+        * `submission_types` - types de communication
+        * `documents` - documents
+        * `committee` - comité
+    SectionWriteRequest:
+      type: object
+      description: 'Écriture : les contrôles métier (HTML, liens, configuration) sont
+        dans le service.'
+      properties:
+        code:
+          type: string
+          minLength: 1
+          maxLength: 64
+          pattern: ^[-a-zA-Z0-9_]+$
+        section_type:
+          allOf:
+          - $ref: '#/components/schemas/SectionType'
+          title: Type
+        title_fr:
+          type: string
+          title: Titre (FR)
+          maxLength: 255
+        title_en:
+          type: string
+          title: Titre (EN)
+          maxLength: 255
+        subtitle_fr:
+          type: string
+          title: Sous-titre (FR)
+          maxLength: 500
+        subtitle_en:
+          type: string
+          title: Sous-titre (EN)
+          maxLength: 500
+        body_fr:
+          type: string
+          title: Corps (FR)
+        body_en:
+          type: string
+          title: Corps (EN)
+        cta_label_fr:
+          type: string
+          title: Bouton 1 (FR)
+          maxLength: 120
+        cta_label_en:
+          type: string
+          title: Bouton 1 (EN)
+          maxLength: 120
+        cta_url:
+          type: string
+          title: Lien du bouton 1
+          maxLength: 500
+        cta2_label_fr:
+          type: string
+          title: Bouton 2 (FR)
+          maxLength: 120
+        cta2_label_en:
+          type: string
+          title: Bouton 2 (EN)
+          maxLength: 120
+        cta2_url:
+          type: string
+          title: Lien du bouton 2
+          maxLength: 500
+        image:
+          type: integer
+          nullable: true
+        config: {}
+        published:
+          type: boolean
+          title: Publiée
+      required:
+      - code
+      - section_type
     ServiceStatus:
       enum:
       - ok
@@ -2507,9 +4855,8 @@ components:
           title: Description (EN)
         default_duration_min:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 65535
           minimum: 0
-          format: int64
           nullable: true
           title: Durée par défaut (min)
         abstract_max_words:
@@ -2519,9 +4866,8 @@ components:
           title: Mots maximum du résumé
         position:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 65535
           minimum: 0
-          format: int64
           title: Ordre
         is_active:
           type: boolean
@@ -2555,9 +4901,8 @@ components:
           title: Description (EN)
         default_duration_min:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 65535
           minimum: 0
-          format: int64
           nullable: true
           title: Durée par défaut (min)
         abstract_max_words:
@@ -2567,9 +4912,8 @@ components:
           title: Mots maximum du résumé
         position:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 65535
           minimum: 0
-          format: int64
           title: Ordre
         is_active:
           type: boolean
@@ -2620,9 +4964,8 @@ components:
           title: Description (EN)
         position:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 65535
           minimum: 0
-          format: int64
           title: Ordre
         is_active:
           type: boolean
@@ -2656,9 +4999,8 @@ components:
           title: Description (EN)
         position:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 65535
           minimum: 0
-          format: int64
           title: Ordre
         is_active:
           type: boolean

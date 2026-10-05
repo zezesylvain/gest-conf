@@ -13,5 +13,6 @@ export const CAPABILITY: Capability[] = [
   'edition.archive',
   'members.read',
   'members.manage',
-  'audit.read'
+  'audit.read',
+  'portal.write'
 ];

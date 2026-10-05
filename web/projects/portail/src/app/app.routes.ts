@@ -1,12 +1,42 @@
-import { Routes } from '@angular/router';
+import { inject } from '@angular/core';
+import { CanActivateFn, Route, Routes } from '@angular/router';
+import { LanguageService } from '@gestconf/shared';
 
-// La propriété « title » contient une clé de traduction (voir TranslatedTitleStrategy).
+import { SITE_LANGUAGES, SITE_PAGES, SiteLanguage } from './site/site-pages';
+
+/** La langue du portail public est celle de l'adresse (E2) : appliquée avant le rendu. */
+function useLanguage(lang: SiteLanguage): CanActivateFn {
+  return () =>
+    inject(LanguageService)
+      .use(lang)
+      .then(() => true);
+}
+
+const portalPage = () => import('./site/portal-page').then((m) => m.PortalPage);
+
+/** `/fr/…` ou `/en/…` : pages du site (adresses figées), puis pages personnalisées `/p/:slug`. */
+function languageRoutes(lang: SiteLanguage): Route {
+  return {
+    path: lang,
+    canActivate: [useLanguage(lang)],
+    children: [
+      ...SITE_PAGES.map((page): Route => ({
+        path: page[lang],
+        pathMatch: 'full',
+        loadComponent: portalPage,
+        data: { lang, slug: page.slug },
+      })),
+      // Déclarée avant « ** » (plan L2 §2.2) ; le slug vient du paramètre.
+      { path: 'p/:slug', loadComponent: portalPage, data: { lang, custom: true } },
+    ],
+  };
+}
+
+// La propriété « title » contient une clé de traduction (voir TranslatedTitleStrategy) ; les
+// pages publiques posent elles-mêmes leur titre (titre de la page en base).
 export const routes: Routes = [
-  {
-    path: '',
-    title: 'portail.home.title',
-    loadComponent: () => import('./pages/home/home-page').then((m) => m.HomePage),
-  },
+  { path: '', pathMatch: 'full', redirectTo: 'fr' },
+  ...SITE_LANGUAGES.map(languageRoutes),
   {
     path: 'compte',
     loadChildren: () => import('./account/account.routes').then((m) => m.accountRoutes),

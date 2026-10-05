@@ -10,12 +10,14 @@
     "ng": "ng",
     "start:portail": "ng serve portail",
     "start:gestion": "ng serve gestion",
-    "build": "ng build portail && ng build gestion && node scripts/inject-csp.mjs dist/portail/browser dist/gestion/browser",
+    "build": "ng build portail && node scripts/check-prerender.mjs dist/portail/browser && ng build gestion && node scripts/inject-csp.mjs dist/portail/browser dist/gestion/browser",
+    "build:portail": "ng build portail && node scripts/check-prerender.mjs dist/portail/browser && node scripts/inject-csp.mjs dist/portail/browser",
     "test": "node --test 'scripts/*.test.mjs' && ng test shared --watch=false && ng test portail --watch=false && ng test gestion --watch=false",
     "lint": "ng lint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "api:generate": "ng-openapi-gen -c ng-openapi-gen.json"
+    "api:generate": "ng-openapi-gen -c ng-openapi-gen.json",
+    "e2e": "playwright test -c e2e/playwright.config.ts"
   },
   "dependencies": {
     "@angular/cdk": "^22.2.1",
@@ -37,6 +39,7 @@
     "@angular/cli": "^22.2.1",
     "@angular/compiler-cli": "^22.2.0",
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "1.63.0",
     "@types/node": "^22.12.0",
     "angular-eslint": "22.5.0",
     "eslint": "^10.9.1",

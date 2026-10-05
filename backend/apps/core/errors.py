@@ -67,6 +67,14 @@ class ErrorCode(models.TextChoices):
     EDITION_ARCHIVED = "edition_archived"
     INVALID_TRANSITION = "invalid_transition"
     EDITION_INCOMPLETE = "edition_incomplete"
+    # Données personnelles (plan L1 §4.9) : anonymisation refusée tant que des
+    # responsabilités (rôles de gestion actifs, dernier ADMIN) n'ont pas été transmises.
+    ACCOUNT_HAS_ACTIVE_DUTIES = "account_has_active_duties"
+    # Soumissions (plan L3) : soumission incomplète (RG-01), appel clos sans dérogation
+    # (RG-02), réglage de l'édition gelé par l'existence de soumissions (RG-19).
+    SUBMISSION_INCOMPLETE = "submission_incomplete"
+    CALL_CLOSED = "call_closed"
+    SETTING_FROZEN = "setting_frozen"
 
 
 class DomainError(Exception):

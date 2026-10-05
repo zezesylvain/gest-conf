@@ -107,6 +107,8 @@ Les deux serveurs de développement relaient `/api` vers `runserver` (`web/proxy
 | File de tâches | `python manage.py run_jobs` (cron en production : `deploy/cron.sh`) |
 | E-mails | `python manage.py send_test_email <adresse>` puis `run_jobs` ; suivi : `python manage.py outbox [--status failed] [--retry ID]` |
 | Éditions (opérateur) | `create_conference --slug … --name-fr …`, `create_edition --conference … --code GC27 --slug … --year … --title-fr … [--admin-email …] [--current]`, `set_current_edition CODE`, `set_edition_status CODE published\|archived\|draft --reason …` |
+| Données personnelles (opérateur) | `export_user_data --email … [--output …]`, `anonymize_user --email … --reason …`, `reactivate_user --email … --reason …` |
+| Intégrité | `python manage.py check_integrity` (cron quotidien : `deploy/cron.sh`) |
 | 2FA (opérateur) | `reset_mfa --email … --reason …` (perte d'appareil), `rotate_mfa_keys [--dry-run]` (voir [`deploy/README.md`](deploy/README.md)) |
 | Rôles (opérateur) | `grant_role --email … --edition CODE --role CHAIR --reason …`, `revoke_role` (mêmes options) |
 | Comptes (opérateur) | `sync_email_addresses [--verified]`, `deactivate_user --email … --reason …`, `audit_query [--action auth.] [--email …] [--since AAAA-MM-JJ]` |

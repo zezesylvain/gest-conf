@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     "apps.accounts",
     "apps.communications",
     "apps.conferences",
+    "apps.portal",
+    "apps.submissions",
     # Après les applications du projet : leurs gabarits d'e-mails (account/email/*) priment.
     "allauth",
     "allauth.account",
@@ -304,6 +306,7 @@ REST_FRAMEWORK = {
         "invitation_create": "20/hour",  # créations d'invitations, par compte
         "data_export": "3/hour",
         "account_deletion": "3/hour",
+        "portal_upload": "60/hour",  # téléversements de fichiers publics, par compte
     },
     "NUM_PROXIES": GESTCONF_TRUSTED_PROXY_COUNT,
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
@@ -342,6 +345,10 @@ SPECTACULAR_SETTINGS = {
         "SkippedReason": "apps.accounts.services.invitations.SkippedReason",
         "ActorKind": "apps.core.actor.ActorKind",
         "EditionStatus": "apps.conferences.models.EditionStatus",
+        "SectionType": "apps.portal.models.SectionType",
+        "MenuLocation": "apps.portal.models.MenuLocation",
+        "PublicFileKind": "apps.core.models.PublicFileKind",
+        "PortalFileKind": "apps.portal.serializers.PORTAL_FILE_KIND_CHOICES",
         "ErrorCode": "apps.core.errors.ErrorCode",
     },
     "POSTPROCESSING_HOOKS": [
@@ -400,6 +407,14 @@ GESTCONF_CRON_INTERVAL_SECONDS = env.int("GESTCONF_CRON_INTERVAL_SECONDS", defau
 # ou « database » (GET_LOCK de MariaDB).
 GESTCONF_COMMAND_LOCK = env.str("GESTCONF_COMMAND_LOCK", default="flock")
 GESTCONF_LOCK_DIR = Path(env.str("GESTCONF_LOCK_DIR", default=str(BASE_DIR / "tmp")))
+# Fichiers déposés (règle n° 8) : HORS de la racine web ; servis par l'API seulement.
+# Fichiers publics (E4, lot L2) dans le sous-dossier « public ».
+GESTCONF_FILES_DIR = Path(env.str("GESTCONF_FILES_DIR", default=str(BASE_DIR / "var" / "files")))
+# Fichiers des auteurs (lot L3, F2) : privés, servis par un endpoint authentifié (règle
+# n° 8 sans adaptation). Par défaut sous GESTCONF_FILES_DIR (une seule sauvegarde).
+GESTCONF_PRIVATE_FILES_DIR = Path(
+    env.str("GESTCONF_PRIVATE_FILES_DIR", default=str(GESTCONF_FILES_DIR / "private"))
+)
 # Durées de conservation de D15 : simulation seule tant qu'elles ne sont pas validées
 # par le commanditaire (les purges imposées par la sécurité s'appliquent toujours).
 GESTCONF_RETENTION_ENFORCED = env.bool("GESTCONF_RETENTION_ENFORCED", default=False)

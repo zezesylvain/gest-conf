@@ -19,10 +19,18 @@ export interface Profile {
   institution?: string;
   is_complete: boolean;
   last_name?: string;
+  linkedin_url?: string;
 
   /**
    * Forme 0000-0000-0000-000X, clé de contrôle vérifiée.
    */
   orcid?: string;
+
+  /**
+   * Adresse de la photo (publique seulement avec le consentement « photo »).
+   */
+  photo_url: string | null;
+  scholar_url?: string;
   title?: (ProfileTitle | BlankEnum);
+  website?: string;
 }

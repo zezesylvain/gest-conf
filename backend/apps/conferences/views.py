@@ -76,8 +76,10 @@ class EditionViewSet(ManageViewSet):
     def partial_update(self, request: Request, edition_id: int) -> Response:
         serializer = EditionSerializer(self.edition, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
+        data = dict(serializer.validated_data)
+        reason = data.pop("reason", "")
         edition = services.update_edition(
-            self.edition, serializer.validated_data, actor=Actor.from_request(request)
+            self.edition, data, actor=Actor.from_request(request), reason=reason
         )
         return Response(EditionSerializer(edition).data)
 
@@ -137,8 +139,10 @@ class ConfidentialityViewSet(ManageViewSet):
     def partial_update(self, request: Request, edition_id: int) -> Response:
         serializer = ConfidentialitySerializer(self.edition, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
+        data = dict(serializer.validated_data)
+        reason = data.pop("reason", "")
         edition = services.update_confidentiality(
-            self.edition, serializer.validated_data, actor=Actor.from_request(request)
+            self.edition, data, actor=Actor.from_request(request), reason=reason
         )
         return Response(ConfidentialitySerializer(edition).data)
 

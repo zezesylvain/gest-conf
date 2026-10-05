@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from apps.conferences.models import Edition, EditionStatus, KeyDate, SubmissionType, Track
@@ -17,7 +18,27 @@ class EditionSummarySerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
-class EditionSerializer(serializers.ModelSerializer):
+class _FreezeMixin(serializers.Serializer):
+    """RG-19 : réglages gelés (lecture) et motif d'un changement forcé par un ADMIN."""
+
+    frozen_fields = serializers.SerializerMethodField(
+        help_text="Réglages gelés depuis la première soumission (RG-19)."
+    )
+    reason = serializers.CharField(
+        write_only=True,
+        required=False,
+        allow_blank=True,
+        default="",
+        help_text="Motif, obligatoire pour qu'un ADMIN change un réglage gelé (RG-19).",
+    )
+
+    def get_frozen_fields(self, edition: Edition) -> list[str]:
+        from apps.conferences.services import frozen_fields
+
+        return frozen_fields(edition)
+
+
+class EditionSerializer(_FreezeMixin, serializers.ModelSerializer):
     class Meta:
         model = Edition
         fields = (
@@ -38,15 +59,17 @@ class EditionSerializer(serializers.ModelSerializer):
             "status",
             "published_at",
             "archived_at",
+            "frozen_fields",
+            "reason",
         )
         # Statut, dates de publication : par leur service seulement (§6.3).
         read_only_fields = ("id", "status", "published_at", "archived_at")
 
 
-class ConfidentialitySerializer(serializers.ModelSerializer):
+class ConfidentialitySerializer(_FreezeMixin, serializers.ModelSerializer):
     class Meta:
         model = Edition
-        fields = ("double_blind", "reviewers_per_submission")
+        fields = ("double_blind", "reviewers_per_submission", "frozen_fields", "reason")
 
 
 class EditionStatusChangeSerializer(serializers.Serializer):
@@ -182,14 +205,17 @@ class PublicEditionSerializer(serializers.ModelSerializer):
         )
         read_only_fields = fields
 
+    @extend_schema_field(PublicTrackSerializer(many=True))
     def get_tracks(self, edition: Edition) -> list[dict]:
         return PublicTrackSerializer(edition.tracks.filter(is_active=True), many=True).data
 
+    @extend_schema_field(PublicSubmissionTypeSerializer(many=True))
     def get_submission_types(self, edition: Edition) -> list[dict]:
         return PublicSubmissionTypeSerializer(
             edition.submission_types.filter(is_active=True), many=True
         ).data
 
+    @extend_schema_field(PublicKeyDateSerializer(many=True))
     def get_key_dates(self, edition: Edition) -> list[dict]:
         return PublicKeyDateSerializer(
             edition.key_dates.filter(is_public=True).select_related("edition"), many=True

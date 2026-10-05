@@ -233,6 +233,12 @@ ANONYMOUS_VIEWS = {
     "apps.accounts.manage_views.InvitationLookupView": "jeton d'invitation (lecture)",
     "apps.accounts.manage_views.InvitationDeclineView": "jeton d'invitation (refus)",
     "apps.conferences.views.PublicCurrentEditionView": "portail public",
+    # Lot L2 : contenus du portail, lus au build (pré-rendu) et dans le navigateur.
+    "apps.portal.views.PublicRoutesView": "portail public (routes à pré-rendre)",
+    "apps.portal.views.PublicCompositionView": "portail public (composition d'une page)",
+    "apps.portal.views.PublicMenuView": "portail public (menus)",
+    "apps.portal.views.PublicSiteView": "portail public (données des gabarits)",
+    "apps.portal.views.PublicFileView": "fichiers publics publiés (L2.4, E4)",
 }
 
 # Seule vue de ``v1/manage/`` hors ``ManageViewSet`` : sélecteur d'édition.

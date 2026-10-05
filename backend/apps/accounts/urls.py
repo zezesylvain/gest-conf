@@ -2,9 +2,12 @@ from django.urls import path
 
 from apps.accounts import manage_views
 from apps.accounts.views import (
+    AnonymizationView,
     ConsentsView,
+    DataExportView,
     MeView,
     PreferencesView,
+    ProfilePhotoView,
     ProfileView,
     TotpQrView,
 )
@@ -17,8 +20,11 @@ urlpatterns = [
     path("me", MeView.as_view(), name="me"),
     path("me/preferences", PreferencesView.as_view(), name="me-preferences"),
     path("me/profile", ProfileView.as_view(), name="me-profile"),
+    path("me/photo", ProfilePhotoView.as_view(), name="me-photo"),
     path("me/consents", ConsentsView.as_view(), name="me-consents"),
     path("me/totp-qr", TotpQrView.as_view(), name="me-totp-qr"),
+    path("me/data-export", DataExportView.as_view(), name="me-data-export"),
+    path("me/anonymization", AnonymizationView.as_view(), name="me-anonymization"),
     # Membres, invitations et journal d'une édition (plan L1 §9.3).
     path(
         f"{E}/roles",

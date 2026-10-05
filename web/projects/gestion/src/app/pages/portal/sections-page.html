@@ -1,0 +1,133 @@
+<gc-page-header
+  [heading]="'gestion.portal.sections.title' | translate"
+  [lead]="'gestion.portal.sections.lead' | translate"
+/>
+<gestion-portal-status-banner [editionId]="editionId()" />
+@if (!canWrite()) {
+  <p class="notice">{{ 'gestion.portal.readOnly' | translate }}</p>
+}
+<div aria-live="polite">
+  @if (status()) {
+    <p class="notice" role="status">{{ status() }}</p>
+  }
+</div>
+<gc-error-summary [messages]="errors()" />
+
+@if (!loading()) {
+  <div class="table-wrap">
+    <table>
+      <caption class="visually-hidden">
+        {{
+          'gestion.portal.sections.title' | translate
+        }}
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">{{ 'gestion.fields.code' | translate }}</th>
+          <th scope="col">{{ 'gestion.portal.fields.type' | translate }}</th>
+          <th scope="col">{{ 'gestion.portal.fields.titleFr' | translate }}</th>
+          <th scope="col">{{ 'gestion.portal.fields.published' | translate }}</th>
+          <th scope="col">{{ 'gestion.portal.sections.placedOn' | translate }}</th>
+          <th scope="col">
+            <span class="visually-hidden">{{ 'gestion.settings.actions' | translate }}</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (section of sections(); track section.id) {
+          <tr>
+            <td>
+              <code>{{ section.code }}</code>
+            </td>
+            <td>{{ 'gestion.portal.types.' + section.section_type | translate }}</td>
+            <td lang="fr">{{ section.title_fr }}</td>
+            <td>
+              {{ (section.published ? 'gestion.settings.yes' : 'gestion.settings.no') | translate }}
+            </td>
+            <td>
+              @for (page of section.pages; track page.id; let last = $last) {
+                <a [routerLink]="['/editions', editionId(), 'portail', 'pages', page.id]">{{
+                  page.title_fr
+                }}</a>
+                @if (!last) {
+                  ,
+                }
+              } @empty {
+                <span class="muted">{{ 'gestion.portal.sections.nowhere' | translate }}</span>
+              }
+            </td>
+            <td class="actions">
+              <a
+                mat-button
+                [routerLink]="['/editions', editionId(), 'portail', 'sections', section.id]"
+              >
+                {{ (canWrite() ? 'gestion.settings.edit' : 'gestion.portal.view') | translate
+                }}<span class="visually-hidden"> {{ section.code }}</span>
+              </a>
+              @if (canWrite()) {
+                <button mat-button type="button" (click)="remove(section)" [disabled]="busy()">
+                  {{ 'gestion.settings.delete' | translate
+                  }}<span class="visually-hidden"> {{ section.code }}</span>
+                </button>
+              }
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="6" class="muted">{{ 'gestion.settings.empty' | translate }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (canWrite()) {
+    @if (!creating()) {
+      <div class="actions">
+        <button mat-flat-button type="button" (click)="creating.set(true)">
+          {{ 'gestion.portal.sections.add' | translate }}
+        </button>
+      </div>
+    } @else {
+      <section class="card" aria-labelledby="section-form-title">
+        <h2 id="section-form-title">{{ 'gestion.portal.sections.add' | translate }}</h2>
+        <form [formGroup]="form" (ngSubmit)="create()" novalidate>
+          <div class="grid-2">
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.portal.fields.type' | translate }}</mat-label>
+              <mat-select formControlName="section_type">
+                @for (type of types; track type) {
+                  <mat-option [value]="type">{{
+                    'gestion.portal.types.' + type | translate
+                  }}</mat-option>
+                }
+              </mat-select>
+              <mat-hint>{{
+                'gestion.portal.typeHints.' + form.controls.section_type.value | translate
+              }}</mat-hint>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.fields.code' | translate }}</mat-label>
+              <input matInput formControlName="code" required />
+              <mat-hint>{{ 'gestion.portal.codeHint' | translate }}</mat-hint>
+              <mat-error>{{ error('code') }}</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.portal.fields.titleFr' | translate }}</mat-label>
+              <input matInput formControlName="title_fr" lang="fr" />
+              <mat-error>{{ error('title_fr') }}</mat-error>
+            </mat-form-field>
+          </div>
+          <div class="actions">
+            <button mat-flat-button type="submit" [disabled]="busy()">
+              {{ 'gestion.portal.sections.createAndEdit' | translate }}
+            </button>
+            <button mat-button type="button" (click)="creating.set(false)">
+              {{ 'shared.reauth.cancel' | translate }}
+            </button>
+          </div>
+        </form>
+      </section>
+    }
+  }
+}

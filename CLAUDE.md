@@ -66,7 +66,7 @@ pip install -r requirements/dev.txt
 python manage.py migrate && python manage.py runserver   # http://localhost:8000/api/v1/health
 pytest                      # SQLite par défaut ; DATABASE_URL=mysql://... pour MariaDB (fait foi en CI)
 ruff check . ../deploy && ruff format --check . ../deploy
-python manage.py spectacular --file schema.yml --validate   # schéma OpenAPI (versionné)
+DATABASE_URL=mysql://... python manage.py spectacular --file schema.yml --validate   # schéma OpenAPI (versionné), généré sur MariaDB comme en CI (bornes des entiers)
 
 # Frontend (Node >= 22.22.3 ou >= 24.15, exigence d'Angular 22)
 cd web && npm ci
@@ -76,6 +76,7 @@ npm run build               # portail pré-rendu + gestion + CSP à empreintes
 npm run api:generate        # régénérer le client TypeScript après chaque évolution du schéma
 
 # Déploiement : deploy/deploy.sh puis deploy/smoke-test.sh (voir deploy/README.md)
+# Cron (deploy/cron.sh) : run_jobs (toutes les 5 min), cleanup et check_integrity (quotidiennes)
 ```
 
 Les URL Django sont déclarées **sans** le préfixe `/api` (`v1/...`) : `config/mount.py` gère le montage.
@@ -105,7 +106,19 @@ Les URL Django sont déclarées **sans** le préfixe `/api` (`v1/...`) : `config
 
 ## Décisions du lot L1
 
-Les décisions D1 à D18 du plan [`docs/L1-socle-plan.md`](docs/L1-socle-plan.md) ont été validées le 5 octobre 2026 : elles s'appliquent (notamment D1 : aucun rôle global, autorité de plateforme exercée par des commandes `manage.py` auditées). La mise à jour correspondante de l'étude est prévue en fin de lot (étape L1.8).
+Les décisions D1 à D18 du plan [`docs/L1-socle-plan.md`](docs/L1-socle-plan.md) ont été validées le 5 octobre 2026 : elles s'appliquent (notamment D1 : aucun rôle global, autorité de plateforme exercée par des commandes `manage.py` auditées). Elles sont reportées dans l'étude, **§17 « Mises à jour issues du lot L1 »**, qui prévaut sur les sections antérieures en cas de divergence. Bilan du lot et exploitation : [`docs/L1-socle.md`](docs/L1-socle.md).
+
+## Décisions du lot L2
+
+Les décisions E1 à E14 du plan [`docs/L2-portail-plan.md`](docs/L2-portail-plan.md) et les adaptations de son §2.4 ont été validées le 5 octobre 2026. Elles sont reportées dans l'étude, **§18 « Mises à jour issues du lot L2 »**, qui prévaut sur les sections antérieures (§17 compris). Points à retenir :
+
+- portail **pré-rendu au build seul**, `/fr/…` et `/en/…` ; une modification n'est visible qu'à la publication (`deploy/deploy.sh --portal-only`), la gestion compte les modifications non publiées ;
+- contenus du portail par le CMS-lite (`apps/portal`) : sections typées à catalogue fermé, HTML en liste blanche assaini au serveur **et** au rendu ; capacité `portal.write` ;
+- fichiers publics (`core.PublicFile`) : adaptation de la règle n° 8 limitée aux fichiers publics par nature ; les fichiers des auteurs restent soumis à la règle sans adaptation ;
+- comités publics : consentement `directory_listing` (et `photo_publication` pour la photo), jamais d'adresse ;
+- gestion : chaque nouvel écran s'inscrit dans `core/navigation.ts` (rail et recherche) et reçoit sa fiche d'aide (`help/help-sheets.ts`), sous peine d'échec des tests de cohérence.
+
+Bilan du lot : [`docs/L2-portail.md`](docs/L2-portail.md).
 
 ## Questions ouvertes (étude §15, à ne pas trancher seul)
 

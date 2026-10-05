@@ -6,12 +6,6 @@
       "myAccount": "Mon compte",
       "signIn": "Connexion"
     },
-    "home": {
-      "title": "Accueil",
-      "heading": "Conférence scientifique",
-      "lead": "Appel à communications, programme et inscriptions.",
-      "managementLink": "Accéder à l'espace de gestion"
-    },
     "notFound": {
       "title": "Page introuvable",
       "heading": "Cette page n'existe pas.",
@@ -23,7 +17,9 @@
         "home": "Accueil",
         "profile": "Profil",
         "logout": "Se déconnecter",
-        "security": "Sécurité"
+        "security": "Sécurité",
+        "privacy": "Confidentialité",
+        "myData": "Mes données"
       },
       "fields": {
         "email": "Adresse e-mail",
@@ -84,7 +80,11 @@
         "management": "Accéder à l'espace de gestion",
         "mfaEnabled": "Double authentification : activée.",
         "mfaDisabled": "Double authentification : non activée.",
-        "security": "Gérer la sécurité du compte"
+        "security": "Gérer la sécurité du compte",
+        "pendingTitle": "Invitations en attente",
+        "pendingHint": "Pour répondre, ouvrez le lien reçu par e-mail.",
+        "editionsTitle": "Mes éditions",
+        "open": "Ouvrir dans la gestion"
       },
       "profile": {
         "title": "Profil",
@@ -97,7 +97,10 @@
           "department": "Département, laboratoire",
           "country": "Pays",
           "orcid": "Identifiant ORCID",
-          "bio": "Biographie"
+          "bio": "Biographie",
+          "website": "Site web",
+          "scholar_url": "Profil Google Scholar",
+          "linkedin_url": "Profil LinkedIn"
         },
         "titles": {
           "none": "Aucun",
@@ -110,7 +113,17 @@
         "orcidFormat": "Forme attendue : 0000-0000-0000-000X.",
         "bioHint": "Texte brut, 2 000 caractères au plus.",
         "languageTitle": "Langue",
-        "languageLead": "La langue choisie avec le sélecteur en haut de page est enregistrée dans votre compte : elle sert aussi aux e-mails."
+        "languageLead": "La langue choisie avec le sélecteur en haut de page est enregistrée dans votre compte : elle sert aussi aux e-mails.",
+        "linkFormat": "Adresse https:// complète attendue.",
+        "photoTitle": "Photo",
+        "photoLead": "PNG, JPEG ou WebP, 5 Mo au plus. Elle est recadrée à 800 pixels et débarrassée de ses métadonnées (dont la position GPS). Elle n'est publiée qu'avec votre accord (page Confidentialité).",
+        "photoAlt": "Votre photo de profil",
+        "photoChoose": "Choisir une photo",
+        "photoRemove": "Retirer la photo",
+        "photoSaved": "Photo enregistrée.",
+        "photoRemoved": "Photo retirée.",
+        "linksTitle": "Liens publics",
+        "linksLead": "Facultatifs : affichés dans l'annuaire des comités si vous y figurez."
       },
       "notice": {
         "summary": "Notice d'information sur vos données (version provisoire)",
@@ -128,14 +141,6 @@
         "codeHint": "Code à 6 chiffres, ou code de secours à 8 chiffres.",
         "submit": "Vérifier",
         "backToLogin": "Retour à la connexion"
-      },
-      "reauth": {
-        "title": "Confirmez votre identité",
-        "lead": "Cette opération est sensible : confirmez votre mot de passe pour continuer.",
-        "useCode": "Utiliser plutôt un code de double authentification",
-        "usePassword": "Utiliser plutôt mon mot de passe",
-        "submit": "Confirmer",
-        "cancel": "Annuler"
       },
       "security": {
         "title": "Sécurité",
@@ -181,7 +186,157 @@
         "addEmail": "Ajouter l'adresse",
         "added": "Adresse ajoutée : un lien de vérification lui a été envoyé.",
         "removed": "Adresse retirée.",
-        "primaryChanged": "Adresse principale modifiée."
+        "primaryChanged": "Adresse principale modifiée.",
+        "cancel": "Annuler"
+      },
+      "invitation": {
+        "title": "Invitation",
+        "missing": "Ouvrez le lien reçu par e-mail pour consulter votre invitation.",
+        "notFound": "Cette invitation est introuvable : le lien est incomplet, ou l'invitation a été remplacée par une plus récente.",
+        "summary": "{{inviter}} vous invite à rejoindre l'édition « {{edition}} » ({{code}}) en tant que {{role}}.",
+        "address": "Adresse invitée : {{email}}",
+        "expires": "Valable jusqu'au {{date}}.",
+        "message": "Message de l'invitant :",
+        "signInFirst": "Pour accepter, connectez-vous avec un compte qui porte l'adresse invitée, ou créez-en un.",
+        "signupHint": "Après la création d'un compte et la vérification de votre adresse, rouvrez le lien de l'invitation.",
+        "accept": "Accepter l'invitation",
+        "decline": "Refuser l'invitation",
+        "otherAddress": "Votre compte ne porte pas l'adresse invitée ({{email}}), ou elle n'est pas vérifiée. Pour accepter avec ce compte, recevez un lien de confirmation à cette adresse.",
+        "sendLink": "Recevoir un lien de confirmation à l'adresse invitée",
+        "linkHint": "Le lien est valable une heure et doit être ouvert depuis ce compte ; votre mot de passe peut vous être redemandé.",
+        "linkSent": "Un lien de confirmation a été envoyé à l'adresse invitée. Ouvrez-le depuis ce compte, dans l'heure.",
+        "linkLead": "Vous avez demandé à rattacher l'adresse invitée à votre compte. Confirmez pour l'ajouter (vérifiée) et accepter l'invitation.",
+        "confirmLink": "Confirmer l'adresse et accepter",
+        "reauthHint": "Si votre dernière confirmation de mot de passe date de plus de 5 minutes, elle vous sera redemandée.",
+        "linkSignIn": "Connectez-vous avec le compte qui a demandé ce lien, puis rouvrez-le.",
+        "declined": "Invitation refusée.",
+        "accepted": "Bienvenue ! Vous avez maintenant le rôle « {{role}} ».",
+        "mfaReminder": "Les rôles de gestion exigent la double authentification : activez-la dans « Sécurité » si ce n'est pas déjà fait.",
+        "notPending": {
+          "pending": "En attente.",
+          "accepted": "Cette invitation a déjà été acceptée.",
+          "declined": "Cette invitation a été refusée.",
+          "cancelled": "Cette invitation a été annulée.",
+          "expired": "Cette invitation a expiré : demandez-en une nouvelle aux organisateurs."
+        },
+        "roles": {
+          "ADMIN": "administrateur de l'édition",
+          "CHAIR": "président de la conférence",
+          "OC_MEMBER": "membre du comité d'organisation",
+          "SC_CHAIR": "président du comité scientifique",
+          "SC_MEMBER": "membre du comité scientifique",
+          "AUTHOR": "auteur",
+          "SPEAKER": "intervenant",
+          "SESSION_CHAIR": "président de session",
+          "ATTENDEE": "participant",
+          "SPONSOR": "partenaire",
+          "VOLUNTEER": "bénévole"
+        }
+      },
+      "privacy": {
+        "title": "Confidentialité",
+        "withdraw": "Retirer mon accord",
+        "saved": "Votre choix est enregistré.",
+        "historyTitle": "Historique de vos choix",
+        "kinds": {
+          "privacy_notice": "Notice d'information (prise de connaissance)",
+          "directory_listing": "Annuaire public",
+          "photo_publication": "Publication de la photo"
+        },
+        "yes": "oui",
+        "no": "non",
+        "optional": {
+          "directory_listing": {
+            "title": "Annuaire public des comités",
+            "lead": "Facultatif : si vous l'acceptez, votre nom, votre institution, votre pays et vos liens publics peuvent apparaître dans la liste publique des comités de la conférence. Vous pouvez retirer votre accord à tout moment.",
+            "granted": "Vous avez accepté d'apparaître dans l'annuaire.",
+            "notGranted": "Vous n'apparaissez pas dans l'annuaire.",
+            "grant": "Apparaître dans l'annuaire"
+          },
+          "photo_publication": {
+            "title": "Publication de votre photo",
+            "lead": "Facultatif : si vous l'acceptez, la photo de votre profil peut accompagner votre nom sur le portail (annuaire des comités). Sans cet accord, elle n'est visible que de vous. Le retrait prend effet immédiatement pour la photo.",
+            "granted": "Vous avez accepté la publication de votre photo.",
+            "notGranted": "Votre photo n'est pas publiée.",
+            "grant": "Publier ma photo"
+          }
+        }
+      },
+      "myData": {
+        "title": "Mes données",
+        "exportTitle": "Télécharger mes données",
+        "exportLead": "Fichier JSON contenant votre compte, votre profil, vos adresses, l'état de votre double authentification (sans aucun secret), vos rôles, vos invitations, vos consentements, les e-mails reçus et vos actions des 12 derniers mois.",
+        "download": "Télécharger (JSON)",
+        "downloaded": "Export téléchargé.",
+        "anonymizeTitle": "Anonymiser mon compte",
+        "anonymizeLead": "Opération immédiate et définitive : votre adresse, votre profil, votre double authentification et vos sessions sont effacés, vos rôles retirés, et vous ne pourrez plus vous connecter.",
+        "anonymizeKept": "Le journal des actions et l'historique de vos consentements sont conservés comme preuves, sans votre adresse ni votre nom. Si vous avez un rôle de gestion actif, transmettez-le d'abord.",
+        "confirmation": "Adresse e-mail du compte",
+        "confirmationHint": "Saisissez {{email}} pour confirmer.",
+        "understood": "Je comprends que cette opération est définitive.",
+        "anonymize": "Anonymiser définitivement mon compte"
+      }
+    },
+    "site": {
+      "loading": "Chargement…",
+      "backHome": "Retour à l'accueil",
+      "errorTitle": "Page momentanément indisponible",
+      "errorLead": "Le contenu de cette page n'a pas pu être chargé. Réessayez dans quelques instants.",
+      "toCall": "Appel à communications",
+      "toDates": "Dates importantes",
+      "callLead": "Formats acceptés, échéances et modèles de documents. Le dépôt des propositions se fera dans l'espace auteur, dès l'ouverture de l'appel.",
+      "formats": "Formats de communication",
+      "deadlines": "Échéances",
+      "templates": "Modèles et documents",
+      "comingSoon": "Cette page sera complétée prochainement.",
+      "committeeSoon": "La composition du comité sera publiée prochainement.",
+      "datesRange": "Du {{start}} au {{end}}",
+      "timezone": "Heures indiquées dans le fuseau de la conférence ({{zone}}).",
+      "noDates": "Les dates seront annoncées prochainement.",
+      "noDocuments": "Aucun document pour le moment.",
+      "duration": "{{minutes}} min",
+      "abstractWords": "résumé de {{words}} mots au plus",
+      "countdown": "J-{{days}}",
+      "keyDates": {
+        "call_open": "Ouverture de l'appel",
+        "call_close": "Clôture de l'appel",
+        "review_deadline": "Fin des évaluations",
+        "notification": "Notification des décisions",
+        "camera_ready": "Version définitive",
+        "registration_open": "Ouverture des inscriptions",
+        "early_bird_end": "Fin du tarif préférentiel",
+        "registration_close": "Clôture des inscriptions"
+      },
+      "nav": {
+        "header": "Navigation principale",
+        "footer": "Liens de pied de page"
+      },
+      "scientificCommittee": "Comité scientifique",
+      "organizingCommittee": "Comité d'organisation",
+      "chair": "Présidence",
+      "othersOne": "et 1 autre membre",
+      "othersMany": "et {{count}} autres membres",
+      "membersOne": "1 membre",
+      "membersMany": "{{count}} membres",
+      "titles": {
+        "dr": "Dr",
+        "pr": "Pr",
+        "mr": "M.",
+        "ms": "Mme"
+      },
+      "functions": {
+        "finance": "Finances",
+        "program": "Programme",
+        "logistics": "Logistique",
+        "communication": "Communication",
+        "external_relations": "Relations extérieures",
+        "volunteers": "Bénévoles",
+        "secretariat": "Secrétariat"
+      },
+      "links": {
+        "website": "Site web",
+        "scholar": "Google Scholar",
+        "linkedin": "LinkedIn"
       }
     }
   }

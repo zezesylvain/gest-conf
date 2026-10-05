@@ -9,6 +9,32 @@ class CoreConfig(AppConfig):
     def ready(self) -> None:
         # Enregistre les extensions drf-spectacular (authentification par session).
         from apps.core import schema  # noqa: F401
-        from apps.core.retention import purge_finished_jobs, register_retention_task
+        from apps.core.integrity import (
+            check_cache_size,
+            check_failed_jobs,
+            register_integrity_check,
+        )
+        from apps.core.personal_data import register_personal_data
+        from apps.core.personal_data_handlers import anonymize_audit, export_audit
+        from apps.core.retention import (
+            purge_audit_network,
+            purge_audit_rows,
+            purge_finished_jobs,
+            register_retention_task,
+        )
 
         register_retention_task("core.finished_jobs", purge_finished_jobs)
+        register_retention_task("core.audit_network", purge_audit_network)
+        register_retention_task("core.audit_rows", purge_audit_rows)
+        from apps.core.public_files import check_missing_files, purge_orphan_files
+
+        register_retention_task("core.orphan_files", purge_orphan_files, security=True)
+        register_integrity_check("core.cache_size", check_cache_size)
+        register_integrity_check("core.failed_jobs", check_failed_jobs)
+        register_integrity_check("core.public_files_missing", check_missing_files)
+        register_personal_data(
+            "core.audit",
+            models=("core.AuditLog",),
+            export=export_audit,
+            anonymize=anonymize_audit,
+        )

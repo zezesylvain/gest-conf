@@ -255,3 +255,85 @@ class CronHeartbeat(models.Model):
 
     def __str__(self) -> str:
         return f"{self.name} ({self.last_status})"
+
+
+class PublicFileKind(models.TextChoices):
+    DOCUMENT = "document", _("document")
+    IMAGE = "image", _("image")
+    PHOTO = "photo", _("photo de profil")
+
+
+class PublicFile(TimeStampedModel):
+    """Fichier **public par nature** (E4, plan L2) : modèle de document, image de section,
+    affiche, photo de profil.
+
+    Stocké hors de la racine web sous un nom aléatoire, type vérifié par son contenu, images
+    réencodées sans métadonnées ; servi par ``GET /v1/public/files/<uuid>/<nom>`` seulement
+    s'il est publié et que son contexte le permet (édition publiée, consentement). Écrit et
+    supprimé par ``apps.core.public_files`` uniquement.
+    """
+
+    uuid = models.UUIDField(_("identifiant public"), unique=True, editable=False)
+    edition = models.ForeignKey(
+        "conferences.Edition",
+        verbose_name=_("édition"),
+        null=True,
+        blank=True,
+        on_delete=models.RESTRICT,
+        related_name="+",
+    )
+    kind = models.CharField(_("nature"), max_length=10, choices=PublicFileKind.choices)
+    storage_name = models.CharField(_("nom de stockage"), max_length=80, unique=True)
+    original_name = models.CharField(_("nom d'origine"), max_length=255)
+    extension = models.CharField(_("extension"), max_length=8)
+    content_type = models.CharField(_("type de contenu"), max_length=100)
+    size = models.PositiveIntegerField(_("taille (octets)"))
+    sha256 = models.CharField(_("empreinte SHA-256"), max_length=64)
+    width = models.PositiveIntegerField(_("largeur"), null=True, blank=True)
+    height = models.PositiveIntegerField(_("hauteur"), null=True, blank=True)
+    title_fr = models.CharField(_("titre (FR)"), max_length=255, blank=True, default="")
+    title_en = models.CharField(_("titre (EN)"), max_length=255, blank=True, default="")
+    position = models.PositiveSmallIntegerField(_("ordre"), default=0)
+    published = models.BooleanField(_("publié"), default=False)
+
+    AUDIT_FIELDS = (
+        "uuid",
+        "kind",
+        "original_name",
+        "content_type",
+        "size",
+        "sha256",
+        "title_fr",
+        "title_en",
+        "position",
+        "published",
+    )
+
+    class Meta:
+        verbose_name = _("fichier public")
+        verbose_name_plural = _("fichiers publics")
+        ordering = ("position", "id")
+        indexes = (models.Index(fields=["edition", "kind", "position"], name="core_pubfile_kind"),)
+
+    def __str__(self) -> str:
+        return f"{self.kind}:{self.uuid}"
+
+
+# --- Compteurs de numérotation (étude §8.3, plan L3 F4) ----------------------------------
+
+
+class Counter(models.Model):
+    """Compteur sans trou ni doublon, par portée (``submission:GC27``, plus tard les
+    factures). Incrémenté seulement par ``apps.core.counters.next_value``, sous verrou de
+    ligne, dans la transaction de l'opération qui consomme le numéro : un échec annule
+    aussi l'incrément."""
+
+    scope = models.CharField(_("portée"), max_length=64, unique=True)
+    value = models.PositiveIntegerField(_("dernière valeur"), default=0)
+
+    class Meta:
+        verbose_name = _("compteur")
+        verbose_name_plural = _("compteurs")
+
+    def __str__(self) -> str:
+        return f"{self.scope}={self.value}"

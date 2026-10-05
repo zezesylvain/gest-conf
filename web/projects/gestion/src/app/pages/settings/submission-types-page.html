@@ -1,0 +1,144 @@
+<gc-page-header
+  [heading]="'gestion.settings.types.title' | translate"
+  [lead]="'gestion.settings.types.lead' | translate"
+/>
+@if (!canWrite()) {
+  <p class="notice">{{ 'gestion.settings.readOnly' | translate }}</p>
+}
+<div aria-live="polite">
+  @if (status()) {
+    <p class="notice" role="status">{{ status() }}</p>
+  }
+</div>
+<gc-error-summary [messages]="errors()" />
+
+@if (!loading()) {
+  <div class="table-wrap">
+    <table>
+      <caption class="visually-hidden">
+        {{
+          'gestion.settings.types.title' | translate
+        }}
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">{{ 'gestion.fields.position' | translate }}</th>
+          <th scope="col">{{ 'gestion.fields.code' | translate }}</th>
+          <th scope="col">{{ 'gestion.fields.labelFr' | translate }}</th>
+          <th scope="col">{{ 'gestion.fields.labelEn' | translate }}</th>
+          <th scope="col">{{ 'gestion.fields.duration' | translate }}</th>
+          <th scope="col">{{ 'gestion.fields.active' | translate }}</th>
+          @if (canWrite()) {
+            <th scope="col">
+              <span class="visually-hidden">{{ 'gestion.settings.actions' | translate }}</span>
+            </th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of items(); track item.id) {
+          <tr>
+            <td>{{ item.position }}</td>
+            <td>
+              <code>{{ item.code }}</code>
+            </td>
+            <td lang="fr">{{ item.label_fr }}</td>
+            <td lang="en">{{ item.label_en }}</td>
+            <td>{{ item.default_duration_min ?? '—' }}</td>
+            <td>
+              {{ (item.is_active ? 'gestion.settings.yes' : 'gestion.settings.no') | translate }}
+            </td>
+            @if (canWrite()) {
+              <td class="actions">
+                <button mat-button type="button" (click)="startEdit(item)">
+                  {{ 'gestion.settings.edit' | translate
+                  }}<span class="visually-hidden"> {{ item.code }}</span>
+                </button>
+                <button mat-button type="button" (click)="confirmDelete(item)">
+                  {{ 'gestion.settings.delete' | translate
+                  }}<span class="visually-hidden"> {{ item.code }}</span>
+                </button>
+              </td>
+            }
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="7" class="muted">{{ 'gestion.settings.empty' | translate }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (canWrite()) {
+    @if (editing() === null) {
+      <div class="actions">
+        <button mat-flat-button type="button" (click)="startCreate()">
+          {{ 'gestion.settings.types.add' | translate }}
+        </button>
+      </div>
+    } @else {
+      <section class="card" aria-labelledby="type-form-title">
+        <h2 id="type-form-title">
+          {{
+            (editing() ? 'gestion.settings.types.editTitle' : 'gestion.settings.types.add')
+              | translate
+          }}
+        </h2>
+        <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+          <div class="grid-2">
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.fields.code' | translate }}</mat-label>
+              <input matInput formControlName="code" required />
+              <mat-error>{{ error('code') }}</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.fields.position' | translate }}</mat-label>
+              <input matInput type="number" formControlName="position" />
+              <mat-error>{{ error('position') }}</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.fields.labelFr' | translate }}</mat-label>
+              <input matInput formControlName="label_fr" lang="fr" required />
+              <mat-error>{{ error('label_fr') }}</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.fields.labelEn' | translate }}</mat-label>
+              <input matInput formControlName="label_en" lang="en" />
+              <mat-error>{{ error('label_en') }}</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.fields.descriptionFr' | translate }}</mat-label>
+              <textarea matInput formControlName="description_fr" lang="fr" rows="3"></textarea>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.fields.descriptionEn' | translate }}</mat-label>
+              <textarea matInput formControlName="description_en" lang="en" rows="3"></textarea>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.fields.duration' | translate }}</mat-label>
+              <input matInput type="number" formControlName="default_duration_min" />
+              <mat-error>{{ error('default_duration_min') }}</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.fields.abstractMaxWords' | translate }}</mat-label>
+              <input matInput type="number" formControlName="abstract_max_words" />
+              <mat-error>{{ error('abstract_max_words') }}</mat-error>
+            </mat-form-field>
+          </div>
+          <mat-checkbox formControlName="is_active">{{
+            'gestion.fields.active' | translate
+          }}</mat-checkbox>
+          <div class="actions">
+            <button mat-flat-button type="submit" [disabled]="saving()">
+              {{ 'gestion.settings.save' | translate }}
+            </button>
+            <button mat-button type="button" (click)="cancel()">
+              {{ 'shared.reauth.cancel' | translate }}
+            </button>
+          </div>
+        </form>
+      </section>
+    }
+  }
+}

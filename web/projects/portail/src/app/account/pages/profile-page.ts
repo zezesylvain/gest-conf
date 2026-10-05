@@ -22,12 +22,13 @@ import {
   LanguageService,
   MeStore,
   PageHeader,
+  countryOptions,
+  Profile,
   ProfileTitle,
 } from '@gestconf/shared';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { AccountService } from '../account.service';
-import { countryOptions } from '../countries';
 
 const ORCID_PATTERN = /^\d{4}-\d{4}-\d{4}-\d{3}[\dXx]$/;
 // « '' » : aucun titre (BlankEnum dans le schéma).
@@ -35,7 +36,22 @@ type TitleValue = ProfileTitle | '';
 const TITLES: TitleValue[] = ['', 'dr', 'pr', 'mr', 'ms'];
 
 type ProfileField =
-  'title' | 'first_name' | 'last_name' | 'institution' | 'department' | 'country' | 'orcid' | 'bio';
+  | 'title'
+  | 'first_name'
+  | 'last_name'
+  | 'institution'
+  | 'department'
+  | 'country'
+  | 'orcid'
+  | 'bio'
+  | 'website'
+  | 'scholar_url'
+  | 'linkedin_url';
+
+/** Lien public : adresse https:// complète (le serveur revérifie). */
+const HTTPS_LINK = /^https:\/\/\S+$/;
+/** Aperçu de sa propre photo (authentifié, même sans consentement de publication). */
+const OWN_PHOTO_URL = '/api/v1/me/photo';
 
 /**
  * Profil (plan L1 §3.3) : nom, prénom, institution et pays forment le profil complet
@@ -57,6 +73,35 @@ type ProfileField =
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './profile-page.html',
   styleUrl: './account-form.scss',
+  styles: `
+    .photo {
+      display: grid;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .photo h2,
+    .profile-links legend {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    .photo img {
+      width: 10rem;
+      height: 10rem;
+      object-fit: cover;
+      border-radius: 50%;
+      border: 1px solid var(--gc-border);
+    }
+    .file {
+      display: grid;
+      gap: 0.25rem;
+    }
+    .profile-links {
+      margin: 1rem 0 0;
+      padding: 0;
+      border: 0;
+    }
+  `,
 })
 export class ProfilePage implements OnInit {
   private readonly account = inject(AccountService);
@@ -66,6 +111,7 @@ export class ProfilePage implements OnInit {
   protected readonly language = inject(LanguageService);
 
   protected readonly titles = TITLES;
+  protected readonly linkFields = ['website', 'scholar_url', 'linkedin_url'] as const;
   protected readonly countries = computed(() => countryOptions(this.language.current()));
   protected readonly form = inject(NonNullableFormBuilder).group({
     title: ['' as TitleValue],
@@ -76,7 +122,15 @@ export class ProfilePage implements OnInit {
     country: ['', Validators.required],
     orcid: ['', Validators.pattern(ORCID_PATTERN)],
     bio: ['', Validators.maxLength(2000)],
+    website: ['', [Validators.maxLength(300), Validators.pattern(HTTPS_LINK)]],
+    scholar_url: ['', [Validators.maxLength(300), Validators.pattern(HTTPS_LINK)]],
+    linkedin_url: ['', [Validators.maxLength(300), Validators.pattern(HTTPS_LINK)]],
   });
+  /** Adresse d'aperçu de la photo (paramètre de version : contourne le cache après un envoi). */
+  protected readonly photo = signal<string | null>(null);
+  protected readonly photoBusy = signal(false);
+  protected readonly photoStatus = signal('');
+  private photoVersion = 0;
   protected readonly loading = signal(true);
   protected readonly saving = signal(false);
   protected readonly saved = signal(false);
@@ -94,7 +148,11 @@ export class ProfilePage implements OnInit {
         country: profile.country ?? '',
         orcid: profile.orcid ?? '',
         bio: profile.bio ?? '',
+        website: profile.website ?? '',
+        scholar_url: profile.scholar_url ?? '',
+        linkedin_url: profile.linkedin_url ?? '',
       });
+      this.showPhoto(profile);
     } catch (error) {
       this.errors.set([apiErrorMessage(this.translate, error)]);
     } finally {
@@ -105,9 +163,55 @@ export class ProfilePage implements OnInit {
   protected error(name: ProfileField): string {
     const control = this.form.controls[name];
     if (control.errors?.['pattern']) {
-      return this.translate.instant('portail.account.profile.orcidFormat');
+      return this.translate.instant(
+        name === 'orcid'
+          ? 'portail.account.profile.orcidFormat'
+          : 'portail.account.profile.linkFormat',
+      );
     }
     return fieldErrorMessage(this.translate, control);
+  }
+
+  protected async uploadPhoto(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) {
+      return;
+    }
+    await this.photoAction(
+      () => this.account.uploadPhoto(file),
+      'portail.account.profile.photoSaved',
+    );
+    input.value = '';
+  }
+
+  protected async removePhoto(): Promise<void> {
+    await this.photoAction(
+      () => this.account.deletePhoto(),
+      'portail.account.profile.photoRemoved',
+    );
+  }
+
+  private async photoAction(action: () => Promise<Profile>, successKey: string): Promise<void> {
+    this.errors.set([]);
+    this.photoStatus.set('');
+    this.photoBusy.set(true);
+    try {
+      this.showPhoto(await action());
+      this.photoStatus.set(this.translate.instant(successKey));
+    } catch (error) {
+      this.errors.set([
+        apiErrorMessage(this.translate, error),
+        ...(error instanceof GcApiError ? Object.values(error.fields).flat() : []),
+      ]);
+    } finally {
+      this.photoBusy.set(false);
+    }
+  }
+
+  private showPhoto(profile: Profile): void {
+    this.photoVersion += 1;
+    this.photo.set(profile.photo_url ? `${OWN_PHOTO_URL}?v=${this.photoVersion}` : null);
   }
 
   protected async submit(): Promise<void> {

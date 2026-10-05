@@ -41,3 +41,19 @@ mat-form-field {
 a {
   color: var(--gc-primary);
 }
+
+.hint {
+  color: var(--gc-muted);
+  font-size: 0.95rem;
+}
+
+blockquote {
+  margin: 0.25rem 0 1rem;
+  padding: 0.5rem 1rem;
+  border-left: 0.25rem solid var(--gc-border);
+  white-space: pre-wrap;
+}
+
+figure {
+  margin: 0;
+}

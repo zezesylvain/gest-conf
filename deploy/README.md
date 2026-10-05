@@ -62,7 +62,35 @@ deploy/deploy.sh
    `migrate`, puis `createcachetable` (tables `gestconf_cache` et `gestconf_throttle_cache`
    du cache partagé, sans effet si elles existent) ;
 5. redémarrage de Passenger (`tmp/restart.txt`) ;
-6. envoi des fichiers statiques, fusion du `.htaccess` racine, tests de fumée.
+6. envoi des fichiers statiques, fusion du `.htaccess` racine ;
+7. **publication du portail pré-rendu** (ci-dessous), le backend de cette version étant en
+   ligne ; puis tests de fumée.
+
+### Publier le portail (lot L2, E9)
+
+Le portail public est **pré-rendu au build** à partir de l'API publique de production : une
+modification faite dans la gestion (contenus, édition, comités) n'y apparaît qu'à la
+publication suivante. Le bandeau des écrans « Portail » de la gestion compte les
+modifications non publiées.
+
+```bash
+deploy/deploy.sh --portal-only   # mêmes variables ; DEPLOY_BASE_URL obligatoire
+```
+
+1. lecture de l'édition courante (`/api/v1/public/portal/site`) et de l'heure de début ;
+2. `npm run build:portail` avec `GESTCONF_PRERENDER_API_ORIGIN` (défaut : `DEPLOY_BASE_URL`) :
+   pré-rendu des pages FR et EN, **contrôle de complétude** (chaque route annoncée par
+   `/api/v1/public/portal/routes` doit avoir sa page complète, sinon refus), écriture de
+   `sitemap.xml` et de la ligne `Sitemap:` de `robots.txt`, CSP à empreintes ;
+3. `rsync --delete` vers la racine web **sans toucher** à `gestion/`, `api/`, `.htaccess`,
+   `.well-known/` ;
+4. `manage.py mark_portal_published <code> --release <commit> --built-at <début>` : le
+   compteur repart de zéro ; une modification faite pendant le build reste comptée.
+
+Le déploiement complet enchaîne cette publication (sauf `SKIP_PORTAL=1`, ou sans
+`DEPLOY_BASE_URL` : le portail est alors rendu dans le navigateur, fonctionnel mais non
+référencé, jusqu'au prochain `--portal-only`). Planifier la publication (cron) relève de la
+décision D18 (déploiement continu), non tranchée.
 
 ### Échec en cours de déploiement
 
@@ -94,7 +122,13 @@ dossier de l'application et y écrit le chemin du venv (`VENV_ACTIVATE`) : le cr
 ```text
 */5 * * * *  $HOME/gestconf-app/deploy/cron.sh run_jobs --max-seconds 240
 17 3 * * *   $HOME/gestconf-app/deploy/cron.sh cleanup
+47 3 * * *   $HOME/gestconf-app/deploy/cron.sh check_integrity
 ```
+
+- `check_integrity` (quotidienne, lecture seule) : doublons d'adresses vérifiées et de 2FA
+  (contraintes que MariaDB ne crée pas), cohérence invitations/rôles, taille du cache, tâches
+  en échec. Les anomalies partent par e-mail aux opérateurs (`GESTCONF_OPERATORS`), sans
+  donnée personnelle ; résumé dans le journal (`integrity.checked`).
 
 - Sorties dans `~/gestconf-app/logs/cron-<commande>.log` (rotation à 5 Mio), jamais sur la
   sortie standard : cron n'envoie pas d'e-mail à chaque passage.
@@ -109,6 +143,38 @@ dossier de l'application et y écrit le chemin du venv (`VENV_ACTIVATE`) : le cr
   `DJANGO_SETTINGS_MODULE=config.settings.prod`) met un e-mail en file ; le passage suivant du
   cron l'envoie. Contrôler la réception (SPF et DKIM valides dans les en-têtes), puis
   `python manage.py outbox` (statut `sent`).
+
+### Données personnelles (plan L1 §4.9, RG-18)
+
+- Les personnes exportent et anonymisent leur compte elles-mêmes (`/compte/mes-donnees`).
+- Demande reçue par courrier ou e-mail, après vérification de l'identité :
+  `python manage.py export_user_data --email … --output fichier.json` (droits 600 ; à
+  transmettre par un canal sûr, puis à supprimer) et
+  `python manage.py anonymize_user --email … --reason …` (irréversible ; refusée tant que la
+  personne a un rôle de gestion actif : `revoke_role` d'abord).
+- Durées de conservation (D15) : `cleanup` les applique **en simulation** tant que
+  `GESTCONF_RETENTION_ENFORCED` est faux ; le résumé (`retention.applied`) indique ce qui
+  serait purgé. Ne l'activer qu'après validation des durées par le commanditaire.
+
+### Fichiers déposés (lot L2, E4)
+
+- **Emplacement** : `GESTCONF_FILES_DIR` (défaut : `var/files` dans le dossier de
+  l'application), **hors de `public_html`** : Apache ne les sert jamais, l'API les sert
+  (`/api/v1/public/files/…` pour les fichiers publiés, avec `nosniff` ; aperçu authentifié
+  dans la gestion).
+- **Sauvegarde** : ce dossier fait partie de la sauvegarde quotidienne, **avec** la base (une
+  ligne `PublicFile` sans son fichier répond 404 ; `check_integrity` le signale :
+  `core.public_files_missing`).
+- **Nettoyage** : `cleanup` supprime les fichiers orphelins (écrits puis transaction annulée)
+  de plus de 24 h (`core.orphan_files`, toujours appliqué).
+- **Fichiers des auteurs** (lot L3) : `GESTCONF_PRIVATE_FILES_DIR` (défaut :
+  `<GESTCONF_FILES_DIR>/private`), hors de `public_html`, servis par l'API **authentifiée**
+  seulement (règle n° 8). Même sauvegarde. `check_integrity` signale un fichier absent du
+  disque (`submissions.missing_files`), plus d'un fichier courant par soumission et un trou
+  dans les références (`submissions.current_files`, `submissions.references`).
+- **Pillow** : roue binaire vérifiée par V28 (`deploy/check-o2switch.sh`). En cas d'échec, le
+  repli de E4 s'applique sans changement de code (images non redimensionnées, JPEG portant un
+  EXIF refusés) : retirer Pillow de `requirements/base.in`, recompiler, redéployer.
 
 ### Clés de la 2FA (plan L1 §4.10)
 
@@ -133,7 +199,10 @@ deploy/smoke-test.sh https://conference.exemple.org [version]
 ```
 
 Vérifie :
-- portail : page pré-rendue, **CSP à empreintes en `<meta>`** sur `/` et sur le repli SPA
+- portail : redirection de `/` vers `/fr/` ; si le portail est pré-rendu, pages `/fr/` et
+  `/en/call/` complètes, adresse canonique, `hreflang`, Open Graph, `sitemap.xml` et ligne
+  `Sitemap:` de `robots.txt` (sinon une ligne INFO, sans échec) ;
+- portail : **CSP à empreintes en `<meta>`** sur `/fr/` et sur le repli SPA
   (pages `/compte/*`), en-tête CSP, repli SPA, `robots.txt` servi tel quel (texte) et
   excluant `/api/`, `/gestion/` et `/compte/` ;
 - gestion : `base href`, **CSP en `<meta>`**, `X-Robots-Tag: noindex`, repli SPA ;
@@ -146,6 +215,8 @@ Vérifie :
   **404 JSON sur une URL d'API inconnue** (preuve que le repli SPA n'intercepte pas
   `/api/`), absence d'admin Django, **diagnostic de l'étape L1.0 désactivé** (404 sur
   `/api/v1/diagnostics/request` : un `GESTCONF_DIAGNOSTICS=1` oublié fait échouer le test).
+- fichiers publics : le premier fichier publié du portail est servi par Django (200,
+  `nosniff`) ; un fichier inconnu répond 404.
 
 Les en-têtes JSON sont lus avec tolérance aux espaces. Validé localement contre le build de
 production et Django en réglages de production (y compris les contre-épreuves : pages sans

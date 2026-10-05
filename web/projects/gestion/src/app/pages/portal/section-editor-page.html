@@ -1,0 +1,231 @@
+<p>
+  <a [routerLink]="['/editions', editionId(), 'portail', 'sections']">{{
+    'gestion.portal.sections.back' | translate
+  }}</a>
+</p>
+@if (section(); as current) {
+  <gc-page-header
+    [heading]="'gestion.portal.sections.editTitle' | translate: { code: current.code }"
+    [lead]="'gestion.portal.typeHints.' + current.section_type | translate"
+  />
+  <p>
+    <span class="badge">{{ 'gestion.portal.types.' + current.section_type | translate }}</span>
+    {{ 'gestion.portal.sections.placedOn' | translate }} :
+    @for (page of current.pages; track page.id; let last = $last) {
+      <a [routerLink]="['/editions', editionId(), 'portail', 'pages', page.id]">{{
+        page.title_fr
+      }}</a>
+      @if (!last) {
+        ,
+      }
+    } @empty {
+      <span class="muted">{{ 'gestion.portal.sections.nowhere' | translate }}</span>
+    }
+  </p>
+}
+@if (!canWrite()) {
+  <p class="notice">{{ 'gestion.portal.readOnly' | translate }}</p>
+}
+<div aria-live="polite">
+  @if (status()) {
+    <p class="notice" role="status">{{ status() }}</p>
+  }
+</div>
+<gc-error-summary [messages]="errors()" />
+
+@if (section(); as current) {
+  <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+    <section class="card" aria-labelledby="section-general">
+      <h2 id="section-general">{{ 'gestion.portal.sections.general' | translate }}</h2>
+      <div class="grid-2">
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'gestion.fields.code' | translate }}</mat-label>
+          <input matInput formControlName="code" required />
+          <mat-hint>{{ 'gestion.portal.codeHint' | translate }}</mat-hint>
+          <mat-error>{{ error('code') }}</mat-error>
+        </mat-form-field>
+      </div>
+      <mat-checkbox formControlName="published">{{
+        'gestion.portal.fields.published' | translate
+      }}</mat-checkbox>
+    </section>
+
+    <section class="card" aria-labelledby="section-texts">
+      <h2 id="section-texts">{{ 'gestion.portal.sections.texts' | translate }}</h2>
+      <div class="languages">
+        @for (language of languages; track language) {
+          <div class="language" [attr.lang]="language">
+            <h3>{{ 'gestion.portal.languages.' + language | translate }}</h3>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.portal.fields.title' | translate }}</mat-label>
+              <input matInput [formControlName]="field('title', language)" />
+              <mat-error>{{ error(field('title', language)) }}</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.portal.fields.subtitle' | translate }}</mat-label>
+              <input matInput [formControlName]="field('subtitle', language)" />
+              <mat-error>{{ error(field('subtitle', language)) }}</mat-error>
+            </mat-form-field>
+            @if (hasContent()) {
+              <mat-form-field appearance="outline">
+                <mat-label>{{ 'gestion.portal.fields.body' | translate }}</mat-label>
+                <textarea matInput [formControlName]="field('body', language)" rows="10"></textarea>
+                <mat-hint>{{ 'gestion.portal.bodyHint' | translate }}</mat-hint>
+                <mat-error>{{ error(field('body', language)) }}</mat-error>
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>{{ 'gestion.portal.fields.cta1' | translate }}</mat-label>
+                <input matInput [formControlName]="field('cta_label', language)" />
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>{{ 'gestion.portal.fields.cta2' | translate }}</mat-label>
+                <input matInput [formControlName]="field('cta2_label', language)" />
+              </mat-form-field>
+            }
+          </div>
+        }
+      </div>
+      @if (!hasContent()) {
+        <p class="muted">{{ 'gestion.portal.sections.dataNotice' | translate }}</p>
+      }
+      <p class="muted">{{ 'gestion.portal.sections.englishFallback' | translate }}</p>
+    </section>
+
+    @if (hasContent()) {
+      <section class="card" aria-labelledby="section-links">
+        <h2 id="section-links">{{ 'gestion.portal.sections.links' | translate }}</h2>
+        <div class="grid-2">
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'gestion.portal.fields.cta1Url' | translate }}</mat-label>
+            <input matInput formControlName="cta_url" />
+            <mat-hint>{{ 'gestion.portal.urlHint' | translate }}</mat-hint>
+            <mat-error>{{ error('cta_url') }}</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'gestion.portal.fields.cta2Url' | translate }}</mat-label>
+            <input matInput formControlName="cta2_url" />
+            <mat-hint>{{ 'gestion.portal.urlHint' | translate }}</mat-hint>
+            <mat-error>{{ error('cta2_url') }}</mat-error>
+          </mat-form-field>
+        </div>
+      </section>
+    }
+
+    @switch (type()) {
+      @case ('edition_hero') {
+        <section class="card" aria-labelledby="section-config">
+          <h2 id="section-config">{{ 'gestion.portal.sections.config' | translate }}</h2>
+          <mat-checkbox formControlName="countdown">{{
+            'gestion.portal.fields.countdown' | translate
+          }}</mat-checkbox>
+        </section>
+      }
+      @case ('key_dates') {
+        <section class="card" aria-labelledby="section-config">
+          <h2 id="section-config">{{ 'gestion.portal.sections.config' | translate }}</h2>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'gestion.portal.fields.limit' | translate }}</mat-label>
+            <input matInput type="number" formControlName="limit" min="1" max="20" />
+            <mat-hint>{{ 'gestion.portal.limitHint' | translate }}</mat-hint>
+            <mat-error>{{ error('limit') }}</mat-error>
+          </mat-form-field>
+        </section>
+      }
+      @case ('documents') {
+        <section class="card" aria-labelledby="section-config">
+          <h2 id="section-config">{{ 'gestion.portal.sections.config' | translate }}</h2>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'gestion.portal.fields.limit' | translate }}</mat-label>
+            <input matInput type="number" formControlName="limit" min="1" max="20" />
+            <mat-hint>{{ 'gestion.portal.limitHint' | translate }}</mat-hint>
+            <mat-error>{{ error('limit') }}</mat-error>
+          </mat-form-field>
+        </section>
+      }
+      @case ('committee') {
+        <section class="card" aria-labelledby="section-config">
+          <h2 id="section-config">{{ 'gestion.portal.sections.config' | translate }}</h2>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'gestion.portal.fields.committee' | translate }}</mat-label>
+            <mat-select formControlName="committee">
+              <mat-option value="scientific">{{
+                'gestion.portal.committees.scientific' | translate
+              }}</mat-option>
+              <mat-option value="organizing">{{
+                'gestion.portal.committees.organizing' | translate
+              }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </section>
+      }
+      @case ('image_text') {
+        <section class="card" aria-labelledby="section-config">
+          <h2 id="section-config">{{ 'gestion.portal.sections.config' | translate }}</h2>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'gestion.portal.fields.imagePosition' | translate }}</mat-label>
+            <mat-select formControlName="image_position">
+              <mat-option value="left">{{
+                'gestion.portal.positions.left' | translate
+              }}</mat-option>
+              <mat-option value="right">{{
+                'gestion.portal.positions.right' | translate
+              }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'gestion.portal.fields.image' | translate }}</mat-label>
+            <mat-select formControlName="image">
+              <mat-option [value]="null">{{
+                'gestion.portal.files.noImage' | translate
+              }}</mat-option>
+              @for (image of images(); track image.id) {
+                <mat-option [value]="image.id">{{
+                  image.title_fr || image.original_name
+                }}</mat-option>
+              }
+            </mat-select>
+            <mat-hint>{{ 'gestion.portal.files.imageHint' | translate }}</mat-hint>
+          </mat-form-field>
+          @if (selectedImage(); as image) {
+            <p>
+              <img [src]="image.preview_url" alt="" style="max-width: 16rem; height: auto" />
+            </p>
+            @if (!image.published) {
+              <p class="notice">{{ 'gestion.portal.files.imageUnpublished' | translate }}</p>
+            }
+          }
+        </section>
+      }
+    }
+
+    @if (canWrite()) {
+      <div class="actions">
+        <button mat-flat-button type="submit" [disabled]="busy()">
+          {{ 'gestion.settings.save' | translate }}
+        </button>
+        @if (hasContent()) {
+          <button mat-stroked-button type="button" (click)="showPreview()" [disabled]="busy()">
+            {{ 'gestion.portal.sections.preview' | translate }}
+          </button>
+        }
+      </div>
+    }
+  </form>
+
+  @if (preview(); as rendered) {
+    <section class="card" aria-labelledby="section-preview">
+      <h2 id="section-preview">{{ 'gestion.portal.sections.previewTitle' | translate }}</h2>
+      <p class="muted">{{ 'gestion.portal.sections.previewLead' | translate }}</p>
+      <div class="languages">
+        <div lang="fr">
+          <h3>{{ 'gestion.portal.languages.fr' | translate }}</h3>
+          <div class="preview" [innerHTML]="rendered.body_fr"></div>
+        </div>
+        <div lang="en">
+          <h3>{{ 'gestion.portal.languages.en' | translate }}</h3>
+          <div class="preview" [innerHTML]="rendered.body_en || rendered.body_fr"></div>
+        </div>
+      </div>
+    </section>
+  }
+}

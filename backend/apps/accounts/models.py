@@ -11,7 +11,7 @@ from django.utils.translation import gettext_lazy as _
 
 from apps.accounts.managers import UserManager
 from apps.accounts.roles import InvitableRole, OcFunction, Role
-from apps.accounts.validators import validate_country, validate_orcid
+from apps.accounts.validators import validate_country, validate_orcid, validate_public_link
 from apps.core.models import AppendOnlyModel, TimeStampedModel
 
 
@@ -105,6 +105,33 @@ class Profile(TimeStampedModel):
         default="",
         validators=[MaxLengthValidator(BIO_MAX_LENGTH)],
     )
+    # Liens et photo publics (E12, lot L2) : affichés sur le portail seulement avec les
+    # consentements « annuaire » (et « photo » pour la photo).
+    website = models.CharField(
+        _("site web"), max_length=300, blank=True, default="", validators=[validate_public_link]
+    )
+    scholar_url = models.CharField(
+        _("profil Google Scholar"),
+        max_length=300,
+        blank=True,
+        default="",
+        validators=[validate_public_link],
+    )
+    linkedin_url = models.CharField(
+        _("profil LinkedIn"),
+        max_length=300,
+        blank=True,
+        default="",
+        validators=[validate_public_link],
+    )
+    photo = models.ForeignKey(
+        "core.PublicFile",
+        verbose_name=_("photo"),
+        null=True,
+        blank=True,
+        on_delete=models.RESTRICT,
+        related_name="+",
+    )
 
     # Champs exigés pour un profil complet (prérequis de la soumission en L3).
     REQUIRED_FIELDS: ClassVar[tuple[str, ...]] = (
@@ -132,6 +159,8 @@ class ConsentKind(models.TextChoices):
     PRIVACY_NOTICE = "privacy_notice", _("notice d'information")
     # Apparition dans l'annuaire public des comités (affiché en L2).
     DIRECTORY_LISTING = "directory_listing", _("annuaire public")
+    # Publication de la photo du profil sur le portail (E12, lot L2).
+    PHOTO_PUBLICATION = "photo_publication", _("publication de la photo")
 
 
 class ConsentSource(models.TextChoices):

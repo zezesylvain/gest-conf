@@ -61,6 +61,8 @@ class Capability(StrEnum):
     MEMBERS_READ = "members.read"
     MEMBERS_MANAGE = "members.manage"
     AUDIT_READ = "audit.read"
+    # Lot L2 (E11) : contenus du portail (sections, pages, menus).
+    PORTAL_WRITE = "portal.write"
 
 
 C = Capability
@@ -80,6 +82,7 @@ CAPABILITIES: Mapping[str, frozenset[Capability]] = {
             C.MEMBERS_READ,
             C.MEMBERS_MANAGE,
             C.AUDIT_READ,
+            C.PORTAL_WRITE,
         }
     ),
     Role.SC_CHAIR: frozenset({C.EDITION_READ, C.MEMBERS_READ, C.MEMBERS_MANAGE}),
@@ -125,10 +128,28 @@ REAUTH_REQUIRED_FOR_GRANT: frozenset[str] = frozenset({Role.ADMIN, Role.CHAIR})
 SCIENTIFIC_COMMITTEE: frozenset[str] = frozenset({Role.SC_CHAIR, Role.SC_MEMBER})
 
 
+# Capacités ajoutées par la fonction au comité d'organisation (rôle, fonction) → capacités.
+# E11 (plan L2) : le CO « communication » rédige les contenus du portail. Les autres
+# fonctions reçoivent leurs écritures dans leur lot (programme L5, finances L6).
+FUNCTION_CAPABILITIES: Mapping[tuple[str, str], frozenset[Capability]] = {
+    (Role.OC_MEMBER, "communication"): frozenset({C.PORTAL_WRITE}),
+}
+
+
 def capabilities_for(roles: Iterable[str]) -> frozenset[Capability]:
+    """Capacités des rôles seuls, sans tenir compte des fonctions au CO."""
     result: set[Capability] = set()
     for role in roles:
         result |= CAPABILITIES[role]
+    return frozenset(result)
+
+
+def capabilities_for_assignments(assignments: Iterable[tuple[str, str]]) -> frozenset[Capability]:
+    """Capacités de couples (rôle, fonction au CO) : rôles, puis ajouts par fonction."""
+    assignments = list(assignments)
+    result = set(capabilities_for(role for role, _function in assignments))
+    for assignment in assignments:
+        result |= FUNCTION_CAPABILITIES.get(assignment, frozenset())
     return frozenset(result)
 
 

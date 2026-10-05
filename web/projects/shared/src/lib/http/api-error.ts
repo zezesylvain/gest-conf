@@ -68,6 +68,22 @@ export function fallbackCode(status: number): string {
   }
 }
 
+/**
+ * Corps d'erreur exploitable. Une requête attendue sans corps JSON (DELETE → 204 : le
+ * client généré demande du texte) reçoit son erreur en **chaîne** : on la relit en JSON,
+ * sinon le code et les messages du serveur seraient perdus (« Requête invalide »).
+ */
+function parsedBody(body: unknown): unknown {
+  if (typeof body !== 'string' || !body.trim().startsWith('{')) {
+    return body;
+  }
+  try {
+    return JSON.parse(body) as unknown;
+  } catch {
+    return body;
+  }
+}
+
 /** Convertit toute erreur HTTP (ou autre) en `GcApiError`. */
 export function toApiError(error: unknown): GcApiError {
   if (error instanceof GcApiError) {
@@ -80,7 +96,7 @@ export function toApiError(error: unknown): GcApiError {
       error instanceof Error ? error.message : String(error),
     );
   }
-  const body: unknown = error.error;
+  const body: unknown = parsedBody(error.error);
   const status = error.status;
 
   // DRF : {code, message, fields}.

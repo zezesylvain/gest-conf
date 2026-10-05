@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gestconf-backend\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-05 16:49+0000\n"
+"POT-Creation-Date: 2026-10-05 22:10+0000\n"
 "PO-Revision-Date: 2026-10-05 11:00+0000\n"
 "Last-Translator: GEST-CONF\n"
 "Language-Team: GEST-CONF\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py apps/submissions/models.py
 msgid "adresse e-mail"
 msgstr "email address"
 
@@ -24,6 +24,7 @@ msgid "actif"
 msgstr "active"
 
 #: apps/accounts/models.py apps/communications/models.py
+#: apps/submissions/models.py
 msgid "langue"
 msgstr "language"
 
@@ -59,19 +60,19 @@ msgstr "Mr"
 msgid "Mme"
 msgstr "Ms"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py apps/submissions/models.py
 msgid "titre"
 msgstr "title"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py apps/submissions/models.py
 msgid "prénom"
 msgstr "first name"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py apps/submissions/models.py
 msgid "nom"
 msgstr "last name"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py apps/submissions/models.py
 msgid "institution"
 msgstr "institution"
 
@@ -80,6 +81,7 @@ msgid "département"
 msgstr "department"
 
 #: apps/accounts/models.py apps/conferences/models.py
+#: apps/submissions/models.py
 msgid "pays"
 msgstr "country"
 
@@ -90,6 +92,22 @@ msgstr "ORCID"
 #: apps/accounts/models.py
 msgid "biographie"
 msgstr "biography"
+
+#: apps/accounts/models.py
+msgid "site web"
+msgstr "website"
+
+#: apps/accounts/models.py
+msgid "profil Google Scholar"
+msgstr "Google Scholar profile"
+
+#: apps/accounts/models.py
+msgid "profil LinkedIn"
+msgstr "LinkedIn profile"
+
+#: apps/accounts/models.py
+msgid "photo"
+msgstr "photo"
 
 #: apps/accounts/models.py
 msgid "profil"
@@ -108,6 +126,10 @@ msgid "annuaire public"
 msgstr "public directory"
 
 #: apps/accounts/models.py
+msgid "publication de la photo"
+msgstr "photo publication"
+
+#: apps/accounts/models.py
 msgid "première connexion"
 msgstr "first login"
 
@@ -119,7 +141,7 @@ msgstr "account area"
 msgid "commande"
 msgstr "command"
 
-#: apps/accounts/models.py apps/core/models.py
+#: apps/accounts/models.py apps/core/models.py apps/portal/models.py
 msgid "type"
 msgstr "kind"
 
@@ -164,7 +186,8 @@ msgid "système"
 msgstr "system"
 
 #: apps/accounts/models.py apps/communications/models.py
-#: apps/conferences/models.py apps/core/models.py
+#: apps/conferences/models.py apps/core/models.py apps/portal/models.py
+#: apps/submissions/models.py
 msgid "édition"
 msgstr "edition"
 
@@ -177,7 +200,7 @@ msgid "fonction au CO"
 msgstr "organising committee function"
 
 #: apps/accounts/models.py apps/communications/models.py
-#: apps/conferences/models.py apps/core/models.py
+#: apps/conferences/models.py apps/core/models.py apps/submissions/models.py
 msgid "statut"
 msgstr "status"
 
@@ -209,7 +232,7 @@ msgstr "roles"
 msgid "en attente"
 msgstr "pending"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py apps/submissions/models.py
 msgid "acceptée"
 msgstr "accepted"
 
@@ -301,7 +324,7 @@ msgstr "scientific committee chair"
 msgid "membre du comité scientifique"
 msgstr "scientific committee member"
 
-#: apps/accounts/roles.py
+#: apps/accounts/roles.py apps/submissions/models.py
 msgid "auteur"
 msgstr "author"
 
@@ -370,9 +393,14 @@ msgid "La prise de connaissance ne se retire pas."
 msgstr "Acknowledging the notice cannot be withdrawn."
 
 #: apps/accounts/services/account.py apps/accounts/services/mfa.py
-#: apps/accounts/services/roles.py apps/conferences/services.py
+#: apps/accounts/services/personal_data.py apps/accounts/services/roles.py
+#: apps/conferences/services.py apps/submissions/workflow.py
 msgid "Motif obligatoire."
 msgstr "A reason is required."
+
+#: apps/accounts/services/account.py
+msgid "Un compte anonymisé ne peut pas être réactivé."
+msgstr "An anonymized account cannot be reactivated."
 
 #: apps/accounts/services/invitations.py
 msgid "invitation déjà en attente"
@@ -447,6 +475,10 @@ msgstr "Your account already has the maximum number of addresses."
 #: apps/accounts/services/invitations.py
 msgid "Nombre maximal de renvois atteint."
 msgstr "Maximum number of resends reached."
+
+#: apps/accounts/services/personal_data.py
+msgid "Transmettez d'abord vos rôles de gestion actifs."
+msgstr "First hand over your active management roles."
 
 #: apps/accounts/services/roles.py
 msgid "Rôle inconnu."
@@ -865,6 +897,14 @@ msgstr "Invalid ORCID iD (format 0000-0000-0000-000X)."
 msgid "Code pays ISO 3166-1 inconnu."
 msgstr "Unknown ISO 3166-1 country code."
 
+#: apps/accounts/validators.py
+msgid "Adresse https:// complète attendue."
+msgstr "A full https:// address is expected."
+
+#: apps/accounts/views.py
+msgid "Saisissez exactement l'adresse de votre compte."
+msgstr "Type exactly the email address of your account."
+
 #: apps/communications/models.py
 msgid "en file"
 msgstr "queued"
@@ -981,11 +1021,11 @@ msgstr "name (FR)"
 msgid "nom (EN)"
 msgstr "name (EN)"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py apps/portal/models.py
 msgid "description (FR)"
 msgstr "description (FR)"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py apps/portal/models.py
 msgid "description (EN)"
 msgstr "description (EN)"
 
@@ -1001,11 +1041,11 @@ msgstr "conference"
 msgid "conférences"
 msgstr "conferences"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py apps/submissions/models.py
 msgid "brouillon"
 msgstr "draft"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py apps/portal/models.py
 msgid "publiée"
 msgstr "published"
 
@@ -1013,7 +1053,7 @@ msgstr "published"
 msgid "archivée"
 msgstr "archived"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py apps/portal/models.py
 msgid "code"
 msgstr "code"
 
@@ -1021,11 +1061,11 @@ msgstr "code"
 msgid "année"
 msgstr "year"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py apps/core/models.py apps/portal/models.py
 msgid "titre (FR)"
 msgstr "title (FR)"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py apps/core/models.py apps/portal/models.py
 msgid "titre (EN)"
 msgstr "title (EN)"
 
@@ -1062,6 +1102,10 @@ msgid "double aveugle"
 msgstr "double blind"
 
 #: apps/conferences/models.py
+msgid "langues des soumissions"
+msgstr "submission languages"
+
+#: apps/conferences/models.py
 msgid "relecteurs par soumission"
 msgstr "reviewers per submission"
 
@@ -1074,10 +1118,15 @@ msgid "archivée le"
 msgstr "archived at"
 
 #: apps/conferences/models.py
+msgid "affiche"
+msgstr "poster"
+
+#: apps/conferences/models.py
 msgid "éditions"
 msgstr "editions"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py apps/core/models.py apps/portal/models.py
+#: apps/submissions/models.py
 msgid "ordre"
 msgstr "order"
 
@@ -1085,19 +1134,31 @@ msgstr "order"
 msgid "active"
 msgstr "active"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py apps/submissions/models.py
 msgid "thématique"
 msgstr "track"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py apps/portal/models.py
 msgid "thématiques"
 msgstr "tracks"
 
 #: apps/conferences/models.py
+msgid "aucun fichier"
+msgstr "no file"
+
+#: apps/conferences/models.py
+msgid "facultatif"
+msgstr "optional"
+
+#: apps/conferences/models.py
+msgid "obligatoire"
+msgstr "required"
+
+#: apps/conferences/models.py apps/portal/models.py
 msgid "libellé (FR)"
 msgstr "label (FR)"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py apps/portal/models.py
 msgid "libellé (EN)"
 msgstr "label (EN)"
 
@@ -1110,10 +1171,18 @@ msgid "mots maximum du résumé"
 msgstr "abstract word limit"
 
 #: apps/conferences/models.py
+msgid "fichier PDF"
+msgstr "PDF file"
+
+#: apps/conferences/models.py
+msgid "taille maximale du fichier (Mo)"
+msgstr "maximum file size (MB)"
+
+#: apps/conferences/models.py apps/submissions/models.py
 msgid "type de communication"
 msgstr "submission type"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py apps/portal/models.py
 msgid "types de communication"
 msgstr "submission types"
 
@@ -1161,7 +1230,7 @@ msgstr "public"
 msgid "date clé"
 msgstr "key date"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py apps/portal/models.py
 msgid "dates clés"
 msgstr "key dates"
 
@@ -1172,6 +1241,18 @@ msgstr "This code is already in use."
 #: apps/conferences/services.py
 msgid "Édition d'une autre conférence."
 msgstr "Edition of another conference."
+
+#: apps/conferences/services.py
+msgid ""
+"Réglage gelé : des soumissions existent. Seul un administrateur peut le "
+"changer, avec un motif."
+msgstr ""
+"Setting frozen: submissions exist. Only an administrator can change it, with "
+"a reason."
+
+#: apps/conferences/services.py
+msgid "Gelé depuis la première soumission."
+msgstr "Frozen since the first submission."
 
 #: apps/conferences/services.py
 msgid "Titres français et anglais obligatoires pour publier."
@@ -1269,11 +1350,11 @@ msgstr "Invalid data."
 msgid "Quota atteint."
 msgstr "Quota reached."
 
-#: apps/core/models.py
+#: apps/core/models.py apps/submissions/models.py
 msgid "date"
 msgstr "date"
 
-#: apps/core/models.py
+#: apps/core/models.py apps/submissions/models.py
 msgid "acteur"
 msgstr "actor"
 
@@ -1281,7 +1362,7 @@ msgstr "actor"
 msgid "type d'acteur"
 msgstr "actor kind"
 
-#: apps/core/models.py
+#: apps/core/models.py apps/submissions/models.py
 msgid "libellé de l'acteur"
 msgstr "actor label"
 
@@ -1305,7 +1386,7 @@ msgstr "before"
 msgid "après"
 msgstr "after"
 
-#: apps/core/models.py
+#: apps/core/models.py apps/submissions/models.py
 msgid "motif"
 msgstr "reason"
 
@@ -1421,6 +1502,127 @@ msgstr "heartbeat"
 msgid "battements de cœur"
 msgstr "heartbeats"
 
+#: apps/core/models.py
+msgid "document"
+msgstr "document"
+
+#: apps/core/models.py apps/portal/models.py
+msgid "image"
+msgstr "image"
+
+#: apps/core/models.py
+msgid "photo de profil"
+msgstr "profile photo"
+
+#: apps/core/models.py
+msgid "identifiant public"
+msgstr "public identifier"
+
+#: apps/core/models.py apps/submissions/models.py
+msgid "nature"
+msgstr "kind"
+
+#: apps/core/models.py apps/submissions/models.py
+msgid "nom de stockage"
+msgstr "storage name"
+
+#: apps/core/models.py apps/submissions/models.py
+msgid "nom d'origine"
+msgstr "original name"
+
+#: apps/core/models.py
+msgid "extension"
+msgstr "extension"
+
+#: apps/core/models.py
+msgid "type de contenu"
+msgstr "content type"
+
+#: apps/core/models.py apps/submissions/models.py
+msgid "taille (octets)"
+msgstr "size (bytes)"
+
+#: apps/core/models.py apps/submissions/models.py
+msgid "empreinte SHA-256"
+msgstr "SHA-256 digest"
+
+#: apps/core/models.py
+msgid "largeur"
+msgstr "width"
+
+#: apps/core/models.py
+msgid "hauteur"
+msgstr "height"
+
+#: apps/core/models.py
+msgid "publié"
+msgstr "published"
+
+#: apps/core/models.py
+msgid "fichier public"
+msgstr "public file"
+
+#: apps/core/models.py
+msgid "fichiers publics"
+msgstr "public files"
+
+#: apps/core/models.py
+msgid "portée"
+msgstr "scope"
+
+#: apps/core/models.py
+msgid "dernière valeur"
+msgstr "last value"
+
+#: apps/core/models.py
+msgid "compteur"
+msgstr "counter"
+
+#: apps/core/models.py
+msgid "compteurs"
+msgstr "counters"
+
+#: apps/core/public_files.py
+msgid "Archive illisible."
+msgstr "Unreadable archive."
+
+#: apps/core/public_files.py
+msgid "Archive trop volumineuse une fois décompressée."
+msgstr "Archive too large once decompressed."
+
+#: apps/core/public_files.py
+msgid "Type de fichier non accepté."
+msgstr "File type not accepted."
+
+#: apps/core/public_files.py
+msgid "Type de fichier non accepté pour cet usage."
+msgstr "File type not accepted for this use."
+
+#: apps/core/public_files.py
+msgid "L'extension du nom ne correspond pas au contenu du fichier."
+msgstr "The file name extension does not match the file content."
+
+#: apps/core/public_files.py
+msgid "Photo refusée : elle contient des métadonnées (EXIF). Exportez-la sans."
+msgstr "Photo refused: it contains metadata (EXIF). Export it without."
+
+#: apps/core/public_files.py
+msgid "Image trop grande."
+msgstr "Image too large."
+
+#: apps/core/public_files.py
+msgid "Image illisible."
+msgstr "Unreadable image."
+
+#: apps/core/public_files.py
+msgid "Fichier vide."
+msgstr "Empty file."
+
+#: apps/core/public_files.py
+#, python-format
+msgid "Fichier trop volumineux (%(max)s Mio au plus)."
+msgstr "File too large (%(max)s MiB at most)."
+
 #: apps/core/views.py
 msgid "Méthode non autorisée."
 msgstr "Method not allowed."
@@ -1440,3 +1642,525 @@ msgstr "Resource not found."
 #: apps/core/views.py
 msgid "Erreur interne du serveur."
 msgstr "Internal server error."
+
+#: apps/portal/models.py
+msgid "texte riche"
+msgstr "rich text"
+
+#: apps/portal/models.py
+msgid "bandeau d'appel à l'action"
+msgstr "call-to-action banner"
+
+#: apps/portal/models.py
+msgid "image et texte"
+msgstr "image and text"
+
+#: apps/portal/models.py
+msgid "en-tête de l'édition"
+msgstr "edition header"
+
+#: apps/portal/models.py
+msgid "documents"
+msgstr "documents"
+
+#: apps/portal/models.py
+msgid "comité"
+msgstr "committee"
+
+#: apps/portal/models.py
+msgid "sous-titre (FR)"
+msgstr "subtitle (FR)"
+
+#: apps/portal/models.py
+msgid "sous-titre (EN)"
+msgstr "subtitle (EN)"
+
+#: apps/portal/models.py
+msgid "corps (FR)"
+msgstr "body (FR)"
+
+#: apps/portal/models.py
+msgid "corps (EN)"
+msgstr "body (EN)"
+
+#: apps/portal/models.py
+msgid "bouton 1 (FR)"
+msgstr "button 1 (FR)"
+
+#: apps/portal/models.py
+msgid "bouton 1 (EN)"
+msgstr "button 1 (EN)"
+
+#: apps/portal/models.py
+msgid "lien du bouton 1"
+msgstr "button 1 link"
+
+#: apps/portal/models.py
+msgid "bouton 2 (FR)"
+msgstr "button 2 (FR)"
+
+#: apps/portal/models.py
+msgid "bouton 2 (EN)"
+msgstr "button 2 (EN)"
+
+#: apps/portal/models.py
+msgid "lien du bouton 2"
+msgstr "button 2 link"
+
+#: apps/portal/models.py
+msgid "configuration"
+msgstr "configuration"
+
+#: apps/portal/models.py
+msgid "section"
+msgstr "section"
+
+#: apps/portal/models.py
+msgid "sections"
+msgstr "sections"
+
+#: apps/portal/models.py
+msgid "identifiant d'URL"
+msgstr "URL identifier"
+
+#: apps/portal/models.py
+msgid "page du site"
+msgstr "site page"
+
+#: apps/portal/models.py
+msgid "page"
+msgstr "page"
+
+#: apps/portal/models.py apps/submissions/models.py
+msgid "pages"
+msgstr "pages"
+
+#: apps/portal/models.py
+msgid "position"
+msgstr "position"
+
+#: apps/portal/models.py
+msgid "section posée"
+msgstr "placed section"
+
+#: apps/portal/models.py
+msgid "sections posées"
+msgstr "placed sections"
+
+#: apps/portal/models.py
+msgid "en-tête"
+msgstr "header"
+
+#: apps/portal/models.py
+msgid "pied de page"
+msgstr "footer"
+
+#: apps/portal/models.py
+msgid "emplacement"
+msgstr "location"
+
+#: apps/portal/models.py
+msgid "adresse"
+msgstr "address"
+
+#: apps/portal/models.py
+msgid "nouvel onglet"
+msgstr "new tab"
+
+#: apps/portal/models.py
+msgid "entrée de menu"
+msgstr "menu item"
+
+#: apps/portal/models.py
+msgid "entrées de menu"
+msgstr "menu items"
+
+#: apps/portal/models.py
+msgid "mis en ligne le"
+msgstr "released on"
+
+#: apps/portal/models.py apps/submissions/models.py
+msgid "version"
+msgstr "version"
+
+#: apps/portal/models.py
+msgid "mise en ligne du portail"
+msgstr "portal release"
+
+#: apps/portal/models.py
+msgid "mises en ligne du portail"
+msgstr "portal releases"
+
+#: apps/portal/services.py
+msgid "Cette valeur est déjà utilisée."
+msgstr "This value is already in use."
+
+#: apps/portal/services.py
+msgid "Adresse refusée : https:, mailto:, tel: ou chemin interne (/…)."
+msgstr "Address refused: https:, mailto:, tel: or internal path (/…)."
+
+#: apps/portal/services.py
+#, python-format
+msgid "Texte trop long (%(max)s caractères au plus)."
+msgstr "Text too long (%(max)s characters at most)."
+
+#: apps/portal/services.py
+msgid "Configuration invalide."
+msgstr "Invalid configuration."
+
+#: apps/portal/services.py
+#, python-format
+msgid "Configuration invalide : %(names)s."
+msgstr "Invalid configuration: %(names)s."
+
+#: apps/portal/services.py
+msgid "Seule une section « image et texte » porte une image."
+msgstr "Only an “image and text” section carries an image."
+
+#: apps/portal/services.py
+msgid "Choisissez une image publique de l'édition."
+msgstr "Choose a public image of the edition."
+
+#: apps/portal/services.py
+msgid ""
+"Une section de données n'a pas de corps : son contenu vient de l'édition."
+msgstr "A data section has no body: its content comes from the edition."
+
+#: apps/portal/services.py
+msgid "Le type d'une section ne change pas."
+msgstr "The type of a section cannot change."
+
+#: apps/portal/services.py
+#, python-format
+msgid "Section posée sur : %(pages)s. Retirez-la de ces pages d'abord."
+msgstr "Section placed on: %(pages)s. Remove it from these pages first."
+
+#: apps/portal/services.py
+msgid "Identifiant réservé à une page du site."
+msgstr "Identifier reserved for a site page."
+
+#: apps/portal/services.py
+msgid "Figé pour une page du site."
+msgstr "Fixed for a site page."
+
+#: apps/portal/services.py
+msgid "Une page du site ne se supprime pas."
+msgstr "A site page cannot be deleted."
+
+#: apps/portal/services.py
+msgid "Page présente dans un menu : retirez-la du menu d'abord."
+msgstr "Page used in a menu: remove it from the menu first."
+
+#: apps/portal/services.py
+msgid "Section inconnue."
+msgstr "Unknown section."
+
+#: apps/portal/services.py
+msgid "Section déjà posée sur cette page."
+msgstr "Section already placed on this page."
+
+#: apps/portal/services.py
+msgid "Section absente de cette page."
+msgstr "Section not placed on this page."
+
+#: apps/portal/services.py
+msgid "La liste doit contenir exactement les sections posées."
+msgstr "The list must contain exactly the placed sections."
+
+#: apps/portal/services.py
+msgid "Choisissez une page ou une adresse, pas les deux."
+msgstr "Choose a page or an address, not both."
+
+#: apps/portal/services.py
+msgid "Page inconnue."
+msgstr "Unknown page."
+
+#: apps/portal/services.py
+msgid "Emplacement inconnu."
+msgstr "Unknown location."
+
+#: apps/portal/services.py
+msgid "La liste doit contenir exactement les entrées de ce menu."
+msgstr "The list must contain exactly the items of this menu."
+
+#: apps/portal/services.py
+msgid "Nature inconnue."
+msgstr "Unknown kind."
+
+#: apps/portal/services.py
+msgid "affiche de l'édition"
+msgstr "edition poster"
+
+#: apps/portal/services.py
+#, python-format
+msgid "Fichier utilisé (%(uses)s) : retirez-le d'abord."
+msgstr "File in use (%(uses)s): remove it first."
+
+#: apps/portal/services.py
+msgid "Date de build invalide (avec fuseau, et pas dans le futur)."
+msgstr "Invalid build date (with time zone, and not in the future)."
+
+#: apps/submissions/models.py
+msgid "soumise"
+msgstr "submitted"
+
+#: apps/submissions/models.py
+msgid "vérification de recevabilité"
+msgstr "screening"
+
+#: apps/submissions/models.py
+msgid "en cours d'évaluation"
+msgstr "under review"
+
+#: apps/submissions/models.py
+msgid "évaluée"
+msgstr "reviewed"
+
+#: apps/submissions/models.py
+msgid "acceptée sous réserve de corrections"
+msgstr "accepted with minor revisions"
+
+#: apps/submissions/models.py
+msgid "liste d'attente"
+msgstr "waiting list"
+
+#: apps/submissions/models.py
+msgid "rejetée"
+msgstr "rejected"
+
+#: apps/submissions/models.py
+msgid "corrections demandées"
+msgstr "revisions requested"
+
+#: apps/submissions/models.py
+msgid "version finale reçue"
+msgstr "camera-ready version received"
+
+#: apps/submissions/models.py
+msgid "présentation confirmée"
+msgstr "presentation confirmed"
+
+#: apps/submissions/models.py
+msgid "programmée"
+msgstr "scheduled"
+
+#: apps/submissions/models.py
+msgid "présentée"
+msgstr "presented"
+
+#: apps/submissions/models.py
+msgid "publiée dans les actes"
+msgstr "published in the proceedings"
+
+#: apps/submissions/models.py
+msgid "retirée"
+msgstr "withdrawn"
+
+#: apps/submissions/models.py
+msgid "référence"
+msgstr "reference"
+
+#: apps/submissions/models.py
+msgid "soumissionnaire"
+msgstr "submitter"
+
+#: apps/submissions/models.py
+msgid "résumé"
+msgstr "abstract"
+
+#: apps/submissions/models.py
+msgid "mots-clés"
+msgstr "keywords"
+
+#: apps/submissions/models.py
+msgid "soumise le"
+msgstr "submitted on"
+
+#: apps/submissions/models.py
+msgid "retirée le"
+msgstr "withdrawn on"
+
+#: apps/submissions/models.py
+msgid "motif du retrait"
+msgstr "withdrawal reason"
+
+#: apps/submissions/models.py
+msgid "révision"
+msgstr "revision"
+
+#: apps/submissions/models.py
+msgid "déclarations"
+msgstr "declarations"
+
+#: apps/submissions/models.py
+msgid "soumission"
+msgstr "submission"
+
+#: apps/submissions/models.py
+msgid "soumissions"
+msgstr "submissions"
+
+#: apps/submissions/models.py
+msgid "compte"
+msgstr "account"
+
+#: apps/submissions/models.py
+msgid "auteur correspondant"
+msgstr "corresponding author"
+
+#: apps/submissions/models.py
+msgid "auteur présentateur"
+msgstr "presenting author"
+
+#: apps/submissions/models.py
+msgid "auteurs"
+msgstr "authors"
+
+#: apps/submissions/models.py
+msgid "fichier principal"
+msgstr "main file"
+
+#: apps/submissions/models.py
+msgid "version finale"
+msgstr "camera-ready version"
+
+#: apps/submissions/models.py
+msgid "métadonnées retirées"
+msgstr "metadata removed"
+
+#: apps/submissions/models.py
+msgid "courant"
+msgstr "current"
+
+#: apps/submissions/models.py
+msgid "déposé par"
+msgstr "uploaded by"
+
+#: apps/submissions/models.py
+msgid "fichier de soumission"
+msgstr "submission file"
+
+#: apps/submissions/models.py
+msgid "fichiers de soumission"
+msgstr "submission files"
+
+#: apps/submissions/models.py
+msgid "numéro"
+msgstr "number"
+
+#: apps/submissions/models.py
+msgid "cliché"
+msgstr "snapshot"
+
+#: apps/submissions/models.py
+msgid "révision de soumission"
+msgstr "submission revision"
+
+#: apps/submissions/models.py
+msgid "révisions de soumission"
+msgstr "submission revisions"
+
+#: apps/submissions/models.py
+msgid "statut précédent"
+msgstr "previous status"
+
+#: apps/submissions/models.py
+msgid "nouveau statut"
+msgstr "new status"
+
+#: apps/submissions/models.py
+msgid "historique de statut"
+msgstr "status history"
+
+#: apps/submissions/models.py
+msgid "historiques de statut"
+msgstr "status histories"
+
+#: apps/submissions/models.py
+msgid "échéance (UTC)"
+msgstr "deadline (UTC)"
+
+#: apps/submissions/models.py
+msgid "accordée par"
+msgstr "granted by"
+
+#: apps/submissions/models.py
+msgid "accordée le"
+msgstr "granted on"
+
+#: apps/submissions/models.py
+msgid "révoquée le"
+msgstr "revoked on"
+
+#: apps/submissions/models.py
+msgid "dérogation"
+msgstr "extension"
+
+#: apps/submissions/models.py
+msgid "dérogations"
+msgstr "extensions"
+
+#: apps/submissions/services.py
+msgid "Titre obligatoire."
+msgstr "Title required."
+
+#: apps/submissions/services.py
+msgid "Résumé obligatoire."
+msgstr "Abstract required."
+
+#: apps/submissions/services.py
+#, python-format
+msgid "Résumé trop long : %(words)s mots pour %(max)s au plus."
+msgstr "Abstract too long: %(words)s words for %(max)s at most."
+
+#: apps/submissions/services.py
+msgid "De 1 à 6 mots-clés."
+msgstr "From 1 to 6 keywords."
+
+#: apps/submissions/services.py
+msgid "Choisissez une thématique active."
+msgstr "Choose an active track."
+
+#: apps/submissions/services.py
+msgid "Choisissez un type de communication actif."
+msgstr "Choose an active submission type."
+
+#: apps/submissions/services.py
+msgid "Choisissez une langue acceptée par l'édition."
+msgstr "Choose a language accepted by the edition."
+
+#: apps/submissions/services.py
+msgid "Au moins un auteur."
+msgstr "At least one author."
+
+#: apps/submissions/services.py
+msgid "Au moins un auteur correspondant."
+msgstr "At least one corresponding author."
+
+#: apps/submissions/services.py
+msgid "Le soumissionnaire fait partie des auteurs."
+msgstr "The submitter must be one of the authors."
+
+#: apps/submissions/services.py
+msgid "Fichier PDF obligatoire pour ce type de communication."
+msgstr "A PDF file is required for this submission type."
+
+#: apps/submissions/services.py
+msgid "Acceptez toutes les déclarations."
+msgstr "Accept all declarations."
+
+#: apps/submissions/workflow.py
+msgid "L'appel à communications est clos."
+msgstr "The call for papers is closed."
+
+#: apps/submissions/workflow.py
+msgid "La soumission est incomplète."
+msgstr "The submission is incomplete."
+
+#: apps/submissions/workflow.py
+msgid "La recevabilité commence à la clôture de l'appel (et des dérogations)."
+msgstr "Screening starts when the call (and any extensions) closes."
+
+#: apps/submissions/workflow.py
+msgid "Changement de statut non autorisé."
+msgstr "Status change not allowed."

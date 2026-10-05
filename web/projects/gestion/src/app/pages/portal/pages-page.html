@@ -1,0 +1,129 @@
+<gc-page-header
+  [heading]="'gestion.portal.pages.title' | translate"
+  [lead]="'gestion.portal.pages.lead' | translate"
+/>
+<gestion-portal-status-banner [editionId]="editionId()" />
+@if (!canWrite()) {
+  <p class="notice">{{ 'gestion.portal.readOnly' | translate }}</p>
+}
+<div aria-live="polite">
+  @if (status()) {
+    <p class="notice" role="status">{{ status() }}</p>
+  }
+</div>
+<gc-error-summary [messages]="errors()" />
+
+<ng-template #rows let-list let-custom="custom">
+  @for (page of list; track page.id) {
+    <tr>
+      <td lang="fr">{{ page.title_fr }}</td>
+      <td>
+        <code>{{ page.paths.fr }}</code> · <code>{{ page.paths.en }}</code>
+      </td>
+      <td>{{ page.sections.length }}</td>
+      <td>
+        {{
+          (page.is_system || page.published ? 'gestion.settings.yes' : 'gestion.settings.no')
+            | translate
+        }}
+      </td>
+      <td class="actions">
+        <a mat-button [routerLink]="['/editions', editionId(), 'portail', 'pages', page.id]">
+          {{ (canWrite() ? 'gestion.portal.pages.compose' : 'gestion.portal.view') | translate
+          }}<span class="visually-hidden"> {{ page.title_fr }}</span>
+        </a>
+        @if (custom && canWrite()) {
+          <button mat-button type="button" (click)="remove(page)" [disabled]="busy()">
+            {{ 'gestion.settings.delete' | translate
+            }}<span class="visually-hidden"> {{ page.title_fr }}</span>
+          </button>
+        }
+      </td>
+    </tr>
+  } @empty {
+    <tr>
+      <td colspan="5" class="muted">{{ 'gestion.settings.empty' | translate }}</td>
+    </tr>
+  }
+</ng-template>
+
+@if (!loading()) {
+  @for (
+    group of [
+      { list: sitePages(), custom: false },
+      { list: customPages(), custom: true },
+    ];
+    track group.custom
+  ) {
+    <section class="card" [attr.aria-labelledby]="group.custom ? 'custom-pages' : 'site-pages'">
+      <h2 [id]="group.custom ? 'custom-pages' : 'site-pages'">
+        {{
+          (group.custom ? 'gestion.portal.pages.custom' : 'gestion.portal.pages.site') | translate
+        }}
+      </h2>
+      <p class="muted">
+        {{
+          (group.custom ? 'gestion.portal.pages.customLead' : 'gestion.portal.pages.siteLead')
+            | translate
+        }}
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">{{ 'gestion.portal.fields.titleFr' | translate }}</th>
+              <th scope="col">{{ 'gestion.portal.fields.address' | translate }}</th>
+              <th scope="col">{{ 'gestion.portal.fields.sections' | translate }}</th>
+              <th scope="col">{{ 'gestion.portal.fields.published' | translate }}</th>
+              <th scope="col">
+                <span class="visually-hidden">{{ 'gestion.settings.actions' | translate }}</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <ng-container
+              *ngTemplateOutlet="rows; context: { $implicit: group.list, custom: group.custom }"
+            />
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+
+  @if (canWrite()) {
+    @if (!creating()) {
+      <div class="actions">
+        <button mat-flat-button type="button" (click)="creating.set(true)">
+          {{ 'gestion.portal.pages.add' | translate }}
+        </button>
+      </div>
+    } @else {
+      <section class="card" aria-labelledby="page-form-title">
+        <h2 id="page-form-title">{{ 'gestion.portal.pages.add' | translate }}</h2>
+        <form [formGroup]="form" (ngSubmit)="create()" novalidate>
+          <div class="grid-2">
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.portal.fields.slug' | translate }}</mat-label>
+              <input matInput formControlName="slug" required />
+              <mat-hint>{{ 'gestion.portal.pages.slugHint' | translate }}</mat-hint>
+              <mat-error>{{ error('slug') }}</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.portal.fields.titleFr' | translate }}</mat-label>
+              <input matInput formControlName="title_fr" lang="fr" required />
+              <mat-error>{{ error('title_fr') }}</mat-error>
+            </mat-form-field>
+          </div>
+          <div class="actions">
+            <button mat-flat-button type="submit" [disabled]="busy()">
+              {{ 'gestion.portal.pages.createAndCompose' | translate }}
+            </button>
+            <button mat-button type="button" (click)="creating.set(false)">
+              {{ 'shared.reauth.cancel' | translate }}
+            </button>
+          </div>
+        </form>
+      </section>
+    }
+  }
+}

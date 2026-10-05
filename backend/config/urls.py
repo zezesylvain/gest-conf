@@ -23,6 +23,7 @@ urlpatterns = [
     path("v1/", include("apps.core.urls")),
     path("v1/", include("apps.accounts.urls")),
     path("v1/", include("apps.conferences.urls")),
+    path("v1/", include("apps.portal.urls")),
     # Authentification : vues d'allauth en mode headless, client « browser » seul
     # (/api/_allauth/browser/v1/…, décision D4). Hors du schéma OpenAPI.
     *(path(f"_allauth/browser/v1/{route}", not_found) for route in DISABLED_ALLAUTH_ROUTES),

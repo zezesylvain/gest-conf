@@ -9,9 +9,11 @@ la spécification, pas contre lui-même. 2FA (``mfa_*``) : cases ajoutées en L1
 from __future__ import annotations
 
 import datetime as dt
+from collections.abc import Callable
 from dataclasses import dataclass
 
 import pytest
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import URLPattern, URLResolver, get_resolver
 from django.utils import timezone
 from rest_framework.test import APIClient
@@ -28,6 +30,9 @@ from apps.conferences.tests.factories import (
     SubmissionTypeFactory,
     TrackFactory,
 )
+from apps.core import public_files
+from apps.core.models import PublicFileKind
+from apps.portal.models import MenuItem, Page, PageSection, Section
 
 pytestmark = pytest.mark.django_db
 
@@ -35,15 +40,19 @@ pytestmark = pytest.mark.django_db
 
 R, W, PUB, ARC = "edition.read", "edition.write", "edition.publish", "edition.archive"
 MR, MM, AR = "members.read", "members.manage", "audit.read"
+PW = "portal.write"
 
 SPEC: dict[str, set[str]] = {
-    "ADMIN": {R, W, PUB, ARC, MR, MM, AR},
-    "CHAIR": {R, W, PUB, MR, MM, AR},
+    "ADMIN": {R, W, PUB, ARC, MR, MM, AR, PW},
+    "CHAIR": {R, W, PUB, MR, MM, AR, PW},
     "SC_CHAIR": {R, MR, MM},  # D8 validée : lecture du paramétrage ; membres du CS seulement
-    "OC_MEMBER": {R},  # D8 : lecture seule
+    "OC_MEMBER": {R},  # D8 : lecture seule (fonction « finances »)
+    "OC_COMMUNICATION": {R, PW},  # E11 (plan L2) : le CO « communication » écrit le portail
     "SC_MEMBER": set(),
     "AUTHOR": set(),
 }
+# Profils qui ne sont pas un rôle seul : (rôle, fonction au CO).
+PROFILE_ROLES = {"OC_COMMUNICATION": (Role.OC_MEMBER, "communication")}
 # Profils sans rôle actif dans l'édition visée : 404 (D5).
 NON_MEMBERS = ("no_role", "other_edition_chair", "revoked_chair", "invited")
 PROFILES = ("anonymous", *NON_MEMBERS, *SPEC)
@@ -55,9 +64,10 @@ class Case:
     method: str
     capability: str
     success: int
-    path: str  # gabarit : {e} édition, {track}, {type}, {date}, {role}, {invitation}
-    body: dict | None = None
+    path: str  # gabarit : {e} édition, {track}, {type}, {date}, {role}, {invitation}, {section}…
+    body: dict | Callable[[dict], dict] | None = None  # fonction : corps calculé des ids
     recent_auth: bool = False
+    format: str = "json"
 
 
 CASES = [
@@ -185,7 +195,182 @@ CASES = [
         "/v1/manage/editions/{e}/invitations/{invitation}/cancel",
     ),
     Case("manage-audit", "GET", AR, 200, "/v1/manage/editions/{e}/audit"),
+    # --- Portail (lot L2, plan L2 §4) : lecture edition.read, écriture portal.write ----------
+    Case("manage-portal-sections-list", "GET", R, 200, "/v1/manage/editions/{e}/portal/sections"),
+    Case(
+        "manage-portal-sections-list",
+        "POST",
+        PW,
+        201,
+        "/v1/manage/editions/{e}/portal/sections",
+        {"code": "bienvenue", "section_type": "rich_text", "body_fr": "<p>Bienvenue</p>"},
+    ),
+    Case(
+        "manage-portal-sections-detail",
+        "GET",
+        R,
+        200,
+        "/v1/manage/editions/{e}/portal/sections/{section}",
+    ),
+    Case(
+        "manage-portal-sections-detail",
+        "PATCH",
+        PW,
+        200,
+        "/v1/manage/editions/{e}/portal/sections/{section}",
+        {"title_en": "Welcome"},
+    ),
+    Case(
+        "manage-portal-sections-detail",
+        "DELETE",
+        PW,
+        204,
+        "/v1/manage/editions/{e}/portal/sections/{section}",
+    ),
+    Case(
+        "manage-portal-sections-preview",
+        "POST",
+        PW,
+        200,
+        "/v1/manage/editions/{e}/portal/sections/preview",
+        {"body_fr": "<p>Aperçu</p>"},
+    ),
+    Case("manage-portal-pages-list", "GET", R, 200, "/v1/manage/editions/{e}/portal/pages"),
+    Case(
+        "manage-portal-pages-list",
+        "POST",
+        PW,
+        201,
+        "/v1/manage/editions/{e}/portal/pages",
+        {"slug": "acces", "title_fr": "Accès"},
+    ),
+    Case(
+        "manage-portal-pages-detail", "GET", R, 200, "/v1/manage/editions/{e}/portal/pages/{page}"
+    ),
+    Case(
+        "manage-portal-pages-detail",
+        "PATCH",
+        PW,
+        200,
+        "/v1/manage/editions/{e}/portal/pages/{page}",
+        {"title_en": "Practical information"},
+    ),
+    Case(
+        "manage-portal-pages-detail",
+        "DELETE",
+        PW,
+        204,
+        "/v1/manage/editions/{e}/portal/pages/{page}",
+    ),
+    Case(
+        "manage-portal-pages-attach",
+        "POST",
+        PW,
+        200,
+        "/v1/manage/editions/{e}/portal/pages/{page}/attach",
+        lambda ids: {"section": ids["section"]},
+    ),
+    Case(
+        "manage-portal-pages-detach",
+        "POST",
+        PW,
+        200,
+        "/v1/manage/editions/{e}/portal/pages/{page}/detach",
+        lambda ids: {"section": ids["placed_section"]},
+    ),
+    Case(
+        "manage-portal-pages-reorder",
+        "POST",
+        PW,
+        200,
+        "/v1/manage/editions/{e}/portal/pages/{page}/reorder",
+        lambda ids: {"sections": [ids["placed_section"]]},
+    ),
+    Case("manage-portal-menu-list", "GET", R, 200, "/v1/manage/editions/{e}/portal/menu"),
+    Case(
+        "manage-portal-menu-list",
+        "POST",
+        PW,
+        201,
+        "/v1/manage/editions/{e}/portal/menu",
+        {"location": "footer", "label_fr": "Contact", "url": "mailto:contact@example.org"},
+    ),
+    Case("manage-portal-menu-detail", "GET", R, 200, "/v1/manage/editions/{e}/portal/menu/{menu}"),
+    Case(
+        "manage-portal-menu-detail",
+        "PATCH",
+        PW,
+        200,
+        "/v1/manage/editions/{e}/portal/menu/{menu}",
+        {"label_en": "Call"},
+    ),
+    Case(
+        "manage-portal-menu-detail",
+        "DELETE",
+        PW,
+        204,
+        "/v1/manage/editions/{e}/portal/menu/{menu}",
+    ),
+    Case(
+        "manage-portal-menu-reorder",
+        "POST",
+        PW,
+        200,
+        "/v1/manage/editions/{e}/portal/menu/reorder",
+        lambda ids: {"location": "header", "items": list(reversed(ids["header_menu"]))},
+    ),
+    Case("manage-portal-status", "GET", R, 200, "/v1/manage/editions/{e}/portal/status"),
+    # --- Fichiers publics (L2.4) ---------------------------------------------------------------
+    Case("manage-portal-files-list", "GET", R, 200, "/v1/manage/editions/{e}/portal/files"),
+    Case(
+        "manage-portal-files-list",
+        "POST",
+        PW,
+        201,
+        "/v1/manage/editions/{e}/portal/files",
+        lambda ids: {
+            "file": SimpleUploadedFile("appel.pdf", PDF, "application/pdf"),
+            "kind": "document",
+        },
+        format="multipart",
+    ),
+    Case(
+        "manage-portal-files-detail", "GET", R, 200, "/v1/manage/editions/{e}/portal/files/{file}"
+    ),
+    Case(
+        "manage-portal-files-detail",
+        "PATCH",
+        PW,
+        200,
+        "/v1/manage/editions/{e}/portal/files/{file}",
+        {"published": True},
+    ),
+    Case(
+        "manage-portal-files-detail",
+        "DELETE",
+        PW,
+        204,
+        "/v1/manage/editions/{e}/portal/files/{file}",
+    ),
+    Case(
+        "manage-portal-files-content",
+        "GET",
+        R,
+        200,
+        "/v1/manage/editions/{e}/portal/files/{file}/content",
+    ),
+    Case("manage-portal-poster", "GET", R, 200, "/v1/manage/editions/{e}/portal/poster"),
+    Case(
+        "manage-portal-poster",
+        "PUT",
+        PW,
+        200,
+        "/v1/manage/editions/{e}/portal/poster",
+        lambda ids: {"file": ids["image"]},
+    ),
 ]
+
+PDF = b"%PDF-1.7\n%%EOF\n"
 
 
 def expected_status(case: Case, profile: str) -> int:
@@ -219,7 +404,10 @@ def world():
     key_date = KeyDateFactory(
         edition=edition, code="call_close", at=dt.datetime(2027, 3, 31, tzinfo=dt.UTC)
     )
-    users = {role: make_member(edition, role) for role in SPEC}
+    users = {}
+    for profile in SPEC:
+        role, oc_function = PROFILE_ROLES.get(profile, (profile, None))
+        users[profile] = make_member(edition, role, oc_function=oc_function)
     users["no_role"] = VerifiedUserFactory()
     users["other_edition_chair"] = make_member(other, Role.CHAIR)
     users["revoked_chair"] = make_member(edition, Role.CHAIR, status=UserRoleStatus.REVOKED)
@@ -250,7 +438,30 @@ def world():
         locale="fr",
         last_sent_at=now,
     )
+    # Portail : section libre (posable, supprimable), section posée sur une page personnalisée.
+    section = Section.objects.create(edition=edition, code="libre", section_type="rich_text")
+    placed = Section.objects.create(edition=edition, code="posee", section_type="rich_text")
+    page = Page.objects.create(edition=edition, slug="infos", title_fr="Infos")
+    PageSection.objects.create(page=page, section=placed, position=0)
+    header_menu = list(
+        MenuItem.objects.filter(edition=edition, location="header")
+        .order_by("position")
+        .values_list("pk", flat=True)
+    )
+    document = public_files.store(
+        data=PDF, name="modele.pdf", kind=PublicFileKind.DOCUMENT, edition=edition
+    )
+    image = public_files.store(
+        data=_png(), name="affiche.png", kind=PublicFileKind.IMAGE, edition=edition
+    )
     ids = {
+        "file": document.pk,
+        "image": image.pk,
+        "section": section.pk,
+        "placed_section": placed.pk,
+        "page": page.pk,
+        "menu": header_menu[0],
+        "header_menu": header_menu,
         "e": edition.pk,
         "track": track.pk,
         "type": submission_type.pk,
@@ -261,12 +472,23 @@ def world():
     return edition, users, ids
 
 
+def _png() -> bytes:
+    import io
+
+    from PIL import Image
+
+    output = io.BytesIO()
+    Image.new("RGB", (20, 10), "navy").save(output, "PNG")
+    return output.getvalue()
+
+
 def call(client: APIClient, case: Case, ids: dict):
     path = case.path.format(**ids)
     method = getattr(client, case.method.lower())
     if case.body is None:
         return method(path)
-    return method(path, case.body, format="json")
+    body = case.body(ids) if callable(case.body) else case.body
+    return method(path, body, format=case.format)
 
 
 @pytest.mark.parametrize(("case", "profile", "expected"), MATRIX)

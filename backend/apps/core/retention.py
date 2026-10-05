@@ -64,3 +64,28 @@ def purge_finished_jobs(dry_run: bool, now: datetime) -> int:
         return finished.count()
     deleted, _per_model = finished.delete()
     return deleted
+
+
+# D15 : IP et navigateur du journal effacés après 6 mois ; lignes supprimées après 3 ans.
+AUDIT_NETWORK_RETENTION = timedelta(days=183)
+AUDIT_ROW_RETENTION = timedelta(days=3 * 365)
+
+
+def purge_audit_network(dry_run: bool, now: datetime) -> int:
+    from apps.core.actor import Actor
+    from apps.core.models import AuditLog
+
+    date = now - AUDIT_NETWORK_RETENTION
+    if dry_run:
+        return AuditLog.objects.filter(at__lt=date).exclude(ip__isnull=True, user_agent="").count()
+    return AuditLog.purge_network_before(date, actor=Actor.system("cron:cleanup"))
+
+
+def purge_audit_rows(dry_run: bool, now: datetime) -> int:
+    from apps.core.actor import Actor
+    from apps.core.models import AuditLog
+
+    date = now - AUDIT_ROW_RETENTION
+    if dry_run:
+        return AuditLog.objects.filter(at__lt=date).count()
+    return AuditLog.purge_before(date, actor=Actor.system("cron:cleanup"))

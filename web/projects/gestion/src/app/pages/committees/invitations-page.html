@@ -1,0 +1,155 @@
+<gc-page-header [heading]="'gestion.invitations.title' | translate" />
+<div aria-live="polite">
+  @if (status()) {
+    <p class="notice" role="status">{{ status() }}</p>
+  }
+  @if (skipped().length) {
+    <div class="notice">
+      <p>{{ 'gestion.invitations.skippedTitle' | translate }}</p>
+      <ul>
+        @for (item of skipped(); track item.email) {
+          <li>{{ item.email }} — {{ 'gestion.invitations.skipped.' + item.reason | translate }}</li>
+        }
+      </ul>
+    </div>
+  }
+</div>
+<gc-error-summary [messages]="errors()" />
+
+@if (canManage() && roles().length) {
+  <section class="card" aria-labelledby="invite-title">
+    <h2 id="invite-title">{{ 'gestion.invitations.newTitle' | translate }}</h2>
+    <form [formGroup]="form" (ngSubmit)="send()" novalidate>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'gestion.invitations.emails' | translate }}</mat-label>
+        <textarea matInput formControlName="emails" rows="4" required></textarea>
+        <mat-hint>{{ 'gestion.invitations.emailsHint' | translate }}</mat-hint>
+        <mat-error>{{ error('emails') }}</mat-error>
+      </mat-form-field>
+      <div class="grid-2">
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'gestion.members.role' | translate }}</mat-label>
+          <mat-select formControlName="role" required>
+            @for (role of roles(); track role) {
+              <mat-option [value]="role">{{ 'gestion.roles.' + role | translate }}</mat-option>
+            }
+          </mat-select>
+          <mat-error>{{ error('role') }}</mat-error>
+        </mat-form-field>
+        @if (form.controls.role.value === 'OC_MEMBER') {
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'gestion.invitations.ocFunction' | translate }}</mat-label>
+            <mat-select formControlName="oc_function" required>
+              @for (item of ocFunctions; track item) {
+                <mat-option [value]="item">{{
+                  'gestion.ocFunctions.' + item | translate
+                }}</mat-option>
+              }
+            </mat-select>
+            <mat-error>{{ error('oc_function') }}</mat-error>
+          </mat-form-field>
+        }
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'gestion.invitations.locale' | translate }}</mat-label>
+          <mat-select formControlName="locale">
+            <mat-option value="fr">Français</mat-option>
+            <mat-option value="en">English</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'gestion.invitations.message' | translate }}</mat-label>
+        <textarea matInput formControlName="message" rows="3"></textarea>
+        <mat-hint>{{ 'gestion.invitations.messageHint' | translate }}</mat-hint>
+        <mat-error>{{ error('message') }}</mat-error>
+      </mat-form-field>
+      <div class="actions">
+        <button mat-flat-button type="submit" [disabled]="sending()">
+          {{ 'gestion.invitations.send' | translate }}
+        </button>
+      </div>
+    </form>
+  </section>
+}
+
+<label class="actions">
+  {{ 'gestion.invitations.filter' | translate }}
+  <select [value]="statusFilter()" (change)="filter($any($event.target).value)">
+    <option value="">{{ 'gestion.invitations.all' | translate }}</option>
+    @for (item of statuses; track item) {
+      <option [value]="item">{{ 'gestion.invitationStatus.' + item | translate }}</option>
+    }
+  </select>
+</label>
+
+<div class="table-wrap">
+  <table>
+    <caption class="visually-hidden">
+      {{
+        'gestion.invitations.title' | translate
+      }}
+    </caption>
+    <thead>
+      <tr>
+        <th scope="col">{{ 'gestion.members.email' | translate }}</th>
+        <th scope="col">{{ 'gestion.members.role' | translate }}</th>
+        <th scope="col">{{ 'gestion.members.status' | translate }}</th>
+        <th scope="col">{{ 'gestion.invitations.invitedBy' | translate }}</th>
+        <th scope="col">{{ 'gestion.invitations.expires' | translate }}</th>
+        <th scope="col">
+          <span class="visually-hidden">{{ 'gestion.settings.actions' | translate }}</span>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (item of invitations(); track item.id) {
+        <tr>
+          <td>{{ item.email }}</td>
+          <td>
+            {{ 'gestion.roles.' + item.role | translate }}
+            @if (item.oc_function) {
+              <span class="muted"
+                >({{ 'gestion.ocFunctions.' + item.oc_function | translate }})</span
+              >
+            }
+          </td>
+          <td>
+            <span class="badge">{{ 'gestion.invitationStatus.' + item.status | translate }}</span>
+          </td>
+          <td>{{ item.invited_by_name }}</td>
+          <td>
+            {{ date(item.expires_at) }} <span class="muted">({{ item.send_count }}×)</span>
+          </td>
+          <td class="actions">
+            @if (canManage() && item.status === 'pending') {
+              <button mat-button type="button" (click)="resend(item)">
+                {{ 'gestion.invitations.resend' | translate
+                }}<span class="visually-hidden"> {{ item.email }}</span>
+              </button>
+              <button mat-button type="button" (click)="cancelInvitation(item)">
+                {{ 'gestion.invitations.cancel' | translate
+                }}<span class="visually-hidden"> {{ item.email }}</span>
+              </button>
+            }
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="6" class="muted">{{ 'gestion.settings.empty' | translate }}</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+@if (pages() > 1) {
+  <nav class="actions" [attr.aria-label]="'gestion.pagination.label' | translate">
+    <button mat-button type="button" [disabled]="page() <= 1" (click)="goTo(page() - 1)">
+      {{ 'gestion.pagination.previous' | translate }}
+    </button>
+    <span>{{ 'gestion.pagination.status' | translate: { page: page(), pages: pages() } }}</span>
+    <button mat-button type="button" [disabled]="page() >= pages()" (click)="goTo(page() + 1)">
+      {{ 'gestion.pagination.next' | translate }}
+    </button>
+  </nav>
+}

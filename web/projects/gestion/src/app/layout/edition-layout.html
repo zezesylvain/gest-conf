@@ -1,0 +1,62 @@
+<div class="edition-bar">
+  <label class="field">
+    <span>{{ 'gestion.layout.edition' | translate }}</span>
+    <select [value]="editionId()" (change)="selectEdition($any($event.target).value)">
+      @for (item of editions(); track item.id) {
+        <option [value]="item.id">{{ item.code }} — {{ title(item) }}</option>
+      }
+    </select>
+  </label>
+  @if (managementRoles().length > 1) {
+    <label class="field">
+      <span>{{ 'gestion.layout.activeRole' | translate }}</span>
+      <select [value]="activeRole() ?? ''" (change)="selectRole($any($event.target).value)">
+        <option value="">{{ 'gestion.layout.allRoles' | translate }}</option>
+        @for (role of managementRoles(); track role) {
+          <option [value]="role">{{ 'gestion.roles.' + role | translate }}</option>
+        }
+      </select>
+    </label>
+  }
+  @if (edition(); as current) {
+    <span class="badge">{{ 'gestion.status.' + current.status | translate }}</span>
+  }
+</div>
+
+<div class="edition-body">
+  <nav class="rail" [attr.aria-label]="'gestion.nav.label' | translate">
+    @for (group of groups(); track group.key) {
+      <div class="rail-group">
+        <h2 class="rail-heading">
+          <button
+            type="button"
+            class="rail-toggle"
+            [attr.aria-expanded]="open() === group.key"
+            [attr.aria-controls]="'rail-' + group.key"
+            (click)="toggle(group.key)"
+          >
+            <span>{{ group.label | translate }}</span>
+            <span class="chevron" aria-hidden="true"></span>
+          </button>
+        </h2>
+        <!-- [hidden] et non @if : les liens restent dans le DOM, routerLinkActive marque l'entrée. -->
+        <ul [id]="'rail-' + group.key" [hidden]="open() !== group.key">
+          @for (entry of group.entries; track entry.key) {
+            <li>
+              <a [routerLink]="entry.url" routerLinkActive="active" ariaCurrentWhenActive="page">
+                {{ entry.label | translate }}
+              </a>
+            </li>
+          }
+        </ul>
+      </div>
+    }
+  </nav>
+  <section class="edition-content">
+    @if (edition()) {
+      <router-outlet />
+    } @else {
+      <p role="alert">{{ 'gestion.forbidden.lead' | translate }}</p>
+    }
+  </section>
+</div>

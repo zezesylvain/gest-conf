@@ -1,17 +1,26 @@
 <a class="skip-link" href="#contenu">{{ 'portail.layout.skipToContent' | translate }}</a>
 
 <header class="site-header">
-  <a class="brand" routerLink="/">{{ 'shared.appName' | translate }}</a>
-  <div class="header-tools">
-    @if (session.authenticated()) {
-      <a class="account-link" routerLink="/compte">{{ 'portail.layout.myAccount' | translate }}</a>
-    } @else {
-      <a class="account-link" routerLink="/compte/connexion">
-        {{ 'portail.layout.signIn' | translate }}
-      </a>
-    }
-    <gc-language-switcher />
+  <div class="header-row">
+    <a class="brand" [routerLink]="homeLink()">{{ 'shared.appName' | translate }}</a>
+    <div class="header-tools">
+      @if (session.authenticated()) {
+        <a class="account-link" routerLink="/compte">{{
+          'portail.layout.myAccount' | translate
+        }}</a>
+      } @else {
+        <a class="account-link" routerLink="/compte/connexion">
+          {{ 'portail.layout.signIn' | translate }}
+        </a>
+      }
+      @if (context.paths()) {
+        <portail-language-links />
+      } @else {
+        <gc-language-switcher />
+      }
+    </div>
   </div>
+  <portail-site-nav location="header" />
 </header>
 
 <main id="contenu" class="site-main" tabindex="-1">
@@ -19,5 +28,6 @@
 </main>
 
 <footer class="site-footer">
+  <portail-site-nav location="footer" />
   <p>{{ 'portail.layout.footer' | translate }}</p>
 </footer>

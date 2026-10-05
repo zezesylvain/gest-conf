@@ -13,6 +13,40 @@
 @if (loading()) {
   <p role="status">{{ 'portail.account.home.loading' | translate }}</p>
 } @else {
+  <section class="photo" aria-labelledby="photo-title">
+    <h2 id="photo-title">{{ 'portail.account.profile.photoTitle' | translate }}</h2>
+    <p class="hint">{{ 'portail.account.profile.photoLead' | translate }}</p>
+    @if (photo(); as src) {
+      <img
+        [src]="src"
+        width="160"
+        height="160"
+        [alt]="'portail.account.profile.photoAlt' | translate"
+      />
+    }
+    <div aria-live="polite">
+      @if (photoStatus()) {
+        <p class="notice" role="status">{{ photoStatus() }}</p>
+      }
+    </div>
+    <div class="actions">
+      <label class="file">
+        <span>{{ 'portail.account.profile.photoChoose' | translate }}</span>
+        <input
+          type="file"
+          accept=".png,.jpg,.jpeg,.webp"
+          (change)="uploadPhoto($event)"
+          [disabled]="photoBusy()"
+        />
+      </label>
+      @if (photo()) {
+        <button mat-stroked-button type="button" (click)="removePhoto()" [disabled]="photoBusy()">
+          {{ 'portail.account.profile.photoRemove' | translate }}
+        </button>
+      }
+    </div>
+  </section>
+
   <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
     <mat-form-field appearance="outline">
       <mat-label>{{ 'portail.account.profile.fields.title' | translate }}</mat-label>
@@ -72,6 +106,24 @@
       <mat-hint>{{ 'portail.account.profile.bioHint' | translate }}</mat-hint>
       <mat-error>{{ error('bio') }}</mat-error>
     </mat-form-field>
+
+    <fieldset class="profile-links">
+      <legend>{{ 'portail.account.profile.linksTitle' | translate }}</legend>
+      <p class="hint">{{ 'portail.account.profile.linksLead' | translate }}</p>
+      @for (name of linkFields; track name) {
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'portail.account.profile.fields.' + name | translate }}</mat-label>
+          <input
+            matInput
+            [formControlName]="name"
+            type="url"
+            inputmode="url"
+            placeholder="https://"
+          />
+          <mat-error>{{ error(name) }}</mat-error>
+        </mat-form-field>
+      }
+    </fieldset>
 
     <div class="actions">
       <button mat-flat-button type="submit" [disabled]="saving()">

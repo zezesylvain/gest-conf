@@ -17,13 +17,22 @@ AUTH_RECORDS = "account_authentication_methods"
 TEST_TOTP_SECRET = "JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP"
 
 
-def make_member(edition, role: str, *, status: str = UserRoleStatus.ACTIVE, **user_fields):
+def make_member(
+    edition,
+    role: str,
+    *,
+    status: str = UserRoleStatus.ACTIVE,
+    oc_function: str | None = None,
+    **user_fields,
+):
     user = VerifiedUserFactory(**user_fields)
+    if oc_function is None:
+        oc_function = OcFunction.FINANCE if role == Role.OC_MEMBER else ""
     UserRole.objects.create(
         user=user,
         edition=edition,
         role=role,
-        oc_function=OcFunction.FINANCE if role == Role.OC_MEMBER else "",
+        oc_function=oc_function,
         status=status,
         source=RoleSource.COMMAND,
         granted_at=timezone.now(),

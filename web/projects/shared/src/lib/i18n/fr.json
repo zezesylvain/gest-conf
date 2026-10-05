@@ -60,7 +60,11 @@
       "incorrect_code": "Code incorrect.",
       "unverified_email": "Vérifiez d'abord toutes les adresses e-mail de votre compte (ou supprimez celles qui ne le sont pas).",
       "add_email_blocked": "Votre compte est protégé par la double authentification : l'ajout d'une adresse passe par une invitation à cette adresse.",
-      "unverified_primary_email": "Votre adresse e-mail principale doit être vérifiée."
+      "unverified_primary_email": "Votre adresse e-mail principale doit être vérifiée.",
+      "account_has_active_duties": "Transmettez d'abord vos rôles de gestion actifs.",
+      "submission_incomplete": "La soumission est incomplète : complétez les éléments signalés.",
+      "call_closed": "L'appel à communications est clos.",
+      "setting_frozen": "Réglage gelé : des soumissions existent. Seul un administrateur peut le changer, avec un motif."
     },
     "form": {
       "errorSummary": "Le formulaire contient des erreurs :",
@@ -75,6 +79,16 @@
     },
     "session": {
       "expired": "Votre session a expiré : reconnectez-vous."
+    },
+    "reauth": {
+      "title": "Confirmez votre identité",
+      "lead": "Cette opération est sensible : confirmez votre mot de passe pour continuer.",
+      "password": "Mot de passe",
+      "code": "Code de double authentification",
+      "useCode": "Utiliser plutôt un code de double authentification",
+      "usePassword": "Utiliser plutôt mon mot de passe",
+      "submit": "Confirmer",
+      "cancel": "Annuler"
     }
   }
 }

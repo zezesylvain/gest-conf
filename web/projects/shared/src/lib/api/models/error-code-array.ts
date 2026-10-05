@@ -34,5 +34,9 @@ export const ERROR_CODE: ErrorCode[] = [
   'email_address_limit',
   'edition_archived',
   'invalid_transition',
-  'edition_incomplete'
+  'edition_incomplete',
+  'account_has_active_duties',
+  'submission_incomplete',
+  'call_closed',
+  'setting_frozen'
 ];

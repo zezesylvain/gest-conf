@@ -1,0 +1,66 @@
+[
+  {
+    "slug": "home",
+    "fr": "",
+    "en": "",
+    "title_fr": "Accueil",
+    "title_en": "Home",
+    "coming_soon": false
+  },
+  {
+    "slug": "call",
+    "fr": "appel",
+    "en": "call",
+    "title_fr": "Appel à communications",
+    "title_en": "Call for papers",
+    "coming_soon": false
+  },
+  {
+    "slug": "dates",
+    "fr": "dates",
+    "en": "dates",
+    "title_fr": "Dates importantes",
+    "title_en": "Important dates",
+    "coming_soon": false
+  },
+  {
+    "slug": "tracks",
+    "fr": "thematiques",
+    "en": "tracks",
+    "title_fr": "Thématiques",
+    "title_en": "Tracks",
+    "coming_soon": false
+  },
+  {
+    "slug": "committees",
+    "fr": "comites",
+    "en": "committees",
+    "title_fr": "Comités",
+    "title_en": "Committees",
+    "coming_soon": false
+  },
+  {
+    "slug": "program",
+    "fr": "programme",
+    "en": "program",
+    "title_fr": "Programme",
+    "title_en": "Programme",
+    "coming_soon": true
+  },
+  {
+    "slug": "speakers",
+    "fr": "intervenants",
+    "en": "speakers",
+    "title_fr": "Intervenants",
+    "title_en": "Speakers",
+    "coming_soon": true
+  },
+  {
+    "slug": "registration",
+    "fr": "inscription",
+    "en": "registration",
+    "title_fr": "Inscription",
+    "title_en": "Registration",
+    "coming_soon": true
+  }
+]

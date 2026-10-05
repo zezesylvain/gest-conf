@@ -2200,7 +2200,7 @@ Ces mises à jour seront livrées par une PR de documentation en L1.8, **après 
 
 ---
 
-## 16. Écarts constatés pendant l'implémentation (L1.0 à L1.6)
+## 16. Écarts constatés pendant l'implémentation (L1.0 à L1.8)
 
 Consignés ici pour ne pas dériver en silence (CLAUDE.md). Les écarts marqués **à valider** attendent
 l'accord du commanditaire ; les autres sont des précisions sans effet sur les décisions D1 à D18.
@@ -2494,4 +2494,89 @@ Ils seront repris dans la PR de documentation de L1.8 (§15).
     connexion, activation par QR code, codes de secours, déconnexion, connexion en deux étapes,
     `mfa_verified` vrai. **Reste à faire sur o2switch** avec le déploiement (roues de
     `cryptography` et `fido2` : vérification V03 de L1.0).
+
+### Étape L1.7 (écrans de gestion et invitations)
+
+58. **§10.3, écrans livrés.** Coque (compte, langue enregistrée dans le compte, déconnexion),
+    sélecteur d'édition, rôle actif, menu filtré par les capacités de `/me`, redirections
+    (dernière édition, unique édition, sinon sélecteur ; tableau de bord avec `edition.read`,
+    sinon « Membres »), tableau de bord (statut, publication et archivage, liste de contrôle
+    indicative, dates clés, invitations en attente, 2FA), cinq écrans de paramétrage, membres
+    (révocation avec motif), invitations (envoi groupé, relance, annulation, filtre par
+    statut), journal (filtres, pagination, avant/après), page « accès refusé ». Démarrage :
+    `GET auth/session` puis `/me`, sinon connexion du portail (page entière, `next`).
+59. **§5.5 et §5.8, tables recopiées côté Angular (à surveiller).** La table d'attribution
+    (`GRANTORS`) et la correspondance rôle actif → rubriques sont recopiées dans
+    `web/projects/gestion/src/app/core/grantors.ts` et `layout/edition-layout.ts`, **pour
+    masquer des boutons seulement** : le serveur reste seul juge (règle n° 2). Toute
+    modification de `apps/accounts/roles.py` doit être reportée ; une exposition de
+    `manageable_roles` dans `/me` supprimerait cette copie (proposition pour L1.8).
+60. **§9.5, schéma des membres.** `GET …/roles` renvoie l'adresse seulement avec
+    `members.manage` (L1.5), mais le schéma ne décrit que la variante avec adresse : le type
+    généré annonce `email` toujours présent. L'écran le tolère (colonne masquée sans
+    `members.manage`). Proposition : deux composants de schéma (`oneOf`) en L1.8.
+61. **Bibliothèque partagée.** La fenêtre de réauthentification et la liste des pays passent
+    dans `shared` (utilisées par les deux applications) ; une fenêtre de confirmation avec
+    motif (`ConfirmDialog`), la garde `capabilityGuard`, le contexte actif (`localStorage`
+    sous try/catch) et `formatInZone` s'y ajoutent. `MatDialog` est chargé à la demande :
+    bundle initial de la gestion 336,7 kB (budget 500 kB), portail 361,8 kB (budget 365 kB).
+62. **Bogue évité (testé).** `Intl.DateTimeFormat` lève une TypeError quand `dateStyle` ou
+    `timeStyle` est combiné avec `timeZoneName` (ECMA-402) : `formatInZone` utilise des
+    options détaillées.
+63. **§10.2, `/compte/invitation`.** Le jeton (ou le lien `#lier=…`) est effacé de la barre
+    d'adresse et gardé **en mémoire** le temps d'une connexion dans l'application. Il n'est
+    jamais stocké : après une **inscription** (vérification de l'adresse par e-mail, nouvelle
+    page), il faut rouvrir le lien de l'invitation, ce que l'écran indique. L'accueil du
+    compte liste les éditions (lien vers la gestion) et les invitations en attente.
+64. **Développement local.** Le portail (`:4200`) et la gestion (`:4201/gestion/`) sont deux
+    serveurs : les renvois de la gestion vers `/compte/…` (connexion, 2FA, sécurité) ne
+    fonctionnent que sous un domaine unique (production). En local, se connecter et valider
+    la 2FA dans le portail, puis ouvrir la gestion.
+65. **Démo B vérifiée en local seulement** (Chromium, Django de développement et deux
+    `ng serve`) : `create_edition --admin-email` ; l'ADMIN active la 2FA, reçoit
+    `mfa_required` puis valide son code, renseigne les informations générales (EN), une
+    thématique, un type, l'ouverture et la clôture de l'appel, publie
+    (`/api/v1/public/editions/current` renvoie l'édition) ; il invite un président du CS, qui
+    accepte avec un compte existant et reçoit `mfa_enrollment_required` sur « Membres » ; le
+    journal montre l'avant/après. **Reste à faire sur o2switch**, avec l'inscription d'un
+    invité sans compte et l'invitation d'un relecteur (403 attendu sur le paramétrage).
+    Le test E2E automatisé dans le dépôt reste prévu en L3 (§12.4).
+
+### Étape L1.8 (données personnelles et clôture)
+
+66. **§4.9, registre.** `apps.core.personal_data` : chaque application déclare ses modèles, son
+    export et son anonymisation dans `ready()` ; le compte passe en dernier (les autres
+    traitements lisent encore ses adresses). Le test d'introspection couvre les modèles ayant une
+    clé vers `User` ou un `EmailField`, tables tierces comprises (`account.EmailAddress`,
+    `mfa.Authenticator`) ; aucune exemption n'a été nécessaire.
+67. **§4.9, balayage (complément).** Le test a révélé un cas non prévu : les e-mails envoyés
+    **à des tiers** citent le nom de l'invitant (corps de l'invitation). L'anonymisation purge
+    donc aussi le corps et l'objet de toute ligne du registre d'envoi qui contient l'une de ses
+    adresses ou son nom (recherche textuelle, 3 caractères au moins). Effet de bord assumé :
+    quelques corps de tiers perdus, sans conséquence (ils ne servent qu'au diagnostic).
+68. **§4.9, confirmation.** La « phrase de confirmation » est l'**adresse du compte**, saisie à
+    nouveau (indépendante de la langue), avec une case « je comprends » côté interface. La
+    session est fermée ; l'interface recharge le portail.
+69. **§4.9, responsabilités.** `account_has_active_duties` (409) liste les rôles à transmettre
+    (`CODE:RÔLE`) : rôle actif autre qu'auteur ou participant dans une édition non archivée, ou
+    dernier `ADMIN` d'une édition, même archivée.
+70. **§9.4, `reactivate_user`.** Ajoutée (prévue au §9.4) ; refusée pour un compte anonymisé.
+71. **§8.4, conservation.** Tâches ajoutées à `cleanup`, toutes **en simulation** tant que D15
+    n'est pas validée : IP du journal et des consentements (6 mois), lignes du journal (3 ans),
+    adresse et message des invitations traitées (12 mois, adresse remplacée par
+    `redacted-invitation-<id>@anonymized.invalid`), registre d'envoi (12 mois).
+72. **§8.4, `check_integrity`.** Registre de contrôles (`apps.core.integrity`) : doublons
+    d'adresses vérifiées et d'authentificateurs 2FA (W036), invitations acceptées sans rôle et
+    clés d'unicité incohérentes, taille du cache (seuil 20 000), tâches en échec. Alerte aux
+    opérateurs sans donnée personnelle ; troisième ligne du cron.
+73. **§15, mise à jour de l'étude.** Faite par une section **§17 « Mises à jour issues du lot
+    L1 »** qui prévaut sur les sections antérieures, plus des corrections ciblées (2FA en P1 par
+    `allauth.mfa`, table `user`, extrait de configuration, RG-19 et RG-20, Vitest). La version
+    HTML est mise à jour à l'identique (aucun générateur n'est versionné dans le dépôt).
+    `CLAUDE.md` renvoie à cette section et à `docs/L1-socle.md`.
+74. **Critères de fin de L1.8.** `test_rg18_*`, test d'introspection et test de balayage au vert
+    (SQLite et MariaDB). **Reste à faire sur o2switch** : tests de fumée en production et cron
+    actifs depuis 48 h sans battement de cœur en retard. Couverture mesurée en local
+    (`pytest --cov=apps`) : 94 % au total ; permissions 91 %, rôles 96 %, invitations 89 %,
+    2FA 90 %, données personnelles 99 %, services de l'édition 93 %, audit 86 %.
 

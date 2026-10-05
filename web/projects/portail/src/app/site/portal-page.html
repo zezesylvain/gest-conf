@@ -1,0 +1,96 @@
+<article class="portal-page" [attr.data-gc-rendered]="marker()" [attr.lang]="lang()">
+  @switch (state()) {
+    @case ('loading') {
+      <p role="status" class="muted">{{ 'portail.site.loading' | translate }}</p>
+    }
+    @case ('missing') {
+      <h1>{{ 'portail.notFound.heading' | translate }}</h1>
+      <p>
+        <a [routerLink]="path('home')">{{ 'portail.site.backHome' | translate }}</a>
+      </p>
+    }
+    @case ('error') {
+      <h1>{{ 'portail.site.errorTitle' | translate }}</h1>
+      <p>{{ 'portail.site.errorLead' | translate }}</p>
+    }
+    @case ('ready') {
+      @if (site(); as data) {
+        @let edition = data.edition;
+        @if (sitePage(); as page) {
+          @switch (page.slug) {
+            @case ('home') {
+              <portail-edition-hero [edition]="edition" [language]="lang()">
+                <portail-countdown [edition]="edition" [language]="lang()" />
+                <p class="buttons">
+                  <a class="button primary" [routerLink]="path('call')">{{
+                    'portail.site.toCall' | translate
+                  }}</a>
+                  <a class="button" [routerLink]="path('dates')">{{
+                    'portail.site.toDates' | translate
+                  }}</a>
+                </p>
+              </portail-edition-hero>
+            }
+            @case ('call') {
+              <h1>{{ heading() }}</h1>
+              <p class="lead">{{ 'portail.site.callLead' | translate }}</p>
+              <h2>{{ 'portail.site.formats' | translate }}</h2>
+              <portail-submission-types-list
+                [types]="edition.submission_types"
+                [language]="lang()"
+              />
+              <h2>{{ 'portail.site.deadlines' | translate }}</h2>
+              <portail-dates-list
+                [dates]="callDates()"
+                [language]="lang()"
+                [timezone]="edition.timezone"
+              />
+              <h2>{{ 'portail.site.templates' | translate }}</h2>
+              <portail-documents-list [documents]="data.documents" [language]="lang()" />
+            }
+            @case ('dates') {
+              <h1>{{ heading() }}</h1>
+              <portail-dates-list
+                [dates]="edition.key_dates"
+                [language]="lang()"
+                [timezone]="edition.timezone"
+              />
+            }
+            @case ('tracks') {
+              <h1>{{ heading() }}</h1>
+              <portail-tracks-list [tracks]="edition.tracks" [language]="lang()" />
+            }
+            @case ('committees') {
+              <h1>{{ heading() }}</h1>
+              <h2>{{ 'portail.site.scientificCommittee' | translate }}</h2>
+              <portail-committee-list
+                [committee]="data.committees.scientific"
+                [language]="lang()"
+              />
+              <h2>{{ 'portail.site.organizingCommittee' | translate }}</h2>
+              <portail-committee-list
+                [committee]="data.committees.organizing"
+                [language]="lang()"
+              />
+            }
+            @default {
+              <h1>{{ heading() }}</h1>
+              @if (page.coming_soon) {
+                <p class="soon">{{ 'portail.site.comingSoon' | translate }}</p>
+              }
+            }
+          }
+        } @else if (composition(); as current) {
+          <h1>{{ heading() }}</h1>
+        }
+        @if (composition(); as current) {
+          <portail-sections
+            [sections]="current.sections"
+            [language]="lang()"
+            [timezone]="edition.timezone"
+          />
+        }
+      }
+    }
+  }
+</article>

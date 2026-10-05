@@ -1,0 +1,132 @@
+<gc-page-header
+  [heading]="'gestion.settings.tracks.title' | translate"
+  [lead]="'gestion.settings.tracks.lead' | translate"
+/>
+@if (!canWrite()) {
+  <p class="notice">{{ 'gestion.settings.readOnly' | translate }}</p>
+}
+<div aria-live="polite">
+  @if (status()) {
+    <p class="notice" role="status">{{ status() }}</p>
+  }
+</div>
+<gc-error-summary [messages]="errors()" />
+
+@if (!loading()) {
+  <div class="table-wrap">
+    <table>
+      <caption class="visually-hidden">
+        {{
+          'gestion.settings.tracks.title' | translate
+        }}
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">{{ 'gestion.fields.position' | translate }}</th>
+          <th scope="col">{{ 'gestion.fields.code' | translate }}</th>
+          <th scope="col">{{ 'gestion.fields.nameFr' | translate }}</th>
+          <th scope="col">{{ 'gestion.fields.nameEn' | translate }}</th>
+          <th scope="col">{{ 'gestion.fields.active' | translate }}</th>
+          @if (canWrite()) {
+            <th scope="col">
+              <span class="visually-hidden">{{ 'gestion.settings.actions' | translate }}</span>
+            </th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of items(); track item.id) {
+          <tr>
+            <td>{{ item.position }}</td>
+            <td>
+              <code>{{ item.code }}</code>
+            </td>
+            <td lang="fr">{{ item.name_fr }}</td>
+            <td lang="en">{{ item.name_en }}</td>
+            <td>
+              {{ (item.is_active ? 'gestion.settings.yes' : 'gestion.settings.no') | translate }}
+            </td>
+            @if (canWrite()) {
+              <td class="actions">
+                <button mat-button type="button" (click)="startEdit(item)">
+                  {{ 'gestion.settings.edit' | translate
+                  }}<span class="visually-hidden"> {{ item.code }}</span>
+                </button>
+                <button mat-button type="button" (click)="confirmDelete(item)">
+                  {{ 'gestion.settings.delete' | translate
+                  }}<span class="visually-hidden"> {{ item.code }}</span>
+                </button>
+              </td>
+            }
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="6" class="muted">{{ 'gestion.settings.empty' | translate }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (canWrite()) {
+    @if (editing() === null) {
+      <div class="actions">
+        <button mat-flat-button type="button" (click)="startCreate()">
+          {{ 'gestion.settings.tracks.add' | translate }}
+        </button>
+      </div>
+    } @else {
+      <section class="card" aria-labelledby="track-form-title">
+        <h2 id="track-form-title">
+          {{
+            (editing() ? 'gestion.settings.tracks.editTitle' : 'gestion.settings.tracks.add')
+              | translate
+          }}
+        </h2>
+        <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+          <div class="grid-2">
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.fields.code' | translate }}</mat-label>
+              <input matInput formControlName="code" required />
+              <mat-error>{{ error('code') }}</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.fields.position' | translate }}</mat-label>
+              <input matInput type="number" formControlName="position" />
+              <mat-error>{{ error('position') }}</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.fields.nameFr' | translate }}</mat-label>
+              <input matInput formControlName="name_fr" lang="fr" required />
+              <mat-error>{{ error('name_fr') }}</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.fields.nameEn' | translate }}</mat-label>
+              <input matInput formControlName="name_en" lang="en" />
+              <mat-error>{{ error('name_en') }}</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.fields.descriptionFr' | translate }}</mat-label>
+              <textarea matInput formControlName="description_fr" lang="fr" rows="3"></textarea>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.fields.descriptionEn' | translate }}</mat-label>
+              <textarea matInput formControlName="description_en" lang="en" rows="3"></textarea>
+            </mat-form-field>
+          </div>
+          <mat-checkbox formControlName="is_active">{{
+            'gestion.fields.active' | translate
+          }}</mat-checkbox>
+          <div class="actions">
+            <button mat-flat-button type="submit" [disabled]="saving()">
+              {{ 'gestion.settings.save' | translate }}
+            </button>
+            <button mat-button type="button" (click)="cancel()">
+              {{ 'shared.reauth.cancel' | translate }}
+            </button>
+          </div>
+        </form>
+      </section>
+    }
+  }
+}

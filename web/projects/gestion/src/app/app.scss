@@ -20,6 +20,7 @@
 
 .app-header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
@@ -37,4 +38,36 @@
 .app-main {
   flex: 1;
   padding: 1.5rem;
+}
+
+.header-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.account {
+  color: inherit;
+}
+
+.logout {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 1px solid currentColor;
+  border-radius: 0.25rem;
+  padding: 0.25rem 0.75rem;
+  cursor: pointer;
+}
+
+@media print {
+  .app-header,
+  .skip-link {
+    display: none;
+  }
+
+  .app-main {
+    padding: 0;
+  }
 }

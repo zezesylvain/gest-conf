@@ -31,6 +31,10 @@
  * * `edition_archived` - Edition Archived
  * * `invalid_transition` - Invalid Transition
  * * `edition_incomplete` - Edition Incomplete
+ * * `account_has_active_duties` - Account Has Active Duties
+ * * `submission_incomplete` - Submission Incomplete
+ * * `call_closed` - Call Closed
+ * * `setting_frozen` - Setting Frozen
  */
-export type ErrorCode = 'validation_error' | 'bad_request' | 'not_authenticated' | 'permission_denied' | 'not_found' | 'throttled' | 'server_error' | 'parse_error' | 'method_not_allowed' | 'not_acceptable' | 'unsupported_media_type' | 'csrf_failed' | 'in_use' | 'reauthentication_required' | 'mfa_enrollment_required' | 'mfa_required' | 'last_admin' | 'invitation_expired' | 'invitation_not_pending' | 'invitation_email_mismatch' | 'invitation_email_unverified' | 'invitation_link_invalid' | 'invitation_self_accept' | 'invitation_resend_limit' | 'email_address_limit' | 'edition_archived' | 'invalid_transition' | 'edition_incomplete';
+export type ErrorCode = 'validation_error' | 'bad_request' | 'not_authenticated' | 'permission_denied' | 'not_found' | 'throttled' | 'server_error' | 'parse_error' | 'method_not_allowed' | 'not_acceptable' | 'unsupported_media_type' | 'csrf_failed' | 'in_use' | 'reauthentication_required' | 'mfa_enrollment_required' | 'mfa_required' | 'last_admin' | 'invitation_expired' | 'invitation_not_pending' | 'invitation_email_mismatch' | 'invitation_email_unverified' | 'invitation_link_invalid' | 'invitation_self_accept' | 'invitation_resend_limit' | 'email_address_limit' | 'edition_archived' | 'invalid_transition' | 'edition_incomplete' | 'account_has_active_duties' | 'submission_incomplete' | 'call_closed' | 'setting_frozen';
 

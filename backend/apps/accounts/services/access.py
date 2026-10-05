@@ -11,7 +11,7 @@ from apps.accounts.models import UserRole, UserRoleStatus
 from apps.accounts.roles import (
     MFA_REQUIRED_ROLES,
     Capability,
-    capabilities_for,
+    capabilities_for_assignments,
     manageable_roles,
     visible_member_roles,
 )
@@ -34,7 +34,7 @@ class EditionAccess:
 
     @property
     def capabilities(self) -> frozenset[Capability]:
-        return capabilities_for(self.role_names)
+        return capabilities_for_assignments(self.roles)
 
     def has(self, capability: Capability) -> bool:
         return capability in self.capabilities
