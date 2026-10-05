@@ -35,5 +35,8 @@ export const ERROR_CODE: ErrorCode[] = [
   'edition_archived',
   'invalid_transition',
   'edition_incomplete',
-  'account_has_active_duties'
+  'account_has_active_duties',
+  'submission_incomplete',
+  'call_closed',
+  'setting_frozen'
 ];

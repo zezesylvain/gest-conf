@@ -141,12 +141,63 @@ def set_current_edition(conference: Conference, edition: Edition, *, actor: Acto
     return conference
 
 
+# RG-19 (plan L3 F9) : réglages gelés dès qu'une soumission a été soumise.
+FROZEN_FIELDS = ("code", "double_blind")
+
+
+def has_submitted_work(edition: Edition) -> bool:
+    """Une soumission non brouillon existe (condition du gel RG-19)."""
+    from django.apps import apps
+
+    Submission = apps.get_model("submissions", "Submission")
+    return Submission.objects.filter(edition=edition).exclude(status="draft").exists()
+
+
+def frozen_fields(edition: Edition) -> list[str]:
+    return list(FROZEN_FIELDS) if has_submitted_work(edition) else []
+
+
+def _is_edition_admin(edition: Edition, actor: Actor) -> bool:
+    from apps.accounts.models import UserRole, UserRoleStatus
+    from apps.accounts.roles import Role
+
+    if actor.kind != ActorKind.USER:
+        return actor.kind == ActorKind.COMMAND
+    return UserRole.objects.filter(
+        user=actor.user, edition=edition, role=Role.ADMIN, status=UserRoleStatus.ACTIVE
+    ).exists()
+
+
+def _check_frozen(edition: Edition, data: Mapping[str, Any], actor: Actor, reason: str) -> None:
+    """RG-19 : ``code`` et ``double_blind`` ne changent plus après la première soumission,
+    sauf par un ADMIN de l'édition (ou l'opérateur), avec un motif ; le motif est journalisé
+    avec le changement."""
+    changing = [
+        name for name in FROZEN_FIELDS if name in data and data[name] != getattr(edition, name)
+    ]
+    if not changing or not has_submitted_work(edition):
+        return
+    if _is_edition_admin(edition, actor) and reason.strip():
+        return
+    raise RuleViolation(
+        _(
+            "Réglage gelé : des soumissions existent. "
+            "Seul un administrateur peut le changer, avec un motif."
+        ),
+        code=ErrorCode.SETTING_FROZEN,
+        fields={name: [_("Gelé depuis la première soumission.")] for name in changing},
+    )
+
+
 @transaction.atomic
-def update_edition(edition: Edition, data: Mapping[str, Any], *, actor: Actor) -> Edition:
+def update_edition(
+    edition: Edition, data: Mapping[str, Any], *, actor: Actor, reason: str = ""
+) -> Edition:
     """Informations générales (§6.1). Un changement de fuseau ne déplace pas les instants
     UTC des dates clés : les heures locales affichées se décalent (audité, §6.2)."""
     edition = Edition.objects.select_for_update().get(pk=edition.pk)
     _writable(edition, actor)
+    _check_frozen(edition, data, actor, reason)
     before = snapshot(edition)
     changed = _apply(edition, data, EDITION_INFO_FIELDS)
     if changed:
@@ -158,16 +209,20 @@ def update_edition(edition: Edition, data: Mapping[str, Any], *, actor: Actor) -
             obj=edition,
             before={name: before[name] for name in changed},
             after={name: snapshot(edition)[name] for name in changed},
+            reason=reason.strip(),
         )
     return edition
 
 
 @transaction.atomic
-def update_confidentiality(edition: Edition, data: Mapping[str, Any], *, actor: Actor) -> Edition:
+def update_confidentiality(
+    edition: Edition, data: Mapping[str, Any], *, actor: Actor, reason: str = ""
+) -> Edition:
     """Double aveugle et nombre de relecteurs : changement classé critique (§6.1).
-    Gel après l'ouverture de l'appel : L3 (RG-19 proposée)."""
+    ``double_blind`` gelé dès la première soumission (RG-19)."""
     edition = Edition.objects.select_for_update().get(pk=edition.pk)
     _writable(edition, actor)
+    _check_frozen(edition, data, actor, reason)
     before = snapshot(edition)
     changed = _apply(edition, data, CONFIDENTIALITY_FIELDS)
     if changed:
@@ -179,6 +234,7 @@ def update_confidentiality(edition: Edition, data: Mapping[str, Any], *, actor: 
             obj=edition,
             before={name: before[name] for name in changed},
             after={name: snapshot(edition)[name] for name in changed},
+            reason=reason.strip(),
         )
     return edition
 

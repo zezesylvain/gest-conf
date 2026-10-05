@@ -317,3 +317,23 @@ class PublicFile(TimeStampedModel):
 
     def __str__(self) -> str:
         return f"{self.kind}:{self.uuid}"
+
+
+# --- Compteurs de numérotation (étude §8.3, plan L3 F4) ----------------------------------
+
+
+class Counter(models.Model):
+    """Compteur sans trou ni doublon, par portée (``submission:GC27``, plus tard les
+    factures). Incrémenté seulement par ``apps.core.counters.next_value``, sous verrou de
+    ligne, dans la transaction de l'opération qui consomme le numéro : un échec annule
+    aussi l'incrément."""
+
+    scope = models.CharField(_("portée"), max_length=64, unique=True)
+    value = models.PositiveIntegerField(_("dernière valeur"), default=0)
+
+    class Meta:
+        verbose_name = _("compteur")
+        verbose_name_plural = _("compteurs")
+
+    def __str__(self) -> str:
+        return f"{self.scope}={self.value}"

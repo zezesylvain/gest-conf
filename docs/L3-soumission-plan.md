@@ -265,3 +265,83 @@ endpoint relecteur.
 | **Stockage privé** | Décision de conception, sans vérification hors ligne possible : `GESTCONF_PRIVATE_FILES_DIR`, distinct des fichiers publics, hors racine web, à sauvegarder avec la base. | Ajouté à `.env.example` et à `deploy/README.md` en L3.1 |
 | **Playwright en CI (F14)** | `@playwright/test` 1.63.0 (dans `web/`, lockfile produit avec npm 11 comme la CI). `web/e2e/playwright.config.ts` lance Django (SQLite dédiée, `migrate`, `createcachetable`) et le portail (`ng serve`, mandataire `/api`). Deux tests de fumée passent en local. Nouveau job CI « E2E (Playwright) ». | Le parcours auteur complet s'y ajoute en L3.6 |
 | Défaut trouvé | Sans `createcachetable`, `/health` répond 503. | Commande ajoutée au démarrage E2E |
+
+## 12. Bilan de L3.1 (5 octobre 2026)
+
+**Livré (backend)** :
+
+- **App `submissions`** :
+  - `Submission`, `SubmissionAuthor`, `SubmissionFile` ;
+  - `SubmissionRevision` et `StatusHistory`, en ajout seul, avec des méthodes nommées de
+    rédaction pour l'anonymisation ;
+  - `SubmissionExtension`, avec contrainte de motif non vide.
+- **Énumération des statuts** : les 16 statuts de l'étude.
+- **Réglages** :
+  - `SubmissionType.file_policy` (`none`, `optional`, `required`) et `max_file_mb` (F1) ;
+  - `Edition.submission_languages` (F11), audités.
+- **Workflow** (`workflow.py`, règle n° 4) :
+  - table des **19 transitions** de l'étude ;
+  - les 4 transitions de L3 disponibles, les autres refusées (`invalid_transition`) jusqu'à
+    leur lot.
+- **`transition()`** :
+  - verrou de ligne ; légalité ; édition archivée ;
+  - acteur : soumissionnaire, ou système pour la clôture ;
+  - gardes RG-01, RG-02 et motif de retrait ;
+  - référence attribuée à la première soumission ;
+  - `StatusHistory`, audit `submission.status_changed` ;
+  - effets après validation (branchement des notifications en L3.2).
+- **RG-01** (`missing_items`) :
+  - champs et nombre de mots (apostrophes et traits d'union internes) ;
+  - 1 à 6 mots-clés ; thématique et type actifs ; langue de l'édition ;
+  - un correspondant ; soumissionnaire parmi les auteurs (F6) ;
+  - fichier selon le type ; déclarations dans leur version courante (`declarations.py`,
+    textes « v0 »).
+- **RG-02** (`can_write`) : appel ouvert, ou dérogation en cours (non révoquée, non échue).
+- **Compteur** `core.Counter` et `next_value`, sous verrou de ligne, dans la transaction
+  appelante (F4).
+- **RG-19** :
+  - `code` et `double_blind` gelés dès la première soumission non brouillon (409
+    `setting_frozen`) ;
+  - un ADMIN de l'édition (ou l'opérateur) peut passer outre avec un motif, journalisé ;
+  - `frozen_fields` exposé par l'API ; champ `reason` en écriture.
+- **Données personnelles** :
+  - traitement `submissions.submissions` dans le registre (export : ses soumissions et ses
+    co-signatures) ;
+  - registre des responsabilités (`register_duty_check`) : une soumission active dans une
+    édition non archivée bloque l'anonymisation (F16) ;
+  - anonymisation : brouillons supprimés ; ailleurs, lignes d'auteur anonymisées, nom et
+    adresses retirés des clichés et des motifs.
+- **Stockage privé** : `GESTCONF_PRIVATE_FILES_DIR` (défaut
+  `<GESTCONF_FILES_DIR>/private`), documenté dans `.env.example` et `deploy/README.md`.
+- **Intégrité** : fichier courant unique, fichier présent sur le disque, références sans trou.
+- **Erreurs** : codes `submission_incomplete`, `call_closed`, `setting_frozen` (messages FR/EN
+  dans `shared`) ; catalogue de traduction de l'API à jour ; schéma régénéré sur MariaDB.
+
+**Défaut trouvé par le test de concurrence (MariaDB)** :
+
+- *Symptôme* : quand le compteur n'existait pas encore, des `SELECT … FOR UPDATE` simultanés
+  prenaient des verrous d'intervalle, et les insertions s'interbloquaient (erreur 1213).
+- *Correction* :
+  - le compteur est créé **avec l'édition** (récepteur, et migration pour les éditions
+    existantes), hors contention ;
+  - sa portée devient l'identifiant de l'édition (`submission:<id>`), puisque le code peut
+    changer jusqu'à la première soumission ;
+  - 8 soumissions simultanées : numéros 1 à 8 sans doublon, sur 3 passes consécutives.
+
+**Écart signalé dans l'étude** : le statut `REVISION_REQUESTED` (tableau de M6) n'a aucune
+transition dans le diagramme du §5.1. Il est déclaré, sans transition, et sera précisé en L4
+avec les décisions. Le méta-test l'admet explicitement.
+
+**Vérifications** :
+
+- **Backend** : 1 372 tests sous SQLite, 1 379 sous MariaDB, dont 28 tests des soumissions :
+  - table et méta-test « statut écrit par `workflow.py` seul », avec contre-épreuve du motif ;
+  - RG-01, RG-02 et RG-19 ;
+  - numérotation (séquence, pas de trou après refus, concurrence) ;
+  - registre, export, anonymisation avec balayage, intégrité.
+- **Contrôles** : `ruff` ; migrations ; schéma identique à la régénération ;
+  `locale/check.sh` ; `pip-audit`.
+- **Front** : tests, lint, format ; aucune erreur de type sur le client régénéré.
+
+**Reporté** : l'écran « Confidentialité » de la gestion n'affiche pas encore le gel
+(`frozen_fields`) ; le serveur le fait respecter. À faire en L3.4.

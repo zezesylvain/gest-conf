@@ -167,6 +167,11 @@ dossier de l'application et y écrit le chemin du venv (`VENV_ACTIVATE`) : le cr
   `core.public_files_missing`).
 - **Nettoyage** : `cleanup` supprime les fichiers orphelins (écrits puis transaction annulée)
   de plus de 24 h (`core.orphan_files`, toujours appliqué).
+- **Fichiers des auteurs** (lot L3) : `GESTCONF_PRIVATE_FILES_DIR` (défaut :
+  `<GESTCONF_FILES_DIR>/private`), hors de `public_html`, servis par l'API **authentifiée**
+  seulement (règle n° 8). Même sauvegarde. `check_integrity` signale un fichier absent du
+  disque (`submissions.missing_files`), plus d'un fichier courant par soumission et un trou
+  dans les références (`submissions.current_files`, `submissions.references`).
 - **Pillow** : roue binaire vérifiée par V28 (`deploy/check-o2switch.sh`). En cas d'échec, le
   repli de E4 s'applique sans changement de code (images non redimensionnées, JPEG portant un
   EXIF refusés) : retirer Pillow de `requirements/base.in`, recompiler, redéployer.

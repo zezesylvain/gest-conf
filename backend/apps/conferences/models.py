@@ -49,6 +49,13 @@ class Conference(TimeStampedModel):
         return self.slug
 
 
+SUBMISSION_LANGUAGES = ("fr", "en")
+
+
+def default_submission_languages() -> list[str]:
+    return list(SUBMISSION_LANGUAGES)
+
+
 class EditionStatus(models.TextChoices):
     DRAFT = "draft", _("brouillon")
     PUBLISHED = "published", _("publiée")
@@ -84,6 +91,10 @@ class Edition(TimeStampedModel):
         validators=[validate_timezone],
     )
     double_blind = models.BooleanField(_("double aveugle"), default=True)
+    # Langues acceptées pour les soumissions (plan L3, F11 ; Q6) : codes ISO 639-1.
+    submission_languages = models.JSONField(
+        _("langues des soumissions"), default=default_submission_languages
+    )
     reviewers_per_submission = models.PositiveSmallIntegerField(
         _("relecteurs par soumission"),
         default=2,
@@ -121,6 +132,7 @@ class Edition(TimeStampedModel):
         "country",
         "timezone",
         "double_blind",
+        "submission_languages",
         "reviewers_per_submission",
         "status",
     )
@@ -186,8 +198,16 @@ class Track(TimeStampedModel):
         return self.code
 
 
+class FilePolicy(models.TextChoices):
+    """Fichier PDF attendu pour un type de communication (plan L3, F1 ; Q5)."""
+
+    NONE = "none", _("aucun fichier")
+    OPTIONAL = "optional", _("facultatif")
+    REQUIRED = "required", _("obligatoire")
+
+
 class SubmissionType(TimeStampedModel):
-    """Type de communication. Formats, taille, article complet : L3 (Q5)."""
+    """Type de communication. Résumé toujours ; fichier PDF selon ``file_policy`` (F1)."""
 
     edition = models.ForeignKey(
         Edition,
@@ -209,6 +229,14 @@ class SubmissionType(TimeStampedModel):
         default=300,
         validators=[MinValueValidator(50), MaxValueValidator(2000)],
     )
+    file_policy = models.CharField(
+        _("fichier PDF"), max_length=8, choices=FilePolicy.choices, default=FilePolicy.OPTIONAL
+    )
+    max_file_mb = models.PositiveSmallIntegerField(
+        _("taille maximale du fichier (Mo)"),
+        default=10,
+        validators=[MinValueValidator(1), MaxValueValidator(50)],
+    )
     position = models.PositiveSmallIntegerField(_("ordre"), default=0)
     is_active = models.BooleanField(_("actif"), default=True)
 
@@ -220,6 +248,8 @@ class SubmissionType(TimeStampedModel):
         "description_en",
         "default_duration_min",
         "abstract_max_words",
+        "file_policy",
+        "max_file_mb",
         "position",
         "is_active",
     )
@@ -233,6 +263,10 @@ class SubmissionType(TimeStampedModel):
             models.CheckConstraint(
                 condition=Q(abstract_max_words__gte=50, abstract_max_words__lte=2000),
                 name="conf_subtype_words_range",
+            ),
+            models.CheckConstraint(
+                condition=Q(max_file_mb__gte=1, max_file_mb__lte=50),
+                name="conf_subtype_file_mb_range",
             ),
         )
 

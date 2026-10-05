@@ -2214,6 +2214,8 @@ components:
         * `portal.write` - portal.write
     Confidentiality:
       type: object
+      description: 'RG-19 : réglages gelés (lecture) et motif d''un changement forcé
+        par un ADMIN.'
       properties:
         double_blind:
           type: boolean
@@ -2223,6 +2225,14 @@ components:
           maximum: 10
           minimum: 1
           title: Relecteurs par soumission
+        frozen_fields:
+          type: array
+          items:
+            type: string
+          readOnly: true
+          description: Réglages gelés depuis la première soumission (RG-19).
+      required:
+      - frozen_fields
     ConsentCreateRequest:
       type: object
       properties:
@@ -2322,6 +2332,8 @@ components:
       - states
     Edition:
       type: object
+      description: 'RG-19 : réglages gelés (lecture) et motif d''un changement forcé
+        par un ADMIN.'
       properties:
         id:
           type: integer
@@ -2398,9 +2410,16 @@ components:
           readOnly: true
           nullable: true
           title: Archivée le
+        frozen_fields:
+          type: array
+          items:
+            type: string
+          readOnly: true
+          description: Réglages gelés depuis la première soumission (RG-19).
       required:
       - archived_at
       - code
+      - frozen_fields
       - id
       - published_at
       - slug
@@ -2504,6 +2523,9 @@ components:
       - invalid_transition
       - edition_incomplete
       - account_has_active_duties
+      - submission_incomplete
+      - call_closed
+      - setting_frozen
       type: string
       description: |-
         * `validation_error` - Validation Error
@@ -2535,6 +2557,9 @@ components:
         * `invalid_transition` - Invalid Transition
         * `edition_incomplete` - Edition Incomplete
         * `account_has_active_duties` - Account Has Active Duties
+        * `submission_incomplete` - Submission Incomplete
+        * `call_closed` - Call Closed
+        * `setting_frozen` - Setting Frozen
     FileUploadRequest:
       type: object
       properties:
@@ -3322,6 +3347,8 @@ components:
             $ref: '#/components/schemas/InvitationWithEmail'
     PatchedConfidentialityRequest:
       type: object
+      description: 'RG-19 : réglages gelés (lecture) et motif d''un changement forcé
+        par un ADMIN.'
       properties:
         double_blind:
           type: boolean
@@ -3331,8 +3358,16 @@ components:
           maximum: 10
           minimum: 1
           title: Relecteurs par soumission
+        reason:
+          type: string
+          writeOnly: true
+          default: ''
+          description: Motif, obligatoire pour qu'un ADMIN change un réglage gelé
+            (RG-19).
     PatchedEditionRequest:
       type: object
+      description: 'RG-19 : réglages gelés (lecture) et motif d''un changement forcé
+        par un ADMIN.'
       properties:
         code:
           type: string
@@ -3393,6 +3428,12 @@ components:
           minLength: 1
           title: Fuseau horaire
           maxLength: 64
+        reason:
+          type: string
+          writeOnly: true
+          default: ''
+          description: Motif, obligatoire pour qu'un ADMIN change un réglage gelé
+            (RG-19).
     PatchedKeyDateWriteRequest:
       type: object
       description: Saisie à l'heure de l'édition (D13), convertie en UTC par le serveur.

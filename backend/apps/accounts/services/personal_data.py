@@ -35,6 +35,7 @@ from apps.core.personal_data import (
     AnonymizationContext,
     anonymize_sections,
     export_sections,
+    registered_duties,
 )
 
 EXPORT_FORMAT = "gestconf-export-v1"
@@ -169,7 +170,8 @@ def _export_invitations(user: User) -> dict[str, Any]:
 
 def active_duties(user: User) -> list[str]:
     """Responsabilités à transmettre avant l'anonymisation (plan §4.9) : rôle actif autre
-    qu'auteur ou participant dans une édition non archivée, ou dernier ADMIN d'une édition."""
+    qu'auteur ou participant dans une édition non archivée, ou dernier ADMIN d'une édition ;
+    plus celles déclarées par les autres applications (``register_duty_check``)."""
     from apps.accounts.services.roles import active_admin_count
 
     duties: list[str] = []
@@ -183,6 +185,8 @@ def active_duties(user: User) -> list[str]:
             item.role == Role.ADMIN and active_admin_count(item.edition) <= 1
         ):
             duties.append(f"{item.edition.code}:{item.role}")
+    # Responsabilités déclarées par les autres applications (soumissions actives, L3 F16).
+    duties += registered_duties(user)
     return sorted(set(duties))
 
 

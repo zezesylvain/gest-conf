@@ -46,6 +46,19 @@ class PersonalDataHandler:
 
 _HANDLERS: dict[str, PersonalDataHandler] = {}
 _EXEMPTIONS: dict[str, str] = {}
+# Responsabilités propres à une application (ex. soumissions actives, plan L3 F16) qui
+# empêchent l'anonymisation : f(user) -> libellés (vide : rien à transmettre).
+type DutyCheck = Callable[[Any], list[str]]
+_DUTY_CHECKS: list[DutyCheck] = []
+
+
+def register_duty_check(check: DutyCheck) -> None:
+    if check not in _DUTY_CHECKS:
+        _DUTY_CHECKS.append(check)
+
+
+def registered_duties(user: Any) -> list[str]:
+    return [duty for check in _DUTY_CHECKS for duty in check(user)]
 
 
 def register_personal_data(
