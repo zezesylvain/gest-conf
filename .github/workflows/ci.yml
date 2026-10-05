@@ -118,6 +118,9 @@ jobs:
           python manage.py check --database default --tag database --fail-level WARNING
 
       - name: Schéma OpenAPI à jour (source du client Angular)
+        # Généré sur MariaDB (DATABASE_URL du job) : les bornes des entiers en dépendent
+        # (PositiveSmallIntegerField : maximum 65535 sous MariaDB, int64 sous SQLite).
+        # En local : DATABASE_URL=mysql://… python manage.py spectacular --file schema.yml.
         run: |
           python manage.py spectacular --file /tmp/schema.yml --validate --fail-on-warn
           diff -u schema.yml /tmp/schema.yml

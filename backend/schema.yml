@@ -3053,9 +3053,8 @@ components:
           title: Nouvel onglet
         position:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 65535
           minimum: 0
-          format: int64
           title: Ordre
         published:
           type: boolean
@@ -3093,9 +3092,8 @@ components:
           title: Nouvel onglet
         position:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 65535
           minimum: 0
-          format: int64
           title: Ordre
         published:
           type: boolean
@@ -3448,9 +3446,8 @@ components:
           title: Nouvel onglet
         position:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 65535
           minimum: 0
-          format: int64
           title: Ordre
         published:
           type: boolean
@@ -3544,9 +3541,8 @@ components:
           maxLength: 255
         position:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 65535
           minimum: 0
-          format: int64
           title: Ordre
         published:
           type: boolean
@@ -3643,9 +3639,8 @@ components:
           title: Description (EN)
         default_duration_min:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 65535
           minimum: 0
-          format: int64
           nullable: true
           title: Durée par défaut (min)
         abstract_max_words:
@@ -3655,9 +3650,8 @@ components:
           title: Mots maximum du résumé
         position:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 65535
           minimum: 0
-          format: int64
           title: Ordre
         is_active:
           type: boolean
@@ -3687,9 +3681,8 @@ components:
           title: Description (EN)
         position:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 65535
           minimum: 0
-          format: int64
           title: Ordre
         is_active:
           type: boolean
@@ -4107,9 +4100,8 @@ components:
           title: Hauteur
         position:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 65535
           minimum: 0
-          format: int64
           title: Ordre
         published:
           type: boolean
@@ -4822,9 +4814,8 @@ components:
           title: Description (EN)
         default_duration_min:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 65535
           minimum: 0
-          format: int64
           nullable: true
           title: Durée par défaut (min)
         abstract_max_words:
@@ -4834,9 +4825,8 @@ components:
           title: Mots maximum du résumé
         position:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 65535
           minimum: 0
-          format: int64
           title: Ordre
         is_active:
           type: boolean
@@ -4870,9 +4860,8 @@ components:
           title: Description (EN)
         default_duration_min:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 65535
           minimum: 0
-          format: int64
           nullable: true
           title: Durée par défaut (min)
         abstract_max_words:
@@ -4882,9 +4871,8 @@ components:
           title: Mots maximum du résumé
         position:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 65535
           minimum: 0
-          format: int64
           title: Ordre
         is_active:
           type: boolean
@@ -4935,9 +4923,8 @@ components:
           title: Description (EN)
         position:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 65535
           minimum: 0
-          format: int64
           title: Ordre
         is_active:
           type: boolean
@@ -4971,9 +4958,8 @@ components:
           title: Description (EN)
         position:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 65535
           minimum: 0
-          format: int64
           title: Ordre
         is_active:
           type: boolean

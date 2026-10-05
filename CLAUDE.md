@@ -66,7 +66,7 @@ pip install -r requirements/dev.txt
 python manage.py migrate && python manage.py runserver   # http://localhost:8000/api/v1/health
 pytest                      # SQLite par défaut ; DATABASE_URL=mysql://... pour MariaDB (fait foi en CI)
 ruff check . ../deploy && ruff format --check . ../deploy
-python manage.py spectacular --file schema.yml --validate   # schéma OpenAPI (versionné)
+DATABASE_URL=mysql://... python manage.py spectacular --file schema.yml --validate   # schéma OpenAPI (versionné), généré sur MariaDB comme en CI (bornes des entiers)
 
 # Frontend (Node >= 22.22.3 ou >= 24.15, exigence d'Angular 22)
 cd web && npm ci
