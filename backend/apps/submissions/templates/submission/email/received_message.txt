@@ -1,0 +1,7 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate %}Bonjour,
+
+Votre soumission « {{ title }} » à {{ edition_title }} a bien été reçue. Sa référence est {{ reference }}.
+
+Vous pouvez la modifier jusqu'à la clôture de l'appel ({{ call_close }}) depuis votre espace : {{ link }}{% endblocktranslate %}
+
+{% include "account/email/_signature.txt" %}{% endautoescape %}

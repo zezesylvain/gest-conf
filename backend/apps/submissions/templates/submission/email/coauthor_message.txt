@@ -1,0 +1,7 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate %}Bonjour,
+
+{{ submitter_name }} vous a déclaré co-auteur de la soumission « {{ title }} » ({{ reference }}) à {{ edition_title }}.
+
+Si ce n'est pas le cas, ou si votre adresse est erronée, prévenez {{ submitter_name }} ou les organisateurs.{% endblocktranslate %}
+
+{% include "account/email/_signature.txt" %}{% endautoescape %}

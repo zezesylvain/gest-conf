@@ -64,7 +64,10 @@
       "account_has_active_duties": "Transmettez d'abord vos rôles de gestion actifs.",
       "submission_incomplete": "La soumission est incomplète : complétez les éléments signalés.",
       "call_closed": "L'appel à communications est clos.",
-      "setting_frozen": "Réglage gelé : des soumissions existent. Seul un administrateur peut le changer, avec un motif."
+      "setting_frozen": "Réglage gelé : des soumissions existent. Seul un administrateur peut le changer, avec un motif.",
+      "stale_revision": "Modifié entre-temps (autre onglet ?) : rechargez avant d'enregistrer.",
+      "submission_locked": "Cette soumission n'est plus modifiable.",
+      "profile_incomplete": "Complétez votre profil avant de soumettre."
     },
     "form": {
       "errorSummary": "Le formulaire contient des erreurs :",

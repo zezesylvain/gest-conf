@@ -3,7 +3,7 @@
 
 
 /**
- * RG-19 : réglages gelés (lecture) et motif d'un changement forcé par un ADMIN.
+ * Double aveugle et nombre de relecteurs (gestion, §6.1).
  */
 export interface PatchedConfidentialityRequest {
   double_blind?: boolean;

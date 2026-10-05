@@ -2063,6 +2063,330 @@ paths:
               schema:
                 $ref: '#/components/schemas/PublicSite'
           description: ''
+  /v1/submissions:
+    get:
+      operationId: submissions_list
+      parameters:
+      - in: query
+        name: edition
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Quel champ utiliser pour classer les résultats.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: Un numéro de page de l'ensemble des résultats.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Nombre de résultats à retourner par page.
+        schema:
+          type: integer
+      tags:
+      - submissions
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSubmissionList'
+          description: ''
+    post:
+      operationId: submissions_create
+      tags:
+      - submissions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmissionCreateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Submission'
+          description: ''
+  /v1/submissions/{submission_id}:
+    get:
+      operationId: submissions_retrieve
+      parameters:
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - submissions
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Submission'
+          description: ''
+    patch:
+      operationId: submissions_update
+      parameters:
+      - in: header
+        name: If-Match
+        schema:
+          type: integer
+        description: Révision lue ; 412 « stale_revision » si la soumission a changé
+          depuis.
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - submissions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSubmissionWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Submission'
+          description: ''
+    delete:
+      operationId: submissions_delete
+      parameters:
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - submissions
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /v1/submissions/{submission_id}/authors:
+    put:
+      operationId: submissions_authors
+      parameters:
+      - in: header
+        name: If-Match
+        schema:
+          type: integer
+        description: Révision lue ; 412 « stale_revision » si la soumission a changé
+          depuis.
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - submissions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthorsWriteRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Submission'
+          description: ''
+  /v1/submissions/{submission_id}/check:
+    get:
+      operationId: submissions_check
+      description: 'RG-01 : ce qui manque pour soumettre, sans rien écrire.'
+      parameters:
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - submissions
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmissionCheck'
+          description: ''
+  /v1/submissions/{submission_id}/file:
+    post:
+      operationId: submissions_file_upload
+      description: |-
+        Route du fichier : multipart pour le dépôt (DRF choisit les analyseurs avant de
+        connaître l'action, d'où une classe dédiée).
+      parameters:
+      - in: header
+        name: If-Match
+        schema:
+          type: integer
+        description: Révision lue ; 412 « stale_revision » si la soumission a changé
+          depuis.
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - submissions
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SubmissionFileUploadRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Submission'
+          description: ''
+    delete:
+      operationId: submissions_file_remove
+      description: |-
+        Route du fichier : multipart pour le dépôt (DRF choisit les analyseurs avant de
+        connaître l'action, d'où une classe dédiée).
+      parameters:
+      - in: header
+        name: If-Match
+        schema:
+          type: integer
+        description: Révision lue ; 412 « stale_revision » si la soumission a changé
+          depuis.
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - submissions
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Submission'
+          description: ''
+  /v1/submissions/{submission_id}/file/content:
+    get:
+      operationId: submissions_file_content
+      description: 'Fichier courant, pour son auteur (règle n° 8 : endpoint authentifié).'
+      parameters:
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - submissions
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  /v1/submissions/{submission_id}/submit:
+    post:
+      operationId: submissions_submit
+      parameters:
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - submissions
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Submission'
+          description: ''
+  /v1/submissions/{submission_id}/timeline:
+    get:
+      operationId: submissions_timeline
+      parameters:
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - submissions
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Timeline'
+          description: ''
+  /v1/submissions/{submission_id}/withdraw:
+    post:
+      operationId: submissions_withdraw
+      parameters:
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - submissions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WithdrawRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Submission'
+          description: ''
 components:
   schemas:
     AcceptRequest:
@@ -2189,6 +2513,46 @@ components:
       - object_id
       - object_type
       - reason
+    AuthorWriteRequest:
+      type: object
+      properties:
+        first_name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        last_name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          minLength: 1
+        institution:
+          type: string
+          maxLength: 255
+        country:
+          type: string
+          maxLength: 2
+        is_corresponding:
+          type: boolean
+          default: false
+        is_presenter:
+          type: boolean
+          default: false
+      required:
+      - email
+      - first_name
+      - last_name
+    AuthorsWriteRequest:
+      type: object
+      properties:
+        authors:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuthorWriteRequest'
+      required:
+      - authors
     BlankEnum:
       enum:
       - ''
@@ -2214,8 +2578,7 @@ components:
         * `portal.write` - portal.write
     Confidentiality:
       type: object
-      description: 'RG-19 : réglages gelés (lecture) et motif d''un changement forcé
-        par un ADMIN.'
+      description: Double aveugle et nombre de relecteurs (gestion, §6.1).
       properties:
         double_blind:
           type: boolean
@@ -2330,10 +2693,23 @@ components:
       required:
       - history
       - states
+    DeclarationState:
+      type: object
+      properties:
+        code:
+          type: string
+        accepted:
+          type: boolean
+          description: Acceptée dans la version courante du texte.
+        text_version:
+          type: string
+      required:
+      - accepted
+      - code
+      - text_version
     Edition:
       type: object
-      description: 'RG-19 : réglages gelés (lecture) et motif d''un changement forcé
-        par un ADMIN.'
+      description: Informations générales de l'édition (gestion, §6.1).
       properties:
         id:
           type: integer
@@ -2393,6 +2769,12 @@ components:
           type: string
           title: Fuseau horaire
           maxLength: 64
+        submission_languages:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubmissionLanguage'
+          description: Langues acceptées pour les soumissions (plan L3, F11).
+          minItems: 1
         status:
           allOf:
           - $ref: '#/components/schemas/EditionStatus'
@@ -2526,6 +2908,9 @@ components:
       - submission_incomplete
       - call_closed
       - setting_frozen
+      - stale_revision
+      - submission_locked
+      - profile_incomplete
       type: string
       description: |-
         * `validation_error` - Validation Error
@@ -2560,6 +2945,19 @@ components:
         * `submission_incomplete` - Submission Incomplete
         * `call_closed` - Call Closed
         * `setting_frozen` - Setting Frozen
+        * `stale_revision` - Stale Revision
+        * `submission_locked` - Submission Locked
+        * `profile_incomplete` - Profile Incomplete
+    FilePolicy:
+      enum:
+      - none
+      - optional
+      - required
+      type: string
+      description: |-
+        * `none` - aucun fichier
+        * `optional` - facultatif
+        * `required` - obligatoire
     FileUploadRequest:
       type: object
       properties:
@@ -3345,10 +3743,32 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/InvitationWithEmail'
+    PaginatedSubmissionList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Submission'
     PatchedConfidentialityRequest:
       type: object
-      description: 'RG-19 : réglages gelés (lecture) et motif d''un changement forcé
-        par un ADMIN.'
+      description: Double aveugle et nombre de relecteurs (gestion, §6.1).
       properties:
         double_blind:
           type: boolean
@@ -3366,8 +3786,7 @@ components:
             (RG-19).
     PatchedEditionRequest:
       type: object
-      description: 'RG-19 : réglages gelés (lecture) et motif d''un changement forcé
-        par un ADMIN.'
+      description: Informations générales de l'édition (gestion, §6.1).
       properties:
         code:
           type: string
@@ -3428,6 +3847,12 @@ components:
           minLength: 1
           title: Fuseau horaire
           maxLength: 64
+        submission_languages:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubmissionLanguage'
+          description: Langues acceptées pour les soumissions (plan L3, F11).
+          minItems: 1
         reason:
           type: string
           writeOnly: true
@@ -3689,6 +4114,15 @@ components:
           maximum: 2000
           minimum: 50
           title: Mots maximum du résumé
+        file_policy:
+          allOf:
+          - $ref: '#/components/schemas/FilePolicy'
+          title: Fichier PDF
+        max_file_mb:
+          type: integer
+          maximum: 50
+          minimum: 1
+          title: Taille maximale du fichier (Mo)
         position:
           type: integer
           maximum: 65535
@@ -3697,6 +4131,36 @@ components:
         is_active:
           type: boolean
           title: Actif
+    PatchedSubmissionWriteRequest:
+      type: object
+      description: 'Écriture partielle (sauvegarde automatique) : valeurs incomplètes
+        admises.'
+      properties:
+        title:
+          type: string
+          maxLength: 300
+        abstract:
+          type: string
+        keywords:
+          type: array
+          items:
+            type: string
+            maxLength: 200
+          maxItems: 20
+        language:
+          type: string
+          maxLength: 2
+        track:
+          type: integer
+          nullable: true
+        submission_type:
+          type: integer
+          nullable: true
+        declarations:
+          type: object
+          additionalProperties:
+            type: boolean
+          description: Code → accepté ; la version courante du texte est enregistrée.
     PatchedTrackRequest:
       type: object
       properties:
@@ -4050,6 +4514,11 @@ components:
           type: string
           readOnly: true
           title: Fuseau horaire
+        submission_languages:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubmissionLanguage'
+          readOnly: true
         tracks:
           type: array
           items:
@@ -4073,6 +4542,7 @@ components:
       - key_dates
       - slug
       - start_date
+      - submission_languages
       - submission_types
       - theme_en
       - theme_fr
@@ -4493,14 +4963,25 @@ components:
           type: integer
           readOnly: true
           title: Mots maximum du résumé
+        file_policy:
+          allOf:
+          - $ref: '#/components/schemas/FilePolicy'
+          readOnly: true
+          title: Fichier PDF
+        max_file_mb:
+          type: integer
+          readOnly: true
+          title: Taille maximale du fichier (Mo)
       required:
       - abstract_max_words
       - code
       - default_duration_min
       - description_en
       - description_fr
+      - file_policy
       - label_en
       - label_fr
+      - max_file_mb
     PublicTrack:
       type: object
       properties:
@@ -4550,6 +5031,17 @@ components:
       - pending_changes
       - pending_since
       - release
+    RevisionSummary:
+      type: object
+      properties:
+        number:
+          type: integer
+        at:
+          type: string
+          format: date-time
+      required:
+      - at
+      - number
     RevokeRequest:
       type: object
       properties:
@@ -4829,6 +5321,322 @@ components:
       description: |-
         * `already_pending` - invitation déjà en attente
         * `already_member` - rôle déjà actif
+    Submission:
+      type: object
+      description: Vue de l'auteur sur **sa** soumission.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        edition:
+          type: integer
+          readOnly: true
+          title: Édition
+        edition_code:
+          type: string
+          readOnly: true
+        double_blind:
+          type: boolean
+          readOnly: true
+          description: 'Double aveugle : le PDF doit être anonyme ; ses métadonnées
+            sont retirées.'
+        reference:
+          type: string
+          readOnly: true
+          nullable: true
+          title: Référence
+        status:
+          allOf:
+          - $ref: '#/components/schemas/SubmissionStatus'
+          readOnly: true
+          title: Statut
+        title:
+          type: string
+          readOnly: true
+          title: Titre
+        abstract:
+          type: string
+          readOnly: true
+          title: Résumé
+        keywords:
+          readOnly: true
+          title: Mots-clés
+        language:
+          type: string
+          readOnly: true
+          title: Langue
+        track:
+          type: integer
+          readOnly: true
+          nullable: true
+          title: Thématique
+        submission_type:
+          type: integer
+          readOnly: true
+          nullable: true
+          title: Type de communication
+        revision:
+          type: integer
+          readOnly: true
+          title: Révision
+        submitted_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Soumise le
+        withdrawn_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Retirée le
+        withdraw_reason:
+          type: string
+          readOnly: true
+          title: Motif du retrait
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        authors:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubmissionAuthor'
+          readOnly: true
+        file:
+          allOf:
+          - $ref: '#/components/schemas/SubmissionFile'
+          nullable: true
+          readOnly: true
+        declarations:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeclarationState'
+          readOnly: true
+        can_edit:
+          type: boolean
+          readOnly: true
+          description: 'Modifiable maintenant (état, RG-02 : appel ouvert ou dérogation).'
+        deadline:
+          type: string
+          format: date-time
+          nullable: true
+          readOnly: true
+          description: 'Fin de la période de modification : dérogation en cours, sinon
+            clôture.'
+        allowed_actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubmissionAction'
+          readOnly: true
+      required:
+      - abstract
+      - allowed_actions
+      - authors
+      - can_edit
+      - created_at
+      - deadline
+      - declarations
+      - double_blind
+      - edition
+      - edition_code
+      - file
+      - id
+      - keywords
+      - language
+      - reference
+      - revision
+      - status
+      - submission_type
+      - submitted_at
+      - title
+      - track
+      - updated_at
+      - withdraw_reason
+      - withdrawn_at
+    SubmissionAction:
+      enum:
+      - submit
+      - withdraw
+      type: string
+      description: |-
+        * `submit` - submit
+        * `withdraw` - withdraw
+    SubmissionAuthor:
+      type: object
+      properties:
+        position:
+          type: integer
+          readOnly: true
+          title: Ordre
+        first_name:
+          type: string
+          title: Prénom
+          maxLength: 150
+        last_name:
+          type: string
+          title: Nom
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          title: Adresse e-mail
+          maxLength: 254
+        institution:
+          type: string
+          maxLength: 255
+        country:
+          type: string
+          title: Pays
+          maxLength: 2
+        is_corresponding:
+          type: boolean
+          title: Auteur correspondant
+        is_presenter:
+          type: boolean
+          title: Auteur présentateur
+        has_account:
+          type: boolean
+          readOnly: true
+          description: Rattaché à un compte dont l'adresse vérifiée correspond (F5).
+      required:
+      - email
+      - first_name
+      - has_account
+      - last_name
+      - position
+    SubmissionCheck:
+      type: object
+      properties:
+        complete:
+          type: boolean
+        missing:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+      required:
+      - complete
+      - missing
+    SubmissionCreateRequest:
+      type: object
+      properties:
+        edition:
+          type: string
+          minLength: 1
+          description: Code de l'édition (édition publique courante).
+          maxLength: 12
+      required:
+      - edition
+    SubmissionFile:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        kind:
+          allOf:
+          - $ref: '#/components/schemas/SubmissionFileKind'
+          readOnly: true
+          title: Nature
+        version:
+          type: integer
+          readOnly: true
+        original_name:
+          type: string
+          readOnly: true
+          title: Nom d'origine
+        size:
+          type: integer
+          readOnly: true
+          title: Taille (octets)
+        pages:
+          type: integer
+          readOnly: true
+        metadata_removed:
+          type: boolean
+          readOnly: true
+          title: Métadonnées retirées
+        uploaded_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - id
+      - kind
+      - metadata_removed
+      - original_name
+      - pages
+      - size
+      - uploaded_at
+      - version
+    SubmissionFileKind:
+      enum:
+      - main
+      - camera_ready
+      type: string
+      description: |-
+        * `main` - fichier principal
+        * `camera_ready` - version finale
+    SubmissionFileUploadRequest:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+          description: PDF ; taille maximale selon le type.
+      required:
+      - file
+    SubmissionLanguage:
+      enum:
+      - fr
+      - en
+      type: string
+      description: |-
+        * `fr` - fr
+        * `en` - en
+    SubmissionStatus:
+      enum:
+      - draft
+      - submitted
+      - screening
+      - under_review
+      - reviewed
+      - accepted
+      - accepted_minor
+      - waitlist
+      - rejected
+      - revision_requested
+      - camera_ready_received
+      - confirmed
+      - scheduled
+      - presented
+      - published
+      - withdrawn
+      type: string
+      description: |-
+        * `draft` - brouillon
+        * `submitted` - soumise
+        * `screening` - vérification de recevabilité
+        * `under_review` - en cours d'évaluation
+        * `reviewed` - évaluée
+        * `accepted` - acceptée
+        * `accepted_minor` - acceptée sous réserve de corrections
+        * `waitlist` - liste d'attente
+        * `rejected` - rejetée
+        * `revision_requested` - corrections demandées
+        * `camera_ready_received` - version finale reçue
+        * `confirmed` - présentation confirmée
+        * `scheduled` - programmée
+        * `presented` - présentée
+        * `published` - publiée dans les actes
+        * `withdrawn` - retirée
     SubmissionType:
       type: object
       properties:
@@ -4864,6 +5672,15 @@ components:
           maximum: 2000
           minimum: 50
           title: Mots maximum du résumé
+        file_policy:
+          allOf:
+          - $ref: '#/components/schemas/FilePolicy'
+          title: Fichier PDF
+        max_file_mb:
+          type: integer
+          maximum: 50
+          minimum: 1
+          title: Taille maximale du fichier (Mo)
         position:
           type: integer
           maximum: 65535
@@ -4910,6 +5727,15 @@ components:
           maximum: 2000
           minimum: 50
           title: Mots maximum du résumé
+        file_policy:
+          allOf:
+          - $ref: '#/components/schemas/FilePolicy'
+          title: Fichier PDF
+        max_file_mb:
+          type: integer
+          maximum: 50
+          minimum: 1
+          title: Taille maximale du fichier (Mo)
         position:
           type: integer
           maximum: 65535
@@ -4921,6 +5747,47 @@ components:
       required:
       - code
       - label_fr
+    Timeline:
+      type: object
+      properties:
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/TimelineEntry'
+        revisions:
+          type: array
+          items:
+            $ref: '#/components/schemas/RevisionSummary'
+      required:
+      - history
+      - revisions
+    TimelineEntry:
+      type: object
+      properties:
+        from_status:
+          allOf:
+          - $ref: '#/components/schemas/SubmissionStatus'
+          readOnly: true
+          title: Statut précédent
+        to_status:
+          allOf:
+          - $ref: '#/components/schemas/SubmissionStatus'
+          readOnly: true
+          title: Nouveau statut
+        at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Date
+        reason:
+          type: string
+          readOnly: true
+          title: Motif
+      required:
+      - at
+      - from_status
+      - reason
+      - to_status
     TokenRequest:
       type: object
       properties:
@@ -5016,6 +5883,13 @@ components:
       description: |-
         * `active` - actif
         * `revoked` - révoqué
+    WithdrawRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+          default: ''
+          maxLength: 2000
   securitySchemes:
     cookieAuth:
       type: apiKey

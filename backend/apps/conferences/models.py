@@ -50,6 +50,8 @@ class Conference(TimeStampedModel):
 
 
 SUBMISSION_LANGUAGES = ("fr", "en")
+# Jeu de choix exposé dans le schéma OpenAPI (énumération « SubmissionLanguage »).
+SUBMISSION_LANGUAGE_CHOICES = [(code, code) for code in SUBMISSION_LANGUAGES]
 
 
 def default_submission_languages() -> list[str]:

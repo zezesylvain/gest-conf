@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gestconf-backend\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-05 22:10+0000\n"
+"POT-Creation-Date: 2026-10-05 22:24+0000\n"
 "PO-Revision-Date: 2026-10-05 11:00+0000\n"
 "Last-Translator: GEST-CONF\n"
 "Language-Team: GEST-CONF\n"
@@ -394,7 +394,8 @@ msgstr "Acknowledging the notice cannot be withdrawn."
 
 #: apps/accounts/services/account.py apps/accounts/services/mfa.py
 #: apps/accounts/services/personal_data.py apps/accounts/services/roles.py
-#: apps/conferences/services.py apps/submissions/workflow.py
+#: apps/conferences/services.py apps/submissions/services.py
+#: apps/submissions/workflow.py
 msgid "Motif obligatoire."
 msgstr "A reason is required."
 
@@ -1347,6 +1348,10 @@ msgid "Données invalides."
 msgstr "Invalid data."
 
 #: apps/core/errors.py
+msgid "Modifié entre-temps (autre onglet ?) : rechargez avant d'enregistrer."
+msgstr "Changed in the meantime (another tab?): reload before saving."
+
+#: apps/core/errors.py
 msgid "Quota atteint."
 msgstr "Quota reached."
 
@@ -2100,6 +2105,34 @@ msgstr "extension"
 msgid "dérogations"
 msgstr "extensions"
 
+#: apps/submissions/pdf.py
+msgid "Le fichier n'est pas un PDF."
+msgstr "The file is not a PDF."
+
+#: apps/submissions/pdf.py
+msgid "PDF illisible ou endommagé."
+msgstr "Unreadable or damaged PDF."
+
+#: apps/submissions/pdf.py
+msgid "PDF protégé par mot de passe : déposez une version sans protection."
+msgstr "Password-protected PDF: upload an unprotected version."
+
+#: apps/submissions/pdf.py
+msgid "PDF sans page."
+msgstr "PDF without any page."
+
+#: apps/submissions/pdf.py
+#, python-format
+msgid "PDF trop long (%(max)s pages au plus)."
+msgstr "PDF too long (%(max)s pages at most)."
+
+#: apps/submissions/pdf.py
+msgid ""
+"Ce PDF ne peut pas être anonymisé automatiquement : réexportez-le puis "
+"réessayez."
+msgstr ""
+"This PDF cannot be anonymised automatically: export it again and retry."
+
 #: apps/submissions/services.py
 msgid "Titre obligatoire."
 msgstr "Title required."
@@ -2149,9 +2182,170 @@ msgstr "A PDF file is required for this submission type."
 msgid "Acceptez toutes les déclarations."
 msgstr "Accept all declarations."
 
-#: apps/submissions/workflow.py
+#: apps/submissions/services.py
+msgid "Cette soumission n'est plus modifiable."
+msgstr "This submission can no longer be changed."
+
+#: apps/submissions/services.py apps/submissions/workflow.py
 msgid "L'appel à communications est clos."
 msgstr "The call for papers is closed."
+
+#: apps/submissions/services.py
+msgid ""
+"Complétez votre profil (nom, prénom, institution, pays) avant de soumettre."
+msgstr ""
+"Complete your profile (first name, last name, institution, country) before "
+"submitting."
+
+#: apps/submissions/services.py
+msgid "Liste attendue."
+msgstr "A list is expected."
+
+#: apps/submissions/services.py
+#, python-format
+msgid "%(max)s caractères au plus."
+msgstr "%(max)s characters at most."
+
+#: apps/submissions/services.py
+msgid "Résumé trop long."
+msgstr "Abstract too long."
+
+#: apps/submissions/services.py
+msgid "Langue non acceptée par l'édition."
+msgstr "Language not accepted by the edition."
+
+#: apps/submissions/services.py
+msgid "Choix invalide pour cette édition."
+msgstr "Invalid choice for this edition."
+
+#: apps/submissions/services.py
+msgid "Déclaration inconnue."
+msgstr "Unknown declaration."
+
+#: apps/submissions/services.py
+msgid "De 1 à 30 auteurs."
+msgstr "From 1 to 30 authors."
+
+#: apps/submissions/services.py
+msgid "Nom et prénom obligatoires."
+msgstr "First and last names required."
+
+#: apps/submissions/services.py
+msgid "Adresse e-mail obligatoire."
+msgstr "Email address required."
+
+#: apps/submissions/services.py
+msgid "Adresse en double."
+msgstr "Duplicate address."
+
+#: apps/submissions/services.py
+msgid "Pays inconnu."
+msgstr "Unknown country."
+
+#: apps/submissions/services.py
+msgid "Choisissez d'abord le type de communication."
+msgstr "Choose the submission type first."
+
+#: apps/submissions/services.py
+msgid "Ce type de communication ne prend pas de fichier."
+msgstr "This submission type takes no file."
+
+#: apps/submissions/services.py
+msgid "Fichier PDF attendu (.pdf)."
+msgstr "A PDF file (.pdf) is expected."
+
+#: apps/submissions/services.py
+#, python-format
+msgid "Fichier trop volumineux (%(max)s Mo au plus)."
+msgstr "File too large (%(max)s MB at most)."
+
+#: apps/submissions/services.py
+msgid "Une soumission envoyée ne se supprime pas : retirez-la."
+msgstr "A submitted submission cannot be deleted: withdraw it."
+
+#: apps/submissions/services.py
+msgid "Dérogation impossible : la soumission n'est plus modifiable."
+msgstr "Extension impossible: the submission can no longer be changed."
+
+#: apps/submissions/services.py
+msgid "Échéance dans le futur attendue."
+msgstr "A deadline in the future is expected."
+
+#: apps/submissions/templates/submission/email/coauthor_message.txt
+#, python-format
+msgid ""
+"Bonjour,\n"
+"\n"
+"%(submitter_name)s vous a déclaré co-auteur de la soumission « %(title)s » (%(reference)s) à %(edition_title)s.\n"
+"\n"
+"Si ce n'est pas le cas, ou si votre adresse est erronée, prévenez %(submitter_name)s ou les organisateurs."
+msgstr ""
+"Hello,\n"
+"\n"
+"%(submitter_name)s has listed you as a co-author of the submission “%(title)s” (%(reference)s) to %(edition_title)s.\n"
+"\n"
+"If this is not the case, or if your address is wrong, please tell %(submitter_name)s or the organisers."
+
+#: apps/submissions/templates/submission/email/coauthor_subject.txt
+#, python-format
+msgid "[%(site_name)s] Vous êtes déclaré co-auteur d'une soumission"
+msgstr "[%(site_name)s] You have been listed as a co-author of a submission"
+
+#: apps/submissions/templates/submission/email/extension_message.txt
+#, python-format
+msgid ""
+"Bonjour,\n"
+"\n"
+"Un délai supplémentaire vous est accordé pour votre soumission « %(title)s » (%(reference)s) à %(edition_title)s, jusqu'au %(until)s.\n"
+"\n"
+"Motif : %(reason)s"
+msgstr ""
+"Hello,\n"
+"\n"
+"You have been granted an extended deadline for your submission “%(title)s” (%(reference)s) to %(edition_title)s, until %(until)s.\n"
+"\n"
+"Reason: %(reason)s"
+
+#: apps/submissions/templates/submission/email/extension_subject.txt
+#, python-format
+msgid "[%(site_name)s] Délai supplémentaire pour votre soumission"
+msgstr "[%(site_name)s] Extended deadline for your submission"
+
+#: apps/submissions/templates/submission/email/received_message.txt
+#, python-format
+msgid ""
+"Bonjour,\n"
+"\n"
+"Votre soumission « %(title)s » à %(edition_title)s a bien été reçue. Sa référence est %(reference)s.\n"
+"\n"
+"Vous pouvez la modifier jusqu'à la clôture de l'appel (%(call_close)s) depuis votre espace : %(link)s"
+msgstr ""
+"Hello,\n"
+"\n"
+"Your submission “%(title)s” to %(edition_title)s has been received. Its reference is %(reference)s.\n"
+"\n"
+"You can change it until the call closes (%(call_close)s) from your space: %(link)s"
+
+#: apps/submissions/templates/submission/email/received_subject.txt
+#, python-format
+msgid "[%(site_name)s] Soumission reçue"
+msgstr "[%(site_name)s] Submission received"
+
+#: apps/submissions/templates/submission/email/withdrawn_message.txt
+#, python-format
+msgid ""
+"Bonjour,\n"
+"\n"
+"Votre soumission « %(title)s » (%(reference)s) à %(edition_title)s a été retirée. Elle ne sera pas évaluée."
+msgstr ""
+"Hello,\n"
+"\n"
+"Your submission “%(title)s” (%(reference)s) to %(edition_title)s has been withdrawn. It will not be reviewed."
+
+#: apps/submissions/templates/submission/email/withdrawn_subject.txt
+#, python-format
+msgid "[%(site_name)s] Soumission retirée"
+msgstr "[%(site_name)s] Submission withdrawn"
 
 #: apps/submissions/workflow.py
 msgid "La soumission est incomplète."

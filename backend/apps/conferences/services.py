@@ -46,6 +46,7 @@ EDITION_INFO_FIELDS = (
     "city",
     "country",
     "timezone",
+    "submission_languages",
 )
 CONFIDENTIALITY_FIELDS = ("double_blind", "reviewers_per_submission")
 TRACK_FIELDS = (
@@ -65,6 +66,8 @@ SUBMISSION_TYPE_FIELDS = (
     "description_en",
     "default_duration_min",
     "abstract_max_words",
+    "file_policy",
+    "max_file_mb",
     "position",
     "is_active",
 )

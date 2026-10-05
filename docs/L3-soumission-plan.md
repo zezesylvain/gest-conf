@@ -345,3 +345,72 @@ avec les décisions. Le méta-test l'admet explicitement.
 
 **Reporté** : l'écran « Confidentialité » de la gestion n'affiche pas encore le gel
 (`frozen_fields`) ; le serveur le fait respecter. À faire en L3.4.
+
+## 13. Bilan de L3.2 (5 octobre 2026)
+
+**API de l'espace auteur** (`/v1/submissions…`, connecté, **ses** soumissions seulement,
+404 sinon) :
+
+- **Brouillon** :
+  - `POST` avec le **code** de l'édition (l'édition publique n'expose toujours pas son
+    identifiant : choix du lot L1 respecté) ;
+  - profil complet exigé (409 `profile_incomplete`) ; appel ouvert exigé ;
+  - le soumissionnaire devient premier auteur, correspondant et présentateur (F6) ;
+  - rôle `AUTHOR` attribué au premier brouillon (D7).
+- **Écriture** :
+  - `PATCH` partiel (sauvegarde automatique) ; `If-Match` facultatif sur `revision`, 412
+    `stale_revision` si la soumission a changé entre-temps ;
+  - après la soumission, chaque écriture crée une **révision** avec son cliché (F3).
+- **Auteurs** : `PUT …/authors`, liste complète ; adresses uniques ; rattachement au compte
+  dont l'adresse vérifiée correspond (F5) ; journal sans adresse.
+- **Fichier** :
+  - `POST`/`DELETE …/file`, `GET …/file/content` (`attachment`, `nosniff`, `no-store`) ;
+  - contrôles : type par le contenu, `.pdf`, taille du type, PDF chiffré, 500 pages au plus ;
+  - en double aveugle, PDF stocké **nettoyé** (`pdf.py`, défauts de L3.0 corrigés, aucun
+    dictionnaire `/Info`) ;
+  - versions conservées ; orphelins purgés par `cleanup`.
+- **Soumission et suivi** :
+  - `GET …/check` (RG-01, sans écriture) ; `POST …/submit` ;
+  - `POST …/withdraw` (motif obligatoire une fois soumise) ;
+  - `GET …/timeline` (historique et révisions) ;
+  - `DELETE` d'un brouillon seulement (409 `submission_locked` ensuite).
+- **RG-02** :
+  - écritures refusées après la clôture (409 `call_closed`), sauf dérogation en cours ;
+  - services `grant_extension` (échéance saisie à l'heure de l'édition, D13) et
+    `revoke_extension` (l'API de gestion vient en L3.4) ;
+  - `can_edit`, `deadline` et `allowed_actions` exposés à l'auteur.
+- **E-mails** (F13, mis en file **dans** la transaction de la transition) :
+  - accusé de réception, information des co-auteurs, retrait, dérogation ;
+  - objets sans variable (règle de L1 : l'objet survit à la purge des corps).
+- **Réglages exposés** :
+  - `file_policy` et `max_file_mb` dans les types de communication (gestion et public) ;
+  - `submission_languages` dans l'édition (gestion) et dans l'édition publique ;
+  - `double_blind` dans la vue auteur de sa soumission (et non dans l'édition publique).
+- **Limites de débit** : `submission_write` (600/h, sauvegarde automatique comprise),
+  `submission_upload` (30/h), `submission_submit` (20/h).
+- **Codes d'erreur** : `stale_revision` (412), `submission_locked`, `profile_incomplete`.
+
+**Défauts trouvés et corrigés pendant l'étape** :
+
+- **Analyseurs multipart** : DRF les choisit avant de connaître l'action, d'où une classe de
+  vue dédiée au fichier.
+- **PDF chiffré** : le nombre de pages était lu avant le contrôle du chiffrement (message
+  « illisible »).
+- **Champ `Producer`** : pypdf l'ajoute par défaut ; il est retiré.
+- **Identifiant de l'édition** : une substitution hors de la bonne classe l'avait retiré du
+  sérialiseur de **gestion**. Le build l'a détecté et il est restauré.
+
+**Vérifications** :
+
+- **Backend** : 1 396 tests sous SQLite, 1 403 sous MariaDB, dont 50 pour les soumissions :
+  - droits : 404 pour autrui, 401 anonyme ;
+  - If-Match, révisions, auteurs ;
+  - PDF : double aveugle, revue ouverte, 4 refus, politique et taille ;
+  - corpus de nettoyage versionné (`test_pdf.py`) ;
+  - e-mails, retrait, RG-02 et dérogation, suppression d'un brouillon, auteurs figés.
+- **Contrôles** : `ruff` ; migrations ; schéma régénéré sur MariaDB et identique ;
+  traductions à jour ; `pip-audit`.
+- **Front** : 234 tests, lint, format, build (types vérifiés).
+
+**Reporté en L3.4** (gestion) : écrans de saisie de `file_policy`, `max_file_mb`,
+`submission_languages` et du gel RG-19 ; API de gestion des dérogations.

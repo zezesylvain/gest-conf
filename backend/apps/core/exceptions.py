@@ -25,6 +25,7 @@ from apps.core.errors import (
     NotAllowed,
     QuotaExceeded,
     RuleViolation,
+    StaleRevision,
 )
 
 logger = logging.getLogger(__name__)
@@ -48,6 +49,7 @@ _DOMAIN_STATUS: tuple[tuple[type[DomainError], int], ...] = (
     (RuleViolation, status.HTTP_409_CONFLICT),
     (NotAllowed, status.HTTP_403_FORBIDDEN),
     (Invalid, status.HTTP_400_BAD_REQUEST),
+    (StaleRevision, status.HTTP_412_PRECONDITION_FAILED),
 )
 
 

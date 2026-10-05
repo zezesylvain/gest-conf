@@ -37,6 +37,9 @@ def test_throttle_settings_are_scoped_only():
         "data_export": "3/hour",
         "account_deletion": "3/hour",
         "portal_upload": "60/hour",
+        "submission_write": "600/hour",
+        "submission_upload": "30/hour",
+        "submission_submit": "20/hour",
     }
 
 
