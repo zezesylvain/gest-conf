@@ -646,3 +646,47 @@ matrice a mis le défaut au jour dès qu'une soumission a existé dans son jeu d
   - textes composés par l'interface ;
   - doublons listés au récapitulatif ;
   - aucune erreur dans la console.
+
+## 17. Bilan de L3.6 (5 octobre 2026) et clôture du lot
+
+**Bout en bout (F14)** : `web/e2e/tests/author.spec.ts`, lancé en CI par le job « E2E
+(Playwright) ».
+
+- **Préparation** : `web/e2e/seed.py` crée, **par les services**, la conférence, l'édition
+  publiée et courante, l'appel ouvert, une thématique et un type à PDF obligatoire, ainsi qu'un
+  PDF de test porteur de métadonnées. Le script est lu par `manage.py shell` et contrôlé par
+  `ruff` en CI.
+- **Accès au backend** : `web/e2e/django.ts` lance `manage.py` sur la base de la série, comme
+  un opérateur. Le lien de vérification de l'adresse part en console : sa clé est recalculée
+  (`EmailConfirmationHMAC`) et la vraie page de vérification la consomme.
+- **Parcours** :
+  - inscription, vérification, connexion, profil ;
+  - brouillon (sauvegarde automatique), co-auteur ;
+  - PDF (métadonnées supprimées) ;
+  - manques RG-01, déclarations ;
+  - soumission (`E2E27-0001`), accusé et e-mail aux co-auteurs (lus dans le registre d'envoi) ;
+  - modification (une révision) ;
+  - clôture simulée : lecture seule ; `close_call` : recevabilité.
+- **Durée et stabilité** : 14 s pour le parcours, 28 s pour la série (fumée comprise) ; stable
+  sur quatre exécutions successives.
+- **Défauts de test corrigés en écrivant le parcours** :
+  - confirmation du mot de passe à l'inscription ;
+  - lien de vérification sur la page déjà ouverte : seul le fragment changeait, sans
+    rechargement ;
+  - apostrophe typographique du nom de pays fourni par `Intl`.
+
+**Recette** (démo D, en local) :
+
+- **Côté auteur** : L3.3 dans Chromium, puis le parcours de bout en bout. Brouillon retrouvé,
+  co-auteurs, PDF nettoyé, accusé, révision avant clôture, refus après la clôture.
+- **Côté gestion** (L3.4) : liste filtrée, détail ; dérogation accordée puis révoquée,
+  journalisée ; le CO en lecture (tests de la matrice et des écrans).
+- **Sur o2switch** : non faite, faute d'accès ; reste à faire avec les deux lignes de cron.
+
+**Documentation** :
+
+- [`docs/L3-soumission.md`](L3-soumission.md) : bilan et exploitation ;
+- étude : §19 « Mises à jour issues du lot L3 » (version 1.3, Markdown et HTML) ;
+- `CLAUDE.md` : décisions du lot L3 ; commande `ruff` étendue à `web/e2e`.
+
+**Charge** : dans l'estimation du §8 (16 à 19,5 j-h).

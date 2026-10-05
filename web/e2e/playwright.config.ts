@@ -1,5 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
+import { BACKEND_ENV, PYTHON } from './django';
+
 /**
  * Tests de bout en bout (CLAUDE.md, « Tests » ; plan L3 F14).
  *
@@ -9,8 +11,7 @@ import { defineConfig, devices } from '@playwright/test';
  * - `GESTCONF_E2E_CHROMIUM` : Chromium déjà installé (poste sans téléchargement de
  *   navigateurs) ; en CI, `npx playwright install --with-deps chromium`.
  */
-const python = process.env['GESTCONF_E2E_PYTHON'] ?? 'python';
-const database = 'sqlite:////tmp/gestconf-e2e.sqlite3';
+const python = PYTHON;
 const chromium = process.env['GESTCONF_E2E_CHROMIUM'];
 
 export default defineConfig({
@@ -41,7 +42,7 @@ export default defineConfig({
         `rm -f /tmp/gestconf-e2e.sqlite3 && ${python} manage.py migrate --noinput -v0 ` +
         `&& ${python} manage.py createcachetable && ${python} manage.py runserver 127.0.0.1:8000 --noreload`,
       cwd: '../../backend',
-      env: { DATABASE_URL: database, DJANGO_SETTINGS_MODULE: 'config.settings.dev' },
+      env: BACKEND_ENV,
       url: 'http://127.0.0.1:8000/v1/health',
       timeout: 120_000,
       reuseExistingServer: false,
