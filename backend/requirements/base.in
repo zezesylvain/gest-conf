@@ -1,0 +1,10 @@
+# Dépendances d'exécution directes (communes à tous les environnements).
+# Fichier source de pip-tools : le fichier verrouillé est base.txt (avec empreintes).
+# Versions figées : toute montée de version passe par une PR dédiée, puis
+# recompilation (voir « Dépendances Python » dans le README principal).
+Django==5.2.17                # LTS (support jusqu'en avril 2028)
+djangorestframework==3.18.1
+drf-spectacular==0.30.0       # schéma OpenAPI -> client TypeScript Angular
+django-filter==26.2
+django-environ==0.14.0        # configuration par variables d'environnement
+PyMySQL==1.2.3                # pilote MariaDB pur Python (pas de compilation sur o2switch)

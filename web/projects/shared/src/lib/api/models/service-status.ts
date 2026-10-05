@@ -3,8 +3,8 @@
 
 
 /**
- * * `ok` - ok
- * * `error` - error
+ * * `ok` - Ok
+ * * `error` - Error
  */
-export type DatabaseEnum = 'ok' | 'error';
+export type ServiceStatus = 'ok' | 'error';
 

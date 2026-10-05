@@ -1,0 +1,11 @@
+# Robots d'indexation (plan L1 §4.6). Le portail public reste explorable ; l'API,
+# l'espace de gestion et l'espace compte ne le sont pas. Ce fichier n'est pas une
+# mesure de sécurité : les droits sont vérifiés par le serveur, et ces zones portent
+# aussi « noindex » (en-tête X-Robots-Tag pour /api/ et /gestion/ ; balise meta pour /compte
+# avec les pages de compte, étape L1.4).
+User-agent: *
+Disallow: /api/
+Disallow: /gestion/
+Disallow: /compte/
+# Page d'accueil de l'espace compte, sans barre oblique finale (« $ » : fin d'URL, RFC 9309).
+Disallow: /compte$

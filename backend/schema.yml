@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: GEST-CONF API
-  version: 1.0.0
+  version: 0.1.0
   description: API de la plateforme de gestion de conférences scientifiques.
 paths:
   /v1/health:
@@ -26,38 +26,90 @@ paths:
           description: ''
 components:
   schemas:
-    DatabaseEnum:
+    ApiError:
+      type: object
+      description: 'Format de toute réponse d''erreur de l''API : {code, message,
+        fields}.'
+      properties:
+        code:
+          $ref: '#/components/schemas/ErrorCode'
+        message:
+          type: string
+          description: Message lisible, dans la langue de la requête.
+        fields:
+          type: object
+          additionalProperties: {}
+          description: 'Erreurs par champ : {nom du champ: [messages]} ; objet vide
+            sinon.'
+      required:
+      - code
+      - fields
+      - message
+    ErrorCode:
       enum:
-      - ok
-      - error
+      - validation_error
+      - bad_request
+      - not_authenticated
+      - permission_denied
+      - not_found
+      - throttled
+      - server_error
+      - parse_error
+      - method_not_allowed
+      - not_acceptable
+      - unsupported_media_type
+      - csrf_failed
+      - in_use
       type: string
       description: |-
-        * `ok` - ok
-        * `error` - error
+        * `validation_error` - Validation Error
+        * `bad_request` - Bad Request
+        * `not_authenticated` - Not Authenticated
+        * `permission_denied` - Permission Denied
+        * `not_found` - Not Found
+        * `throttled` - Throttled
+        * `server_error` - Server Error
+        * `parse_error` - Parse Error
+        * `method_not_allowed` - Method Not Allowed
+        * `not_acceptable` - Not Acceptable
+        * `unsupported_media_type` - Unsupported Media Type
+        * `csrf_failed` - Csrf Failed
+        * `in_use` - In Use
     Health:
       type: object
       properties:
         status:
-          $ref: '#/components/schemas/StatusEnum'
+          $ref: '#/components/schemas/HealthStatus'
         database:
-          $ref: '#/components/schemas/DatabaseEnum'
+          $ref: '#/components/schemas/ServiceStatus'
+        cache:
+          $ref: '#/components/schemas/ServiceStatus'
         secure:
           type: boolean
           description: Vrai si Django voit la requête comme HTTPS (contrôle du déploiement).
         release:
           type: string
       required:
+      - cache
       - database
       - release
       - secure
       - status
-    StatusEnum:
+    HealthStatus:
       enum:
       - ok
       - degraded
       type: string
       description: |-
-        * `ok` - ok
-        * `degraded` - degraded
+        * `ok` - Ok
+        * `degraded` - Degraded
+    ServiceStatus:
+      enum:
+      - ok
+      - error
+      type: string
+      description: |-
+        * `ok` - Ok
+        * `error` - Error
 servers:
 - url: /api

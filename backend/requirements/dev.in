@@ -1,0 +1,11 @@
+# Outils de développement, de test et de CI, en plus des dépendances d'exécution.
+# Fichier source de pip-tools : le fichier verrouillé est dev.txt (avec empreintes).
+-c base.txt
+-r base.in
+pytest==9.1.1
+pytest-django==4.14.0
+pytest-cov==7.1.0             # couverture (configuration dans pyproject.toml)
+factory-boy==3.3.3            # fabriques de données de test
+ruff==0.16.10
+pip-audit==2.10.1
+pip-tools==7.6.1              # verrouillage des dépendances (pip-compile)

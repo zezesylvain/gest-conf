@@ -7,9 +7,11 @@ export { RequestBuilder } from './request-builder';
 export type { StrictHttpResponse } from './strict-http-response';
 export { Api } from './api';
 
-export type { DatabaseEnum } from './models/database-enum';
+export type { ApiError } from './models/api-error';
+export type { ErrorCode } from './models/error-code';
 export type { Health } from './models/health';
-export type { StatusEnum } from './models/status-enum';
+export type { HealthStatus } from './models/health-status';
+export type { ServiceStatus } from './models/service-status';
 
 export type { Health$Params as Health$Params } from './fn/health/health';
 export { health as health } from './fn/health/health';

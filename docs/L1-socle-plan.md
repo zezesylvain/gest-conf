@@ -2197,3 +2197,59 @@ Ces mises à jour seront livrées par une PR de documentation en L1.8, **après 
     - Sauvegardes avant les données réelles.
     - Règle de déclenchement de la variante courte.
     - Lot d'accueil du déploiement continu.
+
+---
+
+## 16. Écarts constatés pendant l'implémentation (L1.0, L1.1)
+
+Consignés ici pour ne pas dériver en silence (CLAUDE.md). Les écarts marqués **à valider** attendent
+l'accord du commanditaire ; les autres sont des précisions sans effet sur les décisions D1 à D18.
+Ils seront repris dans la PR de documentation de L1.8 (§15).
+
+1. **§9.1, catalogue `ErrorCode`.** Quatre codes s'ajoutent à la liste : `parse_error`,
+   `method_not_allowed`, `not_acceptable` et `unsupported_media_type`. Ce sont les codes par défaut
+   des exceptions de DRF que l'API produit déjà (corps JSON illisible, méthode refusée, en-tête
+   `Accept` ou type de contenu refusé) ; sans eux, `ApiError.code` aurait reçu des valeurs hors de
+   l'énumération. Les codes des étapes suivantes (`mfa_required`, `invitation_*`…) n'entrent dans le
+   catalogue qu'avec le code qui les émet.
+2. **§7.2, `Actor`.** Le constructeur s'appelle bien `Actor.command(nom)`, comme prévu (un premier
+   jet l'avait nommé `for_command`, corrigé).
+3. **§13, critère de fin de L1.1 (à valider).** « Une requête anonyme reçoit 401 en JSON ; un POST
+   DRF connecté sans jeton reçoit 403 `csrf_failed` ; 429 obtenu sur MariaDB » n'est pas vérifiable
+   **sur la recette** : aucun endpoint protégé ni limité en débit n'y est déployé avant L1.3 et L1.5.
+   Reformulation proposée : « vérifié par pytest sur MariaDB en CI ; sur la recette, le test de fumée
+   détecte la CSP en `<meta>`, le cache OK, `X-Robots-Tag`, `robots.txt` et le diagnostic désactivé ».
+   Le test de fumée `GET /api/_allauth/browser/v1/auth/session` → 401 (§11) arrive avec L1.3.
+4. **§3.5 et R18, cache partagé : deux tables au lieu d'une (à valider).** Les compteurs des limites
+   DRF ont leur propre table, `gestconf_throttle_cache` (alias `throttle`,
+   `apps.core.throttling.ScopedRateThrottle`), créée elle aussi par `createcachetable`. La purge de
+   Django supprime les clés **par ordre alphabétique** : dans une table commune, une inondation de
+   compteurs anonymes `throttle_invitation_<ip>` effaçait d'abord les clés `allauth…` (limites de
+   débit, anti-rejeu TOTP) et les compteurs `throttle_account_deletion_…`. Elle ne peut plus purger
+   que des compteurs DRF. Conséquences pour L1.2 : la purge des entrées expirées de `run_jobs` et
+   l'alerte de `check_integrity` (au-delà de 20 000 entrées) couvrent **les deux tables**.
+5. **§4.7 et §4.11, sonde `/health`.** `/health` est public et sans limite de débit ; la sonde du
+   cache (écriture, lecture, suppression dans les deux tables, chaque écriture précédée d'un
+   `SELECT COUNT(*)`) est donc **mémorisée 10 s par processus**. Les écritures dues à la sonde sont
+   bornées quel que soit le trafic ; une panne du cache apparaît avec au plus 10 s de retard.
+6. **§9.5.** `SPECTACULAR_SETTINGS["VERSION"]` est lu dans `backend/pyproject.toml` (source unique) :
+   le schéma passe de `1.0.0` à `0.1.0`.
+7. **§11, déploiement.** Les contrôles passent **avant** `migrate` (un avertissement n'arrête plus
+   le déploiement entre deux migrations, le DDL n'étant pas transactionnel sous MariaDB), en deux
+   commandes : `check --deploy --fail-level WARNING`, toujours **sans** `--database` comme le prévoit
+   le §3.7 (sinon `models.W036` des contraintes conditionnelles d'allauth bloquerait les déploiements
+   dès L1.3), puis `check --database default --tag database --fail-level WARNING`, qui ne lance que
+   les contrôles de la base (connexion, `mysql.W002`). Le code Django envoyé est celui du
+   commit (`git archive`), jamais un fichier ignoré du poste. Le garde-fou CSP couvre toutes les pages
+   HTML du build. Le test de fumée vérifie que le diagnostic de L1.0 est désactivé (404).
+8. **§11, CI.** pytest tourne sur MariaDB (la suite refuse de démarrer hors MariaDB grâce à
+   `GESTCONF_REQUIRE_MARIADB=1`) **et** sur SQLite ; `prod.txt` est téléchargé en roues
+   `manylinux2014` pour chaque version de Python, comme l'installe `deploy.sh` ; le `dist` Angular est
+   publié comme artefact (D18).
+9. **Fiche L1.0.** Les décisions d'hébergement s'appellent H-1 à H-11 (et non D-1 à D-11, qui se
+   confondaient avec D1 à D18). Contrôle ajouté : V27, format de ligne InnoDB (`DYNAMIC` et pages
+   ≥ 8 Kio, sans quoi `migrate` échoue sur les index utf8mb4 longs).
+10. **`CLAUDE.md`, section « Commandes » (proposition, à valider ; fichier non modifié).** Ajouter
+    `python manage.py createcachetable` après `migrate`, `requirements/compile.sh` (verrouillage
+    avec empreintes), `locale/check.sh` (traductions de l'API) et `deploy/check-o2switch.sh`
+    (vérifications de l'hébergement, lecture seule).
