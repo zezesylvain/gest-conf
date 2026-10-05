@@ -10,6 +10,7 @@ asgiref==3.12.1 \
     # via
     #   -c requirements/base.txt
     #   django
+    #   django-allauth
 attrs==26.1.0 \
     --hash=sha256:c647aa4a12dfbad9333ca4e71fe62ddc36f4e63b2d260a37a8b83d2f043ac309 \
     --hash=sha256:d03ceb89cb322a8fd706d4fb91940737b6642aa36998fe130a9bc96c985eff32
@@ -354,10 +355,17 @@ django==5.2.17 \
     # via
     #   -c requirements/base.txt
     #   -r requirements/base.in
+    #   django-allauth
     #   django-anymail
     #   django-filter
     #   djangorestframework
     #   drf-spectacular
+django-allauth==65.19.7 \
+    --hash=sha256:8899377f38afabf10445c9ee2f808a730304ca8aecc540657d51a8b3928283d6 \
+    --hash=sha256:c7749551b659ca954e483f6f634cd0c262d65dd8144f5219b3a31cba0426e981
+    # via
+    #   -c requirements/base.txt
+    #   -r requirements/base.in
 django-anymail==15.2 \
     --hash=sha256:65b26b1c99e6a09051b71b012ac4dfdd75a33aeb057315944dd9fb872cae57cf \
     --hash=sha256:866ed547e9d3110210e6fad343a2311eead55dbd4d544195fb628d06ae25d737

@@ -1,0 +1,9 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate %}Bonjour,
+
+Pour confirmer cette adresse sur votre compte {{ site_name }}, ouvrez ce lien :
+
+{{ activate_url }}
+
+Si vous n'êtes pas à l'origine de cette demande, ignorez ce message.{% endblocktranslate %}
+
+{% include "account/email/_signature.txt" %}{% endautoescape %}

@@ -1,0 +1,7 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate %}Bonjour,
+
+L'adresse principale de votre compte {{ site_name }} est passée de {{ from_email }} à {{ to_email }}.{% endblocktranslate %}
+
+{% include "account/email/_security_footer.txt" %}
+
+{% include "account/email/_signature.txt" %}{% endautoescape %}

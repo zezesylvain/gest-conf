@@ -83,6 +83,15 @@ if [[ -n "$EXPECTED_RELEASE" ]]; then
   check "API : version déployée = $EXPECTED_RELEASE" "$(json_has "$health" release "\"$EXPECTED_RELEASE\"" && echo 1)"
 fi
 
+# Authentification (allauth headless, client « browser ») : amorçage d'un visiteur anonyme.
+# 401 JSON avec meta.is_authenticated=false, et cookie csrftoken posé (lu par Angular).
+auth=$("${CURL[@]}" -D - -w '\n%{http_code}' "$BASE_URL/api/_allauth/browser/v1/auth/session")
+check "API : auth/session anonyme -> 401 JSON (allauth monté sous /api/_allauth/)" \
+  "$([[ "${auth##*$'\n'}" == "401" ]] && json_has "$auth" is_authenticated false && echo 1)"
+check "API : auth/session pose le cookie csrftoken" "$(has_header "$auth" set-cookie 'csrftoken=' && echo 1)"
+check "API : client « app » d'allauth absent (404)" \
+  "$([[ "$(status_of "$BASE_URL/api/_allauth/app/v1/config")" == "404" ]] && echo 1)"
+
 body=$("${CURL[@]}" -w '\n%{http_code}' "$BASE_URL/api/v1/route-inexistante")
 check "API : URL inconnue -> 404 JSON (non interceptée par le repli SPA)" \
   "$([[ "${body##*$'\n'}" == "404" ]] && json_has "$body" code '"not_found"' && echo 1)"

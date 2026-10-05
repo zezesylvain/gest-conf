@@ -1,0 +1,1 @@
+{% load i18n %}{% blocktranslate %}[{{ site_name }}] Un compte existe déjà avec cette adresse{% endblocktranslate %}

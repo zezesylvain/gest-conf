@@ -1,0 +1,9 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate %}Bonjour,
+
+Une inscription à {{ site_name }} a été demandée avec cette adresse, mais un compte existe déjà. Vous pouvez vous connecter avec votre mot de passe ; si vous l'avez oublié, réinitialisez-le ici :
+
+{{ password_reset_url }}
+
+Si vous n'êtes pas à l'origine de cette demande, ignorez ce message : votre compte n'a pas été modifié.{% endblocktranslate %}
+
+{% include "account/email/_signature.txt" %}{% endautoescape %}

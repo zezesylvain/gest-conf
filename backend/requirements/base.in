@@ -9,3 +9,4 @@ django-filter==26.2
 django-environ==0.14.0        # configuration par variables d'environnement
 PyMySQL==1.2.3                # pilote MariaDB pur Python (pas de compilation sur o2switch)
 django-anymail==15.2          # e-mails transactionnels par API (Brevo ou Mailjet, décision D10)
+django-allauth==65.19.7       # comptes, mode headless (décisions D2, D4) ; extra « mfa » ajouté en L1.6

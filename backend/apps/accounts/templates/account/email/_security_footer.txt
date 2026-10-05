@@ -1,0 +1,5 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate %}Si vous n'êtes pas à l'origine de cette opération, changez votre mot de passe sans attendre et prévenez les organisateurs. Origine de la demande :
+
+- adresse IP : {{ ip }}
+- navigateur : {{ user_agent }}
+- date : {{ timestamp }}{% endblocktranslate %}{% endautoescape %}

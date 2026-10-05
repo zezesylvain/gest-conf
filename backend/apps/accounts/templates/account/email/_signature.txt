@@ -1,0 +1,4 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate %}Cordialement,
+L'équipe {{ site_name }}
+
+Ce message a été envoyé automatiquement ; merci de ne pas y répondre.{% endblocktranslate %}{% endautoescape %}

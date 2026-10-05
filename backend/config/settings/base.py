@@ -44,6 +44,10 @@ INSTALLED_APPS = [
     "apps.core",
     "apps.accounts",
     "apps.communications",
+    # Après les applications du projet : leurs gabarits d'e-mails (account/email/*) priment.
+    "allauth",
+    "allauth.account",
+    "allauth.headless",
 ]
 
 MIDDLEWARE = [
@@ -61,7 +65,11 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    # Juste après l'authentification : 12 h absolues depuis la connexion (D12).
+    "apps.accounts.middleware.AbsoluteSessionTimeoutMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # Obligatoire pour allauth, en fin de liste.
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -121,6 +129,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # --- Authentification ---------------------------------------------------------
 AUTH_USER_MODEL = "accounts.User"
 
+AUTHENTICATION_BACKENDS = ["allauth.account.auth_backends.AuthenticationBackend"]
+
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {
@@ -130,6 +140,62 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
+
+# --- Comptes : django-allauth en mode headless (plan L1 §4.2, décisions D2, D4, D12) ---------
+# URL publique du site (portail) : base des liens envoyés par e-mail. URL absolue, jamais
+# déduite de l'en-tête Host, qui peut être forgé (§4.11).
+GESTCONF_PUBLIC_URL = env.str("GESTCONF_PUBLIC_URL", default="http://localhost:4200").rstrip("/")
+
+ACCOUNT_ADAPTER = "apps.accounts.adapters.AccountAdapter"
+ACCOUNT_LOGIN_METHODS = {"email"}
+# Confirmation du mot de passe faite dans Angular.
+ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*"]
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+# Vérification obligatoire, en mode « lien » (option (a) de D6).
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+ACCOUNT_EMAIL_VERIFICATION_BY_CODE_ENABLED = False
+ACCOUNT_PREVENT_ENUMERATION = True
+# Rien n'est envoyé à une adresse inconnue : la plateforme ne peut pas servir à écrire
+# à des adresses quelconques, et la réponse reste identique.
+ACCOUNT_EMAIL_UNKNOWN_ACCOUNTS = False
+# Alertes de sécurité (mot de passe changé, adresse supprimée...), faux par défaut.
+ACCOUNT_EMAIL_NOTIFICATIONS = True
+ACCOUNT_LOGIN_BY_CODE_ENABLED = False
+ACCOUNT_MAX_EMAIL_ADDRESSES = 3
+ACCOUNT_CHANGE_EMAIL = False
+# Réauthentification récente (5 min) pour ajouter ou supprimer une adresse, ou changer
+# l'adresse principale : sinon une session volée suffit pour ajouter une adresse puis
+# réinitialiser le mot de passe par elle (plan v3, §4.2 et §4.11).
+ACCOUNT_REAUTHENTICATION_REQUIRED = True
+# Objet des e-mails : préfixe porté par nos gabarits (« [GEST-CONF] … »).
+ACCOUNT_EMAIL_SUBJECT_PREFIX = ""
+# Resserrement des limites d'allauth (§4.7) ; les autres valeurs par défaut sont gardées.
+ACCOUNT_RATE_LIMITS = {
+    "signup": "20/m/ip,100/3600s/ip",
+    "reset_password": "20/m/ip,3/3600s/key",
+}
+# Lien de réinitialisation valable 2 h (Django : 3 jours par défaut).
+PASSWORD_RESET_TIMEOUT = 2 * 3600
+
+HEADLESS_ONLY = True
+# Client « browser » seul : le client « app » utilise des jetons et des vues sans CSRF.
+HEADLESS_CLIENTS = ("browser",)
+HEADLESS_SERVE_SPECIFICATION = False
+# Liens des e-mails vers le portail ; la clé dans le fragment (#) ne part ni dans les
+# journaux du serveur ni dans l'en-tête Referer.
+HEADLESS_FRONTEND_URLS = {
+    "account_confirm_email": f"{GESTCONF_PUBLIC_URL}/compte/verifier-email#{{key}}",
+    "account_reset_password": f"{GESTCONF_PUBLIC_URL}/compte/mot-de-passe-oublie",
+    "account_reset_password_from_key": f"{GESTCONF_PUBLIC_URL}/compte/reinitialiser#{{key}}",
+    "account_signup": f"{GESTCONF_PUBLIC_URL}/compte/inscription",
+}
+
+# --- Sessions (D12) -------------------------------------------------------------------
+# 12 h au plus, imposées par AbsoluteSessionTimeoutMiddleware (Django fait glisser
+# l'échéance à chaque enregistrement de la session) ; cookie sans date d'expiration.
+SESSION_COOKIE_AGE = 12 * 3600
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+GESTCONF_SESSION_MAX_AGE = SESSION_COOKIE_AGE
 
 # --- Internationalisation -------------------------------------------------------
 LANGUAGE_CODE = "fr"
@@ -192,6 +258,8 @@ CSRF_FAILURE_VIEW = "apps.core.views.csrf_failure"
 GESTCONF_TRUSTED_PROXY_COUNT = env.int("GESTCONF_TRUSTED_PROXY_COUNT", default=0)
 if GESTCONF_TRUSTED_PROXY_COUNT < 0:
     raise ImproperlyConfigured("GESTCONF_TRUSTED_PROXY_COUNT doit être positif ou nul.")
+# Même valeur pour allauth (limites de débit, IP des notifications de sécurité), §4.2.
+ALLAUTH_TRUSTED_PROXY_COUNT = GESTCONF_TRUSTED_PROXY_COUNT
 
 # Endpoint de diagnostic /api/v1/diagnostics/request (étape L1.0) : désactivé par
 # défaut ; à n'activer que le temps d'une mesure.
@@ -245,6 +313,11 @@ SPECTACULAR_SETTINGS = {
         "HealthStatus": "apps.core.serializers.HealthStatus",
         "ServiceStatus": "apps.core.serializers.ServiceStatus",
         "JobsStatus": "apps.core.serializers.JobsStatus",
+        "Locale": "apps.accounts.serializers.Locale",
+        "ProfileTitle": "apps.accounts.models.ProfileTitle",
+        "ConsentKind": "apps.accounts.models.ConsentKind",
+        "ConsentSource": "apps.accounts.models.ConsentSource",
+        "ConsentRequestSource": "apps.accounts.serializers.ConsentRequestSource",
         "ErrorCode": "apps.core.errors.ErrorCode",
     },
     "POSTPROCESSING_HOOKS": [

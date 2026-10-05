@@ -8,8 +8,24 @@ Aucune route d'administration Django (règle n° 1 de CLAUDE.md).
 from django.conf import settings
 from django.urls import include, path
 
+from apps.core.views import not_found
+
+# Routes d'allauth montées sans condition mais non configurées (téléphone) : sans
+# adaptateur de téléphone, elles lèvent NotImplementedError (erreur 500, vérifié).
+# Déclarées avant l'inclusion d'allauth, elles répondent 404 JSON (plan L1 §9.2).
+DISABLED_ALLAUTH_ROUTES = (
+    "account/phone",
+    "auth/phone/verify",
+    "auth/phone/verify/resend",
+)
+
 urlpatterns = [
     path("v1/", include("apps.core.urls")),
+    path("v1/", include("apps.accounts.urls")),
+    # Authentification : vues d'allauth en mode headless, client « browser » seul
+    # (/api/_allauth/browser/v1/…, décision D4). Hors du schéma OpenAPI.
+    *(path(f"_allauth/browser/v1/{route}", not_found) for route in DISABLED_ALLAUTH_ROUTES),
+    path("_allauth/", include("allauth.headless.urls")),
 ]
 
 if settings.DEBUG:
