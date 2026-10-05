@@ -1,311 +1,283 @@
 # Lot L2 — Portail public : plan d'implémentation
 
-> **Statut : proposition v1 (5 octobre 2026), à valider.** Rien n'est implémenté avant la
-> validation des décisions E1 à E12 (`CLAUDE.md` : plan d'abord pour toute modification large
+> **Statut : proposition v2 (5 octobre 2026), à valider.** Rien n'est implémenté avant la
+> validation des décisions E1 à E14 (`CLAUDE.md` : plan d'abord pour toute modification large
 > du modèle de données ou des permissions).
 >
-> Sources : étude §4 (M1, M2), §10.1, §10.4, §14 (L2 : « Pages, appel à communications, dates,
-> comités, programme public (lecture), pré-rendu », 10 à 14 j-h) ; plan L1 §1.3 (reports vers
-> L2) et §1.4 (prérequis) ; décisions D1 à D18, D16 (anti-robots), D18 (déploiement continu).
+> **v2** : le plan suit trois compétences imposées par le commanditaire (dépôt
+> `zezesylvain/zds-skills`) :
+> - `gestion-cms-portail-angular` : CMS-lite (pages composées de sections réutilisables,
+>   menus gérables, pages personnalisées `/p/<slug>`, bilingue, pré-rendu au build) ;
+> - `guide-utilisateur-integre-angular` : guide `/aide` et aide contextuelle `?` dans la gestion ;
+> - `recherche-menu-topbar-angular` : rail rétractable et recherche d'écran dans la barre haute.
+>
+> Elles remplacent les choix de la v1 sur le rendu (instantané + rafraîchissement →
+> pré-rendu seul avec bandeau d'écart), les URL (`/` → `/fr/` et `/en/`), le format des
+> contenus (Markdown → HTML en liste blanche) et le modèle (`portal_page` à clés fixes →
+> `Page`, `Section`, `PageSection`, `MenuItem`). Les écarts entre ces compétences et les règles
+> de GEST-CONF sont signalés au §2.4.
+>
+> Sources : étude §4 (M1, M2), §10.1, §10.4, §14 (L2 : 10 à 14 j-h) ; plan L1 §1.3 (reports)
+> et §1.4 (prérequis) ; décisions D1 à D18.
 
 ## En bref
 
 | | |
 |---|---|
-| **Objectif** | Un site vitrine bilingue, pré-rendu, à jour et bien référencé pour l'édition courante : accueil, présentation et thématiques, appel à communications (règles, formats, modèles de documents, dates), dates clés, comités, informations pratiques ; plus, dans la gestion, l'édition de ces contenus. |
-| **Point dur** | Le portail est **pré-rendu au build** (SSG, pas de serveur Node), alors que ses contenus vivent en base et changent souvent. Recommandation : instantané des données pris au build depuis l'API publique de production, puis rafraîchissement dans le navigateur (E1). |
-| **Hors périmètre** | Programme, intervenants, inscriptions et tarifs : leurs données n'existent qu'en L5 et L6 ; le portail leur réserve une page « à venir » éditable (E6). Contact, FAQ, actualités, sponsors (P2). Archives des éditions (P3). |
-| **Charge** | **12,5 à 16 j-h** (étude : 10 à 14). L'écart vient des fichiers publics (classe nouvelle, règle n° 8) et des deux langues pré-rendues. |
-| **Démo C** | Le président publie le portail (FR et EN) : textes de présentation et de l'appel, deux modèles de documents, dates, comités ; un visiteur anonyme le consulte, le télécharge, le partage (aperçu Open Graph) ; un membre qui a refusé l'annuaire n'apparaît pas. |
+| **Objectif** | Un site vitrine bilingue `/fr/…` et `/en/…`, pré-rendu et bien référencé, pour l'édition courante : accueil, appel à communications (règles, formats, modèles, dates), dates clés, thématiques, comités, pages « à venir » (programme, intervenants, inscription), pages personnalisées (informations pratiques…). Dans la gestion : un CMS-lite (sections, pages, menus, composeur, documents, publication). |
+| **Ergonomie de la gestion** | Avec le portail, la gestion passe de 9 à 16 écrans : rail en catégories rétractables, recherche d'écran (`⌘K`), guide intégré et aide contextuelle, pour **toute** la gestion (écrans L1 compris). |
+| **Point dur** | Pré-rendu au build : une modification n'est visible qu'au déploiement suivant. Ce n'est pas masqué : la gestion compte les modifications non publiées et l'annonce dans un bandeau ; `deploy.sh --portal-only` republie le portail seul. |
+| **Hors périmètre** | Données du programme, des intervenants et des tarifs (L5, L6 : pages « à venir » éditables) ; contact, FAQ, actualités, sponsors (P2) ; archives (P3). |
+| **Charge** | **17 à 21,5 j-h** (étude : 10 à 14 ; v1 : 12,5 à 16). Hausse : CMS-lite complet (+3), ergonomie de toute la gestion (+2,5 à 3). Détail au §8. |
+| **Démo C** | Le président compose l'accueil (sections réutilisables), crée la page « Informations pratiques », l'ajoute au menu, publie deux modèles de documents, voit le bandeau « 5 modifications non publiées », republie ; un visiteur consulte le portail en FR et en EN, télécharge un modèle, partage le lien (aperçu Open Graph) ; un membre sans consentement n'apparaît pas dans les comités. Dans la gestion, `⌘K` « affiche » trouve « Documents », et `?` ouvre la fiche de l'écran courant. |
 
 ## 1. Périmètre
 
-### 1.1 Fonctions de M1 couvertes
+### 1.1 Fonctions de M1
 
-| Fonction (M1) | Priorité | L2 |
+| Fonction (M1) | Prio. | L2 |
 |---|---|---|
-| Accueil : thème, dates, lieu, compte à rebours, appels à l'action | P1 | Oui |
-| Présentation de la conférence et des thématiques | P1 | Oui |
-| Appel à communications : règles, formats, modèles de documents, dates clés | P1 | Oui |
-| Dates importantes | P1 | Oui |
-| Comités scientifique et d'organisation (photos, affiliations, pays) | P1 | Oui, avec consentement (E5) |
-| Programme public | P1 | **Page « à venir »** ; données en L5 (E6) |
-| Intervenants invités | P1 | **Page « à venir »** ; données en L5 / M10 (E6) |
-| Inscription et tarifs | P1 | **Page « à venir »** ; données en L6 (E6) |
-| Lieu, accès, hébergement, visas | P2 | Oui, en contenu éditorial (coût marginal, même mécanisme) |
-| Sponsors, actualités, FAQ, contact | P2 | Non (contact : formulaire et anti-robots D16 en L3 au plus tôt) |
-| Actes, archives, galerie | P3 | Non ; l'URL `/editions/<slug>/` est réservée (E10) |
-
-Contraintes de l'étude : pages pré-rendues, Open Graph, plan de site, `schema.org/Event`.
+| Accueil : thème, dates, lieu, compte à rebours, appels à l'action | P1 | Page du site (gabarit) + sections |
+| Présentation et thématiques | P1 | Page du site « Thématiques » + sections ; présentation en sections |
+| Appel à communications : règles, formats, modèles, dates | P1 | Page du site (gabarit : formats, échéances, documents) + sections |
+| Dates importantes | P1 | Page du site |
+| Comités (photos, affiliations, pays) | P1 | Page du site, avec consentements (E5) |
+| Programme public, intervenants, inscription et tarifs | P1 | Pages du site au gabarit « à venir » + sections ; données en L5, L6 (E6) |
+| Lieu, accès, hébergement, visas | P2 | Page personnalisée `/p/infos-pratiques` (aucun code dédié) |
+| Sponsors, actualités, FAQ, contact | P2 | Non |
+| Actes, archives, galerie | P3 | Non ; `/editions/<slug>/` réservé |
 
 ### 1.2 Reports de L1 traités ici
 
-- Annuaire public des comités (consentement `directory_listing` prêt depuis L1).
-- Photo de profil et liens professionnels, avec une **classe « fichier public »** (B11).
-- Contenus du portail (texte mis en forme).
-- `GET /public/key-dates` séparé : **non nécessaire** (dates incluses dans l'édition publique).
-
-### 1.3 Prérequis disponibles (L1)
-
-`GET /v1/public/editions/current` (édition, thématiques, types, dates publiques), capacités par
-édition et `ManageViewSet`, audit, i18n FR/EN, kit UI, `formatInZone`, budgets et CSP à
-empreintes, `deploy.sh` (build sur le poste de déploiement).
+Annuaire public des comités, photo de profil et liens, classe « fichier public », contenus du
+portail. `GET /public/key-dates` séparé : inutile.
 
 ## 2. Décisions à valider
 
+### 2.1 Tableau
+
 | # | Question | Recommandation |
 |---|---|---|
-| E1 | Comment un site pré-rendu affiche-t-il des contenus de la base ? | Instantané au build + rafraîchissement dans le navigateur |
-| E2 | URL des deux langues | `/` en français, `/en/…` en anglais, pré-rendues toutes les deux |
-| E3 | Format des contenus éditoriaux | Markdown restreint, rendu par le serveur (`markdown-it-py`, HTML brut désactivé) |
-| E4 | Fichiers publics (modèles, photos) | Classe « fichier public » hors racine web, servie par un endpoint public contrôlé ; photos réencodées par Pillow |
-| E5 | Qui figure dans la page des comités ? | Seulement les membres actifs ayant consenti à l'annuaire ; photo avec un second consentement |
-| E6 | Programme, intervenants, inscriptions | Pages « à venir » éditables en L2 ; vraies pages en L5 et L6 |
-| E7 | Référencement | Métadonnées par page, `sitemap.xml`, JSON-LD `Event`, `hreflang`, URL canoniques |
-| E8 | Compte à rebours et heure affichée | Calculé dans le navigateur après le rendu ; dates dans le fuseau de l'édition |
-| E9 | Mise à jour du portail après une modification | `deploy.sh --portal-only` (rebuild du portail seul) ; le déploiement continu reste une décision séparée (D18) |
-| E10 | Plusieurs éditions | Édition courante seule ; `/editions/<slug>/` réservé aux archives (P3) |
-| E11 | Qui modifie le portail ? | Nouvelle capacité `portal.write` : `ADMIN`, `CHAIR`, et `OC_MEMBER` de fonction « communication » |
-| E12 | Photo et liens du profil | Ajoutés au profil ; photo publique seulement avec consentement `photo_publication` |
+| E1 | Rendu des contenus de la base dans un site pré-rendu | **Pré-rendu au build seul** ; bandeau « N modifications non publiées » dans la gestion (compétence CMS) |
+| E2 | URL des langues | `/fr/…` et `/en/…`, tout bilingue ; `/` redirige vers `/fr/` ; `/compte` et `/gestion` inchangés |
+| E3 | Format des textes | HTML en **liste blanche**, assaini à l'écriture (serveur) **et** au rendu (portail, sans DOM) |
+| E4 | Fichiers publics (modèles, photos, images de sections) | Classe « fichier public » hors racine web, endpoint public contrôlé, photos réencodées (Pillow, à vérifier) |
+| E5 | Comités publics | Membres actifs ayant consenti à l'annuaire ; photo avec un second consentement |
+| E6 | Programme, intervenants, inscription | Pages « à venir » éditables par sections ; vraies pages en L5 et L6 (écart avec l'étude) |
+| E7 | Référencement | Métadonnées par page, `hreflang`, canoniques, `sitemap.xml`, JSON-LD `Event` |
+| E8 | Compte à rebours | Calculé dans le navigateur après le rendu ; dates dans le fuseau de l'édition |
+| E9 | Republier | `deploy.sh --portal-only`, puis `manage.py mark_portal_published` ; déploiement continu : décision séparée (D18) |
+| E10 | Plusieurs éditions | Édition courante seule |
+| E11 | Droits | Capacité `portal.write` : `ADMIN`, `CHAIR`, `OC_MEMBER` de fonction `communication` |
+| E12 | Profil | Photo (consentement `photo_publication`) et liens publics |
+| E13 | Navigation de la gestion | Rail en catégories rétractables + recherche d'écran `⌘K` (compétence recherche) |
+| E14 | Aide | Guide `/gestion/aide` et aide contextuelle `?` (compétence guide), pour toute la gestion |
 
-### E1. Contenus dynamiques et pré-rendu
+### 2.2 Le CMS-lite (compétence `gestion-cms-portail-angular`)
 
-**Le problème.** Le portail est pré-rendu au build (CLAUDE.md : SSG, pas de SSR), et o2switch
-n'exécute pas Angular côté serveur dans notre architecture. Or les dates, les comités et les
-textes changent en base.
+- **Section typée**, catalogue fermé que le portail sait rendre ; un type inconnu n'affiche rien.
+  Types proposés :
 
-**Options.**
-- **(a) Rendu dans le navigateur seulement** : pages pré-rendues vides, données chargées par
-  l'API. Simple, mais aucun contenu pour les moteurs de recherche ni pour les aperçus de partage
-  (Open Graph) : contraire à M1.
-- **(b) Instantané au build seulement** : `deploy.sh` lit l'API publique de production et
-  pré-rend les pages avec ces données. Bon référencement, mais toute modification attend un
-  nouveau déploiement.
-- **(c) Hybride (recommandé)** : (b), puis, dans le navigateur, un rafraîchissement depuis
-  l'API publique. Les visiteurs voient la version à jour en quelques centaines de
-  millisecondes ; les moteurs et les aperçus voient la version du dernier build.
-- **(d) Serveur Node (SSR) sur o2switch** (« Setup Node.js App » existe en cPanel, **non
-  vérifié**) : contraire à la stack imposée et au budget d'hébergement. Écarté.
+  | Type | Contenu | Source |
+  |---|---|---|
+  | `rich_text` | titre, sous-titre, corps | Section (HTML en liste blanche) |
+  | `cta_banner` | titre, texte, deux boutons | Section |
+  | `image_text` | image + texte | Section + fichier public |
+  | `edition_hero` | habillage seulement | Édition (titre, thème, dates, lieu, compte à rebours) |
+  | `key_dates` | habillage | Dates clés publiques |
+  | `tracks` | habillage | Thématiques actives |
+  | `submission_types` | habillage | Types de communication actifs |
+  | `documents` | habillage, `config.kind` | Fichiers publics publiés de l'édition |
+  | `committee` | habillage, `config.committee` (`scientific`, `organizing`) | Membres consentants (E5) |
 
-**Détails de (c).**
-- Endpoint unique `GET /v1/public/portal` (édition courante, pages, documents, comités) :
-  l'instantané est **le même JSON** que celui lu dans le navigateur ; pas de deux sources.
-- Au build, `GESTCONF_PORTAL_SNAPSHOT_URL` (production) ou un fichier local
-  (`web/portal-snapshot.json`, développement et CI) ; sans édition publiée, le portail est
-  pré-rendu en mode « bientôt » (aucune erreur de build).
-- L'instantané est intégré aux pages par le `TransferState` d'Angular : pas de second appel au
-  premier affichage si le rafraîchissement le juge inutile (même empreinte `ETag`).
-- Une modification publiée est visible tout de suite par les visiteurs ; les moteurs la voient
-  au rebuild suivant (E9).
+  Les types « données » ne portent que l'habillage ; leur contenu vient des services publics
+  existants, **jamais d'une copie**.
+- **Pages du site** (gabarit codé, adresse figée, `is_system`, liste `SITE_ROUTES` unique lue
+  par le menu, la résolution d'URL et les routes à pré-rendre) et **pages personnalisées**
+  (`/p/<slug>`). Une page du site rend ses sections **après** son contenu ; une page
+  personnalisée rend les siennes intégralement.
+- **Le CMS ajoute, il ne remplace pas** : le *seed* livre les sections prêtes à poser, les pages
+  du site et les menus, **aucune composition**.
+- **Menus** `header` et `footer` gérables ; repli sur la navigation codée tant que la liste est
+  vide (pas de clignotement).
+- **Composeur** : poser, retirer, ordonner par boutons « monter » / « descendre » (pas de
+  glisser-déposer, pas de dépendance) ; l'ordre est envoyé en **liste complète**, refusée (400)
+  si elle ne correspond pas exactement ; les trois écritures renvoient la composition **relue
+  depuis la base**. Chaque section indique les pages qui la portent.
+- **Tout est bilingue** (`_fr`/`_en`), une colonne anglaise vide se repliant sur le français ;
+  l'écran d'édition montre les deux langues côte à côte.
+- **Pièges intégrés** : `pagination_class = None` sur les vues du CMS ; `config.limit` borné au
+  rendu ; suppression d'une section encore posée → 400 nommant les pages ; route `/p/:slug`
+  déclarée avant `**` ; **compte des routes pré-rendues vérifié au build** (une API injoignable
+  donnerait un build vert avec moins de pages : refus de livrer un compte inférieur à
+  l'attendu) ; aucune page du site n'est pré-rendue aussi sous `/p/<slug>`.
 
-### E2. Langues et URL
+### 2.3 Gestion : rail, recherche et aide
 
-`/` (français, langue par défaut de l'édition) et `/en/…` (anglais), chaque page pré-rendue dans
-les deux langues avec `hreflang` et `<html lang>`. Le sélecteur de langue change d'URL sur le
-portail public (il reste un réglage d'interface sur `/compte`). Slugs traduits
-(`/appel-a-communications` et `/en/call-for-papers`). Alternative : une seule URL dont la langue
-change dans le navigateur ; les moteurs n'indexeraient que le français. Déconseillé.
+**Rail et recherche (compétence `recherche-menu-topbar-angular`).**
+- Table de navigation **unique** dans `gestion/src/app/core/navigation.ts`, sans import
+  Angular : `buildNavigation(capabilities, activeRole)` → groupes (Pilotage, Paramétrage,
+  Comités, Portail, Contrôle, Aide). Elle remplace la constante `NAV` de L1.7.
+- Rail en accordéon : une seule catégorie ouverte, celle de l'écran courant (plus long préfixe),
+  repli sur la première ; en-têtes en `<button aria-expanded>` ; corps masqués par `[hidden]`
+  avec `[hidden]{display:none !important}`.
+- Recherche dans la barre haute : `catalogue(groups)` **dérivé** du rail (un écran retiré du menu
+  est introuvable), normalisation NFD, rangs 0 à 5, tri stable, combobox ARIA écrite à la main,
+  `⌘K`/`Ctrl+K`, `(mousedown)`. Mots-clés métier dans la table (écrans fixes : pas de registre
+  serveur dans GEST-CONF).
+- Les gardes et la matrice des droits restent la sécurité (règle n° 2) ; le rail n'est que le
+  reflet des capacités de `/me`.
 
-### E3. Contenus éditoriaux
+**Guide intégré (compétence `guide-utilisateur-integre-angular`).**
+- Fiches en **données typées** (`gestion/src/app/help/sheets.ts`, sans import Angular), gabarit
+  unique, page `/gestion/aide` (sommaire suiveur, index par profil et par écran, impression),
+  bouton `?` et tiroir montés **une fois** dans la coque ; la fiche se déduit de l'URL par la
+  table de navigation (chaque entrée porte `help`).
+- Fiches pour **tous** les écrans de gestion (L1 et L2) et transversales (premiers pas, 2FA et
+  réauthentification, publier le portail) ; elles disent ce que le logiciel refuse et pourquoi.
+- Les contrôles de cohérence (chaque écran pointe une fiche existante, aucune fiche orpheline
+  hors liste `TRANSVERSAL`) sont des tests Vitest.
 
-**Recommandation : Markdown restreint**, saisi dans la gestion (FR et EN), converti en HTML par
-le **serveur** avec `markdown-it-py` (pur Python, licence MIT, **à confirmer**), HTML brut
-**désactivé**, liens limités à `https:`, `http:` et `mailto:`, titres de niveau 2 et 3, listes,
-gras, italique, liens, tableaux simples. Le HTML produit est stocké à côté de la source et
-renvoyé par l'API ; Angular l'insère par `[innerHTML]`, qu'il nettoie de nouveau.
+### 2.4 Adaptations des compétences aux règles de GEST-CONF (à valider)
 
-Pourquoi pas `nh3` (envisagé en L1) : avec le HTML brut désactivé, rien n'est à nettoyer, et
-`nh3` est un paquet binaire (Rust) à valider sur o2switch. Il reste le repli si un éditeur
-WYSIWYG est demandé plus tard. Aperçu en direct dans la gestion par un appel `POST …/preview`.
+| Compétence | Point | Adaptation | Raison |
+|---|---|---|---|
+| CMS | Administration par la console générique (`console-admin-generique`, registre de collections) | **Écrans dédiés** dans la gestion (sections, pages, menus, composeur), sur le modèle des écrans L1.7 | La gestion n'a pas de console générique ; celle-ci donne un CRUD sur une liste de modèles « réservé au super-admin », ce que D1 (aucun rôle global) exclut. Adopter cette compétence serait une décision séparée |
+| CMS | Permission Django `cms.change_page` | Capacité d'édition `portal.write` (E11), `ManageViewSet`, 2FA | Rôles par édition (règle n° 5), pas de permissions de modèle Django (méta-test L1) |
+| CMS | Modèles dans une app `cms`, routes `/api/v1/composition/` | App `portal`, routes `v1/public/portal/…` et `v1/manage/editions/{id}/portal/…` | Conventions d'URL de L1 (édition dans le chemin, D5) |
+| CMS | Assainissement serveur non précisé | Liste blanche par `html.parser` de la bibliothèque standard | Pas de dépendance binaire (`nh3` est en Rust : règle n° 10) |
+| CMS | « Réutiliser le modèle `Page` existant » | Nouveau modèle `Page` (GEST-CONF n'en a pas) | Rien à réutiliser |
+| Recherche, guide | Identifiants en français (`construireNavigation`, `chercher`, `FICHES`) | Identifiants en anglais (`buildNavigation`, `search`, `HELP_SHEETS`) ; textes en français par i18n | `CLAUDE.md` : identifiants en anglais, textes par clés de traduction |
+| Recherche, guide | Vérifications par esbuild + Node (`npm run verify:console`) | Tests **Vitest** (même contenu) | GEST-CONF a déjà Vitest ; un second outillage serait redondant |
+| Guide | Fiches rédigées en français dans le code | Fiches en clés i18n FR/EN, parité vérifiée | Interface bilingue (aucune chaîne en dur) |
 
-### E4. Fichiers publics
+### 2.5 Autres décisions (inchangées depuis la v1, sauf mention)
 
-**Le problème.** La règle n° 8 (fichiers hors racine web, nom aléatoire, type vérifié par le
-contenu, **servis par un endpoint authentifié**) vise les fichiers des soumissions. Les modèles
-de documents et les photos des comités sont publics par nature (B11).
+- **E4 — Fichiers publics.** Stockage hors `public_html`, nom aléatoire (UUID), liste blanche
+  vérifiée par signature (PDF, DOCX, ODT, ZIP de modèle LaTeX, PNG, JPEG, WebP), 10 Mio
+  (documents) et 5 Mio (images) ; photos et images réencodées par **Pillow** (800 px pour les
+  photos, 1 600 px pour les images, EXIF supprimé) — **paquet binaire à vérifier sur o2switch**
+  (contrôle V28), repli : JPEG avec EXIF refusés, pas de redimensionnement ; servis par
+  `GET /v1/public/files/<uuid>/<nom>` (`nosniff`, `attachment` pour les documents, cache
+  public) seulement s'ils sont publiés et rattachés à une édition publiée (ou à un profil
+  consentant). C'est une adaptation de la règle n° 8 (« servis par un endpoint authentifié »)
+  aux fichiers publics par nature : **à valider**.
+- **E5 — Comités.** Membres actifs (`CHAIR`, `SC_CHAIR`, `SC_MEMBER`, `OC_MEMBER`) ayant le
+  consentement `directory_listing` ; photo avec `photo_publication` ; jamais l'adresse.
+  Afficher « et N autres membres » : **à valider**. Retrait du consentement : visible au
+  prochain build (bandeau d'écart) ; **à valider**, sinon republication déclenchée.
+- **E6.** L'étude place le « programme public (lecture) » en L2 ; ses données n'existent qu'en
+  L5 : **écart à valider**.
+- **E7.** JSON-LD `<script type="application/ld+json">` : non exécutable, ignoré par les
+  empreintes de la CSP (`inject-csp.mjs` le vérifie, testé).
+- **E9.** `deploy.sh --portal-only` relit l'API publique de production, rebuild le portail seul,
+  le synchronise, puis appelle `manage.py mark_portal_published` (date de mise en ligne ; le
+  compteur de modifications repart de zéro).
+- **E11.** Première écriture « partielle » du CO (Q12 non tranchée) : **à valider**.
 
-**Recommandation : une classe « fichier public » distincte**, qui garde tout le reste de la
-règle n° 8 :
-- stockage hors de `public_html` (`GESTCONF_MEDIA_ROOT/public/…`), nom aléatoire (UUID), jamais
-  le nom fourni ;
-- types en liste blanche, vérifiés par **signature** (octets de tête) et extension :
-  PDF, DOCX, ODT, ZIP (modèle LaTeX), PNG, JPEG, WebP ; taille maximale 10 Mio (documents)
-  et 5 Mio (images) ;
-- **photos réencodées** par Pillow (taille maximale 800 px, métadonnées EXIF supprimées, dont la
-  position GPS) ; **Pillow est un paquet binaire, à vérifier sur o2switch** (nouveau contrôle
-  V28). Repli : refuser les JPEG porteurs de métadonnées EXIF et ne pas redimensionner ;
-- servis par `GET /v1/public/files/<uuid>/<nom-affiché>` : `Content-Type` fixé par le serveur,
-  `X-Content-Type-Options: nosniff`, `Content-Disposition: attachment` pour les documents,
-  `Cache-Control: public, max-age=86400` ; jamais d'exécution ni d'aperçu HTML ;
-- un fichier n'est servi que s'il est **publié** et rattaché à une édition publiée (ou, pour une
-  photo, à un profil consentant) ; sinon 404 ;
-- l'envoi passe par la gestion (`portal.write`) ou par le compte (sa propre photo), audité.
+## 3. Modèle de données (app `portal`, additif)
 
-Aucun antivirus n'est disponible sur o2switch (**non vérifié**) : les fichiers acceptés sont
-limités à des formats sans macro exécutable à l'ouverture, hors DOCX (macros impossibles dans
-`.docx`, contrairement à `.docm`, refusé).
-
-### E5. Comités publics
-
-- Figurent les membres **actifs** de l'édition (`SC_CHAIR`, `SC_MEMBER`, `OC_MEMBER`, `CHAIR`)
-  qui ont donné le consentement `directory_listing`. Les autres ne sont **pas** listés ; la page
-  indique seulement « et N autres membres » (nombre, sans identité). **À valider** : ce nombre
-  est-il souhaité ?
-- Champs : titre, prénom, nom, institution, pays ; photo seulement avec le consentement
-  `photo_publication` (nouveau, L2). Jamais l'adresse e-mail.
-- Le consentement est **par compte** (L1) ; il deviendra « par édition » en L3 (`Consent.edition`).
-- Retrait du consentement : effet immédiat dans l'API, et au rebuild suivant dans les pages
-  pré-rendues (E9). **À valider** : délai acceptable, sinon rebuild déclenché à chaque retrait.
-
-### E6. Programme, intervenants, inscriptions
-
-Leurs données n'existent qu'en L5 (programme, M10) et L6 (tarifs). En L2, ces pages existent
-avec un contenu éditorial (« Le programme sera publié en mai »), modifiable dans la gestion, et
-sont exclues du plan de site tant qu'elles sont vides. Elles deviennent de vraies pages dans
-leur lot. L'étude place le « programme public (lecture) » en L2 : **écart à valider**.
-
-### E7. Référencement
-
-- Par page : `<title>`, description, `og:title`, `og:description`, `og:image` (affiche de
-  l'édition, fichier public), `og:locale`, URL canonique, `hreflang` FR/EN.
-- `sitemap.xml` produit au build depuis l'instantané (pages non vides seulement) ; `robots.txt`
-  existant complété par la ligne `Sitemap:`.
-- JSON-LD `schema.org/Event` (nom, dates, lieu, organisateur, `inLanguage`) sur l'accueil. Un
-  `<script type="application/ld+json">` n'est pas exécutable : il n'entre pas dans les empreintes
-  de la CSP (`inject-csp.mjs` le vérifie déjà, à tester).
-- Nom de domaine et URL publique : `GESTCONF_PUBLIC_URL`.
-
-### E8. Compte à rebours et heures
-
-Les dates sont affichées dans le **fuseau de l'édition** (D13), avec le fuseau indiqué. Le
-compte à rebours est calculé dans le navigateur après le rendu (`afterNextRender`) : la page
-pré-rendue affiche la date, jamais un nombre de jours figé au build.
-
-### E9. Mettre à jour les pages pré-rendues
-
-`deploy.sh --portal-only` relit l'instantané, rebuild le portail seul et le synchronise
-(`public_html`, sans toucher à l'API ni à la gestion), en quelques minutes. La gestion affiche
-« dernière publication du portail : <date du build> » (lue dans un fichier `build-info.json`).
-Le déploiement continu (D18) permettrait un rebuild automatique ; il reste une décision séparée,
-**à prendre avant L3**.
-
-### E10. Plusieurs éditions
-
-L2 affiche l'**édition courante** de la conférence (hypothèse mono-conférence, Q2). Les archives
-(P3) prendront `/editions/<slug>/…` ; aucune route actuelle ne l'utilise.
-
-### E11. Droits
-
-Nouvelle capacité **`portal.write`** (pages, documents, choix de l'affiche) : `ADMIN`, `CHAIR`
-et `OC_MEMBER` de fonction `communication`. C'est la première écriture « partielle » du CO
-(Q12 non tranchée) : **à valider**. Lecture des contenus dans la gestion avec `edition.read`.
-La matrice des droits et son test de complétude reçoivent les nouvelles routes.
-
-### E12. Profil
-
-Ajouts au profil : photo (fichier public, avec le consentement `photo_publication`), page web
-personnelle et identifiants publics (ORCID déjà présent, Google Scholar, LinkedIn : URL
-`https:` seulement). Ces données entrent dans le registre des données personnelles (export,
-anonymisation : photo supprimée du disque).
-
-## 3. Modèle de données (additif)
-
-| Table | Champs | Remarques |
+| Table | Champs principaux | Remarques |
 |---|---|---|
-| `portal_page` | `edition`, `key` (énumération : `home_intro`, `about`, `call`, `practical`, `program_soon`, `speakers_soon`, `registration_soon`), `title_fr/en`, `body_fr/en` (Markdown), `html_fr/en` (rendu), `is_published`, `updated_by`, horodatages | Unicité (`edition`, `key`) ; pas de pages libres en L2 (structure fixe, menus stables) |
-| `public_file` | `uuid`, `edition` (nullable : photos de profil), `kind` (`document`, `image`, `photo`), `storage_name`, `original_name`, `content_type`, `size`, `sha256`, `title_fr/en`, `position`, `is_published`, `uploaded_by` | FK `RESTRICT` ; suppression : ligne puis fichier, dans un `on_commit` |
-| `edition` | `poster` (FK `public_file`, nullable) | Image Open Graph et bandeau d'accueil |
-| `profile` | `photo` (FK `public_file`, nullable), `website`, `scholar_url`, `linkedin_url` | Données personnelles : registre mis à jour |
-| `consent.kind` | `photo_publication` | Nouvelle valeur (choix, migration de choix seulement) |
+| `portal_page` | `edition`, `slug`, `is_system`, `route`, `title_fr/en`, `description_fr/en` (métadonnées), `published` | `SITE_ROUTES` marque les pages du site à `save()` **et** par migration de données ; propriété `path` ; page système non supprimable, slug verrouillé |
+| `portal_section` | `edition`, `key`, `section_type`, `title_fr/en`, `subtitle_fr/en`, `body_fr/en` (HTML assaini), `cta_label_fr/en`, `cta_url`, `cta2_label_fr/en`, `cta2_url`, `image` (FK `public_file`), `config` (JSON borné par type), `published` | Champs traduisibles déclarés (`TRANSLATABLE`) |
+| `portal_page_section` | `page`, `section`, `position` | Unicité (`page`, `section`) et (`page`, `position`) ; FK `RESTRICT` côté section (suppression refusée si posée) |
+| `portal_menu_item` | `edition`, `location` (`header`, `footer`), `label_fr/en`, `page` (FK nullable), `url`, `new_tab`, `position`, `published` | Page **ou** URL `https:` obligatoire |
+| `portal_publication` | `edition`, `published_at`, `release`, `actor` | Dernière mise en ligne ; le compteur d'écart se calcule par l'audit (`portal.*` postérieurs) |
+| `public_file` | `uuid`, `edition` (nullable), `kind` (`document`, `image`, `photo`), `storage_name`, `original_name`, `content_type`, `size`, `sha256`, `title_fr/en`, `position`, `published`, `uploaded_by` | Suppression : ligne puis fichier dans un `on_commit` |
+| `edition` | `poster` (FK `public_file`, nullable) | Image Open Graph |
+| `profile` | `photo` (FK `public_file`), `website`, `scholar_url`, `linkedin_url` | Registre des données personnelles mis à jour |
+| `consent.kind` | `photo_publication` | Nouvelle valeur |
+
+Toutes les écritures passent par `portal/services.py`, auditées (`portal.section_updated`…).
 
 ## 4. API
 
-**Public (anonyme, `AllowAny`, liste blanche du test de plateforme).**
-- `GET /v1/public/portal` : édition courante, pages publiées (HTML seulement), documents
-  publiés, dates publiques, comités publics ; `ETag` et `Cache-Control: public, max-age=300`.
-  `GET /v1/public/editions/current` reste pour compatibilité (test de fumée).
-- `GET /v1/public/files/<uuid>/<nom>` (E4).
+**Public** (`AllowAny`, liste blanche du test de plateforme, `pagination_class = None`) :
+- `GET /v1/public/portal/routes` : routes à pré-rendre (`/fr/…`, `/en/…`, `/fr/p/<slug>`…) et
+  leur **nombre attendu** ;
+- `GET /v1/public/portal/composition/<chemin|slug>` : page, sections publiées ordonnées en paires
+  de langue, données des sections « données » ; 404 si inconnue (le gabarit s'affiche seul) ;
+- `GET /v1/public/portal/menu?location=header|footer` ;
+- `GET /v1/public/portal/site` : édition, dates, thématiques, types, documents, comités (un seul
+  appel pour les gabarits des pages du site) ;
+- `GET /v1/public/files/<uuid>/<nom>`.
 
-**Gestion (`ManageViewSet`, 2FA).**
-- `…/portal/pages` (liste, détail, modification ; `POST …/preview`).
-- `…/portal/files` (liste, envoi multipart, modification du titre et de l'ordre, publication,
-  suppression) ; `PATCH …/edition` accepte `poster`.
-- `…/portal/status` : date du dernier build connu, nombre de modifications depuis.
+**Gestion** (`ManageViewSet`, 2FA, `portal.write` en écriture, `edition.read` en lecture) :
+`…/portal/sections` (CRUD, `POST …/preview`), `…/portal/pages` (CRUD ; actions `attach`,
+`detach`, `reorder`), `…/portal/menu` (CRUD, `reorder` par emplacement), `…/portal/files`
+(multipart), `…/portal/status` (dernière mise en ligne, modifications depuis).
 
-**Compte.** `PUT /v1/me/photo` (multipart), `DELETE /v1/me/photo` ; liens dans
-`PATCH /v1/me/profile`.
-
-Le client TypeScript généré gère le multipart (à vérifier avec `ng-openapi-gen`, sinon
-service écrit à la main et documenté).
+**Compte** : `PUT`/`DELETE /v1/me/photo`, liens dans `PATCH /v1/me/profile`.
 
 ## 5. Frontend
 
-**Portail (pré-rendu FR et EN).** Accueil (titre, thème, dates, lieu, compte à rebours, appels
-à l'action : « Soumettre » visible pendant l'appel, renvoyant vers `/compte` jusqu'à L3),
-Présentation, Thématiques, Appel à communications (règles, formats, modèles, échéances),
-Dates clés, Comités, Informations pratiques, Programme / Intervenants / Inscriptions (« à
-venir »). Service d'instantané (`TransferState` puis rafraîchissement), sélecteur de langue par
-URL, en-tête et pied de page de l'édition, métadonnées par route. Budgets surveillés (le
-portail initial est à 361,8 kB pour 365 kB) : pas de Material sur les pages publiques.
+**Portail.** Routes `/fr/…` et `/en/…` (accueil, appel à communications, dates, thématiques,
+comités, programme, intervenants, inscription), `/fr/p/:slug` et `/en/p/:slug` **avant** `**`,
+pré-rendues à partir de `routes` ; `/compte/**` inchangé (rendu client). Rendu des sections
+(`SectionsComponent`, un composant par type, type inconnu ignoré), assainisseur sans DOM
+(`sanitize.ts`, liste blanche de balises, aucun attribut sauf `href` http(s)/interne/`mailto`/
+`tel`), en-tête et pied de page à menus gérés (repli codé), sélecteur de langue par URL,
+métadonnées par route. Pas de Material sur les pages publiques (budget : 361,8 kB sur 365).
 
-**Gestion.** Rubrique « Portail » : pages (éditeur Markdown FR/EN avec aperçu), documents
-(envoi, titres, ordre, publication), affiche, état de publication ; menu filtré par
-`portal.write`.
+**Gestion.** Rail et recherche (§2.3), guide et aide contextuelle (§2.3), rubrique « Portail » :
+sections (édition FR/EN côte à côte, aperçu), pages (du site et personnalisées), composeur,
+menus, documents, état de publication et bandeau d'écart.
 
-**Compte.** Photo et liens dans « Profil » ; consentement `photo_publication` dans
-« Confidentialité ».
+**Compte.** Photo et liens dans « Profil » ; `photo_publication` dans « Confidentialité ».
 
 ## 6. Sécurité et données personnelles
 
-- Rendu Markdown sans HTML brut, liens filtrés ; test de non-régression XSS (charges connues).
-- Fichiers : signature, extension, taille, réencodage des photos, `nosniff`, `attachment`, aucun
-  fichier servi par Apache ; quota d'envoi (limite de débit `portal_upload`).
-- Comités : jamais d'adresse ; consentement vérifié dans la requête (pas seulement à l'affichage).
-- Registre des données personnelles : photo, liens ; anonymisation supprime la photo du disque ;
-  le test de balayage couvre les nouvelles colonnes.
-- CSP inchangée (`img-src 'self' data:` couvre les images servies sous `/api/`).
+- HTML assaini aux deux bouts ; tests avec des charges XSS connues (`<script>`, `style=`,
+  `javascript:`, `on*=`, balises SVG) côté Python **et** côté portail.
+- Fichiers : signature, extension, taille, réencodage, `nosniff`, `attachment`, jamais servis par
+  Apache ; limite de débit `portal_upload`.
+- Comités : jamais d'adresse ; consentement vérifié dans la requête.
+- Registre des données personnelles (photo, liens) et test de balayage étendus.
+- CSP inchangée.
 
 ## 7. Tests
 
-- Backend : rendu Markdown (charges XSS), fichiers (types refusés, signature trompeuse,
-  réencodage sans EXIF, 404 si non publié), `GET /v1/public/portal` (brouillon invisible,
-  membres sans consentement absents, aucune adresse), matrice des droits (`portal.write`),
-  introspection et balayage étendus.
-- Frontend : service d'instantané (hydratation puis rafraîchissement), pages, sélecteur de
-  langue, métadonnées ; build : chaque page pré-rendue dans les deux langues, CSP présente,
-  JSON-LD valide, `sitemap.xml` cohérent.
-- Test de fumée : `/`, `/en/`, `/sitemap.xml`, un fichier public.
+Backend : assainisseur, composition (ordre, liste complète exigée, relue), pages du site
+(marquage, pas de doublon `/p/`), menus (repli, validation), routes (compte attendu), fichiers,
+comités (consentement), matrice des droits (`portal.write`), registre et balayage.
+Frontend : navigation (une catégorie ouverte, repli, plus long préfixe), recherche (NFD, rangs,
+tri stable, profil restreint : écran hors périmètre introuvable), cohérence des fiches d'aide,
+rendu des sections (type inconnu, assainissement), pré-rendu (compte de routes, CSP, JSON-LD,
+`sitemap.xml`). Vérification **dans le navigateur** du rail (le piège `[hidden]` ne se voit pas
+hors navigateur). Test de fumée : `/fr/`, `/en/`, `/sitemap.xml`, un fichier public.
 
 ## 8. Étapes
 
 | Étape | Contenu | Critère de fin | Charge |
 |---|---|---|---|
-| L2.0 | Vérifications : `markdown-it-py`, Pillow sur o2switch (V28), multipart du client généré, routes FR/EN pré-rendues (preuve de concept) | Rapport ajouté à `L1-verifications-o2switch.md` ; décisions E1 à E4 confirmées | 1 – 1,5 |
-| L2.1 | Pages éditoriales : modèle, rendu, API publique et gestion, écrans « Portail › Pages » | Démo : un texte FR/EN publié est servi par `/v1/public/portal` | 2,5 – 3 |
-| L2.2 | Fichiers publics : stockage, contrôles, réencodage, endpoint public, écrans « Documents » et affiche ; photo du profil | Tests de sécurité des fichiers au vert ; démo d'envoi et de téléchargement | 3 – 3,5 |
-| L2.3 | Portail : instantané au build, routes FR/EN, accueil, présentation, thématiques, appel, dates, pages « à venir », compte à rebours | Pages pré-rendues dans les deux langues, budgets tenus | 3 – 4 |
-| L2.4 | Comités publics (consentements), liens du profil | Membre sans consentement absent (test) | 1 – 1,5 |
-| L2.5 | Référencement (métadonnées, JSON-LD, `sitemap.xml`, `hreflang`), `deploy.sh --portal-only`, état de publication | Validation des aperçus Open Graph et du JSON-LD ; test de fumée étendu | 1,5 – 2 |
-| L2.6 | Recette, documentation, mise à jour de l'étude | **Démo C sur o2switch** | 0,5 – 1 |
-| **Total** | | | **12,5 – 16** |
+| L2.0 | Vérifications : Pillow sur o2switch (V28), multipart du client généré, pré-rendu `/fr` + `/en` + `/p/:slug` alimenté par une API (preuve de concept), redirection `/` | Rapport ; E1 à E4 confirmées | 1 |
+| L2.1 | Gestion : table de navigation, rail en accordéon, recherche `⌘K`, guide `/aide` et aide contextuelle, fiches des écrans L1 | Vérifications de la compétence au vert, dans le navigateur | 2,5 – 3 |
+| L2.2 | CMS backend : modèles, assainisseur, services audités, API publique et de gestion, *seed* sans composition, `portal.write`, état de publication | Tests du CMS et matrice au vert | 3 – 3,5 |
+| L2.3 | CMS gestion : sections, pages, composeur, menus, bandeau d'écart, fiches d'aide | Démo : composer une page, la voir dans l'aperçu | 3 – 3,5 |
+| L2.4 | Fichiers publics, documents, affiche, photo du profil | Tests de sécurité des fichiers au vert | 2,5 – 3 |
+| L2.5 | Portail : routes FR/EN pré-rendues, pages du site, rendu des sections, menus, `/p/:slug`, compte de routes, compte à rebours | Toutes les pages pré-rendues dans les deux langues ; budgets tenus | 3 – 4 |
+| L2.6 | Comités publics, référencement, `deploy.sh --portal-only`, `mark_portal_published` | Aperçus Open Graph et JSON-LD valides ; test de fumée étendu | 1,5 – 2,5 |
+| L2.7 | Recette, documentation, mise à jour de l'étude (§17) | **Démo C sur o2switch** | 0,5 – 1 |
+| **Total** | | | **17 – 21,5** |
 
 ## 9. Risques et hypothèses non vérifiées
 
 | Risque | Mesure |
 |---|---|
-| Pillow ne s'installe pas sur o2switch (paquet binaire) | V28 en L2.0 ; repli : pas de réencodage, JPEG avec EXIF refusés |
-| Le poste de déploiement n'atteint pas l'API de production au build | Instantané lu depuis un fichier exporté par une commande (`manage.py export_portal_snapshot`) |
-| Pages pré-rendues en retard sur la base | État de publication affiché dans la gestion ; `--portal-only` ; décision CD (D18) |
-| Budget du portail (361,8 kB sur 365) dépassé par les nouvelles pages | Pages chargées à la demande ; pas de Material public ; mesure à chaque étape |
-| Formats de fichiers dangereux | Liste blanche courte, signature, `attachment`, `nosniff` ; antivirus **non vérifié** |
-| Données personnelles publiées sans base légale | Consentements explicites, retirables ; cadre légal Q14 toujours ouvert |
+| Pillow ne s'installe pas sur o2switch | V28 en L2.0 ; repli sans réencodage |
+| API de production injoignable au build → pages manquantes, build vert | Compte de routes attendu fourni par l'API et vérifié ; refus de livrer |
+| Modifications non visibles avant republication | Bandeau d'écart, `--portal-only`, fiche d'aide « publier le portail » ; déploiement continu (D18) |
+| Budget du portail (361,8 kB sur 365) | Sections chargées à la demande ; pas de Material public ; mesure à chaque étape |
+| Rail correct en logique, faux à l'écran (`[hidden]`) | Vérification visuelle dans Chromium à chaque étape touchant la coque |
+| Formats de fichiers dangereux | Liste blanche courte, signature, `attachment`, `nosniff` ; antivirus non vérifié |
+| Données personnelles publiées sans base légale | Consentements explicites et retirables ; cadre légal Q14 ouvert |
 
 ## 10. Questions au commanditaire
 
-1. Validation des décisions E1 à E12, en particulier E1 (hybride), E4 (Pillow), E5 (nombre de
-   membres non listés), E6 (programme en L5 : écart avec l'étude) et E11 (écriture par le CO
-   « communication »).
-2. Textes définitifs (présentation, appel, informations pratiques) et affiche : à saisir par
-   l'organisation, hors charge (étude §14.3).
-3. Nom de domaine de production (pour les URL canoniques et le plan de site).
-4. Déploiement continu (D18) : à décider avant L3.
+1. Validation de E1 à E14, et des adaptations du §2.4 (surtout : écrans dédiés plutôt que la
+   console générique ; tests Vitest plutôt que `verify:console`).
+2. E4 (fichiers publics : adaptation de la règle n° 8), E5 (« et N autres membres », délai de
+   retrait du consentement), E6 (programme en L5), E11 (écriture par le CO « communication »).
+3. Charge de 17 à 21,5 j-h, contre 10 à 14 dans l'étude.
+4. Textes, affiche, nom de domaine de production ; déploiement continu (D18) avant L3.
