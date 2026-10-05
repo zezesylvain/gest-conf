@@ -28,12 +28,13 @@ function items(capabilities: string[], role: Parameters<typeof buildNavigation>[
 }
 
 describe('Table de navigation de la gestion (plan L2 §2.3)', () => {
-  it('président : cinq catégories, ordre du rail numéroté', () => {
+  it('président : six catégories, ordre du rail numéroté', () => {
     const groups = buildNavigation(3, CHAIR);
     expect(groups.map((group) => group.key)).toEqual([
       'steering',
       'settings',
       'committees',
+      'portal',
       'control',
       'help',
     ]);
@@ -54,6 +55,10 @@ describe('Table de navigation de la gestion (plan L2 §2.3)', () => {
       'confidentiality',
       'members',
       'invitations',
+      // Lecture du portail (edition.read) ; écriture réservée à portal.write.
+      'portalSections',
+      'portalPages',
+      'portalMenus',
       'guide',
     ]);
   });

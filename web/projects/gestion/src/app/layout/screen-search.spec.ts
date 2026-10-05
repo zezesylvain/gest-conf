@@ -56,7 +56,7 @@ describe('ScreenSearch', () => {
   it('saisie vide : tout le rail ; une lettre : rien', async () => {
     const { type, options, root } = await render();
     await type('');
-    expect(options()).toHaveLength(10);
+    expect(options()).toHaveLength(13);
     await type('c');
     expect(options()).toEqual([]);
     expect(root.querySelector('.empty')?.textContent).toContain('deux lettres');
@@ -116,7 +116,7 @@ describe('ScreenSearch', () => {
     await type('journal');
     await key('Escape');
     expect(input.value).toBe('');
-    expect(options()).toHaveLength(10);
+    expect(options()).toHaveLength(13);
   });
 
   it('profil restreint : un écran hors périmètre est introuvable', async () => {

@@ -33,11 +33,17 @@ export interface HelpSheet {
 export const HELP_PROFILES: readonly Role[] = ['ADMIN', 'CHAIR', 'SC_CHAIR', 'OC_MEMBER'];
 
 /** Fiches qui ne correspondent à aucun écran et ne sont pas orphelines pour autant. */
-export const TRANSVERSAL: readonly string[] = ['first-steps', 'security', 'roles'];
+export const TRANSVERSAL: readonly string[] = [
+  'first-steps',
+  'security',
+  'roles',
+  'portal-publish',
+];
 
 const ALL = HELP_PROFILES;
 const SETTINGS_WRITERS: readonly Role[] = ['ADMIN', 'CHAIR'];
 const MEMBER_MANAGERS: readonly Role[] = ['ADMIN', 'CHAIR', 'SC_CHAIR'];
+const PORTAL_EDITORS: readonly Role[] = ['ADMIN', 'CHAIR', 'OC_MEMBER'];
 
 /** Constructeur : les clés d'une fiche sont toutes sous `gestion.help.sheets.<id>`. */
 function sheet(
@@ -126,6 +132,32 @@ export const HELP_SHEETS: readonly HelpSheet[] = [
     steps(k, 'invite', 'follow', 'resend'),
     callout('info', k, 'link'),
     callout('warning', k, 'sensitive'),
+  ]),
+  sheet('portal-sections', PORTAL_EDITORS, (k) => [
+    text(k('intro')),
+    list(k('content'), k('data')),
+    steps(k, 'create', 'edit', 'preview'),
+    callout('info', k, 'reuse'),
+    callout('warning', k, 'delete'),
+  ]),
+  sheet('portal-pages', PORTAL_EDITORS, (k) => [
+    text(k('intro')),
+    list(k('site'), k('custom')),
+    steps(k, 'compose', 'order', 'info'),
+    callout('info', k, 'template'),
+    callout('warning', k, 'refusals'),
+  ]),
+  sheet('portal-menus', PORTAL_EDITORS, (k) => [
+    text(k('intro')),
+    steps(k, 'add', 'order'),
+    callout('info', k, 'fallback'),
+    callout('warning', k, 'links'),
+  ]),
+  sheet('portal-publish', PORTAL_EDITORS, (k) => [
+    text(k('intro')),
+    steps(k, 'edit', 'banner', 'deploy'),
+    callout('warning', k, 'delay'),
+    callout('info', k, 'who'),
   ]),
   sheet('audit', SETTINGS_WRITERS, (k) => [
     text(k('intro')),

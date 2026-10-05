@@ -3324,6 +3324,40 @@ components:
         is_active:
           type: boolean
           title: Actif
+    PlacedSection:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        code:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        section_type:
+          allOf:
+          - $ref: '#/components/schemas/SectionType'
+          readOnly: true
+          title: Type
+        title_fr:
+          type: string
+          readOnly: true
+          title: Titre (FR)
+        title_en:
+          type: string
+          readOnly: true
+          title: Titre (EN)
+        published:
+          type: boolean
+          readOnly: true
+          title: Publiée
+      required:
+      - code
+      - id
+      - published
+      - section_type
+      - title_en
+      - title_fr
     Placement:
       type: object
       properties:
@@ -3331,9 +3365,8 @@ components:
           type: integer
           readOnly: true
         section:
-          type: object
-          additionalProperties: {}
-          description: id, code, section_type, title_fr, title_en, published
+          allOf:
+          - $ref: '#/components/schemas/PlacedSection'
           readOnly: true
       required:
       - position

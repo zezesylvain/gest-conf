@@ -422,3 +422,53 @@ n'est remise en cause.
   - assainisseur, services, API publique et de gestion (pas de requêtes N+1), commandes.
 - Couverture de `apps/portal` : 94 %.
 - Schéma OpenAPI régénéré et validé ; client TypeScript régénéré ; front inchangé, au vert.
+
+## 14. Bilan de L2.3 (5 octobre 2026)
+
+**Livré dans la gestion**, nouvelle catégorie « Portail » du rail :
+
+- **Sections** :
+  - liste avec le type, la publication et les pages qui portent chaque section (« Posée
+    sur ») ;
+  - création, puis éditeur : champs bilingues côte à côte, champs selon le type (corps HTML
+    et boutons pour les sections de contenu, réglages pour les sections de données) ;
+  - aperçu du HTML tel qu'il sera enregistré, assaini par le serveur.
+- **Pages** : pages du site (gabarit annoncé, adresse figée) et pages personnalisées, avec
+  création et suppression.
+- **Composeur** :
+  - sections posées, ordonnées par « Monter » / « Descendre », avec « Retirer » et « Poser à
+    la fin » ; l'ordre part en liste complète, et chaque écriture affiche la page relue ;
+  - informations de la page (titres, descriptions, identifiant et publication des pages
+    personnalisées).
+- **Menus** : en-tête et pied de page ; chaque entrée vise une page ou une adresse, et s'ordonne
+  par boutons.
+- **Bandeau d'écart** sur chaque écran du portail (E1) : modifications non publiées et date de
+  la plus ancienne, dernière mise en ligne, explication du délai.
+- **Droits dans l'interface** : écriture avec `portal.write`, sinon lecture seule annoncée ; le
+  serveur reste juge.
+- **4 fiches d'aide** : sections, pages et composeur, menus, et la fiche transversale
+  « Publier le portail ». Elles nomment les refus : section posée, page du site, page dans un
+  menu, adresses acceptées.
+
+**Défaut corrigé, trouvé dans le navigateur** :
+
+- Une erreur sur un `DELETE` perdait son code et son message : « Requête invalide » au lieu de
+  « Section posée sur : … ». Le client généré attend du texte pour ces réponses, donc le corps
+  JSON de l'erreur arrivait en chaîne.
+- `toApiError` relit désormais ce corps en JSON (test ajouté). La correction vaut aussi pour les
+  suppressions de L1.
+- **Côté serveur** : `Placement.section` est maintenant typé (`PlacedSection`) dans le schéma,
+  et non un dictionnaire libre.
+
+**Vérifications** :
+
+- **Tests Vitest** : gestion 68 (12 de plus : composeur, sections, menus, bandeau, `moved`),
+  shared 76 ; lint et format au vert.
+- **Dans Chromium** (comptes ADMIN et CO « communication », 2FA) :
+  - une section avec `<script>` et `onclick` est assainie à l'aperçu et à l'enregistrement ;
+  - création d'une page personnalisée, deux sections posées, « Descendre » ;
+  - suppression d'une section posée refusée, avec le nom des pages ;
+  - entrée `mailto:` dans le pied de page ;
+  - `⌘K` « composer » trouve « Pages » ; « ? » ouvre « Pages et composeur » ;
+  - bandeau au bon compte ; aucune erreur dans la console.
+- **Bundles initiaux** : gestion 359,5 kB, portail 362,0 kB.

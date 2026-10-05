@@ -1,0 +1,181 @@
+<gc-page-header
+  [heading]="'gestion.portal.menus.title' | translate"
+  [lead]="'gestion.portal.menus.lead' | translate"
+/>
+<gestion-portal-status-banner [editionId]="editionId()" />
+@if (!canWrite()) {
+  <p class="notice">{{ 'gestion.portal.readOnly' | translate }}</p>
+}
+<div aria-live="polite">
+  @if (status()) {
+    <p class="notice" role="status">{{ status() }}</p>
+  }
+</div>
+<gc-error-summary [messages]="errors()" />
+
+@if (!loading()) {
+  @for (location of locations; track location) {
+    <section class="card" [attr.aria-labelledby]="'menu-' + location">
+      <h2 [id]="'menu-' + location">{{ 'gestion.portal.menus.' + location | translate }}</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">{{ 'gestion.portal.fields.labelFr' | translate }}</th>
+              <th scope="col">{{ 'gestion.portal.fields.labelEn' | translate }}</th>
+              <th scope="col">{{ 'gestion.portal.fields.target' | translate }}</th>
+              <th scope="col">{{ 'gestion.portal.fields.published' | translate }}</th>
+              @if (canWrite()) {
+                <th scope="col">
+                  <span class="visually-hidden">{{ 'gestion.settings.actions' | translate }}</span>
+                </th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (
+              item of byLocation()[location];
+              track item.id;
+              let i = $index, first = $first, last = $last
+            ) {
+              <tr>
+                <td lang="fr">{{ item.label_fr }}</td>
+                <td lang="en">{{ item.label_en }}</td>
+                <td>
+                  {{ target(item) }}
+                  @if (item.new_tab) {
+                    <span class="badge">{{ 'gestion.portal.fields.newTab' | translate }}</span>
+                  }
+                </td>
+                <td>
+                  {{
+                    (item.published ? 'gestion.settings.yes' : 'gestion.settings.no') | translate
+                  }}
+                </td>
+                @if (canWrite()) {
+                  <td class="actions">
+                    <button
+                      mat-button
+                      type="button"
+                      (click)="move(location, i, -1)"
+                      [disabled]="first || busy()"
+                    >
+                      {{ 'gestion.portal.composer.up' | translate
+                      }}<span class="visually-hidden"> {{ item.label_fr }}</span>
+                    </button>
+                    <button
+                      mat-button
+                      type="button"
+                      (click)="move(location, i, 1)"
+                      [disabled]="last || busy()"
+                    >
+                      {{ 'gestion.portal.composer.down' | translate
+                      }}<span class="visually-hidden"> {{ item.label_fr }}</span>
+                    </button>
+                    <button mat-button type="button" (click)="startEdit(item)">
+                      {{ 'gestion.settings.edit' | translate
+                      }}<span class="visually-hidden"> {{ item.label_fr }}</span>
+                    </button>
+                    <button mat-button type="button" (click)="remove(item)" [disabled]="busy()">
+                      {{ 'gestion.settings.delete' | translate
+                      }}<span class="visually-hidden"> {{ item.label_fr }}</span>
+                    </button>
+                  </td>
+                }
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" class="muted">{{ 'gestion.portal.menus.empty' | translate }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      @if (canWrite() && editing() === null) {
+        <div class="actions">
+          <button mat-stroked-button type="button" (click)="startCreate(location)">
+            {{ 'gestion.portal.menus.add' | translate }}
+          </button>
+        </div>
+      }
+    </section>
+  }
+
+  @if (canWrite() && editing() !== null) {
+    <section class="card" aria-labelledby="menu-form-title">
+      <h2 id="menu-form-title">
+        {{
+          (editing() ? 'gestion.portal.menus.editTitle' : 'gestion.portal.menus.add') | translate
+        }}
+      </h2>
+      <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+        <div class="grid-2">
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'gestion.portal.fields.location' | translate }}</mat-label>
+            <mat-select formControlName="location">
+              @for (location of locations; track location) {
+                <mat-option [value]="location">{{
+                  'gestion.portal.menus.' + location | translate
+                }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <span></span>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'gestion.portal.fields.labelFr' | translate }}</mat-label>
+            <input matInput formControlName="label_fr" lang="fr" required />
+            <mat-error>{{ error('label_fr') }}</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'gestion.portal.fields.labelEn' | translate }}</mat-label>
+            <input matInput formControlName="label_en" lang="en" />
+            <mat-error>{{ error('label_en') }}</mat-error>
+          </mat-form-field>
+        </div>
+        <mat-radio-group
+          formControlName="target"
+          [attr.aria-label]="'gestion.portal.fields.target' | translate"
+        >
+          <mat-radio-button value="page">{{
+            'gestion.portal.menus.toPage' | translate
+          }}</mat-radio-button>
+          <mat-radio-button value="url">{{
+            'gestion.portal.menus.toUrl' | translate
+          }}</mat-radio-button>
+        </mat-radio-group>
+        @if (form.controls.target.value === 'page') {
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'gestion.portal.fields.page' | translate }}</mat-label>
+            <mat-select formControlName="page">
+              @for (page of pages(); track page.id) {
+                <mat-option [value]="page.id">{{ page.title_fr }} ({{ page.paths.fr }})</mat-option>
+              }
+            </mat-select>
+            <mat-error>{{ error('page') }}</mat-error>
+          </mat-form-field>
+        } @else {
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'gestion.portal.fields.url' | translate }}</mat-label>
+            <input matInput formControlName="url" />
+            <mat-hint>{{ 'gestion.portal.urlHint' | translate }}</mat-hint>
+            <mat-error>{{ error('url') }}</mat-error>
+          </mat-form-field>
+        }
+        <mat-checkbox formControlName="new_tab">{{
+          'gestion.portal.fields.newTab' | translate
+        }}</mat-checkbox>
+        <mat-checkbox formControlName="published">{{
+          'gestion.portal.fields.published' | translate
+        }}</mat-checkbox>
+        <div class="actions">
+          <button mat-flat-button type="submit" [disabled]="busy()">
+            {{ 'gestion.settings.save' | translate }}
+          </button>
+          <button mat-button type="button" (click)="editing.set(null)">
+            {{ 'shared.reauth.cancel' | translate }}
+          </button>
+        </div>
+      </form>
+    </section>
+  }
+}

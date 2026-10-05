@@ -9,7 +9,7 @@ import type { Capability, Role } from '@gestconf/shared';
  * surtout, au serveur (règle n° 2).
  */
 
-export type NavGroupKey = 'steering' | 'settings' | 'committees' | 'control' | 'help';
+export type NavGroupKey = 'steering' | 'settings' | 'committees' | 'portal' | 'control' | 'help';
 
 /** Entrée du rail, prête à afficher (libellés en clés de traduction). */
 export interface NavEntry {
@@ -47,6 +47,7 @@ export const GROUP_ORDER: readonly NavGroupKey[] = [
   'steering',
   'settings',
   'committees',
+  'portal',
   'control',
   'help',
 ];
@@ -117,6 +118,30 @@ export const SCREENS: readonly ScreenDef[] = [
     capability: 'members.read',
   },
   {
+    key: 'portalSections',
+    path: 'portail/sections',
+    label: 'gestion.nav.portalSections',
+    help: 'portal-sections',
+    group: 'portal',
+    capability: 'edition.read',
+  },
+  {
+    key: 'portalPages',
+    path: 'portail/pages',
+    label: 'gestion.nav.portalPages',
+    help: 'portal-pages',
+    group: 'portal',
+    capability: 'edition.read',
+  },
+  {
+    key: 'portalMenus',
+    path: 'portail/menus',
+    label: 'gestion.nav.portalMenus',
+    help: 'portal-menus',
+    group: 'portal',
+    capability: 'edition.read',
+  },
+  {
     key: 'audit',
     path: 'audit',
     label: 'gestion.nav.audit',
@@ -148,10 +173,10 @@ export const EXTRA_HELP_ROUTES: readonly { url: string; help: string }[] = [
  * L'aide est toujours présente.
  */
 export const ROLE_GROUPS: Partial<Record<Role, readonly NavGroupKey[]>> = {
-  ADMIN: ['steering', 'settings', 'committees', 'control'],
-  CHAIR: ['steering', 'settings', 'committees', 'control'],
+  ADMIN: ['steering', 'settings', 'committees', 'portal', 'control'],
+  CHAIR: ['steering', 'settings', 'committees', 'portal', 'control'],
   SC_CHAIR: ['steering', 'committees'],
-  OC_MEMBER: ['steering', 'settings'],
+  OC_MEMBER: ['steering', 'settings', 'portal'],
 };
 
 /** Rôles de gestion : ceux que le sélecteur « Rôle actif » propose. */

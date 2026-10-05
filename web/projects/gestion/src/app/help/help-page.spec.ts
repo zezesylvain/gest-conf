@@ -21,7 +21,7 @@ describe('HelpPage', () => {
     expect(root.querySelector('#index-profils h3')?.textContent).toContain(
       "Administrateur de l'édition",
     );
-    expect(root.querySelectorAll('#index-ecrans > ul:first-of-type li')).toHaveLength(9);
+    expect(root.querySelectorAll('#index-ecrans > ul:first-of-type li')).toHaveLength(12);
     for (const sheet of HELP_SHEETS) {
       expect(root.querySelector(`#fiche-${sheet.id}`)).not.toBeNull();
     }

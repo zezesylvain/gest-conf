@@ -47,6 +47,18 @@ describe('toApiError', () => {
     expect(error.body).toEqual(body);
   });
 
+  it('relit en JSON un corps reçu en texte (DELETE : réponse attendue sans corps)', () => {
+    const body = JSON.stringify({
+      code: 'validation_error',
+      message: 'Données invalides.',
+      fields: { non_field_errors: ['Section posée sur : home.'] },
+    });
+    const error = toApiError(httpError(400, body));
+    expect(error.code).toBe('validation_error');
+    expect(error.fields).toEqual({ non_field_errors: ['Section posée sur : home.'] });
+    expect(toApiError(httpError(400, '{pas du json')).code).toBe('bad_request');
+  });
+
   it('donne un code générique sans corps exploitable', () => {
     expect(toApiError(httpError(0, null)).code).toBe('network_error');
     expect(toApiError(httpError(502, '<html>')).code).toBe('server_error');

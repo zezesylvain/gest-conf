@@ -82,27 +82,20 @@ class PreviewSerializer(serializers.Serializer):
     body_en = serializers.CharField(required=False, allow_blank=True, default="")
 
 
+class PlacedSectionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Section
+        fields = ("id", "code", "section_type", "title_fr", "title_en", "published")
+        read_only_fields = fields
+
+
 class PlacementSerializer(serializers.ModelSerializer):
-    section = serializers.SerializerMethodField()
+    section = PlacedSectionSerializer(read_only=True)
 
     class Meta:
         model = PageSection
         fields = ("position", "section")
         read_only_fields = fields
-
-    @extend_schema_field(
-        serializers.DictField(help_text="id, code, section_type, title_fr, title_en, published")
-    )
-    def get_section(self, placement: PageSection) -> dict[str, Any]:
-        section = placement.section
-        return {
-            "id": section.pk,
-            "code": section.code,
-            "section_type": section.section_type,
-            "title_fr": section.title_fr,
-            "title_en": section.title_en,
-            "published": section.published,
-        }
 
 
 class PageSerializer(serializers.ModelSerializer):

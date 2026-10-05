@@ -70,6 +70,38 @@ export const routes: Routes = [
           import('./pages/committees/invitations-page').then((m) => m.InvitationsPage),
       },
       {
+        path: 'portail/sections',
+        title: 'gestion.portal.sections.title',
+        canActivate: [capabilityGuard('edition.read')],
+        loadComponent: () => import('./pages/portal/sections-page').then((m) => m.SectionsPage),
+      },
+      {
+        path: 'portail/sections/:sectionId',
+        title: 'gestion.portal.sections.title',
+        canActivate: [capabilityGuard('edition.read')],
+        loadComponent: () =>
+          import('./pages/portal/section-editor-page').then((m) => m.SectionEditorPage),
+      },
+      {
+        path: 'portail/pages',
+        title: 'gestion.portal.pages.title',
+        canActivate: [capabilityGuard('edition.read')],
+        loadComponent: () => import('./pages/portal/pages-page').then((m) => m.PagesPage),
+      },
+      {
+        path: 'portail/pages/:pageId',
+        title: 'gestion.portal.pages.title',
+        canActivate: [capabilityGuard('edition.read')],
+        loadComponent: () =>
+          import('./pages/portal/page-composer-page').then((m) => m.PageComposerPage),
+      },
+      {
+        path: 'portail/menus',
+        title: 'gestion.portal.menus.title',
+        canActivate: [capabilityGuard('edition.read')],
+        loadComponent: () => import('./pages/portal/menus-page').then((m) => m.MenusPage),
+      },
+      {
         path: 'audit',
         title: 'gestion.audit.title',
         canActivate: [capabilityGuard('audit.read')],

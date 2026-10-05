@@ -43,6 +43,9 @@ describe('EditionLayout', () => {
       'Confidentialité',
       'Membres',
       'Invitations',
+      'Sections',
+      'Pages',
+      'Menus',
       'Journal',
       'Guide',
     ]);
@@ -52,7 +55,7 @@ describe('EditionLayout', () => {
     const root = await render([CHAIR_EDITION]);
     expect(openGroups(root)).toEqual(['Pilotage']);
     expect(links(root, '.rail ul:not([hidden]) a')).toEqual(['Tableau de bord']);
-    expect(root.querySelectorAll('.rail ul[hidden]').length).toBe(4);
+    expect(root.querySelectorAll('.rail ul[hidden]').length).toBe(5);
   });
 
   it('un clic ouvre une autre catégorie et referme la précédente', async () => {

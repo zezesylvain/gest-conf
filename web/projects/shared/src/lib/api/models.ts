@@ -61,6 +61,7 @@ export type { PatchedProfileRequest } from './models/patched-profile-request';
 export type { PatchedSectionWriteRequest } from './models/patched-section-write-request';
 export type { PatchedSubmissionTypeRequest } from './models/patched-submission-type-request';
 export type { PatchedTrackRequest } from './models/patched-track-request';
+export type { PlacedSection } from './models/placed-section';
 export type { Placement } from './models/placement';
 export type { Preview } from './models/preview';
 export type { PreviewRequest } from './models/preview-request';
