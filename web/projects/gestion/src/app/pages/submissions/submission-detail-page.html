@@ -1,0 +1,235 @@
+<gc-page-header
+  [heading]="
+    submission()?.reference
+      ? ('gestion.submissions.detail.titleWithReference'
+        | translate: { reference: submission()?.reference })
+      : ('gestion.submissions.detail.title' | translate)
+  "
+  [lead]="submission()?.title ?? ''"
+/>
+<p>
+  <a [routerLink]="['..']">{{ 'gestion.submissions.detail.back' | translate }}</a>
+</p>
+<div aria-live="polite">
+  @if (status()) {
+    <p class="notice" role="status">{{ status() }}</p>
+  }
+</div>
+<gc-error-summary [messages]="errors()" />
+
+@if (submission(); as current) {
+  <section class="card" aria-labelledby="meta-title">
+    <h2 id="meta-title">{{ 'gestion.submissions.detail.metadata' | translate }}</h2>
+    <dl>
+      <dt>{{ 'gestion.submissions.fields.status' | translate }}</dt>
+      <dd>
+        <span class="badge">{{ 'gestion.submissions.status.' + current.status | translate }}</span>
+      </dd>
+      <dt>{{ 'gestion.submissions.fields.submitter' | translate }}</dt>
+      <dd>{{ current.submitter_name }}</dd>
+      <dt>{{ 'gestion.submissions.fields.track' | translate }}</dt>
+      <dd>{{ current.track ?? '—' }}</dd>
+      <dt>{{ 'gestion.submissions.fields.type' | translate }}</dt>
+      <dd>{{ current.submission_type ?? '—' }}</dd>
+      <dt>{{ 'gestion.submissions.fields.language' | translate }}</dt>
+      <dd>{{ current.language ? ('shared.language.' + current.language | translate) : '—' }}</dd>
+      <dt>{{ 'gestion.submissions.fields.keywords' | translate }}</dt>
+      <dd>{{ current.keywords.join(', ') || '—' }}</dd>
+      <dt>{{ 'gestion.submissions.fields.submittedAt' | translate }}</dt>
+      <dd>{{ date(current.submitted_at) }}</dd>
+      <dt>{{ 'gestion.submissions.fields.updatedAt' | translate }}</dt>
+      <dd>{{ date(current.updated_at) }}</dd>
+      @if (current.withdrawn_at) {
+        <dt>{{ 'gestion.submissions.fields.withdrawn' | translate }}</dt>
+        <dd>{{ date(current.withdrawn_at) }} — {{ current.withdraw_reason }}</dd>
+      }
+    </dl>
+    <h3>{{ 'gestion.submissions.fields.abstract' | translate }}</h3>
+    <p class="abstract">{{ current.abstract || '—' }}</p>
+  </section>
+
+  <section class="card" aria-labelledby="authors-title">
+    <h2 id="authors-title">{{ 'gestion.submissions.fields.authors' | translate }}</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">{{ 'gestion.submissions.authors.name' | translate }}</th>
+            <th scope="col">{{ 'gestion.submissions.authors.email' | translate }}</th>
+            <th scope="col">{{ 'gestion.submissions.authors.institution' | translate }}</th>
+            <th scope="col">{{ 'gestion.submissions.authors.roles' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (author of current.authors; track author.position) {
+            <tr>
+              <td>{{ author.position }}</td>
+              <td>{{ author.first_name }} {{ author.last_name }}</td>
+              <td>
+                <a [href]="'mailto:' + author.email">{{ author.email }}</a>
+              </td>
+              <td>
+                {{ author.institution || '—' }}
+                {{ author.country ? '(' + author.country + ')' : '' }}
+              </td>
+              <td>
+                @if (author.is_corresponding) {
+                  <span class="badge">{{
+                    'gestion.submissions.authors.corresponding' | translate
+                  }}</span>
+                }
+                @if (author.is_presenter) {
+                  <span class="badge">{{
+                    'gestion.submissions.authors.presenter' | translate
+                  }}</span>
+                }
+                @if (author.has_account) {
+                  <span class="muted">{{ 'gestion.submissions.authors.account' | translate }}</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="files-title">
+    <h2 id="files-title">{{ 'gestion.submissions.detail.files' | translate }}</h2>
+    @if (current.files.length) {
+      <ul>
+        @for (file of current.files; track file.id) {
+          <li>
+            <a [href]="download(file.id)" download>{{ file.original_name }}</a>
+            ·
+            {{
+              'gestion.submissions.detail.fileDetails'
+                | translate: { version: file.version, pages: file.pages }
+            }}
+            · {{ date(file.uploaded_at) }}
+            @if (file.metadata_removed) {
+              · {{ 'gestion.submissions.detail.cleaned' | translate }}
+            }
+            @if ($first) {
+              · <strong>{{ 'gestion.submissions.detail.current' | translate }}</strong>
+            }
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="muted">{{ 'gestion.submissions.detail.noFile' | translate }}</p>
+    }
+  </section>
+
+  <section class="card" aria-labelledby="declarations-title">
+    <h2 id="declarations-title">{{ 'gestion.submissions.detail.declarations' | translate }}</h2>
+    <ul class="checklist">
+      @for (declaration of current.declarations; track declaration.code) {
+        <li>
+          <span [class]="declaration.accepted ? 'ok' : 'ko'" aria-hidden="true">{{
+            declaration.accepted ? '✔' : '✘'
+          }}</span>
+          <span class="visually-hidden">{{
+            (declaration.accepted ? 'gestion.dashboard.check.done' : 'gestion.dashboard.check.todo')
+              | translate
+          }}</span>
+          {{ 'gestion.submissions.declarations.' + declaration.code | translate }}
+          <span class="muted">({{ declaration.text_version }})</span>
+        </li>
+      }
+    </ul>
+  </section>
+
+  <section class="card" aria-labelledby="extensions-title">
+    <h2 id="extensions-title">{{ 'gestion.submissions.extensions.title' | translate }}</h2>
+    <p class="muted">{{ 'gestion.submissions.extensions.lead' | translate }}</p>
+    @if (current.extensions.length) {
+      <ul>
+        @for (extension of current.extensions; track extension.id) {
+          <li>
+            {{
+              'gestion.submissions.extensions.until' | translate: { date: date(extension.until) }
+            }}
+            — {{ extension.reason }}
+            <span class="muted">
+              ({{ extension.granted_by_name || '—' }}, {{ date(extension.granted_at) }})
+            </span>
+            @if (extension.is_active) {
+              <span class="badge">{{ 'gestion.submissions.extensions.active' | translate }}</span>
+              @if (canExtend()) {
+                <button mat-button type="button" (click)="revoke(extension)" [disabled]="busy()">
+                  {{ 'gestion.submissions.extensions.revoke' | translate }}
+                </button>
+              }
+            } @else if (extension.revoked_at) {
+              <span class="muted">
+                {{
+                  'gestion.submissions.extensions.revokedAt'
+                    | translate: { date: date(extension.revoked_at) }
+                }}
+              </span>
+            } @else {
+              <span class="muted">{{ 'gestion.submissions.extensions.expired' | translate }}</span>
+            }
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="muted">{{ 'gestion.submissions.extensions.none' | translate }}</p>
+    }
+    @if (canExtend()) {
+      <form [formGroup]="extensionForm" (ngSubmit)="grant()" novalidate>
+        <div class="grid-2">
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'gestion.submissions.extensions.untilLocal' | translate }}</mat-label>
+            <input matInput type="datetime-local" formControlName="until_local" required />
+            <mat-hint>{{
+              'gestion.submissions.extensions.timezoneHint' | translate: { zone: timezone() }
+            }}</mat-hint>
+            <mat-error>{{ error('until_local') }}</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'gestion.submissions.extensions.reason' | translate }}</mat-label>
+            <textarea matInput formControlName="reason" rows="2" required></textarea>
+            <mat-error>{{ error('reason') }}</mat-error>
+          </mat-form-field>
+        </div>
+        <div class="actions">
+          <button mat-flat-button type="submit" [disabled]="busy()">
+            {{ 'gestion.submissions.extensions.grant' | translate }}
+          </button>
+        </div>
+      </form>
+    }
+  </section>
+
+  <section class="card" aria-labelledby="history-title">
+    <h2 id="history-title">{{ 'gestion.submissions.detail.history' | translate }}</h2>
+    @if (current.history.length) {
+      <ol>
+        @for (entry of current.history; track $index) {
+          <li>
+            <time [attr.datetime]="entry.at">{{ date(entry.at) }}</time> ·
+            {{ 'gestion.submissions.status.' + entry.to_status | translate }} ·
+            {{ entry.actor_name }}
+            @if (entry.reason) {
+              — {{ entry.reason }}
+            }
+          </li>
+        }
+      </ol>
+    } @else {
+      <p class="muted">{{ 'gestion.submissions.detail.noHistory' | translate }}</p>
+    }
+    @if (current.revisions.length) {
+      <p class="muted">
+        {{
+          'gestion.submissions.detail.revisions' | translate: { count: current.revisions.length }
+        }}
+      </p>
+    }
+  </section>
+} @else if (!loading()) {
+  <p class="muted">{{ 'gestion.submissions.detail.notFound' | translate }}</p>
+}

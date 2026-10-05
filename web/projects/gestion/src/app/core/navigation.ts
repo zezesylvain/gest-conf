@@ -9,7 +9,8 @@ import type { Capability, Role } from '@gestconf/shared';
  * surtout, au serveur (règle n° 2).
  */
 
-export type NavGroupKey = 'steering' | 'settings' | 'committees' | 'portal' | 'control' | 'help';
+export type NavGroupKey =
+  'steering' | 'submissions' | 'settings' | 'committees' | 'portal' | 'control' | 'help';
 
 /** Entrée du rail, prête à afficher (libellés en clés de traduction). */
 export interface NavEntry {
@@ -45,6 +46,7 @@ export interface ScreenDef {
 
 export const GROUP_ORDER: readonly NavGroupKey[] = [
   'steering',
+  'submissions',
   'settings',
   'committees',
   'portal',
@@ -60,6 +62,14 @@ export const SCREENS: readonly ScreenDef[] = [
     help: 'dashboard',
     group: 'steering',
     capability: 'edition.read',
+  },
+  {
+    key: 'submissions',
+    path: 'soumissions',
+    label: 'gestion.nav.submissions',
+    help: 'submissions',
+    group: 'submissions',
+    capability: 'submissions.read',
   },
   {
     key: 'general',
@@ -181,10 +191,10 @@ export const EXTRA_HELP_ROUTES: readonly { url: string; help: string }[] = [
  * L'aide est toujours présente.
  */
 export const ROLE_GROUPS: Partial<Record<Role, readonly NavGroupKey[]>> = {
-  ADMIN: ['steering', 'settings', 'committees', 'portal', 'control'],
-  CHAIR: ['steering', 'settings', 'committees', 'portal', 'control'],
-  SC_CHAIR: ['steering', 'committees'],
-  OC_MEMBER: ['steering', 'settings', 'portal'],
+  ADMIN: ['steering', 'submissions', 'settings', 'committees', 'portal', 'control'],
+  CHAIR: ['steering', 'submissions', 'settings', 'committees', 'portal', 'control'],
+  SC_CHAIR: ['steering', 'submissions', 'committees'],
+  OC_MEMBER: ['steering', 'submissions', 'settings', 'portal'],
 };
 
 /** Rôles de gestion : ceux que le sélecteur « Rôle actif » propose. */

@@ -4,12 +4,21 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { ErrorSummary, PageHeader, SubmissionType, SubmissionTypeRequest } from '@gestconf/shared';
+import { MatSelectModule } from '@angular/material/select';
+import {
+  ErrorSummary,
+  FilePolicy,
+  PageHeader,
+  SubmissionType,
+  SubmissionTypeRequest,
+} from '@gestconf/shared';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { ItemListPage } from './item-list';
 
 const SLUG = /^[-a-zA-Z0-9_]+$/;
+/** Fichier PDF attendu (plan L3, F1) ; la taille maximale est bornée par le serveur. */
+export const FILE_POLICIES: readonly FilePolicy[] = ['none', 'optional', 'required'];
 
 function typeForm(builder: NonNullableFormBuilder) {
   return builder.group({
@@ -20,12 +29,15 @@ function typeForm(builder: NonNullableFormBuilder) {
     description_en: [''],
     default_duration_min: [20 as number | null, [Validators.min(1), Validators.max(600)]],
     abstract_max_words: [300, [Validators.min(0), Validators.max(5000)]],
+    file_policy: ['optional' as FilePolicy],
+    max_file_mb: [10, [Validators.required, Validators.min(1), Validators.max(50)]],
     position: [0, [Validators.min(0), Validators.max(32767)]],
     is_active: [true],
   });
 }
 
-/** Types de communication (plan L1 §6.1) : durée par défaut, limite du résumé, bilingues. */
+/** Types de communication (plan L1 §6.1) : durée par défaut, limite du résumé, bilingues ;
+ * fichier PDF attendu et taille maximale (plan L3, F1). */
 @Component({
   selector: 'gestion-submission-types-page',
   imports: [
@@ -34,6 +46,7 @@ function typeForm(builder: NonNullableFormBuilder) {
     MatFormFieldModule,
     MatInputModule,
     MatCheckboxModule,
+    MatSelectModule,
     MatButtonModule,
     ErrorSummary,
     PageHeader,
@@ -45,6 +58,7 @@ function typeForm(builder: NonNullableFormBuilder) {
 export class SubmissionTypesPage extends ItemListPage<SubmissionType, ReturnType<typeof typeForm>> {
   protected readonly keys = 'gestion.settings.types';
   protected readonly form = typeForm(inject(NonNullableFormBuilder));
+  protected readonly filePolicies = FILE_POLICIES;
 
   protected fetch(editionId: number) {
     return this.api.submissionTypes(editionId);
@@ -67,6 +81,8 @@ export class SubmissionTypesPage extends ItemListPage<SubmissionType, ReturnType
       description_en: item.description_en ?? '',
       default_duration_min: item.default_duration_min ?? null,
       abstract_max_words: item.abstract_max_words ?? 300,
+      file_policy: item.file_policy ?? 'optional',
+      max_file_mb: item.max_file_mb ?? 10,
       position: item.position ?? 0,
       is_active: item.is_active ?? true,
     };
@@ -80,6 +96,8 @@ export class SubmissionTypesPage extends ItemListPage<SubmissionType, ReturnType
       description_en: '',
       default_duration_min: 20,
       abstract_max_words: 300,
+      file_policy: 'optional' as FilePolicy,
+      max_file_mb: 10,
       position: this.items().length,
       is_active: true,
     };

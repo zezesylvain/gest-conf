@@ -1,0 +1,145 @@
+<gc-page-header
+  [heading]="'gestion.submissions.title' | translate"
+  [lead]="'gestion.submissions.lead' | translate"
+/>
+<gc-error-summary [messages]="errors()" />
+
+<form [formGroup]="form" (ngSubmit)="search()" novalidate class="card">
+  <div class="grid-2">
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'gestion.submissions.search' | translate }}</mat-label>
+      <input matInput formControlName="q" maxlength="100" />
+      <mat-hint>{{ 'gestion.submissions.searchHint' | translate }}</mat-hint>
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'gestion.submissions.fields.status' | translate }}</mat-label>
+      <mat-select formControlName="status" multiple>
+        @for (status of statuses; track status) {
+          <mat-option [value]="status">{{
+            'gestion.submissions.status.' + status | translate
+          }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'gestion.submissions.fields.track' | translate }}</mat-label>
+      <mat-select formControlName="track">
+        <mat-option value="">{{ 'gestion.submissions.all' | translate }}</mat-option>
+        @for (track of tracks(); track track.id) {
+          <mat-option [value]="track.code">{{ track.code }} — {{ track.name_fr }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'gestion.submissions.fields.type' | translate }}</mat-label>
+      <mat-select formControlName="submission_type">
+        <mat-option value="">{{ 'gestion.submissions.all' | translate }}</mat-option>
+        @for (type of types(); track type.id) {
+          <mat-option [value]="type.code">{{ type.code }} — {{ type.label_fr }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'gestion.submissions.fields.language' | translate }}</mat-label>
+      <mat-select formControlName="language">
+        <mat-option value="">{{ 'gestion.submissions.all' | translate }}</mat-option>
+        <mat-option value="fr">{{ 'shared.language.fr' | translate }}</mat-option>
+        <mat-option value="en">{{ 'shared.language.en' | translate }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'gestion.submissions.ordering' | translate }}</mat-label>
+      <mat-select formControlName="ordering">
+        @for (ordering of orderings; track ordering) {
+          <mat-option [value]="ordering">{{
+            'gestion.submissions.orderings.' + ordering | translate
+          }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+  <div class="actions">
+    <button mat-flat-button type="submit">{{ 'gestion.submissions.apply' | translate }}</button>
+    <button mat-button type="button" (click)="reset()">
+      {{ 'gestion.submissions.reset' | translate }}
+    </button>
+  </div>
+</form>
+
+@if (!loading()) {
+  <div class="actions">
+    <p class="muted" role="status">
+      {{ 'gestion.submissions.count' | translate: { count: count() } }}
+    </p>
+    @if (canExport()) {
+      <a mat-stroked-button [href]="exportHref()" download>
+        {{ 'gestion.submissions.export' | translate }}
+      </a>
+    }
+  </div>
+  <div class="table-wrap">
+    <table>
+      <caption class="visually-hidden">
+        {{
+          'gestion.submissions.title' | translate
+        }}
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">{{ 'gestion.submissions.fields.reference' | translate }}</th>
+          <th scope="col">{{ 'gestion.submissions.fields.title' | translate }}</th>
+          <th scope="col">{{ 'gestion.submissions.fields.authors' | translate }}</th>
+          <th scope="col">{{ 'gestion.submissions.fields.track' | translate }}</th>
+          <th scope="col">{{ 'gestion.submissions.fields.type' | translate }}</th>
+          <th scope="col">{{ 'gestion.submissions.fields.status' | translate }}</th>
+          <th scope="col">{{ 'gestion.submissions.fields.submittedAt' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows(); track row.id) {
+          <tr>
+            <td>
+              <a [routerLink]="[row.id]">{{
+                row.reference || ('gestion.submissions.draft' | translate)
+              }}</a>
+            </td>
+            <td class="title">{{ row.title || ('gestion.submissions.untitled' | translate) }}</td>
+            <td>{{ row.authors_label }}</td>
+            <td>{{ row.track ?? '—' }}</td>
+            <td>{{ row.submission_type ?? '—' }}</td>
+            <td>
+              <span class="badge">{{
+                'gestion.submissions.status.' + row.status | translate
+              }}</span>
+              @if (row.extension_until) {
+                <span class="extension muted">
+                  ·
+                  {{
+                    'gestion.submissions.extensionUntil'
+                      | translate: { date: date(row.extension_until) }
+                  }}
+                </span>
+              }
+            </td>
+            <td>{{ date(row.submitted_at) }}</td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="7" class="muted">{{ 'gestion.submissions.empty' | translate }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  @if (pages() > 1) {
+    <nav class="actions" [attr.aria-label]="'gestion.pagination.label' | translate">
+      <button mat-button type="button" [disabled]="page() <= 1" (click)="goTo(page() - 1)">
+        {{ 'gestion.pagination.previous' | translate }}
+      </button>
+      <span>{{ 'gestion.pagination.status' | translate: { page: page(), pages: pages() } }}</span>
+      <button mat-button type="button" [disabled]="page() >= pages()" (click)="goTo(page() + 1)">
+        {{ 'gestion.pagination.next' | translate }}
+      </button>
+    </nav>
+  }
+}

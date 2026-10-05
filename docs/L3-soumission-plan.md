@@ -488,3 +488,98 @@ avec les décisions. Le méta-test l'admet explicitement.
   - **conflit entre deux onglets** (412) puis rechargement ;
   - soumission (référence GC27-0001), liste, retrait motivé, historique, lecture seule ;
   - 375 px sans débordement à chaque étape ; aucune erreur dans la console.
+
+## 15. Bilan de L3.4 (5 octobre 2026)
+
+**API de gestion** (`/v1/manage/editions/{id}/submissions…`, `ManageViewSet` : 401, 404, 403,
+2FA) :
+
+- **Capacités** :
+  - `submissions.read` : `ADMIN`, `CHAIR`, `SC_CHAIR`, CO (toutes fonctions) ;
+  - `submissions.extend` et `submissions.export` : `ADMIN`, `CHAIR`, `SC_CHAIR` ;
+  - `SC_MEMBER` : aucun accès avant L4 ;
+  - matrice des droits étendue : 7 routes, une case par profil.
+- **Liste** :
+  - paginée ; filtres : statuts (plusieurs), thématique et type (codes), langue ;
+  - recherche dans la référence, le titre et le nom des auteurs ;
+  - tri explicite (référence, brouillons à la fin, ou dates, ou titre) ;
+  - noms des auteurs, **sans adresse** ; nombre de pages ; dérogation en cours ;
+  - nombre de requêtes borné, indépendant du nombre de soumissions (testé).
+- **Brouillons dans la liste** : une dérogation peut être accordée à un auteur que la clôture
+  a interrompu (F8). Ils sont signalés comme tels.
+- **Détail** :
+  - métadonnées, auteurs **avec adresses**, versions du PDF, déclarations ;
+  - historique avec l'auteur de chaque changement, révisions, dérogations ;
+  - sérialiseurs nommés par rôle (`SubmissionManage*`) ; la vue relecteur (RG-04) reste à
+    écrire en L4.
+- **Fichier** : chaque version du PDF se télécharge (`…/files/{id}/content`, `attachment`,
+  `nosniff`, `no-store`).
+- **Compteurs par statut** (`…/stats`) pour le tableau de bord.
+- **Export CSV** (`…/export`, mêmes filtres que la liste) :
+  - séparateur « ; » et BOM UTF-8 (tableur en français), dates à l'heure de l'édition ;
+  - **journalisé** (RG-17 : nombre de lignes et filtres) ;
+  - cellules **neutralisées contre l'injection de formules** (`=`, `+`, `-`, `@`, tabulation,
+    retour chariot : apostrophe en tête).
+- **Dérogations** :
+  - accordées (`…/extensions`) et révoquées (`…/extensions/{id}/revoke`, idempotente) par les
+    services de L3.2 ;
+  - révocation refusée sur une édition archivée (409 `edition_archived`).
+- **Clôture** : commande `close_call`, ajoutée au cron (toutes les heures, `deploy/cron.sh` et
+  `deploy/README.md`) :
+  - `SUBMITTED` → `SCREENING` par `transition()`, acteur `cron:close_call` ;
+  - une soumission en dérogation passe au premier passage après l'échéance ;
+  - brouillons et éditions archivées ignorés ; idempotente, verrouillée, battement de cœur ;
+  - une soumission en recevabilité ne reçoit plus de dérogation (409 `submission_locked`).
+
+**Défaut trouvé et corrigé** : supprimer une thématique ou un type **utilisé** par une
+soumission levait une `RestrictedError` (erreur 500). Il répond maintenant 409 `in_use`
+(« désactivez-le »), comme l'annonçait le commentaire de L1. Un test dédié couvre le cas. La
+matrice a mis le défaut au jour dès qu'une soumission a existé dans son jeu de données.
+
+**Écrans de la gestion** :
+
+- **Rubrique « Soumissions »**, nouvelle catégorie du rail après le pilotage :
+  - entrée dans `core/navigation.ts` ; fiche d'aide `submissions` ;
+  - recherche d'écran (« dérogation », « export »…) ;
+  - le détail relève de la même fiche et de la même catégorie.
+- **Liste** : filtres, tri, pagination ; lien « Exporter (CSV) » aux mêmes filtres, affiché avec
+  `submissions.export` seulement.
+- **Détail** :
+  - auteurs (`mailto:`), versions du PDF, déclarations, historique ;
+  - dérogations : échéance à l'heure de l'édition, motif ; révocation après confirmation.
+- **Tableau de bord** : carte « Soumissions » (envoyées, brouillons, nombre par statut).
+- **Paramétrage** :
+  - types : fichier PDF (aucun, facultatif, obligatoire) et taille maximale ;
+  - informations générales : langues des soumissions ;
+  - **RG-19** : code et double aveugle gelés après la première soumission, avec une
+    explication. Pour un non-administrateur, la case est désactivée. Pour l'administrateur,
+    un motif est exigé et transmis ; le serveur reste juge (`setting_frozen`).
+- **Fiches d'aide** : `submissions` (nouvelle). `settings-general`, `settings-lists` et
+  `settings-confidentiality` sont complétées : gel, politique de fichier, « élément utilisé ».
+
+**Vérifications** :
+
+- **Backend** : 1 511 tests sous SQLite, 1 518 sous MariaDB (115 nouveaux, dont 7 routes ×
+  12 profils dans la matrice). Également : `ruff`, schéma régénéré sur MariaDB, traductions à
+  jour.
+- **Front** : gestion 87 tests (13 nouveaux : liste, export, détail, dérogations, RG-19,
+  navigation), portail 104, shared 76, scripts 11 ; lint, format, build. Bundle initial : gestion
+  360,7 kB, portail 367,7 kB.
+- **Chromium**, base locale, administratrice avec 2FA :
+  - compteurs du tableau de bord ; liste et filtre « Soumise » ;
+  - export CSV (200, `text/csv`, BOM, en-têtes traduits) ;
+  - PDF téléchargé (`attachment`) ;
+  - dérogation accordée puis révoquée ;
+  - politique de fichier des types ; gel RG-19 et motif demandé ;
+  - recherche d'écran ; 375 px sans débordement ; aucune erreur dans la console.
+- **`close_call` sur la base locale** : 2 soumissions passent en recevabilité, puis 0 au second
+  passage ; les brouillons restent intacts.
+- **Défaut corrigé pendant la vérification** : après l'octroi d'une dérogation, le formulaire
+  vidé s'affichait en erreur (état « soumis » conservé). Il est maintenant réinitialisé par sa
+  directive.
+
+**Reporté en L3.5** :
+
+- rappels des brouillons ;
+- doublons (F15 : signalement dans la liste de gestion) ;
+- cloche de notifications (portail).

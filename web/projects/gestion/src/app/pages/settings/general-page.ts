@@ -22,6 +22,7 @@ import {
   MeStore,
   PageHeader,
   PatchedEditionRequest,
+  SubmissionLanguage,
 } from '@gestconf/shared';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -38,11 +39,18 @@ function timeZones(): string[] {
   }
 }
 
+/** Langues des soumissions proposées (plan L3, F11). */
+export const SUBMISSION_LANGUAGES: readonly SubmissionLanguage[] = ['fr', 'en'];
+
 /**
  * Informations générales de l'édition (plan L1 §6.1), bilingues (D14 : l'anglais est exigé
  * pour publier). Lecture seule sans `edition.write` ; une édition archivée est refusée par
  * le serveur (`edition_archived`). Un changement de fuseau ne déplace pas les instants UTC
  * des dates clés : leurs heures locales affichées changent (§6.2).
+ *
+ * RG-19 : après la première soumission, le code est gelé. Seul un administrateur de
+ * l'édition le change, avec un motif ; l'interface le montre, le serveur le décide
+ * (`setting_frozen`).
  */
 @Component({
   selector: 'gestion-general-page',
@@ -74,6 +82,13 @@ export class GeneralPage implements OnInit {
   protected readonly canWrite = computed(() =>
     editionCapabilities(this.meStore, this.editionId()).includes('edition.write'),
   );
+  /** Indice d'ergonomie : `edition.archive` n'appartient qu'à l'administrateur (§5.2). */
+  protected readonly isAdmin = computed(() =>
+    editionCapabilities(this.meStore, this.editionId()).includes('edition.archive'),
+  );
+  protected readonly frozen = signal<string[]>([]);
+  protected readonly languages = SUBMISSION_LANGUAGES;
+  private initialCode = '';
   protected readonly form = inject(NonNullableFormBuilder).group({
     code: ['', [Validators.required, Validators.pattern(/^[A-Z][A-Z0-9]{1,11}$/)]],
     slug: ['', [Validators.required, Validators.maxLength(64)]],
@@ -88,6 +103,8 @@ export class GeneralPage implements OnInit {
     city: ['', Validators.maxLength(255)],
     country: [''],
     timezone: ['', Validators.required],
+    submission_languages: [[] as SubmissionLanguage[], Validators.required],
+    reason: ['', Validators.maxLength(2000)],
   });
   protected readonly loading = signal(true);
   protected readonly saving = signal(false);
@@ -111,9 +128,15 @@ export class GeneralPage implements OnInit {
         city: edition.city ?? '',
         country: edition.country ?? '',
         timezone: edition.timezone ?? '',
+        submission_languages: edition.submission_languages ?? ['fr', 'en'],
+        reason: '',
       });
+      this.initialCode = edition.code;
+      this.frozen.set(edition.frozen_fields);
       if (!this.canWrite()) {
         this.form.disable();
+      } else if (edition.frozen_fields.includes('code') && !this.isAdmin()) {
+        this.form.controls.code.disable();
       }
     } catch (error) {
       this.errors.set(errorMessages(this.translate, error));
@@ -130,9 +153,17 @@ export class GeneralPage implements OnInit {
     return fieldErrorMessage(this.translate, control);
   }
 
+  /** Changement d'un réglage gelé (RG-19) : un motif est exigé. */
+  protected frozenChange(): boolean {
+    return this.frozen().includes('code') && this.form.controls.code.value !== this.initialCode;
+  }
+
   protected async submit(): Promise<void> {
     this.errors.set([]);
     this.saved.set(false);
+    if (this.frozenChange() && !this.form.controls.reason.value.trim()) {
+      this.form.controls.reason.setErrors({ required: true });
+    }
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       focusFirstInvalid(this.host.nativeElement);
@@ -140,13 +171,16 @@ export class GeneralPage implements OnInit {
     }
     this.saving.set(true);
     try {
-      const value = this.form.getRawValue();
+      const { reason, ...value } = this.form.getRawValue();
       const body: PatchedEditionRequest = {
         ...value,
         start_date: value.start_date || null,
         end_date: value.end_date || null,
+        ...(this.frozenChange() ? { reason: reason.trim() } : {}),
       };
-      await this.api.updateEdition(Number(this.editionId()), body);
+      const saved = await this.api.updateEdition(Number(this.editionId()), body);
+      this.initialCode = saved.code;
+      this.form.controls.reason.reset('');
       this.form.markAsPristine();
       this.saved.set(true);
       await this.meStore.load().catch(() => undefined);

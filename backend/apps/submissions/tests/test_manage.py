@@ -237,6 +237,7 @@ def test_export_csv_filtered_audited_and_formula_safe(world):
     by_reference = {row[0]: row for row in rows[1:]}
     assert by_reference[world["second"].reference][2] == '\'=HYPERLINK("http://x")'
     first = by_reference[world["first"].reference]
+    assert first[1] == "Soumise"
     assert "Awa Koné (INP-HB, CI)" not in first[6]  # le soumissionnaire n'a pas d'institution ici
     assert "Mariam Traoré (INP-HB, CI)" in first[6]
     assert first[7] == "awa@univ.ci"  # correspondants seulement

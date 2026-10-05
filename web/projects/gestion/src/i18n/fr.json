@@ -26,7 +26,8 @@
         "committees": "Comités",
         "portal": "Portail",
         "control": "Contrôle",
-        "help": "Aide"
+        "help": "Aide",
+        "submissions": "Soumissions"
       },
       "keywords": {
         "dashboard": "accueil, statut, publier, publication, archiver, état, résumé",
@@ -42,12 +43,14 @@
         "portalSections": "blocs, contenu, texte, bandeau, accueil, rédaction",
         "portalPages": "composer, composeur, page personnalisée, informations pratiques, site",
         "portalMenus": "navigation, liens, en-tête, pied de page",
-        "portalFiles": "modèle, téléchargement, pdf, fichier, affiche, image, photo"
+        "portalFiles": "modèle, téléchargement, pdf, fichier, affiche, image, photo",
+        "submissions": "propositions, communications, articles, résumés, auteurs, dérogation, délai, export, csv, références"
       },
       "portalSections": "Sections",
       "portalPages": "Pages",
       "portalMenus": "Menus",
-      "portalFiles": "Documents et images"
+      "portalFiles": "Documents et images",
+      "submissions": "Soumissions"
     },
     "status": {
       "draft": "brouillon",
@@ -141,6 +144,11 @@
         "message": "L'édition passera en lecture seule. Possible seulement après la fin de la conférence.",
         "confirm": "Archiver",
         "done": "Édition archivée."
+      },
+      "submissions": {
+        "title": "Soumissions",
+        "summary": "{{total}} soumission(s) envoyée(s), {{drafts}} brouillon(s) en cours.",
+        "see": "Voir les soumissions"
       }
     },
     "fields": {
@@ -168,7 +176,11 @@
       "duration": "Durée par défaut (min)",
       "abstractMaxWords": "Mots maximum du résumé",
       "keyDate": "Date clé",
-      "public": "Visible sur le portail"
+      "public": "Visible sur le portail",
+      "filePolicy": "Fichier PDF",
+      "maxFileMb": "Taille maximale (Mo)",
+      "maxFileMbShort": "{{mb}} Mo au plus",
+      "submissionLanguages": "Langues des soumissions"
     },
     "settings": {
       "readOnly": "Lecture seule : vos rôles ne permettent pas de modifier le paramétrage.",
@@ -188,7 +200,8 @@
         "title": "Informations générales",
         "codeHint": "Une majuscule, puis 1 à 11 majuscules ou chiffres (ex. GC27).",
         "codeFormat": "Format attendu : une majuscule, puis 1 à 11 majuscules ou chiffres.",
-        "timezoneHint": "Fuseau IANA (ex. Africa/Abidjan) : les échéances se saisissent dans ce fuseau."
+        "timezoneHint": "Fuseau IANA (ex. Africa/Abidjan) : les échéances se saisissent dans ce fuseau.",
+        "submissionLanguagesHint": "Langues dans lesquelles les auteurs peuvent soumettre."
       },
       "tracks": {
         "title": "Thématiques",
@@ -200,7 +213,8 @@
         "title": "Types de communication",
         "lead": "Formats proposés aux auteurs (communication orale, poster…).",
         "add": "Ajouter un type",
-        "editTitle": "Modifier le type"
+        "editTitle": "Modifier le type",
+        "filePolicyHint": "Le résumé est toujours demandé ; le PDF selon ce réglage."
       },
       "calendar": {
         "title": "Calendrier",
@@ -219,6 +233,12 @@
         "doubleBlindHint": "Les relecteurs ne voient ni le nom, ni l'adresse, ni l'affiliation des auteurs.",
         "reviewers": "Relecteurs par soumission (1 à 10)",
         "sensitive": "Changement sensible : une confirmation de votre identité peut être demandée ; il est journalisé."
+      },
+      "frozen": {
+        "hint": "Gelé depuis la première soumission (RG-19).",
+        "admin": "Des soumissions existent : ce réglage est gelé. En tant qu'administrateur, vous pouvez le changer en donnant un motif, journalisé.",
+        "locked": "Des soumissions existent : ce réglage est gelé. Seul un administrateur de l'édition peut le changer, avec un motif.",
+        "reason": "Motif du changement (obligatoire, journalisé)"
       }
     },
     "members": {
@@ -394,21 +414,25 @@
           "timezoneTitle": "Changer de fuseau",
           "timezoneText": "Les échéances déjà saisies gardent leur instant : leurs heures locales affichées se décalent. Vérifiez le calendrier après tout changement de fuseau.",
           "readOnlyTitle": "Lecture seule",
-          "readOnlyText": "Seuls l'administrateur et le président de la conférence modifient le paramétrage ; les autres rôles le consultent. Une édition archivée n'est plus modifiable."
+          "readOnlyText": "Seuls l'administrateur et le président de la conférence modifient le paramétrage ; les autres rôles le consultent. Une édition archivée n'est plus modifiable.",
+          "languages": "Langues des soumissions : celles dans lesquelles les auteurs peuvent rédiger leur proposition.",
+          "frozenTitle": "Code gelé après la première soumission",
+          "frozenText": "Dès qu'une soumission est envoyée, le code de l'édition (préfixe des références) est gelé (RG-19). Seul un administrateur peut le changer, avec un motif journalisé."
         },
         "settings-lists": {
           "title": "Thématiques et types de communication",
           "summary": "Listes proposées aux auteurs : bilingues, ordonnées, activables.",
           "path": "Paramétrage › Thématiques ; Paramétrage › Types de communication",
-          "intro": "Chaque élément a un nom en français et en anglais, un ordre d'affichage et un état actif. Les types portent aussi une durée par défaut et un nombre maximal de mots pour le résumé.",
+          "intro": "Chaque élément a un nom en français et en anglais, un ordre d'affichage et un état actif. Les types portent aussi une durée par défaut, un nombre maximal de mots pour le résumé et le fichier PDF attendu.",
           "addTitle": "Ajouter",
           "addBody": "Bouton « Ajouter », puis « Enregistrer » : l'élément prend sa place selon son ordre.",
           "editTitle": "Modifier ou supprimer",
           "editBody": "Boutons de la ligne. Toute modification et toute suppression sont journalisées.",
           "deactivateTitle": "Désactiver plutôt que supprimer",
-          "deactivateText": "Dès que des soumissions existeront, un élément utilisé ne pourra plus être supprimé : il faudra le désactiver.",
+          "deactivateText": "Un élément utilisé par une soumission ne peut plus être supprimé (refus « élément utilisé ») : désactivez-le, il disparaît alors des choix proposés aux auteurs.",
           "publishTitle": "Condition de publication",
-          "publishText": "Au moins une thématique et un type de communication actifs sont exigés pour publier l'édition."
+          "publishText": "Au moins une thématique et un type de communication actifs sont exigés pour publier l'édition.",
+          "filePolicy": "Fichier PDF d'un type : aucun, facultatif ou obligatoire, avec une taille maximale de 1 à 50 Mo."
         },
         "settings-calendar": {
           "title": "Calendrier",
@@ -430,7 +454,9 @@
           "intro": "En double aveugle, les relecteurs ne voient ni le nom, ni l'adresse, ni l'affiliation des auteurs. C'est le serveur qui retire ces informations, pas l'affichage.",
           "reviewers": "Relecteurs par soumission : de 1 à 10.",
           "sensitiveTitle": "Changement sensible",
-          "sensitiveText": "La modification demande une confirmation d'identité récente ; elle est journalisée avec l'avant et l'après."
+          "sensitiveText": "La modification demande une confirmation d'identité récente ; elle est journalisée avec l'avant et l'après.",
+          "frozenTitle": "Double aveugle gelé après la première soumission",
+          "frozenText": "Dès qu'une soumission est envoyée, le double aveugle est gelé (RG-19) : les auteurs ont préparé leur fichier en conséquence. Seul un administrateur peut le changer, avec un motif journalisé."
         },
         "members": {
           "title": "Membres",
@@ -557,6 +583,26 @@
           "refusedText": "Le type est vérifié d'après le contenu, pas d'après le nom : un fichier dont l'extension ne correspond pas, un SVG, un exécutable ou une archive trop volumineuse une fois décompressée sont refusés.",
           "inUseTitle": "Suppression refusée",
           "inUseText": "Un fichier utilisé (section, affiche) ne se supprime pas : la colonne « Utilisé par » dit où le retirer d'abord."
+        },
+        "submissions": {
+          "title": "Soumissions",
+          "summary": "Liste filtrée, détail, export CSV et dérogations après la clôture.",
+          "path": "Soumissions",
+          "intro": "Toutes les propositions de l'édition, brouillons compris, avec leurs auteurs. Le détail montre les métadonnées, les adresses des auteurs, les versions du PDF, les déclarations et l'historique des états.",
+          "filterTitle": "Filtrer",
+          "filterBody": "Combinez états, thématique, type et langue ; la recherche porte sur la référence, le titre et le nom des auteurs.",
+          "detailTitle": "Consulter",
+          "detailBody": "Cliquez sur la référence. Chaque version du PDF se télécharge ; en double aveugle, les métadonnées du fichier ont été supprimées au dépôt.",
+          "exportTitle": "Exporter",
+          "exportBody": "« Exporter (CSV) » reprend les filtres affichés. Le fichier s'ouvre dans un tableur (séparateur « ; ») ; chaque export est journalisé.",
+          "extensionTitle": "Accorder une dérogation",
+          "extensionBody": "Dans le détail : échéance à l'heure de l'édition et motif, transmis à l'auteur. Une dérogation se révoque à tout moment.",
+          "draftsTitle": "Brouillons",
+          "draftsText": "Les brouillons figurent dans la liste pour qu'une dérogation puisse être accordée à un auteur que la clôture a interrompu ; ils ne sont pas encore soumis.",
+          "closingTitle": "Clôture de l'appel",
+          "closingText": "À la clôture, les soumissions passent en vérification de recevabilité, automatiquement, dans l'heure. Une soumission en dérogation y passe à l'échéance de sa dérogation. Une soumission en recevabilité ne reçoit plus de dérogation.",
+          "whoTitle": "Qui peut le faire",
+          "whoText": "Consultation : administrateur, présidents et comité d'organisation. Dérogations et export : administrateur, président de la conférence et président du comité scientifique."
         }
       }
     },
@@ -741,6 +787,115 @@
         "noImage": "Aucune image",
         "imageHint": "Images publiques de l'édition (Portail › Documents et images). Elle doit être publiée.",
         "imageUnpublished": "Cette image n'est pas publiée : elle n'apparaîtra pas sur le portail tant qu'elle ne l'est pas (Portail › Documents et images)."
+      }
+    },
+    "filePolicies": {
+      "none": "Aucun fichier",
+      "optional": "Facultatif",
+      "required": "Obligatoire"
+    },
+    "submissions": {
+      "title": "Soumissions",
+      "lead": "Propositions de l'édition : recherche, filtres, détail, dérogations et export.",
+      "search": "Rechercher",
+      "searchHint": "Référence, titre ou nom d'auteur.",
+      "all": "Toutes",
+      "ordering": "Tri",
+      "orderings": {
+        "reference": "Référence",
+        "-submitted_at": "Soumission la plus récente",
+        "-updated_at": "Modification la plus récente",
+        "title": "Titre"
+      },
+      "apply": "Filtrer",
+      "reset": "Réinitialiser",
+      "count": "{{count}} soumission(s)",
+      "export": "Exporter (CSV)",
+      "draft": "Brouillon",
+      "untitled": "(sans titre)",
+      "extensionUntil": "dérogation jusqu'au {{date}}",
+      "empty": "Aucune soumission ne correspond.",
+      "fields": {
+        "reference": "Référence",
+        "title": "Titre",
+        "authors": "Auteurs",
+        "track": "Thématique",
+        "type": "Type",
+        "status": "État",
+        "submittedAt": "Soumise le",
+        "updatedAt": "Modifiée le",
+        "language": "Langue",
+        "keywords": "Mots-clés",
+        "abstract": "Résumé",
+        "submitter": "Soumissionnaire",
+        "withdrawn": "Retirée le"
+      },
+      "status": {
+        "draft": "Brouillon",
+        "submitted": "Soumise",
+        "screening": "Vérification de recevabilité",
+        "under_review": "En cours d'évaluation",
+        "reviewed": "Évaluée",
+        "accepted": "Acceptée",
+        "accepted_minor": "Acceptée sous réserve de corrections",
+        "waitlist": "Liste d'attente",
+        "rejected": "Rejetée",
+        "revision_requested": "Corrections demandées",
+        "camera_ready_received": "Version finale reçue",
+        "confirmed": "Présentation confirmée",
+        "scheduled": "Programmée",
+        "presented": "Présentée",
+        "published": "Publiée dans les actes",
+        "withdrawn": "Retirée"
+      },
+      "detail": {
+        "title": "Soumission",
+        "titleWithReference": "Soumission {{reference}}",
+        "back": "← Soumissions",
+        "metadata": "Informations",
+        "files": "Fichier PDF",
+        "fileDetails": "version {{version}}, {{pages}} page(s)",
+        "cleaned": "métadonnées supprimées",
+        "current": "version courante",
+        "noFile": "Aucun fichier déposé.",
+        "declarations": "Déclarations de l'auteur",
+        "history": "Historique",
+        "noHistory": "Aucun changement d'état.",
+        "revisions": "{{count}} révision(s) enregistrée(s) après la soumission.",
+        "notFound": "Soumission introuvable."
+      },
+      "authors": {
+        "name": "Nom",
+        "email": "Adresse e-mail",
+        "institution": "Institution",
+        "roles": "Rôle",
+        "corresponding": "Correspondant",
+        "presenter": "Présentateur",
+        "account": "compte rattaché"
+      },
+      "declarations": {
+        "originality": "Travail original, non évalué ailleurs",
+        "ethics": "Règles d'éthique de la recherche respectées",
+        "conflicts": "Conflits d'intérêts déclarés",
+        "publication": "Accord de publication du résumé"
+      },
+      "extensions": {
+        "title": "Dérogations (RG-02)",
+        "lead": "Après la clôture, une dérogation rouvre la modification de cette soumission jusqu'à son échéance. L'auteur en est informé par e-mail.",
+        "until": "Jusqu'au {{date}}",
+        "active": "en cours",
+        "revoke": "Révoquer",
+        "revokedAt": "révoquée le {{date}}",
+        "expired": "échue",
+        "none": "Aucune dérogation.",
+        "untilLocal": "Échéance",
+        "timezoneHint": "Heure de l'édition ({{zone}}).",
+        "reason": "Motif (transmis à l'auteur)",
+        "grant": "Accorder la dérogation",
+        "granted": "Dérogation accordée ; l'auteur est prévenu par e-mail.",
+        "revoked": "Dérogation révoquée.",
+        "revokeTitle": "Révoquer la dérogation",
+        "revokeMessage": "La modification de la soumission sera de nouveau refusée (échéance prévue : {{date}})."
       }
     }
   }

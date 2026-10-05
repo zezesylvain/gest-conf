@@ -22,6 +22,8 @@ import {
   LanguageService,
   MeStore,
   PageHeader,
+  SubmissionStats,
+  SubmissionStatus,
 } from '@gestconf/shared';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
@@ -29,6 +31,7 @@ import { firstValueFrom } from 'rxjs';
 import { EditionApi } from '../../core/edition-api';
 import { editionTitle } from '../../core/managed-editions';
 import { editionCapabilities, errorMessages } from '../../core/page-support';
+import { SubmissionsApi } from '../../core/submissions-api';
 
 interface CheckItem {
   label: string;
@@ -38,8 +41,8 @@ interface CheckItem {
 
 /**
  * Tableau de bord de l'édition (squelette US-12, plan L1 §10.3) : statut et publication,
- * paramétrage à compléter, dates clés, invitations en attente, état de la 2FA. Pas
- * d'indicateurs (L4). La liste de contrôle est indicative : le serveur revérifie les
+ * paramétrage à compléter, dates clés, invitations en attente, état de la 2FA ; compteurs
+ * de soumissions par statut avec `submissions.read` (plan L3). Autres indicateurs en L4. La liste de contrôle est indicative : le serveur revérifie les
  * préconditions à la publication (`edition_incomplete`).
  */
 @Component({
@@ -53,6 +56,7 @@ export class DashboardPage implements OnInit {
   readonly editionId = input.required<string>();
 
   private readonly api = inject(EditionApi);
+  private readonly submissions = inject(SubmissionsApi);
   private readonly meStore = inject(MeStore);
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
@@ -62,6 +66,13 @@ export class DashboardPage implements OnInit {
   protected readonly keyDates = signal<KeyDate[]>([]);
   protected readonly checklist = signal<CheckItem[]>([]);
   protected readonly pendingInvitations = signal<number | null>(null);
+  protected readonly submissionStats = signal<SubmissionStats | null>(null);
+  /** Statuts non nuls, dans l'ordre du serveur (celui du workflow). */
+  protected readonly statusCounts = computed(() =>
+    Object.entries(this.submissionStats()?.by_status ?? {})
+      .filter(([, count]) => count > 0)
+      .map(([status, count]) => ({ status: status as SubmissionStatus, count })),
+  );
   protected readonly errors = signal<string[]>([]);
   protected readonly status = signal('');
   protected readonly busy = signal(false);
@@ -160,6 +171,9 @@ export class DashboardPage implements OnInit {
           page_size: 1,
         });
         this.pendingInvitations.set(page.count ?? 0);
+      }
+      if (this.can('submissions.read')) {
+        this.submissionStats.set(await this.submissions.stats(id));
       }
     } catch (error) {
       this.errors.set(errorMessages(this.translate, error));

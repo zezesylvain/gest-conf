@@ -21,7 +21,8 @@ import { editionCapabilities, errorMessages } from '../../core/page-support';
 /**
  * Confidentialité de l'évaluation (plan L1 §6.1) : double aveugle (RG-04) et relecteurs par
  * soumission. Changement **critique** : réauthentification récente exigée (la fenêtre
- * s'ouvre d'elle-même), audit avant/après. Le gel après l'ouverture de l'appel arrive en L3.
+ * s'ouvre d'elle-même), audit avant/après. RG-19 : après la première soumission, le double
+ * aveugle est gelé ; seul un administrateur le change, avec un motif (`setting_frozen`).
  */
 @Component({
   selector: 'gestion-confidentiality-page',
@@ -53,6 +54,21 @@ import { editionCapabilities, errorMessages } from '../../core/page-support';
           {{ 'gestion.settings.confidentiality.doubleBlind' | translate }}
         </mat-checkbox>
         <p class="muted">{{ 'gestion.settings.confidentiality.doubleBlindHint' | translate }}</p>
+        @if (frozen().includes('double_blind')) {
+          <p class="notice">
+            {{
+              (isAdmin() ? 'gestion.settings.frozen.admin' : 'gestion.settings.frozen.locked')
+                | translate
+            }}
+          </p>
+        }
+        @if (frozenChange()) {
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'gestion.settings.frozen.reason' | translate }}</mat-label>
+            <textarea matInput formControlName="reason" rows="2" required></textarea>
+            <mat-error>{{ 'shared.form.required' | translate }}</mat-error>
+          </mat-form-field>
+        }
         <mat-form-field appearance="outline">
           <mat-label>{{ 'gestion.settings.confidentiality.reviewers' | translate }}</mat-label>
           <input
@@ -87,9 +103,16 @@ export class ConfidentialityPage implements OnInit {
   protected readonly canWrite = computed(() =>
     editionCapabilities(this.meStore, this.editionId()).includes('edition.write'),
   );
+  /** Indice d'ergonomie : `edition.archive` n'appartient qu'à l'administrateur (§5.2). */
+  protected readonly isAdmin = computed(() =>
+    editionCapabilities(this.meStore, this.editionId()).includes('edition.archive'),
+  );
+  protected readonly frozen = signal<string[]>([]);
+  private initialDoubleBlind = true;
   protected readonly form = inject(NonNullableFormBuilder).group({
     double_blind: [true],
     reviewers_per_submission: [3, [Validators.required, Validators.min(1), Validators.max(10)]],
+    reason: ['', Validators.maxLength(2000)],
   });
   protected readonly loading = signal(true);
   protected readonly saving = signal(false);
@@ -102,9 +125,14 @@ export class ConfidentialityPage implements OnInit {
       this.form.reset({
         double_blind: value.double_blind ?? true,
         reviewers_per_submission: value.reviewers_per_submission ?? 3,
+        reason: '',
       });
+      this.initialDoubleBlind = value.double_blind ?? true;
+      this.frozen.set(value.frozen_fields);
       if (!this.canWrite()) {
         this.form.disable();
+      } else if (value.frozen_fields.includes('double_blind') && !this.isAdmin()) {
+        this.form.controls.double_blind.disable();
       }
     } catch (error) {
       this.errors.set(errorMessages(this.translate, error));
@@ -117,16 +145,33 @@ export class ConfidentialityPage implements OnInit {
     return fieldErrorMessage(this.translate, this.form.controls.reviewers_per_submission);
   }
 
+  /** Changement d'un réglage gelé (RG-19) : un motif est exigé. */
+  protected frozenChange(): boolean {
+    return (
+      this.frozen().includes('double_blind') &&
+      this.form.controls.double_blind.value !== this.initialDoubleBlind
+    );
+  }
+
   protected async submit(): Promise<void> {
     this.errors.set([]);
     this.saved.set(false);
+    if (this.frozenChange() && !this.form.controls.reason.value.trim()) {
+      this.form.controls.reason.setErrors({ required: true });
+    }
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
     this.saving.set(true);
     try {
-      await this.api.updateConfidentiality(Number(this.editionId()), this.form.getRawValue());
+      const { reason, ...value } = this.form.getRawValue();
+      const saved = await this.api.updateConfidentiality(Number(this.editionId()), {
+        ...value,
+        ...(this.frozenChange() ? { reason: reason.trim() } : {}),
+      });
+      this.initialDoubleBlind = saved.double_blind ?? value.double_blind;
+      this.form.controls.reason.reset('');
       this.saved.set(true);
     } catch (error) {
       this.errors.set(errorMessages(this.translate, error, this.form));

@@ -15,6 +15,9 @@ const CHAIR = [
   'members.read',
   'members.manage',
   'audit.read',
+  'submissions.read',
+  'submissions.extend',
+  'submissions.export',
 ];
 
 /** Catalogue « traduit » minimal : la clé tient lieu de libellé. */
@@ -28,10 +31,11 @@ function items(capabilities: string[], role: Parameters<typeof buildNavigation>[
 }
 
 describe('Table de navigation de la gestion (plan L2 §2.3)', () => {
-  it('président : six catégories, ordre du rail numéroté', () => {
+  it('président : sept catégories, ordre du rail numéroté', () => {
     const groups = buildNavigation(3, CHAIR);
     expect(groups.map((group) => group.key)).toEqual([
       'steering',
+      'submissions',
       'settings',
       'committees',
       'portal',
@@ -64,9 +68,28 @@ describe('Table de navigation de la gestion (plan L2 §2.3)', () => {
     ]);
   });
 
+  it('soumissions (plan L3) : catégorie dédiée, après le pilotage, avec submissions.read', () => {
+    const groups = buildNavigation(3, CHAIR);
+    expect(catalogue(groups)[1].url).toBe('/editions/3/soumissions');
+    // Sans submissions.read (relecteur avant L4) : pas de catégorie.
+    const reader = buildNavigation(3, ['edition.read']);
+    expect(reader.map((group) => group.key)).not.toContain('submissions');
+    // CO : lecture des soumissions, catégorie présente avec le rôle actif.
+    const oc = buildNavigation(3, ['edition.read', 'submissions.read'], 'OC_MEMBER');
+    expect(oc.map((group) => group.key)).toContain('submissions');
+    // Le détail d'une soumission relève de la même fiche et de la même catégorie.
+    expect(helpForUrl('/editions/3/soumissions/42')).toBe('submissions');
+    expect(activeGroup(groups, '/editions/3/soumissions/42')).toBe('submissions');
+  });
+
   it('rôle actif : filtre de menu (catégories du rôle), aide toujours présente', () => {
     const groups = buildNavigation(3, CHAIR, 'SC_CHAIR');
-    expect(groups.map((group) => group.key)).toEqual(['steering', 'committees', 'help']);
+    expect(groups.map((group) => group.key)).toEqual([
+      'steering',
+      'submissions',
+      'committees',
+      'help',
+    ]);
   });
 
   it('aucune capacité dans l’édition : rail vide (pas d’aide seule)', () => {

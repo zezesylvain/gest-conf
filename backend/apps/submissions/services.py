@@ -16,6 +16,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Count, Exists, Max, OuterRef
 from django.utils import timezone
+from django.utils.text import capfirst
 from django.utils.translation import gettext_lazy as _
 
 from apps.conferences.models import Edition, EditionStatus, FilePolicy, KeyDate, KeyDateCode
@@ -695,7 +696,7 @@ def export_csv(
                 csv_cell(value)
                 for value in (
                     submission.reference or "",
-                    submission.get_status_display(),
+                    capfirst(submission.get_status_display()),
                     submission.title,
                     submission.track.code if submission.track else "",
                     submission.submission_type.code if submission.submission_type else "",
