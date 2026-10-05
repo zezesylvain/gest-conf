@@ -1,0 +1,21 @@
+#!/usr/bin/env python
+"""Utilitaire en ligne de commande de Django.
+
+Par défaut, les paramètres de développement sont utilisés. En production,
+DJANGO_SETTINGS_MODULE=config.settings.prod doit être exporté explicitement
+(le script de déploiement le fait).
+"""
+
+import os
+import sys
+
+
+def main() -> None:
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.dev")
+    from django.core.management import execute_from_command_line
+
+    execute_from_command_line(sys.argv)
+
+
+if __name__ == "__main__":
+    main()

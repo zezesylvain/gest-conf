@@ -1,0 +1,18 @@
+{
+  "gestion": {
+    "layout": {
+      "skipToContent": "Aller au contenu",
+      "area": "Gestion"
+    },
+    "dashboard": {
+      "title": "Tableau de bord",
+      "heading": "Espace de gestion",
+      "lead": "Comités scientifique et d'organisation, administration de l'édition."
+    },
+    "notFound": {
+      "title": "Page introuvable",
+      "heading": "Cette page n'existe pas.",
+      "backHome": "Retour au tableau de bord"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "portail": {
+    "layout": {
+      "skipToContent": "Skip to content",
+      "footer": "Scientific conference management platform"
+    },
+    "home": {
+      "title": "Home",
+      "heading": "Scientific conference",
+      "lead": "Call for papers, programme and registration.",
+      "managementLink": "Go to the management area"
+    },
+    "notFound": {
+      "title": "Page not found",
+      "heading": "This page does not exist.",
+      "backHome": "Back to home"
+    }
+  }
+}

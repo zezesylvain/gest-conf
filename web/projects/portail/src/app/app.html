@@ -1,0 +1,14 @@
+<a class="skip-link" href="#contenu">{{ 'portail.layout.skipToContent' | translate }}</a>
+
+<header class="site-header">
+  <a class="brand" routerLink="/">{{ 'shared.appName' | translate }}</a>
+  <gc-language-switcher />
+</header>
+
+<main id="contenu" class="site-main" tabindex="-1">
+  <router-outlet />
+</main>
+
+<footer class="site-footer">
+  <p>{{ 'portail.layout.footer' | translate }}</p>
+</footer>

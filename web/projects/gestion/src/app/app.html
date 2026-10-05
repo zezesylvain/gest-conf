@@ -1,0 +1,12 @@
+<a class="skip-link" href="#contenu">{{ 'gestion.layout.skipToContent' | translate }}</a>
+
+<header class="app-header">
+  <a class="brand" routerLink="/">
+    {{ 'shared.appName' | translate }} · {{ 'gestion.layout.area' | translate }}
+  </a>
+  <gc-language-switcher />
+</header>
+
+<main id="contenu" class="app-main" tabindex="-1">
+  <router-outlet />
+</main>

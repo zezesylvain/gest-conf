@@ -1,0 +1,45 @@
+# BEGIN GEST-CONF
+# Bloc géré par deploy/deploy.sh (fusionné dans public_html/.htaccess) : ne pas
+# le modifier sur le serveur. Le reste du fichier, en particulier le bloc
+# Passenger écrit par cPanel (« Setup Python App »), est conservé tel quel.
+
+DirectoryIndex index.html
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # 1. Ne jamais intercepter l'API (Passenger) ni l'espace de gestion (qui a son
+  #    propre .htaccess). On teste REQUEST_URI, valable quel que soit le dossier
+  #    dans lequel la règle est évaluée.
+  RewriteCond %{REQUEST_URI} ^/(api|gestion)(/|$)
+  RewriteRule ^ - [L]
+
+  # 2. Fichier ou dossier existant (dont les pages pré-rendues) : servi tel quel.
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # 3. Sinon : coquille Angular rendue dans le navigateur (repli SPA).
+  RewriteRule ^ /index.csr.html [L]
+</IfModule>
+
+<IfModule mod_headers.c>
+  # En-têtes de sécurité (étude §9.3). Les scripts sont encadrés par la CSP à
+  # empreintes générée par Angular (autoCsp, balise <meta>) ; cet en-tête couvre
+  # les autres directives, dont frame-ancestors qui n'existe pas en <meta>.
+  Header always set Content-Security-Policy "object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; frame-src 'none'; img-src 'self' data:; font-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; media-src 'self'; manifest-src 'self'; worker-src 'self'"
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "DENY"
+  Header always set Referrer-Policy "same-origin"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
+  Header always set Strict-Transport-Security "max-age=31536000"
+
+  # Cache : fichiers à empreinte (nom haché) en cache long ; HTML jamais figé.
+  <FilesMatch "-[A-Za-z0-9_-]{8}\.(js|css)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  <FilesMatch "\.html$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+</IfModule>
+# END GEST-CONF
