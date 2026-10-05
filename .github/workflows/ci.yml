@@ -110,7 +110,10 @@ jobs:
           GESTCONF_PUBLIC_URL: https://conference.exemple.org
         # Comme deploy.sh : sécurité sans --database (sinon models.W036, plan L1 §3.7), puis
         # contrôles de la base seuls (--tag database : connexion, mysql.W002 mode strict).
+        # Clé de chiffrement TOTP obligatoire en production (plan L1 §4.10) : générée pour ce
+        # job seulement, jamais versionnée ni réutilisée.
         run: |
+          export GESTCONF_MFA_ENCRYPTION_KEYS="$(python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())')"
           python manage.py check --deploy --fail-level WARNING
           python manage.py check --database default --tag database --fail-level WARNING
 
