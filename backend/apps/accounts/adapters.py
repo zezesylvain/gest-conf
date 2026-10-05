@@ -7,8 +7,11 @@ from typing import Any
 
 from allauth.account.adapter import DefaultAccountAdapter
 from allauth.account.models import EmailAddress
+from allauth.mfa.adapter import DefaultMFAAdapter
+from cryptography.fernet import Fernet, InvalidToken, MultiFernet
 from django.conf import settings
 from django.contrib.auth.hashers import make_password
+from django.core.exceptions import ImproperlyConfigured
 from django.http import HttpRequest
 from django.utils import translation
 
@@ -77,3 +80,31 @@ class AccountAdapter(DefaultAccountAdapter):
         email = credentials.get("email") or ""
         user = account_for_email(email) if email else None
         record("auth.login_failed", actor=Actor.from_request(request), obj=user)
+
+
+# --- 2FA (plan L1 §4.2 « Adaptateurs », §4.10) ------------------------------------------
+
+
+def mfa_cipher() -> MultiFernet:
+    """Chiffrement des secrets 2FA : la première clé chiffre, toutes déchiffrent."""
+    keys = [key.strip() for key in settings.GESTCONF_MFA_ENCRYPTION_KEYS if key.strip()]
+    if not keys:
+        raise ImproperlyConfigured("GESTCONF_MFA_ENCRYPTION_KEYS est vide.")
+    return MultiFernet([Fernet(key.encode()) for key in keys])
+
+
+class MFAAdapter(DefaultMFAAdapter):
+    """Secret TOTP et graine des codes de secours chiffrés en base (allauth les stocke en
+    clair par défaut) ; émetteur fixe (``MFA_TOTP_ISSUER``), jamais l'en-tête ``Host``."""
+
+    def encrypt(self, text: str) -> str:
+        return mfa_cipher().encrypt(text.encode()).decode()
+
+    def decrypt(self, encrypted_text: str) -> str:
+        try:
+            return mfa_cipher().decrypt(encrypted_text.encode()).decode()
+        except InvalidToken as exc:
+            # Clé perdue ou retirée trop tôt : échec fermé (code refusé, pas de contournement).
+            raise ImproperlyConfigured(
+                "Secret 2FA indéchiffrable avec les clés actuelles."
+            ) from exc

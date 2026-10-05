@@ -54,7 +54,13 @@
       "email_address_limit": "Your account already has the maximum number of addresses.",
       "edition_archived": "Archived edition: read only.",
       "invalid_transition": "Status change not allowed.",
-      "edition_incomplete": "The edition is not ready to be published."
+      "edition_incomplete": "The edition is not ready to be published.",
+      "mfa_required": "Confirm your identity with your two-factor authentication code.",
+      "mfa_enrollment_required": "Enable two-factor authentication to access the management area.",
+      "incorrect_code": "Incorrect code.",
+      "unverified_email": "First verify every email address of your account (or remove the unverified ones).",
+      "add_email_blocked": "Your account is protected by two-factor authentication: adding an address goes through an invitation to that address.",
+      "unverified_primary_email": "Your primary email address must be verified."
     },
     "form": {
       "errorSummary": "The form contains errors:",

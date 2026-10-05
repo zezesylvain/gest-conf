@@ -46,6 +46,34 @@ export function sessionExpiredHandlerFactory(): () => void {
   };
 }
 
+/** Pages 2FA du portail (plan L1 §10.2). */
+export const MFA_PATH = '/compte/double-authentification';
+export const SECURITY_PATH = '/compte/securite';
+
+/**
+ * Fabrique du traitement d'un refus 2FA (`MfaVerified`) : la page courante devient le
+ * `next` de la vérification (`mfa_required`) ou de l'activation (`mfa_enrollment_required`).
+ */
+export function mfaChallengeHandlerFactory(): (
+  challenge: 'mfa_required' | 'mfa_enrollment_required',
+) => void {
+  const navigation = inject(LOGIN_NAVIGATION);
+  const router = inject(Router, { optional: true });
+  const document = inject(DOCUMENT);
+  return (challenge) => {
+    const location = document.defaultView?.location;
+    const current = location ? `${location.pathname}${location.search}` : '';
+    const next = safeNext(current, '');
+    const path = challenge === 'mfa_required' ? MFA_PATH : SECURITY_PATH;
+    const target = next ? `${path}?next=${encodeURIComponent(next)}` : path;
+    if (navigation === 'document' || !router) {
+      location?.assign(target);
+    } else if (!router.url.startsWith(path)) {
+      void router.navigateByUrl(target);
+    }
+  };
+}
+
 /** Suite de la connexion : route interne du portail, ou page entière vers la gestion. */
 export function navigateAfterLogin(router: Router, document: Document, next: unknown): void {
   const target = safeNext(next);

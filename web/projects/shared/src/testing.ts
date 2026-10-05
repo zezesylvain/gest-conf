@@ -37,6 +37,8 @@ export const TEST_ME: Me = {
   privacy_notice_pending: true,
   editions: [],
   pending_invitations: [],
+  mfa_enabled: false,
+  mfa_verified: false,
 };
 
 /**

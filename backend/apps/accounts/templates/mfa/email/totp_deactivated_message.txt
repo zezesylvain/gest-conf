@@ -1,0 +1,7 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate %}Bonjour,
+
+La double authentification (application TOTP) vient d'être désactivée sur votre compte {{ site_name }}. Si votre compte a un rôle de gestion, vous devrez la réactiver pour accéder à l'espace de gestion.{% endblocktranslate %}
+
+{% include "account/email/_security_footer.txt" %}
+
+{% include "account/email/_signature.txt" %}{% endautoescape %}

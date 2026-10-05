@@ -1,7 +1,13 @@
 from django.urls import path
 
 from apps.accounts import manage_views
-from apps.accounts.views import ConsentsView, MeView, PreferencesView, ProfileView
+from apps.accounts.views import (
+    ConsentsView,
+    MeView,
+    PreferencesView,
+    ProfileView,
+    TotpQrView,
+)
 
 app_name = "accounts"
 
@@ -12,6 +18,7 @@ urlpatterns = [
     path("me/preferences", PreferencesView.as_view(), name="me-preferences"),
     path("me/profile", ProfileView.as_view(), name="me-profile"),
     path("me/consents", ConsentsView.as_view(), name="me-consents"),
+    path("me/totp-qr", TotpQrView.as_view(), name="me-totp-qr"),
     # Membres, invitations et journal d'une édition (plan L1 §9.3).
     path(
         f"{E}/roles",

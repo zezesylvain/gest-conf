@@ -2,7 +2,7 @@
 
 Variables d'environnement obligatoires : DJANGO_SECRET_KEY, DJANGO_ALLOWED_HOSTS,
 DJANGO_CSRF_TRUSTED_ORIGINS, DATABASE_URL, GESTCONF_EMAIL_BACKEND, DEFAULT_FROM_EMAIL,
-GESTCONF_PUBLIC_URL.
+GESTCONF_PUBLIC_URL, GESTCONF_MFA_ENCRYPTION_KEYS.
 Voir .env.example.
 """
 
@@ -28,6 +28,10 @@ DEFAULT_FROM_EMAIL = env.str("DEFAULT_FROM_EMAIL")
 # obligatoire (lu par base.py, qui construit HEADLESS_FRONTEND_URLS).
 if not env.str("GESTCONF_PUBLIC_URL", default="").startswith("https://"):
     raise ImproperlyConfigured("GESTCONF_PUBLIC_URL (https://…) est obligatoire en production.")
+
+# Chiffrement du secret TOTP (plan L1 §4.10) : sans clé, aucune 2FA ne pourrait être activée.
+if not GESTCONF_MFA_ENCRYPTION_KEYS:
+    raise ImproperlyConfigured("GESTCONF_MFA_ENCRYPTION_KEYS est obligatoire en production.")
 
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True

@@ -1,0 +1,7 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate %}Bonjour,
+
+À votre demande, l'équipe {{ site_name }} a réinitialisé la double authentification de votre compte ({{ timestamp }}). Activez-la de nouveau depuis la page « Sécurité » de votre compte ; un rôle de gestion l'exige.
+
+Si vous n'êtes pas à l'origine de cette demande, prévenez les organisateurs sans attendre.{% endblocktranslate %}
+
+{% include "account/email/_signature.txt" %}{% endautoescape %}

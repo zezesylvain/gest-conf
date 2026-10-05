@@ -47,6 +47,17 @@ export const accountRoutes: Routes = [
         loadComponent: () => import('./pages/reset-password-page').then((m) => m.ResetPasswordPage),
       },
       {
+        path: 'double-authentification',
+        title: 'portail.account.mfa.title',
+        loadComponent: () => import('./pages/mfa-page').then((m) => m.MfaPage),
+      },
+      {
+        path: 'securite',
+        title: 'portail.account.security.title',
+        canMatch: [authGuard],
+        loadComponent: () => import('./pages/security/security-page').then((m) => m.SecurityPage),
+      },
+      {
         path: 'profil',
         title: 'portail.account.profile.title',
         canMatch: [authGuard],

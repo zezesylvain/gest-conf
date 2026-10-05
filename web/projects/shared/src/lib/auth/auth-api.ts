@@ -4,7 +4,16 @@ import { firstValueFrom, Observable } from 'rxjs';
 
 import { GcApiError } from '../http/api-error';
 import { AUTH_API_PREFIX } from '../http/interceptors';
-import { AllauthResponse, AuthResult, toAuthResult } from './allauth';
+import {
+  AllauthResponse,
+  AuthenticatorInfo,
+  AuthResult,
+  EmailAddressInfo,
+  RecoveryCodesInfo,
+  toAuthResult,
+  TotpSetup,
+} from './allauth';
+import { ReauthenticationPrompt } from './reauthentication';
 import { SessionStore } from './session.store';
 
 /**
@@ -19,6 +28,7 @@ import { SessionStore } from './session.store';
 export class AuthApi {
   private readonly http = inject(HttpClient);
   private readonly session = inject(SessionStore);
+  private readonly reauthentication = inject(ReauthenticationPrompt);
 
   /** Amorçage : état de la session et pose du cookie CSRF. */
   loadSession(): Promise<AuthResult> {
@@ -76,6 +86,99 @@ export class AuthApi {
     );
   }
 
+  // --- 2FA (plan L1 §4.3, L1.6) ------------------------------------------------------------
+
+  /** Étape 2FA de la connexion (flux `mfa_authenticate`) : code TOTP ou code de secours. */
+  mfaAuthenticate(code: string): Promise<AuthResult> {
+    return this.track(this.http.post<AllauthResponse>(this.url('auth/2fa/authenticate'), { code }));
+  }
+
+  /** Réauthentification par la 2FA : valide aussi la session pour la gestion (*step-up*). */
+  mfaReauthenticate(code: string): Promise<AuthResult> {
+    return this.track(
+      this.http.post<AllauthResponse>(this.url('auth/2fa/reauthenticate'), { code }),
+    );
+  }
+
+  async authenticators(): Promise<AuthenticatorInfo[]> {
+    const result = await this.call(
+      this.http.get<AllauthResponse>(this.url('account/authenticators')),
+    );
+    return Array.isArray(result.data) ? (result.data as AuthenticatorInfo[]) : [];
+  }
+
+  /**
+   * Secret TOTP en attente (404 d'allauth avec `meta.secret`), ou `null` si la 2FA est déjà
+   * active. 409 `unverified_email` : une adresse du compte n'est pas vérifiée.
+   */
+  async totpSetup(): Promise<{ setup: TotpSetup | null; result: AuthResult }> {
+    const result = await this.call(
+      this.http.get<AllauthResponse>(this.url('account/authenticators/totp')),
+    );
+    const meta = result.meta;
+    const setup =
+      result.status === 404 && meta?.secret && meta.totp_url
+        ? { secret: meta.secret, totpUrl: meta.totp_url }
+        : null;
+    return { setup, result };
+  }
+
+  activateTotp(code: string): Promise<AuthResult> {
+    return this.withReauthentication(() =>
+      this.http.post<AllauthResponse>(this.url('account/authenticators/totp'), { code }),
+    );
+  }
+
+  deactivateTotp(): Promise<AuthResult> {
+    return this.withReauthentication(() =>
+      this.http.delete<AllauthResponse>(this.url('account/authenticators/totp')),
+    );
+  }
+
+  async recoveryCodes(): Promise<RecoveryCodesInfo | null> {
+    const result = await this.withReauthentication(() =>
+      this.http.get<AllauthResponse>(this.url('account/authenticators/recovery-codes')),
+    );
+    return result.status === 200 ? (result.data as RecoveryCodesInfo) : null;
+  }
+
+  async regenerateRecoveryCodes(): Promise<RecoveryCodesInfo | null> {
+    const result = await this.withReauthentication(() =>
+      this.http.post<AllauthResponse>(this.url('account/authenticators/recovery-codes'), {}),
+    );
+    return result.status === 200 ? (result.data as RecoveryCodesInfo) : null;
+  }
+
+  // --- Adresses e-mail (réauthentification récente exigée, §4.2) ----------------------------
+
+  async emailAddresses(): Promise<EmailAddressInfo[]> {
+    const result = await this.call(this.http.get<AllauthResponse>(this.url('account/email')));
+    return Array.isArray(result.data) ? (result.data as EmailAddressInfo[]) : [];
+  }
+
+  addEmail(email: string): Promise<AuthResult> {
+    return this.withReauthentication(() =>
+      this.http.post<AllauthResponse>(this.url('account/email'), { email }),
+    );
+  }
+
+  removeEmail(email: string): Promise<AuthResult> {
+    return this.withReauthentication(() =>
+      this.http.delete<AllauthResponse>(this.url('account/email'), { body: { email } }),
+    );
+  }
+
+  makePrimaryEmail(email: string): Promise<AuthResult> {
+    return this.withReauthentication(() =>
+      this.http.patch<AllauthResponse>(this.url('account/email'), { email, primary: true }),
+    );
+  }
+
+  /** Renvoi du lien de vérification d'une adresse secondaire. */
+  resendEmailVerification(email: string): Promise<AuthResult> {
+    return this.call(this.http.put<AllauthResponse>(this.url('account/email'), { email }));
+  }
+
   private url(path: string): string {
     return `${AUTH_API_PREFIX}${path}`;
   }
@@ -85,6 +188,24 @@ export class AuthApi {
     const result = await this.call(request);
     if (result.status === 200 || result.status === 401) {
       this.session.apply(result);
+    }
+    return result;
+  }
+
+  /**
+   * Action protégée : sur un 401 portant le flux `reauthenticate` (session toujours
+   * ouverte), ouvre la fenêtre de réauthentification puis rejoue l'appel **une seule fois**.
+   */
+  private async withReauthentication(
+    request: () => Observable<AllauthResponse>,
+  ): Promise<AuthResult> {
+    const result = await this.call(request());
+    const needsReauthentication =
+      result.status === 401 &&
+      result.authenticated &&
+      (result.pendingFlow === 'reauthenticate' || result.pendingFlow === 'mfa_reauthenticate');
+    if (needsReauthentication && (await this.reauthentication.prompt())) {
+      return this.call(request());
     }
     return result;
   }

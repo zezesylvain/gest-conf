@@ -21,6 +21,8 @@ export const ERROR_CODE: ErrorCode[] = [
   'csrf_failed',
   'in_use',
   'reauthentication_required',
+  'mfa_enrollment_required',
+  'mfa_required',
   'last_admin',
   'invitation_expired',
   'invitation_not_pending',

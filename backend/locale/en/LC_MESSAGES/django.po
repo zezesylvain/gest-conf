@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gestconf-backend\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-05 16:26+0000\n"
+"POT-Creation-Date: 2026-10-05 16:49+0000\n"
 "PO-Revision-Date: 2026-10-05 11:00+0000\n"
 "Last-Translator: GEST-CONF\n"
 "Language-Team: GEST-CONF\n"
@@ -270,6 +270,14 @@ msgid "invitations"
 msgstr "invitations"
 
 #: apps/accounts/permissions.py
+msgid "Activez la double authentification pour accéder à la gestion."
+msgstr "Enable two-factor authentication to access the management area."
+
+#: apps/accounts/permissions.py
+msgid "Confirmez votre identité avec votre code de double authentification."
+msgstr "Confirm your identity with your two-factor authentication code."
+
+#: apps/accounts/permissions.py
 msgid "Confirmez votre mot de passe pour continuer."
 msgstr "Confirm your password to continue."
 
@@ -361,8 +369,8 @@ msgstr "Unknown consent type."
 msgid "La prise de connaissance ne se retire pas."
 msgstr "Acknowledging the notice cannot be withdrawn."
 
-#: apps/accounts/services/account.py apps/accounts/services/roles.py
-#: apps/conferences/services.py
+#: apps/accounts/services/account.py apps/accounts/services/mfa.py
+#: apps/accounts/services/roles.py apps/conferences/services.py
 msgid "Motif obligatoire."
 msgstr "A reason is required."
 
@@ -684,6 +692,74 @@ msgstr ""
 #, python-format
 msgid "[%(site_name)s] Un mot de passe a été défini pour votre compte"
 msgstr "[%(site_name)s] A password was set for your account"
+
+#: apps/accounts/templates/mfa/email/mfa_reset_message.txt
+#, python-format
+msgid ""
+"Bonjour,\n"
+"\n"
+"À votre demande, l'équipe %(site_name)s a réinitialisé la double authentification de votre compte (%(timestamp)s). Activez-la de nouveau depuis la page « Sécurité » de votre compte ; un rôle de gestion l'exige.\n"
+"\n"
+"Si vous n'êtes pas à l'origine de cette demande, prévenez les organisateurs sans attendre."
+msgstr ""
+"Hello,\n"
+"\n"
+"At your request, the %(site_name)s team reset the two-factor authentication of your account (%(timestamp)s). Enable it again from the “Security” page of your account; management roles require it.\n"
+"\n"
+"If you did not make this request, let the organisers know right away."
+
+#: apps/accounts/templates/mfa/email/mfa_reset_subject.txt
+#, python-format
+msgid "[%(site_name)s] Double authentification réinitialisée"
+msgstr "[%(site_name)s] Two-factor authentication reset"
+
+#: apps/accounts/templates/mfa/email/recovery_codes_generated_message.txt
+#, python-format
+msgid ""
+"Bonjour,\n"
+"\n"
+"De nouveaux codes de secours pour la double authentification ont été générés sur votre compte %(site_name)s. Les anciens codes ne sont plus valables."
+msgstr ""
+"Hello,\n"
+"\n"
+"New two-factor authentication recovery codes were generated for your %(site_name)s account. The previous codes are no longer valid."
+
+#: apps/accounts/templates/mfa/email/recovery_codes_generated_subject.txt
+#, python-format
+msgid "[%(site_name)s] Nouveaux codes de secours"
+msgstr "[%(site_name)s] New recovery codes"
+
+#: apps/accounts/templates/mfa/email/totp_activated_message.txt
+#, python-format
+msgid ""
+"Bonjour,\n"
+"\n"
+"La double authentification (application TOTP) vient d'être activée sur votre compte %(site_name)s. Conservez vos codes de secours en lieu sûr."
+msgstr ""
+"Hello,\n"
+"\n"
+"Two-factor authentication (TOTP app) has just been enabled on your %(site_name)s account. Keep your recovery codes somewhere safe."
+
+#: apps/accounts/templates/mfa/email/totp_activated_subject.txt
+#, python-format
+msgid "[%(site_name)s] Double authentification activée"
+msgstr "[%(site_name)s] Two-factor authentication enabled"
+
+#: apps/accounts/templates/mfa/email/totp_deactivated_message.txt
+#, python-format
+msgid ""
+"Bonjour,\n"
+"\n"
+"La double authentification (application TOTP) vient d'être désactivée sur votre compte %(site_name)s. Si votre compte a un rôle de gestion, vous devrez la réactiver pour accéder à l'espace de gestion."
+msgstr ""
+"Hello,\n"
+"\n"
+"Two-factor authentication (TOTP app) has just been disabled on your %(site_name)s account. If your account has a management role, you will need to enable it again to access the management area."
+
+#: apps/accounts/templates/mfa/email/totp_deactivated_subject.txt
+#, python-format
+msgid "[%(site_name)s] Double authentification désactivée"
+msgstr "[%(site_name)s] Two-factor authentication disabled"
 
 #: apps/accounts/templates/role/email/invitation_link_message.txt
 #, python-format

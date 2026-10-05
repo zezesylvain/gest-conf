@@ -14,6 +14,7 @@ export * from './lib/auth/auth-api';
 export * from './lib/auth/auth.guard';
 export * from './lib/auth/login-navigation';
 export * from './lib/auth/me.store';
+export * from './lib/auth/reauthentication';
 export * from './lib/auth/safe-next';
 export * from './lib/auth/session.store';
 

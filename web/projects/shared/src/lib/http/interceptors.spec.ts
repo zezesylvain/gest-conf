@@ -5,22 +5,26 @@ import { firstValueFrom } from 'rxjs';
 
 import { provideI18nTesting } from '../../testing';
 import { GcApiError } from './api-error';
-import { SESSION_EXPIRED_HANDLER } from './interceptors';
+import { ReauthenticationPrompt } from '../auth/reauthentication';
+import { MFA_CHALLENGE_HANDLER, SESSION_EXPIRED_HANDLER } from './interceptors';
 import { provideGestconfApi } from './provide-api';
 
 describe('Intercepteurs de l’API', () => {
   let http: HttpClient;
   let backend: HttpTestingController;
   let expired: ReturnType<typeof vi.fn>;
+  let mfaChallenge: ReturnType<typeof vi.fn>;
 
   beforeEach(async () => {
     expired = vi.fn();
+    mfaChallenge = vi.fn();
     TestBed.configureTestingModule({
       providers: [
         provideI18nTesting(),
         provideGestconfApi(),
         provideHttpClientTesting(),
         { provide: SESSION_EXPIRED_HANDLER, useValue: expired },
+        { provide: MFA_CHALLENGE_HANDLER, useValue: mfaChallenge },
       ],
     });
     http = TestBed.inject(HttpClient);
@@ -88,5 +92,44 @@ describe('Intercepteurs de l’API', () => {
       .flush({ status: 401 }, { status: 401, statusText: '' });
     backend.expectOne('/api/v1/me/profile').flush(csrf, { status: 403, statusText: '' });
     expect(((await result) as GcApiError).code).toBe('csrf_failed');
+  });
+
+  it('reauthentication_required : fenêtre, puis une seule nouvelle tentative', async () => {
+    const prompt = vi.fn().mockResolvedValue(true);
+    TestBed.inject(ReauthenticationPrompt).register(prompt);
+    const result = firstValueFrom(http.post('/api/v1/manage/editions/1/status', {}));
+    const refusal = { code: 'reauthentication_required', message: 'Non.', fields: {} };
+    backend
+      .expectOne('/api/v1/manage/editions/1/status')
+      .flush(refusal, { status: 403, statusText: '' });
+    const retry = await vi.waitFor(() => backend.expectOne('/api/v1/manage/editions/1/status'));
+    retry.flush({ ok: true });
+    expect(await result).toEqual({ ok: true });
+    expect(prompt).toHaveBeenCalledTimes(1);
+  });
+
+  it('reauthentication_required sans fenêtre : l’erreur remonte', async () => {
+    const result = firstValueFrom(http.post('/api/v1/x', {})).catch((error: unknown) => error);
+    backend
+      .expectOne('/api/v1/x')
+      .flush(
+        { code: 'reauthentication_required', message: 'Non.', fields: {} },
+        { status: 403, statusText: '' },
+      );
+    expect(((await result) as GcApiError).code).toBe('reauthentication_required');
+  });
+
+  it('mfa_required : traitement 2FA appelé, erreur transmise', async () => {
+    const result = firstValueFrom(http.get('/api/v1/manage/editions/1')).catch(
+      (error: unknown) => error,
+    );
+    backend
+      .expectOne('/api/v1/manage/editions/1')
+      .flush(
+        { code: 'mfa_required', message: 'Non.', fields: {} },
+        { status: 403, statusText: '' },
+      );
+    expect(((await result) as GcApiError).code).toBe('mfa_required');
+    expect(mfaChallenge).toHaveBeenCalledWith('mfa_required');
   });
 });

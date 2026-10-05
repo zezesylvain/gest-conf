@@ -63,7 +63,7 @@ class MePendingInvitationSerializer(serializers.Serializer):
 
 class MeSerializer(serializers.Serializer):
     """Compte connecté : identité, langue, éditions (rôles, capacités), invitations en
-    attente. L'état de la 2FA s'y ajoutera en L1.6."""
+    attente, état de la 2FA."""
 
     id = serializers.IntegerField()
     email = serializers.EmailField()
@@ -76,6 +76,16 @@ class MeSerializer(serializers.Serializer):
     )
     editions = MeEditionSerializer(many=True)
     pending_invitations = MePendingInvitationSerializer(many=True)
+    mfa_enabled = serializers.BooleanField(help_text="2FA (TOTP) activée sur le compte.")
+    mfa_verified = serializers.BooleanField(
+        help_text="Session validée par la 2FA (connexion en deux étapes ou réauthentification)."
+    )
+
+
+class TotpQrSerializer(serializers.Serializer):
+    qr_code = serializers.CharField(
+        help_text="QR code de l'enrôlement, en data:image/svg+xml;base64,…"
+    )
 
 
 class PreferencesSerializer(serializers.Serializer):

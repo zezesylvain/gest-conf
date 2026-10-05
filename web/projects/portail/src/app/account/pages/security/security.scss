@@ -1,0 +1,97 @@
+:host {
+  display: block;
+}
+
+.card {
+  margin: 0 0 1.5rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--gc-border);
+  border-radius: 0.5rem;
+  max-width: 40rem;
+}
+
+h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1.25rem;
+}
+
+h3 {
+  margin: 1.25rem 0 0.5rem;
+  font-size: 1.05rem;
+}
+
+form {
+  display: grid;
+  gap: 0.25rem;
+  max-width: 28rem;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.notice {
+  margin: 0 0 1rem;
+  padding: 0.75rem 1rem;
+  border-left: 0.35rem solid var(--gc-primary);
+  background: var(--gc-surface-muted);
+}
+
+.notice p {
+  margin: 0 0 0.5rem;
+}
+
+.hint {
+  color: var(--gc-muted);
+}
+
+.qr {
+  display: block;
+  margin: 0.5rem 0 1rem;
+  background: #fff;
+  padding: 0.5rem;
+}
+
+.secret {
+  word-break: break-all;
+}
+
+.codes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+  gap: 0.25rem 1rem;
+  margin: 0.5rem 0;
+  padding: 0;
+  list-style: none;
+  font-size: 1.1rem;
+}
+
+.addresses {
+  margin: 0 0 1rem;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.addresses li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.badge {
+  font-size: 0.85rem;
+  padding: 0.1rem 0.5rem;
+  border: 1px solid var(--gc-border);
+  border-radius: 1rem;
+}

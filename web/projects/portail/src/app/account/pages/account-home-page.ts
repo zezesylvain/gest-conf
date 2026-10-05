@@ -11,7 +11,7 @@ import { PrivacyNotice } from '../ui/privacy-notice';
  * Accueil du compte et première connexion (plan L1 §4.3) : prise de connaissance de la
  * notice d'information et invitation à compléter le profil. Pas de blocage global côté
  * serveur : chaque lot vérifie ses propres prérequis (L3 : profil complet pour soumettre).
- * Les éditions, rôles et invitations s'afficheront ici à partir de L1.5.
+ * Rappel de l'état de la double authentification (obligatoire pour la gestion).
  */
 @Component({
   selector: 'portail-account-home-page',
@@ -50,6 +50,14 @@ import { PrivacyNotice } from '../ui/privacy-notice';
           <a routerLink="/compte/profil">{{ 'portail.account.home.editProfile' | translate }}</a>
         </p>
       }
+
+      <p>
+        {{
+          (me.mfa_enabled ? 'portail.account.home.mfaEnabled' : 'portail.account.home.mfaDisabled')
+            | translate
+        }}
+        <a routerLink="/compte/securite">{{ 'portail.account.home.security' | translate }}</a>
+      </p>
 
       <p>
         <a href="/gestion/">{{ 'portail.account.home.management' | translate }}</a>

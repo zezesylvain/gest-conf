@@ -9,6 +9,8 @@ from .base import *
 DEBUG = False
 
 SECRET_KEY = "test-only-secret-key"  # noqa: S105
+# Clé Fernet de test (32 octets nuls encodés), jamais utilisée ailleurs.
+GESTCONF_MFA_ENCRYPTION_KEYS = ["AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="]
 
 ALLOWED_HOSTS = ["testserver"]
 

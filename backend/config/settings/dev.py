@@ -9,6 +9,15 @@ SECRET_KEY = (
     env.str("DJANGO_SECRET_KEY", default="") or "dev-only-insecure-key-do-not-use-in-production"
 )
 
+# Clé de chiffrement 2FA dérivée de SECRET_KEY si aucune n'est fournie (développement seul).
+if not GESTCONF_MFA_ENCRYPTION_KEYS:
+    import base64
+    import hashlib
+
+    GESTCONF_MFA_ENCRYPTION_KEYS = [
+        base64.urlsafe_b64encode(hashlib.sha256(SECRET_KEY.encode()).digest()).decode()
+    ]
+
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "[::1]"]
 
 # MariaDB recommandée (DATABASE_URL dans .env) ; SQLite en repli pour démarrer vite.

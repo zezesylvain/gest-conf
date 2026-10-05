@@ -1035,6 +1035,25 @@ paths:
               schema:
                 $ref: '#/components/schemas/Profile'
           description: ''
+  /v1/me/totp-qr:
+    get:
+      operationId: me_totp_qr
+      description: |-
+        ``GET /v1/me/totp-qr`` : QR code du secret TOTP en attente (plan L1 §10.2).
+
+        Le secret est celui qu'allauth a mis en session au ``GET …/authenticators/totp`` ;
+        404 sans secret en attente. Jamais mis en cache.
+      tags:
+      - me
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TotpQr'
+          description: ''
   /v1/public/editions/current:
     get:
       operationId: public_current_edition
@@ -1461,6 +1480,8 @@ components:
       - csrf_failed
       - in_use
       - reauthentication_required
+      - mfa_enrollment_required
+      - mfa_required
       - last_admin
       - invitation_expired
       - invitation_not_pending
@@ -1489,6 +1510,8 @@ components:
         * `csrf_failed` - Csrf Failed
         * `in_use` - In Use
         * `reauthentication_required` - Reauthentication Required
+        * `mfa_enrollment_required` - Mfa Enrollment Required
+        * `mfa_required` - Mfa Required
         * `last_admin` - Last Admin
         * `invitation_expired` - Invitation Expired
         * `invitation_not_pending` - Invitation Not Pending
@@ -1802,7 +1825,7 @@ components:
       type: object
       description: |-
         Compte connecté : identité, langue, éditions (rôles, capacités), invitations en
-        attente. L'état de la 2FA s'y ajoutera en L1.6.
+        attente, état de la 2FA.
       properties:
         id:
           type: integer
@@ -1826,11 +1849,19 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/MePendingInvitation'
+        mfa_enabled:
+          type: boolean
+          description: 2FA (TOTP) activée sur le compte.
+        mfa_verified:
+          type: boolean
+          description: Session validée par la 2FA (connexion en deux étapes ou réauthentification).
       required:
       - editions
       - email
       - id
       - locale
+      - mfa_enabled
+      - mfa_verified
       - pending_invitations
       - privacy_notice_pending
       - profile_complete
@@ -2555,6 +2586,14 @@ components:
           maxLength: 128
       required:
       - token
+    TotpQr:
+      type: object
+      properties:
+        qr_code:
+          type: string
+          description: QR code de l'enrôlement, en data:image/svg+xml;base64,…
+      required:
+      - qr_code
     Track:
       type: object
       properties:

@@ -2200,7 +2200,7 @@ Ces mises à jour seront livrées par une PR de documentation en L1.8, **après 
 
 ---
 
-## 16. Écarts constatés pendant l'implémentation (L1.0 à L1.5)
+## 16. Écarts constatés pendant l'implémentation (L1.0 à L1.6)
 
 Consignés ici pour ne pas dériver en silence (CLAUDE.md). Les écarts marqués **à valider** attendent
 l'accord du commanditaire ; les autres sont des précisions sans effet sur les décisions D1 à D18.
@@ -2450,4 +2450,48 @@ Ils seront repris dans la PR de documentation de L1.8 (§15).
     seul et réauthentification exigée.
 48. **§13, critère « test de fumée ».** Vérifié en local seulement (script rejoué contre des
     réponses simulées 200, 404, HTML et 500). **Reste à faire sur o2switch** avec le déploiement.
+
+### Étape L1.6 (double authentification)
+
+49. **§4.2, `MFA_TOTP_ISSUER` (à valider, Q15).** Le plan le laissait vide : allauth affiche
+    alors l'en-tête `Host` de la requête dans l'application TOTP (lu dans le code). Il vaut
+    `GESTCONF_SITE_NAME` (« GEST-CONF » par défaut) : nom fixe, jamais tiré d'un en-tête.
+50. **§4.10, clés de chiffrement.** `GESTCONF_MFA_ENCRYPTION_KEYS` est obligatoire en
+    production (`prod.py` refuse de démarrer sans elle). En développement, une clé est dérivée
+    de `SECRET_KEY` si aucune n'est fournie ; les tests utilisent une clé fixe. Un secret
+    indéchiffrable (clé retirée trop tôt) lève une erreur de configuration : échec fermé
+    (500 et alerte), jamais un contournement. La rotation (`MultiFernet.rotate`) est
+    **vérifiée** par test : rechiffrement, puis lecture avec la nouvelle clé seule.
+51. **§4.3, refus `unverified_email`.** allauth le renvoie dès la demande du secret
+    (`GET account/authenticators/totp`, 409), et non seulement à l'activation (constaté).
+    L'écran l'affiche avant même le QR code.
+52. **§10.1, réauthentification côté Angular.** La fenêtre est fournie par l'application
+    (portail : coque `/compte`), enregistrée auprès d'un service partagé
+    `ReauthenticationPrompt`. L'intercepteur (403 `reauthentication_required`) et `AuthApi`
+    (401 `reauthenticate` d'allauth) l'ouvrent puis rejouent la requête une seule fois. Sans
+    fenêtre enregistrée (gestion avant L1.7), l'erreur remonte telle quelle. La fenêtre
+    propose le mot de passe ou, pour un compte 2FA, un code.
+53. **§10.1, `mfa_required` et `mfa_enrollment_required`.** L'intercepteur renvoie vers
+    `/compte/double-authentification` ou `/compte/securite`, avec `next` (page entière depuis
+    la gestion). `/v1/me` expose `mfa_enabled` et `mfa_verified` (session validée par la 2FA),
+    pour que les écrans proposent la validation sans attendre un refus.
+54. **§10.2, `/compte/securite`.** Livrée avec trois sections : 2FA (QR code, clé en texte,
+    codes de secours, régénération, désactivation après confirmation), mot de passe (ancien
+    mot de passe exigé) et adresses e-mail (ajout, retrait, adresse principale, renvoi du lien).
+    Le renvoi d'un lien moins de 3 min après le précédent répond 403 (limite d'allauth,
+    constaté) : message dédié. Un compte 2FA reçoit `add_email_blocked` à l'ajout, comme
+    prévu par D6 (a).
+55. **Constats sur allauth 65.19.7.** Le changement de mot de passe conserve les
+    enregistrements d'authentification de la session (la validation 2FA reste acquise,
+    vérifié). Les signaux `authenticator_added` et `authenticator_reset` sont émis après la
+    validation de la transaction : l'audit `mfa.enabled` et `mfa.recovery_codes_regenerated`
+    est donc écrit hors de la transaction d'allauth. La contrainte d'unicité conditionnelle
+    d'`Authenticator` (un TOTP par compte) n'existe pas sous MariaDB (W036) : contrôle prévu
+    par `check_integrity` (L1.8).
+56. **Budget du portail.** Le bundle initial passe de 356,6 à 361,2 kB (intercepteur et
+    service de réauthentification partagés), sous le budget de 365 kB.
+57. **Parcours vérifié en local** (Chromium, Django de développement et `ng serve`) :
+    connexion, activation par QR code, codes de secours, déconnexion, connexion en deux étapes,
+    `mfa_verified` vrai. **Reste à faire sur o2switch** avec le déploiement (roues de
+    `cryptography` et `fido2` : vérification V03 de L1.0).
 

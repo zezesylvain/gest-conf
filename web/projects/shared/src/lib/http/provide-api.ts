@@ -6,10 +6,15 @@ import {
   withXsrfConfiguration,
 } from '@angular/common/http';
 
-import { LOGIN_NAVIGATION, sessionExpiredHandlerFactory } from '../auth/login-navigation';
+import {
+  LOGIN_NAVIGATION,
+  mfaChallengeHandlerFactory,
+  sessionExpiredHandlerFactory,
+} from '../auth/login-navigation';
 import {
   acceptLanguageInterceptor,
   apiErrorInterceptor,
+  MFA_CHALLENGE_HANDLER,
   SESSION_EXPIRED_HANDLER,
   sessionInterceptor,
 } from './interceptors';
@@ -42,5 +47,6 @@ export function provideGestconfApi(options: GestconfApiOptions = {}): Environmen
     ),
     { provide: LOGIN_NAVIGATION, useValue: options.loginNavigation ?? 'router' },
     { provide: SESSION_EXPIRED_HANDLER, useFactory: sessionExpiredHandlerFactory },
+    { provide: MFA_CHALLENGE_HANDLER, useFactory: mfaChallengeHandlerFactory },
   ]);
 }

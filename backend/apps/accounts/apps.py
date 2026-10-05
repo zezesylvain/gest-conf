@@ -13,12 +13,14 @@ class AccountsConfig(AppConfig):
             expire_due_invitations,
             register_invitation_templates,
         )
+        from apps.accounts.services.mfa import register_mfa_templates
         from apps.accounts.services.roles import register_role_templates
         from apps.core.retention import register_retention_task
 
         register_account_templates()
         register_role_templates()
         register_invitation_templates()
+        register_mfa_templates()
         # Changement d'état (et non purge) : appliqué à chaque passage de cleanup (§8.4).
         register_retention_task(
             "accounts.expire_invitations", expire_due_invitations, security=True

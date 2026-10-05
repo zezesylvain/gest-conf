@@ -27,7 +27,9 @@ Topologie (étude §11.3) : un seul domaine, Angular en fichiers statiques dans
    `DJANGO_ALLOWED_HOSTS`, `DJANGO_CSRF_TRUSTED_ORIGINS`, `GESTCONF_EMAIL_BACKEND`,
    `DEFAULT_FROM_EMAIL` et la clé du fournisseur d'e-mails (D10), `GESTCONF_PUBLIC_URL`
    (URL publique en `https://`, base des liens envoyés par e-mail), `GESTCONF_OPERATORS`
-   (alertes, D17), `GESTCONF_CRON_INTERVAL_SECONDS`. Ne jamais le committer.
+   (alertes, D17), `GESTCONF_CRON_INTERVAL_SECONDS`, `GESTCONF_MFA_ENCRYPTION_KEYS` (clé
+   Fernet chiffrant les secrets de la 2FA, voir « Clés de la 2FA » ci-dessous). Ne jamais le
+   committer.
 4. **HTTPS** : vérifier le certificat AutoSSL et activer « Forcer la redirection
    HTTPS » dans cPanel › Domaines. La redirection n'est pas faite dans notre
    `.htaccess` pour éviter toute boucle si Apache est derrière un proxy.
@@ -107,6 +109,22 @@ dossier de l'application et y écrit le chemin du venv (`VENV_ACTIVATE`) : le cr
   `DJANGO_SETTINGS_MODULE=config.settings.prod`) met un e-mail en file ; le passage suivant du
   cron l'envoie. Contrôler la réception (SPF et DKIM valides dans les en-têtes), puis
   `python manage.py outbox` (statut `sent`).
+
+### Clés de la 2FA (plan L1 §4.10)
+
+- **Génération** : `python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"`.
+- **Sauvegarde** : la clé est conservée **hors de l'hébergement, séparément des sauvegardes de
+  la base** (sinon le vol d'une sauvegarde livre aussi la clé). Sa perte rend toutes les 2FA
+  inutilisables : chacun devra être réinitialisé (`reset_mfa`) puis se réenrôler.
+- **Rotation** (rechiffrement vérifié par test) :
+  1. placer la nouvelle clé **en tête** de `GESTCONF_MFA_ENCRYPTION_KEYS`, l'ancienne
+     derrière (séparateur : virgule), puis redémarrer Passenger (`tmp/restart.txt`) ;
+  2. `python manage.py rotate_mfa_keys --dry-run`, puis `python manage.py rotate_mfa_keys`
+     (idempotente, auditée `mfa.keys_rotated`) ;
+  3. retirer l'ancienne clé, redémarrer, puis vérifier une connexion 2FA.
+- **Perte d'appareil d'un utilisateur** : après vérification de son identité hors bande
+  (procédure à valider), `python manage.py reset_mfa --email … --reason …` (audit
+  `mfa.reset`, e-mail à l'adresse principale).
 
 ## 3. Tests de fumée
 

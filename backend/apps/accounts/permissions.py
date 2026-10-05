@@ -1,7 +1,7 @@
 """Cadre de permissions par édition (plan L1 §5.1, §5.3, §4.4, §4.5 ; règles n° 2 et 5).
 
 Ordre des contrôles, fixé et testé (D5) : anonyme → 401 ; non-membre → 404 ; membre sans
-capacité → 403 ; rôle sensible sans 2FA → 403 ``mfa_*`` (L1.6). Pour le garantir,
+capacité → 403 ; rôle sensible sans 2FA → 403 ``mfa_*``. Pour le garantir,
 l'édition et les droits sont chargés dans ``check_permissions``, que DRF appelle dans
 ``initial()``, après l'authentification et avant ``get_queryset()``.
 """
@@ -12,7 +12,6 @@ import time
 from typing import Any
 
 from allauth.account import app_settings as account_settings
-from django.apps import apps
 from django.db.models import QuerySet
 from django.utils.translation import gettext_lazy as _
 from rest_framework.permissions import BasePermission, IsAuthenticated
@@ -71,24 +70,41 @@ class HasCapability(BasePermission):
         return capability is not None and access.has(capability)
 
 
-def mfa_installed() -> bool:
-    return apps.is_installed("allauth.mfa")
+def session_has_mfa(request: Request) -> bool:
+    """Vrai si la session a été validée par la 2FA (entrée ``mfa`` des enregistrements
+    d'authentification d'allauth : connexion en deux étapes ou réauthentification 2FA).
+
+    Seul point de lecture de cette structure interne, figée par un test de contrat (§4.5).
+    """
+    from allauth.account.authentication import get_authentication_records
+
+    return any(record.get("method") == "mfa" for record in get_authentication_records(request))
 
 
 class MfaVerified(BasePermission):
     """2FA imposée aux rôles de ``MFA_REQUIRED_ROLES`` dans l'édition du chemin (D3, §4.4).
 
-    **Inactive tant qu'``allauth.mfa`` n'est pas installé** (L1.6) : elle laisse passer,
-    et la matrice des droits le vérifie.
+    Vérifiée à chaque requête (*step-up*), après la capacité :
+    1. 2FA non activée sur le compte → 403 ``mfa_enrollment_required`` ;
+    2. session non validée par la 2FA → 403 ``mfa_required`` ;
+    3. sinon, accès accordé. Un rôle non concerné (relecteur, auteur) passe toujours.
     """
 
     def has_permission(self, request: Request, view: Any) -> bool:
-        if not mfa_installed():
-            return True
+        from allauth.mfa.utils import is_mfa_enabled
+
         access: EditionAccess | None = getattr(view, "access", None)
         if access is None or not access.mfa_required:
             return True
-        return True  # Contrôles effectifs ajoutés en L1.6 (mfa_enrollment_required, mfa_required).
+        if not is_mfa_enabled(request.user):
+            self.message = _("Activez la double authentification pour accéder à la gestion.")
+            self.code = ErrorCode.MFA_ENROLLMENT_REQUIRED.value
+            return False
+        if not session_has_mfa(request):
+            self.message = _("Confirmez votre identité avec votre code de double authentification.")
+            self.code = ErrorCode.MFA_REQUIRED.value
+            return False
+        return True
 
 
 def last_authentication_at(request: Request) -> float | None:

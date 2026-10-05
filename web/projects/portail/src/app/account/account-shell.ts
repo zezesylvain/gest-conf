@@ -8,9 +8,17 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { Meta } from '@angular/platform-browser';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { AuthApi, LanguageService, MeStore, SessionStore } from '@gestconf/shared';
+import {
+  AuthApi,
+  LanguageService,
+  MeStore,
+  ReauthenticationPrompt,
+  SessionStore,
+} from '@gestconf/shared';
+import { firstValueFrom } from 'rxjs';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { ensureThemeStylesheet } from './theme';
@@ -19,7 +27,8 @@ import { ensureThemeStylesheet } from './theme';
  * Coque de l'espace /compte : rendu dans le navigateur seulement (RenderMode.Client),
  * `noindex`, thème Material chargé à la demande, navigation et déconnexion. Après la
  * connexion, l'interface adopte la langue du compte ; un changement de langue ensuite
- * est enregistré dans le compte (plan L1 §10.4).
+ * est enregistré dans le compte (plan L1 §10.4). Fournit la fenêtre de réauthentification
+ * (`ReauthenticationPrompt`) aux pages de l'espace compte.
  */
 @Component({
   selector: 'portail-account-shell',
@@ -37,6 +46,9 @@ import { ensureThemeStylesheet } from './theme';
         </a>
         <a routerLink="/compte/profil" routerLinkActive="active">
           {{ 'portail.account.nav.profile' | translate }}
+        </a>
+        <a routerLink="/compte/securite" routerLinkActive="active">
+          {{ 'portail.account.nav.security' | translate }}
         </a>
         <button type="button" class="link-button" (click)="logout()" [disabled]="loggingOut()">
           {{ 'portail.account.nav.logout' | translate }}
@@ -80,6 +92,9 @@ export class AccountShell implements OnInit, OnDestroy {
   private readonly language = inject(LanguageService);
   private readonly meta = inject(Meta);
   private readonly document = inject(DOCUMENT);
+  private readonly dialog = inject(MatDialog);
+  private readonly reauthentication = inject(ReauthenticationPrompt);
+  private unregisterReauthentication: (() => void) | null = null;
 
   protected readonly loggingOut = signal(false);
   private languageAdopted = false;
@@ -114,10 +129,23 @@ export class AccountShell implements OnInit, OnDestroy {
   ngOnInit(): void {
     ensureThemeStylesheet(this.document);
     this.meta.updateTag({ name: 'robots', content: 'noindex, nofollow' });
+    this.unregisterReauthentication = this.reauthentication.register(() => this.openReauthDialog());
   }
 
   ngOnDestroy(): void {
     this.meta.removeTag('name="robots"');
+    this.unregisterReauthentication?.();
+  }
+
+  private async openReauthDialog(): Promise<boolean> {
+    const { ReauthDialog } = await import('./ui/reauth-dialog');
+    const ref = this.dialog.open(ReauthDialog, { width: '28rem', autoFocus: 'first-tabbable' });
+    const done = await firstValueFrom(ref.afterClosed());
+    if (done === true) {
+      // État 2FA de la session (mfa_verified) à jour après une réauthentification.
+      await this.meStore.load().catch(() => undefined);
+    }
+    return done === true;
   }
 
   /** Déconnexion, puis rechargement complet pour vider l'état des applications (§4.3). */

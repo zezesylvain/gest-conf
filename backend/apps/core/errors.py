@@ -48,6 +48,10 @@ class ErrorCode(models.TextChoices):
     IN_USE = "in_use"
     # Réauthentification récente exigée (RecentAuthRequired, plan L1 §4.5).
     REAUTHENTICATION_REQUIRED = "reauthentication_required"
+    # 2FA imposée aux rôles de gestion (MfaVerified, plan L1 §4.4) : pas encore activée,
+    # ou pas encore validée dans la session.
+    MFA_ENROLLMENT_REQUIRED = "mfa_enrollment_required"
+    MFA_REQUIRED = "mfa_required"
     # Rôles et invitations (plan L1 §5.5, §5.7, RG-20).
     LAST_ADMIN = "last_admin"
     INVITATION_EXPIRED = "invitation_expired"

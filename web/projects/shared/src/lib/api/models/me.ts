@@ -7,13 +7,23 @@ import { MePendingInvitation } from '../models/me-pending-invitation';
 
 /**
  * Compte connecté : identité, langue, éditions (rôles, capacités), invitations en
- * attente. L'état de la 2FA s'y ajoutera en L1.6.
+ * attente, état de la 2FA.
  */
 export interface Me {
   editions: Array<MeEdition>;
   email: string;
   id: number;
   locale: Locale;
+
+  /**
+   * 2FA (TOTP) activée sur le compte.
+   */
+  mfa_enabled: boolean;
+
+  /**
+   * Session validée par la 2FA (connexion en deux étapes ou réauthentification).
+   */
+  mfa_verified: boolean;
   pending_invitations: Array<MePendingInvitation>;
 
   /**

@@ -6,8 +6,9 @@ import {
   HttpRequest,
 } from '@angular/common/http';
 import { inject, InjectionToken } from '@angular/core';
-import { catchError, EMPTY, endWith, ignoreElements, switchMap, throwError } from 'rxjs';
+import { catchError, EMPTY, endWith, from, ignoreElements, switchMap, throwError } from 'rxjs';
 
+import { ReauthenticationPrompt } from '../auth/reauthentication';
 import { LanguageService } from '../i18n/language.service';
 import { GcApiError, toApiError } from './api-error';
 
@@ -16,7 +17,7 @@ export const API_PREFIX = '/api/';
 export const BUSINESS_API_PREFIX = '/api/v1/';
 export const AUTH_API_PREFIX = '/api/_allauth/browser/v1/';
 
-/** Une seule nouvelle tentative par requête (CSRF, plan §10.1). */
+/** Une seule nouvelle tentative par requête (CSRF ou réauthentification, plan §10.1). */
 const RETRIED = new HttpContextToken<boolean>(() => false);
 
 /**
@@ -27,6 +28,19 @@ const RETRIED = new HttpContextToken<boolean>(() => false);
 export const SESSION_EXPIRED_HANDLER = new InjectionToken<() => void>('SESSION_EXPIRED_HANDLER', {
   factory: () => () => undefined,
 });
+
+/** Codes de `MfaVerified` (plan L1 §4.4) : 2FA à activer, ou à valider dans la session. */
+export type MfaChallenge = 'mfa_required' | 'mfa_enrollment_required';
+
+/**
+ * Réaction à un refus 2FA d'une route de gestion : renvoi vers
+ * `/compte/double-authentification` (`mfa_required`) ou `/compte/securite`
+ * (`mfa_enrollment_required`), avec `next`. Fournie par `provideGestconfApi`.
+ */
+export const MFA_CHALLENGE_HANDLER = new InjectionToken<(challenge: MfaChallenge) => void>(
+  'MFA_CHALLENGE_HANDLER',
+  { factory: () => () => undefined },
+);
 
 function pathOf(url: string): string {
   try {
@@ -67,10 +81,16 @@ export const apiErrorInterceptor: HttpInterceptorFn = (request, next) => {
  *   12 h) → `SESSION_EXPIRED_HANDLER`. Sous `/api/_allauth/`, un 401 fait partie du
  *   protocole (amorçage, `verify_email`, `reauthenticate`…) : il est laissé à `AuthApi` ;
  * - **403 `csrf_failed`** : `GET auth/session` (qui repose le cookie `csrftoken`), puis
- *   une seule nouvelle tentative.
+ *   une seule nouvelle tentative ;
+ * - **403 `reauthentication_required`** : fenêtre de réauthentification
+ *   (`ReauthenticationPrompt`), puis une seule nouvelle tentative si elle aboutit ;
+ * - **403 `mfa_required` / `mfa_enrollment_required`** : `MFA_CHALLENGE_HANDLER`, puis
+ *   l'erreur remonte (la page appelante n'affiche rien de plus).
  */
 export const sessionInterceptor: HttpInterceptorFn = (request, next) => {
   const onSessionExpired = inject(SESSION_EXPIRED_HANDLER);
+  const onMfaChallenge = inject(MFA_CHALLENGE_HANDLER);
+  const reauthentication = inject(ReauthenticationPrompt);
   return next(request).pipe(
     catchError((error: unknown) => {
       if (!(error instanceof GcApiError)) {
@@ -81,10 +101,17 @@ export const sessionInterceptor: HttpInterceptorFn = (request, next) => {
         onSessionExpired();
         return throwError(() => error);
       }
+      const retry = () => next(request.clone({ context: request.context.set(RETRIED, true) }));
       if (error.code === 'csrf_failed' && !request.context.get(RETRIED)) {
-        return refreshCsrfCookie(next).pipe(
-          switchMap(() => next(request.clone({ context: request.context.set(RETRIED, true) }))),
+        return refreshCsrfCookie(next).pipe(switchMap(retry));
+      }
+      if (error.code === 'reauthentication_required' && !request.context.get(RETRIED)) {
+        return from(reauthentication.prompt()).pipe(
+          switchMap((done) => (done ? retry() : throwError(() => error))),
         );
+      }
+      if (error.code === 'mfa_required' || error.code === 'mfa_enrollment_required') {
+        onMfaChallenge(error.code);
       }
       return throwError(() => error);
     }),

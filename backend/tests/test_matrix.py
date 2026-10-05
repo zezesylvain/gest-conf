@@ -304,8 +304,9 @@ def test_matrix_archived_edition_is_read_only(world):
             assert response.json()["code"] == "edition_archived"
 
 
-def test_manage_response_order_401_404_403():
-    """D5 : l'ordre des contrôles ne révèle pas l'existence d'une édition."""
+def test_manage_response_order_401_404_403_mfa():
+    """D5, §4.4 : l'ordre des contrôles ne révèle pas l'existence d'une édition, et la 2FA
+    n'est demandée qu'à un membre qui détient la capacité (401 → 404 → 403 → 403 mfa)."""
     edition = EditionFactory()
     author = make_member(edition, Role.AUTHOR)
     stranger = VerifiedUserFactory()
@@ -317,6 +318,11 @@ def test_manage_response_order_401_404_403():
     response = client_for(author).get(path)
     assert response.status_code == 403
     assert response.json()["code"] == "permission_denied"
+    # Un non-membre sans 2FA reçoit toujours 404, jamais une demande de 2FA.
+    assert client_for(stranger, mfa=False).get(path).status_code == 404
+    chair = make_member(edition, Role.CHAIR)
+    response = client_for(chair, mfa=False).get(path)
+    assert (response.status_code, response.json()["code"]) == (403, "mfa_enrollment_required")
 
 
 def test_object_of_another_edition_is_404(world):

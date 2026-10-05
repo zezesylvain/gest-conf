@@ -120,6 +120,16 @@ describe('LoginPage', () => {
     expect(assign).toHaveBeenCalledWith('/gestion/');
   });
 
+  it('compte 2FA : suite vers la saisie du code, avec le même « next »', async () => {
+    next = '/gestion/';
+    login.mockResolvedValue(result({ status: 401, pendingFlow: 'mfa_authenticate' }));
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    await fill(await render(), 'awa@univ.ci', 'motdepasse-solide');
+    expect(navigate).toHaveBeenCalledWith(['/compte/double-authentification'], {
+      queryParams: { next: '/gestion/' },
+    });
+  });
+
   it('adresse non vérifiée : message « consultez vos e-mails »', async () => {
     login.mockResolvedValue(result({ status: 401, pendingFlow: 'verify_email' }));
     const fixture = await render();

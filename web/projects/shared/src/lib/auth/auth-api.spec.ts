@@ -6,6 +6,7 @@ import { provideI18nTesting } from '../../testing';
 import { GcApiError } from '../http/api-error';
 import { provideGestconfApi } from '../http/provide-api';
 import { AuthApi } from './auth-api';
+import { ReauthenticationPrompt } from './reauthentication';
 import { SessionStore } from './session.store';
 
 const AUTH = '/api/_allauth/browser/v1';
@@ -111,5 +112,70 @@ describe('AuthApi', () => {
       );
     await promise;
     expect(session.authenticated()).toBe(false);
+  });
+
+  describe('2FA et réauthentification (L1.6)', () => {
+    const STALE = {
+      status: 401,
+      data: { user: USER, flows: [{ id: 'reauthenticate' }, { id: 'mfa_reauthenticate' }] },
+      meta: { is_authenticated: true },
+    };
+
+    it('étape 2FA de la connexion : session authentifiée', async () => {
+      const promise = api.mfaAuthenticate('123456');
+      const request = backend.expectOne(`${AUTH}/auth/2fa/authenticate`);
+      expect(request.request.body).toEqual({ code: '123456' });
+      request.flush({ status: 200, data: { user: USER }, meta: { is_authenticated: true } });
+      expect((await promise).authenticated).toBe(true);
+      expect(session.authenticated()).toBe(true);
+    });
+
+    it('secret TOTP en attente lu dans meta (404 attendu)', async () => {
+      const promise = api.totpSetup();
+      backend
+        .expectOne(`${AUTH}/account/authenticators/totp`)
+        .flush(
+          { status: 404, meta: { secret: 'ABC', totp_url: 'otpauth://totp/x' } },
+          { status: 404, statusText: '' },
+        );
+      expect((await promise).setup).toEqual({ secret: 'ABC', totpUrl: 'otpauth://totp/x' });
+    });
+
+    it('409 unverified_email : pas de secret, erreur renvoyée', async () => {
+      const promise = api.totpSetup();
+      backend
+        .expectOne(`${AUTH}/account/authenticators/totp`)
+        .flush(
+          { status: 409, errors: [{ code: 'unverified_email', message: 'Non.' }] },
+          { status: 409, statusText: '' },
+        );
+      const { setup, result } = await promise;
+      expect(setup).toBeNull();
+      expect(result.errors[0].code).toBe('unverified_email');
+    });
+
+    it('401 reauthenticate : fenêtre, puis une seule nouvelle tentative', async () => {
+      const prompt = vi.fn().mockResolvedValue(true);
+      TestBed.inject(ReauthenticationPrompt).register(prompt);
+      const promise = api.deactivateTotp();
+      backend
+        .expectOne(`${AUTH}/account/authenticators/totp`)
+        .flush(STALE, { status: 401, statusText: '' });
+      const retry = await vi.waitFor(() =>
+        backend.expectOne(`${AUTH}/account/authenticators/totp`),
+      );
+      retry.flush({ status: 200 });
+      expect((await promise).status).toBe(200);
+      expect(prompt).toHaveBeenCalledTimes(1);
+    });
+
+    it('fenêtre refermée sans réauthentification : pas de nouvelle tentative', async () => {
+      TestBed.inject(ReauthenticationPrompt).register(() => Promise.resolve(false));
+      const promise = api.recoveryCodes();
+      backend
+        .expectOne(`${AUTH}/account/authenticators/recovery-codes`)
+        .flush(STALE, { status: 401, statusText: '' });
+      expect(await promise).toBeNull();
+    });
   });
 });

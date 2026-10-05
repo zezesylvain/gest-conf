@@ -48,6 +48,8 @@ def test_me_returns_own_identity(me_client, user):
         "privacy_notice_pending": True,
         "editions": [],
         "pending_invitations": [],
+        "mfa_enabled": False,
+        "mfa_verified": False,
     }
 
 

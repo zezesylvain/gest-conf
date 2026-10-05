@@ -79,5 +79,7 @@ export type { MeProfile$Params as MeProfile$Params } from './fn/me/me-profile';
 export { meProfile as meProfile } from './fn/me/me-profile';
 export type { MeProfileUpdate$Params as MeProfileUpdate$Params } from './fn/me/me-profile-update';
 export { meProfileUpdate as meProfileUpdate } from './fn/me/me-profile-update';
+export type { MeTotpQr$Params as MeTotpQr$Params } from './fn/me/me-totp-qr';
+export { meTotpQr as meTotpQr } from './fn/me/me-totp-qr';
 export type { PublicCurrentEdition$Params as PublicCurrentEdition$Params } from './fn/public/public-current-edition';
 export { publicCurrentEdition as publicCurrentEdition } from './fn/public/public-current-edition';

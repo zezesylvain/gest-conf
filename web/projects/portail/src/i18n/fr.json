@@ -22,7 +22,8 @@
         "label": "Navigation de l'espace compte",
         "home": "Accueil",
         "profile": "Profil",
-        "logout": "Se déconnecter"
+        "logout": "Se déconnecter",
+        "security": "Sécurité"
       },
       "fields": {
         "email": "Adresse e-mail",
@@ -80,7 +81,10 @@
         "profileLead": "Nom, prénom, institution et pays sont nécessaires pour soumettre une communication.",
         "completeProfile": "Compléter mon profil",
         "editProfile": "Modifier mon profil",
-        "management": "Accéder à l'espace de gestion"
+        "management": "Accéder à l'espace de gestion",
+        "mfaEnabled": "Double authentification : activée.",
+        "mfaDisabled": "Double authentification : non activée.",
+        "security": "Gérer la sécurité du compte"
       },
       "profile": {
         "title": "Profil",
@@ -115,6 +119,69 @@
         "retention": "Les connexions et actions sensibles sont journalisées pour la sécurité ; l'adresse IP est effacée au bout de six mois.",
         "rights": "Vous pouvez à tout moment exporter vos données ou demander l'anonymisation de votre compte depuis votre espace.",
         "version": "Version {{version}}"
+      },
+      "mfa": {
+        "title": "Double authentification",
+        "lead": "Saisissez le code à 6 chiffres affiché par votre application d'authentification, ou l'un de vos codes de secours.",
+        "stepUpLead": "Pour accéder à l'espace de gestion, confirmez votre identité avec le code de votre application d'authentification (ou un code de secours).",
+        "code": "Code",
+        "codeHint": "Code à 6 chiffres, ou code de secours à 8 chiffres.",
+        "submit": "Vérifier",
+        "backToLogin": "Retour à la connexion"
+      },
+      "reauth": {
+        "title": "Confirmez votre identité",
+        "lead": "Cette opération est sensible : confirmez votre mot de passe pour continuer.",
+        "useCode": "Utiliser plutôt un code de double authentification",
+        "usePassword": "Utiliser plutôt mon mot de passe",
+        "submit": "Confirmer",
+        "cancel": "Annuler"
+      },
+      "security": {
+        "title": "Sécurité",
+        "mfaTitle": "Double authentification",
+        "mfaEnabled": "La double authentification est activée sur votre compte.",
+        "mfaDisabled": "La double authentification n'est pas activée sur votre compte.",
+        "mfaRequiredHint": "Elle est obligatoire pour les rôles de gestion : administration, présidence, comités d'organisation et scientifique.",
+        "enable": "Activer la double authentification",
+        "scanLead": "Scannez ce QR code avec votre application d'authentification (FreeOTP, Aegis, Google Authenticator…), puis saisissez le code qu'elle affiche.",
+        "qrAlt": "QR code de configuration de la double authentification",
+        "manualKey": "Ou saisissez cette clé à la main :",
+        "copy": "Copier la clé",
+        "copied": "Clé copiée.",
+        "activate": "Activer",
+        "activated": "Double authentification activée. Notez vos codes de secours ci-dessous.",
+        "stepUpNeeded": "Pour accéder à la gestion pendant cette session, validez une fois votre code.",
+        "stepUp": "Valider mon code",
+        "recoveryTitle": "Codes de secours",
+        "recoveryLead": "Chacun ne sert qu'une fois. Conservez-les en lieu sûr : ils permettent de vous connecter si vous perdez votre téléphone.",
+        "recoveryRemaining": "Codes de secours non utilisés : {{count}}.",
+        "showCodes": "Afficher les codes de secours",
+        "regenerate": "Générer de nouveaux codes",
+        "regenerated": "Nouveaux codes générés : les anciens ne sont plus valables.",
+        "disableTitle": "Désactiver la double authentification",
+        "disableWarning": "Sans double authentification, l'espace de gestion vous sera refusé.",
+        "disable": "Désactiver…",
+        "disableConfirm": "Confirmer la désactivation",
+        "disabled": "Double authentification désactivée.",
+        "passwordTitle": "Mot de passe",
+        "currentPassword": "Mot de passe actuel",
+        "changePassword": "Changer le mot de passe",
+        "passwordChanged": "Mot de passe modifié.",
+        "emailsTitle": "Adresses e-mail",
+        "primary": "principale",
+        "verified": "vérifiée",
+        "unverified": "non vérifiée",
+        "makePrimary": "Rendre principale",
+        "remove": "Retirer",
+        "resend": "Renvoyer le lien de vérification",
+        "resent": "Lien de vérification envoyé.",
+        "resendTooSoon": "Un lien a été envoyé il y a moins de trois minutes : réessayez un peu plus tard.",
+        "newEmail": "Nouvelle adresse e-mail",
+        "addEmail": "Ajouter l'adresse",
+        "added": "Adresse ajoutée : un lien de vérification lui a été envoyé.",
+        "removed": "Adresse retirée.",
+        "primaryChanged": "Adresse principale modifiée."
       }
     }
   }

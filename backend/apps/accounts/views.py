@@ -3,6 +3,7 @@ par défaut) ; CSRF contrôlé par ``apps.core.authentication.SessionAuthenticat
 
 from __future__ import annotations
 
+from django.http import Http404, HttpRequest
 from drf_spectacular.utils import extend_schema
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -10,6 +11,7 @@ from rest_framework.views import APIView
 
 from apps.accounts import services
 from apps.accounts.models import Consent
+from apps.accounts.permissions import session_has_mfa
 from apps.accounts.serializers import (
     ConsentCreateSerializer,
     ConsentRecordSerializer,
@@ -17,14 +19,16 @@ from apps.accounts.serializers import (
     MeSerializer,
     PreferencesSerializer,
     ProfileSerializer,
+    TotpQrSerializer,
     consent_states,
 )
 from apps.accounts.services.access import editions_with_roles
 from apps.accounts.services.invitations import pending_for_user
+from apps.accounts.services.mfa import mfa_enabled, totp_qr_data_url
 from apps.core.actor import Actor
 
 
-def me_payload(user) -> dict:
+def me_payload(user, request: Request | HttpRequest) -> dict:
     editions = [
         {
             "id": access.edition.pk,
@@ -50,13 +54,15 @@ def me_payload(user) -> dict:
         "privacy_notice_pending": services.privacy_notice_pending(user),
         "editions": editions,
         "pending_invitations": pending_for_user(user),
+        "mfa_enabled": mfa_enabled(user),
+        "mfa_verified": session_has_mfa(request),
     }
 
 
 class MeView(APIView):
     @extend_schema(operation_id="me", responses={200: MeSerializer})
     def get(self, request: Request) -> Response:
-        return Response(MeSerializer(me_payload(request.user)).data)
+        return Response(MeSerializer(me_payload(request.user, request)).data)
 
 
 class PreferencesView(APIView):
@@ -71,7 +77,7 @@ class PreferencesView(APIView):
         user = services.set_locale(
             request.user, serializer.validated_data["locale"], actor=Actor.from_request(request)
         )
-        return Response(MeSerializer(me_payload(user)).data)
+        return Response(MeSerializer(me_payload(user, request)).data)
 
 
 class ProfileView(APIView):
@@ -120,3 +126,20 @@ class ConsentsView(APIView):
             actor=Actor.from_request(request),
         )
         return Response(ConsentRecordSerializer(consent).data, status=201)
+
+
+class TotpQrView(APIView):
+    """``GET /v1/me/totp-qr`` : QR code du secret TOTP en attente (plan L1 §10.2).
+
+    Le secret est celui qu'allauth a mis en session au ``GET …/authenticators/totp`` ;
+    404 sans secret en attente. Jamais mis en cache.
+    """
+
+    @extend_schema(operation_id="me_totp_qr", responses={200: TotpQrSerializer})
+    def get(self, request: Request) -> Response:
+        qr_code = totp_qr_data_url(request)
+        if qr_code is None:
+            raise Http404
+        response = Response(TotpQrSerializer({"qr_code": qr_code}).data)
+        response["Cache-Control"] = "no-store"
+        return response

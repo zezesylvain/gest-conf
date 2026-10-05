@@ -60,6 +60,7 @@ export type { SkippedReason } from './models/skipped-reason';
 export type { SubmissionType } from './models/submission-type';
 export type { SubmissionTypeRequest } from './models/submission-type-request';
 export type { TokenRequest } from './models/token-request';
+export type { TotpQr } from './models/totp-qr';
 export type { Track } from './models/track';
 export type { TrackRequest } from './models/track-request';
 export type { UserRoleStatus } from './models/user-role-status';

@@ -29,7 +29,8 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 /**
  * Connexion (plan L1 §4.3). Une adresse non vérifiée renvoie le flux `verify_email` :
  * allauth renvoie alors le lien de vérification (au plus une fois toutes les 3 min).
- * La 2FA (flux `mfa_authenticate`) arrive en L1.6.
+ * Un compte protégé par la 2FA (flux `mfa_authenticate`) poursuit sur
+ * `/compte/double-authentification`, avec le même `next`.
  */
 @Component({
   selector: 'portail-login-page',
@@ -86,6 +87,11 @@ export class LoginPage {
           this.document,
           this.route.snapshot.queryParamMap.get('next'),
         );
+      } else if (result.pendingFlow === 'mfa_authenticate') {
+        const next = this.route.snapshot.queryParamMap.get('next');
+        void this.router.navigate(['/compte/double-authentification'], {
+          queryParams: next ? { next } : {},
+        });
       } else if (result.pendingFlow === 'verify_email') {
         this.verificationPending.set(true);
       } else {
