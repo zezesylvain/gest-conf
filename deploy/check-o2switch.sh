@@ -551,13 +551,14 @@ main() {
   glibc="$(getconf GNU_LIBC_VERSION 2>/dev/null | awk '{print $2}')"
   if [[ -z "$glibc" ]]; then glibc="$(ldd --version 2>/dev/null | sed -n '1s/.* \([0-9][0-9.]*\)$/\1/p')"; fi
   if [[ -z "$glibc" ]]; then
-    report V02 ÉCHEC "glibc >= 2.17 (roues manylinux2014)" "version introuvable"
-  elif version_ge "$glibc" 2.17; then
+    report V02 ÉCHEC "glibc >= 2.27 (roues manylinux_2_27 de Pillow)" "version introuvable"
+  elif version_ge "$glibc" 2.27; then
     local note="roues manylinux_2_28 non utilisables"
     if version_ge "$glibc" 2.28; then note="roues manylinux_2_28 utilisables"; fi
-    report V02 OK "glibc >= 2.17 (roues manylinux2014)" "glibc $glibc ; $note"
+    report V02 OK "glibc >= 2.27 (roues manylinux_2_27 de Pillow)" "glibc $glibc ; $note"
   else
-    report V02 ÉCHEC "glibc >= 2.17 (roues manylinux2014)" "glibc $glibc"
+    # De 2.17 à 2.26 : cryptography s'installe, Pillow 12 non (deploy.sh échouerait).
+    report V02 ÉCHEC "glibc >= 2.27 (roues manylinux_2_27 de Pillow)" "glibc $glibc"
   fi
 
   # --- Python : venv jetable et paquets binaires --------------------------------------

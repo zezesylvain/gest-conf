@@ -184,8 +184,8 @@ cd "$app_dir"
 export DJANGO_SETTINGS_MODULE=config.settings.prod
 # Fichier verrouillé avec empreintes (requirements/compile.sh) : --require-hashes refuse
 # tout paquet non épinglé ou altéré ; --only-binary interdit toute compilation sur
-# l'hébergement (roues manylinux2014 disponibles pour toutes les dépendances, vérifié
-# pour Python 3.12 et 3.13 ; contrôle V04 de docs/L1-verifications-o2switch.md).
+# l'hébergement (roues manylinux_2_27 au plus pour toutes les dépendances, vérifié en CI
+# pour Python 3.12 et 3.13 ; contrôles V02, V04 et V28 de docs/L1-verifications-o2switch.md).
 pip install --quiet --require-hashes --only-binary=:all: -r requirements/prod.txt
 # Contrôles AVANT toute modification de la base : un avertissement arrête le déploiement
 # sans migration appliquée (le DDL n'est pas transactionnel sous MariaDB). Le nouveau code

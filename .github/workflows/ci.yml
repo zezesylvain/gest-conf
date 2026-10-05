@@ -74,13 +74,15 @@ jobs:
           DATABASE_URL: "sqlite://:memory:"
         run: pytest -q -rs
 
-      - name: Dépendances de production installables en roues manylinux2014 (comme deploy.sh)
+      - name: Dépendances de production installables en roues manylinux_2_27 au plus (comme deploy.sh)
         # deploy.sh installe prod.txt avec --only-binary=:all: sur o2switch : une dépendance
         # publiée seulement en sdist, ou seulement en manylinux_2_28 et plus, ferait échouer
-        # le déploiement. Plateforme minimale à ajuster selon la glibc relevée par V02
-        # (docs/L1-verifications-o2switch.md).
+        # le déploiement. Minimum : glibc 2.27, exigée par les roues de Pillow 12 (lot L2,
+        # contrôles V02 et V28 de docs/L1-verifications-o2switch.md). pip n'étend pas une
+        # étiquette manylinux aux plus anciennes : elles sont toutes listées.
         run: >-
           pip download --quiet -d /tmp/wheels --only-binary=:all: --require-hashes
+          --platform manylinux_2_27_x86_64 --platform manylinux_2_17_x86_64
           --platform manylinux2014_x86_64 --python-version ${{ matrix.python }} --implementation cp
           -r requirements/prod.txt
 
