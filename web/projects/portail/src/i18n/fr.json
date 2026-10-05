@@ -2,7 +2,9 @@
   "portail": {
     "layout": {
       "skipToContent": "Aller au contenu",
-      "footer": "Plateforme de gestion de conférences scientifiques"
+      "footer": "Plateforme de gestion de conférences scientifiques",
+      "myAccount": "Mon compte",
+      "signIn": "Connexion"
     },
     "home": {
       "title": "Accueil",
@@ -14,6 +16,106 @@
       "title": "Page introuvable",
       "heading": "Cette page n'existe pas.",
       "backHome": "Retour à l'accueil"
+    },
+    "account": {
+      "nav": {
+        "label": "Navigation de l'espace compte",
+        "home": "Accueil",
+        "profile": "Profil",
+        "logout": "Se déconnecter"
+      },
+      "fields": {
+        "email": "Adresse e-mail",
+        "password": "Mot de passe",
+        "newPassword": "Nouveau mot de passe",
+        "passwordConfirm": "Confirmer le mot de passe",
+        "passwordHint": "{{min}} caractères au moins, pas un mot de passe courant."
+      },
+      "login": {
+        "title": "Connexion",
+        "submit": "Se connecter",
+        "forgot": "Mot de passe oublié ?",
+        "signup": "Créer un compte",
+        "verificationPending": "Votre adresse n'est pas encore vérifiée. Un nouveau lien de vérification vient de vous être envoyé (au plus un toutes les trois minutes) : consultez votre messagerie."
+      },
+      "signup": {
+        "title": "Créer un compte",
+        "lead": "Un compte unique pour soumettre, évaluer, s'inscrire et participer.",
+        "submit": "Créer mon compte",
+        "login": "J'ai déjà un compte"
+      },
+      "verify": {
+        "title": "Vérification de l'adresse",
+        "sent": "Consultez votre messagerie : un lien de vérification vous a été envoyé.",
+        "sentTo": "Consultez votre messagerie : si l'adresse {{email}} peut être utilisée, un e-mail vient de lui être envoyé.",
+        "verifying": "Vérification en cours…",
+        "verified": "Votre adresse est vérifiée. Vous pouvez maintenant vous connecter.",
+        "login": "Se connecter",
+        "resendHint": "Rien reçu ? Vérifiez vos courriers indésirables, puis connectez-vous : un nouveau lien vous sera envoyé.",
+        "resend": "Recevoir un nouveau lien (connexion)"
+      },
+      "forgot": {
+        "title": "Mot de passe oublié",
+        "lead": "Indiquez l'adresse de votre compte : vous recevrez un lien pour choisir un nouveau mot de passe.",
+        "submit": "Recevoir le lien",
+        "sent": "Si un compte correspond à cette adresse, un e-mail vous sera envoyé dans les prochaines minutes. Le lien est valable deux heures.",
+        "login": "Retour à la connexion"
+      },
+      "reset": {
+        "title": "Nouveau mot de passe",
+        "checking": "Vérification du lien…",
+        "submit": "Enregistrer le mot de passe",
+        "done": "Votre mot de passe a été modifié. Vous pouvez vous connecter.",
+        "login": "Se connecter",
+        "again": "Demander un nouveau lien"
+      },
+      "home": {
+        "title": "Mon compte",
+        "loading": "Chargement…",
+        "signedInAs": "Connecté avec l'adresse {{email}}.",
+        "noticeTitle": "Notice d'information",
+        "noticeLead": "Avant de continuer, prenez connaissance de la façon dont vos données sont traitées.",
+        "acknowledge": "J'ai pris connaissance de la notice",
+        "profileTitle": "Complétez votre profil",
+        "profileLead": "Nom, prénom, institution et pays sont nécessaires pour soumettre une communication.",
+        "completeProfile": "Compléter mon profil",
+        "editProfile": "Modifier mon profil",
+        "management": "Accéder à l'espace de gestion"
+      },
+      "profile": {
+        "title": "Profil",
+        "lead": "Ces informations servent aux soumissions, aux évaluations et aux inscriptions.",
+        "fields": {
+          "title": "Titre",
+          "firstName": "Prénom",
+          "lastName": "Nom",
+          "institution": "Institution",
+          "department": "Département, laboratoire",
+          "country": "Pays",
+          "orcid": "Identifiant ORCID",
+          "bio": "Biographie"
+        },
+        "titles": {
+          "none": "Aucun",
+          "dr": "Dr",
+          "pr": "Pr",
+          "mr": "M.",
+          "ms": "Mme"
+        },
+        "orcidHint": "Facultatif. Forme 0000-0000-0000-000X.",
+        "orcidFormat": "Forme attendue : 0000-0000-0000-000X.",
+        "bioHint": "Texte brut, 2 000 caractères au plus.",
+        "languageTitle": "Langue",
+        "languageLead": "La langue choisie avec le sélecteur en haut de page est enregistrée dans votre compte : elle sert aussi aux e-mails."
+      },
+      "notice": {
+        "summary": "Notice d'information sur vos données (version provisoire)",
+        "controller": "Responsable du traitement : le comité d'organisation de la conférence. Le texte définitif, conforme au cadre légal applicable, remplacera cette version provisoire avant l'ouverture de l'appel à communications.",
+        "purpose": "Vos données (adresse e-mail, profil, rôles) servent uniquement à gérer votre participation : comptes, soumissions, évaluations, programme et inscriptions.",
+        "retention": "Les connexions et actions sensibles sont journalisées pour la sécurité ; l'adresse IP est effacée au bout de six mois.",
+        "rights": "Vous pouvez à tout moment exporter vos données ou demander l'anonymisation de votre compte depuis votre espace.",
+        "version": "Version {{version}}"
+      }
     }
   }
 }

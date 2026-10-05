@@ -154,6 +154,12 @@ jobs:
         # Les budgets d'angular.json (dont le CSS initial du portail) font échouer le build.
         run: npm run build
 
+      - name: Thème Material absent des pages publiques pré-rendues (plan L1 §10.5)
+        # Feuille séparée (gc-theme.css, non injectée), chargée par la coque de /compte.
+        run: |
+          test -f dist/portail/browser/gc-theme.css
+          ! grep -l 'gc-theme' dist/portail/browser/index.html dist/portail/browser/index.csr.html
+
       - name: robots.txt à la racine du portail
         run: |
           for path in /api/ /gestion/ /compte/; do

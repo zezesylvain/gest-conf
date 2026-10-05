@@ -1,0 +1,57 @@
+import { Routes } from '@angular/router';
+import { authGuard } from '@gestconf/shared';
+
+import { AccountShell } from './account-shell';
+
+/**
+ * Espace compte /compte/* (plan L1 §10.2) : chargé à la demande, rendu dans le navigateur
+ * (les pages lisent des jetons dans le fragment), marqué noindex par la coque.
+ * La propriété « title » contient une clé de traduction (TranslatedTitleStrategy).
+ */
+export const accountRoutes: Routes = [
+  {
+    path: '',
+    component: AccountShell,
+    children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        title: 'portail.account.home.title',
+        canMatch: [authGuard],
+        loadComponent: () => import('./pages/account-home-page').then((m) => m.AccountHomePage),
+      },
+      {
+        path: 'connexion',
+        title: 'portail.account.login.title',
+        loadComponent: () => import('./pages/login-page').then((m) => m.LoginPage),
+      },
+      {
+        path: 'inscription',
+        title: 'portail.account.signup.title',
+        loadComponent: () => import('./pages/signup-page').then((m) => m.SignupPage),
+      },
+      {
+        path: 'verifier-email',
+        title: 'portail.account.verify.title',
+        loadComponent: () => import('./pages/verify-email-page').then((m) => m.VerifyEmailPage),
+      },
+      {
+        path: 'mot-de-passe-oublie',
+        title: 'portail.account.forgot.title',
+        loadComponent: () =>
+          import('./pages/forgot-password-page').then((m) => m.ForgotPasswordPage),
+      },
+      {
+        path: 'reinitialiser',
+        title: 'portail.account.reset.title',
+        loadComponent: () => import('./pages/reset-password-page').then((m) => m.ResetPasswordPage),
+      },
+      {
+        path: 'profil',
+        title: 'portail.account.profile.title',
+        canMatch: [authGuard],
+        loadComponent: () => import('./pages/profile-page').then((m) => m.ProfilePage),
+      },
+    ],
+  },
+];

@@ -11,6 +11,51 @@
       "ok": "API opérationnelle",
       "degraded": "API dégradée : base de données indisponible",
       "unreachable": "API injoignable"
+    },
+    "errors": {
+      "validation_error": "Certaines données sont invalides.",
+      "bad_request": "Requête invalide.",
+      "not_authenticated": "Vous devez vous connecter.",
+      "permission_denied": "Accès refusé.",
+      "not_found": "Ressource introuvable.",
+      "throttled": "Trop de demandes : réessayez dans quelques instants.",
+      "server_error": "Erreur du serveur. Réessayez plus tard.",
+      "parse_error": "Requête illisible.",
+      "method_not_allowed": "Opération non autorisée.",
+      "not_acceptable": "Format de réponse non disponible.",
+      "unsupported_media_type": "Format de données non pris en charge.",
+      "csrf_failed": "Votre session de sécurité a expiré : rechargez la page.",
+      "in_use": "Élément déjà utilisé : modification impossible.",
+      "network_error": "Le serveur est injoignable. Vérifiez votre connexion.",
+      "conflict": "Opération impossible dans l'état actuel.",
+      "unexpected": "Une erreur inattendue s'est produite.",
+      "email_password_mismatch": "Adresse e-mail ou mot de passe incorrect.",
+      "too_many_login_attempts": "Trop de tentatives de connexion : réessayez dans quelques minutes.",
+      "invalid_or_expired_key": "Ce lien est invalide ou a expiré.",
+      "invalid_password_reset": "Ce lien de réinitialisation est invalide, expiré ou déjà utilisé.",
+      "incorrect_password": "Mot de passe incorrect.",
+      "enter_current_password": "Saisissez votre mot de passe actuel.",
+      "account_inactive": "Ce compte est désactivé.",
+      "rate_limited": "Trop de demandes : patientez un instant.",
+      "same_as_current": "La nouvelle valeur doit différer de l'actuelle.",
+      "password_too_short": "Mot de passe trop court (12 caractères au moins).",
+      "password_too_common": "Ce mot de passe est trop courant.",
+      "password_entirely_numeric": "Le mot de passe ne peut pas être entièrement numérique.",
+      "password_too_similar": "Le mot de passe est trop proche de votre adresse e-mail."
+    },
+    "form": {
+      "errorSummary": "Le formulaire contient des erreurs :",
+      "required": "Ce champ est obligatoire.",
+      "email": "Adresse e-mail invalide.",
+      "minlength": "{{min}} caractères au moins.",
+      "maxlength": "{{max}} caractères au plus.",
+      "passwordMismatch": "Les deux mots de passe ne correspondent pas.",
+      "saving": "Enregistrement…",
+      "saved": "Modifications enregistrées.",
+      "save": "Enregistrer"
+    },
+    "session": {
+      "expired": "Votre session a expiré : reconnectez-vous."
     }
   }
 }

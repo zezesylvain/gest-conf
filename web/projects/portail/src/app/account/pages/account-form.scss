@@ -1,0 +1,43 @@
+:host {
+  display: block;
+  max-width: 32rem;
+}
+
+form {
+  display: grid;
+  gap: 0.25rem;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+.actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.notice {
+  margin: 0 0 1rem;
+  padding: 0.75rem 1rem;
+  border-left: 0.35rem solid var(--gc-primary);
+  background: var(--gc-surface-muted);
+}
+
+.notice p {
+  margin: 0;
+}
+
+.links {
+  margin: 1.5rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.5rem;
+}
+
+a {
+  color: var(--gc-primary);
+}

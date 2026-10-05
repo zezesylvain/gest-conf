@@ -1,0 +1,16 @@
+// Jetons de l'interface GEST-CONF (plan L1 §10.5), communs aux deux applications et
+// présents dans leurs styles initiaux : légers, sans dépendance à Angular Material.
+// Contrastes (WCAG 2.1 AA) : texte #1f2937 et #4b5563 sur blanc, blanc sur #1d3a6e.
+:root {
+  --gc-primary: #1d3a6e;
+  --gc-on-primary: #ffffff;
+  --gc-surface: #ffffff;
+  --gc-surface-muted: #f3f4f6;
+  --gc-text: #1f2937;
+  --gc-muted: #4b5563;
+  --gc-border: #d1d5db;
+  --gc-success: #15803d;
+  --gc-warning: #b45309;
+  --gc-danger: #b91c1c;
+  --gc-font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}

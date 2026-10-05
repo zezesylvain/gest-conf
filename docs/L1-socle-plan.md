@@ -2200,7 +2200,7 @@ Ces mises à jour seront livrées par une PR de documentation en L1.8, **après 
 
 ---
 
-## 16. Écarts constatés pendant l'implémentation (L1.0 à L1.3)
+## 16. Écarts constatés pendant l'implémentation (L1.0 à L1.4)
 
 Consignés ici pour ne pas dériver en silence (CLAUDE.md). Les écarts marqués **à valider** attendent
 l'accord du commanditaire ; les autres sont des précisions sans effet sur les décisions D1 à D18.
@@ -2365,3 +2365,39 @@ Ils seront repris dans la PR de documentation de L1.8 (§15).
 32. **§3.8.** `accounts/0002` regroupe `anonymized_at`, `Profile` et `Consent`, comme le prévoit
     le tableau des migrations. `GESTCONF_PUBLIC_URL` est obligatoire en production, en
     `https://` (contrôle au démarrage).
+
+### Étape L1.4 (socle front et pages de compte)
+
+33. **§10.5, budget `initial` du portail (à valider).** Mesure : 356,6 kB bruts, 102,6 kB
+    transférés, contre 307 kB et 84 kB avant L1.4. Le budget passe de 312/327 kB à **365/380 kB**.
+    Cause établie par essais : esbuild découpe par module ; le code d'`@angular/core` qu'utilise
+    l'espace compte, pourtant chargé à la demande, est placé dans un morceau importé par `main`.
+    Coque seule : +12 kB ; composants Material : +33 kB ; infrastructure de session
+    (intercepteurs, `AuthApi`, stores) : environ 15 kB. Ni `afterNextRender` ni la feuille de thème
+    n'y sont pour quelque chose (vérifié). Piste si la valeur gêne : sortir `/compte` dans une
+    application séparée, à décider.
+34. **§10.5, feuille du thème (vérifié).** `inject: false` produit `gc-theme.css` **sans
+    empreinte** (7,1 kB, 1,1 kB transférés), absente de `index.html` et `index.csr.html` (contrôle
+    en CI). Faute d'empreinte, le `.htaccess` la sert en `no-cache` (revalidation). L'absence de
+    clignotement au premier affichage n'a pas été mesurée (aucun constaté sur les captures).
+    L'API de thème de Material 22 (`mat.theme`, palettes M3) est confirmée.
+35. **§10.1, nom `GcApiError`.** Le client généré exporte déjà un modèle `ApiError` (format
+    DRF) : l'erreur normalisée côté Angular s'appelle `GcApiError` (`status`, `code`, `message`,
+    `fields`, `body`).
+36. **§10.1, périmètre des intercepteurs en L1.4.** Gérés : `Accept-Language`, 401 sous
+    `/api/v1/` seulement (expiration : vidage des stores, connexion avec `next`), `csrf_failed`
+    (rechargement du cookie puis une seule nouvelle tentative). Bogue évité et testé : le premier
+    événement `Sent` de l'amorçage déclenchait la nouvelle tentative trop tôt. `mfa_required`,
+    `mfa_enrollment_required` et `reauthentication_required` arrivent avec les codes qui les émettent
+    (L1.5, L1.6), de même que `capabilityGuard` et le contexte actif (L1.5, L1.7).
+37. **Outillage.** Material 22 n'exige pas `@angular/animations`. Le verrou npm doit être modifié
+    avec npm 11.19.0 (`packageManager`) : npm 10 retire les champs `libc`.
+38. **Démo A, vérifiée en local seulement.** Parcours rejoué dans Chromium (Playwright, script hors
+    dépôt), Django en développement et `ng serve` : inscription avec un navigateur en anglais,
+    e-mail en anglais, vérification (clé effacée de l'adresse), connexion avec `next`, notice,
+    profil (ORCID refusé puis accepté), langue enregistrée dans le compte, déconnexion,
+    réinitialisation par le lien envoyé au passage de `run_jobs`, nouvelle connexion ; `noindex`
+    et thème chargé sur `/compte`. **Reste à faire sur o2switch** (critère de L1.4), après J-tech.
+    Le test E2E automatisé reste prévu en L3. Limite constatée : coller un nouveau lien de
+    vérification dans l'onglet déjà ouvert sur `/compte/verifier-email` ne change que le fragment
+    et n'est pas pris en compte ; le clic depuis l'e-mail, qui charge la page, fonctionne.

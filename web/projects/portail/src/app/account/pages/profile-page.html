@@ -1,0 +1,87 @@
+<gc-page-header
+  [heading]="'portail.account.profile.title' | translate"
+  [lead]="'portail.account.profile.lead' | translate"
+/>
+
+<gc-error-summary [messages]="errors()" />
+<div aria-live="polite">
+  @if (saved()) {
+    <p class="notice" role="status">{{ 'shared.form.saved' | translate }}</p>
+  }
+</div>
+
+@if (loading()) {
+  <p role="status">{{ 'portail.account.home.loading' | translate }}</p>
+} @else {
+  <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'portail.account.profile.fields.title' | translate }}</mat-label>
+      <mat-select formControlName="title">
+        @for (title of titles; track title) {
+          <mat-option [value]="title">
+            {{ 'portail.account.profile.titles.' + (title || 'none') | translate }}
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'portail.account.profile.fields.firstName' | translate }}</mat-label>
+      <input matInput formControlName="first_name" autocomplete="given-name" required />
+      <mat-error>{{ error('first_name') }}</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'portail.account.profile.fields.lastName' | translate }}</mat-label>
+      <input matInput formControlName="last_name" autocomplete="family-name" required />
+      <mat-error>{{ error('last_name') }}</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'portail.account.profile.fields.institution' | translate }}</mat-label>
+      <input matInput formControlName="institution" autocomplete="organization" required />
+      <mat-error>{{ error('institution') }}</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'portail.account.profile.fields.department' | translate }}</mat-label>
+      <input matInput formControlName="department" />
+      <mat-error>{{ error('department') }}</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'portail.account.profile.fields.country' | translate }}</mat-label>
+      <mat-select formControlName="country" required>
+        @for (country of countries(); track country.code) {
+          <mat-option [value]="country.code">{{ country.name }}</mat-option>
+        }
+      </mat-select>
+      <mat-error>{{ error('country') }}</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'portail.account.profile.fields.orcid' | translate }}</mat-label>
+      <input matInput formControlName="orcid" placeholder="0000-0000-0000-0000" />
+      <mat-hint>{{ 'portail.account.profile.orcidHint' | translate }}</mat-hint>
+      <mat-error>{{ error('orcid') }}</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'portail.account.profile.fields.bio' | translate }}</mat-label>
+      <textarea matInput formControlName="bio" rows="5"></textarea>
+      <mat-hint>{{ 'portail.account.profile.bioHint' | translate }}</mat-hint>
+      <mat-error>{{ error('bio') }}</mat-error>
+    </mat-form-field>
+
+    <div class="actions">
+      <button mat-flat-button type="submit" [disabled]="saving()">
+        {{ (saving() ? 'shared.form.saving' : 'shared.form.save') | translate }}
+      </button>
+    </div>
+  </form>
+
+  <section class="language" aria-labelledby="language-title">
+    <h2 id="language-title">{{ 'portail.account.profile.languageTitle' | translate }}</h2>
+    <p>{{ 'portail.account.profile.languageLead' | translate }}</p>
+  </section>
+}

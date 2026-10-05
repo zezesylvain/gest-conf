@@ -1,12 +1,5 @@
-/* Styles globaux de l’espace de gestion. Le kit d'interface (Angular Material ou PrimeNG) reste à choisir (étude §7.2). */
-:root {
-  --gc-primary: #1d3a6e;
-  --gc-on-primary: #ffffff;
-  --gc-surface: #ffffff;
-  --gc-text: #1f2937;
-  --gc-muted: #4b5563;
-  --gc-border: #d1d5db;
-}
+/* Styles globaux de l’espace de gestion. Jetons --gc-* communs : shared/ui-kit (plan L1 §10.5). Thème Angular Material : shared/ui-kit/theme.scss, dans les styles globaux (angular.json). */
+@use '../../shared/src/lib/ui-kit/tokens';
 
 *,
 *::before,
@@ -20,12 +13,7 @@ body {
 }
 
 body {
-  font-family:
-    system-ui,
-    -apple-system,
-    'Segoe UI',
-    Roboto,
-    sans-serif;
+  font-family: var(--gc-font);
   line-height: 1.5;
   color: var(--gc-text);
   background: var(--gc-surface);

@@ -2,7 +2,9 @@
   "portail": {
     "layout": {
       "skipToContent": "Skip to content",
-      "footer": "Scientific conference management platform"
+      "footer": "Scientific conference management platform",
+      "myAccount": "My account",
+      "signIn": "Sign in"
     },
     "home": {
       "title": "Home",
@@ -14,6 +16,106 @@
       "title": "Page not found",
       "heading": "This page does not exist.",
       "backHome": "Back to home"
+    },
+    "account": {
+      "nav": {
+        "label": "Account navigation",
+        "home": "Home",
+        "profile": "Profile",
+        "logout": "Sign out"
+      },
+      "fields": {
+        "email": "Email address",
+        "password": "Password",
+        "newPassword": "New password",
+        "passwordConfirm": "Confirm password",
+        "passwordHint": "At least {{min}} characters, not a common password."
+      },
+      "login": {
+        "title": "Sign in",
+        "submit": "Sign in",
+        "forgot": "Forgot your password?",
+        "signup": "Create an account",
+        "verificationPending": "Your address is not verified yet. A new verification link has just been sent to you (at most one every three minutes): check your inbox."
+      },
+      "signup": {
+        "title": "Create an account",
+        "lead": "One account to submit, review, register and take part.",
+        "submit": "Create my account",
+        "login": "I already have an account"
+      },
+      "verify": {
+        "title": "Email verification",
+        "sent": "Check your inbox: a verification link has been sent to you.",
+        "sentTo": "Check your inbox: if the address {{email}} can be used, an email has just been sent to it.",
+        "verifying": "Verifying…",
+        "verified": "Your address is verified. You can now sign in.",
+        "login": "Sign in",
+        "resendHint": "Nothing received? Check your spam folder, then sign in: a new link will be sent to you.",
+        "resend": "Get a new link (sign in)"
+      },
+      "forgot": {
+        "title": "Forgot password",
+        "lead": "Enter your account address: you will receive a link to choose a new password.",
+        "submit": "Send the link",
+        "sent": "If an account matches this address, an email will be sent to you within the next few minutes. The link is valid for two hours.",
+        "login": "Back to sign in"
+      },
+      "reset": {
+        "title": "New password",
+        "checking": "Checking the link…",
+        "submit": "Save the password",
+        "done": "Your password has been changed. You can sign in.",
+        "login": "Sign in",
+        "again": "Request a new link"
+      },
+      "home": {
+        "title": "My account",
+        "loading": "Loading…",
+        "signedInAs": "Signed in as {{email}}.",
+        "noticeTitle": "Privacy notice",
+        "noticeLead": "Before continuing, please read how your data is processed.",
+        "acknowledge": "I have read the notice",
+        "profileTitle": "Complete your profile",
+        "profileLead": "First name, last name, institution and country are required to submit a paper.",
+        "completeProfile": "Complete my profile",
+        "editProfile": "Edit my profile",
+        "management": "Go to the management area"
+      },
+      "profile": {
+        "title": "Profile",
+        "lead": "This information is used for submissions, reviews and registrations.",
+        "fields": {
+          "title": "Title",
+          "firstName": "First name",
+          "lastName": "Last name",
+          "institution": "Institution",
+          "department": "Department, laboratory",
+          "country": "Country",
+          "orcid": "ORCID iD",
+          "bio": "Biography"
+        },
+        "titles": {
+          "none": "None",
+          "dr": "Dr",
+          "pr": "Prof.",
+          "mr": "Mr",
+          "ms": "Ms"
+        },
+        "orcidHint": "Optional. Format 0000-0000-0000-000X.",
+        "orcidFormat": "Expected format: 0000-0000-0000-000X.",
+        "bioHint": "Plain text, 2,000 characters at most.",
+        "languageTitle": "Language",
+        "languageLead": "The language chosen with the selector at the top of the page is saved in your account: it is also used for emails."
+      },
+      "notice": {
+        "summary": "Privacy notice on your data (provisional version)",
+        "controller": "Data controller: the conference organizing committee. The final text, compliant with the applicable legal framework, will replace this provisional version before the call for papers opens.",
+        "purpose": "Your data (email address, profile, roles) is used only to manage your participation: accounts, submissions, reviews, programme and registrations.",
+        "retention": "Sign-ins and sensitive actions are logged for security; the IP address is erased after six months.",
+        "rights": "You may export your data or request the anonymization of your account from your account area at any time.",
+        "version": "Version {{version}}"
+      }
     }
   }
 }

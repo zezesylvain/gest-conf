@@ -8,7 +8,8 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
-    provideGestconfApi(),
+    // Connexion dans le portail (D11) : retour par une navigation de page entière.
+    provideGestconfApi({ loginNavigation: 'document' }),
     provideI18n({
       fr: () => import('../i18n/fr.json'),
       en: () => import('../i18n/en.json'),

@@ -2,7 +2,16 @@
 
 <header class="site-header">
   <a class="brand" routerLink="/">{{ 'shared.appName' | translate }}</a>
-  <gc-language-switcher />
+  <div class="header-tools">
+    @if (session.authenticated()) {
+      <a class="account-link" routerLink="/compte">{{ 'portail.layout.myAccount' | translate }}</a>
+    } @else {
+      <a class="account-link" routerLink="/compte/connexion">
+        {{ 'portail.layout.signIn' | translate }}
+      </a>
+    }
+    <gc-language-switcher />
+  </div>
 </header>
 
 <main id="contenu" class="site-main" tabindex="-1">
