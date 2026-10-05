@@ -1,0 +1,3107 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Étude fonctionnelle et technique – GEST-CONF</title>
+<style>
+:root{--bg:#fff;--fg:#1c2430;--mut:#5b6677;--line:#dfe4ec;--acc:#1f5fbf;--accbg:#eef4fd;--code:#f4f6f9;--th:#f0f3f8}
+@media(prefers-color-scheme:dark){:root{--bg:#12161c;--fg:#e4e8ef;--mut:#9aa5b6;--line:#2a323d;--acc:#6aa5ff;--accbg:#18222f;--code:#1b212a;--th:#1a212b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+.layout{display:flex;max-width:1400px;margin:0 auto}
+nav{position:sticky;top:0;align-self:flex-start;height:100vh;overflow:auto;width:300px;flex:none;padding:24px 16px;border-right:1px solid var(--line);font-size:14px}
+nav .toc ul{list-style:none;margin:0;padding-left:14px} nav .toc>ul{padding-left:0}
+nav a{color:var(--mut);text-decoration:none;display:block;padding:2px 0} nav a:hover{color:var(--acc)}
+main{flex:1;min-width:0;padding:32px 40px 80px;max-width:1000px}
+h1{font-size:2rem;line-height:1.2;margin:0 0 .3em} h2{font-size:1.5rem;margin:2.2em 0 .6em;padding-top:.6em;border-top:1px solid var(--line)}
+h3{font-size:1.2rem;margin:1.8em 0 .5em} h4{margin:1.4em 0 .4em}
+a{color:var(--acc)}
+.tw{overflow-x:auto;margin:1em 0} table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top} th{background:var(--th)}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+pre{background:var(--code);padding:14px;border-radius:8px;overflow:auto;font-size:13.5px;line-height:1.5} pre code{background:none;padding:0}
+pre.mermaid{background:var(--accbg);text-align:center;border:1px solid var(--line)}
+blockquote{margin:1em 0;padding:.6em 1em;border-left:4px solid var(--acc);background:var(--accbg);border-radius:0 6px 6px 0} blockquote p{margin:.3em 0}
+hr{border:0;border-top:1px solid var(--line);margin:2em 0}
+@media(max-width:900px){.layout{display:block} nav{position:static;height:auto;width:auto;border-right:0;border-bottom:1px solid var(--line)} main{padding:20px 16px 60px}}
+@media print{nav{display:none} main{max-width:none;padding:0} h2{break-before:auto} pre,table{break-inside:avoid}}
+</style></head>
+<body><div class="layout"><nav><strong>Sommaire</strong><div class="toc">
+<ul>
+<li><a href="#plateforme-de-gestion-de-conferences-scientifiques-gest-conf">Plateforme de gestion de conférences scientifiques — « GEST-CONF »</a></li>
+<li><a href="#table-des-matieres">Table des matières</a></li>
+<li><a href="#1-synthese-et-recommandations-cles">1. Synthèse et recommandations clés</a><ul>
+<li><a href="#11-ce-que-couvre-la-plateforme">1.1 Ce que couvre la plateforme</a></li>
+<li><a href="#12-les-10-decisions-structurantes">1.2 Les 10 décisions structurantes</a></li>
+<li><a href="#13-ce-qui-a-ete-ajoute-au-cahier-des-charges-initial">1.3 Ce qui a été ajouté au cahier des charges initial</a></li>
+<li><a href="#14-points-dattention-majeurs">1.4 Points d'attention majeurs</a></li>
+</ul>
+</li>
+<li><a href="#2-contexte-objectifs-et-perimetre">2. Contexte, objectifs et périmètre</a><ul>
+<li><a href="#21-contexte">2.1 Contexte</a></li>
+<li><a href="#22-objectifs">2.2 Objectifs</a></li>
+<li><a href="#23-perimetre">2.3 Périmètre</a></li>
+<li><a href="#24-hypotheses-de-dimensionnement">2.4 Hypothèses de dimensionnement</a></li>
+</ul>
+</li>
+<li><a href="#3-acteurs-roles-et-matrice-des-droits">3. Acteurs, rôles et matrice des droits</a><ul>
+<li><a href="#31-acteurs">3.1 Acteurs</a></li>
+<li><a href="#32-roles-applicatifs">3.2 Rôles applicatifs</a></li>
+<li><a href="#33-matrice-des-droits-extrait">3.3 Matrice des droits (extrait)</a></li>
+</ul>
+</li>
+<li><a href="#4-etude-fonctionnelle-par-module">4. Étude fonctionnelle par module</a><ul>
+<li><a href="#m1-portail-public-p1">M1 — Portail public (P1)</a></li>
+<li><a href="#m2-comptes-et-authentification-p1">M2 — Comptes et authentification (P1)</a></li>
+<li><a href="#m3-parametrage-de-ledition-p1">M3 — Paramétrage de l'édition (P1)</a></li>
+<li><a href="#m4-candidature-et-soumission-p1">M4 — Candidature et soumission (P1)</a></li>
+<li><a href="#m5-evaluation-par-le-comite-scientifique-p1">M5 — Évaluation par le comité scientifique (P1)</a></li>
+<li><a href="#m6-decision-et-suivi-du-statut-de-la-candidature-p1">M6 — Décision et suivi du statut de la candidature (P1)</a></li>
+<li><a href="#m7-programme-et-agenda-p1-pour-le-programme-de-base-p2-pour-lassistance">M7 — Programme et agenda (P1 pour le programme de base, P2 pour l'assistance)</a></li>
+<li><a href="#m8-comites-p1">M8 — Comités (P1)</a></li>
+<li><a href="#m9-inscriptions-et-paiements-p2">M9 — Inscriptions et paiements (P2)</a></li>
+<li><a href="#m10-intervenants-invites-et-logistique-p2">M10 — Intervenants invités et logistique (P2)</a></li>
+<li><a href="#m11-espace-comite-dorganisation-p1-pour-les-bases">M11 — Espace comité d'organisation (P1 pour les bases)</a></li>
+<li><a href="#m12-communication-et-notifications-p1">M12 — Communication et notifications (P1)</a></li>
+<li><a href="#m13-sponsors-et-exposants-p2">M13 — Sponsors et exposants (P2)</a></li>
+<li><a href="#m14-jour-j-p2">M14 — Jour J (P2)</a></li>
+<li><a href="#m15-actes-et-apres-conference-p3">M15 — Actes et après-conférence (P3)</a></li>
+<li><a href="#m16-reporting-et-statistiques-p2">M16 — Reporting et statistiques (P2)</a></li>
+<li><a href="#m17-administration-audit-et-conformite-p1">M17 — Administration, audit et conformité (P1)</a></li>
+</ul>
+</li>
+<li><a href="#5-workflows-et-cycles-de-vie">5. Workflows et cycles de vie</a><ul>
+<li><a href="#51-cycle-de-vie-dune-soumission">5.1 Cycle de vie d'une soumission</a></li>
+<li><a href="#52-processus-devaluation">5.2 Processus d'évaluation</a></li>
+<li><a href="#53-parcours-dinscription-et-de-paiement">5.3 Parcours d'inscription et de paiement</a></li>
+<li><a href="#54-construction-et-publication-du-programme">5.4 Construction et publication du programme</a></li>
+</ul>
+</li>
+<li><a href="#6-regles-de-gestion">6. Règles de gestion</a></li>
+<li><a href="#7-architecture-technique">7. Architecture technique</a><ul>
+<li><a href="#71-vue-densemble">7.1 Vue d'ensemble</a></li>
+<li><a href="#72-stack-proposee">7.2 Stack proposée</a></li>
+<li><a href="#73-organisation-du-code-backend-django">7.3 Organisation du code backend (Django)</a></li>
+<li><a href="#74-organisation-du-code-frontend-angular">7.4 Organisation du code frontend (Angular)</a></li>
+</ul>
+</li>
+<li><a href="#8-modele-de-donnees-mariadb">8. Modèle de données (MariaDB)</a><ul>
+<li><a href="#81-diagramme-entite-relation-vue-conceptuelle">8.1 Diagramme entité-relation (vue conceptuelle)</a></li>
+<li><a href="#82-entites-principales-extrait-detaille">8.2 Entités principales (extrait détaillé)</a></li>
+<li><a href="#83-choix-de-modelisation">8.3 Choix de modélisation</a></li>
+</ul>
+</li>
+<li><a href="#9-api-django-et-securite">9. API Django et sécurité</a><ul>
+<li><a href="#91-conventions">9.1 Conventions</a></li>
+<li><a href="#92-principaux-groupes-dendpoints">9.2 Principaux groupes d'endpoints</a></li>
+<li><a href="#93-securite">9.3 Sécurité</a></li>
+</ul>
+</li>
+<li><a href="#10-frontends-angular">10. Frontends Angular</a><ul>
+<li><a href="#101-ecrans-principaux-portail-et-espaces-personnels">10.1 Écrans principaux — Portail et espaces personnels</a></li>
+<li><a href="#102-ecrans-principaux-espace-de-gestion">10.2 Écrans principaux — Espace de gestion</a></li>
+<li><a href="#103-principes-dexperience-utilisateur">10.3 Principes d'expérience utilisateur</a></li>
+<li><a href="#104-performance-et-referencement-du-portail">10.4 Performance et référencement du portail</a></li>
+<li><a href="#105-pwa-jour-j">10.5 PWA (jour J)</a></li>
+</ul>
+</li>
+<li><a href="#11-hebergement-o2switch-et-deploiement">11. Hébergement o2switch et déploiement</a><ul>
+<li><a href="#111-ce-que-lhebergement-permet-verifie">11.1 Ce que l'hébergement permet (vérifié)</a></li>
+<li><a href="#112-points-a-confirmer-avant-de-sengager-non-verifies">11.2 Points à confirmer avant de s'engager (non vérifiés)</a></li>
+<li><a href="#113-topologie-sur-un-domaine-unique">11.3 Topologie sur un domaine unique</a></li>
+<li><a href="#114-deploiement">11.4 Déploiement</a></li>
+<li><a href="#115-taches-planifiees-cron-cpanel">11.5 Tâches planifiées (cron cPanel)</a></li>
+<li><a href="#116-sauvegarde-et-reprise">11.6 Sauvegarde et reprise</a></li>
+<li><a href="#117-supervision">11.7 Supervision</a></li>
+</ul>
+</li>
+<li><a href="#12-exigences-non-fonctionnelles">12. Exigences non fonctionnelles</a></li>
+<li><a href="#13-propositions-damelioration">13. Propositions d'amélioration</a><ul>
+<li><a href="#131-a-forte-valeur-effort-modere">13.1 À forte valeur, effort modéré</a></li>
+<li><a href="#132-options-a-etudier">13.2 Options à étudier</a></li>
+<li><a href="#133-alternatives-techniques-a-considerer">13.3 Alternatives techniques à considérer</a></li>
+</ul>
+</li>
+<li><a href="#14-planning-charges-et-risques">14. Planning, charges et risques</a><ul>
+<li><a href="#141-decoupage-en-lots">14.1 Découpage en lots</a></li>
+<li><a href="#142-ordre-et-echeances-recommandes">14.2 Ordre et échéances recommandés</a></li>
+<li><a href="#143-estimation-de-charge-ordre-de-grandeur">14.3 Estimation de charge (ordre de grandeur)</a></li>
+<li><a href="#144-risques">14.4 Risques</a></li>
+</ul>
+</li>
+<li><a href="#15-points-ouverts-et-hypotheses">15. Points ouverts et hypothèses</a><ul>
+<li><a href="#151-questions-a-valider-avec-le-commanditaire">15.1 Questions à valider avec le commanditaire</a></li>
+<li><a href="#152-hypotheses-retenues-en-labsence-de-reponse">15.2 Hypothèses retenues en l'absence de réponse</a></li>
+</ul>
+</li>
+<li><a href="#16-annexes">16. Annexes</a><ul>
+<li><a href="#a1-glossaire">A1 — Glossaire</a></li>
+<li><a href="#a2-matrice-des-notifications-extrait">A2 — Matrice des notifications (extrait)</a></li>
+<li><a href="#a3-exemples-dhistoires-utilisateur-extrait">A3 — Exemples d'histoires utilisateur (extrait)</a></li>
+<li><a href="#a4-exemple-de-configuration-de-lapi-extraits-indicatifs">A4 — Exemple de configuration de l'API (extraits indicatifs)</a></li>
+<li><a href="#a5-check-list-de-mise-en-production">A5 — Check-list de mise en production</a></li>
+<li><a href="#a6-strategie-de-tests">A6 — Stratégie de tests</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</nav><main><h1 id="etude-fonctionnelle-et-technique">Étude fonctionnelle et technique</h1>
+<h2 id="plateforme-de-gestion-de-conferences-scientifiques-gest-conf">Plateforme de gestion de conférences scientifiques — « GEST-CONF »</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Version</strong></td>
+<td>1.0 – document de cadrage</td>
+</tr>
+<tr>
+<td><strong>Date</strong></td>
+<td>5 octobre 2026</td>
+</tr>
+<tr>
+<td><strong>Auteur</strong></td>
+<td>Étude réalisée pour ZDS</td>
+</tr>
+<tr>
+<td><strong>Statut</strong></td>
+<td>Pour validation</td>
+</tr>
+<tr>
+<td><strong>Stack imposée</strong></td>
+<td>Django (sans admin) · Angular · MariaDB · o2switch (mono-domaine)</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p><strong>Lecture rapide</strong> : la section 1 résume les décisions clés ; les sections 4 à 6 décrivent le fonctionnel ; les sections 7 à 12 le technique et l'hébergement ; la section 13 propose des améliorations ; la section 14 le planning et les risques ; la section 15 liste les points à trancher avec le commanditaire.</p>
+</blockquote>
+<hr />
+<h2 id="table-des-matieres">Table des matières</h2>
+<ol>
+<li>Synthèse et recommandations clés</li>
+<li>Contexte, objectifs et périmètre</li>
+<li>Acteurs, rôles et matrice des droits</li>
+<li>Étude fonctionnelle par module</li>
+<li>Workflows et cycles de vie</li>
+<li>Règles de gestion</li>
+<li>Architecture technique</li>
+<li>Modèle de données (MariaDB)</li>
+<li>API Django et sécurité</li>
+<li>Frontends Angular</li>
+<li>Hébergement o2switch et déploiement</li>
+<li>Exigences non fonctionnelles</li>
+<li>Propositions d'amélioration</li>
+<li>Planning, charges et risques</li>
+<li>Points ouverts et hypothèses</li>
+<li>Annexes</li>
+</ol>
+<hr />
+<h2 id="1-synthese-et-recommandations-cles">1. Synthèse et recommandations clés</h2>
+<h3 id="11-ce-que-couvre-la-plateforme">1.1 Ce que couvre la plateforme</h3>
+<p>GEST-CONF couvre le cycle complet d'une conférence scientifique : <strong>appel à communications → candidature → évaluation pondérée par le comité scientifique → décision → programme → inscriptions → jour J → actes et bilan</strong>. Elle comprend :</p>
+<ul>
+<li>un <strong>portail public</strong> (vitrine, appel à communications, programme, inscription) ;</li>
+<li>un <strong>espace de gestion</strong> (back-office) réservé aux comités et à l'administration, qui remplace l'admin Django ;</li>
+<li>des <strong>espaces personnels</strong> pour les auteurs, évaluateurs, intervenants et participants.</li>
+</ul>
+<h3 id="12-les-10-decisions-structurantes">1.2 Les 10 décisions structurantes</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Décision</th>
+<th>Justification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>Une API REST Django (DRF) unique</strong>, documentée en OpenAPI, consommée par deux applications Angular</td>
+<td>Séparation nette, client Angular généré, tests simples</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Un workspace Angular, deux applications</strong> (<code>portail</code>, <code>gestion</code>) + une bibliothèque partagée</td>
+<td>Le portail est public et doit être léger et référençable ; le back-office est lourd et authentifié</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Authentification par session + CSRF</strong> (cookies <code>HttpOnly</code>) plutôt que JWT dans le navigateur</td>
+<td>Mono-domaine donc pas de CORS ; pas de jeton exposé à XSS ; 2FA TOTP pour les rôles sensibles</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Rôles rattachés à une édition</strong> (<code>UserRole(user, édition, rôle)</code>)</td>
+<td>Un même utilisateur peut être relecteur en 2026 et auteur en 2027</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>Modèle multi-éditions dès le départ</strong> (Conférence → Édition)</td>
+<td>Évite une refonte si la conférence est reconduite</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>Grilles d'évaluation configurables</strong> (critères, poids, échelle)</td>
+<td>Exigence centrale : critères pondérés</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>Pas de Celery</strong> : tâches asynchrones via file en base + cron o2switch</td>
+<td>L'hébergement mutualisé n'offre pas de worker permanent ni de Redis</td>
+</tr>
+<tr>
+<td>8</td>
+<td><strong>Portail pré-rendu (SSG)</strong> plutôt que SSR</td>
+<td>Référencement sans processus Node permanent</td>
+</tr>
+<tr>
+<td>9</td>
+<td><strong>Paiement mobile money + carte</strong> via agrégateur (CinetPay ou équivalent, à valider)</td>
+<td>Contexte ivoirien et participants internationaux</td>
+</tr>
+<tr>
+<td>10</td>
+<td><strong>Double aveugle natif</strong> (anonymisation des soumissions pour les relecteurs)</td>
+<td>Standard académique ; coûteux à ajouter après coup</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="13-ce-qui-a-ete-ajoute-au-cahier-des-charges-initial">1.3 Ce qui a été ajouté au cahier des charges initial</h3>
+<p>Au-delà de la liste fournie (portail, agenda, comités, candidatures, évaluation, statut, agenda de passage), l'étude ajoute les modules suivants, jugés indispensables pour ce type d'événement :</p>
+<ul>
+<li><strong>Inscriptions et paiements</strong> (catégories tarifaires, early bird, codes promo, factures, reçus) ;</li>
+<li><strong>Gestion des conflits d'intérêts</strong> et affectation des relecteurs (manuelle et assistée) ;</li>
+<li><strong>Version finale (camera-ready)</strong>, <strong>actes</strong> et <strong>attestations</strong> ;</li>
+<li><strong>Check-in par QR code</strong> et <strong>badges</strong> ;</li>
+<li><strong>Lettres d'invitation</strong> (visas) ;</li>
+<li><strong>Sponsors et exposants</strong> ;</li>
+<li><strong>Logistique</strong> : salles, hébergement, transport, restauration, bénévoles ;</li>
+<li><strong>Tâches du comité d'organisation</strong> (kanban) et <strong>budget</strong> ;</li>
+<li><strong>Communication</strong> : modèles d'e-mails, annonces, notifications in-app ;</li>
+<li><strong>Tableaux de bord</strong>, exports, <strong>journal d'audit</strong>, conformité <strong>protection des données</strong> ;</li>
+<li><strong>Bilinguisme FR/EN</strong>, accessibilité, PWA pour le jour J.</li>
+</ul>
+<p>Le tout est classé par priorité (MVP / V1 / V2) pour que le périmètre reste maîtrisable.</p>
+<h3 id="14-points-dattention-majeurs">1.4 Points d'attention majeurs</h3>
+<ol>
+<li><strong>Django sans admin</strong> : tout ce que l'admin offrait gratuitement (CRUD, filtres, exports) doit être construit dans l'espace de gestion Angular. C'est le principal poste de charge caché (voir §14).</li>
+<li><strong>Hébergement mutualisé</strong> : pas de WebSocket, pas de processus persistant, ressources limitées. L'architecture est pensée pour cela (§11), mais le temps réel (Q&amp;A en direct, chat) est volontairement hors périmètre.</li>
+<li><strong>Confidentialité de l'évaluation</strong> : c'est le cœur de crédibilité de la plateforme. Les règles d'accès (§6, §9) sont à appliquer côté serveur, jamais seulement dans l'interface.</li>
+</ol>
+<hr />
+<h2 id="2-contexte-objectifs-et-perimetre">2. Contexte, objectifs et périmètre</h2>
+<h3 id="21-contexte">2.1 Contexte</h3>
+<p>L'organisation d'une conférence scientifique mobilise des outils dispersés (formulaires, tableurs, e-mails). Les conséquences classiques : perte de traçabilité des évaluations, erreurs de programmation, relances manuelles, absence de vision globale pour le comité d'organisation.</p>
+<h3 id="22-objectifs">2.2 Objectifs</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Objectif</th>
+<th>Indicateur de réussite</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Centraliser le cycle de vie d'une communication</td>
+<td>100 % des soumissions, évaluations et décisions tracées dans l'outil</td>
+</tr>
+<tr>
+<td>Garantir une évaluation équitable et traçable</td>
+<td>Chaque note rattachée à une grille, un relecteur, une date ; scores calculés automatiquement</td>
+</tr>
+<tr>
+<td>Informer en temps réel les candidats</td>
+<td>Statut visible à tout moment ; notification à chaque changement</td>
+</tr>
+<tr>
+<td>Fiabiliser le programme</td>
+<td>Zéro conflit de salle ou d'intervenant non détecté</td>
+</tr>
+<tr>
+<td>Réduire la charge administrative</td>
+<td>Génération automatique des factures, attestations, badges, lettres</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="23-perimetre">2.3 Périmètre</h3>
+<p><strong>Inclus</strong> : tout ce qui est décrit au §4 (modules M1 à M17).</p>
+<p><strong>Exclus de la version initiale</strong> (voir §13 pour les évolutions) :</p>
+<ul>
+<li>diffusion vidéo en direct hébergée par la plateforme (on intègre des liens Zoom/Teams/YouTube) ;</li>
+<li>chat et questions-réponses en temps réel ;</li>
+<li>application mobile native (une PWA est prévue) ;</li>
+<li>comptabilité complète (on produit le suivi budgétaire et les exports).</li>
+</ul>
+<h3 id="24-hypotheses-de-dimensionnement">2.4 Hypothèses de dimensionnement</h3>
+<p>À confirmer au §15. Base de travail retenue :</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Paramètre</th>
+<th>Valeur de calcul</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Éditions actives simultanément</td>
+<td>1 (modèle prêt pour plusieurs)</td>
+</tr>
+<tr>
+<td>Soumissions par édition</td>
+<td>100 à 600</td>
+</tr>
+<tr>
+<td>Relecteurs</td>
+<td>30 à 100</td>
+</tr>
+<tr>
+<td>Participants</td>
+<td>200 à 1 500</td>
+</tr>
+<tr>
+<td>Pic de trafic portail</td>
+<td>50 à 200 visiteurs simultanés (ouverture des inscriptions, clôture de l'appel)</td>
+</tr>
+<tr>
+<td>Langues</td>
+<td>Français, anglais</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="3-acteurs-roles-et-matrice-des-droits">3. Acteurs, rôles et matrice des droits</h2>
+<h3 id="31-acteurs">3.1 Acteurs</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Acteur</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Visiteur</strong></td>
+<td>Navigue sur le portail sans compte</td>
+</tr>
+<tr>
+<td><strong>Auteur / candidat</strong></td>
+<td>Soumet une ou plusieurs communications ; peut être co-auteur d'autres</td>
+</tr>
+<tr>
+<td><strong>Évaluateur</strong></td>
+<td>Membre du comité scientifique chargé de relire des soumissions</td>
+</tr>
+<tr>
+<td><strong>Président du comité scientifique</strong></td>
+<td>Affecte les relecteurs, arbitre, rend les décisions</td>
+</tr>
+<tr>
+<td><strong>Membre du comité d'organisation</strong></td>
+<td>Gère la logistique ; sous-rôles possibles (finances, programme, communication, secrétariat)</td>
+</tr>
+<tr>
+<td><strong>Président de la conférence (chair)</strong></td>
+<td>Vue globale, validation des décisions majeures</td>
+</tr>
+<tr>
+<td><strong>Intervenant invité (keynote)</strong></td>
+<td>Orateur invité, hors processus de soumission</td>
+</tr>
+<tr>
+<td><strong>Président de séance / discutant</strong></td>
+<td>Anime une session du programme</td>
+</tr>
+<tr>
+<td><strong>Participant</strong></td>
+<td>Inscrit à l'événement</td>
+</tr>
+<tr>
+<td><strong>Sponsor / exposant</strong></td>
+<td>Partenaire avec espace dédié</td>
+</tr>
+<tr>
+<td><strong>Bénévole</strong></td>
+<td>Accès restreint au check-in et à l'accueil</td>
+</tr>
+<tr>
+<td><strong>Administrateur technique</strong></td>
+<td>Paramétrage global, gestion des comptes, audit</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="32-roles-applicatifs">3.2 Rôles applicatifs</h3>
+<p>Rôles stockés dans <code>UserRole</code> (par édition) : <code>ADMIN</code>, <code>CHAIR</code>, <code>OC_MEMBER</code> (avec <code>oc_function</code>), <code>SC_CHAIR</code>, <code>SC_MEMBER</code>, <code>AUTHOR</code>, <code>SPEAKER</code>, <code>SESSION_CHAIR</code>, <code>ATTENDEE</code>, <code>SPONSOR</code>, <code>VOLUNTEER</code>.</p>
+<p>Un utilisateur peut cumuler plusieurs rôles. Les rôles <code>AUTHOR</code> et <code>ATTENDEE</code> sont attribués automatiquement ; les autres le sont par un administrateur ou le comité concerné.</p>
+<h3 id="33-matrice-des-droits-extrait">3.3 Matrice des droits (extrait)</h3>
+<p>Légende : <strong>L</strong> lecture · <strong>E</strong> écriture · <strong>V</strong> validation/décision · <strong>—</strong> aucun accès · <strong>(anon.)</strong> accès sans identité de l'auteur</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Ressource</th>
+<th>Auteur</th>
+<th>Évaluateur</th>
+<th>Prés. CS</th>
+<th>CO</th>
+<th>Chair</th>
+<th>Admin</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sa propre soumission</td>
+<td>L/E (avant clôture)</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Toutes les soumissions</td>
+<td>—</td>
+<td>L (affectées, anon.)</td>
+<td>L/E</td>
+<td>L (méta, sans notes)</td>
+<td>L</td>
+<td>L</td>
+</tr>
+<tr>
+<td>Identité des auteurs</td>
+<td>—</td>
+<td>— (double aveugle)</td>
+<td>L</td>
+<td>L</td>
+<td>L</td>
+<td>L</td>
+</tr>
+<tr>
+<td>Ses évaluations</td>
+<td>—</td>
+<td>L/E</td>
+<td>L</td>
+<td>—</td>
+<td>L</td>
+<td>L</td>
+</tr>
+<tr>
+<td>Évaluations des autres relecteurs</td>
+<td>—</td>
+<td>L après envoi de la sienne, si discussion ouverte</td>
+<td>L</td>
+<td>—</td>
+<td>L</td>
+<td>L</td>
+</tr>
+<tr>
+<td>Décision</td>
+<td>L (la sienne)</td>
+<td>L (affectées)</td>
+<td>V</td>
+<td>L</td>
+<td>V</td>
+<td>L</td>
+</tr>
+<tr>
+<td>Programme (brouillon)</td>
+<td>—</td>
+<td>—</td>
+<td>L</td>
+<td>L/E</td>
+<td>L/V</td>
+<td>L/E</td>
+</tr>
+<tr>
+<td>Programme (publié)</td>
+<td>L</td>
+<td>L</td>
+<td>L</td>
+<td>L/E</td>
+<td>L/V</td>
+<td>L/E</td>
+</tr>
+<tr>
+<td>Inscriptions et paiements</td>
+<td>L (siennes)</td>
+<td>—</td>
+<td>—</td>
+<td>L/E (finances)</td>
+<td>L</td>
+<td>L/E</td>
+</tr>
+<tr>
+<td>Paramétrage de l'édition</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>L/E (partiel)</td>
+<td>L/E</td>
+<td>L/E</td>
+</tr>
+<tr>
+<td>Journal d'audit</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>L</td>
+<td>L</td>
+</tr>
+</tbody>
+</table></div>
+<p>La matrice complète (par endpoint) est à établir en phase de conception détaillée ; elle sera traduite en classes de permissions DRF et en tests automatisés (un test par case sensible).</p>
+<hr />
+<h2 id="4-etude-fonctionnelle-par-module">4. Étude fonctionnelle par module</h2>
+<p>Priorités : <strong>P1</strong> = MVP (indispensable pour ouvrir l'appel) · <strong>P2</strong> = V1 (avant la conférence) · <strong>P3</strong> = V2 (confort, après lancement).</p>
+<h3 id="m1-portail-public-p1">M1 — Portail public (P1)</h3>
+<p>Site vitrine de l'événement, bilingue FR/EN.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Fonction</th>
+<th>Priorité</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Page d'accueil : thème, dates, lieu, compte à rebours, appels à l'action</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>Présentation de la conférence et des thématiques (tracks)</td>
+<td>P1</td>
+</tr>
+<tr>
+<td><strong>Appel à communications</strong> : règles, formats, modèles de documents à télécharger, dates clés</td>
+<td>P1</td>
+</tr>
+<tr>
+<td><strong>Dates importantes</strong> (calendrier : soumission, notification, version finale, inscription)</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>Comité scientifique et comité d'organisation (photos, affiliations, pays)</td>
+<td>P1</td>
+</tr>
+<tr>
+<td><strong>Programme public</strong> : filtrable par jour, salle, thème, type de session ; recherche</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>Intervenants invités (biographies, résumés des keynotes)</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>Inscription et tarifs</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>Lieu, accès, hébergement, visas, informations pratiques</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>Sponsors et partenaires (logos, niveaux)</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>Actualités et annonces</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>FAQ, contact (formulaire protégé anti-spam)</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>Actes publiés et archives des éditions précédentes</td>
+<td>P3</td>
+</tr>
+<tr>
+<td>Galerie photos / replays</td>
+<td>P3</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Contrainte</strong> : pages publiques pré-rendues, métadonnées Open Graph, plan de site, balisage schema.org <code>Event</code> pour le référencement.</p>
+<h3 id="m2-comptes-et-authentification-p1">M2 — Comptes et authentification (P1)</h3>
+<ul>
+<li>Inscription par e-mail avec <strong>vérification de l'adresse</strong>, réinitialisation du mot de passe ;</li>
+<li><strong>Connexion ORCID</strong> (identifiant chercheur standard, apprécié des auteurs) — P2 ;</li>
+<li>Profil : titre, nom, prénom, institution, pays, spécialités, biographie, photo, ORCID, réseaux professionnels ;</li>
+<li><strong>Authentification à deux facteurs (TOTP)</strong> obligatoire pour comités et administrateurs — P2 ;</li>
+<li>Un compte unique pour tous les rôles, sélecteur de rôle actif dans l'interface ;</li>
+<li>Consentements (données personnelles, publication de la photo et du résumé) horodatés ;</li>
+<li>Suppression / anonymisation de compte sur demande.</li>
+</ul>
+<h3 id="m3-parametrage-de-ledition-p1">M3 — Paramétrage de l'édition (P1)</h3>
+<p>Remplace la configuration par l'admin Django. Écrans réservés à <code>ADMIN</code>, <code>CHAIR</code> et au CO selon droits.</p>
+<ul>
+<li>Informations générales : nom, édition, thème, dates, lieu, fuseau horaire, langues ;</li>
+<li><strong>Thématiques / tracks</strong> (liste, description, président de track éventuel) ;</li>
+<li><strong>Types de communication</strong> : communication orale, poster, atelier, symposium, table ronde — avec durée par défaut, longueur de résumé, formats de fichiers acceptés ;</li>
+<li><strong>Calendrier</strong> : ouverture/clôture de l'appel, date d'évaluation, notification, version finale, inscription anticipée, etc. ; toutes les dates pilotent des états automatiques ;</li>
+<li><strong>Grille d'évaluation</strong> (voir M5) ;</li>
+<li>Tarifs et catégories d'inscription ;</li>
+<li>Modèles d'e-mails et de documents (attestations, lettres, factures) ;</li>
+<li>Contenu du portail (pages, actualités, FAQ) via un éditeur de contenu simple ;</li>
+<li>Paramètres de confidentialité : double aveugle activé ou non, nombre de relecteurs par soumission, seuils.</li>
+</ul>
+<h3 id="m4-candidature-et-soumission-p1">M4 — Candidature et soumission (P1)</h3>
+<p><strong>Parcours auteur</strong></p>
+<ol>
+<li>Création d'une soumission en <strong>brouillon</strong> (sauvegarde automatique) ;</li>
+<li>Saisie : titre, <strong>résumé</strong> (limite de mots paramétrable), mots-clés, thématique, type de communication souhaité, langue ;</li>
+<li><strong>Auteurs et co-auteurs</strong> (ordre, affiliation, auteur correspondant, auteur présentateur) ; un co-auteur est invité par e-mail s'il n'a pas de compte ;</li>
+<li>Dépôt de fichiers : résumé étendu ou article complet (PDF), fichier anonymisé si double aveugle, annexes ;</li>
+<li>Déclarations : originalité, éthique, conflits d'intérêts, consentement de publication ;</li>
+<li><strong>Soumission définitive</strong> → accusé de réception par e-mail, numéro de référence (<code>GC26-0123</code>) ;</li>
+<li>Modification possible <strong>jusqu'à la clôture</strong> (chaque version conservée) ; retrait possible avec motif ;</li>
+<li>Après décision : dépôt de la <strong>version finale</strong> si acceptée, réponses aux commentaires (« rebuttal » ou lettre de réponse) si corrections demandées.</li>
+</ol>
+<p><strong>Contrôles</strong> : taille et type de fichier validés côté serveur, compteur de mots, détection de doublons (même titre / mêmes auteurs), vérification d'anonymisation (métadonnées PDF nettoyées).</p>
+<p><strong>Priorités</strong> : parcours complet P1 ; invitation des co-auteurs P2 ; contrôle d'anonymisation assisté P2 ; export de similarité (plagiat) P3.</p>
+<h3 id="m5-evaluation-par-le-comite-scientifique-p1">M5 — Évaluation par le comité scientifique (P1)</h3>
+<p>C'est le module central de la demande : <em>évaluation dans l'application avec critères pondérés</em>.</p>
+<h4 id="51-grille-devaluation">5.1 Grille d'évaluation</h4>
+<p>La grille est <strong>configurable par édition et par type de communication</strong>.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Élément</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Critère</strong></td>
+<td>Libellé, description d'aide à la notation, <strong>poids</strong> (%), échelle (ex. 0–5 ou 1–10), obligatoire ou non</td>
+</tr>
+<tr>
+<td><strong>Poids</strong></td>
+<td>La somme des poids d'une grille doit être égale à 100 (contrôle bloquant)</td>
+</tr>
+<tr>
+<td><strong>Recommandation globale</strong></td>
+<td>Accepter / Accepter avec corrections / Rejeter (+ « Discuter »)</td>
+</tr>
+<tr>
+<td><strong>Niveau de confiance du relecteur</strong></td>
+<td>1 (peu familier) à 5 (expert)</td>
+</tr>
+<tr>
+<td><strong>Commentaires</strong></td>
+<td>Aux auteurs (visible) ; confidentiels au comité (non visible des auteurs)</td>
+</tr>
+<tr>
+<td><strong>Éléments facultatifs</strong></td>
+<td>Signalement d'éthique, de plagiat présumé, suggestion de format (oral/poster)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Exemple de grille par défaut (proposition)</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Critère</th>
+<th>Poids</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Originalité et contribution scientifique</td>
+<td>25 %</td>
+</tr>
+<tr>
+<td>Rigueur méthodologique</td>
+<td>30 %</td>
+</tr>
+<tr>
+<td>Pertinence par rapport aux thématiques</td>
+<td>15 %</td>
+</tr>
+<tr>
+<td>Qualité de la rédaction et de la structure</td>
+<td>15 %</td>
+</tr>
+<tr>
+<td>Résultats, portée et impact</td>
+<td>15 %</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Calcul</strong></p>
+<pre><code class="language-text">Note pondérée d'un relecteur  = Σ (note_i × poids_i) / Σ poids_i      (ramenée sur 100 ou sur l'échelle)
+Score final de la soumission  = moyenne des notes pondérées des relecteurs
+                                (option : moyenne pondérée par le niveau de confiance)
+</code></pre>
+<p>Exemple : échelle 0–5, notes (4 ; 3 ; 5 ; 4 ; 3) avec poids (25 ; 30 ; 15 ; 15 ; 15) :
+<code>(4×25 + 3×30 + 5×15 + 4×15 + 3×15) / 100 = (100 + 90 + 75 + 60 + 45) / 100 = 3,70 / 5 → 74 / 100</code>.</p>
+<h4 id="52-affectation-des-relecteurs">5.2 Affectation des relecteurs</h4>
+<ul>
+<li><strong>Manuelle</strong> par le président du CS ;</li>
+<li><strong>Assistée</strong> : suggestion basée sur les mots-clés et thématiques déclarés par chaque relecteur, la <strong>charge</strong> (maximum paramétrable), et l'<strong>exclusion des conflits d'intérêts</strong> ;</li>
+<li><strong>Enchères</strong> (« bidding ») optionnelles : les relecteurs indiquent leurs préférences sur les titres/résumés — P3 ;</li>
+<li>Nombre de relecteurs par soumission : paramétrable (2 ou 3 par défaut) ;</li>
+<li>Relecteur <strong>de remplacement</strong> et relance automatique si échéance dépassée.</li>
+</ul>
+<h4 id="53-conflits-dinterets">5.3 Conflits d'intérêts</h4>
+<p>Déclaration par le relecteur (même institution, co-publication récente, lien personnel) ; détection automatique du <strong>même établissement</strong> et des <strong>co-auteurs connus</strong> ; un relecteur en conflit ne voit ni la soumission ni les discussions ; tout conflit est journalisé.</p>
+<h4 id="54-double-aveugle">5.4 Double aveugle</h4>
+<p>Les relecteurs ne voient ni noms ni affiliations des auteurs ; seul le fichier anonymisé leur est servi. Les auteurs ne voient pas l'identité des relecteurs. L'anonymisation est garantie <strong>côté serveur</strong> (sérialiseurs distincts selon le rôle), pas seulement masquée par l'interface.</p>
+<h4 id="55-suivi-discussion-et-arbitrage">5.5 Suivi, discussion et arbitrage</h4>
+<ul>
+<li>Tableau de bord du président : avancement par relecteur, par track, soumissions sans relecture complète, retards ;</li>
+<li><strong>Divergence</strong> : si l'écart entre deux notes dépasse un seuil paramétrable (ex. 30 points), alerte et proposition d'une relecture supplémentaire ;</li>
+<li><strong>Discussion confidentielle</strong> entre relecteurs d'une même soumission, ouverte après remise de toutes les évaluations ;</li>
+<li>Possibilité de <strong>modifier son évaluation</strong> après discussion (historique conservé) ;</li>
+<li>Vue <strong>classement</strong> avec seuil d'acceptation et simulation (« combien de communications acceptées si le seuil est à X ? ») ;</li>
+<li>Export CSV/PDF des évaluations pour archives.</li>
+</ul>
+<h3 id="m6-decision-et-suivi-du-statut-de-la-candidature-p1">M6 — Décision et suivi du statut de la candidature (P1)</h3>
+<p><strong>Décisions possibles</strong> : <code>ACCEPTÉE</code>, <code>ACCEPTÉE SOUS RÉSERVE DE CORRECTIONS</code>, <code>LISTE D'ATTENTE</code>, <code>REJETÉE</code> ; avec <strong>format attribué</strong> (oral, poster, etc.) pouvant différer du format demandé.</p>
+<ul>
+<li>Décision individuelle ou <strong>en lot</strong> par le président du CS, après simulation ;</li>
+<li>Validation par le chair si la politique l'impose ;</li>
+<li><strong>Notification groupée</strong> aux auteurs avec les commentaires (anonymisés) et le modèle d'e-mail adapté ;</li>
+<li>Verrou : aucune décision n'est visible des auteurs tant que le président n'a pas « publié les résultats » ;</li>
+<li><strong>Page de suivi pour l'auteur</strong> : chronologie visuelle (frise) avec l'état courant.</li>
+</ul>
+<p><strong>Statuts visibles par l'auteur</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Statut interne</th>
+<th>Libellé affiché à l'auteur</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DRAFT</code></td>
+<td>Brouillon</td>
+</tr>
+<tr>
+<td><code>SUBMITTED</code></td>
+<td>Soumise</td>
+</tr>
+<tr>
+<td><code>SCREENING</code></td>
+<td>Vérification de recevabilité</td>
+</tr>
+<tr>
+<td><code>UNDER_REVIEW</code></td>
+<td>En cours d'évaluation</td>
+</tr>
+<tr>
+<td><code>REVIEWED</code></td>
+<td>Évaluée — décision en attente <em>(ne montre pas les notes)</em></td>
+</tr>
+<tr>
+<td><code>ACCEPTED</code> / <code>ACCEPTED_MINOR</code> / <code>WAITLIST</code> / <code>REJECTED</code></td>
+<td>Décision</td>
+</tr>
+<tr>
+<td><code>REVISION_REQUESTED</code></td>
+<td>Corrections demandées</td>
+</tr>
+<tr>
+<td><code>CAMERA_READY_RECEIVED</code></td>
+<td>Version finale reçue</td>
+</tr>
+<tr>
+<td><code>CONFIRMED</code></td>
+<td>Présentation confirmée (inscription réglée)</td>
+</tr>
+<tr>
+<td><code>SCHEDULED</code></td>
+<td>Programmée (date, salle, heure)</td>
+</tr>
+<tr>
+<td><code>PRESENTED</code></td>
+<td>Présentée</td>
+</tr>
+<tr>
+<td><code>PUBLISHED</code></td>
+<td>Publiée dans les actes</td>
+</tr>
+<tr>
+<td><code>WITHDRAWN</code></td>
+<td>Retirée</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="m7-programme-et-agenda-p1-pour-le-programme-de-base-p2-pour-lassistance">M7 — Programme et agenda (P1 pour le programme de base, P2 pour l'assistance)</h3>
+<p><strong>Structure</strong> : Édition → Jours → Sessions → Créneaux de communication.</p>
+<p><strong>Types de session</strong> (liste paramétrable) :</p>
+<ul>
+<li><strong>Conférence inaugurale</strong> / cérémonie d'ouverture ;</li>
+<li><strong>Conférences plénières (keynotes)</strong> ;</li>
+<li><strong>Sessions parallèles</strong> (communications orales) ;</li>
+<li><strong>Sessions posters</strong> ;</li>
+<li><strong>Ateliers / workshops</strong>, <strong>tutoriels</strong> ;</li>
+<li><strong>Tables rondes</strong>, <strong>panels</strong> ;</li>
+<li><strong>Assemblée générale</strong>, réunions de comité ;</li>
+<li><strong>Pauses café</strong>, <strong>déjeuners</strong>, <strong>cocktail</strong>, <strong>dîner de gala</strong> ;</li>
+<li><strong>Visites</strong> et activités sociales ;</li>
+<li><strong>Cérémonie de clôture</strong> et remise de prix.</li>
+</ul>
+<p><strong>Fonctions</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Fonction</th>
+<th>Priorité</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Création des salles (capacité, équipements, accessibilité)</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>Création de sessions avec salle, horaires, président de séance</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>Affectation des communications acceptées aux créneaux (glisser-déposer)</td>
+<td>P1</td>
+</tr>
+<tr>
+<td><strong>Détection de conflits</strong> : salle occupée, intervenant ou président déjà engagé, chevauchement, dépassement de durée, indisponibilité déclarée</td>
+<td>P1</td>
+</tr>
+<tr>
+<td><strong>Agenda de passage de chaque acteur</strong> : fiche « Mon passage » (date, heure, salle, durée, rôle, consignes)</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>Déclaration des <strong>indisponibilités</strong> de l'intervenant avant planification</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>Proposition automatique de planning (regroupement par thème, contraintes)</td>
+<td>P3</td>
+</tr>
+<tr>
+<td><strong>Mon programme</strong> : le participant compose son agenda personnel</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>Export <strong>iCal (.ics)</strong> individuel, PDF du programme, version imprimable</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>Statut <strong>brouillon / publié</strong> du programme, journal des modifications</td>
+<td>P1</td>
+</tr>
+<tr>
+<td><strong>Notification automatique</strong> d'un changement (aux intervenants et aux inscrits concernés)</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>Liens de visioconférence pour sessions hybrides</td>
+<td>P3</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Agenda par acteur</strong> (exigence explicite) :</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Acteur</th>
+<th>Ce qu'il voit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Auteur / intervenant</td>
+<td>Ses passages : session, salle, créneau, durée, co-intervenants, consignes techniques ; bouton « Ajouter à mon agenda »</td>
+</tr>
+<tr>
+<td>Président de séance</td>
+<td>Sa ou ses sessions, la liste des intervenants avec horaires, minuterie</td>
+</tr>
+<tr>
+<td>Évaluateur</td>
+<td>Ses échéances d'évaluation, ses sessions éventuelles</td>
+</tr>
+<tr>
+<td>Membre du CO</td>
+<td>Sa grille de service (accueil, salles, logistique)</td>
+</tr>
+<tr>
+<td>Participant</td>
+<td>Son programme personnalisé</td>
+</tr>
+<tr>
+<td>Bénévole</td>
+<td>Ses postes et horaires</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="m8-comites-p1">M8 — Comités (P1)</h3>
+<ul>
+<li><strong>Comité scientifique</strong> : liste des membres, pays, institutions, domaines d'expertise, charge maximale, disponibilité, invitation par e-mail (acceptation/refus tracés) ;</li>
+<li><strong>Comité d'organisation</strong> : membres et <strong>fonctions</strong> (finances, programme, logistique, communication, relations extérieures, bénévoles) ;</li>
+<li><strong>Annuaire public</strong> (avec consentement) ;</li>
+<li>Réunions : convocation, ordre du jour, comptes rendus déposés, suivi des décisions — P3.</li>
+</ul>
+<h3 id="m9-inscriptions-et-paiements-p2">M9 — Inscriptions et paiements (P2)</h3>
+<ul>
+<li><strong>Catégories</strong> : auteur, participant, étudiant, chercheur, professionnel, accompagnant, intervenant invité, membre de comité, sponsor ;</li>
+<li><strong>Tarifs</strong> par catégorie et période (early bird, normal, sur place), par pays (tarif local / international) ;</li>
+<li>Options : atelier, dîner de gala, visite, hébergement groupé ;</li>
+<li><strong>Codes promo</strong>, gratuités, groupes ;</li>
+<li><strong>Obligation d'inscription d'au moins un auteur</strong> pour qu'une communication acceptée soit programmée (règle paramétrable) ;</li>
+<li><strong>Paiement en ligne</strong> : mobile money, carte via agrégateur ; <strong>virement</strong> et <strong>paiement sur place</strong> avec validation manuelle (rapprochement) ;</li>
+<li><strong>Facture / reçu PDF</strong> numérotés, <strong>bon de commande</strong> institutionnel (facture pro forma) ;</li>
+<li>Remboursements et annulations selon règles paramétrables ;</li>
+<li>Exports comptables (CSV) ;</li>
+<li>Tableau de bord financier (recettes, impayés, prévisions).</li>
+</ul>
+<h3 id="m10-intervenants-invites-et-logistique-p2">M10 — Intervenants invités et logistique (P2)</h3>
+<ul>
+<li>Fiche intervenant : biographie, photo, titre de la keynote, besoins techniques, restrictions alimentaires ;</li>
+<li><strong>Lettres d'invitation</strong> (visa) générées en PDF, signées numériquement (image de signature + QR de vérification) ;</li>
+<li>Suivi de voyage et d'hébergement (arrivée, départ, hôtel, transferts) ;</li>
+<li>Gestion des <strong>salles</strong>, du <strong>matériel</strong> (vidéoprojecteurs, micros, interprétation) ;</li>
+<li><strong>Restauration</strong> : estimation des effectifs, régimes particuliers ;</li>
+<li><strong>Bénévoles</strong> : recrutement, planning, rôles ;</li>
+<li>Cartographie et informations pratiques pour le public.</li>
+</ul>
+<h3 id="m11-espace-comite-dorganisation-p1-pour-les-bases">M11 — Espace comité d'organisation (P1 pour les bases)</h3>
+<ul>
+<li><strong>Tableau de bord</strong> : soumissions, inscriptions, recettes, avancement des tâches, échéances ;</li>
+<li><strong>Tâches</strong> : kanban (à faire / en cours / terminé), responsable, échéance, commentaires, pièces jointes — P2 ;</li>
+<li><strong>Budget prévisionnel et réalisé</strong> par poste — P2 ;</li>
+<li><strong>Annuaire des participants</strong> avec filtres et exports ;</li>
+<li><strong>Messagerie de masse</strong> par segments (auteurs acceptés, relecteurs en retard, participants non payés…) ;</li>
+<li><strong>Documents partagés</strong> (conventions, contrats, comptes rendus) ;</li>
+<li><strong>Journal d'activité</strong> (qui a fait quoi, quand).</li>
+</ul>
+<h3 id="m12-communication-et-notifications-p1">M12 — Communication et notifications (P1)</h3>
+<ul>
+<li><strong>Modèles d'e-mails</strong> (FR/EN) avec variables (<code>{{nom}}</code>, <code>{{titre}}</code>, <code>{{statut}}</code>…) ;</li>
+<li><strong>File d'envoi</strong> avec reprise sur erreur, journal, taux d'échec ;</li>
+<li><strong>Notifications dans l'application</strong> (cloche) ;</li>
+<li><strong>Rappels automatiques</strong> (échéances de soumission, d'évaluation, d'inscription) ;</li>
+<li><strong>Annonces</strong> diffusées sur le portail et par e-mail ;</li>
+<li>SMS / WhatsApp — P3 (coût et dépendance à un fournisseur).</li>
+</ul>
+<p>La matrice des notifications est en annexe A2.</p>
+<h3 id="m13-sponsors-et-exposants-p2">M13 — Sponsors et exposants (P2)</h3>
+<p>Niveaux (platine, or, argent, bronze), contreparties, logos sur le portail, espace de dépôt de documents, plan des stands, factures, badges exposants.</p>
+<h3 id="m14-jour-j-p2">M14 — Jour J (P2)</h3>
+<ul>
+<li><strong>Badges</strong> imprimables (PDF A6 ou planche A4) avec <strong>QR code</strong> unique ;</li>
+<li><strong>Check-in</strong> par scan QR depuis un téléphone (PWA) avec liste hors-ligne synchronisable ;</li>
+<li><strong>Émargement par session</strong> (présence réelle aux communications) ;</li>
+<li><strong>Attestations de participation / de communication / d'évaluation</strong> générées en PDF avec <strong>QR de vérification publique</strong> ;</li>
+<li>Questionnaire de satisfaction (par session et global) ;</li>
+<li>Annonces de dernière minute (bandeau sur le portail et notifications).</li>
+</ul>
+<h3 id="m15-actes-et-apres-conference-p3">M15 — Actes et après-conférence (P3)</h3>
+<ul>
+<li>Compilation des versions finales en <strong>actes</strong> (ordre, pagination, sommaire) ;</li>
+<li>Métadonnées de publication (DOI, ISBN/ISSN si applicable) ;</li>
+<li>Publication sur le portail (consentement des auteurs) ;</li>
+<li>Remise de <strong>prix</strong> (meilleure communication, meilleur poster) avec vote du comité ;</li>
+<li>Bilan : statistiques, satisfaction, export des données, archivage de l'édition.</li>
+</ul>
+<h3 id="m16-reporting-et-statistiques-p2">M16 — Reporting et statistiques (P2)</h3>
+<p>Taux d'acceptation par track et par pays, délais de relecture, répartition géographique, évolution des inscriptions, recettes, taux de présence. Exports CSV / XLSX / PDF.</p>
+<h3 id="m17-administration-audit-et-conformite-p1">M17 — Administration, audit et conformité (P1)</h3>
+<p>Gestion des comptes et rôles ; <strong>journal d'audit</strong> (connexions, décisions, consultation de données sensibles) ; <strong>export et suppression</strong> des données personnelles sur demande ; <strong>durées de conservation</strong> paramétrables ; sauvegardes et restauration (voir §11).</p>
+<hr />
+<h2 id="5-workflows-et-cycles-de-vie">5. Workflows et cycles de vie</h2>
+<h3 id="51-cycle-de-vie-dune-soumission">5.1 Cycle de vie d'une soumission</h3>
+<pre class="mermaid">stateDiagram-v2
+    [*] --&gt; DRAFT
+    DRAFT --&gt; SUBMITTED : soumission définitive
+    SUBMITTED --&gt; SCREENING : clôture de l'appel
+    SCREENING --&gt; UNDER_REVIEW : recevable + relecteurs affectés
+    SCREENING --&gt; REJECTED : irrecevable
+    UNDER_REVIEW --&gt; REVIEWED : toutes évaluations reçues
+    REVIEWED --&gt; ACCEPTED : décision
+    REVIEWED --&gt; ACCEPTED_MINOR : décision avec corrections
+    REVIEWED --&gt; WAITLIST : décision
+    REVIEWED --&gt; REJECTED : décision
+    ACCEPTED_MINOR --&gt; CAMERA_READY_RECEIVED : version finale déposée
+    ACCEPTED --&gt; CAMERA_READY_RECEIVED : version finale déposée
+    WAITLIST --&gt; ACCEPTED : place libérée
+    CAMERA_READY_RECEIVED --&gt; CONFIRMED : inscription réglée
+    CONFIRMED --&gt; SCHEDULED : affectée à un créneau
+    SCHEDULED --&gt; PRESENTED : présence validée
+    PRESENTED --&gt; PUBLISHED : intégrée aux actes
+    DRAFT --&gt; WITHDRAWN
+    SUBMITTED --&gt; WITHDRAWN
+    ACCEPTED --&gt; WITHDRAWN
+    PUBLISHED --&gt; [*]
+    REJECTED --&gt; [*]
+    WITHDRAWN --&gt; [*]
+</pre>
+<p>Toute transition est portée par un <strong>service métier unique</strong> (<code>transition(submission, to_state, actor)</code>) qui vérifie la légalité de la transition, les droits, écrit dans l'historique, et déclenche notifications et effets secondaires. Les vues n'écrivent jamais directement le champ <code>status</code>.</p>
+<h3 id="52-processus-devaluation">5.2 Processus d'évaluation</h3>
+<pre class="mermaid">flowchart TD
+    A[Clôture de l'appel] --&gt; B[Contrôle de recevabilité par le secrétariat]
+    B --&gt;|irrecevable| X[Rejet motivé + notification]
+    B --&gt;|recevable| C[Affectation des relecteurs par le président du CS]
+    C --&gt; D{Conflit d'intérêts ?}
+    D --&gt;|oui| C
+    D --&gt;|non| E[Notification aux relecteurs]
+    E --&gt; F[Évaluation selon la grille pondérée]
+    F --&gt; G{Toutes évaluations reçues ?}
+    G --&gt;|non, échéance dépassée| H[Relance automatique / remplacement]
+    H --&gt; F
+    G --&gt;|oui| I{Écart entre notes &gt; seuil ?}
+    I --&gt;|oui| J[Relecteur supplémentaire ou discussion]
+    J --&gt; F
+    I --&gt;|non| K[Classement et simulation du seuil]
+    K --&gt; L[Décision par le président du CS]
+    L --&gt; M[Validation du chair si requise]
+    M --&gt; N[Publication des résultats]
+    N --&gt; O[Notification des auteurs]
+</pre>
+<h3 id="53-parcours-dinscription-et-de-paiement">5.3 Parcours d'inscription et de paiement</h3>
+<pre class="mermaid">flowchart LR
+    A[Création de compte] --&gt; B[Choix catégorie et options]
+    B --&gt; C[Code promo ?]
+    C --&gt; D{Mode de paiement}
+    D --&gt;|En ligne| E[Agrégateur de paiement]
+    D --&gt;|Virement / sur place| F[Facture pro forma]
+    E --&gt; G[Webhook de confirmation]
+    F --&gt; H[Validation manuelle par le CO]
+    G --&gt; I[Inscription confirmée + reçu + QR]
+    H --&gt; I
+</pre>
+<h3 id="54-construction-et-publication-du-programme">5.4 Construction et publication du programme</h3>
+<ol>
+<li>Le CO crée salles, jours et <strong>sessions</strong> (modèle de session).</li>
+<li>Les communications <code>CONFIRMED</code> apparaissent dans la liste « à programmer ».</li>
+<li>Le responsable programme les glisse dans les créneaux ; le <strong>moteur de contrôle</strong> signale les conflits en temps réel.</li>
+<li>Le chair valide ; le programme passe de <code>DRAFT</code> à <code>PUBLISHED</code>.</li>
+<li>Toute modification ultérieure génère une <strong>notification ciblée</strong> (intervenants, président de séance, inscrits ayant ajouté la session à leur agenda) et une entrée au journal.</li>
+</ol>
+<hr />
+<h2 id="6-regles-de-gestion">6. Règles de gestion</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Réf.</th>
+<th>Règle</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>RG-01</strong></td>
+<td>Une soumission ne peut être soumise définitivement que si tous les champs obligatoires sont renseignés, au moins un auteur est marqué « correspondant » et au moins un fichier valide est déposé.</td>
+</tr>
+<tr>
+<td><strong>RG-02</strong></td>
+<td>Après la date de clôture, toute modification d'une soumission est refusée, sauf dérogation accordée par le CO (journalisée, avec nouvelle échéance).</td>
+</tr>
+<tr>
+<td><strong>RG-03</strong></td>
+<td>Un relecteur ne peut évaluer une soumission que s'il y est affecté et qu'aucun conflit d'intérêts n'est déclaré.</td>
+</tr>
+<tr>
+<td><strong>RG-04</strong></td>
+<td>En double aveugle, aucune donnée permettant d'identifier un auteur (nom, e-mail, affiliation, métadonnées de fichier) n'est renvoyée à un relecteur par l'API.</td>
+</tr>
+<tr>
+<td><strong>RG-05</strong></td>
+<td>La somme des poids d'une grille d'évaluation vaut 100. Une grille utilisée par au moins une évaluation ne peut plus être modifiée : on la duplique en nouvelle version.</td>
+</tr>
+<tr>
+<td><strong>RG-06</strong></td>
+<td>Une évaluation est « envoyée » seulement si tous les critères obligatoires sont notés ; une fois envoyée, elle est modifiable jusqu'à la décision (chaque version historisée).</td>
+</tr>
+<tr>
+<td><strong>RG-07</strong></td>
+<td>Une soumission ne passe à <code>REVIEWED</code> que lorsque le nombre minimal de relecteurs a envoyé son évaluation.</td>
+</tr>
+<tr>
+<td><strong>RG-08</strong></td>
+<td>Un relecteur ne voit les évaluations des autres qu'après avoir envoyé la sienne et seulement si la discussion est ouverte.</td>
+</tr>
+<tr>
+<td><strong>RG-09</strong></td>
+<td>Les décisions ne sont visibles des auteurs qu'après « publication des résultats » par le président du CS.</td>
+</tr>
+<tr>
+<td><strong>RG-10</strong></td>
+<td>Un auteur ne voit jamais l'identité des relecteurs ni les commentaires confidentiels au comité.</td>
+</tr>
+<tr>
+<td><strong>RG-11</strong></td>
+<td>Une communication acceptée n'est programmable que si au moins un auteur présentateur a une inscription confirmée (règle désactivable).</td>
+</tr>
+<tr>
+<td><strong>RG-12</strong></td>
+<td>Une session ne peut contenir deux communications qui se chevauchent ; une personne ne peut être à deux endroits au même moment (orateur, président, discutant) ; une salle ne peut accueillir deux sessions simultanées.</td>
+</tr>
+<tr>
+<td><strong>RG-13</strong></td>
+<td>Le total des durées des communications d'une session ne peut dépasser sa durée, tampons de transition compris (paramétrables).</td>
+</tr>
+<tr>
+<td><strong>RG-14</strong></td>
+<td>Une facture émise n'est jamais supprimée : elle peut être annulée par un avoir. La numérotation est continue par année.</td>
+</tr>
+<tr>
+<td><strong>RG-15</strong></td>
+<td>Un paiement n'est considéré valide que sur confirmation signée de l'agrégateur (webhook vérifié), jamais sur simple retour du navigateur.</td>
+</tr>
+<tr>
+<td><strong>RG-16</strong></td>
+<td>Une attestation n'est délivrée qu'aux personnes dont la présence est enregistrée (ou, pour les auteurs, la communication marquée <code>PRESENTED</code>).</td>
+</tr>
+<tr>
+<td><strong>RG-17</strong></td>
+<td>Toute action sensible (décision, changement de rôle, export de masse, consultation de l'identité en double aveugle, modification après clôture) est inscrite au journal d'audit (qui, quoi, quand, avant/après).</td>
+</tr>
+<tr>
+<td><strong>RG-18</strong></td>
+<td>Les données personnelles d'une édition sont anonymisées ou supprimées à l'issue de la durée de conservation paramétrée.</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="7-architecture-technique">7. Architecture technique</h2>
+<h3 id="71-vue-densemble">7.1 Vue d'ensemble</h3>
+<pre class="mermaid">flowchart TB
+    subgraph Navigateur
+        P[Angular - Portail public]
+        G[Angular - Espace de gestion]
+        U[Espaces personnels\nintégrés au portail ou à la gestion]
+    end
+    subgraph o2switch [Hébergement o2switch - domaine unique]
+        A[Apache + Passenger]
+        S[Fichiers statiques Angular\n/ et /gestion]
+        D[Django + DRF\n/api]
+        M[(MariaDB)]
+        F[(Fichiers privés\nhors racine web)]
+        C[Cron cPanel\nfile de tâches, rappels, sauvegardes]
+    end
+    EXT1[Agrégateur de paiement]
+    EXT2[Service e-mail transactionnel / SMTP]
+    EXT3[ORCID]
+    P --&gt; A
+    G --&gt; A
+    U --&gt; A
+    A --&gt; S
+    A --&gt; D
+    D --&gt; M
+    D --&gt; F
+    C --&gt; D
+    D --&gt; EXT2
+    D &lt;--&gt; EXT1
+    D &lt;--&gt; EXT3
+</pre>
+<h3 id="72-stack-proposee">7.2 Stack proposée</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Couche</th>
+<th>Choix</th>
+<th>Remarque</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Langage backend</td>
+<td>Python 3.12 ou 3.13</td>
+<td>Versions proposées par o2switch jusqu'à 3.13 (vérifié sur la FAQ o2switch)</td>
+</tr>
+<tr>
+<td>Framework</td>
+<td><strong>Django</strong> (version LTS en cours) + <strong>Django REST Framework</strong></td>
+<td><code>django.contrib.admin</code> <strong>retiré</strong> de <code>INSTALLED_APPS</code> et des URL</td>
+</tr>
+<tr>
+<td>Documentation d'API</td>
+<td><code>drf-spectacular</code> (OpenAPI 3)</td>
+<td>Génère le client TypeScript utilisé par Angular</td>
+</tr>
+<tr>
+<td>Authentification</td>
+<td><code>django-allauth</code> (e-mail, ORCID, mode headless) + sessions + CSRF</td>
+<td>Pas de JWT stocké dans le navigateur</td>
+</tr>
+<tr>
+<td>2FA</td>
+<td><code>django-otp</code> (TOTP)</td>
+<td>Obligatoire pour comités et admins</td>
+</tr>
+<tr>
+<td>Base de données</td>
+<td><strong>MariaDB</strong> (version fournie par o2switch)</td>
+<td>Django supporte MariaDB ; jeu de caractères <code>utf8mb4</code></td>
+</tr>
+<tr>
+<td>Pilote MariaDB</td>
+<td><code>PyMySQL</code> (pur Python) en première intention</td>
+<td><code>mysqlclient</code> nécessite une compilation, accès au compilateur à demander au support o2switch (cf. FAQ)</td>
+</tr>
+<tr>
+<td>Tâches asynchrones</td>
+<td>File en base (modèle <code>Job</code>) + commande <code>manage.py run_jobs</code> lancée par <strong>cron</strong></td>
+<td>Pas de Celery/Redis sur mutualisé</td>
+</tr>
+<tr>
+<td>PDF</td>
+<td><code>ReportLab</code> ou <code>fpdf2</code> + <code>pypdf</code>/<code>pikepdf</code> pour métadonnées</td>
+<td>Pure Python ; <strong>WeasyPrint</strong> est à éviter sauf si ses bibliothèques système sont confirmées sur l'hébergement</td>
+</tr>
+<tr>
+<td>QR codes</td>
+<td><code>segno</code></td>
+<td>Pure Python</td>
+</tr>
+<tr>
+<td>E-mails</td>
+<td>SMTP avec <code>django-anymail</code> vers un service transactionnel (Brevo, Mailjet, etc.)</td>
+<td>Meilleure délivrabilité que l'envoi direct depuis le mutualisé</td>
+</tr>
+<tr>
+<td>Paiement</td>
+<td>Agrégateur : CinetPay (mobile money Afrique de l'Ouest) et/ou Stripe/PayPal pour l'international</td>
+<td><strong>À valider</strong> : disponibilité, frais, contrat</td>
+</tr>
+<tr>
+<td>Frontend</td>
+<td><strong>Angular</strong> (version stable courante), composants autonomes (standalone), signaux</td>
+<td>Une seule version pour les deux applications</td>
+</tr>
+<tr>
+<td>UI</td>
+<td>Angular Material <strong>ou</strong> PrimeNG</td>
+<td>PrimeNG est riche en tableaux/planning ; Material est sobre et accessible</td>
+</tr>
+<tr>
+<td>Planning (agenda)</td>
+<td>FullCalendar (resource timeline) ou composant maison</td>
+<td>À trancher en prototype</td>
+</tr>
+<tr>
+<td>i18n</td>
+<td><code>@ngx-translate</code> (changement de langue sans rechargement)</td>
+<td>Alternative : i18n natif Angular (un build par langue)</td>
+</tr>
+<tr>
+<td>Tests</td>
+<td><code>pytest-django</code>, <code>factory_boy</code> ; Jest/Karma ; Playwright (E2E)</td>
+<td></td>
+</tr>
+<tr>
+<td>Qualité</td>
+<td><code>ruff</code>, <code>mypy</code> (optionnel), ESLint, pre-commit</td>
+<td></td>
+</tr>
+<tr>
+<td>CI/CD</td>
+<td>GitHub Actions → build Angular + déploiement SSH/rsync</td>
+<td>o2switch fournit l'accès SSH</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="73-organisation-du-code-backend-django">7.3 Organisation du code backend (Django)</h3>
+<pre><code class="language-text">gestconf/
+├── manage.py
+├── config/
+│   ├── settings/ (base.py, prod.py, dev.py)
+│   ├── urls.py            # /api/... uniquement, pas d'admin
+│   └── wsgi.py            # point d'entrée Passenger (passenger_wsgi.py)
+├── apps/
+│   ├── core/              # utilitaires, audit, paramètres, permissions de base, jobs
+│   ├── accounts/          # utilisateurs, profils, rôles par édition, 2FA
+│   ├── conferences/       # conférence, édition, tracks, calendrier, contenus
+│   ├── committees/        # membres CS et CO, invitations, disponibilités
+│   ├── submissions/       # soumissions, auteurs, fichiers, versions
+│   ├── reviews/           # grilles, critères, affectations, évaluations, décisions
+│   ├── program/           # salles, sessions, créneaux, indisponibilités, conflits
+│   ├── registrations/     # inscriptions, tarifs, codes promo
+│   ├── payments/          # paiements, factures, webhooks
+│   ├── events/            # badges, check-in, attestations, lettres
+│   ├── communications/    # modèles d'e-mails, envois, notifications, annonces
+│   ├── sponsors/          # sponsors, exposants
+│   ├── logistics/         # voyages, hébergement, bénévoles, tâches, budget
+│   └── reports/           # statistiques et exports
+├── tests/
+└── requirements/ (base.txt, prod.txt, dev.txt)
+</code></pre>
+<p><strong>Principes</strong> : logique métier dans des <strong>services</strong> (<code>services.py</code>) et non dans les vues ni les modèles ; sérialiseurs distincts par rôle pour les champs sensibles ; chaque application possède ses permissions, ses tests, ses fixtures.</p>
+<p><strong>Suppression de l'admin</strong> : retirer <code>django.contrib.admin</code> des applications installées et des URL ; conserver <code>auth</code>, <code>contenttypes</code>, <code>sessions</code>. La création du premier administrateur passe par une commande (<code>manage.py create_platform_admin</code>) ; les opérations de maintenance (import de relecteurs, réinitialisations, correction de données) passent par des <strong>commandes de gestion</strong> documentées, et par l'espace de gestion Angular pour tout le reste.</p>
+<h3 id="74-organisation-du-code-frontend-angular">7.4 Organisation du code frontend (Angular)</h3>
+<pre><code class="language-text">gestconf-web/
+├── projects/
+│   ├── portail/                 # application publique (SSG) + espaces personnels
+│   │   └── src/app/ (accueil, appel, programme, intervenants, inscription,
+│   │                 mon-espace: soumissions, evaluations, mon-programme, ...)
+│   ├── gestion/                 # back-office (comités, administration)
+│   │   └── src/app/ (tableau-de-bord, soumissions, evaluation, comites,
+│   │                 programme, inscriptions, finances, communication,
+│   │                 logistique, sponsors, parametrage, audit)
+│   └── shared/                  # bibliothèque partagée
+│       └── src/lib/ (api-client généré, auth, guards, interceptors,
+│                     ui-kit, i18n, pipes, modèles, formulaires)
+└── angular.json
+</code></pre>
+<p><strong>Où placer les espaces personnels ?</strong> Proposition : l'<strong>espace auteur / participant / intervenant</strong> vit dans l'application <code>portail</code> (même expérience visuelle que le site) ; l'<strong>espace évaluateur</strong> vit dans <code>gestion</code> (outil de travail dense, tableaux, grilles). Le comité scientifique et le comité d'organisation partagent donc la même application <code>gestion</code>, avec une navigation filtrée par rôle. Cette répartition est à valider au §15.</p>
+<p><strong>Conventions</strong> : composants autonomes, chargement différé (lazy loading) par route, état local en signaux, formulaires réactifs typés, intercepteur d'erreurs, garde par rôle (qui ne remplace jamais le contrôle serveur), thème unique, accessibilité vérifiée par audit automatisé en CI.</p>
+<hr />
+<h2 id="8-modele-de-donnees-mariadb">8. Modèle de données (MariaDB)</h2>
+<h3 id="81-diagramme-entite-relation-vue-conceptuelle">8.1 Diagramme entité-relation (vue conceptuelle)</h3>
+<pre class="mermaid">erDiagram
+    USER ||--o| PROFILE : possède
+    USER ||--o{ USER_ROLE : détient
+    CONFERENCE ||--o{ EDITION : se_décline_en
+    EDITION ||--o{ USER_ROLE : cadre
+    EDITION ||--o{ TRACK : comprend
+    EDITION ||--o{ SUBMISSION_TYPE : définit
+    EDITION ||--o{ KEY_DATE : planifie
+    EDITION ||--o{ EVALUATION_GRID : paramètre
+    EVALUATION_GRID ||--o{ CRITERION : contient
+    EDITION ||--o{ SUBMISSION : reçoit
+    USER ||--o{ SUBMISSION : dépose
+    TRACK ||--o{ SUBMISSION : classe
+    SUBMISSION ||--o{ SUBMISSION_AUTHOR : liste
+    SUBMISSION ||--o{ SUBMISSION_FILE : joint
+    SUBMISSION ||--o{ STATUS_HISTORY : trace
+    SUBMISSION ||--o{ REVIEW_ASSIGNMENT : affecte
+    USER ||--o{ REVIEW_ASSIGNMENT : relit
+    REVIEW_ASSIGNMENT ||--o| REVIEW : produit
+    REVIEW ||--o{ REVIEW_SCORE : note
+    CRITERION ||--o{ REVIEW_SCORE : évalué_par
+    USER ||--o{ CONFLICT_OF_INTEREST : déclare
+    SUBMISSION ||--o{ CONFLICT_OF_INTEREST : concerne
+    SUBMISSION ||--o| DECISION : reçoit
+    EDITION ||--o{ ROOM : dispose
+    EDITION ||--o{ SESSION : organise
+    ROOM ||--o{ SESSION : accueille
+    SESSION ||--o{ SLOT : découpe
+    SLOT |o--o| SUBMISSION : présente
+    SESSION ||--o{ SESSION_ROLE : anime
+    USER ||--o{ SESSION_ROLE : tient
+    USER ||--o{ UNAVAILABILITY : déclare
+    EDITION ||--o{ REGISTRATION_CATEGORY : tarife
+    USER ||--o{ REGISTRATION : s_inscrit
+    REGISTRATION_CATEGORY ||--o{ REGISTRATION : classe
+    REGISTRATION ||--o{ PAYMENT : réglée_par
+    REGISTRATION ||--o{ INVOICE : facturée
+    REGISTRATION ||--o{ CHECKIN : pointe
+    REGISTRATION ||--o{ CERTIFICATE : obtient
+    EDITION ||--o{ SPONSOR : accueille
+    EDITION ||--o{ TASK : suit
+    EDITION ||--o{ EMAIL_TEMPLATE : utilise
+    USER ||--o{ NOTIFICATION : reçoit
+    USER ||--o{ AUDIT_LOG : agit
+</pre>
+<h3 id="82-entites-principales-extrait-detaille">8.2 Entités principales (extrait détaillé)</h3>
+<p>Les types sont indicatifs. Toutes les tables ont <code>id</code> (BIGINT), <code>created_at</code>, <code>updated_at</code>. Moteur <strong>InnoDB</strong>, jeu de caractères <strong>utf8mb4</strong>, clés étrangères actives.</p>
+<h4 id="identite-et-roles">Identité et rôles</h4>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Table</th>
+<th>Champs clés</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>user</code></td>
+<td>email (unique), password, is_active, email_verified_at, locale, last_login, totp_enabled</td>
+</tr>
+<tr>
+<td><code>profile</code></td>
+<td>user_id, civility, first_name, last_name, institution, department, country, orcid, bio, photo, expertise_keywords (JSON), consent_directory, consent_at</td>
+</tr>
+<tr>
+<td><code>user_role</code></td>
+<td>user_id, edition_id, role (enum), oc_function (nullable), status (invited / active / declined), invited_at, accepted_at — <strong>unique (user, edition, role)</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h4 id="conference-et-parametrage">Conférence et paramétrage</h4>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Table</th>
+<th>Champs clés</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>conference</code></td>
+<td>name, slug, description</td>
+</tr>
+<tr>
+<td><code>edition</code></td>
+<td>conference_id, year, title, theme, start_date, end_date, venue, timezone, languages, double_blind (bool), reviewers_per_submission, status</td>
+</tr>
+<tr>
+<td><code>track</code></td>
+<td>edition_id, name_fr, name_en, description, chair_user_id</td>
+</tr>
+<tr>
+<td><code>submission_type</code></td>
+<td>edition_id, code, label, default_duration_min, abstract_max_words, allowed_file_types</td>
+</tr>
+<tr>
+<td><code>key_date</code></td>
+<td>edition_id, code (call_open, call_close, notification, camera_ready, early_bird_end…), at, label</td>
+</tr>
+</tbody>
+</table></div>
+<h4 id="soumission">Soumission</h4>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Table</th>
+<th>Champs clés</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>submission</code></td>
+<td>edition_id, reference (unique), track_id, type_id, title, abstract, keywords, language, status, submitted_at, submitter_id, requested_format, assigned_format, version</td>
+</tr>
+<tr>
+<td><code>submission_author</code></td>
+<td>submission_id, user_id (nullable), first_name, last_name, email, institution, country, position, is_corresponding, is_presenter</td>
+</tr>
+<tr>
+<td><code>submission_file</code></td>
+<td>submission_id, kind (full_text, anonymous, camera_ready, annex), version, storage_path, original_name, mime, size, sha256, is_current</td>
+</tr>
+<tr>
+<td><code>status_history</code></td>
+<td>submission_id, from_status, to_status, actor_id, reason, at</td>
+</tr>
+</tbody>
+</table></div>
+<p><em>Remarque</em> : le nom et l'e-mail des auteurs sont dupliqués dans <code>submission_author</code> pour conserver l'état au moment de la soumission, même si le profil change ensuite.</p>
+<h4 id="evaluation">Évaluation</h4>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Table</th>
+<th>Champs clés</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>evaluation_grid</code></td>
+<td>edition_id, submission_type_id (nullable), name, version, scale_min, scale_max, is_locked</td>
+</tr>
+<tr>
+<td><code>criterion</code></td>
+<td>grid_id, label_fr, label_en, help_text, weight (DECIMAL 5,2), position, is_required</td>
+</tr>
+<tr>
+<td><code>review_assignment</code></td>
+<td>submission_id, reviewer_id, assigned_by, assigned_at, due_at, status (pending / declined / submitted), reminders_sent</td>
+</tr>
+<tr>
+<td><code>review</code></td>
+<td>assignment_id, overall_recommendation, confidence (1–5), comment_to_authors, comment_to_committee, weighted_score (DECIMAL 5,2), submitted_at, version</td>
+</tr>
+<tr>
+<td><code>review_score</code></td>
+<td>review_id, criterion_id, value (DECIMAL 4,1) — <strong>unique (review, criterion)</strong></td>
+</tr>
+<tr>
+<td><code>review_revision</code></td>
+<td>review_id, snapshot (JSON), at — historique des versions</td>
+</tr>
+<tr>
+<td><code>conflict_of_interest</code></td>
+<td>reviewer_id, submission_id, reason, declared_by (reviewer / system), at</td>
+</tr>
+<tr>
+<td><code>decision</code></td>
+<td>submission_id, outcome, assigned_format, comment, decided_by, decided_at, published_at</td>
+</tr>
+<tr>
+<td><code>review_discussion</code></td>
+<td>submission_id, author_id, body, at</td>
+</tr>
+</tbody>
+</table></div>
+<p>Le <code>weighted_score</code> est <strong>recalculé et stocké</strong> à l'envoi de l'évaluation (pour les classements rapides) ; la valeur de référence reste calculable à partir de <code>review_score</code> et <code>criterion.weight</code>, avec contrôle de cohérence périodique.</p>
+<h4 id="programme">Programme</h4>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Table</th>
+<th>Champs clés</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>room</code></td>
+<td>edition_id, name, capacity, equipment (JSON), is_accessible, location_note</td>
+</tr>
+<tr>
+<td><code>session</code></td>
+<td>edition_id, kind (opening, keynote, parallel, poster, workshop, round_table, break, lunch, social, closing…), title, track_id, room_id, starts_at, ends_at, status (draft / published), is_hybrid, stream_url</td>
+</tr>
+<tr>
+<td><code>slot</code></td>
+<td>session_id, submission_id (nullable), speaker_id (nullable, pour les invités), title (libre), starts_at, ends_at, order</td>
+</tr>
+<tr>
+<td><code>session_role</code></td>
+<td>session_id, user_id, role (chair, discussant, moderator, panelist)</td>
+</tr>
+<tr>
+<td><code>unavailability</code></td>
+<td>user_id, edition_id, starts_at, ends_at, reason</td>
+</tr>
+<tr>
+<td><code>personal_agenda</code></td>
+<td>user_id, session_id</td>
+</tr>
+</tbody>
+</table></div>
+<p><em>Contraintes</em> : <code>ends_at &gt; starts_at</code> ; les contrôles de chevauchement (salle, personne) sont appliqués par le <strong>service de planification</strong> dans une transaction avec verrou, doublés d'une vérification périodique d'intégrité (MariaDB n'offre pas de contrainte d'exclusion de plages).</p>
+<h4 id="inscriptions-paiements-jour-j">Inscriptions, paiements, jour J</h4>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Table</th>
+<th>Champs clés</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>registration_category</code></td>
+<td>edition_id, code, label, rules (JSON), is_active</td>
+</tr>
+<tr>
+<td><code>fee</code></td>
+<td>category_id, label, amount, currency, valid_from, valid_to, country_scope</td>
+</tr>
+<tr>
+<td><code>promo_code</code></td>
+<td>edition_id, code, discount_type, value, max_uses, used_count, valid_to</td>
+</tr>
+<tr>
+<td><code>registration</code></td>
+<td>edition_id, user_id, category_id, status, options (JSON), total_amount, currency, qr_token (unique), registered_at</td>
+</tr>
+<tr>
+<td><code>payment</code></td>
+<td>registration_id, provider, provider_ref, amount, currency, status, raw_payload (JSON), paid_at</td>
+</tr>
+<tr>
+<td><code>invoice</code></td>
+<td>registration_id, number (unique par année), issued_at, amount, status, pdf_path, credit_note_of</td>
+</tr>
+<tr>
+<td><code>checkin</code></td>
+<td>registration_id, session_id (nullable), at, by_user_id, method</td>
+</tr>
+<tr>
+<td><code>certificate</code></td>
+<td>registration_id, kind, verification_code (unique), issued_at, pdf_path</td>
+</tr>
+</tbody>
+</table></div>
+<h4 id="transverses">Transverses</h4>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Table</th>
+<th>Champs clés</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>email_template</code></td>
+<td>edition_id, code, locale, subject, body</td>
+</tr>
+<tr>
+<td><code>outbox_email</code></td>
+<td>to, template, context (JSON), status, attempts, last_error, scheduled_at, sent_at</td>
+</tr>
+<tr>
+<td><code>notification</code></td>
+<td>user_id, kind, payload (JSON), read_at</td>
+</tr>
+<tr>
+<td><code>job</code></td>
+<td>type, payload (JSON), status, run_at, attempts, last_error, locked_at</td>
+</tr>
+<tr>
+<td><code>sponsor</code></td>
+<td>edition_id, name, level, logo, website, contact, contribution_amount</td>
+</tr>
+<tr>
+<td><code>task</code></td>
+<td>edition_id, title, description, assignee_id, due_date, status, priority</td>
+</tr>
+<tr>
+<td><code>budget_line</code></td>
+<td>edition_id, category, planned, actual</td>
+</tr>
+<tr>
+<td><code>document</code></td>
+<td>edition_id, title, storage_path, visibility</td>
+</tr>
+<tr>
+<td><code>content_page</code> / <code>news</code> / <code>faq</code></td>
+<td>contenus du portail, bilingues</td>
+</tr>
+<tr>
+<td><code>audit_log</code></td>
+<td>at, actor_id, action, object_type, object_id, ip, before (JSON), after (JSON)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="83-choix-de-modelisation">8.3 Choix de modélisation</h3>
+<ul>
+<li><strong>Rôles par édition</strong> et non par groupe global : évite les fuites de droits d'une édition à l'autre.</li>
+<li><strong>Historisation</strong> explicite (statuts, révisions d'évaluation, versions de fichiers) plutôt que suppression.</li>
+<li><strong>JSON</strong> (colonnes <code>JSON</code> de MariaDB, en réalité <code>LONGTEXT</code> avec contrôle JSON) réservé aux données non interrogées en profondeur (options, équipements) ; tout critère de recherche ou de classement reste en colonnes relationnelles.</li>
+<li><strong>Index</strong> à prévoir : <code>(edition_id, status)</code> sur <code>submission</code>, <code>(reviewer_id, status)</code> sur <code>review_assignment</code>, <code>(room_id, starts_at)</code> et <code>(starts_at)</code> sur <code>session</code>, <code>qr_token</code>, <code>verification_code</code>, <code>reference</code>.</li>
+<li><strong>Intégrité</strong> : clés étrangères avec <code>ON DELETE RESTRICT</code> par défaut ; suppression logique ou anonymisation pour les données personnelles.</li>
+<li><strong>Numérotation</strong> (références de soumission, factures) : table de compteurs verrouillée en transaction, pour éviter trous et doublons sous concurrence.</li>
+</ul>
+<hr />
+<h2 id="9-api-django-et-securite">9. API Django et sécurité</h2>
+<h3 id="91-conventions">9.1 Conventions</h3>
+<ul>
+<li><strong>REST/JSON</strong>, préfixe <code>/api/v1/</code>, version dans l'URL ;</li>
+<li>pagination, tri, filtres uniformes (<code>django-filter</code>) ; recherche textuelle simple (<code>LIKE</code>/FULLTEXT MariaDB) ;</li>
+<li>erreurs normalisées <code>{ "code": "...", "message": "...", "fields": {...} }</code> ;</li>
+<li>horodatages en UTC (ISO 8601), conversion en fuseau de l'édition côté interface ;</li>
+<li>schéma OpenAPI publié en environnement de développement ; <strong>client TypeScript généré</strong> à chaque évolution ;</li>
+<li>idempotence pour les opérations de paiement (clé d'idempotence).</li>
+</ul>
+<h3 id="92-principaux-groupes-dendpoints">9.2 Principaux groupes d'endpoints</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Groupe</th>
+<th>Exemples</th>
+<th>Accès</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Auth</td>
+<td><code>POST /auth/signup</code>, <code>/auth/login</code>, <code>/auth/logout</code>, <code>/auth/password/reset</code>, <code>/auth/2fa/...</code>, <code>GET /me</code></td>
+<td>Public / connecté</td>
+</tr>
+<tr>
+<td>Public</td>
+<td><code>GET /public/editions/current</code>, <code>/public/program</code>, <code>/public/speakers</code>, <code>/public/news</code>, <code>/public/key-dates</code></td>
+<td>Public (cache)</td>
+</tr>
+<tr>
+<td>Soumissions (auteur)</td>
+<td><code>GET/POST /submissions</code>, <code>PATCH /submissions/{id}</code>, <code>POST /submissions/{id}/submit</code>, <code>POST /submissions/{id}/files</code>, <code>POST /submissions/{id}/withdraw</code>, <code>GET /submissions/{id}/timeline</code></td>
+<td>Auteur</td>
+</tr>
+<tr>
+<td>Évaluation</td>
+<td><code>GET /reviews/assignments</code>, <code>GET /reviews/assignments/{id}</code>, <code>PUT /reviews/{id}</code>, <code>POST /reviews/{id}/submit</code>, <code>GET/POST /reviews/submissions/{id}/discussion</code></td>
+<td>Évaluateur</td>
+</tr>
+<tr>
+<td>Pilotage CS</td>
+<td><code>GET /sc/submissions</code>, <code>POST /sc/assignments</code>, <code>GET /sc/assignments/suggest?submission=</code>, <code>GET /sc/ranking</code>, <code>POST /sc/decisions</code>, <code>POST /sc/decisions/publish</code></td>
+<td>Président CS</td>
+</tr>
+<tr>
+<td>Programme</td>
+<td><code>GET/POST /program/sessions</code>, <code>POST /program/slots</code>, <code>POST /program/check-conflicts</code>, <code>POST /program/publish</code>, <code>GET /me/agenda</code>, <code>GET /me/agenda.ics</code></td>
+<td>CO / connecté</td>
+</tr>
+<tr>
+<td>Inscriptions</td>
+<td><code>GET /registration/options</code>, <code>POST /registrations</code>, <code>POST /registrations/{id}/pay</code>, <code>POST /payments/webhook/{provider}</code>, <code>GET /registrations/{id}/invoice</code></td>
+<td>Connecté / agrégateur</td>
+</tr>
+<tr>
+<td>Jour J</td>
+<td><code>POST /checkin</code>, <code>GET /checkin/offline-bundle</code>, <code>GET /certificates/verify/{code}</code></td>
+<td>Bénévole / Public</td>
+</tr>
+<tr>
+<td>Gestion</td>
+<td><code>/manage/...</code> (comités, rôles, paramétrage, communications, logistique, sponsors, rapports)</td>
+<td>CO / Admin</td>
+</tr>
+<tr>
+<td>Audit</td>
+<td><code>GET /audit</code></td>
+<td>Chair / Admin</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="93-securite">9.3 Sécurité</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Domaine</th>
+<th>Mesures</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Authentification</strong></td>
+<td>Session sécurisée (<code>HttpOnly</code>, <code>Secure</code>, <code>SameSite=Lax</code>), CSRF Django + jeton XSRF lu par Angular ; verrouillage progressif après échecs, mots de passe validés (longueur, liste noire), vérification de l'e-mail ; 2FA TOTP pour comités/admins</td>
+</tr>
+<tr>
+<td><strong>Autorisation</strong></td>
+<td>RBAC par édition ; classes de permissions DRF ; <strong>filtrage des querysets par rôle</strong> (un relecteur ne peut même pas interroger une soumission non affectée) ; tests automatisés par case sensible de la matrice</td>
+</tr>
+<tr>
+<td><strong>Double aveugle</strong></td>
+<td>Sérialiseurs dédiés ; fichiers anonymisés servis via endpoint contrôlé ; métadonnées PDF purgées (<code>pikepdf</code>) ; nom de stockage aléatoire</td>
+</tr>
+<tr>
+<td><strong>Fichiers</strong></td>
+<td>Stockage <strong>hors racine web</strong>, nom aléatoire, validation du type par contenu (pas seulement l'extension), limite de taille, hash SHA-256, téléchargement via endpoint authentifié, analyse antivirus si disponible (à confirmer sur l'hébergement)</td>
+</tr>
+<tr>
+<td><strong>Entrées</strong></td>
+<td>Validation par sérialiseurs, ORM (pas de SQL concaténé), échappement automatique ; contenu riche (annonces) assaini côté serveur (<code>nh3</code>/<code>bleach</code>)</td>
+</tr>
+<tr>
+<td><strong>Transport</strong></td>
+<td>HTTPS partout (certificat AutoSSL), HSTS, redirection HTTP→HTTPS</td>
+</tr>
+<tr>
+<td><strong>En-têtes</strong></td>
+<td>CSP stricte, <code>X-Content-Type-Options</code>, <code>Referrer-Policy</code>, <code>Permissions-Policy</code>, <code>frame-ancestors 'none'</code></td>
+</tr>
+<tr>
+<td><strong>Débit</strong></td>
+<td>Limitation par IP/compte (<code>DRF throttling</code>) sur connexion, inscription, formulaire de contact, vérification d'attestation ; anti-robots (Turnstile/hCaptcha ou équivalent) sur les formulaires publics</td>
+</tr>
+<tr>
+<td><strong>Paiement</strong></td>
+<td>Aucune donnée de carte sur le serveur ; webhooks signés et vérifiés ; réconciliation périodique avec l'agrégateur</td>
+</tr>
+<tr>
+<td><strong>Secrets</strong></td>
+<td>Variables d'environnement hors dépôt, rotation documentée</td>
+</tr>
+<tr>
+<td><strong>Journalisation</strong></td>
+<td>Journal d'audit applicatif ; journaux serveur conservés ; alerte sur erreurs (Sentry ou équivalent)</td>
+</tr>
+<tr>
+<td><strong>Données personnelles</strong></td>
+<td>Minimisation, consentements horodatés, droit d'accès/rectification/suppression, durées de conservation, registre des traitements. Cadre applicable à vérifier avec le commanditaire : loi ivoirienne n° 2013-450 (autorité ARTCI) et, si des participants européens sont concernés, RGPD</td>
+</tr>
+<tr>
+<td><strong>Sauvegardes</strong></td>
+<td>Dump MariaDB quotidien + copie des fichiers, rotation, <strong>copie hors hébergement</strong>, test de restauration avant l'ouverture de l'appel</td>
+</tr>
+<tr>
+<td><strong>Qualité</strong></td>
+<td>Revue de code, analyse des dépendances (<code>pip-audit</code>, <code>npm audit</code>), test de sécurité avant mise en production (OWASP Top 10)</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="10-frontends-angular">10. Frontends Angular</h2>
+<h3 id="101-ecrans-principaux-portail-et-espaces-personnels">10.1 Écrans principaux — Portail et espaces personnels</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Zone</th>
+<th>Écrans</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Public</strong></td>
+<td>Accueil · Appel à communications · Dates clés · Thématiques · Programme (liste, grille par salle, recherche) · Fiche session · Fiche intervenant · Comités · Inscription et tarifs · Lieu et pratique · Sponsors · Actualités · FAQ · Contact · Vérification d'attestation</td>
+</tr>
+<tr>
+<td><strong>Compte</strong></td>
+<td>Connexion / inscription · Vérification e-mail · Mot de passe oublié · Profil · Sécurité (2FA) · Consentements</td>
+</tr>
+<tr>
+<td><strong>Auteur</strong></td>
+<td>Mes soumissions · Assistant de soumission (étapes : informations → auteurs → fichiers → déclarations → récapitulatif) · Suivi (frise de statut) · Résultat et commentaires · Version finale · <strong>Mon passage</strong> (agenda de présentation)</td>
+</tr>
+<tr>
+<td><strong>Participant</strong></td>
+<td>Mon inscription · Paiement · Factures et reçus · Mon programme · Mes attestations · Questionnaire</td>
+</tr>
+<tr>
+<td><strong>Intervenant</strong></td>
+<td>Ma fiche · Mes besoins techniques · Mes indisponibilités · Mon passage · Logistique de voyage</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="102-ecrans-principaux-espace-de-gestion">10.2 Écrans principaux — Espace de gestion</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Zone</th>
+<th>Écrans</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Tableau de bord</strong></td>
+<td>Indicateurs selon le rôle (soumissions, évaluations en retard, inscriptions, recettes, tâches)</td>
+</tr>
+<tr>
+<td><strong>Évaluateur</strong></td>
+<td>Mes évaluations (liste, échéances) · Formulaire d'évaluation (résumé + fichier à gauche, grille pondérée à droite, <strong>score calculé en direct</strong>) · Discussion</td>
+</tr>
+<tr>
+<td><strong>Comité scientifique</strong></td>
+<td>Liste des soumissions (filtres, statuts) · Détail soumission · Affectation (manuelle / suggestions) · Suivi des relecteurs · Classement et simulation de seuil · Décisions (individuelles / en lot) · Publication des résultats</td>
+</tr>
+<tr>
+<td><strong>Comités</strong></td>
+<td>Membres CS et CO · Invitations · Expertises et charges · Disponibilités</td>
+</tr>
+<tr>
+<td><strong>Programme</strong></td>
+<td>Salles · Sessions · <strong>Planificateur</strong> (grille jours × salles, glisser-déposer, alertes de conflit) · Liste « à programmer » · Publication · Journal des modifications</td>
+</tr>
+<tr>
+<td><strong>Inscriptions et finances</strong></td>
+<td>Inscriptions · Tarifs · Codes promo · Paiements et rapprochement · Factures · Budget · Exports</td>
+</tr>
+<tr>
+<td><strong>Communication</strong></td>
+<td>Modèles d'e-mails · Envois groupés (segments) · File d'envoi · Annonces · Contenus du portail</td>
+</tr>
+<tr>
+<td><strong>Logistique</strong></td>
+<td>Intervenants invités · Voyages et hébergements · Bénévoles · Tâches (kanban) · Documents</td>
+</tr>
+<tr>
+<td><strong>Sponsors</strong></td>
+<td>Sponsors · Niveaux · Contreparties</td>
+</tr>
+<tr>
+<td><strong>Jour J</strong></td>
+<td>Check-in (PWA, scanner QR) · Badges · Attestations · Présences</td>
+</tr>
+<tr>
+<td><strong>Paramétrage</strong></td>
+<td>Édition · Tracks · Types · Calendrier · <strong>Grilles d'évaluation</strong> · Rôles et permissions · Confidentialité</td>
+</tr>
+<tr>
+<td><strong>Audit</strong></td>
+<td>Journal d'activité · Exports RGPD</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="103-principes-dexperience-utilisateur">10.3 Principes d'expérience utilisateur</h3>
+<ul>
+<li><strong>Orienté tâche</strong> : chaque rôle voit ce qu'il a à faire (« 3 évaluations à rendre avant le 12 », « 14 soumissions sans relecteur »).</li>
+<li><strong>Évaluation fluide</strong> : lecture du résumé et du PDF sans quitter l'écran, notation avec <strong>aide contextuelle par critère</strong>, sauvegarde automatique, score pondéré mis à jour en direct, validation avec contrôle de complétude.</li>
+<li><strong>Planificateur visuel</strong> : grille salles × heures, code couleur par thème, alertes de conflit immédiates mais non bloquantes en brouillon (bloquantes à la publication).</li>
+<li><strong>Tableaux</strong> : tri, filtres sauvegardés, sélection multiple, actions en lot, export.</li>
+<li><strong>Mobile</strong> : le portail et les écrans « Mon programme », « Mon passage », « Check-in » sont conçus mobile d'abord ; le back-office est optimisé tablette/ordinateur.</li>
+<li><strong>Accessibilité</strong> : cible WCAG 2.1 AA (contrastes, navigation clavier, libellés, focus visibles), vérifiée en intégration continue.</li>
+<li><strong>Bilingue</strong> : toute chaîne est traduite ; contenus éditoriaux saisis dans les deux langues ; langue mémorisée dans le profil.</li>
+</ul>
+<h3 id="104-performance-et-referencement-du-portail">10.4 Performance et référencement du portail</h3>
+<ul>
+<li><strong>Pré-rendu statique (SSG)</strong> des pages publiques à chaque publication de contenu (build automatisé) ; hydratation côté client ;</li>
+<li>images optimisées (formats modernes, tailles adaptées), polices locales ;</li>
+<li>cache HTTP agressif pour les assets versionnés ;</li>
+<li>données publiques (programme, intervenants) servies par des endpoints en cache ;</li>
+<li>budget de performance : première peinture &lt; 2 s sur 4G, bundle initial du portail à surveiller en CI.</li>
+</ul>
+<blockquote>
+<p><strong>Pourquoi pas le rendu serveur (SSR) ?</strong> Il nécessite un processus Node permanent. o2switch propose bien Node.js via cPanel, mais le SSR ajoute un point de défaillance et de la consommation de ressources. Le pré-rendu couvre le besoin de référencement d'un site événementiel dont le contenu change peu.</p>
+</blockquote>
+<h3 id="105-pwa-jour-j">10.5 PWA (jour J)</h3>
+<p>Une PWA limitée au module de <strong>check-in</strong> et à <strong>Mon programme</strong> : installable, cache du programme, scan QR par la caméra, file de pointages hors-ligne synchronisée au retour du réseau (utile si le wifi du lieu est faible).</p>
+<hr />
+<h2 id="11-hebergement-o2switch-et-deploiement">11. Hébergement o2switch et déploiement</h2>
+<h3 id="111-ce-que-lhebergement-permet-verifie">11.1 Ce que l'hébergement permet (vérifié)</h3>
+<p>D'après la documentation o2switch consultée le 5 octobre 2026 :</p>
+<ul>
+<li><strong>Python</strong> : versions 3.3 à 3.13 installées ; déploiement via l'outil cPanel « Setup Python App » (environnement virtuel, Passenger/WSGI, gestion des dépendances par pip) ;</li>
+<li><strong>Node.js</strong> : versions 6 à 24 (utile pour les builds ponctuels, pas nécessaire à l'exécution) ;</li>
+<li><strong>Accès SSH</strong> pour les applications Python/Node ;</li>
+<li>la documentation recommande de placer l'application <strong>dans un dossier distinct de la racine du domaine</strong>.</li>
+</ul>
+<p>Sources : <a href="https://faq.o2switch.fr/cpanel/logiciels/hebergement-python-multi-version/">Déployer une application Python sur un hébergement o2switch</a> · <a href="https://faq.o2switch.fr/guides/langages-supportes-php-node-ruby-python/">Langages supportés sur l'hébergement o2switch</a>.</p>
+<h3 id="112-points-a-confirmer-avant-de-sengager-non-verifies">11.2 Points à confirmer avant de s'engager (non vérifiés)</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Point</th>
+<th>Pourquoi c'est important</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Version exacte de <strong>MariaDB</strong> fournie</td>
+<td>Compatibilité avec la version de Django retenue</td>
+<td>Vérifier dans cPanel (phpMyAdmin / version)</td>
+</tr>
+<tr>
+<td><strong>Compilation</strong> de <code>mysqlclient</code></td>
+<td>La FAQ indique que l'accès au compilateur se demande au support</td>
+<td>Utiliser <code>PyMySQL</code> (pur Python), ou demander l'accès</td>
+</tr>
+<tr>
+<td><strong>Fréquence minimale du cron</strong> (1 min ?)</td>
+<td>Détermine la réactivité de la file de tâches</td>
+<td>Tester dans cPanel</td>
+</tr>
+<tr>
+<td><strong>Limites de ressources</strong> (CPU, mémoire, processus, connexions)</td>
+<td>Pic d'ouverture des inscriptions ou de clôture de l'appel</td>
+<td>Test de charge sur l'hébergement réel ; contacter le support</td>
+</tr>
+<tr>
+<td><strong>Sous-domaines</strong> autorisés sur l'offre « mono-domaine » ?</td>
+<td>Séparer API, recette, etc.</td>
+<td>Vérifier l'offre souscrite ; sinon tout en chemins (<code>/api</code>, <code>/gestion</code>)</td>
+</tr>
+<tr>
+<td><strong>Environnement de recette</strong></td>
+<td>On ne teste pas sur la production</td>
+<td>Recette locale ou sur un second dossier/sous-domaine si autorisé</td>
+</tr>
+<tr>
+<td><strong>Antivirus</strong> pour les dépôts de fichiers</td>
+<td>Sécurité des PDF reçus</td>
+<td>Vérifier la disponibilité d'un scanner côté hébergement</td>
+</tr>
+<tr>
+<td><strong>Envoi d'e-mails</strong> (quotas, délivrabilité)</td>
+<td>Notifications massives</td>
+<td>Service transactionnel externe + SPF/DKIM/DMARC</td>
+</tr>
+<tr>
+<td><strong>WeasyPrint / dépendances système</strong></td>
+<td>Génération PDF avancée</td>
+<td>Rester sur bibliothèques pur Python sauf confirmation</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="113-topologie-sur-un-domaine-unique">11.3 Topologie sur un domaine unique</h3>
+<pre><code class="language-text">https://conference.exemple.org/            → Angular « portail » (fichiers statiques, public_html/)
+https://conference.exemple.org/gestion/    → Angular « gestion » (public_html/gestion/)
+https://conference.exemple.org/api/        → Django/DRF via Passenger (Setup Python App)
+/home/&lt;compte&gt;/gestconf-app/               → code Django + venv (hors racine web)
+/home/&lt;compte&gt;/gestconf-private/uploads/   → fichiers déposés (hors racine web, servis par l'API)
+/home/&lt;compte&gt;/gestconf-private/backups/   → sauvegardes locales
+</code></pre>
+<p><strong>Routage</strong> : <code>.htaccess</code> à la racine avec règle de repli SPA (toute URL non-fichier du portail renvoie <code>index.html</code>) ; une règle équivalente dans <code>/gestion/</code>. Les chemins <code>/api/</code> sont <strong>exclus</strong> de ces règles.</p>
+<blockquote>
+<p><strong>Point de vigilance</strong> : l'outil « Setup Python App » écrit lui-même un bloc dans le <code>.htaccess</code> du domaine pour l'URL de l'application. Les règles de repli SPA doivent être placées de façon à ne pas l'écraser. À <strong>valider dès l'étape de cadrage technique</strong> par un « squelette de déploiement » (Django minimal + deux pages Angular) avant tout développement lourd.</p>
+</blockquote>
+<h3 id="114-deploiement">11.4 Déploiement</h3>
+<ol>
+<li><strong>Build</strong> Angular (<code>portail</code> et <code>gestion</code>) en intégration continue ;</li>
+<li><strong>Pré-rendu</strong> des pages publiques ;</li>
+<li>Transfert par <strong>rsync/SSH</strong> vers <code>public_html/</code> et <code>public_html/gestion/</code> ;</li>
+<li>Mise à jour du code Django (git ou rsync), <code>pip install -r requirements/prod.txt</code> dans le venv ;</li>
+<li><code>manage.py migrate</code> (migrations rétro-compatibles, voir ci-dessous) ;</li>
+<li>Redémarrage Passenger (fichier <code>tmp/restart.txt</code>) ;</li>
+<li><strong>Tests de fumée</strong> automatiques post-déploiement (page d'accueil, <code>/api/v1/public/editions/current</code>, connexion).</li>
+</ol>
+<p><strong>Bonnes pratiques</strong> : migrations en deux temps (ajout puis suppression) pour limiter les ruptures ; mode maintenance (page statique) pendant les opérations lourdes ; <code>DEBUG=False</code> ; liste <code>ALLOWED_HOSTS</code> stricte ; variables d'environnement dans un fichier hors dépôt.</p>
+<h3 id="115-taches-planifiees-cron-cpanel">11.5 Tâches planifiées (cron cPanel)</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Fréquence</th>
+<th>Commande</th>
+<th>Rôle</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Chaque minute (si autorisé) ou toutes les 5 min</td>
+<td><code>manage.py run_jobs</code></td>
+<td>File de tâches : envois d'e-mails, PDF, notifications</td>
+</tr>
+<tr>
+<td>Toutes les heures</td>
+<td><code>manage.py send_reminders</code></td>
+<td>Rappels d'échéances (soumission, évaluation, inscription)</td>
+</tr>
+<tr>
+<td>Toutes les heures</td>
+<td><code>manage.py sync_payments</code></td>
+<td>Réconciliation avec l'agrégateur</td>
+</tr>
+<tr>
+<td>Quotidienne (nuit)</td>
+<td><code>manage.py backup_db</code> + copie hors site</td>
+<td>Sauvegarde</td>
+</tr>
+<tr>
+<td>Quotidienne</td>
+<td><code>manage.py check_integrity</code></td>
+<td>Cohérence : scores, conflits de planning, poids des grilles</td>
+</tr>
+<tr>
+<td>Quotidienne</td>
+<td><code>manage.py cleanup</code></td>
+<td>Purge de données expirées, jetons, fichiers orphelins</td>
+</tr>
+</tbody>
+</table></div>
+<p>Chaque commande est <strong>idempotente</strong> et protégée par un verrou pour éviter l'exécution simultanée de deux instances.</p>
+<h3 id="116-sauvegarde-et-reprise">11.6 Sauvegarde et reprise</h3>
+<ul>
+<li>sauvegarde quotidienne de la base et des fichiers privés, rotation 7 quotidiennes / 4 hebdomadaires / 3 mensuelles ;</li>
+<li><strong>copie hors hébergement</strong> (autre fournisseur ou stockage objet) ;</li>
+<li><strong>test de restauration</strong> documenté avant l'ouverture de l'appel, puis avant la conférence ;</li>
+<li>objectif de reprise indicatif : perte de données maximale 24 h, rétablissement sous 4 h (à valider avec le commanditaire).</li>
+</ul>
+<h3 id="117-supervision">11.7 Supervision</h3>
+<p>Surveillance de disponibilité externe (page publique + endpoint <code>/api/v1/health</code>), remontée d'erreurs applicatives, alerte sur échec de cron (« heartbeat » de la file de tâches), suivi de la taille de la base et de l'espace disque.</p>
+<hr />
+<h2 id="12-exigences-non-fonctionnelles">12. Exigences non fonctionnelles</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Domaine</th>
+<th>Exigence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Disponibilité</strong></td>
+<td>99 % hors maintenance ; renforcée (surveillance rapprochée) lors des périodes critiques : clôture de l'appel, ouverture et fin des inscriptions, conférence</td>
+</tr>
+<tr>
+<td><strong>Performance</strong></td>
+<td>Réponse API &lt; 500 ms au 95ᵉ centile hors export/PDF ; pages publiques servies statiquement ; liste des soumissions paginée</td>
+</tr>
+<tr>
+<td><strong>Capacité</strong></td>
+<td>600 soumissions, 100 relecteurs, 1 500 participants, 200 utilisateurs connectés simultanément (à confirmer par test de charge)</td>
+</tr>
+<tr>
+<td><strong>Sécurité</strong></td>
+<td>Voir §9.3 ; test d'intrusion ou revue OWASP avant l'ouverture</td>
+</tr>
+<tr>
+<td><strong>Confidentialité</strong></td>
+<td>Double aveugle garanti côté serveur, journal de toute levée d'anonymat</td>
+</tr>
+<tr>
+<td><strong>Traçabilité</strong></td>
+<td>Historique complet des statuts, évaluations, décisions, paiements</td>
+</tr>
+<tr>
+<td><strong>Accessibilité</strong></td>
+<td>WCAG 2.1 AA visé</td>
+</tr>
+<tr>
+<td><strong>Compatibilité</strong></td>
+<td>Deux dernières versions des navigateurs courants ; mobile pour portail et jour J</td>
+</tr>
+<tr>
+<td><strong>Maintenabilité</strong></td>
+<td>Couverture de tests ≥ 80 % sur la logique métier critique (évaluation, décisions, planning, paiements) ; documentation d'API générée ; <code>README</code> d'exploitation</td>
+</tr>
+<tr>
+<td><strong>Internationalisation</strong></td>
+<td>FR/EN, fuseau de l'édition, formats de date et de devise localisés ; devises XOF (FCFA), EUR, USD</td>
+</tr>
+<tr>
+<td><strong>Conformité</strong></td>
+<td>Protection des données personnelles, conservation, droits des personnes, registre des traitements</td>
+</tr>
+<tr>
+<td><strong>Réversibilité</strong></td>
+<td>Export complet des données (CSV/JSON + fichiers) à tout moment</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="13-propositions-damelioration">13. Propositions d'amélioration</h2>
+<p>Classées par valeur et effort. Les éléments ✅ sont déjà intégrés aux modules du §4 ; les autres sont des options à arbitrer.</p>
+<h3 id="131-a-forte-valeur-effort-modere">13.1 À forte valeur, effort modéré</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Proposition</th>
+<th>Valeur</th>
+<th>Statut</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Connexion ORCID</strong> et import de la liste de publications</td>
+<td>Confiance, gain de saisie</td>
+<td>✅ P2</td>
+</tr>
+<tr>
+<td><strong>Détection des conflits d'intérêts</strong> automatique</td>
+<td>Équité</td>
+<td>✅ P1</td>
+</tr>
+<tr>
+<td><strong>Suggestions d'affectation</strong> par mots-clés + charge</td>
+<td>Gain de temps du président CS</td>
+<td>✅ P2</td>
+</tr>
+<tr>
+<td><strong>Simulation du seuil d'acceptation</strong></td>
+<td>Aide à la décision</td>
+<td>✅ P1</td>
+</tr>
+<tr>
+<td><strong>Export iCal</strong> et agenda personnel</td>
+<td>Adoption</td>
+<td>✅ P2</td>
+</tr>
+<tr>
+<td><strong>QR code</strong> (badge, attestation vérifiable)</td>
+<td>Jour J fluide, anti-fraude</td>
+<td>✅ P2</td>
+</tr>
+<tr>
+<td><strong>Tableau de bord par rôle</strong> orienté tâches</td>
+<td>Réduction des relances</td>
+<td>✅ P1</td>
+</tr>
+<tr>
+<td><strong>Mode de paiement mobile money</strong></td>
+<td>Accessibilité locale</td>
+<td>✅ P2</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="132-options-a-etudier">13.2 Options à étudier</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Proposition</th>
+<th>Valeur</th>
+<th>Effort</th>
+<th>Remarque</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Enchères de relecture (bidding)</strong></td>
+<td>Meilleure adéquation relecteur/sujet</td>
+<td>Moyen</td>
+<td>Utile à partir de ~150 soumissions</td>
+</tr>
+<tr>
+<td><strong>Relecteur par track avec « méta-relecteur »</strong></td>
+<td>Qualité de l'arbitrage</td>
+<td>Moyen</td>
+<td>Pour grandes conférences</td>
+</tr>
+<tr>
+<td><strong>Détection de plagiat</strong> via service externe</td>
+<td>Intégrité scientifique</td>
+<td>Moyen</td>
+<td>Coût et confidentialité à évaluer</td>
+</tr>
+<tr>
+<td><strong>Vérification d'anonymisation assistée</strong> (détection de noms/affiliations dans le texte)</td>
+<td>Fiabilité du double aveugle</td>
+<td>Moyen</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Aide à la planification automatique</strong> (regroupement thématique, contraintes de disponibilité)</td>
+<td>Gain de temps programme</td>
+<td>Élevé</td>
+<td>Heuristique simple d'abord</td>
+</tr>
+<tr>
+<td><strong>Visioconférence intégrée</strong> pour sessions hybrides (liens + présence)</td>
+<td>Participation à distance</td>
+<td>Faible</td>
+<td>Liens externes plutôt qu'hébergement</td>
+</tr>
+<tr>
+<td><strong>Notifications WhatsApp / SMS</strong></td>
+<td>Réactivité terrain</td>
+<td>Moyen</td>
+<td>Coûts, consentement, fournisseur</td>
+</tr>
+<tr>
+<td><strong>Application mobile native</strong></td>
+<td>Confort</td>
+<td>Élevé</td>
+<td>La PWA couvre l'essentiel</td>
+</tr>
+<tr>
+<td><strong>Réseau de participants</strong> (annuaire, prise de rendez-vous)</td>
+<td>Valeur de la rencontre</td>
+<td>Moyen</td>
+<td>Consentement explicite</td>
+</tr>
+<tr>
+<td><strong>Votes pour les prix</strong> (jury + public)</td>
+<td>Animation</td>
+<td>Faible</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Journal de publication</strong> (DOI Crossref, ISBN)</td>
+<td>Valorisation des actes</td>
+<td>Moyen</td>
+<td>Selon éditeur</td>
+</tr>
+<tr>
+<td><strong>Module « Évaluation de la conférence »</strong> (satisfaction, NPS)</td>
+<td>Amélioration continue</td>
+<td>Faible</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Multi-conférences</strong> (plusieurs événements sur la même instance)</td>
+<td>Mutualisation</td>
+<td>Moyen</td>
+<td>Modèle prêt ; interface à étendre</td>
+</tr>
+<tr>
+<td><strong>Thème et marque personnalisables</strong> par édition</td>
+<td>Identité</td>
+<td>Faible</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>API publique</strong> (programme en JSON/iCal) pour partenaires</td>
+<td>Rayonnement</td>
+<td>Faible</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Attestations signées électroniquement</strong></td>
+<td>Valeur institutionnelle</td>
+<td>Moyen</td>
+<td>Selon exigences des universités</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="133-alternatives-techniques-a-considerer">13.3 Alternatives techniques à considérer</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Sujet</th>
+<th>Option retenue</th>
+<th>Alternative</th>
+<th>Quand reconsidérer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Hébergement</td>
+<td>o2switch mutualisé</td>
+<td>VPS (contrôle, workers, Redis, WebSocket)</td>
+<td>Si temps réel, forte charge ou besoin de Celery</td>
+</tr>
+<tr>
+<td>Front</td>
+<td>2 apps Angular</td>
+<td>1 seule app avec routes protégées</td>
+<td>Si l'équipe est réduite et le SEO moins critique</td>
+</tr>
+<tr>
+<td>Auth</td>
+<td>Session + CSRF</td>
+<td>JWT</td>
+<td>Si une application mobile native consomme l'API</td>
+</tr>
+<tr>
+<td>Tâches</td>
+<td>File en base + cron</td>
+<td>Celery + Redis</td>
+<td>Si le volume d'e-mails ou de PDF dépasse la capacité du cron</td>
+</tr>
+<tr>
+<td>Recherche</td>
+<td><code>LIKE</code> / FULLTEXT MariaDB</td>
+<td>Moteur dédié (Meilisearch)</td>
+<td>Si recherche avancée dans le contenu des soumissions</td>
+</tr>
+<tr>
+<td>PDF</td>
+<td>Pur Python</td>
+<td>WeasyPrint</td>
+<td>Si mise en page sophistiquée requise et dépendances disponibles</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="14-planning-charges-et-risques">14. Planning, charges et risques</h2>
+<h3 id="141-decoupage-en-lots">14.1 Découpage en lots</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Lot</th>
+<th>Contenu</th>
+<th>Priorité</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>L0 — Cadrage et prototype de déploiement</strong></td>
+<td>Validation du périmètre, maquettes clés, squelette Django + 2 Angular déployé sur o2switch, choix paiement et e-mail</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>L1 — Socle</strong></td>
+<td>Comptes, rôles par édition, 2FA, paramétrage de l'édition, audit, i18n, kit UI, CI/CD</td>
+<td>P1</td>
+</tr>
+<tr>
+<td><strong>L2 — Portail public</strong></td>
+<td>Pages, appel à communications, dates, comités, programme public (lecture), pré-rendu</td>
+<td>P1</td>
+</tr>
+<tr>
+<td><strong>L3 — Soumission</strong></td>
+<td>Assistant de soumission, fichiers, co-auteurs, suivi du statut, notifications</td>
+<td>P1</td>
+</tr>
+<tr>
+<td><strong>L4 — Évaluation et décision</strong></td>
+<td>Grilles pondérées, affectation, conflits, double aveugle, évaluation, classement, décisions, publication</td>
+<td>P1</td>
+</tr>
+<tr>
+<td><strong>L5 — Programme</strong></td>
+<td>Salles, sessions, planificateur avec conflits, publication, « Mon passage », iCal</td>
+<td>P1/P2</td>
+</tr>
+<tr>
+<td><strong>L6 — Inscriptions et paiements</strong></td>
+<td>Catégories, tarifs, promos, paiement, factures, reçus</td>
+<td>P2</td>
+</tr>
+<tr>
+<td><strong>L7 — Jour J et attestations</strong></td>
+<td>Badges, check-in PWA, présences, attestations, lettres d'invitation</td>
+<td>P2</td>
+</tr>
+<tr>
+<td><strong>L8 — Logistique, sponsors, reporting</strong></td>
+<td>Tâches, budget, sponsors, bénévoles, tableaux de bord</td>
+<td>P2</td>
+</tr>
+<tr>
+<td><strong>L9 — Recette, sécurité, charge</strong></td>
+<td>Tests E2E, revue OWASP, test de charge, restauration, formation</td>
+<td>P1</td>
+</tr>
+<tr>
+<td><strong>L10 — Actes et bilan</strong></td>
+<td>Actes, prix, bilan, archivage</td>
+<td>P3</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="142-ordre-et-echeances-recommandes">14.2 Ordre et échéances recommandés</h3>
+<p>L'<strong>appel à communications</strong> étant le premier usage réel, la chaîne <strong>L0 → L1 → L2 → L3 → L4</strong> forme le <strong>MVP</strong> et doit être livrée avant l'ouverture de l'appel. Le programme (L5) est nécessaire avant la publication des résultats, les inscriptions (L6) avant la notification d'acceptation, le jour J (L7) avant la conférence.</p>
+<pre class="mermaid">gantt
+    title Planning indicatif (semaines, 1 équipe réduite)
+    dateFormat  YYYY-MM-DD
+    axisFormat  S%W
+    section MVP
+    L0 Cadrage + prototype      :l0, 2026-11-02, 14d
+    L1 Socle                    :l1, after l0, 28d
+    L2 Portail public           :l2, after l1, 21d
+    L3 Soumission               :l3, after l2, 21d
+    L4 Évaluation et décision   :l4, after l3, 28d
+    section V1
+    L5 Programme                :l5, after l4, 28d
+    L6 Inscriptions/paiements   :l6, after l5, 21d
+    L7 Jour J + attestations    :l7, after l6, 14d
+    L8 Logistique + reporting   :l8, after l7, 21d
+    section Mise en service
+    L9 Recette, sécurité, charge:l9, after l8, 21d
+</pre>
+<blockquote>
+<p><strong>Les dates sont purement illustratives</strong> : la date de la conférence n'est pas connue. Le planning réel se construit <strong>à rebours</strong> à partir de la date de l'événement (voir §15).</p>
+</blockquote>
+<h3 id="143-estimation-de-charge-ordre-de-grandeur">14.3 Estimation de charge (ordre de grandeur)</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Lot</th>
+<th>Charge (jours-homme)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>L0</td>
+<td>8 – 10</td>
+</tr>
+<tr>
+<td>L1</td>
+<td>15 – 20</td>
+</tr>
+<tr>
+<td>L2</td>
+<td>10 – 14</td>
+</tr>
+<tr>
+<td>L3</td>
+<td>12 – 16</td>
+</tr>
+<tr>
+<td>L4</td>
+<td>18 – 24</td>
+</tr>
+<tr>
+<td>L5</td>
+<td>16 – 22</td>
+</tr>
+<tr>
+<td>L6</td>
+<td>12 – 16</td>
+</tr>
+<tr>
+<td>L7</td>
+<td>8 – 12</td>
+</tr>
+<tr>
+<td>L8</td>
+<td>10 – 14</td>
+</tr>
+<tr>
+<td>L9</td>
+<td>10 – 14</td>
+</tr>
+<tr>
+<td><strong>Total (hors L10)</strong></td>
+<td><strong>≈ 120 – 160 j-h</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>Ces chiffres supposent un développeur full-stack expérimenté, un design sobre basé sur un kit UI existant, et ne comprennent ni la saisie de contenus, ni la formation, ni la gestion de projet. Ils sont à <strong>affiner après le lot L0</strong>. Les écrans de gestion Angular qui remplacent l’admin Django représentent environ <strong>30 à 35 %</strong> de cette charge.</p>
+<h3 id="144-risques">14.4 Risques</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Risque</th>
+<th>Probabilité</th>
+<th>Impact</th>
+<th>Parade</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Contraintes de l'hébergement mutualisé (ressources, cron, <code>.htaccess</code>) découvertes tard</td>
+<td>Moyenne</td>
+<td>Élevé</td>
+<td>Prototype de déploiement en L0 ; test de charge ; plan de repli VPS</td>
+</tr>
+<tr>
+<td>Périmètre qui enfle (nombreuses options)</td>
+<td>Élevée</td>
+<td>Élevé</td>
+<td>Priorisation P1/P2/P3 ; gel du MVP ; arbitrage formel des demandes</td>
+</tr>
+<tr>
+<td>Fuite de l'identité des auteurs (double aveugle)</td>
+<td>Faible</td>
+<td>Très élevé</td>
+<td>Sérialiseurs par rôle, tests automatisés dédiés, revue de sécurité</td>
+</tr>
+<tr>
+<td>Intégration paiement tardive ou refusée</td>
+<td>Moyenne</td>
+<td>Moyen</td>
+<td>Choix de l'agrégateur en L0 ; virement et paiement sur place en repli</td>
+</tr>
+<tr>
+<td>Délivrabilité des e-mails</td>
+<td>Moyenne</td>
+<td>Élevé</td>
+<td>Service transactionnel, SPF/DKIM/DMARC, surveillance des rebonds</td>
+</tr>
+<tr>
+<td>Conflits de planning non détectés</td>
+<td>Faible</td>
+<td>Moyen</td>
+<td>Contrôles dans transaction + contrôle d'intégrité quotidien</td>
+</tr>
+<tr>
+<td>Perte de données</td>
+<td>Faible</td>
+<td>Très élevé</td>
+<td>Sauvegardes hors site et tests de restauration</td>
+</tr>
+<tr>
+<td>Pic de charge à la clôture de l'appel</td>
+<td>Élevée</td>
+<td>Moyen</td>
+<td>Extension éventuelle de la date, sauvegarde auto des brouillons, test de charge</td>
+</tr>
+<tr>
+<td>Faible adoption par les relecteurs (échéances non tenues)</td>
+<td>Moyenne</td>
+<td>Élevé</td>
+<td>Rappels automatiques, tableau de bord de suivi, UX d'évaluation soignée</td>
+</tr>
+<tr>
+<td>Dépendance à une personne clé</td>
+<td>Moyenne</td>
+<td>Moyen</td>
+<td>Documentation, tests, code revu</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="15-points-ouverts-et-hypotheses">15. Points ouverts et hypothèses</h2>
+<h3 id="151-questions-a-valider-avec-le-commanditaire">15.1 Questions à valider avec le commanditaire</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Question</th>
+<th>Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>Date de la conférence</strong> et date visée d'ouverture de l'appel à communications ?</td>
+<td>Planning, périmètre MVP</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Une seule conférence</strong> ou plusieurs éditions/conférences sur la même plateforme ?</td>
+<td>Modèle, paramétrage</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Double aveugle</strong> obligatoire, simple aveugle, ou ouvert ?</td>
+<td>Règles RG-04, UX</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Nombre de relecteurs par soumission ; échelle de notation ; <strong>pondérations</strong> définitives ?</td>
+<td>Grille par défaut</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Soumission : <strong>résumé seul</strong> ou <strong>article complet</strong> ? Formats, limites, modèles ?</td>
+<td>Module M4</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>Langues</strong> de la plateforme et des soumissions ?</td>
+<td>i18n</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>Inscription payante</strong> ? Montants, catégories, devises, modes de paiement souhaités ?</td>
+<td>M9, choix de l'agrégateur</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Organisme de <strong>facturation</strong> (entité légale, mentions, TVA éventuelle) ?</td>
+<td>Factures</td>
+</tr>
+<tr>
+<td>9</td>
+<td><strong>Publication d'actes</strong> (ISBN/DOI) ? Éditeur ?</td>
+<td>M15</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Besoin de <strong>sessions hybrides</strong> (à distance) ?</td>
+<td>Programme, liens</td>
+</tr>
+<tr>
+<td>11</td>
+<td><strong>Lettres d'invitation</strong> (visa) et signataire ?</td>
+<td>M10</td>
+</tr>
+<tr>
+<td>12</td>
+<td>Qui sont les <strong>utilisateurs du back-office</strong> et quels sont leurs niveaux d'autonomie (sous-rôles du CO) ?</td>
+<td>Matrice des droits</td>
+</tr>
+<tr>
+<td>13</td>
+<td>Nombre attendu de soumissions, relecteurs, participants ?</td>
+<td>Dimensionnement</td>
+</tr>
+<tr>
+<td>14</td>
+<td>Exigences <strong>institutionnelles</strong> (charte de données, hébergement en Afrique/Europe, attestations officielles) ?</td>
+<td>Conformité</td>
+</tr>
+<tr>
+<td>15</td>
+<td>Identité visuelle existante (logo, charte, nom de domaine) ?</td>
+<td>Design</td>
+</tr>
+<tr>
+<td>16</td>
+<td>Où placer l'espace évaluateur : dans l'application de gestion (proposition) ou dans le portail ?</td>
+<td>Architecture front</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="152-hypotheses-retenues-en-labsence-de-reponse">15.2 Hypothèses retenues en l'absence de réponse</h3>
+<ul>
+<li>une seule édition active ; modèle multi-éditions prêt ;</li>
+<li>double aveugle activable par édition (activé par défaut) ;</li>
+<li>2 relecteurs par soumission, échelle 0–5, grille par défaut du §4 (M5) ;</li>
+<li>inscription payante, mobile money + carte + virement ;</li>
+<li>plateforme bilingue FR/EN ;</li>
+<li>actes en version simple (PDF compilé) ;</li>
+<li>hébergement sur le plan o2switch existant, avec repli VPS si les tests de charge le justifient.</li>
+</ul>
+<hr />
+<h2 id="16-annexes">16. Annexes</h2>
+<h3 id="a1-glossaire">A1 — Glossaire</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Terme</th>
+<th>Définition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CFP</strong> (call for papers)</td>
+<td>Appel à communications</td>
+</tr>
+<tr>
+<td><strong>CS / CO</strong></td>
+<td>Comité scientifique / comité d'organisation</td>
+</tr>
+<tr>
+<td><strong>Double aveugle</strong></td>
+<td>Les relecteurs ignorent l'identité des auteurs et inversement</td>
+</tr>
+<tr>
+<td><strong>Camera-ready</strong></td>
+<td>Version finale prête pour publication dans les actes</td>
+</tr>
+<tr>
+<td><strong>Keynote</strong></td>
+<td>Conférence plénière d'un intervenant invité</td>
+</tr>
+<tr>
+<td><strong>Track</strong></td>
+<td>Thématique / axe de la conférence</td>
+</tr>
+<tr>
+<td><strong>Rebuttal</strong></td>
+<td>Réponse des auteurs aux commentaires des relecteurs</td>
+</tr>
+<tr>
+<td><strong>Actes</strong></td>
+<td>Recueil publié des communications acceptées</td>
+</tr>
+<tr>
+<td><strong>SSG / SSR</strong></td>
+<td>Pré-rendu statique / rendu côté serveur</td>
+</tr>
+<tr>
+<td><strong>Passenger</strong></td>
+<td>Serveur d'applications intégré à Apache, utilisé par cPanel pour Python</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="a2-matrice-des-notifications-extrait">A2 — Matrice des notifications (extrait)</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Événement</th>
+<th style="text-align: center;">Auteur</th>
+<th style="text-align: center;">Relecteur</th>
+<th style="text-align: center;">Prés. CS</th>
+<th style="text-align: center;">CO</th>
+<th style="text-align: center;">Participant</th>
+<th>Canal</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Création de compte / vérification e-mail</td>
+<td style="text-align: center;">●</td>
+<td style="text-align: center;">●</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">●</td>
+<td>E-mail</td>
+</tr>
+<tr>
+<td>Soumission déposée</td>
+<td style="text-align: center;">●</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">○</td>
+<td style="text-align: center;">○</td>
+<td style="text-align: center;"></td>
+<td>E-mail, in-app</td>
+</tr>
+<tr>
+<td>Rappel avant clôture de l'appel</td>
+<td style="text-align: center;">● (brouillons)</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td>E-mail</td>
+</tr>
+<tr>
+<td>Affectation d'une relecture</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">●</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td>E-mail, in-app</td>
+</tr>
+<tr>
+<td>Rappel échéance d'évaluation</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">●</td>
+<td style="text-align: center;">○</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td>E-mail</td>
+</tr>
+<tr>
+<td>Évaluation en retard</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">●</td>
+<td style="text-align: center;">●</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td>E-mail, in-app</td>
+</tr>
+<tr>
+<td>Toutes évaluations reçues</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">●</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td>In-app</td>
+</tr>
+<tr>
+<td>Écart de notes &gt; seuil</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">●</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td>In-app</td>
+</tr>
+<tr>
+<td>Résultats publiés</td>
+<td style="text-align: center;">●</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">○</td>
+<td style="text-align: center;"></td>
+<td>E-mail</td>
+</tr>
+<tr>
+<td>Demande de corrections / version finale</td>
+<td style="text-align: center;">●</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td>E-mail</td>
+</tr>
+<tr>
+<td>Inscription confirmée / reçu</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">○</td>
+<td style="text-align: center;">●</td>
+<td>E-mail</td>
+</tr>
+<tr>
+<td>Paiement échoué ou en attente</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">●</td>
+<td style="text-align: center;">●</td>
+<td>E-mail</td>
+</tr>
+<tr>
+<td>Programme publié</td>
+<td style="text-align: center;">●</td>
+<td style="text-align: center;">●</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">●</td>
+<td style="text-align: center;">●</td>
+<td>E-mail, portail</td>
+</tr>
+<tr>
+<td>Modification de programme</td>
+<td style="text-align: center;">● (concernés)</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">●</td>
+<td style="text-align: center;">● (concernés)</td>
+<td>E-mail, in-app</td>
+</tr>
+<tr>
+<td>Rappel « Mon passage » (J-7, J-1)</td>
+<td style="text-align: center;">●</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td>E-mail</td>
+</tr>
+<tr>
+<td>Attestation disponible</td>
+<td style="text-align: center;">●</td>
+<td style="text-align: center;">●</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">●</td>
+<td>E-mail</td>
+</tr>
+<tr>
+<td>Questionnaire de satisfaction</td>
+<td style="text-align: center;">●</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">●</td>
+<td>E-mail</td>
+</tr>
+</tbody>
+</table></div>
+<p>● destinataire principal · ○ en copie ou synthèse</p>
+<h3 id="a3-exemples-dhistoires-utilisateur-extrait">A3 — Exemples d'histoires utilisateur (extrait)</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Réf.</th>
+<th>En tant que…</th>
+<th>je veux…</th>
+<th>afin de…</th>
+<th>Priorité</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>US-01</td>
+<td>Auteur</td>
+<td>enregistrer ma soumission en brouillon et la reprendre</td>
+<td>ne pas perdre mon travail</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>US-02</td>
+<td>Auteur</td>
+<td>voir à tout moment le statut de ma candidature</td>
+<td>savoir où elle en est</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>US-03</td>
+<td>Évaluateur</td>
+<td>noter chaque critère et voir mon score pondéré en direct</td>
+<td>évaluer vite et de façon cohérente</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>US-04</td>
+<td>Évaluateur</td>
+<td>déclarer un conflit d'intérêts</td>
+<td>garantir mon impartialité</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>US-05</td>
+<td>Président CS</td>
+<td>affecter des relecteurs avec suggestions</td>
+<td>gagner du temps</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>US-06</td>
+<td>Président CS</td>
+<td>simuler un seuil d'acceptation</td>
+<td>décider en connaissance de cause</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>US-07</td>
+<td>CO</td>
+<td>programmer par glisser-déposer avec alertes de conflits</td>
+<td>éviter les erreurs</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>US-08</td>
+<td>Intervenant</td>
+<td>consulter « Mon passage » et l'ajouter à mon agenda</td>
+<td>être à l'heure</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>US-09</td>
+<td>Participant</td>
+<td>composer mon programme et l'exporter</td>
+<td>organiser ma participation</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>US-10</td>
+<td>Bénévole</td>
+<td>scanner un badge, même hors ligne</td>
+<td>accueillir vite</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>US-11</td>
+<td>Participant</td>
+<td>télécharger mon attestation vérifiable</td>
+<td>justifier ma participation</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>US-12</td>
+<td>Chair</td>
+<td>consulter un tableau de bord global</td>
+<td>piloter l'événement</td>
+<td>P1</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="a4-exemple-de-configuration-de-lapi-extraits-indicatifs">A4 — Exemple de configuration de l'API (extraits indicatifs)</h3>
+<pre><code class="language-python"># config/settings/base.py (extrait)
+INSTALLED_APPS = [
+    # 'django.contrib.admin',   # volontairement absent : pas d'admin Django
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'rest_framework',
+    'django_filters',
+    'drf_spectacular',
+    'allauth', 'allauth.account', 'allauth.socialaccount',
+    'allauth.socialaccount.providers.orcid',
+    'django_otp', 'django_otp.plugins.otp_totp',
+    'apps.core', 'apps.accounts', 'apps.conferences', 'apps.committees',
+    'apps.submissions', 'apps.reviews', 'apps.program', 'apps.registrations',
+    'apps.payments', 'apps.events', 'apps.communications',
+    'apps.sponsors', 'apps.logistics', 'apps.reports',
+]
+
+DATABASES = {'default': {
+    'ENGINE': 'django.db.backends.mysql',   # compatible MariaDB
+    'OPTIONS': {'charset': 'utf8mb4'},
+    # NAME, USER, PASSWORD, HOST depuis variables d'environnement
+}}
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': ['rest_framework.authentication.SessionAuthentication'],
+    'DEFAULT_PERMISSION_CLASSES': ['rest_framework.permissions.IsAuthenticated'],
+    'DEFAULT_RENDERER_CLASSES': ['rest_framework.renderers.JSONRenderer'],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_THROTTLE_RATES': {'anon': '60/min', 'user': '300/min', 'auth': '10/min'},
+}
+
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+SECURE_HSTS_SECONDS = 31536000
+</code></pre>
+<pre><code class="language-python"># passenger_wsgi.py (racine de l'application)
+from config.wsgi import application
+</code></pre>
+<pre><code class="language-python"># Calcul du score pondéré (principe)
+from decimal import Decimal
+
+def weighted_score(scores, criteria, scale_min, scale_max):
+    &quot;&quot;&quot;scores: {criterion_id: Decimal}; criteria: [(id, weight)]. Retourne un score sur 100.&quot;&quot;&quot;
+    total_w = sum(w for _, w in criteria)
+    acc = sum(scores[cid] * w for cid, w in criteria)
+    normalized = (acc / total_w - scale_min) / (scale_max - scale_min)
+    return (normalized * 100).quantize(Decimal('0.01'))
+</code></pre>
+<p><em>Remarque</em> : selon la convention retenue, une échelle 0–5 se normalise directement (<code>scale_min = 0</code>). Pour une échelle 1–10, la normalisation soustrait le minimum afin qu'une note minimale donne 0 %.</p>
+<h3 id="a5-check-list-de-mise-en-production">A5 — Check-list de mise en production</h3>
+<ul>
+<li>[ ] <code>DEBUG=False</code>, <code>ALLOWED_HOSTS</code>, <code>SECRET_KEY</code> spécifique</li>
+<li>[ ] HTTPS actif, HSTS, redirections</li>
+<li>[ ] Migrations appliquées, comptes administrateurs créés par commande</li>
+<li>[ ] Rôles et grilles de l'édition configurés</li>
+<li>[ ] E-mails : SPF, DKIM, DMARC valides, test d'envoi</li>
+<li>[ ] Agrégateur de paiement : clés de production, webhook vérifié, test réel de petit montant</li>
+<li>[ ] Cron configuré et heartbeat vérifié</li>
+<li>[ ] Sauvegarde automatique + <strong>restauration testée</strong></li>
+<li>[ ] Dossier de fichiers privés hors racine web, droits restreints</li>
+<li>[ ] Test d'accès : un relecteur ne peut pas lire l'identité des auteurs ni une soumission non affectée</li>
+<li>[ ] Supervision et alertes actives</li>
+<li>[ ] Pages légales (mentions, confidentialité, cookies) publiées</li>
+<li>[ ] Test de charge exécuté sur l'hébergement réel</li>
+<li>[ ] Documentation d'exploitation remise</li>
+</ul>
+<h3 id="a6-strategie-de-tests">A6 — Stratégie de tests</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Niveau</th>
+<th>Contenu</th>
+<th>Outil</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unitaire</td>
+<td>Calcul de score, transitions de statut, détection de conflits, numérotation</td>
+<td><code>pytest</code></td>
+</tr>
+<tr>
+<td>API</td>
+<td>Droits par rôle (matrice), double aveugle, filtres, erreurs</td>
+<td><code>pytest-django</code> + client DRF</td>
+</tr>
+<tr>
+<td>Intégration</td>
+<td>Paiement (webhook simulé), e-mails, génération PDF, cron</td>
+<td><code>pytest</code> + doubles</td>
+</tr>
+<tr>
+<td>Front</td>
+<td>Composants critiques (formulaire d'évaluation, planificateur)</td>
+<td>Jest / Karma</td>
+</tr>
+<tr>
+<td>E2E</td>
+<td>Parcours auteur complet, évaluation, décision, inscription, check-in</td>
+<td>Playwright</td>
+</tr>
+<tr>
+<td>Non fonctionnel</td>
+<td>Charge, accessibilité, sécurité</td>
+<td>k6 / Lighthouse / axe / ZAP</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<p><em>Fin du document.</em></p></main></div>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+const dark = matchMedia('(prefers-color-scheme: dark)').matches;
+mermaid.initialize({startOnLoad:true, theme: dark ? 'dark':'default', securityLevel:'strict'});
+</script></body></html>
