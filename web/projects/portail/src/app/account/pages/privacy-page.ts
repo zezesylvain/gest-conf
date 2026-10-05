@@ -9,6 +9,7 @@ import {
 import { MatButtonModule } from '@angular/material/button';
 import {
   apiErrorMessage,
+  ConsentKind,
   ConsentRecord,
   ConsentState,
   ErrorSummary,
@@ -20,6 +21,9 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { AccountService } from '../account.service';
 import { PrivacyNotice } from '../ui/privacy-notice';
+
+/** Annuaire public des comités, puis publication de la photo (E12, lot L2). */
+const OPTIONAL_CONSENTS: readonly ConsentKind[] = ['directory_listing', 'photo_publication'];
 
 /**
  * Confidentialité (plan L1 §4.8, D15) : notice d'information, consentements facultatifs
@@ -40,22 +44,25 @@ import { PrivacyNotice } from '../ui/privacy-notice';
     </div>
     <gc-error-summary [messages]="errors()" />
 
-    @if (directory(); as state) {
-      <section class="card" aria-labelledby="directory-title">
-        <h2 id="directory-title">{{ 'portail.account.privacy.directoryTitle' | translate }}</h2>
-        <p>{{ 'portail.account.privacy.directoryLead' | translate }}</p>
+    @for (state of optional(); track state.kind) {
+      <section class="card" [attr.aria-labelledby]="state.kind + '-title'">
+        <h2 [id]="state.kind + '-title'">
+          {{ 'portail.account.privacy.optional.' + state.kind + '.title' | translate }}
+        </h2>
+        <p>{{ 'portail.account.privacy.optional.' + state.kind + '.lead' | translate }}</p>
         <p>
           {{
-            (state.granted
-              ? 'portail.account.privacy.granted'
-              : 'portail.account.privacy.notGranted'
-            ) | translate
+            'portail.account.privacy.optional.' +
+              state.kind +
+              (state.granted ? '.granted' : '.notGranted') | translate
           }}
         </p>
         <button mat-stroked-button type="button" (click)="toggle(state)" [disabled]="busy()">
           {{
-            (state.granted ? 'portail.account.privacy.withdraw' : 'portail.account.privacy.grant')
-              | translate
+            (state.granted
+              ? 'portail.account.privacy.withdraw'
+              : 'portail.account.privacy.optional.' + state.kind + '.grant'
+            ) | translate
           }}
         </button>
       </section>
@@ -107,8 +114,11 @@ export class PrivacyPage implements OnInit {
   protected readonly busy = signal(false);
   protected readonly errors = signal<string[]>([]);
   protected readonly status = signal('');
-  protected readonly directory = computed(() =>
-    this.states().find((state) => state.kind === 'directory_listing'),
+  /** Consentements facultatifs, dans l'ordre d'affichage (la notice n'en est pas un). */
+  protected readonly optional = computed(() =>
+    OPTIONAL_CONSENTS.map((kind) => this.states().find((state) => state.kind === kind)).filter(
+      (state): state is ConsentState => state !== undefined,
+    ),
   );
 
   async ngOnInit(): Promise<void> {

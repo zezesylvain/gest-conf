@@ -33,7 +33,7 @@
 </div>
 <gc-error-summary [messages]="errors()" />
 
-@if (section()) {
+@if (section(); as current) {
   <form [formGroup]="form" (ngSubmit)="save()" novalidate>
     <section class="card" aria-labelledby="section-general">
       <h2 id="section-general">{{ 'gestion.portal.sections.general' | translate }}</h2>
@@ -172,7 +172,28 @@
               }}</mat-option>
             </mat-select>
           </mat-form-field>
-          <p class="muted">{{ 'gestion.portal.sections.imageLater' | translate }}</p>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'gestion.portal.fields.image' | translate }}</mat-label>
+            <mat-select formControlName="image">
+              <mat-option [value]="null">{{
+                'gestion.portal.files.noImage' | translate
+              }}</mat-option>
+              @for (image of images(); track image.id) {
+                <mat-option [value]="image.id">{{
+                  image.title_fr || image.original_name
+                }}</mat-option>
+              }
+            </mat-select>
+            <mat-hint>{{ 'gestion.portal.files.imageHint' | translate }}</mat-hint>
+          </mat-form-field>
+          @if (selectedImage(); as image) {
+            <p>
+              <img [src]="image.preview_url" alt="" style="max-width: 16rem; height: auto" />
+            </p>
+            @if (!image.published) {
+              <p class="notice">{{ 'gestion.portal.files.imageUnpublished' | translate }}</p>
+            }
+          }
         </section>
       }
     }

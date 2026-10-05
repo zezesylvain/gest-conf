@@ -79,6 +79,17 @@ def _export_account(user: User) -> dict[str, Any]:
             "last_login": user.last_login.isoformat() if user.last_login else None,
         },
         "profile": {name: getattr(profile, name) for name in PROFILE_FIELDS} if profile else {},
+        # Photo : métadonnées (le fichier se télécharge depuis l'espace compte).
+        "photo": (
+            {
+                "uuid": str(profile.photo.uuid),
+                "content_type": profile.photo.content_type,
+                "size": profile.photo.size,
+                "uploaded_at": profile.photo.created_at.isoformat(),
+            }
+            if profile and profile.photo_id
+            else None
+        ),
         "email_addresses": [
             {"email": item.email, "verified": item.verified, "primary": item.primary}
             for item in EmailAddress.objects.filter(user=user).order_by("id")
@@ -255,6 +266,9 @@ def _anonymize_invitations(user: User, context: AnonymizationContext) -> None:
 def _anonymize_account(user: User, context: AnonymizationContext) -> None:
     """Dernier traitement : profil vidé, adresses et 2FA supprimées, sessions fermées,
     compte désactivé avec une adresse anonyme et un mot de passe inutilisable."""
+    from apps.accounts.services.profile import remove_photo
+
+    remove_photo(user, actor=context.actor)
     Profile.objects.filter(user=user).update(**dict.fromkeys(PROFILE_FIELDS, ""))
     Authenticator.objects.filter(user=user).delete()
     EmailAddress.objects.filter(user=user).delete()

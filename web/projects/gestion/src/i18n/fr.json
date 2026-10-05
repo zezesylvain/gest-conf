@@ -41,11 +41,13 @@
         "guide": "aide, documentation, manuel, mode d'emploi, tutoriel",
         "portalSections": "blocs, contenu, texte, bandeau, accueil, rédaction",
         "portalPages": "composer, composeur, page personnalisée, informations pratiques, site",
-        "portalMenus": "navigation, liens, en-tête, pied de page"
+        "portalMenus": "navigation, liens, en-tête, pied de page",
+        "portalFiles": "modèle, téléchargement, pdf, fichier, affiche, image, photo"
       },
       "portalSections": "Sections",
       "portalPages": "Pages",
-      "portalMenus": "Menus"
+      "portalMenus": "Menus",
+      "portalFiles": "Documents et images"
     },
     "status": {
       "draft": "brouillon",
@@ -535,6 +537,24 @@
           "delayText": "Entre l'enregistrement et la mise en ligne, le portail montre l'ancienne version : ce n'est pas une panne.",
           "whoTitle": "Qui peut modifier",
           "whoText": "Administrateur, président de la conférence et membre du comité d'organisation chargé de la communication. Les autres rôles de gestion consultent."
+        },
+        "portal-files": {
+          "title": "Documents et images",
+          "summary": "Fichiers publics de l'édition, affiche comprise.",
+          "path": "Portail › Documents et images",
+          "intro": "Les fichiers déposés ici sont publics par nature : une fois publiés, n'importe quel visiteur du portail peut les télécharger.",
+          "documents": "Documents : PDF, DOCX, ODT ou ZIP (modèle LaTeX), 10 Mo au plus. Ils s'affichent dans les sections « Documents ».",
+          "images": "Images : PNG, JPEG ou WebP, 5 Mo au plus, redimensionnées et débarrassées de leurs métadonnées (dont la position GPS). Elles servent aux sections « image et texte » et à l'affiche.",
+          "uploadTitle": "Ajouter",
+          "uploadBody": "Choisissez la nature, le fichier et ses titres, puis « Envoyer ». Le fichier arrive non publié.",
+          "publishTitle": "Publier",
+          "publishBody": "« Modifier » : relisez les titres, cochez « Publiée ». Un fichier non publié n'est jamais servi.",
+          "posterTitle": "Choisir l'affiche",
+          "posterBody": "En bas de l'écran : une image publiée devient l'image des aperçus de partage.",
+          "refusedTitle": "Fichiers refusés",
+          "refusedText": "Le type est vérifié d'après le contenu, pas d'après le nom : un fichier dont l'extension ne correspond pas, un SVG, un exécutable ou une archive trop volumineuse une fois décompressée sont refusés.",
+          "inUseTitle": "Suppression refusée",
+          "inUseText": "Un fichier utilisé (section, affiche) ne se supprime pas : la colonne « Utilisé par » dit où le retirer d'abord."
         }
       }
     },
@@ -608,7 +628,8 @@
         "target": "Destination",
         "page": "Page",
         "url": "Adresse",
-        "newTab": "Nouvel onglet"
+        "newTab": "Nouvel onglet",
+        "image": "Image"
       },
       "status": {
         "pending": "{{count}} modification(s) non publiée(s) sur le portail",
@@ -634,7 +655,6 @@
         "config": "Réglages",
         "dataNotice": "Section de données : son contenu vient de l'édition ; seuls le titre et le sous-titre se rédigent ici.",
         "englishFallback": "Une colonne anglaise vide affiche le français sur le portail anglais.",
-        "imageLater": "L'image se choisira avec les fichiers publics (étape suivante).",
         "preview": "Aperçu",
         "previewTitle": "Aperçu du texte",
         "previewLead": "Tel qu'il sera enregistré : les balises et attributs non autorisés sont retirés."
@@ -685,6 +705,40 @@
         "deleteTitle": "Supprimer cette entrée ?",
         "toPage": "Vers une page du portail",
         "toUrl": "Vers une adresse"
+      },
+      "files": {
+        "title": "Documents et images",
+        "lead": "Fichiers publics de l'édition : modèles, guides, images des sections, affiche.",
+        "upload": "Ajouter un fichier",
+        "uploadLead": "Le type est vérifié d'après le contenu du fichier ; les images sont redimensionnées et débarrassées de leurs métadonnées. Un fichier ajouté n'est pas publié : publiez-le après relecture.",
+        "kind": "Nature",
+        "kinds": {
+          "document": "Document",
+          "image": "Image"
+        },
+        "hints": {
+          "document": "PDF, DOCX, ODT ou ZIP (modèle LaTeX), 10 Mo au plus.",
+          "image": "PNG, JPEG ou WebP, 5 Mo au plus."
+        },
+        "file": "Fichier",
+        "send": "Envoyer",
+        "chooseFirst": "Choisissez d'abord un fichier.",
+        "uploaded": "Fichier ajouté (non publié).",
+        "groups": {
+          "document": "Documents",
+          "image": "Images"
+        },
+        "preview": "Aperçu",
+        "details": "Format",
+        "usedBy": "Utilisé par",
+        "deleteTitle": "Supprimer ce fichier ?",
+        "posterTitle": "Affiche de l'édition",
+        "posterLead": "Image affichée dans les aperçus de partage (réseaux sociaux, messageries). Elle doit être publiée.",
+        "poster": "Affiche",
+        "noPoster": "Aucune affiche",
+        "noImage": "Aucune image",
+        "imageHint": "Images publiques de l'édition (Portail › Documents et images). Elle doit être publiée.",
+        "imageUnpublished": "Cette image n'est pas publiée : elle n'apparaîtra pas sur le portail tant qu'elle ne l'est pas (Portail › Documents et images)."
       }
     }
   }

@@ -9,7 +9,7 @@ from rest_framework import serializers
 from apps.accounts.consents import CURRENT_TEXT_VERSIONS
 from apps.accounts.models import BIO_MAX_LENGTH, ConsentKind, ConsentSource, ProfileTitle
 from apps.accounts.roles import CAPABILITY_CHOICES, InvitableRole, OcFunction, Role
-from apps.accounts.validators import validate_country, validate_orcid
+from apps.accounts.validators import validate_country, validate_orcid, validate_public_link
 from apps.conferences.models import EditionStatus
 
 
@@ -117,7 +117,32 @@ class ProfileSerializer(serializers.Serializer):
         trim_whitespace=False,
         help_text="Texte brut.",
     )
+    website = serializers.CharField(max_length=300, required=False, allow_blank=True)
+    scholar_url = serializers.CharField(max_length=300, required=False, allow_blank=True)
+    linkedin_url = serializers.CharField(max_length=300, required=False, allow_blank=True)
+    photo_url = serializers.SerializerMethodField(
+        help_text="Adresse de la photo (publique seulement avec le consentement « photo »)."
+    )
     is_complete = serializers.BooleanField(read_only=True)
+
+    def get_photo_url(self, profile) -> str | None:
+        if not getattr(profile, "photo_id", None):
+            return None
+        from apps.portal.services import public_file_url
+
+        return public_file_url(profile.photo)
+
+    def validate_website(self, value: str) -> str:
+        _run_django_validator(validate_public_link, value)
+        return value
+
+    def validate_scholar_url(self, value: str) -> str:
+        _run_django_validator(validate_public_link, value)
+        return value
+
+    def validate_linkedin_url(self, value: str) -> str:
+        _run_django_validator(validate_public_link, value)
+        return value
 
     # Normalisation (majuscules) avant contrôle ; Django ValidationError → erreur de champ.
     def validate_country(self, value: str) -> str:

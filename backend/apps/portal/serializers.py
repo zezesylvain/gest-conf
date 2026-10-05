@@ -8,6 +8,7 @@ from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from apps.conferences.serializers import PublicEditionSerializer
+from apps.core.models import PublicFile
 from apps.portal.models import MenuItem, MenuLocation, Page, PageSection, Section, SectionType
 
 SECTION_CONTENT_FIELDS = (
@@ -25,9 +26,112 @@ SECTION_CONTENT_FIELDS = (
     "cta2_label_fr",
     "cta2_label_en",
     "cta2_url",
+    "image",
     "config",
     "published",
 )
+
+
+class PublicFileRefSerializer(serializers.ModelSerializer):
+    """Fichier public tel que le voient les pages : adresse, dimensions, titre."""
+
+    url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = PublicFile
+        fields = (
+            "uuid",
+            "url",
+            "title_fr",
+            "title_en",
+            "extension",
+            "content_type",
+            "size",
+            "width",
+            "height",
+        )
+        read_only_fields = fields
+
+    def get_url(self, public_file: PublicFile) -> str:
+        from apps.portal.services import public_file_url
+
+        return public_file_url(public_file)
+
+
+class PublicFileSerializer(PublicFileRefSerializer):
+    """Gestion des fichiers de l'édition (documents et images)."""
+
+    uses = serializers.SerializerMethodField()
+    preview_url = serializers.SerializerMethodField(
+        help_text="Aperçu dans la gestion (authentifié), publié ou non."
+    )
+
+    class Meta:
+        model = PublicFile
+        fields = (
+            "preview_url",
+            "id",
+            "uuid",
+            "kind",
+            "original_name",
+            "url",
+            "title_fr",
+            "title_en",
+            "extension",
+            "content_type",
+            "size",
+            "width",
+            "height",
+            "position",
+            "published",
+            "uses",
+            "created_at",
+        )
+        read_only_fields = (
+            "id",
+            "uuid",
+            "kind",
+            "original_name",
+            "url",
+            "extension",
+            "content_type",
+            "size",
+            "width",
+            "height",
+            "uses",
+            "created_at",
+        )
+
+    def get_preview_url(self, public_file: PublicFile) -> str:
+        from django.urls import reverse
+
+        return reverse(
+            "portal:manage-portal-files-content",
+            kwargs={"edition_id": public_file.edition_id, "item_id": public_file.pk},
+        )
+
+    def get_uses(self, public_file: PublicFile) -> list[str]:
+        from apps.portal.services import file_uses
+
+        return file_uses(public_file)
+
+
+# Natures téléversables dans la gestion du portail (les photos passent par /v1/me/photo).
+PORTAL_FILE_KIND_CHOICES = [("document", "document"), ("image", "image")]
+
+
+class FileUploadSerializer(serializers.Serializer):
+    file = serializers.FileField(
+        help_text="Document : PDF, DOCX, ODT, ZIP ; image : PNG, JPEG, WebP."
+    )
+    kind = serializers.ChoiceField(choices=PORTAL_FILE_KIND_CHOICES)
+    title_fr = serializers.CharField(max_length=255, required=False, allow_blank=True, default="")
+    title_en = serializers.CharField(max_length=255, required=False, allow_blank=True, default="")
+
+
+class PosterSerializer(serializers.Serializer):
+    file = serializers.IntegerField(allow_null=True, help_text="Image de l'édition, ou null.")
+    poster = PublicFileRefSerializer(read_only=True, allow_null=True)
 
 
 class PagePathsSerializer(serializers.Serializer):
@@ -50,11 +154,12 @@ class SectionSerializer(serializers.ModelSerializer):
 
     pages = serializers.SerializerMethodField()
     is_data = serializers.BooleanField(read_only=True)
+    image_ref = PublicFileRefSerializer(source="image", read_only=True, allow_null=True)
 
     class Meta:
         model = Section
-        fields = ("id", *SECTION_CONTENT_FIELDS, "is_data", "pages", "updated_at")
-        read_only_fields = ("id", "is_data", "pages", "updated_at")
+        fields = ("id", *SECTION_CONTENT_FIELDS, "image_ref", "is_data", "pages", "updated_at")
+        read_only_fields = ("id", "image_ref", "is_data", "pages", "updated_at")
 
     @extend_schema_field(PageRefSerializer(many=True))
     def get_pages(self, section: Section) -> list[dict]:
@@ -67,6 +172,9 @@ class SectionWriteSerializer(serializers.ModelSerializer):
     """Écriture : les contrôles métier (HTML, liens, configuration) sont dans le service."""
 
     config = serializers.JSONField(required=False)
+    image = serializers.PrimaryKeyRelatedField(
+        queryset=PublicFile.objects.all(), allow_null=True, required=False
+    )
 
     class Meta:
         model = Section
@@ -194,6 +302,7 @@ class PublicSectionSerializer(serializers.ModelSerializer):
     """Section publiée : habillage, contenu assaini, et données pour les types « données »."""
 
     data = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
 
     class Meta:
         model = Section
@@ -212,10 +321,17 @@ class PublicSectionSerializer(serializers.ModelSerializer):
             "cta2_label_fr",
             "cta2_label_en",
             "cta2_url",
+            "image",
             "config",
             "data",
         )
         read_only_fields = fields
+
+    @extend_schema_field(PublicFileRefSerializer(allow_null=True))
+    def get_image(self, section: Section) -> dict | None:
+        """Image de la section, seulement si elle est publiée (sinon son adresse ferait 404)."""
+        image = section.image
+        return PublicFileRefSerializer(image).data if image and image.published else None
 
     @extend_schema_field(
         serializers.JSONField(
@@ -269,5 +385,6 @@ class PublicMenuItemSerializer(serializers.Serializer):
 
 class PublicSiteSerializer(serializers.Serializer):
     edition = PublicEditionSerializer()
-    documents = serializers.ListField(child=serializers.DictField())
+    poster = PublicFileRefSerializer(allow_null=True)
+    documents = PublicFileRefSerializer(many=True)
     committees = serializers.DictField(child=serializers.ListField(child=serializers.DictField()))

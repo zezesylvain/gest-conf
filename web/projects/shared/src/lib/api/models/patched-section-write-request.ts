@@ -17,6 +17,7 @@ export interface PatchedSectionWriteRequest {
   cta_label_en?: string;
   cta_label_fr?: string;
   cta_url?: string;
+  image?: number | null;
   published?: boolean;
   section_type?: SectionType;
   subtitle_en?: string;

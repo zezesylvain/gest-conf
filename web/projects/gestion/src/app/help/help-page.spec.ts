@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { useTestLanguage } from '@gestconf/shared/testing';
 
 import { provideGestionTesting } from '../../testing/gestion-testing';
+import { SCREENS } from '../core/navigation';
 import { HELP_SHEETS } from './help-sheets';
 import { HelpPage } from './help-page';
 
@@ -21,7 +22,9 @@ describe('HelpPage', () => {
     expect(root.querySelector('#index-profils h3')?.textContent).toContain(
       "Administrateur de l'édition",
     );
-    expect(root.querySelectorAll('#index-ecrans > ul:first-of-type li')).toHaveLength(12);
+    expect(root.querySelectorAll('#index-ecrans > ul:first-of-type li')).toHaveLength(
+      SCREENS.filter((screen) => !screen.path.startsWith('/')).length,
+    );
     for (const sheet of HELP_SHEETS) {
       expect(root.querySelector(`#fiche-${sheet.id}`)).not.toBeNull();
     }

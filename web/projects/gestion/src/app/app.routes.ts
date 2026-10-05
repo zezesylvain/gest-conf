@@ -96,6 +96,12 @@ export const routes: Routes = [
           import('./pages/portal/page-composer-page').then((m) => m.PageComposerPage),
       },
       {
+        path: 'portail/documents',
+        title: 'gestion.portal.files.title',
+        canActivate: [capabilityGuard('edition.read')],
+        loadComponent: () => import('./pages/portal/files-page').then((m) => m.FilesPage),
+      },
+      {
         path: 'portail/menus',
         title: 'gestion.portal.menus.title',
         canActivate: [capabilityGuard('edition.read')],

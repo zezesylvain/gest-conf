@@ -9,11 +9,13 @@ Aucune pagination (``pagination_class = None``) : listes courtes, lues en entier
 from __future__ import annotations
 
 from django.db.models import Prefetch
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404
+from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import mixins, status
 from rest_framework.decorators import action
+from rest_framework.parsers import JSONParser, MultiPartParser
 from rest_framework.permissions import AllowAny
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -23,16 +25,22 @@ from apps.accounts.permissions import ManageViewSet
 from apps.accounts.roles import Capability
 from apps.conferences.serializers import PublicEditionSerializer
 from apps.conferences.services import current_public_edition
+from apps.core import public_files
 from apps.core.actor import Actor
+from apps.core.models import PublicFile, PublicFileKind
 from apps.portal import services
 from apps.portal.models import MenuItem, MenuLocation, Page, PageSection, Section
 from apps.portal.serializers import (
+    FileUploadSerializer,
     MenuItemSerializer,
     MenuOrderSerializer,
     PageSerializer,
+    PosterSerializer,
     PreviewSerializer,
     PublicationStatusSerializer,
     PublicCompositionSerializer,
+    PublicFileRefSerializer,
+    PublicFileSerializer,
     PublicMenuItemSerializer,
     PublicRoutesSerializer,
     PublicSiteSerializer,
@@ -68,9 +76,13 @@ class _PortalViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, ManageVie
 
 class SectionViewSet(_PortalViewSet):
     serializer_class = SectionSerializer
-    queryset = Section.objects.prefetch_related(
-        Prefetch("placements", queryset=PageSection.objects.select_related("page"))
-    ).order_by("code", "id")
+    queryset = (
+        Section.objects.select_related("image")
+        .prefetch_related(
+            Prefetch("placements", queryset=PageSection.objects.select_related("page"))
+        )
+        .order_by("code", "id")
+    )
     required_capabilities = {**_PortalViewSet.required_capabilities, "preview": WRITE}
 
     def _reread(self, section: Section) -> dict:
@@ -263,6 +275,123 @@ class MenuItemViewSet(_PortalViewSet):
         return Response(MenuItemSerializer(items, many=True).data)
 
 
+# --- Gestion : fichiers publics (L2.4) ------------------------------------------------------
+
+
+class PublicFileViewSet(_PortalViewSet):
+    """Documents et images de l'édition : téléversement (multipart), titres, ordre,
+    publication ; suppression refusée tant que le fichier est utilisé (409 ``in_use``)."""
+
+    serializer_class = PublicFileSerializer
+    queryset = PublicFile.objects.filter(kind__in=services.PORTAL_FILE_KINDS).order_by(
+        "kind", "position", "id"
+    )
+    parser_classes = (JSONParser, MultiPartParser)
+
+    required_capabilities = {**_PortalViewSet.required_capabilities, "content": READ}
+
+    def get_throttles(self):
+        if self.action == "create":
+            self.throttle_scope = "portal_upload"
+        return super().get_throttles()
+
+    @extend_schema(
+        operation_id="manage_portal_files_content",
+        responses={(200, "application/octet-stream"): OpenApiTypes.BINARY},
+    )
+    @action(detail=True, methods=["get"])
+    def content(self, request: Request, edition_id: int, item_id: int) -> HttpResponse:
+        """Aperçu dans la gestion, publié ou non (la lecture de l'édition suffit)."""
+        public_file = self.get_object()
+        try:
+            data = public_files.read(public_file)
+        except FileNotFoundError as exc:
+            raise Http404 from exc
+        response = HttpResponse(data, content_type=public_file.content_type)
+        response["Cache-Control"] = "private, no-store"
+        response["X-Content-Type-Options"] = "nosniff"
+        response["Content-Security-Policy"] = "default-src 'none'; sandbox"
+        disposition = "inline" if public_file.kind != PublicFileKind.DOCUMENT else "attachment"
+        name = public_files.safe_download_name(public_file.original_name, public_file.extension)
+        response["Content-Disposition"] = f'{disposition}; filename="{name}"'
+        return response
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        kind = self.request.query_params.get("kind")
+        return queryset.filter(kind=kind) if kind else queryset
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "kind", enum=list(services.PORTAL_FILE_KINDS), required=False, type=str
+            )
+        ]
+    )
+    def list(self, request: Request, *args, **kwargs) -> Response:
+        return super().list(request, *args, **kwargs)
+
+    @extend_schema(
+        request={"multipart/form-data": FileUploadSerializer},
+        responses={201: PublicFileSerializer},
+    )
+    def create(self, request: Request, edition_id: int) -> Response:
+        serializer = FileUploadSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        stored = services.upload_file(
+            self.edition,
+            data=data["file"].read(),
+            name=data["file"].name,
+            kind=data["kind"],
+            title_fr=data["title_fr"],
+            title_en=data["title_en"],
+            actor=_actor(request),
+        )
+        return Response(PublicFileSerializer(stored).data, status=status.HTTP_201_CREATED)
+
+    def partial_update(self, request: Request, edition_id: int, item_id: int) -> Response:
+        public_file = self.get_object()
+        serializer = PublicFileSerializer(public_file, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        public_file = services.update_file(
+            public_file, serializer.validated_data, actor=_actor(request)
+        )
+        return Response(PublicFileSerializer(public_file).data)
+
+    def destroy(self, request: Request, edition_id: int, item_id: int) -> Response:
+        services.delete_file(self.get_object(), actor=_actor(request))
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class PosterViewSet(ManageViewSet):
+    """``…/portal/poster`` : affiche de l'édition (image Open Graph, E7)."""
+
+    serializer_class = PosterSerializer
+    required_capabilities = {"retrieve": READ, "update": WRITE}
+
+    def _payload(self, edition) -> dict:
+        poster = edition.poster if edition.poster_id else None
+        return {"file": edition.poster_id, "poster": poster}
+
+    @extend_schema(operation_id="manage_portal_poster")
+    def retrieve(self, request: Request, edition_id: int) -> Response:
+        return Response(PosterSerializer(self._payload(self.edition)).data)
+
+    @extend_schema(operation_id="manage_portal_poster_update", request=PosterSerializer)
+    def update(self, request: Request, edition_id: int) -> Response:
+        serializer = PosterSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        file_id = serializer.validated_data["file"]
+        poster = (
+            get_object_or_404(PublicFile, pk=file_id, edition=self.edition)
+            if file_id is not None
+            else None
+        )
+        edition = services.set_poster(self.edition, poster, actor=_actor(request))
+        return Response(PosterSerializer(self._payload(edition)).data)
+
+
 class PublicationStatusViewSet(ManageViewSet):
     """``GET …/portal/status`` : dernière mise en ligne, modifications non publiées (E1)."""
 
@@ -295,10 +424,12 @@ class _PublicPortalView(APIView):
 
 def _site_data(edition) -> dict:
     """Données des gabarits et des sections « données » : une seule lecture de l'édition.
-    Documents : L2.4 ; comités (avec consentements) : L2.6."""
+    Comités (avec consentements) : L2.6."""
+    poster = edition.poster if edition.poster_id else None
     return {
         "edition": PublicEditionSerializer(edition).data,
-        "documents": [],
+        "poster": PublicFileRefSerializer(poster).data if poster and poster.published else None,
+        "documents": PublicFileRefSerializer(services.public_documents(edition), many=True).data,
         "committees": {"scientific": [], "organizing": []},
     }
 
@@ -381,6 +512,45 @@ class PublicMenuView(_PublicPortalView):
                 }
             )
         return self.respond(PublicMenuItemSerializer(data, many=True).data)
+
+
+class PublicFileView(_PublicPortalView):
+    """``GET /v1/public/files/<uuid>/<nom>`` : fichier public, s'il est publié et dans un
+    contexte public (``services.is_publicly_served``), sinon 404 (rien n'est révélé).
+
+    Jamais servi par Apache (stockage hors racine web). ``nosniff`` ; documents en
+    ``attachment`` ; CSP ``sandbox`` ; cache public court, ETag = empreinte SHA-256.
+    """
+
+    @extend_schema(
+        operation_id="public_file",
+        responses={(200, "application/octet-stream"): OpenApiTypes.BINARY},
+        auth=[],
+    )
+    def get(self, request: Request, uuid, name: str):
+        public_file = PublicFile.objects.filter(uuid=uuid).first()
+        if public_file is None or not services.is_publicly_served(public_file):
+            raise Http404
+        etag = f'"{public_file.sha256}"'
+        if request.headers.get("If-None-Match") == etag:
+            response = HttpResponse(status=304)
+        else:
+            try:
+                data = public_files.read(public_file)
+            except FileNotFoundError as exc:  # ligne sans fichier : signalé par check_integrity
+                raise Http404 from exc
+            response = HttpResponse(data, content_type=public_file.content_type)
+            download = public_files.safe_download_name(
+                public_file.original_name, public_file.extension
+            )
+            disposition = "inline" if public_file.kind != PublicFileKind.DOCUMENT else "attachment"
+            response["Content-Disposition"] = f'{disposition}; filename="{download}"'
+            response["Content-Length"] = str(len(data))
+        response["ETag"] = etag
+        response["X-Content-Type-Options"] = "nosniff"
+        response["Content-Security-Policy"] = "default-src 'none'; sandbox"
+        response["Cache-Control"] = "public, max-age=3600"
+        return response
 
 
 class PublicSiteView(_PublicPortalView):

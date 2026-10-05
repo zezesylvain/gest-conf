@@ -41,11 +41,13 @@
         "guide": "help, documentation, manual, how to, tutorial",
         "portalSections": "blocks, content, text, banner, home, writing",
         "portalPages": "compose, composer, custom page, practical information, website",
-        "portalMenus": "navigation, links, header, footer"
+        "portalMenus": "navigation, links, header, footer",
+        "portalFiles": "template, download, pdf, file, poster, image, picture"
       },
       "portalSections": "Sections",
       "portalPages": "Pages",
-      "portalMenus": "Menus"
+      "portalMenus": "Menus",
+      "portalFiles": "Documents and images"
     },
     "status": {
       "draft": "draft",
@@ -535,6 +537,24 @@
           "delayText": "Between saving and release, the portal shows the previous version: this is not a fault.",
           "whoTitle": "Who can change it",
           "whoText": "Administrator, conference chair and the organising committee member in charge of communication. Other management roles can view."
+        },
+        "portal-files": {
+          "title": "Documents and images",
+          "summary": "Public files of the edition, poster included.",
+          "path": "Portal › Documents and images",
+          "intro": "Files added here are public by nature: once published, any portal visitor can download them.",
+          "documents": "Documents: PDF, DOCX, ODT or ZIP (LaTeX template), 10 MB at most. They appear in “Documents” sections.",
+          "images": "Images: PNG, JPEG or WebP, 5 MB at most, resized and stripped of their metadata (including GPS position). They are used by “image and text” sections and as the poster.",
+          "uploadTitle": "Add",
+          "uploadBody": "Choose the kind, the file and its titles, then “Upload”. The file arrives unpublished.",
+          "publishTitle": "Publish",
+          "publishBody": "“Edit”: review the titles, tick “Published”. An unpublished file is never served.",
+          "posterTitle": "Choose the poster",
+          "posterBody": "At the bottom of the screen: a published image becomes the image of share previews.",
+          "refusedTitle": "Refused files",
+          "refusedText": "The type is checked from the content, not the name: a file whose extension does not match, an SVG, an executable or an archive too large once uncompressed is refused.",
+          "inUseTitle": "Deletion refused",
+          "inUseText": "A file in use (section, poster) cannot be deleted: the “Used by” column says where to remove it first."
         }
       }
     },
@@ -608,7 +628,8 @@
         "target": "Destination",
         "page": "Page",
         "url": "Address",
-        "newTab": "New tab"
+        "newTab": "New tab",
+        "image": "Image"
       },
       "status": {
         "pending": "{{count}} unpublished change(s) on the portal",
@@ -634,7 +655,6 @@
         "config": "Settings",
         "dataNotice": "Data section: its content comes from the edition; only the title and subtitle are written here.",
         "englishFallback": "An empty English column shows the French text on the English portal.",
-        "imageLater": "The image will be chosen with public files (next step).",
         "preview": "Preview",
         "previewTitle": "Text preview",
         "previewLead": "As it will be saved: tags and attributes that are not allowed are removed."
@@ -685,6 +705,40 @@
         "deleteTitle": "Delete this entry?",
         "toPage": "To a portal page",
         "toUrl": "To an address"
+      },
+      "files": {
+        "title": "Documents and images",
+        "lead": "Public files of the edition: templates, guides, section images, poster.",
+        "upload": "Add a file",
+        "uploadLead": "The type is checked from the file content; images are resized and stripped of their metadata. An added file is not published: publish it after review.",
+        "kind": "Kind",
+        "kinds": {
+          "document": "Document",
+          "image": "Image"
+        },
+        "hints": {
+          "document": "PDF, DOCX, ODT or ZIP (LaTeX template), 10 MB at most.",
+          "image": "PNG, JPEG or WebP, 5 MB at most."
+        },
+        "file": "File",
+        "send": "Upload",
+        "chooseFirst": "Choose a file first.",
+        "uploaded": "File added (unpublished).",
+        "groups": {
+          "document": "Documents",
+          "image": "Images"
+        },
+        "preview": "Preview",
+        "details": "Format",
+        "usedBy": "Used by",
+        "deleteTitle": "Delete this file?",
+        "posterTitle": "Edition poster",
+        "posterLead": "Image shown in share previews (social networks, messaging apps). It must be published.",
+        "poster": "Poster",
+        "noPoster": "No poster",
+        "noImage": "No image",
+        "imageHint": "Public images of the edition (Portal › Documents and images). It must be published.",
+        "imageUnpublished": "This image is not published: it will not appear on the portal until it is (Portal › Documents and images)."
       }
     }
   }

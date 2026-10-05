@@ -11,4 +11,5 @@ from apps.accounts.models import ConsentKind
 CURRENT_TEXT_VERSIONS: dict[str, str] = {
     ConsentKind.PRIVACY_NOTICE: "2026-10-v0",
     ConsentKind.DIRECTORY_LISTING: "2026-10-v0",
+    ConsentKind.PHOTO_PUBLICATION: "2026-10-v0",
 }

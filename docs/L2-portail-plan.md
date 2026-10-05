@@ -472,3 +472,69 @@ n'est remise en cause.
   - `⌘K` « composer » trouve « Pages » ; « ? » ouvre « Pages et composeur » ;
   - bandeau au bon compte ; aucune erreur dans la console.
 - **Bundles initiaux** : gestion 359,5 kB, portail 362,0 kB.
+
+## 15. Bilan de L2.4 (5 octobre 2026)
+
+**Livré** :
+
+- **Classe « fichier public »** (`core.PublicFile`, `apps/core/public_files.py`) :
+  - type vérifié **par le contenu** : PDF, DOCX, ODT, ZIP, PNG, JPEG, WebP ; l'extension du
+    nom doit correspondre ; SVG, HTML déguisé, exécutables refusés ; archives bornées en
+    nombre d'entrées et en taille décompressée ;
+  - tailles : 10 Mio (documents), 5 Mio (images) ;
+  - images réencodées par **Pillow 12.3.0** (V28) : 1 600 px, 800 px pour une photo, sans
+    EXIF ni GPS, garde contre les bombes de décompression ;
+  - stockage **hors racine web** (`GESTCONF_FILES_DIR`) : nom aléatoire, écriture atomique,
+    droits 640, fichier supprimé après validation de la transaction ;
+  - orphelins nettoyés par `cleanup` ; lignes sans fichier signalées par `check_integrity`.
+- **Portail** :
+  - documents et images de l'édition, téléversés **non publiés**, avec titres bilingues,
+    ordre et publication ;
+  - suppression refusée tant que le fichier est utilisé (409, usages nommés) ;
+  - affiche de l'édition (`edition.poster`) ; image des sections « image et texte » ;
+  - données publiques : documents et affiche publiés seulement.
+- **`GET /v1/public/files/<uuid>/<nom>`** : servi seulement si le fichier est publié et dans un
+  contexte public (édition courante publiée, ou photo avec consentement), sinon 404. En-têtes :
+  `nosniff`, CSP `sandbox`, `attachment` pour les documents, ETag/304, cache d'une heure.
+  Aperçu **authentifié** dans la gestion : `…/portal/files/{id}/content`, avec `edition.read`.
+- **Profil (E12)** :
+  - photo (`PUT`/`DELETE /v1/me/photo`, et `GET` pour l'aperçu de son titulaire) ;
+  - liens publics `https://` (site web, Google Scholar, LinkedIn) ;
+  - consentement `photo_publication`, dont le retrait a un effet immédiat sur la photo ;
+  - export et anonymisation : la photo est exportée (métadonnées) et supprimée ; les liens
+    sont vidés.
+- **Écrans** :
+  - gestion : « Documents et images » (envoi, vignettes, titres, publication, ordre, affiche,
+    colonne « Utilisé par ») et choix de l'image dans l'éditeur de section ;
+  - espace compte : photo et liens dans « Profil », consentement « photo » dans
+    « Confidentialité » ;
+  - fiche d'aide « Documents et images ».
+
+**Défauts corrigés, trouvés dans le navigateur** :
+
+- La colonne « Utilisé par » n'était pas relue après le choix de l'affiche.
+- Un refus 409 affichait le libellé générique du code au lieu du message du serveur, qui
+  nomme ce qui bloque.
+- Les vignettes d'un fichier non publié pointaient l'adresse publique, qui répond 404 : d'où
+  l'aperçu authentifié.
+
+**Exploitation** : `deploy/README.md`, § « Fichiers déposés » (emplacement, sauvegarde avec la
+base, nettoyage, repli sans Pillow) ; `GESTCONF_FILES_DIR` dans `.env.example`.
+
+**Vérifications** :
+
+- **Backend** : 1 332 tests sous SQLite, 1 338 sous MariaDB :
+  - 26 tests des fichiers (signatures, contenus déguisés, bombes, EXIF, repli sans Pillow,
+    orphelins, intégrité) ;
+  - 14 tests portail et profil (règles de service, en-têtes, usages, consentement, export,
+    anonymisation) ;
+  - matrice étendue à 8 routes.
+- **Front** : gestion 74, portail 42, shared 76.
+- **Dans Chromium** :
+  - faux PDF refusé ;
+  - JPEG avec EXIF réencodé en 1 600×1 067 sans EXIF ; vignette d'un fichier non publié
+    affichée ;
+  - affiche choisie ; suppression refusée avec l'usage nommé ;
+  - image posée dans une section ;
+  - photo de profil réduite à 800×533 ; lien `http` refusé ; consentement « photo » accordé ;
+  - aucune erreur dans la console.

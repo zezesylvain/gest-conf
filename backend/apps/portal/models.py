@@ -69,6 +69,15 @@ class Section(TimeStampedModel):
     cta2_label_fr = models.CharField(_("bouton 2 (FR)"), max_length=120, blank=True, default="")
     cta2_label_en = models.CharField(_("bouton 2 (EN)"), max_length=120, blank=True, default="")
     cta2_url = models.CharField(_("lien du bouton 2"), max_length=500, blank=True, default="")
+    # Image d'une section « image et texte » : une image publique de l'édition (L2.4).
+    image = models.ForeignKey(
+        "core.PublicFile",
+        verbose_name=_("image"),
+        null=True,
+        blank=True,
+        on_delete=models.RESTRICT,
+        related_name="+",
+    )
     # Réglages propres au type, bornés par le service (``SECTION_CONFIG``).
     config = models.JSONField(_("configuration"), default=dict, blank=True)
     published = models.BooleanField(_("publiée"), default=True)
@@ -95,6 +104,7 @@ class Section(TimeStampedModel):
         "cta2_label_fr",
         "cta2_label_en",
         "cta2_url",
+        "image",
         "config",
         "published",
     )

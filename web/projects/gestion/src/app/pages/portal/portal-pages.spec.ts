@@ -30,6 +30,7 @@ function section(id: number, code: string, pages: Section['pages'] = []): Sectio
     title_fr: code.toUpperCase(),
     published: true,
     is_data: false,
+    image_ref: null,
     pages,
     updated_at: '2026-10-05T10:00:00Z',
   };

@@ -36,6 +36,9 @@ PROFILE_FIELDS = (
     "country",
     "orcid",
     "bio",
+    "website",
+    "scholar_url",
+    "linkedin_url",
 )
 
 

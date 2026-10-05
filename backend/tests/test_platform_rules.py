@@ -238,6 +238,7 @@ ANONYMOUS_VIEWS = {
     "apps.portal.views.PublicCompositionView": "portail public (composition d'une page)",
     "apps.portal.views.PublicMenuView": "portail public (menus)",
     "apps.portal.views.PublicSiteView": "portail public (données des gabarits)",
+    "apps.portal.views.PublicFileView": "fichiers publics publiés (L2.4, E4)",
 }
 
 # Seule vue de ``v1/manage/`` hors ``ManageViewSet`` : sélecteur d'édition.

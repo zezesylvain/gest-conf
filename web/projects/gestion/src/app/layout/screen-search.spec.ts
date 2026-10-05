@@ -5,6 +5,7 @@ import { MeEdition } from '@gestconf/shared';
 import { useTestLanguage } from '@gestconf/shared/testing';
 
 import { CHAIR_EDITION, provideGestionTesting } from '../../testing/gestion-testing';
+import { SCREENS } from '../core/navigation';
 import { NavigationStore } from '../core/navigation-store';
 import { ScreenSearch } from './screen-search';
 
@@ -56,7 +57,7 @@ describe('ScreenSearch', () => {
   it('saisie vide : tout le rail ; une lettre : rien', async () => {
     const { type, options, root } = await render();
     await type('');
-    expect(options()).toHaveLength(13);
+    expect(options()).toHaveLength(SCREENS.length);
     await type('c');
     expect(options()).toEqual([]);
     expect(root.querySelector('.empty')?.textContent).toContain('deux lettres');
@@ -116,7 +117,7 @@ describe('ScreenSearch', () => {
     await type('journal');
     await key('Escape');
     expect(input.value).toBe('');
-    expect(options()).toHaveLength(13);
+    expect(options()).toHaveLength(SCREENS.length);
   });
 
   it('profil restreint : un écran hors périmètre est introuvable', async () => {

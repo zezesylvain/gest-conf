@@ -45,6 +45,7 @@ describe('EditionLayout', () => {
       'Invitations',
       'Sections',
       'Pages',
+      'Documents et images',
       'Menus',
       'Journal',
       'Guide',

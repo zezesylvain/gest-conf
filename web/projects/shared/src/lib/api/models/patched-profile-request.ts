@@ -18,10 +18,13 @@ export interface PatchedProfileRequest {
   first_name?: string;
   institution?: string;
   last_name?: string;
+  linkedin_url?: string;
 
   /**
    * Forme 0000-0000-0000-000X, clé de contrôle vérifiée.
    */
   orcid?: string;
+  scholar_url?: string;
   title?: (ProfileTitle | BlankEnum);
+  website?: string;
 }

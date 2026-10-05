@@ -13,6 +13,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 
 import pytest
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import URLPattern, URLResolver, get_resolver
 from django.utils import timezone
 from rest_framework.test import APIClient
@@ -29,6 +30,8 @@ from apps.conferences.tests.factories import (
     SubmissionTypeFactory,
     TrackFactory,
 )
+from apps.core import public_files
+from apps.core.models import PublicFileKind
 from apps.portal.models import MenuItem, Page, PageSection, Section
 
 pytestmark = pytest.mark.django_db
@@ -64,6 +67,7 @@ class Case:
     path: str  # gabarit : {e} édition, {track}, {type}, {date}, {role}, {invitation}, {section}…
     body: dict | Callable[[dict], dict] | None = None  # fonction : corps calculé des ids
     recent_auth: bool = False
+    format: str = "json"
 
 
 CASES = [
@@ -316,7 +320,57 @@ CASES = [
         lambda ids: {"location": "header", "items": list(reversed(ids["header_menu"]))},
     ),
     Case("manage-portal-status", "GET", R, 200, "/v1/manage/editions/{e}/portal/status"),
+    # --- Fichiers publics (L2.4) ---------------------------------------------------------------
+    Case("manage-portal-files-list", "GET", R, 200, "/v1/manage/editions/{e}/portal/files"),
+    Case(
+        "manage-portal-files-list",
+        "POST",
+        PW,
+        201,
+        "/v1/manage/editions/{e}/portal/files",
+        lambda ids: {
+            "file": SimpleUploadedFile("appel.pdf", PDF, "application/pdf"),
+            "kind": "document",
+        },
+        format="multipart",
+    ),
+    Case(
+        "manage-portal-files-detail", "GET", R, 200, "/v1/manage/editions/{e}/portal/files/{file}"
+    ),
+    Case(
+        "manage-portal-files-detail",
+        "PATCH",
+        PW,
+        200,
+        "/v1/manage/editions/{e}/portal/files/{file}",
+        {"published": True},
+    ),
+    Case(
+        "manage-portal-files-detail",
+        "DELETE",
+        PW,
+        204,
+        "/v1/manage/editions/{e}/portal/files/{file}",
+    ),
+    Case(
+        "manage-portal-files-content",
+        "GET",
+        R,
+        200,
+        "/v1/manage/editions/{e}/portal/files/{file}/content",
+    ),
+    Case("manage-portal-poster", "GET", R, 200, "/v1/manage/editions/{e}/portal/poster"),
+    Case(
+        "manage-portal-poster",
+        "PUT",
+        PW,
+        200,
+        "/v1/manage/editions/{e}/portal/poster",
+        lambda ids: {"file": ids["image"]},
+    ),
 ]
+
+PDF = b"%PDF-1.7\n%%EOF\n"
 
 
 def expected_status(case: Case, profile: str) -> int:
@@ -394,7 +448,15 @@ def world():
         .order_by("position")
         .values_list("pk", flat=True)
     )
+    document = public_files.store(
+        data=PDF, name="modele.pdf", kind=PublicFileKind.DOCUMENT, edition=edition
+    )
+    image = public_files.store(
+        data=_png(), name="affiche.png", kind=PublicFileKind.IMAGE, edition=edition
+    )
     ids = {
+        "file": document.pk,
+        "image": image.pk,
         "section": section.pk,
         "placed_section": placed.pk,
         "page": page.pk,
@@ -410,13 +472,23 @@ def world():
     return edition, users, ids
 
 
+def _png() -> bytes:
+    import io
+
+    from PIL import Image
+
+    output = io.BytesIO()
+    Image.new("RGB", (20, 10), "navy").save(output, "PNG")
+    return output.getvalue()
+
+
 def call(client: APIClient, case: Case, ids: dict):
     path = case.path.format(**ids)
     method = getattr(client, case.method.lower())
     if case.body is None:
         return method(path)
     body = case.body(ids) if callable(case.body) else case.body
-    return method(path, body, format="json")
+    return method(path, body, format=case.format)
 
 
 @pytest.mark.parametrize(("case", "profile", "expected"), MATRIX)

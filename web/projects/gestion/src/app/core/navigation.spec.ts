@@ -58,6 +58,7 @@ describe('Table de navigation de la gestion (plan L2 §2.3)', () => {
       // Lecture du portail (edition.read) ; écriture réservée à portal.write.
       'portalSections',
       'portalPages',
+      'portalFiles',
       'portalMenus',
       'guide',
     ]);

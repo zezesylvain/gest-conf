@@ -33,3 +33,14 @@ def validate_orcid(value: str) -> None:
 def validate_country(value: str) -> None:
     if value and value not in ISO_3166_1_ALPHA_2:
         raise ValidationError(_("Code pays ISO 3166-1 inconnu."), code="invalid_country")
+
+
+def validate_public_link(value: str) -> None:
+    """Lien public d'un profil (E12, lot L2) : adresse ``https://`` complète, sans espace."""
+    from urllib.parse import urlsplit
+
+    if not value:
+        return
+    parts = urlsplit(value)
+    if parts.scheme != "https" or not parts.netloc or any(c.isspace() for c in value):
+        raise ValidationError(_("Adresse https:// complète attendue."), code="invalid_link")

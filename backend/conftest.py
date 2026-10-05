@@ -60,6 +60,8 @@ def _fresh_health_cache_probe():
 def _isolated_command_locks(settings, tmp_path):
     """Verrous des commandes cron dans un dossier propre au test, jamais dans backend/tmp."""
     settings.GESTCONF_LOCK_DIR = tmp_path / "locks"
+    # Fichiers déposés (lot L2) : jamais dans le dépôt pendant les tests.
+    settings.GESTCONF_FILES_DIR = tmp_path / "files"
 
 
 @pytest.fixture

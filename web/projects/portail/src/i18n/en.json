@@ -103,7 +103,10 @@
           "department": "Department, laboratory",
           "country": "Country",
           "orcid": "ORCID iD",
-          "bio": "Biography"
+          "bio": "Biography",
+          "website": "Website",
+          "scholar_url": "Google Scholar profile",
+          "linkedin_url": "LinkedIn profile"
         },
         "titles": {
           "none": "None",
@@ -116,7 +119,17 @@
         "orcidFormat": "Expected format: 0000-0000-0000-000X.",
         "bioHint": "Plain text, 2,000 characters at most.",
         "languageTitle": "Language",
-        "languageLead": "The language chosen with the selector at the top of the page is saved in your account: it is also used for emails."
+        "languageLead": "The language chosen with the selector at the top of the page is saved in your account: it is also used for emails.",
+        "linkFormat": "A complete https:// address is expected.",
+        "photoTitle": "Photo",
+        "photoLead": "PNG, JPEG or WebP, 5 MB at most. It is resized to 800 pixels and stripped of its metadata (including GPS position). It is only published with your agreement (Privacy page).",
+        "photoAlt": "Your profile photo",
+        "photoChoose": "Choose a photo",
+        "photoRemove": "Remove the photo",
+        "photoSaved": "Photo saved.",
+        "photoRemoved": "Photo removed.",
+        "linksTitle": "Public links",
+        "linksLead": "Optional: shown in the committee directory if you appear in it."
       },
       "notice": {
         "summary": "Privacy notice on your data (provisional version)",
@@ -228,20 +241,32 @@
       },
       "privacy": {
         "title": "Privacy",
-        "directoryTitle": "Public committee directory",
-        "directoryLead": "Optional: if you agree, your name and institution may appear in the public list of the conference committees. You can withdraw your consent at any time.",
-        "granted": "You agreed to appear in the directory.",
-        "notGranted": "You do not appear in the directory.",
-        "grant": "Appear in the directory",
         "withdraw": "Withdraw my consent",
         "saved": "Your choice has been saved.",
         "historyTitle": "History of your choices",
         "kinds": {
           "privacy_notice": "Privacy notice (acknowledged)",
-          "directory_listing": "Public directory"
+          "directory_listing": "Public directory",
+          "photo_publication": "Photo publication"
         },
         "yes": "yes",
-        "no": "no"
+        "no": "no",
+        "optional": {
+          "directory_listing": {
+            "title": "Public committee directory",
+            "lead": "Optional: if you agree, your name, institution, country and public links may appear in the conference's public list of committees. You can withdraw your agreement at any time.",
+            "granted": "You agreed to appear in the directory.",
+            "notGranted": "You do not appear in the directory.",
+            "grant": "Appear in the directory"
+          },
+          "photo_publication": {
+            "title": "Publishing your photo",
+            "lead": "Optional: if you agree, your profile photo may accompany your name on the portal (committee directory). Without this agreement, only you can see it. Withdrawal takes effect immediately for the photo.",
+            "granted": "You agreed to the publication of your photo.",
+            "notGranted": "Your photo is not published.",
+            "grant": "Publish my photo"
+          }
+        }
       },
       "myData": {
         "title": "My data",

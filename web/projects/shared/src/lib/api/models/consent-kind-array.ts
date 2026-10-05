@@ -8,5 +8,6 @@ import { ConsentKind } from './consent-kind';
  */
 export const CONSENT_KIND: ConsentKind[] = [
   'privacy_notice',
-  'directory_listing'
+  'directory_listing',
+  'photo_publication'
 ];

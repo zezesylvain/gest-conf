@@ -20,10 +20,11 @@ from django.utils.translation import gettext_lazy as _
 
 from apps.accounts.services.roles import ensure_editable
 from apps.conferences.models import Edition
+from apps.core import public_files
 from apps.core.actor import Actor
 from apps.core.audit import record
 from apps.core.errors import ErrorCode, Invalid, RuleViolation
-from apps.core.models import AuditLog
+from apps.core.models import AuditLog, PublicFile, PublicFileKind
 from apps.portal.models import (
     MenuItem,
     MenuLocation,
@@ -51,6 +52,7 @@ SECTION_FIELDS = (
     "cta2_label_fr",
     "cta2_label_en",
     "cta2_url",
+    "image",
     "config",
     "published",
 )
@@ -215,6 +217,12 @@ def _clean_section(section: Section) -> None:
                 _("Configuration invalide : %(names)s.")
                 % {"names": ", ".join(unknown + invalid + missing)}
             ]
+    if section.image_id is not None:
+        image = section.image
+        if section.section_type != SectionType.IMAGE_TEXT:
+            errors["image"] = [_("Seule une section « image et texte » porte une image.")]
+        elif image.kind != PublicFileKind.IMAGE or image.edition_id != section.edition_id:
+            errors["image"] = [_("Choisissez une image publique de l'édition.")]
     if section.is_data and (section.body_fr or section.body_en):
         errors["body_fr"] = [
             _("Une section de données n'a pas de corps : son contenu vient de l'édition.")
@@ -551,6 +559,146 @@ def reorder_menu(
     )
 
 
+# --- Fichiers publics (L2.4, E4) ------------------------------------------------------------
+
+FILE_FIELDS = ("title_fr", "title_en", "position", "published")
+PORTAL_FILE_KINDS = (PublicFileKind.DOCUMENT, PublicFileKind.IMAGE)
+
+
+@transaction.atomic
+def upload_file(
+    edition: Edition,
+    *,
+    data: bytes,
+    name: str,
+    kind: str,
+    title_fr: str = "",
+    title_en: str = "",
+    actor: Actor,
+) -> PublicFile:
+    """Document ou image de l'édition : type vérifié par le contenu, image réencodée ;
+    **non publié** à l'arrivée (on le publie une fois relu)."""
+    ensure_editable(edition)
+    if kind not in PORTAL_FILE_KINDS:
+        raise Invalid(fields={"kind": [_("Nature inconnue.")]})
+    last = PublicFile.objects.filter(edition=edition, kind=kind).aggregate(last=Max("position"))
+    stored = public_files.store(
+        data=data, name=name, kind=kind, edition=edition, title_fr=title_fr, title_en=title_en
+    )
+    stored.position = 0 if last["last"] is None else last["last"] + 1
+    stored.save(update_fields=["position"])
+    record("portal.file_uploaded", actor=actor, edition=edition, obj=stored, after=snapshot(stored))
+    return stored
+
+
+@transaction.atomic
+def update_file(public_file: PublicFile, data: Mapping[str, Any], *, actor: Actor) -> PublicFile:
+    public_file = PublicFile.objects.select_for_update().get(pk=public_file.pk)
+    edition = Edition.objects.get(pk=public_file.edition_id)
+    ensure_editable(edition)
+    before = _values(public_file)
+    changed = _apply(public_file, data, FILE_FIELDS)
+    if changed:
+        public_file.save(update_fields=[*changed, "updated_at"])
+        old, new = _diff(before, public_file, changed)
+        record(
+            "portal.file_updated",
+            actor=actor,
+            edition=edition,
+            obj=public_file,
+            before=old,
+            after=new,
+        )
+    return public_file
+
+
+def file_uses(public_file: PublicFile) -> list[str]:
+    """Usages qui interdisent la suppression : sections, affiche de l'édition."""
+    uses = [
+        f"section {code}"
+        for code in Section.objects.filter(image=public_file).values_list("code", flat=True)
+    ]
+    if Edition.objects.filter(poster=public_file).exists():
+        uses.append(str(_("affiche de l'édition")))
+    return uses
+
+
+@transaction.atomic
+def delete_file(public_file: PublicFile, *, actor: Actor) -> None:
+    public_file = PublicFile.objects.select_for_update().get(pk=public_file.pk)
+    edition = Edition.objects.get(pk=public_file.edition_id)
+    ensure_editable(edition)
+    uses = file_uses(public_file)
+    if uses:
+        raise RuleViolation(
+            _("Fichier utilisé (%(uses)s) : retirez-le d'abord.") % {"uses": ", ".join(uses)},
+            code=ErrorCode.IN_USE,
+        )
+    record(
+        "portal.file_deleted",
+        actor=actor,
+        edition=edition,
+        obj=public_file,
+        before=snapshot(public_file),
+    )
+    public_files.delete(public_file)
+
+
+@transaction.atomic
+def set_poster(edition: Edition, poster: PublicFile | None, *, actor: Actor) -> Edition:
+    """Affiche de l'édition : une image publique de l'édition, ou aucune."""
+    edition = Edition.objects.select_for_update().get(pk=edition.pk)
+    ensure_editable(edition)
+    if poster is not None and (
+        poster.kind != PublicFileKind.IMAGE or poster.edition_id != edition.pk
+    ):
+        raise Invalid(fields={"file": [_("Choisissez une image publique de l'édition.")]})
+    before = edition.poster_id
+    if before != (poster.pk if poster else None):
+        edition.poster = poster
+        edition.save(update_fields=["poster", "updated_at"])
+        record(
+            "portal.poster_changed",
+            actor=actor,
+            edition=edition,
+            obj=edition,
+            before={"poster": before},
+            after={"poster": edition.poster_id},
+        )
+    return edition
+
+
+def public_file_url(public_file: PublicFile) -> str:
+    """Adresse publique (``/api/v1/public/files/<uuid>/<nom>``, préfixe de montage compris)."""
+    from django.urls import reverse
+
+    name = public_files.safe_download_name(public_file.original_name, public_file.extension)
+    return reverse("portal:public-file", kwargs={"uuid": public_file.uuid, "name": name})
+
+
+def is_publicly_served(public_file: PublicFile) -> bool:
+    """Un fichier n'est servi qu'une fois publié et dans un contexte public : document ou
+    image de l'édition courante publiée ; photo d'un compte actif qui a consenti (E12)."""
+    from apps.conferences.services import current_public_edition
+
+    if not public_file.published:
+        return False
+    if public_file.kind == PublicFileKind.PHOTO:
+        from apps.accounts.services.profile import photo_is_public
+
+        return photo_is_public(public_file)
+    edition = current_public_edition()
+    return edition is not None and public_file.edition_id == edition.pk
+
+
+def public_documents(edition: Edition) -> list[PublicFile]:
+    return list(
+        PublicFile.objects.filter(
+            edition=edition, kind=PublicFileKind.DOCUMENT, published=True
+        ).order_by("position", "id")
+    )
+
+
 # --- Seed --------------------------------------------------------------------------------
 
 
@@ -653,7 +801,7 @@ def published_placements_prefetch() -> Prefetch:
     return Prefetch(
         "placements",
         queryset=PageSection.objects.filter(section__published=True)
-        .select_related("section")
+        .select_related("section", "section__image")
         .order_by("position", "id"),
         to_attr="published_placements",
     )

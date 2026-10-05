@@ -138,6 +138,9 @@ def test_o2switch_check_pins_pillow_version():
     code = CHECK_SCRIPT.read_text(encoding="utf-8")
     line = re.search(r"^readonly PILLOW_REQUIREMENT='([^']+)'", code, re.M)
     assert line and "==" in line.group(1)
+    # Même version que le fichier verrouillé : V28 vérifie ce que deploy.sh installera.
+    locked = (REPO_DIR / "backend" / "requirements" / "base.txt").read_text(encoding="utf-8")
+    assert re.search(rf"^{re.escape(line.group(1).lower())} \\$", locked, re.M)
     assert "report V28 OK" in code
     assert 'assert not reread.getexif(), "EXIF conservé"' in code
 

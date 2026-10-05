@@ -4,11 +4,12 @@ par défaut) ; CSRF contrôlé par ``apps.core.authentication.SessionAuthenticat
 from __future__ import annotations
 
 from django.contrib.auth import logout
-from django.http import Http404, HttpRequest
+from django.http import Http404, HttpRequest, HttpResponse
 from django.utils.translation import gettext_lazy as _
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiResponse, extend_schema
-from rest_framework import status
+from rest_framework import serializers, status
+from rest_framework.parsers import MultiPartParser
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -27,6 +28,7 @@ from apps.accounts.serializers import (
     TotpQrSerializer,
     consent_states,
 )
+from apps.accounts.services import profile as profile_services
 from apps.accounts.services.access import editions_with_roles
 from apps.accounts.services.invitations import pending_for_user
 from apps.accounts.services.mfa import mfa_enabled, totp_qr_data_url
@@ -103,6 +105,57 @@ class ProfileView(APIView):
         profile = services.update_profile(
             request.user, serializer.validated_data, actor=Actor.from_request(request)
         )
+        return Response(ProfileSerializer(profile).data)
+
+
+class PhotoUploadSerializer(serializers.Serializer):
+    file = serializers.FileField(help_text="PNG, JPEG ou WebP, 5 Mio au plus.")
+
+
+class ProfilePhotoView(APIView):
+    """``PUT``/``DELETE /v1/me/photo`` : photo du profil (E12), réencodée sans métadonnées.
+    Publiée sur le portail seulement avec le consentement ``photo_publication``."""
+
+    parser_classes = (MultiPartParser,)
+    throttle_scope = "portal_upload"
+
+    @extend_schema(
+        operation_id="me_photo_update",
+        request={"multipart/form-data": PhotoUploadSerializer},
+        responses={200: ProfileSerializer},
+    )
+    def put(self, request: Request) -> Response:
+        serializer = PhotoUploadSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        upload = serializer.validated_data["file"]
+        profile = profile_services.set_photo(
+            request.user, data=upload.read(), name=upload.name, actor=Actor.from_request(request)
+        )
+        return Response(ProfileSerializer(profile).data)
+
+    @extend_schema(
+        operation_id="me_photo",
+        responses={(200, "application/octet-stream"): OpenApiTypes.BINARY},
+    )
+    def get(self, request: Request) -> HttpResponse:
+        """Sa propre photo, même sans consentement de publication (aperçu de l'espace compte)."""
+        profile = services.get_profile(request.user)
+        if profile._state.adding or profile.photo_id is None:
+            raise Http404
+        from apps.core import public_files
+
+        try:
+            data = public_files.read(profile.photo)
+        except FileNotFoundError as exc:
+            raise Http404 from exc
+        response = HttpResponse(data, content_type=profile.photo.content_type)
+        response["Cache-Control"] = "private, no-store"
+        response["X-Content-Type-Options"] = "nosniff"
+        return response
+
+    @extend_schema(operation_id="me_photo_delete", responses={200: ProfileSerializer})
+    def delete(self, request: Request) -> Response:
+        profile = profile_services.remove_photo(request.user, actor=Actor.from_request(request))
         return Response(ProfileSerializer(profile).data)
 
 

@@ -33,5 +33,10 @@ export function errorMessages(
   if (error instanceof GcApiError && Object.keys(error.fields).length) {
     return [apiErrorMessage(translate, error), ...Object.values(error.fields).flat()];
   }
+  // Conflit (409) : le message du serveur, dans la langue de la requête, dit ce qui bloque
+  // (« Fichier utilisé (section visuel, affiche) ») ; le libellé générique du code ne le dit pas.
+  if (error instanceof GcApiError && error.status === 409 && error.message) {
+    return [error.message];
+  }
   return [apiErrorMessage(translate, error)];
 }

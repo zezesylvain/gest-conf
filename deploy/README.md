@@ -128,6 +128,21 @@ dossier de l'application et y écrit le chemin du venv (`VENV_ACTIVATE`) : le cr
   `GESTCONF_RETENTION_ENFORCED` est faux ; le résumé (`retention.applied`) indique ce qui
   serait purgé. Ne l'activer qu'après validation des durées par le commanditaire.
 
+### Fichiers déposés (lot L2, E4)
+
+- **Emplacement** : `GESTCONF_FILES_DIR` (défaut : `var/files` dans le dossier de
+  l'application), **hors de `public_html`** : Apache ne les sert jamais, l'API les sert
+  (`/api/v1/public/files/…` pour les fichiers publiés, avec `nosniff` ; aperçu authentifié
+  dans la gestion).
+- **Sauvegarde** : ce dossier fait partie de la sauvegarde quotidienne, **avec** la base (une
+  ligne `PublicFile` sans son fichier répond 404 ; `check_integrity` le signale :
+  `core.public_files_missing`).
+- **Nettoyage** : `cleanup` supprime les fichiers orphelins (écrits puis transaction annulée)
+  de plus de 24 h (`core.orphan_files`, toujours appliqué).
+- **Pillow** : roue binaire vérifiée par V28 (`deploy/check-o2switch.sh`). En cas d'échec, le
+  repli de E4 s'applique sans changement de code (images non redimensionnées, JPEG portant un
+  EXIF refusés) : retirer Pillow de `requirements/base.in`, recompiler, redéployer.
+
 ### Clés de la 2FA (plan L1 §4.10)
 
 - **Génération** : `python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"`.

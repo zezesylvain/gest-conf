@@ -47,6 +47,17 @@ urlpatterns = [
         name="manage-portal-menu-reorder",
     ),
     *_crud("menu", views.MenuItemViewSet, "menu"),
+    *_crud("files", views.PublicFileViewSet, "files"),
+    path(
+        f"{E}/files/<int:item_id>/content",
+        views.PublicFileViewSet.as_view({"get": "content"}),
+        name="manage-portal-files-content",
+    ),
+    path(
+        f"{E}/poster",
+        views.PosterViewSet.as_view({"get": "retrieve", "put": "update"}),
+        name="manage-portal-poster",
+    ),
     path(
         f"{E}/status",
         views.PublicationStatusViewSet.as_view({"get": "retrieve"}),
@@ -60,4 +71,9 @@ urlpatterns = [
     ),
     path("public/portal/menu", views.PublicMenuView.as_view(), name="public-portal-menu"),
     path("public/portal/site", views.PublicSiteView.as_view(), name="public-portal-site"),
+    path(
+        "public/files/<uuid:uuid>/<str:name>",
+        views.PublicFileView.as_view(),
+        name="public-file",
+    ),
 ]

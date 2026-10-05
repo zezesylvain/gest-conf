@@ -15,6 +15,8 @@ import {
   invitationLookup,
   meConsentsCreate,
   meProfile,
+  mePhotoDelete,
+  mePhotoUpdate,
   meProfileUpdate,
   meTotpQr,
   PatchedProfileRequest,
@@ -32,6 +34,15 @@ export class AccountService {
 
   updateProfile(body: PatchedProfileRequest): Promise<Profile> {
     return this.api.invoke(meProfileUpdate, { body });
+  }
+
+  /** Photo du profil (E12) : réencodée par le serveur, publiée seulement avec consentement. */
+  uploadPhoto(file: File): Promise<Profile> {
+    return this.api.invoke(mePhotoUpdate, { body: { file } });
+  }
+
+  deletePhoto(): Promise<Profile> {
+    return this.api.invoke(mePhotoDelete);
   }
 
   /** QR code du secret TOTP en attente (data:image/svg+xml), après `AuthApi.totpSetup()`. */

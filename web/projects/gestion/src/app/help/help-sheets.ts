@@ -147,6 +147,13 @@ export const HELP_SHEETS: readonly HelpSheet[] = [
     callout('info', k, 'template'),
     callout('warning', k, 'refusals'),
   ]),
+  sheet('portal-files', PORTAL_EDITORS, (k) => [
+    text(k('intro')),
+    list(k('documents'), k('images')),
+    steps(k, 'upload', 'publish', 'poster'),
+    callout('warning', k, 'refused'),
+    callout('info', k, 'inUse'),
+  ]),
   sheet('portal-menus', PORTAL_EDITORS, (k) => [
     text(k('intro')),
     steps(k, 'add', 'order'),

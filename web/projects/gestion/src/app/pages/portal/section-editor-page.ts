@@ -22,11 +22,13 @@ import {
   PageHeader,
   PatchedSectionWriteRequest,
   Preview,
+  PublicFile,
   Section,
 } from '@gestconf/shared';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { errorMessages } from '../../core/page-support';
+import { PortalFilesApi } from '../../core/portal-api';
 import { CONTENT_SECTION_TYPES, PortalScreen, SLUG_PATTERN } from './portal-support';
 
 /** Les deux langues côte à côte : chaque champ traduisible a sa colonne FR et EN. */
@@ -80,6 +82,7 @@ export class SectionEditorPage extends PortalScreen implements OnInit {
   readonly sectionId = input.required<string>();
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly files = inject(PortalFilesApi);
   protected readonly section = signal<Section | null>(null);
   protected readonly preview = signal<Preview | null>(null);
   protected readonly languages = ['fr', 'en'] as const;
@@ -104,7 +107,14 @@ export class SectionEditorPage extends PortalScreen implements OnInit {
     limit: [null as number | null, [Validators.min(1), Validators.max(20)]],
     committee: ['scientific'],
     image_position: ['left'],
+    image: [null as number | null],
   });
+  /** Images publiques de l'édition, pour une section « image et texte ». */
+  protected readonly images = signal<PublicFile[]>([]);
+  private readonly imageId = signal<number | null>(null);
+  protected readonly selectedImage = computed(
+    () => this.images().find((image) => image.id === this.imageId()) ?? null,
+  );
 
   protected readonly type = computed(() => this.section()?.section_type ?? null);
   protected readonly hasContent = computed(() => {
@@ -116,6 +126,11 @@ export class SectionEditorPage extends PortalScreen implements OnInit {
     try {
       const section = await this.api.section(this.edition, Number(this.sectionId()));
       this.load(section);
+      if (section.section_type === 'image_text') {
+        this.images.set(await this.files.files(this.edition, 'image'));
+      }
+      this.form.controls.image.valueChanges.subscribe((value) => this.imageId.set(value));
+      this.imageId.set(this.form.controls.image.value);
       if (!this.canWrite()) {
         this.form.disable();
       }
@@ -182,6 +197,7 @@ export class SectionEditorPage extends PortalScreen implements OnInit {
     }
     return {
       ...common,
+      ...(this.type() === 'image_text' ? { image: value.image } : {}),
       body_fr: value.body_fr,
       body_en: value.body_en,
       cta_label_fr: value.cta_label_fr,
@@ -233,6 +249,7 @@ export class SectionEditorPage extends PortalScreen implements OnInit {
       limit: typeof config['limit'] === 'number' ? config['limit'] : null,
       committee: config['committee'] === 'organizing' ? 'organizing' : 'scientific',
       image_position: config['image_position'] === 'right' ? 'right' : 'left',
+      image: section.image ?? null,
     });
   }
 }

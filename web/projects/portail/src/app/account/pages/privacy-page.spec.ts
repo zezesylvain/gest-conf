@@ -42,4 +42,39 @@ describe('PrivacyPage', () => {
     expect(account.setConsent).toHaveBeenCalledWith('directory_listing', true);
     expect(root.textContent).toContain('Retirer mon accord');
   });
+
+  it('photo : second consentement facultatif, indépendant de l’annuaire', async () => {
+    const consents = {
+      states: [
+        ...STATE(true).states,
+        {
+          kind: 'photo_publication',
+          granted: false,
+          text_version: 'v0',
+          recorded_at: null,
+          current_text_version: 'v0',
+        },
+      ],
+      history: [],
+    };
+    const account = {
+      consents: vi.fn().mockResolvedValue(consents),
+      setConsent: vi.fn().mockResolvedValue({}),
+    };
+    TestBed.configureTestingModule({
+      imports: [PrivacyPage],
+      providers: [...provideAccountTesting(), { provide: AccountService, useValue: account }],
+    });
+    await useTestLanguage('fr');
+    const fixture = TestBed.createComponent(PrivacyPage);
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const root: HTMLElement = fixture.nativeElement;
+    expect(root.textContent).toContain("Votre photo n'est pas publiée.");
+    Array.from(root.querySelectorAll('button'))
+      .find((button) => button.textContent?.includes('Publier ma photo'))!
+      .click();
+    await fixture.whenStable();
+    expect(account.setConsent).toHaveBeenCalledWith('photo_publication', true);
+  });
 });

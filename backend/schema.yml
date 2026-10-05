@@ -573,6 +573,186 @@ paths:
       responses:
         '204':
           description: No response body
+  /v1/manage/editions/{edition_id}/portal/files:
+    get:
+      operationId: manage_editions_portal_files_list
+      description: |-
+        Documents et images de l'édition : téléversement (multipart), titres, ordre,
+        publication ; suppression refusée tant que le fichier est utilisé (409 ``in_use``).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: kind
+        schema:
+          type: string
+          enum:
+          - document
+          - image
+      - name: ordering
+        required: false
+        in: query
+        description: Quel champ utiliser pour classer les résultats.
+        schema:
+          type: string
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PublicFile'
+          description: ''
+    post:
+      operationId: manage_editions_portal_files_create
+      description: |-
+        Documents et images de l'édition : téléversement (multipart), titres, ordre,
+        publication ; suppression refusée tant que le fichier est utilisé (409 ``in_use``).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FileUploadRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicFile'
+          description: ''
+  /v1/manage/editions/{edition_id}/portal/files/{item_id}:
+    get:
+      operationId: manage_editions_portal_files_retrieve
+      description: |-
+        Documents et images de l'édition : téléversement (multipart), titres, ordre,
+        publication ; suppression refusée tant que le fichier est utilisé (409 ``in_use``).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicFile'
+          description: ''
+    patch:
+      operationId: manage_editions_portal_files_partial_update
+      description: |-
+        Documents et images de l'édition : téléversement (multipart), titres, ordre,
+        publication ; suppression refusée tant que le fichier est utilisé (409 ``in_use``).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPublicFileRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPublicFileRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicFile'
+          description: ''
+    delete:
+      operationId: manage_editions_portal_files_destroy
+      description: |-
+        Documents et images de l'édition : téléversement (multipart), titres, ordre,
+        publication ; suppression refusée tant que le fichier est utilisé (409 ``in_use``).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /v1/manage/editions/{edition_id}/portal/files/{item_id}/content:
+    get:
+      operationId: manage_portal_files_content
+      description: Aperçu dans la gestion, publié ou non (la lecture de l'édition
+        suffit).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+          description: ''
   /v1/manage/editions/{edition_id}/portal/menu:
     get:
       operationId: manage_editions_portal_menu_list
@@ -962,6 +1142,55 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Page'
+          description: ''
+  /v1/manage/editions/{edition_id}/portal/poster:
+    get:
+      operationId: manage_portal_poster
+      description: '``…/portal/poster`` : affiche de l''édition (image Open Graph,
+        E7).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Poster'
+          description: ''
+    put:
+      operationId: manage_portal_poster_update
+      description: '``…/portal/poster`` : affiche de l''édition (image Open Graph,
+        E7).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PosterRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Poster'
           description: ''
   /v1/manage/editions/{edition_id}/portal/sections:
     get:
@@ -1589,6 +1818,61 @@ paths:
                 type: object
                 additionalProperties: {}
           description: Export JSON.
+  /v1/me/photo:
+    get:
+      operationId: me_photo
+      description: Sa propre photo, même sans consentement de publication (aperçu
+        de l'espace compte).
+      tags:
+      - me
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+          description: ''
+    put:
+      operationId: me_photo_update
+      description: |-
+        ``PUT``/``DELETE /v1/me/photo`` : photo du profil (E12), réencodée sans métadonnées.
+        Publiée sur le portail seulement avec le consentement ``photo_publication``.
+      tags:
+      - me
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PhotoUploadRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+          description: ''
+    delete:
+      operationId: me_photo_delete
+      description: |-
+        ``PUT``/``DELETE /v1/me/photo`` : photo du profil (E12), réencodée sans métadonnées.
+        Publiée sur le portail seulement avec le consentement ``photo_publication``.
+      tags:
+      - me
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+          description: ''
   /v1/me/preferences:
     patch:
       operationId: me_preferences_update
@@ -1674,6 +1958,37 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PublicEdition'
+          description: ''
+  /v1/public/files/{uuid}/{name}:
+    get:
+      operationId: public_file
+      description: |-
+        ``GET /v1/public/files/<uuid>/<nom>`` : fichier public, s'il est publié et dans un
+        contexte public (``services.is_publicly_served``), sinon 404 (rien n'est révélé).
+
+        Jamais servi par Apache (stockage hors racine web). ``nosniff`` ; documents en
+        ``attachment`` ; CSP ``sandbox`` ; cache public court, ETag = empreinte SHA-256.
+      parameters:
+      - in: path
+        name: name
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: uuid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - public
+      responses:
+        '200':
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
           description: ''
   /v1/public/portal/menu:
     get:
@@ -1926,10 +2241,12 @@ components:
       enum:
       - privacy_notice
       - directory_listing
+      - photo_publication
       type: string
       description: |-
         * `privacy_notice` - notice d'information
         * `directory_listing` - annuaire public
+        * `photo_publication` - publication de la photo
     ConsentRecord:
       type: object
       properties:
@@ -2218,6 +2535,26 @@ components:
         * `invalid_transition` - Invalid Transition
         * `edition_incomplete` - Edition Incomplete
         * `account_has_active_duties` - Account Has Active Duties
+    FileUploadRequest:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+          description: 'Document : PDF, DOCX, ODT, ZIP ; image : PNG, JPEG, WebP.'
+        kind:
+          $ref: '#/components/schemas/PortalFileKind'
+        title_fr:
+          type: string
+          default: ''
+          maxLength: 255
+        title_en:
+          type: string
+          default: ''
+          maxLength: 255
+      required:
+      - file
+      - kind
     Health:
       type: object
       properties:
@@ -3184,6 +3521,36 @@ components:
           type: string
           description: Texte brut.
           maxLength: 2000
+        website:
+          type: string
+          maxLength: 300
+        scholar_url:
+          type: string
+          maxLength: 300
+        linkedin_url:
+          type: string
+          maxLength: 300
+    PatchedPublicFileRequest:
+      type: object
+      description: Gestion des fichiers de l'édition (documents et images).
+      properties:
+        title_fr:
+          type: string
+          title: Titre (FR)
+          maxLength: 255
+        title_en:
+          type: string
+          title: Titre (EN)
+          maxLength: 255
+        position:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: Ordre
+        published:
+          type: boolean
+          title: Publié
     PatchedSectionWriteRequest:
       type: object
       description: 'Écriture : les contrôles métier (HTML, liens, configuration) sont
@@ -3244,6 +3611,9 @@ components:
           type: string
           title: Lien du bouton 2
           maxLength: 500
+        image:
+          type: integer
+          nullable: true
         config: {}
         published:
           type: boolean
@@ -3324,6 +3694,15 @@ components:
         is_active:
           type: boolean
           title: Actif
+    PhotoUploadRequest:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+          description: PNG, JPEG ou WebP, 5 Mio au plus.
+      required:
+      - file
     PlacedSection:
       type: object
       properties:
@@ -3371,6 +3750,38 @@ components:
       required:
       - position
       - section
+    PortalFileKind:
+      enum:
+      - document
+      - image
+      type: string
+      description: |-
+        * `document` - document
+        * `image` - image
+    Poster:
+      type: object
+      properties:
+        file:
+          type: integer
+          nullable: true
+          description: Image de l'édition, ou null.
+        poster:
+          allOf:
+          - $ref: '#/components/schemas/PublicFileRef'
+          readOnly: true
+          nullable: true
+      required:
+      - file
+      - poster
+    PosterRequest:
+      type: object
+      properties:
+        file:
+          type: integer
+          nullable: true
+          description: Image de l'édition, ou null.
+      required:
+      - file
     Preview:
       type: object
       properties:
@@ -3421,11 +3832,27 @@ components:
           type: string
           description: Texte brut.
           maxLength: 2000
+        website:
+          type: string
+          maxLength: 300
+        scholar_url:
+          type: string
+          maxLength: 300
+        linkedin_url:
+          type: string
+          maxLength: 300
+        photo_url:
+          type: string
+          nullable: true
+          readOnly: true
+          description: Adresse de la photo (publique seulement avec le consentement
+            « photo »).
         is_complete:
           type: boolean
           readOnly: true
       required:
       - is_complete
+      - photo_url
     ProfileTitle:
       enum:
       - dr
@@ -3547,6 +3974,157 @@ components:
       - tracks
       - venue
       - year
+    PublicFile:
+      type: object
+      description: Gestion des fichiers de l'édition (documents et images).
+      properties:
+        preview_url:
+          type: string
+          readOnly: true
+          description: Aperçu dans la gestion (authentifié), publié ou non.
+        id:
+          type: integer
+          readOnly: true
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+          title: Identifiant public
+        kind:
+          allOf:
+          - $ref: '#/components/schemas/PublicFileKind'
+          readOnly: true
+          title: Nature
+        original_name:
+          type: string
+          readOnly: true
+          title: Nom d'origine
+        url:
+          type: string
+          readOnly: true
+        title_fr:
+          type: string
+          title: Titre (FR)
+          maxLength: 255
+        title_en:
+          type: string
+          title: Titre (EN)
+          maxLength: 255
+        extension:
+          type: string
+          readOnly: true
+        content_type:
+          type: string
+          readOnly: true
+          title: Type de contenu
+        size:
+          type: integer
+          readOnly: true
+          title: Taille (octets)
+        width:
+          type: integer
+          readOnly: true
+          nullable: true
+          title: Largeur
+        height:
+          type: integer
+          readOnly: true
+          nullable: true
+          title: Hauteur
+        position:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: Ordre
+        published:
+          type: boolean
+          title: Publié
+        uses:
+          type: array
+          items:
+            type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - content_type
+      - created_at
+      - extension
+      - height
+      - id
+      - kind
+      - original_name
+      - preview_url
+      - size
+      - url
+      - uses
+      - uuid
+      - width
+    PublicFileKind:
+      enum:
+      - document
+      - image
+      - photo
+      type: string
+      description: |-
+        * `document` - document
+        * `image` - image
+        * `photo` - photo de profil
+    PublicFileRef:
+      type: object
+      description: 'Fichier public tel que le voient les pages : adresse, dimensions,
+        titre.'
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+          title: Identifiant public
+        url:
+          type: string
+          readOnly: true
+        title_fr:
+          type: string
+          readOnly: true
+          title: Titre (FR)
+        title_en:
+          type: string
+          readOnly: true
+          title: Titre (EN)
+        extension:
+          type: string
+          readOnly: true
+        content_type:
+          type: string
+          readOnly: true
+          title: Type de contenu
+        size:
+          type: integer
+          readOnly: true
+          title: Taille (octets)
+        width:
+          type: integer
+          readOnly: true
+          nullable: true
+          title: Largeur
+        height:
+          type: integer
+          readOnly: true
+          nullable: true
+          title: Hauteur
+      required:
+      - content_type
+      - extension
+      - height
+      - size
+      - title_en
+      - title_fr
+      - url
+      - uuid
+      - width
     PublicMenuItem:
       type: object
       properties:
@@ -3691,6 +4269,11 @@ components:
           type: string
           readOnly: true
           title: Lien du bouton 2
+        image:
+          allOf:
+          - $ref: '#/components/schemas/PublicFileRef'
+          nullable: true
+          readOnly: true
         config:
           readOnly: true
           title: Configuration
@@ -3710,6 +4293,7 @@ components:
       - cta_label_fr
       - cta_url
       - data
+      - image
       - section_type
       - subtitle_en
       - subtitle_fr
@@ -3720,11 +4304,14 @@ components:
       properties:
         edition:
           $ref: '#/components/schemas/PublicEdition'
+        poster:
+          allOf:
+          - $ref: '#/components/schemas/PublicFileRef'
+          nullable: true
         documents:
           type: array
           items:
-            type: object
-            additionalProperties: {}
+            $ref: '#/components/schemas/PublicFileRef'
         committees:
           type: object
           additionalProperties:
@@ -3736,6 +4323,7 @@ components:
       - committees
       - documents
       - edition
+      - poster
     PublicationStatus:
       type: object
       properties:
@@ -3862,11 +4450,19 @@ components:
           type: string
           title: Lien du bouton 2
           maxLength: 500
+        image:
+          type: integer
+          nullable: true
         config:
           title: Configuration
         published:
           type: boolean
           title: Publiée
+        image_ref:
+          allOf:
+          - $ref: '#/components/schemas/PublicFileRef'
+          readOnly: true
+          nullable: true
         is_data:
           type: boolean
           readOnly: true
@@ -3882,6 +4478,7 @@ components:
       required:
       - code
       - id
+      - image_ref
       - is_data
       - pages
       - section_type
@@ -3989,6 +4586,9 @@ components:
           type: string
           title: Lien du bouton 2
           maxLength: 500
+        image:
+          type: integer
+          nullable: true
         config: {}
         published:
           type: boolean

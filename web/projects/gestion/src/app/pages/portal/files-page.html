@@ -1,0 +1,194 @@
+<gc-page-header
+  [heading]="'gestion.portal.files.title' | translate"
+  [lead]="'gestion.portal.files.lead' | translate"
+/>
+<gestion-portal-status-banner [editionId]="editionId()" />
+@if (!canWrite()) {
+  <p class="notice">{{ 'gestion.portal.readOnly' | translate }}</p>
+}
+<div aria-live="polite">
+  @if (status()) {
+    <p class="notice" role="status">{{ status() }}</p>
+  }
+</div>
+<gc-error-summary [messages]="errors()" />
+
+@if (!loading()) {
+  @if (canWrite()) {
+    <section class="card" aria-labelledby="upload-title">
+      <h2 id="upload-title">{{ 'gestion.portal.files.upload' | translate }}</h2>
+      <p class="muted">{{ 'gestion.portal.files.uploadLead' | translate }}</p>
+      <form [formGroup]="uploadForm" (ngSubmit)="upload()" novalidate>
+        <div class="grid-2">
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'gestion.portal.files.kind' | translate }}</mat-label>
+            <mat-select formControlName="kind">
+              @for (kind of kinds; track kind) {
+                <mat-option [value]="kind">{{
+                  'gestion.portal.files.kinds.' + kind | translate
+                }}</mat-option>
+              }
+            </mat-select>
+            <mat-hint>{{
+              'gestion.portal.files.hints.' + uploadForm.controls.kind.value | translate
+            }}</mat-hint>
+          </mat-form-field>
+          <label class="file-input">
+            <span>{{ 'gestion.portal.files.file' | translate }}</span>
+            <input #fileInput type="file" [accept]="accept()" (change)="chooseFile($event)" />
+          </label>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'gestion.portal.fields.titleFr' | translate }}</mat-label>
+            <input matInput formControlName="title_fr" lang="fr" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'gestion.portal.fields.titleEn' | translate }}</mat-label>
+            <input matInput formControlName="title_en" lang="en" />
+          </mat-form-field>
+        </div>
+        <div class="actions">
+          <button mat-flat-button type="submit" [disabled]="busy()">
+            {{ 'gestion.portal.files.send' | translate }}
+          </button>
+        </div>
+      </form>
+    </section>
+  }
+
+  @for (kind of kinds; track kind) {
+    <section class="card" [attr.aria-labelledby]="'files-' + kind">
+      <h2 [id]="'files-' + kind">{{ 'gestion.portal.files.groups.' + kind | translate }}</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              @if (kind === 'image') {
+                <th scope="col">{{ 'gestion.portal.files.preview' | translate }}</th>
+              }
+              <th scope="col">{{ 'gestion.portal.fields.titleFr' | translate }}</th>
+              <th scope="col">{{ 'gestion.portal.files.details' | translate }}</th>
+              <th scope="col">{{ 'gestion.portal.fields.published' | translate }}</th>
+              <th scope="col">{{ 'gestion.portal.files.usedBy' | translate }}</th>
+              @if (canWrite()) {
+                <th scope="col">
+                  <span class="visually-hidden">{{ 'gestion.settings.actions' | translate }}</span>
+                </th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (
+              item of byKind()[kind];
+              track item.id;
+              let i = $index, first = $first, last = $last
+            ) {
+              <tr>
+                @if (kind === 'image') {
+                  <td><img class="thumb" [src]="item.preview_url" alt="" /></td>
+                }
+                <td>
+                  @if (editing() === item.id) {
+                    <form [formGroup]="editForm" (ngSubmit)="saveEdit(item)" novalidate>
+                      <mat-form-field appearance="outline">
+                        <mat-label>{{ 'gestion.portal.fields.titleFr' | translate }}</mat-label>
+                        <input matInput formControlName="title_fr" lang="fr" />
+                      </mat-form-field>
+                      <mat-form-field appearance="outline">
+                        <mat-label>{{ 'gestion.portal.fields.titleEn' | translate }}</mat-label>
+                        <input matInput formControlName="title_en" lang="en" />
+                      </mat-form-field>
+                      <mat-checkbox formControlName="published">{{
+                        'gestion.portal.fields.published' | translate
+                      }}</mat-checkbox>
+                      <div class="actions">
+                        <button mat-flat-button type="submit" [disabled]="busy()">
+                          {{ 'gestion.settings.save' | translate }}
+                        </button>
+                        <button mat-button type="button" (click)="editing.set(null)">
+                          {{ 'shared.reauth.cancel' | translate }}
+                        </button>
+                      </div>
+                    </form>
+                  } @else {
+                    <a [href]="item.preview_url" target="_blank" rel="noopener">{{
+                      item.title_fr || item.original_name
+                    }}</a>
+                  }
+                </td>
+                <td>
+                  <code>{{ item.extension }}</code> · {{ size(item.size) }}
+                  @if (item.width) {
+                    · {{ item.width }}×{{ item.height }}
+                  }
+                </td>
+                <td>
+                  {{
+                    (item.published ? 'gestion.settings.yes' : 'gestion.settings.no') | translate
+                  }}
+                </td>
+                <td>
+                  @for (use of item.uses; track use; let lastUse = $last) {
+                    {{ use }}
+                    @if (!lastUse) {
+                      ,
+                    }
+                  } @empty {
+                    <span class="muted">—</span>
+                  }
+                </td>
+                @if (canWrite()) {
+                  <td class="actions">
+                    <button
+                      mat-button
+                      type="button"
+                      (click)="move(kind, i, -1)"
+                      [disabled]="first || busy()"
+                    >
+                      {{ 'gestion.portal.composer.up' | translate }}
+                    </button>
+                    <button
+                      mat-button
+                      type="button"
+                      (click)="move(kind, i, 1)"
+                      [disabled]="last || busy()"
+                    >
+                      {{ 'gestion.portal.composer.down' | translate }}
+                    </button>
+                    <button mat-button type="button" (click)="startEdit(item)">
+                      {{ 'gestion.settings.edit' | translate }}
+                    </button>
+                    <button mat-button type="button" (click)="remove(item)" [disabled]="busy()">
+                      {{ 'gestion.settings.delete' | translate }}
+                    </button>
+                  </td>
+                }
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="6" class="muted">{{ 'gestion.settings.empty' | translate }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+
+  <section class="card" aria-labelledby="poster-title">
+    <h2 id="poster-title">{{ 'gestion.portal.files.posterTitle' | translate }}</h2>
+    <p class="muted">{{ 'gestion.portal.files.posterLead' | translate }}</p>
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'gestion.portal.files.poster' | translate }}</mat-label>
+      <mat-select
+        [value]="poster()"
+        (valueChange)="savePoster($event)"
+        [disabled]="!canWrite() || busy()"
+      >
+        <mat-option [value]="null">{{ 'gestion.portal.files.noPoster' | translate }}</mat-option>
+        @for (item of byKind().image; track item.id) {
+          <mat-option [value]="item.id">{{ item.title_fr || item.original_name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </section>
+}

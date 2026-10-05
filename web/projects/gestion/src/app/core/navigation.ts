@@ -134,6 +134,14 @@ export const SCREENS: readonly ScreenDef[] = [
     capability: 'edition.read',
   },
   {
+    key: 'portalFiles',
+    path: 'portail/documents',
+    label: 'gestion.nav.portalFiles',
+    help: 'portal-files',
+    group: 'portal',
+    capability: 'edition.read',
+  },
+  {
     key: 'portalMenus',
     path: 'portail/menus',
     label: 'gestion.nav.portalMenus',

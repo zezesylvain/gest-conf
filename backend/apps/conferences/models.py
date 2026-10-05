@@ -94,6 +94,16 @@ class Edition(TimeStampedModel):
     )
     published_at = models.DateTimeField(_("publiée le"), null=True, blank=True)
     archived_at = models.DateTimeField(_("archivée le"), null=True, blank=True)
+    # Affiche (lot L2, E7) : image Open Graph et en-tête du portail ; choisie dans les images
+    # publiques de l'édition par ``portal.services.set_poster``.
+    poster = models.ForeignKey(
+        "core.PublicFile",
+        verbose_name=_("affiche"),
+        null=True,
+        blank=True,
+        on_delete=models.RESTRICT,
+        related_name="+",
+    )
 
     # Champs de configuration journalisés avant/après (RG-17, B14).
     AUDIT_FIELDS: ClassVar[tuple[str, ...]] = (

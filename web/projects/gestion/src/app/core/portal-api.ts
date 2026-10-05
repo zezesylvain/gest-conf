@@ -15,7 +15,13 @@ import {
   manageEditionsPortalSectionsList,
   manageEditionsPortalSectionsPartialUpdate,
   manageEditionsPortalSectionsRetrieve,
+  manageEditionsPortalFilesCreate,
+  manageEditionsPortalFilesDestroy,
+  manageEditionsPortalFilesList,
+  manageEditionsPortalFilesPartialUpdate$Json,
   managePortalMenuReorder,
+  managePortalPoster,
+  managePortalPosterUpdate,
   managePortalPagesAttach,
   managePortalPagesDetach,
   managePortalPagesReorder,
@@ -28,6 +34,10 @@ import {
   PageRequest,
   PatchedMenuItemRequest,
   PatchedPageRequest,
+  PatchedPublicFileRequest,
+  PortalFileKind,
+  Poster,
+  PublicFile,
   PatchedSectionWriteRequest,
   Preview,
   PublicationStatus,
@@ -169,6 +179,56 @@ export class PortalApi {
       edition_id: editionId,
       body: { location, items },
     });
+  }
+}
+
+/** Fichiers publics de l'édition (L2.4) : documents et images, affiche. */
+@Injectable({ providedIn: 'root' })
+export class PortalFilesApi {
+  private readonly api = inject(Api);
+
+  files(editionId: number, kind?: PortalFileKind): Promise<PublicFile[]> {
+    return this.api.invoke(manageEditionsPortalFilesList, {
+      edition_id: editionId,
+      ...(kind ? { kind } : {}),
+    });
+  }
+
+  /** Téléversement (multipart) : le serveur vérifie le type par le contenu. */
+  upload(
+    editionId: number,
+    file: File,
+    kind: PortalFileKind,
+    titleFr = '',
+    titleEn = '',
+  ): Promise<PublicFile> {
+    return this.api.invoke(manageEditionsPortalFilesCreate, {
+      edition_id: editionId,
+      body: { file, kind, title_fr: titleFr, title_en: titleEn },
+    });
+  }
+
+  update(editionId: number, id: number, body: PatchedPublicFileRequest): Promise<PublicFile> {
+    return this.api.invoke(manageEditionsPortalFilesPartialUpdate$Json, {
+      edition_id: editionId,
+      item_id: id,
+      body,
+    });
+  }
+
+  remove(editionId: number, id: number): Promise<void> {
+    return this.api.invoke(manageEditionsPortalFilesDestroy, {
+      edition_id: editionId,
+      item_id: id,
+    });
+  }
+
+  poster(editionId: number): Promise<Poster> {
+    return this.api.invoke(managePortalPoster, { edition_id: editionId });
+  }
+
+  setPoster(editionId: number, file: number | null): Promise<Poster> {
+    return this.api.invoke(managePortalPosterUpdate, { edition_id: editionId, body: { file } });
   }
 }
 
