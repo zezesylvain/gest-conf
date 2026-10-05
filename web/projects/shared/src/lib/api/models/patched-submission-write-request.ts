@@ -16,7 +16,15 @@ export interface PatchedSubmissionWriteRequest {
 };
   keywords?: Array<string>;
   language?: string;
-  submission_type?: number | null;
+
+  /**
+   * Code du type de communication (édition de la soumission).
+   */
+  submission_type?: string | null;
   title?: string;
-  track?: number | null;
+
+  /**
+   * Code de la thématique (édition de la soumission).
+   */
+  track?: string | null;
 }

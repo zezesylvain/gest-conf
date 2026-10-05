@@ -52,6 +52,9 @@ class SubmissionViewSet(GenericViewSet):
     serializer_class = SubmissionSerializer
     queryset = Submission.objects.none()
     lookup_url_kwarg = "submission_id"
+    # Liste courte (ses propres soumissions) : ni pagination, ni tri ou filtre génériques.
+    pagination_class = None
+    filter_backends = ()
 
     def get_queryset(self):
         if getattr(self, "swagger_fake_view", False):  # génération du schéma
@@ -118,7 +121,9 @@ class SubmissionViewSet(GenericViewSet):
     )
     def partial_update(self, request: Request, submission_id: int) -> Response:
         submission = self._submission(submission_id)
-        serializer = SubmissionWriteSerializer(data=request.data, partial=True)
+        serializer = SubmissionWriteSerializer(
+            data=request.data, partial=True, context={"edition": submission.edition}
+        )
         serializer.is_valid(raise_exception=True)
         services.update_submission(
             submission,

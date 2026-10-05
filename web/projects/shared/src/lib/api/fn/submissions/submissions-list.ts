@@ -7,34 +7,16 @@ import { filter, map } from 'rxjs/operators';
 import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
-import { PaginatedSubmissionList } from '../../models/paginated-submission-list';
+import { Submission } from '../../models/submission';
 
 export interface SubmissionsList$Params {
   edition?: number;
-
-/**
- * Quel champ utiliser pour classer les résultats.
- */
-  ordering?: string;
-
-/**
- * Un numéro de page de l'ensemble des résultats.
- */
-  page?: number;
-
-/**
- * Nombre de résultats à retourner par page.
- */
-  page_size?: number;
 }
 
-export function submissionsList(http: HttpClient, rootUrl: string, params?: SubmissionsList$Params, context?: HttpContext): Observable<StrictHttpResponse<PaginatedSubmissionList>> {
+export function submissionsList(http: HttpClient, rootUrl: string, params?: SubmissionsList$Params, context?: HttpContext): Observable<StrictHttpResponse<Array<Submission>>> {
   const rb = new RequestBuilder(rootUrl, submissionsList.PATH, 'get');
   if (params) {
     rb.query('edition', params.edition, {});
-    rb.query('ordering', params.ordering, {});
-    rb.query('page', params.page, {});
-    rb.query('page_size', params.page_size, {});
   }
 
   return http.request(
@@ -42,7 +24,7 @@ export function submissionsList(http: HttpClient, rootUrl: string, params?: Subm
   ).pipe(
     filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
     map((r: HttpResponse<any>) => {
-      return r as StrictHttpResponse<PaginatedSubmissionList>;
+      return r as StrictHttpResponse<Array<Submission>>;
     })
   );
 }

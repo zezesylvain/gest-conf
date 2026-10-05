@@ -35,15 +35,15 @@ export interface Submission {
   edition_code: string;
   file: SubmissionFile | null;
   id: number;
-  keywords: any;
+  keywords: Array<string>;
   language: string;
   reference: string | null;
   revision: number;
   status: SubmissionStatus;
-  submission_type: number | null;
+  submission_type: string | null;
   submitted_at: string | null;
   title: string;
-  track: number | null;
+  track: string | null;
   updated_at: string;
   withdraw_reason: string;
   withdrawn_at: string | null;

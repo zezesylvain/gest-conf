@@ -1,0 +1,88 @@
+:host {
+  display: block;
+}
+form {
+  display: grid;
+  gap: 0.5rem;
+  max-width: 48rem;
+}
+.steps ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0;
+  margin: 1rem 0 1.5rem;
+  list-style: none;
+}
+.step {
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--gc-border);
+  border-radius: 0.25rem;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.step.current {
+  border-color: var(--gc-primary);
+  color: var(--gc-primary);
+  font-weight: 700;
+}
+.authors {
+  display: grid;
+  gap: 1rem;
+  padding: 0;
+  list-style: none;
+}
+fieldset {
+  border: 1px solid var(--gc-border);
+  border-radius: 0.25rem;
+  padding: 0.75rem;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  gap: 0 0.75rem;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+.hint,
+.save-state {
+  color: var(--gc-muted);
+}
+.warning {
+  border-left: 4px solid var(--gc-warning, #b26a00);
+  padding-left: 0.75rem;
+}
+.file {
+  display: grid;
+  gap: 0.25rem;
+}
+.notice {
+  border-left: 4px solid var(--gc-primary);
+  padding-left: 0.75rem;
+}
+.withdraw {
+  display: grid;
+  gap: 0.5rem;
+  max-width: 48rem;
+  margin-top: 1.5rem;
+}
+.withdraw button {
+  justify-self: start;
+}
+.visually-hidden-heading {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.timeline {
+  margin-top: 2rem;
+}

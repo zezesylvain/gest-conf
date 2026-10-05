@@ -16,7 +16,7 @@
     "lint": "ng lint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "api:generate": "ng-openapi-gen -c ng-openapi-gen.json",
+    "api:generate": "ng-openapi-gen -c ng-openapi-gen.json && node scripts/api-barrel.mjs projects/shared/src/lib/api/index.ts",
     "e2e": "playwright test -c e2e/playwright.config.ts"
   },
   "dependencies": {

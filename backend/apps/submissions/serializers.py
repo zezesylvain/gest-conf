@@ -93,6 +93,11 @@ class SubmissionSerializer(serializers.ModelSerializer):
     """Vue de l'auteur sur **sa** soumission."""
 
     edition_code = serializers.CharField(source="edition.code", read_only=True)
+    track = serializers.SlugRelatedField(slug_field="code", read_only=True, allow_null=True)
+    submission_type = serializers.SlugRelatedField(
+        slug_field="code", read_only=True, allow_null=True
+    )
+    keywords = serializers.ListField(child=serializers.CharField(), read_only=True)
     double_blind = serializers.BooleanField(
         source="edition.double_blind",
         read_only=True,
@@ -207,17 +212,41 @@ class SubmissionWriteSerializer(serializers.Serializer):
         max_length=20,
     )
     language = serializers.CharField(max_length=2, required=False, allow_blank=True)
-    track = serializers.PrimaryKeyRelatedField(
-        queryset=Track.objects.all(), required=False, allow_null=True
+    track = serializers.CharField(
+        max_length=32,
+        required=False,
+        allow_null=True,
+        help_text="Code de la thématique (édition de la soumission).",
     )
-    submission_type = serializers.PrimaryKeyRelatedField(
-        queryset=SubmissionType.objects.all(), required=False, allow_null=True
+    submission_type = serializers.CharField(
+        max_length=32,
+        required=False,
+        allow_null=True,
+        help_text="Code du type de communication (édition de la soumission).",
     )
     declarations = serializers.DictField(
         child=serializers.BooleanField(),
         required=False,
         help_text="Code → accepté ; la version courante du texte est enregistrée.",
     )
+
+    def _resolve(self, model, code: str | None, field: str):
+        """Code → objet de l'édition de la soumission (contexte ``edition``)."""
+        if code in (None, ""):
+            return None
+        found = model.objects.filter(edition=self.context["edition"], code=code).first()
+        if found is None:
+            raise serializers.ValidationError({field: ["Code inconnu pour cette édition."]})
+        return found
+
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
+        if "track" in attrs:
+            attrs["track"] = self._resolve(Track, attrs["track"], "track")
+        if "submission_type" in attrs:
+            attrs["submission_type"] = self._resolve(
+                SubmissionType, attrs["submission_type"], "submission_type"
+            )
+        return attrs
 
 
 class SubmissionCheckSerializer(serializers.Serializer):

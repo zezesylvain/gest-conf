@@ -2071,24 +2071,6 @@ paths:
         name: edition
         schema:
           type: integer
-      - name: ordering
-        required: false
-        in: query
-        description: Quel champ utiliser pour classer les résultats.
-        schema:
-          type: string
-      - name: page
-        required: false
-        in: query
-        description: Un numéro de page de l'ensemble des résultats.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Nombre de résultats à retourner par page.
-        schema:
-          type: integer
       tags:
       - submissions
       security:
@@ -2098,7 +2080,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedSubmissionList'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Submission'
           description: ''
     post:
       operationId: submissions_create
@@ -3743,29 +3727,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/InvitationWithEmail'
-    PaginatedSubmissionList:
-      type: object
-      required:
-      - count
-      - results
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Submission'
     PatchedConfidentialityRequest:
       type: object
       description: Double aveugle et nombre de relecteurs (gestion, §6.1).
@@ -4151,11 +4112,17 @@ components:
           type: string
           maxLength: 2
         track:
-          type: integer
+          type: string
           nullable: true
+          minLength: 1
+          description: Code de la thématique (édition de la soumission).
+          maxLength: 32
         submission_type:
-          type: integer
+          type: string
           nullable: true
+          minLength: 1
+          description: Code du type de communication (édition de la soumission).
+          maxLength: 32
         declarations:
           type: object
           additionalProperties:
@@ -5359,22 +5326,22 @@ components:
           readOnly: true
           title: Résumé
         keywords:
+          type: array
+          items:
+            type: string
           readOnly: true
-          title: Mots-clés
         language:
           type: string
           readOnly: true
           title: Langue
         track:
-          type: integer
+          type: string
           readOnly: true
           nullable: true
-          title: Thématique
         submission_type:
-          type: integer
+          type: string
           readOnly: true
           nullable: true
-          title: Type de communication
         revision:
           type: integer
           readOnly: true

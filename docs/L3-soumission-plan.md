@@ -414,3 +414,77 @@ avec les décisions. Le méta-test l'admet explicitement.
 
 **Reporté en L3.4** (gestion) : écrans de saisie de `file_policy`, `max_file_mb`,
 `submission_languages` et du gel RG-19 ; API de gestion des dérogations.
+
+## 14. Bilan de L3.3 (5 octobre 2026)
+
+**Espace auteur du portail** (`/compte/soumissions`, rendu navigateur, `authGuard`) :
+
+- **« Mes soumissions »** :
+  - liste : référence (ou « Brouillon »), titre, état traduit, échéance de modification ;
+  - « Nouvelle soumission » si l'appel de l'édition courante est ouvert (dates clés
+    publiques ; le serveur revérifie, RG-02) ;
+  - profil incomplet : lien vers le profil et bouton désactivé (le serveur refuse aussi,
+    409 `profile_incomplete`) ;
+  - lien depuis l'accueil du compte et la navigation du compte.
+- **Assistant en 5 étapes** (informations, auteurs, fichier, déclarations, récapitulatif) :
+  - **sauvegarde automatique** des informations et des déclarations (anti-rebond de
+    1,2 s, indicateur « Enregistré à… » à l'heure de l'édition) ; auteurs et fichier par
+    une action explicite ;
+  - compteur de mots du résumé, même règle que le serveur (apostrophes et traits d'union
+    internes) ;
+  - écritures **sérialisées** : chacune part avec la révision rendue par la précédente
+    (`If-Match`) ; un 412 affiche « modifiée ailleurs » et propose de recharger ;
+  - fichier : politique du type, avertissement en double aveugle, lien vers l'endpoint
+    authentifié, versions, « métadonnées supprimées » ;
+  - récapitulatif : manques lus sur `check` (RG-01) ; « Soumettre » désactivé tant que la
+    soumission est incomplète ; suppression d'un brouillon ;
+  - après la soumission : référence annoncée, lecture seule si l'appel est clos, retrait
+    motivé, historique des états et nombre de révisions.
+- **Choix de l'API** (ajustés à l'étape) :
+  - thématique et type de communication échangés par leur **code** (l'édition publique
+    n'expose pas d'identifiants) ;
+  - mots-clés typés en liste ;
+  - liste des soumissions non paginée : quelques soumissions par auteur.
+- **Traductions** : clés `portail.submissions.*` (FR et EN), 16 états de l'étude (M6) et
+  textes provisoires des 4 déclarations (Q14).
+
+**Bundle initial du portail : 367,7 kB** (371,4 kB à la fin de L2 ; avertissement à
+365 kB, erreur à 380 kB) :
+
+- **Cause** : l'index du client généré utilise des réexportations nommées. Avec elles,
+  esbuild range dans le bundle initial **toute fonction d'API utilisée**, même par une seule
+  page chargée à la demande. L'étape l'aurait porté à 375,3 kB.
+- **Vérification** : sans l'index, la fonction suit sa page. Avec des réexportations
+  « étoile », chaque fonction suit les pages qui l'utilisent.
+- **Correction** : `scripts/api-barrel.mjs` réécrit l'index en `export * from …` à chaque
+  `npm run api:generate`. Le script a 3 tests. Le client n'est pas édité à la main et le
+  contrôle « client obsolète » de la CI reste valable.
+- **Effet** : le portail gagne aussi les fonctions déjà utilisées par les pages du compte
+  (L1, L2). La gestion est à 359,9 kB.
+- **Pages groupées** : les deux pages auteur forment un seul morceau chargé à la demande.
+
+**Défauts trouvés dans le navigateur et corrigés** :
+
+- **Bouton « Enregistrer les auteurs » sans effet** : le formulaire n'avait pas de
+  `[formGroup]`, donc `ngSubmit` n'était jamais émis. Les tests unitaires appelaient la
+  méthode directement ; un test clique désormais sur le bouton.
+- **« Vous pouvez la soumettre »** restait affiché après la soumission.
+- **Liste à 375 px** : débordement horizontal de 76 px. Le tableau défile maintenant dans
+  son cadre (région focalisable).
+- **Formulaire de retrait** mal aligné.
+
+**Vérifications** :
+
+- **Front** : portail 104 tests (20 nouveaux : service, liste, assistant), gestion 74,
+  shared 76, scripts 11 ; lint, format, build.
+- **Backend** : 1 396 tests sous SQLite, 1 403 sous MariaDB ; `ruff` ; schéma régénéré sur
+  MariaDB et identique.
+- **Parcours complet dans Chromium**, base locale avec un appel ouvert :
+  - brouillon, sauvegarde automatique, compteur de mots ;
+  - auteur prérempli, co-auteur ajouté ;
+  - faux PDF refusé, vrai PDF déposé puis téléchargé (`attachment`), métadonnées
+    supprimées ;
+  - manques RG-01 affichés, puis déclarations enregistrées automatiquement ;
+  - **conflit entre deux onglets** (412) puis rechargement ;
+  - soumission (référence GC27-0001), liste, retrait motivé, historique, lecture seule ;
+  - 375 px sans débordement à chaque étape ; aucune erreur dans la console.

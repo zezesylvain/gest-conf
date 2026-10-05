@@ -1,0 +1,354 @@
+<gc-page-header
+  [heading]="
+    submission()?.reference
+      ? ('portail.submissions.edit.titleWithReference'
+        | translate: { reference: submission()?.reference })
+      : ('portail.submissions.edit.title' | translate)
+  "
+  [lead]="'portail.submissions.edit.lead' | translate"
+/>
+<p>
+  <a routerLink="/compte/soumissions">{{ 'portail.submissions.edit.back' | translate }}</a>
+</p>
+
+<gc-error-summary [messages]="errors()" />
+<div aria-live="polite">
+  @if (notice()) {
+    <p class="notice" role="status">{{ notice() }}</p>
+  }
+</div>
+
+@if (loading()) {
+  <p role="status">{{ 'portail.account.home.loading' | translate }}</p>
+} @else if (submission(); as current) {
+  <section class="status" aria-labelledby="status-title">
+    <h2 id="status-title" class="visually-hidden-heading">
+      {{ 'portail.submissions.fields.status' | translate }}
+    </h2>
+    <p>
+      <strong>{{ 'portail.submissions.status.' + current.status | translate }}</strong>
+      @if (current.can_edit && current.deadline) {
+        ·
+        {{ 'portail.submissions.edit.editableUntil' | translate: { date: when(current.deadline) } }}
+      } @else if (!current.can_edit) {
+        · {{ 'portail.submissions.edit.readOnly' | translate }}
+      }
+    </p>
+    <p class="save-state" aria-live="polite">
+      @switch (saveState()) {
+        @case ('saving') {
+          {{ 'portail.submissions.save.saving' | translate }}
+        }
+        @case ('saved') {
+          {{ 'portail.submissions.save.saved' | translate: { time: savedAt() } }}
+        }
+        @case ('conflict') {
+          {{ 'portail.submissions.save.conflict' | translate }}
+          <button mat-stroked-button type="button" (click)="reload()">
+            {{ 'portail.submissions.save.reload' | translate }}
+          </button>
+        }
+        @case ('error') {
+          {{ 'portail.submissions.save.error' | translate }}
+        }
+      }
+    </p>
+  </section>
+
+  <nav class="steps" [attr.aria-label]="'portail.submissions.steps.label' | translate">
+    <ol>
+      @for (name of steps; track name; let index = $index) {
+        <li>
+          <button
+            type="button"
+            class="step"
+            [class.current]="step() === name"
+            [attr.aria-current]="step() === name ? 'step' : null"
+            (click)="step.set(name)"
+          >
+            {{ index + 1 }}. {{ 'portail.submissions.steps.' + name | translate }}
+          </button>
+        </li>
+      }
+    </ol>
+  </nav>
+
+  @switch (step()) {
+    @case ('info') {
+      <form [formGroup]="info" (ngSubmit)="autosave()" novalidate>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'portail.submissions.fields.title' | translate }}</mat-label>
+          <input matInput formControlName="title" maxlength="300" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'portail.submissions.fields.abstract' | translate }}</mat-label>
+          <textarea matInput formControlName="abstract" rows="10"></textarea>
+          <mat-hint>
+            {{
+              'portail.submissions.info.words'
+                | translate: { words: words(), max: selectedType()?.abstract_max_words ?? '—' }
+            }}
+          </mat-hint>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'portail.submissions.fields.keywords' | translate }}</mat-label>
+          <input matInput formControlName="keywords" />
+          <mat-hint>{{ 'portail.submissions.info.keywordsHint' | translate }}</mat-hint>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'portail.submissions.fields.track' | translate }}</mat-label>
+          <mat-select formControlName="track">
+            <mat-option value="">—</mat-option>
+            @for (track of edition()?.tracks ?? []; track track.code) {
+              <mat-option [value]="track.code">{{ localized(track, 'name') }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'portail.submissions.fields.type' | translate }}</mat-label>
+          <mat-select formControlName="submission_type">
+            <mat-option value="">—</mat-option>
+            @for (type of edition()?.submission_types ?? []; track type.code) {
+              <mat-option [value]="type.code">{{ localized(type, 'label') }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'portail.submissions.fields.language' | translate }}</mat-label>
+          <mat-select formControlName="language">
+            <mat-option value="">—</mat-option>
+            @for (code of edition()?.submission_languages ?? []; track code) {
+              <mat-option [value]="code">{{ 'shared.language.' + code | translate }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <p class="hint">{{ 'portail.submissions.info.autosave' | translate }}</p>
+      </form>
+    }
+    @case ('authors') {
+      <p class="hint">{{ 'portail.submissions.authors.lead' | translate }}</p>
+      <form [formGroup]="authorsForm" (ngSubmit)="saveAuthors()" novalidate>
+        <ol class="authors" formArrayName="authors">
+          @for (group of authors.controls; track group; let index = $index) {
+            <li [formGroupName]="index">
+              <fieldset>
+                <legend>
+                  {{ 'portail.submissions.authors.author' | translate: { n: index + 1 } }}
+                </legend>
+                <div class="grid">
+                  <mat-form-field appearance="outline">
+                    <mat-label>{{
+                      'portail.account.profile.fields.firstName' | translate
+                    }}</mat-label>
+                    <input matInput formControlName="first_name" required />
+                  </mat-form-field>
+                  <mat-form-field appearance="outline">
+                    <mat-label>{{
+                      'portail.account.profile.fields.lastName' | translate
+                    }}</mat-label>
+                    <input matInput formControlName="last_name" required />
+                  </mat-form-field>
+                  <mat-form-field appearance="outline">
+                    <mat-label>{{ 'portail.submissions.authors.email' | translate }}</mat-label>
+                    <input matInput type="email" formControlName="email" required />
+                  </mat-form-field>
+                  <mat-form-field appearance="outline">
+                    <mat-label>{{
+                      'portail.account.profile.fields.institution' | translate
+                    }}</mat-label>
+                    <input matInput formControlName="institution" />
+                  </mat-form-field>
+                  <mat-form-field appearance="outline">
+                    <mat-label>{{
+                      'portail.account.profile.fields.country' | translate
+                    }}</mat-label>
+                    <mat-select formControlName="country">
+                      <mat-option value="">—</mat-option>
+                      @for (country of countries(); track country.code) {
+                        <mat-option [value]="country.code">{{ country.name }}</mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+                <mat-checkbox formControlName="is_corresponding">
+                  {{ 'portail.submissions.authors.corresponding' | translate }}
+                </mat-checkbox>
+                <mat-checkbox formControlName="is_presenter">
+                  {{ 'portail.submissions.authors.presenter' | translate }}
+                </mat-checkbox>
+                @if (editable()) {
+                  <p class="actions">
+                    <button
+                      mat-button
+                      type="button"
+                      (click)="moveAuthor(index, -1)"
+                      [disabled]="index === 0"
+                    >
+                      {{ 'portail.submissions.authors.up' | translate }}
+                    </button>
+                    <button
+                      mat-button
+                      type="button"
+                      (click)="moveAuthor(index, 1)"
+                      [disabled]="index === authors.length - 1"
+                    >
+                      {{ 'portail.submissions.authors.down' | translate }}
+                    </button>
+                    <button
+                      mat-button
+                      type="button"
+                      (click)="removeAuthor(index)"
+                      [disabled]="authors.length === 1"
+                    >
+                      {{ 'portail.submissions.authors.remove' | translate }}
+                    </button>
+                  </p>
+                }
+              </fieldset>
+            </li>
+          }
+        </ol>
+        @if (editable()) {
+          <p class="actions">
+            <button mat-stroked-button type="button" (click)="addAuthor()">
+              {{ 'portail.submissions.authors.add' | translate }}
+            </button>
+            <button mat-flat-button type="submit">
+              {{ 'portail.submissions.authors.save' | translate }}
+            </button>
+          </p>
+        }
+      </form>
+    }
+    @case ('file') {
+      @if (selectedType(); as type) {
+        <p>
+          {{
+            'portail.submissions.file.policy.' + type.file_policy
+              | translate: { max: type.max_file_mb }
+          }}
+        </p>
+      } @else {
+        <p class="hint">{{ 'portail.submissions.file.chooseType' | translate }}</p>
+      }
+      @if (current.double_blind) {
+        <p class="warning">{{ 'portail.submissions.file.doubleBlind' | translate }}</p>
+      }
+      @if (current.file; as file) {
+        <p>
+          <a [href]="fileUrl()">{{ file.original_name }}</a>
+          ·
+          {{
+            'portail.submissions.file.details'
+              | translate: { version: file.version, pages: file.pages }
+          }}
+          @if (file.metadata_removed) {
+            · {{ 'portail.submissions.file.cleaned' | translate }}
+          }
+        </p>
+      }
+      @if (editable() && selectedType()?.file_policy !== 'none') {
+        <p class="actions">
+          <label class="file">
+            <span>{{ 'portail.submissions.file.choose' | translate }}</span>
+            <input type="file" accept=".pdf,application/pdf" (change)="uploadFile($event)" />
+          </label>
+          @if (current.file) {
+            <button mat-stroked-button type="button" (click)="removeFile()">
+              {{ 'portail.submissions.file.remove' | translate }}
+            </button>
+          }
+        </p>
+      }
+    }
+    @case ('declarations') {
+      <form [formGroup]="declarations" novalidate>
+        @for (declaration of current.declarations; track declaration.code) {
+          <p>
+            <mat-checkbox [formControlName]="declaration.code">
+              {{ 'portail.submissions.declarations.' + declaration.code | translate }}
+            </mat-checkbox>
+          </p>
+        }
+      </form>
+      <p class="hint">{{ 'portail.submissions.declarations.version' | translate }}</p>
+    }
+    @case ('review') {
+      @if (check(); as result) {
+        @if (result.complete) {
+          @if (current.allowed_actions.includes('submit')) {
+            <p class="notice">{{ 'portail.submissions.review.complete' | translate }}</p>
+          }
+        } @else if (current.can_edit) {
+          <p>{{ 'portail.submissions.review.missing' | translate }}</p>
+          <ul class="missing">
+            @for (message of missingMessages(); track $index) {
+              <li>{{ message }}</li>
+            }
+          </ul>
+        }
+      }
+      <p class="actions">
+        @if (current.allowed_actions.includes('submit')) {
+          <button
+            mat-flat-button
+            type="button"
+            (click)="submit()"
+            [disabled]="busy() || !check()?.complete"
+          >
+            {{ 'portail.submissions.review.submit' | translate }}
+          </button>
+        }
+        @if (current.status === 'draft') {
+          <button mat-stroked-button type="button" (click)="deleteDraft()" [disabled]="busy()">
+            {{ 'portail.submissions.review.delete' | translate }}
+          </button>
+        }
+      </p>
+      @if (current.status === 'submitted' && current.allowed_actions.includes('withdraw')) {
+        <section class="withdraw" aria-labelledby="withdraw-title">
+          <h2 id="withdraw-title">{{ 'portail.submissions.withdraw.title' | translate }}</h2>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'portail.submissions.withdraw.reason' | translate }}</mat-label>
+            <textarea matInput [formControl]="withdrawReason" rows="3"></textarea>
+          </mat-form-field>
+          <button
+            mat-stroked-button
+            type="button"
+            (click)="withdraw()"
+            [disabled]="busy() || !withdrawReason.value.trim()"
+          >
+            {{ 'portail.submissions.withdraw.confirm' | translate }}
+          </button>
+        </section>
+      }
+    }
+  }
+
+  @if (timeline(); as events) {
+    @if (events.history.length) {
+      <section class="timeline" aria-labelledby="timeline-title">
+        <h2 id="timeline-title">{{ 'portail.submissions.timeline.title' | translate }}</h2>
+        <ol>
+          @for (entry of events.history; track $index) {
+            <li>
+              <time [attr.datetime]="entry.at">{{ when(entry.at) }}</time> ·
+              {{ 'portail.submissions.status.' + entry.to_status | translate }}
+              @if (entry.reason) {
+                — {{ entry.reason }}
+              }
+            </li>
+          }
+        </ol>
+        @if (events.revisions.length) {
+          <p class="hint">
+            {{
+              'portail.submissions.timeline.revisions'
+                | translate: { count: events.revisions.length }
+            }}
+          </p>
+        }
+      </section>
+    }
+  }
+}

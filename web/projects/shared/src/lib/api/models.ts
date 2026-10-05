@@ -56,7 +56,6 @@ export type { PageRef } from './models/page-ref';
 export type { PageRequest } from './models/page-request';
 export type { PaginatedAuditEntryList } from './models/paginated-audit-entry-list';
 export type { PaginatedInvitationWithEmailList } from './models/paginated-invitation-with-email-list';
-export type { PaginatedSubmissionList } from './models/paginated-submission-list';
 export type { PatchedConfidentialityRequest } from './models/patched-confidentiality-request';
 export type { PatchedEditionRequest } from './models/patched-edition-request';
 export type { PatchedKeyDateWriteRequest } from './models/patched-key-date-write-request';

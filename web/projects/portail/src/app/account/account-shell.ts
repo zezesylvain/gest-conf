@@ -43,6 +43,9 @@ import { ensureThemeStylesheet } from './theme';
         >
           {{ 'portail.account.nav.home' | translate }}
         </a>
+        <a routerLink="/compte/soumissions" routerLinkActive="active">
+          {{ 'portail.account.nav.submissions' | translate }}
+        </a>
         <a routerLink="/compte/profil" routerLinkActive="active">
           {{ 'portail.account.nav.profile' | translate }}
         </a>

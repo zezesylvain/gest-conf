@@ -69,8 +69,8 @@ def fill(client, body, track, oral) -> dict:
             "abstract": "Un résumé court.",
             "keywords": ["ia", " IA ", "santé"],
             "language": "fr",
-            "track": track.pk,
-            "submission_type": oral.pk,
+            "track": track.code,
+            "submission_type": oral.code,
             "declarations": {code: True for code in ACCEPTED_DECLARATIONS},
         },
         format="json",
@@ -154,7 +154,7 @@ def test_autosave_with_if_match_and_stale_revision(setup):
     stale = client.patch(f"{BASE}/{body['id']}", {"title": "x"}, format="json", HTTP_IF_MATCH="0")
     assert stale.status_code == 412 and stale.json()["code"] == "stale_revision"
     other_track = TrackFactory()  # autre édition
-    response = client.patch(f"{BASE}/{body['id']}", {"track": other_track.pk}, format="json")
+    response = client.patch(f"{BASE}/{body['id']}", {"track": other_track.code}, format="json")
     assert response.status_code == 400 and "track" in response.json()["fields"]
     response = client.patch(f"{BASE}/{body['id']}", {"language": "de"}, format="json")
     assert response.status_code == 400
@@ -269,11 +269,13 @@ def test_file_policy_and_size_limit(setup):
     poster = SubmissionTypeFactory(edition=edition, file_policy="none")
     body = create(client, edition)
     body = client.patch(
-        f"{BASE}/{body['id']}", {"submission_type": poster.pk}, format="json"
+        f"{BASE}/{body['id']}", {"submission_type": poster.code}, format="json"
     ).json()
     assert upload(client, body).status_code == 400
     small = SubmissionTypeFactory(edition=edition, file_policy="optional", max_file_mb=1)
-    body = client.patch(f"{BASE}/{body['id']}", {"submission_type": small.pk}, format="json").json()
+    body = client.patch(
+        f"{BASE}/{body['id']}", {"submission_type": small.code}, format="json"
+    ).json()
     big = pdf_bytes() + b"%" + b"0" * (1024 * 1024)
     response = upload(client, body, big)
     assert response.status_code == 400 and "1 Mo" in response.json()["fields"]["file"][0]

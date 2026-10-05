@@ -75,6 +75,12 @@ export const accountRoutes: Routes = [
         loadComponent: () => import('./pages/my-data-page').then((m) => m.MyDataPage),
       },
       {
+        path: 'soumissions',
+        canMatch: [authGuard],
+        loadChildren: () =>
+          import('./submissions/submissions.routes').then((m) => m.submissionRoutes),
+      },
+      {
         path: 'profil',
         title: 'portail.account.profile.title',
         canMatch: [authGuard],
