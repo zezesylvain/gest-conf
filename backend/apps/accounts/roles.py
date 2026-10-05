@@ -63,6 +63,10 @@ class Capability(StrEnum):
     AUDIT_READ = "audit.read"
     # Lot L2 (E11) : contenus du portail (sections, pages, menus).
     PORTAL_WRITE = "portal.write"
+    # Lot L3 (F8, F10) : soumissions dans la gestion (lecture, dérogations, export).
+    SUBMISSIONS_READ = "submissions.read"
+    SUBMISSIONS_EXTEND = "submissions.extend"
+    SUBMISSIONS_EXPORT = "submissions.export"
 
 
 C = Capability
@@ -83,12 +87,25 @@ CAPABILITIES: Mapping[str, frozenset[Capability]] = {
             C.MEMBERS_MANAGE,
             C.AUDIT_READ,
             C.PORTAL_WRITE,
+            C.SUBMISSIONS_READ,
+            C.SUBMISSIONS_EXTEND,
+            C.SUBMISSIONS_EXPORT,
         }
     ),
-    Role.SC_CHAIR: frozenset({C.EDITION_READ, C.MEMBERS_READ, C.MEMBERS_MANAGE}),
+    Role.SC_CHAIR: frozenset(
+        {
+            C.EDITION_READ,
+            C.MEMBERS_READ,
+            C.MEMBERS_MANAGE,
+            C.SUBMISSIONS_READ,
+            C.SUBMISSIONS_EXTEND,
+            C.SUBMISSIONS_EXPORT,
+        }
+    ),
     # CO en lecture seule en L1, quelle que soit sa fonction (D8) ; écritures partielles
-    # attribuées fonction par fonction dans leur lot (programme L5, finances L6).
-    Role.OC_MEMBER: frozenset({C.EDITION_READ}),
+    # attribuées fonction par fonction dans leur lot (programme L5, finances L6). Lecture
+    # des soumissions, identité des auteurs comprise (F10, matrice §3.3 de l'étude).
+    Role.OC_MEMBER: frozenset({C.EDITION_READ, C.SUBMISSIONS_READ}),
     Role.SC_MEMBER: frozenset(),
     Role.AUTHOR: frozenset(),
     Role.SPEAKER: frozenset(),

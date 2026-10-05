@@ -1594,6 +1594,276 @@ paths:
       responses:
         '204':
           description: No response body
+  /v1/manage/editions/{edition_id}/submissions:
+    get:
+      operationId: manage_submissions_list
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: language
+        schema:
+          type: string
+      - in: query
+        name: ordering
+        schema:
+          type: string
+          enum:
+          - -submitted_at
+          - -updated_at
+          - reference
+          - title
+        description: |-
+          * `reference` - reference
+          * `-submitted_at` - -submitted_at
+          * `-updated_at` - -updated_at
+          * `title` - title
+      - name: page
+        required: false
+        in: query
+        description: Un numéro de page de l'ensemble des résultats.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Nombre de résultats à retourner par page.
+        schema:
+          type: integer
+      - in: query
+        name: q
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: array
+          items:
+            type: string
+            title: Statut
+            enum:
+            - accepted
+            - accepted_minor
+            - camera_ready_received
+            - confirmed
+            - draft
+            - presented
+            - published
+            - rejected
+            - reviewed
+            - revision_requested
+            - scheduled
+            - screening
+            - submitted
+            - under_review
+            - waitlist
+            - withdrawn
+        description: |-
+          * `draft` - brouillon
+          * `submitted` - soumise
+          * `screening` - vérification de recevabilité
+          * `under_review` - en cours d'évaluation
+          * `reviewed` - évaluée
+          * `accepted` - acceptée
+          * `accepted_minor` - acceptée sous réserve de corrections
+          * `waitlist` - liste d'attente
+          * `rejected` - rejetée
+          * `revision_requested` - corrections demandées
+          * `camera_ready_received` - version finale reçue
+          * `confirmed` - présentation confirmée
+          * `scheduled` - programmée
+          * `presented` - présentée
+          * `published` - publiée dans les actes
+          * `withdrawn` - retirée
+        explode: true
+        style: form
+      - in: query
+        name: submission_type
+        schema:
+          type: string
+      - in: query
+        name: track
+        schema:
+          type: string
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSubmissionManageList'
+          description: ''
+  /v1/manage/editions/{edition_id}/submissions/{submission_id}:
+    get:
+      operationId: manage_submission_retrieve
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmissionManageDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/submissions/{submission_id}/extensions:
+    post:
+      operationId: manage_submission_extension_grant
+      description: Dérogation RG-02 (F8), journalisée ; l'auteur en est informé par
+        e-mail.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExtensionGrantRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmissionManageDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/submissions/{submission_id}/extensions/{extension_id}/revoke:
+    post:
+      operationId: manage_submission_extension_revoke
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: extension_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmissionManageDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/submissions/{submission_id}/files/{file_id}/content:
+    get:
+      operationId: manage_submission_file_content
+      description: 'Une version du PDF (règle n° 8 : endpoint authentifié, jamais
+        servi par Apache).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: file_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  /v1/manage/editions/{edition_id}/submissions/export:
+    get:
+      operationId: manage_submissions_export
+      description: Export CSV des soumissions filtrées (mêmes filtres que la liste),
+        journalisé.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  /v1/manage/editions/{edition_id}/submissions/stats:
+    get:
+      operationId: manage_submissions_stats
+      description: Compteurs par statut (tableau de bord).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmissionStats'
+          description: ''
   /v1/manage/editions/{edition_id}/tracks:
     get:
       operationId: manage_editions_tracks_list
@@ -2550,6 +2820,9 @@ components:
       - members.manage
       - audit.read
       - portal.write
+      - submissions.read
+      - submissions.extend
+      - submissions.export
       type: string
       description: |-
         * `edition.read` - edition.read
@@ -2560,6 +2833,9 @@ components:
         * `members.manage` - members.manage
         * `audit.read` - audit.read
         * `portal.write` - portal.write
+        * `submissions.read` - submissions.read
+        * `submissions.extend` - submissions.extend
+        * `submissions.export` - submissions.export
     Confidentiality:
       type: object
       description: Double aveugle et nombre de relecteurs (gestion, §6.1).
@@ -2932,6 +3208,62 @@ components:
         * `stale_revision` - Stale Revision
         * `submission_locked` - Submission Locked
         * `profile_incomplete` - Profile Incomplete
+    Extension:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        until:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Échéance (UTC)
+        reason:
+          type: string
+          readOnly: true
+          title: Motif
+        granted_by_name:
+          type: string
+          readOnly: true
+        granted_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Accordée le
+        revoked_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Révoquée le
+        is_active:
+          type: boolean
+          readOnly: true
+      required:
+      - granted_at
+      - granted_by_name
+      - id
+      - is_active
+      - reason
+      - revoked_at
+      - until
+    ExtensionGrantRequest:
+      type: object
+      description: 'Dérogation (RG-02, F8) : échéance à l''heure de l''édition (D13),
+        motif obligatoire.'
+      properties:
+        until_local:
+          type: string
+          format: date-time
+          description: Échéance dans le fuseau de l'édition, sans fuseau (2027-04-02T23:59).
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 2000
+      required:
+      - reason
+      - until_local
     FilePolicy:
       enum:
       - none
@@ -3259,6 +3591,82 @@ components:
       description: |-
         * `fr` - Français
         * `en` - English
+    ManageAuthor:
+      type: object
+      description: 'Auteur vu par la gestion : adresse comprise (contact des auteurs,
+        F10).'
+      properties:
+        position:
+          type: integer
+          readOnly: true
+          title: Ordre
+        first_name:
+          type: string
+          title: Prénom
+          maxLength: 150
+        last_name:
+          type: string
+          title: Nom
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          title: Adresse e-mail
+          maxLength: 254
+        institution:
+          type: string
+          maxLength: 255
+        country:
+          type: string
+          title: Pays
+          maxLength: 2
+        is_corresponding:
+          type: boolean
+          title: Auteur correspondant
+        is_presenter:
+          type: boolean
+          title: Auteur présentateur
+        has_account:
+          type: boolean
+          readOnly: true
+          description: Rattaché à un compte dont l'adresse vérifiée correspond (F5).
+      required:
+      - email
+      - first_name
+      - has_account
+      - last_name
+      - position
+    ManageHistoryEntry:
+      type: object
+      properties:
+        from_status:
+          allOf:
+          - $ref: '#/components/schemas/SubmissionStatus'
+          readOnly: true
+          title: Statut précédent
+        to_status:
+          allOf:
+          - $ref: '#/components/schemas/SubmissionStatus'
+          readOnly: true
+          title: Nouveau statut
+        at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Date
+        reason:
+          type: string
+          readOnly: true
+          title: Motif
+        actor_name:
+          type: string
+          readOnly: true
+      required:
+      - actor_name
+      - at
+      - from_status
+      - reason
+      - to_status
     Me:
       type: object
       description: |-
@@ -3727,6 +4135,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/InvitationWithEmail'
+    PaginatedSubmissionManageList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubmissionManage'
     PatchedConfidentialityRequest:
       type: object
       description: Double aveugle et nombre de relecteurs (gestion, §6.1).
@@ -5568,6 +5999,245 @@ components:
       description: |-
         * `fr` - fr
         * `en` - en
+    SubmissionManage:
+      type: object
+      description: 'Ligne de la liste de gestion : identité des auteurs (noms), sans
+        adresse e-mail.'
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        reference:
+          type: string
+          readOnly: true
+          nullable: true
+          title: Référence
+        status:
+          allOf:
+          - $ref: '#/components/schemas/SubmissionStatus'
+          readOnly: true
+          title: Statut
+        title:
+          type: string
+          readOnly: true
+          title: Titre
+        track:
+          type: string
+          readOnly: true
+          nullable: true
+        submission_type:
+          type: string
+          readOnly: true
+          nullable: true
+        language:
+          type: string
+          readOnly: true
+          title: Langue
+        authors_label:
+          type: string
+          readOnly: true
+          description: 'Auteurs dans l''ordre : « Prénom Nom ; Prénom Nom ».'
+        authors_count:
+          type: integer
+          readOnly: true
+        pages:
+          type: integer
+          nullable: true
+          readOnly: true
+          description: 'Pages du PDF courant (null : aucun).'
+        extension_until:
+          type: string
+          format: date-time
+          nullable: true
+          readOnly: true
+          description: Échéance de la dérogation en cours (RG-02), sinon null.
+        submitted_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Soumise le
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - authors_count
+      - authors_label
+      - extension_until
+      - id
+      - language
+      - pages
+      - reference
+      - status
+      - submission_type
+      - submitted_at
+      - title
+      - track
+      - updated_at
+    SubmissionManageDetail:
+      type: object
+      description: |-
+        Détail de gestion : métadonnées, auteurs avec adresses, fichiers, historique,
+        révisions, dérogations. Réservé à ``submissions.read`` (jamais aux relecteurs, RG-04).
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        reference:
+          type: string
+          readOnly: true
+          nullable: true
+          title: Référence
+        status:
+          allOf:
+          - $ref: '#/components/schemas/SubmissionStatus'
+          readOnly: true
+          title: Statut
+        title:
+          type: string
+          readOnly: true
+          title: Titre
+        track:
+          type: string
+          readOnly: true
+          nullable: true
+        submission_type:
+          type: string
+          readOnly: true
+          nullable: true
+        language:
+          type: string
+          readOnly: true
+          title: Langue
+        authors_label:
+          type: string
+          readOnly: true
+          description: 'Auteurs dans l''ordre : « Prénom Nom ; Prénom Nom ».'
+        authors_count:
+          type: integer
+          readOnly: true
+        pages:
+          type: integer
+          nullable: true
+          readOnly: true
+          description: 'Pages du PDF courant (null : aucun).'
+        extension_until:
+          type: string
+          format: date-time
+          nullable: true
+          readOnly: true
+          description: Échéance de la dérogation en cours (RG-02), sinon null.
+        submitted_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Soumise le
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        abstract:
+          type: string
+          readOnly: true
+          title: Résumé
+        keywords:
+          type: array
+          items:
+            type: string
+          readOnly: true
+        withdrawn_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Retirée le
+        withdraw_reason:
+          type: string
+          readOnly: true
+          title: Motif du retrait
+        submitter_name:
+          type: string
+          readOnly: true
+        authors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ManageAuthor'
+          readOnly: true
+        files:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubmissionFile'
+          readOnly: true
+        declarations:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeclarationState'
+          readOnly: true
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/ManageHistoryEntry'
+          readOnly: true
+        revisions:
+          type: array
+          items:
+            $ref: '#/components/schemas/RevisionSummary'
+          readOnly: true
+        extensions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Extension'
+          readOnly: true
+        can_extend:
+          type: boolean
+          readOnly: true
+          description: Une dérogation peut être accordée (brouillon ou soumise, édition
+            non archivée).
+      required:
+      - abstract
+      - authors
+      - authors_count
+      - authors_label
+      - can_extend
+      - declarations
+      - extension_until
+      - extensions
+      - files
+      - history
+      - id
+      - keywords
+      - language
+      - pages
+      - reference
+      - revisions
+      - status
+      - submission_type
+      - submitted_at
+      - submitter_name
+      - title
+      - track
+      - updated_at
+      - withdraw_reason
+      - withdrawn_at
+    SubmissionStats:
+      type: object
+      properties:
+        by_status:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Statut → nombre (tous les statuts).
+        total:
+          type: integer
+          description: Soumissions hors brouillons.
+        drafts:
+          type: integer
+      required:
+      - by_status
+      - drafts
+      - total
     SubmissionStatus:
       enum:
       - draft

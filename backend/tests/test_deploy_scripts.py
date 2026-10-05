@@ -170,7 +170,7 @@ def test_deploy_ships_the_cron_script_from_the_commit():
 def test_cron_script_only_runs_scheduled_commands():
     """Liste fermée : le script cron n'est pas un accès générique à manage.py."""
     code = shell_code(CRON_SCRIPT)
-    assert re.search(r"^\s*run_jobs \| cleanup \| check_integrity\)", code, re.M)
+    assert re.search(r"^\s*run_jobs \| close_call \| cleanup \| check_integrity\)", code, re.M)
     assert "config.settings.prod" in code
     assert CRON_SCRIPT.stat().st_mode & 0o111
 

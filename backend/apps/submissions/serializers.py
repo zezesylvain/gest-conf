@@ -1,6 +1,7 @@
-"""Sérialiseurs des soumissions. **Vue auteur** ici (sa propre soumission) ; la vue de
-gestion (L3.4) et la vue relecteur sans identité (L4, RG-04) sont des sérialiseurs
-distincts (règle n° 3)."""
+"""Sérialiseurs des soumissions, **par rôle** (règle n° 3) : vue auteur (sa propre
+soumission) ; vue de gestion (``SubmissionManage*``, identité des auteurs visible des rôles
+qui détiennent ``submissions.read``, F10). La vue relecteur sans identité (RG-04) est un
+sérialiseur distinct, écrit en L4 avec le premier endpoint relecteur."""
 
 from __future__ import annotations
 
@@ -10,13 +11,16 @@ from django.utils import timezone
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
+from apps.accounts.services.invitations import display_name
 from apps.conferences.models import SubmissionType, Track
+from apps.conferences.serializers import LocalDateTimeField
 from apps.submissions import services, workflow
 from apps.submissions.declarations import DECLARATIONS
 from apps.submissions.models import (
     StatusHistory,
     Submission,
     SubmissionAuthor,
+    SubmissionExtension,
     SubmissionFile,
     SubmissionFileKind,
     SubmissionStatus,
@@ -277,3 +281,198 @@ class RevisionSummarySerializer(serializers.Serializer):
 class TimelineSerializer(serializers.Serializer):
     history = TimelineEntrySerializer(many=True)
     revisions = RevisionSummarySerializer(many=True)
+
+
+# --- Gestion (plan L3 §4, F10) -----------------------------------------------------------------
+
+
+def _current_file(submission: Submission) -> SubmissionFile | None:
+    """Fichier principal courant, lu dans les fichiers préchargés (pas de requête)."""
+    return next(
+        (f for f in submission.files.all() if f.kind == SubmissionFileKind.MAIN and f.is_current),
+        None,
+    )
+
+
+def _active_extensions(submission: Submission, now) -> list[SubmissionExtension]:
+    return [e for e in submission.extensions.all() if e.revoked_at is None and e.until > now]
+
+
+class SubmissionManageSerializer(serializers.ModelSerializer):
+    """Ligne de la liste de gestion : identité des auteurs (noms), sans adresse e-mail."""
+
+    track = serializers.SlugRelatedField(slug_field="code", read_only=True, allow_null=True)
+    submission_type = serializers.SlugRelatedField(
+        slug_field="code", read_only=True, allow_null=True
+    )
+    authors_label = serializers.SerializerMethodField(
+        help_text="Auteurs dans l'ordre : « Prénom Nom ; Prénom Nom »."
+    )
+    authors_count = serializers.SerializerMethodField()
+    pages = serializers.SerializerMethodField(help_text="Pages du PDF courant (null : aucun).")
+    extension_until = serializers.SerializerMethodField(
+        help_text="Échéance de la dérogation en cours (RG-02), sinon null."
+    )
+
+    class Meta:
+        model = Submission
+        fields = (
+            "id",
+            "reference",
+            "status",
+            "title",
+            "track",
+            "submission_type",
+            "language",
+            "authors_label",
+            "authors_count",
+            "pages",
+            "extension_until",
+            "submitted_at",
+            "updated_at",
+        )
+        read_only_fields = fields
+
+    def _now(self):
+        return self.context.get("now") or timezone.now()
+
+    def _authors(self, submission: Submission) -> list[SubmissionAuthor]:
+        return sorted(submission.authors.all(), key=lambda author: author.position)
+
+    def get_authors_label(self, submission: Submission) -> str:
+        return " ; ".join(
+            f"{a.first_name} {a.last_name}".strip() for a in self._authors(submission)
+        )
+
+    def get_authors_count(self, submission: Submission) -> int:
+        return len(submission.authors.all())
+
+    @extend_schema_field(serializers.IntegerField(allow_null=True))
+    def get_pages(self, submission: Submission) -> int | None:
+        current = _current_file(submission)
+        return current.pages if current else None
+
+    @extend_schema_field(serializers.DateTimeField(allow_null=True))
+    def get_extension_until(self, submission: Submission) -> Any:
+        active = _active_extensions(submission, self._now())
+        return max((e.until for e in active), default=None)
+
+
+class ManageAuthorSerializer(SubmissionAuthorSerializer):
+    """Auteur vu par la gestion : adresse comprise (contact des auteurs, F10)."""
+
+
+class ExtensionSerializer(serializers.ModelSerializer):
+    granted_by_name = serializers.SerializerMethodField()
+    is_active = serializers.SerializerMethodField()
+
+    class Meta:
+        model = SubmissionExtension
+        fields = (
+            "id",
+            "until",
+            "reason",
+            "granted_by_name",
+            "granted_at",
+            "revoked_at",
+            "is_active",
+        )
+        read_only_fields = fields
+
+    def get_granted_by_name(self, extension: SubmissionExtension) -> str:
+        return display_name(extension.granted_by) if extension.granted_by_id else ""
+
+    def get_is_active(self, extension: SubmissionExtension) -> bool:
+        now = self.context.get("now") or timezone.now()
+        return extension.revoked_at is None and extension.until > now
+
+
+class ManageHistoryEntrySerializer(serializers.ModelSerializer):
+    actor_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = StatusHistory
+        fields = ("from_status", "to_status", "at", "reason", "actor_name")
+        read_only_fields = fields
+
+    def get_actor_name(self, entry: StatusHistory) -> str:
+        return display_name(entry.actor) if entry.actor_id else entry.actor_label
+
+
+class SubmissionManageDetailSerializer(SubmissionManageSerializer):
+    """Détail de gestion : métadonnées, auteurs avec adresses, fichiers, historique,
+    révisions, dérogations. Réservé à ``submissions.read`` (jamais aux relecteurs, RG-04)."""
+
+    keywords = serializers.ListField(child=serializers.CharField(), read_only=True)
+    authors = ManageAuthorSerializer(many=True, read_only=True)
+    submitter_name = serializers.SerializerMethodField()
+    files = serializers.SerializerMethodField()
+    declarations = serializers.SerializerMethodField()
+    history = ManageHistoryEntrySerializer(source="status_history", many=True, read_only=True)
+    revisions = serializers.SerializerMethodField()
+    extensions = ExtensionSerializer(many=True, read_only=True)
+    can_extend = serializers.SerializerMethodField(
+        help_text="Une dérogation peut être accordée (brouillon ou soumise, édition non archivée)."
+    )
+
+    class Meta(SubmissionManageSerializer.Meta):
+        fields = (
+            *SubmissionManageSerializer.Meta.fields,
+            "abstract",
+            "keywords",
+            "withdrawn_at",
+            "withdraw_reason",
+            "submitter_name",
+            "authors",
+            "files",
+            "declarations",
+            "history",
+            "revisions",
+            "extensions",
+            "can_extend",
+        )
+        read_only_fields = fields
+
+    def get_submitter_name(self, submission: Submission) -> str:
+        return display_name(submission.submitter)
+
+    @extend_schema_field(SubmissionFileSerializer(many=True))
+    def get_files(self, submission: Submission) -> list[dict]:
+        files = sorted(
+            (f for f in submission.files.all() if f.kind == SubmissionFileKind.MAIN),
+            key=lambda f: -f.version,
+        )
+        return SubmissionFileSerializer(files, many=True).data
+
+    @extend_schema_field(DeclarationStateSerializer(many=True))
+    def get_declarations(self, submission: Submission) -> list[dict]:
+        return SubmissionSerializer().get_declarations(submission)
+
+    @extend_schema_field(RevisionSummarySerializer(many=True))
+    def get_revisions(self, submission: Submission) -> list[dict]:
+        return RevisionSummarySerializer(submission.revisions.all(), many=True).data
+
+    def get_can_extend(self, submission: Submission) -> bool:
+        from apps.conferences.models import EditionStatus
+
+        return (
+            submission.status in services.EDITABLE_STATUSES
+            and submission.edition.status != EditionStatus.ARCHIVED
+        )
+
+
+class ExtensionGrantSerializer(serializers.Serializer):
+    """Dérogation (RG-02, F8) : échéance à l'heure de l'édition (D13), motif obligatoire."""
+
+    until_local = LocalDateTimeField(
+        help_text="Échéance dans le fuseau de l'édition, sans fuseau (2027-04-02T23:59)."
+    )
+    reason = serializers.CharField(max_length=2000)
+
+
+class SubmissionStatsSerializer(serializers.Serializer):
+    by_status = serializers.DictField(
+        child=serializers.IntegerField(), help_text="Statut → nombre (tous les statuts)."
+    )
+    total = serializers.IntegerField(help_text="Soumissions hors brouillons.")
+    drafts = serializers.IntegerField()

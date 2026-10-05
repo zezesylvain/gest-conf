@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gestconf-backend\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-05 22:24+0000\n"
+"POT-Creation-Date: 2026-10-05 23:14+0000\n"
 "PO-Revision-Date: 2026-10-05 11:00+0000\n"
 "Last-Translator: GEST-CONF\n"
 "Language-Team: GEST-CONF\n"
@@ -15,445 +15,459 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: apps/accounts/models.py apps/submissions/models.py
+#: apps/accounts/models.py:29 apps/submissions/models.py:139
 msgid "adresse e-mail"
 msgstr "email address"
 
-#: apps/accounts/models.py apps/conferences/models.py
+#: apps/accounts/models.py:30 apps/accounts/models.py:226
+#: apps/conferences/models.py:243
 msgid "actif"
 msgstr "active"
 
-#: apps/accounts/models.py apps/communications/models.py
-#: apps/submissions/models.py
+#: apps/accounts/models.py:32 apps/accounts/models.py:373
+#: apps/communications/models.py:52 apps/submissions/models.py:81
 msgid "langue"
 msgstr "language"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:35
 msgid "anonymisé le"
 msgstr "anonymized at"
 
-#: apps/accounts/models.py apps/core/actor.py
+#: apps/accounts/models.py:44 apps/accounts/models.py:78
+#: apps/accounts/models.py:182 apps/accounts/models.py:251
+#: apps/core/actor.py:29
 msgid "utilisateur"
 msgstr "user"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:45
 msgid "utilisateurs"
 msgstr "users"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:58
 msgid "aucun"
 msgstr "none"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:59
 msgid "Dr"
 msgstr "Dr"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:60
 msgid "Pr"
 msgstr "Prof."
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:61
 msgid "M."
 msgstr "Mr"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:62
 msgid "Mme"
 msgstr "Ms"
 
-#: apps/accounts/models.py apps/submissions/models.py
+#: apps/accounts/models.py:84 apps/submissions/models.py:82
 msgid "titre"
 msgstr "title"
 
-#: apps/accounts/models.py apps/submissions/models.py
+#: apps/accounts/models.py:86 apps/submissions/models.py:137
 msgid "prénom"
 msgstr "first name"
 
-#: apps/accounts/models.py apps/submissions/models.py
+#: apps/accounts/models.py:87 apps/submissions/models.py:138
 msgid "nom"
 msgstr "last name"
 
-#: apps/accounts/models.py apps/submissions/models.py
+#: apps/accounts/models.py:88 apps/submissions/models.py:140
 msgid "institution"
 msgstr "institution"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:89
 msgid "département"
 msgstr "department"
 
-#: apps/accounts/models.py apps/conferences/models.py
-#: apps/submissions/models.py
+#: apps/accounts/models.py:92 apps/conferences/models.py:87
+#: apps/submissions/models.py:141
 msgid "pays"
 msgstr "country"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:95
 msgid "ORCID"
 msgstr "ORCID"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:103
 msgid "biographie"
 msgstr "biography"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:111
 msgid "site web"
 msgstr "website"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:114
 msgid "profil Google Scholar"
 msgstr "Google Scholar profile"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:121
 msgid "profil LinkedIn"
 msgstr "LinkedIn profile"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:129
 msgid "photo"
 msgstr "photo"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:145
 msgid "profil"
 msgstr "profile"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:146
 msgid "profils"
 msgstr "profiles"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:159
 msgid "notice d'information"
 msgstr "privacy notice"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:161
 msgid "annuaire public"
 msgstr "public directory"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:163
 msgid "publication de la photo"
 msgstr "photo publication"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:167
 msgid "première connexion"
 msgstr "first login"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:168
 msgid "espace compte"
 msgstr "account area"
 
-#: apps/accounts/models.py apps/core/actor.py apps/core/models.py
+#: apps/accounts/models.py:169 apps/accounts/models.py:232
+#: apps/core/actor.py:30 apps/core/models.py:241
 msgid "commande"
 msgstr "command"
 
-#: apps/accounts/models.py apps/core/models.py apps/portal/models.py
+#: apps/accounts/models.py:184 apps/core/models.py:205 apps/portal/models.py:58
 msgid "type"
 msgstr "kind"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:185
 msgid "accordé"
 msgstr "granted"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:186
 msgid "version du texte"
 msgstr "text version"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:187
 msgid "enregistré le"
 msgstr "recorded at"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:188 apps/accounts/models.py:267
 msgid "origine"
 msgstr "source"
 
-#: apps/accounts/models.py apps/core/models.py
+#: apps/accounts/models.py:189 apps/core/models.py:116
 msgid "adresse IP"
 msgstr "IP address"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:192
 msgid "consentement"
 msgstr "consent"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:193
 msgid "consentements"
 msgstr "consents"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:227
 msgid "révoqué"
 msgstr "revoked"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:231 apps/accounts/models.py:289
+#: apps/accounts/models.py:399
 msgid "invitation"
 msgstr "invitation"
 
-#: apps/accounts/models.py apps/core/actor.py
+#: apps/accounts/models.py:233 apps/core/actor.py:31
 msgid "système"
 msgstr "system"
 
-#: apps/accounts/models.py apps/communications/models.py
-#: apps/conferences/models.py apps/core/models.py apps/portal/models.py
-#: apps/submissions/models.py
+#: apps/accounts/models.py:255 apps/accounts/models.py:345
+#: apps/communications/models.py:45 apps/conferences/models.py:143
+#: apps/conferences/models.py:172 apps/conferences/models.py:216
+#: apps/conferences/models.py:303 apps/core/models.py:98
+#: apps/core/models.py:279 apps/portal/models.py:54 apps/portal/models.py:132
+#: apps/portal/models.py:213 apps/portal/models.py:268
+#: apps/submissions/models.py:51
 msgid "édition"
 msgstr "edition"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:259 apps/accounts/models.py:306
+#: apps/accounts/models.py:350
 msgid "rôle"
 msgstr "role"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:262 apps/accounts/models.py:352
 msgid "fonction au CO"
 msgstr "organising committee function"
 
-#: apps/accounts/models.py apps/communications/models.py
-#: apps/conferences/models.py apps/core/models.py apps/submissions/models.py
+#: apps/accounts/models.py:265 apps/accounts/models.py:356
+#: apps/communications/models.py:58 apps/conferences/models.py:106
+#: apps/core/models.py:208 apps/submissions/models.py:86
 msgid "statut"
 msgstr "status"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:268
 msgid "attribué le"
 msgstr "granted at"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:271
 msgid "attribué par"
 msgstr "granted by"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:277
 msgid "révoqué le"
 msgstr "revoked at"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:280
 msgid "révoqué par"
 msgstr "revoked by"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:286
 msgid "motif de révocation"
 msgstr "revocation reason"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:307
 msgid "rôles"
 msgstr "roles"
 
-#: apps/accounts/models.py apps/core/models.py
+#: apps/accounts/models.py:324 apps/core/models.py:183
 msgid "en attente"
 msgstr "pending"
 
-#: apps/accounts/models.py apps/submissions/models.py
+#: apps/accounts/models.py:325 apps/submissions/models.py:29
 msgid "acceptée"
 msgstr "accepted"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:326
 msgid "refusée"
 msgstr "declined"
 
-#: apps/accounts/models.py apps/core/models.py
+#: apps/accounts/models.py:327 apps/core/models.py:187
 msgid "annulée"
 msgstr "cancelled"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:328
 msgid "expirée"
 msgstr "expired"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:349
 msgid "adresse invitée"
 msgstr "invited address"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:354
 msgid "empreinte du jeton"
 msgstr "token hash"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:362
 msgid "clé d'unicité en attente"
 msgstr "pending uniqueness key"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:366
 msgid "invité par"
 msgstr "invited by"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:372
 msgid "expire le"
 msgstr "expires at"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:374
 msgid "message"
 msgstr "message"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:375
 msgid "envois"
 msgstr "sends"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:376
 msgid "dernier envoi"
 msgstr "last sent at"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:377
 msgid "répondu le"
 msgstr "answered at"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:380
 msgid "acceptée par"
 msgstr "accepted by"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py:400
 msgid "invitations"
 msgstr "invitations"
 
-#: apps/accounts/permissions.py
+#: apps/accounts/permissions.py:100
 msgid "Activez la double authentification pour accéder à la gestion."
 msgstr "Enable two-factor authentication to access the management area."
 
-#: apps/accounts/permissions.py
+#: apps/accounts/permissions.py:104
 msgid "Confirmez votre identité avec votre code de double authentification."
 msgstr "Confirm your identity with your two-factor authentication code."
 
-#: apps/accounts/permissions.py
+#: apps/accounts/permissions.py:138
 msgid "Confirmez votre mot de passe pour continuer."
 msgstr "Confirm your password to continue."
 
-#: apps/accounts/roles.py
+#: apps/accounts/roles.py:20
 msgid "administrateur de l'édition"
 msgstr "edition administrator"
 
-#: apps/accounts/roles.py
+#: apps/accounts/roles.py:21
 msgid "président de la conférence"
 msgstr "conference chair"
 
-#: apps/accounts/roles.py
+#: apps/accounts/roles.py:22
 msgid "membre du comité d'organisation"
 msgstr "organising committee member"
 
-#: apps/accounts/roles.py
+#: apps/accounts/roles.py:23
 msgid "président du comité scientifique"
 msgstr "scientific committee chair"
 
-#: apps/accounts/roles.py
+#: apps/accounts/roles.py:24
 msgid "membre du comité scientifique"
 msgstr "scientific committee member"
 
-#: apps/accounts/roles.py apps/submissions/models.py
+#: apps/accounts/roles.py:25 apps/submissions/models.py:146
 msgid "auteur"
 msgstr "author"
 
-#: apps/accounts/roles.py
+#: apps/accounts/roles.py:26
 msgid "intervenant"
 msgstr "speaker"
 
-#: apps/accounts/roles.py
+#: apps/accounts/roles.py:27
 msgid "président de session"
 msgstr "session chair"
 
-#: apps/accounts/roles.py
+#: apps/accounts/roles.py:28
 msgid "participant"
 msgstr "attendee"
 
-#: apps/accounts/roles.py
+#: apps/accounts/roles.py:29
 msgid "partenaire"
 msgstr "sponsor"
 
-#: apps/accounts/roles.py
+#: apps/accounts/roles.py:30
 msgid "bénévole"
 msgstr "volunteer"
 
-#: apps/accounts/roles.py
+#: apps/accounts/roles.py:36
 msgid "aucune"
 msgstr "none"
 
-#: apps/accounts/roles.py
+#: apps/accounts/roles.py:37
 msgid "finances"
 msgstr "finance"
 
-#: apps/accounts/roles.py
+#: apps/accounts/roles.py:38
 msgid "programme"
 msgstr "programme"
 
-#: apps/accounts/roles.py
+#: apps/accounts/roles.py:39
 msgid "logistique"
 msgstr "logistics"
 
-#: apps/accounts/roles.py
+#: apps/accounts/roles.py:40
 msgid "communication"
 msgstr "communication"
 
-#: apps/accounts/roles.py
+#: apps/accounts/roles.py:41
 msgid "relations extérieures"
 msgstr "external relations"
 
-#: apps/accounts/roles.py
+#: apps/accounts/roles.py:42
 msgid "bénévoles"
 msgstr "volunteers"
 
-#: apps/accounts/roles.py
+#: apps/accounts/roles.py:43
 msgid "secrétariat"
 msgstr "secretariat"
 
-#: apps/accounts/services/account.py apps/conferences/services.py
+#: apps/accounts/services/account.py:66 apps/conferences/services.py:104
+#: apps/conferences/services.py:487
 msgid "Champ non modifiable."
 msgstr "This field cannot be changed."
 
-#: apps/accounts/services/account.py
+#: apps/accounts/services/account.py:129
 msgid "Type de consentement inconnu."
 msgstr "Unknown consent type."
 
-#: apps/accounts/services/account.py
+#: apps/accounts/services/account.py:133
 msgid "La prise de connaissance ne se retire pas."
 msgstr "Acknowledging the notice cannot be withdrawn."
 
-#: apps/accounts/services/account.py apps/accounts/services/mfa.py
-#: apps/accounts/services/personal_data.py apps/accounts/services/roles.py
-#: apps/conferences/services.py apps/submissions/services.py
-#: apps/submissions/workflow.py
+#: apps/accounts/services/account.py:169 apps/accounts/services/account.py:191
+#: apps/accounts/services/mfa.py:84 apps/accounts/services/personal_data.py:205
+#: apps/accounts/services/roles.py:196 apps/conferences/services.py:293
+#: apps/submissions/services.py:567 apps/submissions/workflow.py:125
 msgid "Motif obligatoire."
 msgstr "A reason is required."
 
-#: apps/accounts/services/account.py
+#: apps/accounts/services/account.py:194
 msgid "Un compte anonymisé ne peut pas être réactivé."
 msgstr "An anonymized account cannot be reactivated."
 
-#: apps/accounts/services/invitations.py
+#: apps/accounts/services/invitations.py:150
 msgid "invitation déjà en attente"
 msgstr "invitation already pending"
 
-#: apps/accounts/services/invitations.py
+#: apps/accounts/services/invitations.py:151
 msgid "rôle déjà actif"
 msgstr "role already active"
 
-#: apps/accounts/services/invitations.py
+#: apps/accounts/services/invitations.py:171
 msgid "Quota d'invitations atteint pour cette heure."
 msgstr "Invitation quota reached for this hour."
 
-#: apps/accounts/services/invitations.py
+#: apps/accounts/services/invitations.py:183
 #, python-format
 msgid "Adresse invalide : %(email)s"
 msgstr "Invalid address: %(email)s"
 
-#: apps/accounts/services/invitations.py
+#: apps/accounts/services/invitations.py:190
 msgid "Au moins une adresse."
 msgstr "At least one address."
 
-#: apps/accounts/services/invitations.py
+#: apps/accounts/services/invitations.py:193
 #, python-format
 msgid "%(max)s adresses au plus."
 msgstr "At most %(max)s addresses."
 
-#: apps/accounts/services/invitations.py
+#: apps/accounts/services/invitations.py:228
 msgid "Rôle non invitable."
 msgstr "This role cannot be invited."
 
-#: apps/accounts/services/invitations.py
+#: apps/accounts/services/invitations.py:233
 msgid "1 000 caractères au plus."
 msgstr "At most 1,000 characters."
 
-#: apps/accounts/services/invitations.py
+#: apps/accounts/services/invitations.py:305
 msgid "Invitation expirée."
 msgstr "Invitation expired."
 
-#: apps/accounts/services/invitations.py
+#: apps/accounts/services/invitations.py:308
+#: apps/accounts/services/invitations.py:582
 msgid "Cette invitation n'est plus en attente."
 msgstr "This invitation is no longer pending."
 
-#: apps/accounts/services/invitations.py
+#: apps/accounts/services/invitations.py:378
 msgid "Vous ne pouvez pas accepter une invitation que vous avez envoyée."
 msgstr "You cannot accept an invitation you sent."
 
-#: apps/accounts/services/invitations.py
+#: apps/accounts/services/invitations.py:394
+#: apps/accounts/services/invitations.py:446
 msgid "Connectez-vous avec le compte qui porte l'adresse invitée."
 msgstr "Sign in with the account that holds the invited address."
 
-#: apps/accounts/services/invitations.py
+#: apps/accounts/services/invitations.py:398
 msgid ""
 "Votre compte ne contrôle pas l'adresse invitée : liez-la d'abord à votre "
 "compte."
@@ -461,56 +475,56 @@ msgstr ""
 "Your account does not control the invited address: link it to your account "
 "first."
 
-#: apps/accounts/services/invitations.py
+#: apps/accounts/services/invitations.py:432
 msgid "Lien invalide ou expiré."
 msgstr "Invalid or expired link."
 
-#: apps/accounts/services/invitations.py
+#: apps/accounts/services/invitations.py:499
 msgid "Cette adresse est déjà vérifiée sur un autre compte."
 msgstr "This address is already verified on another account."
 
-#: apps/accounts/services/invitations.py
+#: apps/accounts/services/invitations.py:506
 msgid "Votre compte porte déjà le nombre maximal d'adresses."
 msgstr "Your account already has the maximum number of addresses."
 
-#: apps/accounts/services/invitations.py
+#: apps/accounts/services/invitations.py:549
 msgid "Nombre maximal de renvois atteint."
 msgstr "Maximum number of resends reached."
 
-#: apps/accounts/services/personal_data.py
+#: apps/accounts/services/personal_data.py:209
 msgid "Transmettez d'abord vos rôles de gestion actifs."
 msgstr "First hand over your active management roles."
 
-#: apps/accounts/services/roles.py
+#: apps/accounts/services/roles.py:42
 msgid "Rôle inconnu."
 msgstr "Unknown role."
 
-#: apps/accounts/services/roles.py
+#: apps/accounts/services/roles.py:44
 msgid "Fonction inconnue."
 msgstr "Unknown function."
 
-#: apps/accounts/services/roles.py
+#: apps/accounts/services/roles.py:47
 msgid "Fonction obligatoire pour le CO, interdite sinon."
 msgstr ""
 "A function is required for the organising committee and forbidden otherwise."
 
-#: apps/accounts/services/roles.py
+#: apps/accounts/services/roles.py:54
 msgid "Édition archivée : lecture seule."
 msgstr "Archived edition: read only."
 
-#: apps/accounts/services/roles.py
+#: apps/accounts/services/roles.py:62
 msgid "Vous ne pouvez pas attribuer ni retirer ce rôle."
 msgstr "You cannot grant or revoke this role."
 
-#: apps/accounts/services/roles.py
+#: apps/accounts/services/roles.py:64
 msgid "Vous ne pouvez pas modifier vos propres rôles."
 msgstr "You cannot change your own roles."
 
-#: apps/accounts/services/roles.py
+#: apps/accounts/services/roles.py:211
 msgid "Le dernier administrateur de l'édition ne se retire que par commande."
 msgstr "The last administrator of the edition can only be removed by command."
 
-#: apps/accounts/templates/account/email/_security_footer.txt
+#: apps/accounts/templates/account/email/_security_footer.txt:1
 #, python-format
 msgid ""
 "Si vous n'êtes pas à l'origine de cette opération, changez votre mot de passe sans attendre et prévenez les organisateurs. Origine de la demande :\n"
@@ -525,7 +539,7 @@ msgstr ""
 "- browser: %(user_agent)s\n"
 "- date: %(timestamp)s"
 
-#: apps/accounts/templates/account/email/_signature.txt
+#: apps/accounts/templates/account/email/_signature.txt:1
 #, python-format
 msgid ""
 "Cordialement,\n"
@@ -538,7 +552,7 @@ msgstr ""
 "\n"
 "This message was sent automatically; please do not reply."
 
-#: apps/accounts/templates/account/email/account_already_exists_message.txt
+#: apps/accounts/templates/account/email/account_already_exists_message.txt:1
 #, python-format
 msgid ""
 "Bonjour,\n"
@@ -557,12 +571,12 @@ msgstr ""
 "\n"
 "If you did not make this request, ignore this message: your account has not been changed."
 
-#: apps/accounts/templates/account/email/account_already_exists_subject.txt
+#: apps/accounts/templates/account/email/account_already_exists_subject.txt:1
 #, python-format
 msgid "[%(site_name)s] Un compte existe déjà avec cette adresse"
 msgstr "[%(site_name)s] An account already exists with this address"
 
-#: apps/accounts/templates/account/email/email_added_message.txt
+#: apps/accounts/templates/account/email/email_added_message.txt:1
 #, python-format
 msgid ""
 "Bonjour,\n"
@@ -573,12 +587,12 @@ msgstr ""
 "\n"
 "The address %(added_email)s has just been added to your %(site_name)s account. It can only be used once confirmed through the link sent to it."
 
-#: apps/accounts/templates/account/email/email_added_subject.txt
+#: apps/accounts/templates/account/email/email_added_subject.txt:1
 #, python-format
 msgid "[%(site_name)s] Une adresse e-mail a été ajoutée à votre compte"
 msgstr "[%(site_name)s] An email address was added to your account"
 
-#: apps/accounts/templates/account/email/email_changed_message.txt
+#: apps/accounts/templates/account/email/email_changed_message.txt:1
 #, python-format
 msgid ""
 "Bonjour,\n"
@@ -589,12 +603,12 @@ msgstr ""
 "\n"
 "The primary address of your %(site_name)s account has changed from %(from_email)s to %(to_email)s."
 
-#: apps/accounts/templates/account/email/email_changed_subject.txt
+#: apps/accounts/templates/account/email/email_changed_subject.txt:1
 #, python-format
 msgid "[%(site_name)s] Votre adresse e-mail principale a été modifiée"
 msgstr "[%(site_name)s] Your primary email address was changed"
 
-#: apps/accounts/templates/account/email/email_confirmation_message.txt
+#: apps/accounts/templates/account/email/email_confirmation_message.txt:1
 #, python-format
 msgid ""
 "Bonjour,\n"
@@ -613,7 +627,7 @@ msgstr ""
 "\n"
 "If you did not make this request, ignore this message."
 
-#: apps/accounts/templates/account/email/email_confirmation_signup_message.txt
+#: apps/accounts/templates/account/email/email_confirmation_signup_message.txt:1
 #, python-format
 msgid ""
 "Bonjour,\n"
@@ -632,13 +646,13 @@ msgstr ""
 "\n"
 "If you did not create an account, ignore this message: no account will be activated."
 
-#: apps/accounts/templates/account/email/email_confirmation_signup_subject.txt
-#: apps/accounts/templates/account/email/email_confirmation_subject.txt
+#: apps/accounts/templates/account/email/email_confirmation_signup_subject.txt:1
+#: apps/accounts/templates/account/email/email_confirmation_subject.txt:1
 #, python-format
 msgid "[%(site_name)s] Confirmez votre adresse e-mail"
 msgstr "[%(site_name)s] Confirm your email address"
 
-#: apps/accounts/templates/account/email/email_deleted_message.txt
+#: apps/accounts/templates/account/email/email_deleted_message.txt:1
 #, python-format
 msgid ""
 "Bonjour,\n"
@@ -649,12 +663,12 @@ msgstr ""
 "\n"
 "The address %(deleted_email)s was removed from your %(site_name)s account."
 
-#: apps/accounts/templates/account/email/email_deleted_subject.txt
+#: apps/accounts/templates/account/email/email_deleted_subject.txt:1
 #, python-format
 msgid "[%(site_name)s] Une adresse e-mail a été retirée de votre compte"
 msgstr "[%(site_name)s] An email address was removed from your account"
 
-#: apps/accounts/templates/account/email/password_changed_message.txt
+#: apps/accounts/templates/account/email/password_changed_message.txt:1
 #, python-format
 msgid ""
 "Bonjour,\n"
@@ -665,12 +679,12 @@ msgstr ""
 "\n"
 "The password of your %(site_name)s account has just been changed."
 
-#: apps/accounts/templates/account/email/password_changed_subject.txt
+#: apps/accounts/templates/account/email/password_changed_subject.txt:1
 #, python-format
 msgid "[%(site_name)s] Votre mot de passe a été modifié"
 msgstr "[%(site_name)s] Your password was changed"
 
-#: apps/accounts/templates/account/email/password_reset_key_message.txt
+#: apps/accounts/templates/account/email/password_reset_key_message.txt:1
 #, python-format
 msgid ""
 "Bonjour,\n"
@@ -689,12 +703,12 @@ msgstr ""
 "\n"
 "If you did not make this request, ignore this message: your password remains unchanged."
 
-#: apps/accounts/templates/account/email/password_reset_key_subject.txt
+#: apps/accounts/templates/account/email/password_reset_key_subject.txt:1
 #, python-format
 msgid "[%(site_name)s] Réinitialisation de votre mot de passe"
 msgstr "[%(site_name)s] Reset your password"
 
-#: apps/accounts/templates/account/email/password_reset_message.txt
+#: apps/accounts/templates/account/email/password_reset_message.txt:1
 #, python-format
 msgid ""
 "Bonjour,\n"
@@ -705,12 +719,12 @@ msgstr ""
 "\n"
 "The password of your %(site_name)s account has just been reset."
 
-#: apps/accounts/templates/account/email/password_reset_subject.txt
+#: apps/accounts/templates/account/email/password_reset_subject.txt:1
 #, python-format
 msgid "[%(site_name)s] Votre mot de passe a été réinitialisé"
 msgstr "[%(site_name)s] Your password was reset"
 
-#: apps/accounts/templates/account/email/password_set_message.txt
+#: apps/accounts/templates/account/email/password_set_message.txt:1
 #, python-format
 msgid ""
 "Bonjour,\n"
@@ -721,12 +735,12 @@ msgstr ""
 "\n"
 "A password has just been set for your %(site_name)s account."
 
-#: apps/accounts/templates/account/email/password_set_subject.txt
+#: apps/accounts/templates/account/email/password_set_subject.txt:1
 #, python-format
 msgid "[%(site_name)s] Un mot de passe a été défini pour votre compte"
 msgstr "[%(site_name)s] A password was set for your account"
 
-#: apps/accounts/templates/mfa/email/mfa_reset_message.txt
+#: apps/accounts/templates/mfa/email/mfa_reset_message.txt:1
 #, python-format
 msgid ""
 "Bonjour,\n"
@@ -741,12 +755,12 @@ msgstr ""
 "\n"
 "If you did not make this request, let the organisers know right away."
 
-#: apps/accounts/templates/mfa/email/mfa_reset_subject.txt
+#: apps/accounts/templates/mfa/email/mfa_reset_subject.txt:1
 #, python-format
 msgid "[%(site_name)s] Double authentification réinitialisée"
 msgstr "[%(site_name)s] Two-factor authentication reset"
 
-#: apps/accounts/templates/mfa/email/recovery_codes_generated_message.txt
+#: apps/accounts/templates/mfa/email/recovery_codes_generated_message.txt:1
 #, python-format
 msgid ""
 "Bonjour,\n"
@@ -757,12 +771,12 @@ msgstr ""
 "\n"
 "New two-factor authentication recovery codes were generated for your %(site_name)s account. The previous codes are no longer valid."
 
-#: apps/accounts/templates/mfa/email/recovery_codes_generated_subject.txt
+#: apps/accounts/templates/mfa/email/recovery_codes_generated_subject.txt:1
 #, python-format
 msgid "[%(site_name)s] Nouveaux codes de secours"
 msgstr "[%(site_name)s] New recovery codes"
 
-#: apps/accounts/templates/mfa/email/totp_activated_message.txt
+#: apps/accounts/templates/mfa/email/totp_activated_message.txt:1
 #, python-format
 msgid ""
 "Bonjour,\n"
@@ -773,12 +787,12 @@ msgstr ""
 "\n"
 "Two-factor authentication (TOTP app) has just been enabled on your %(site_name)s account. Keep your recovery codes somewhere safe."
 
-#: apps/accounts/templates/mfa/email/totp_activated_subject.txt
+#: apps/accounts/templates/mfa/email/totp_activated_subject.txt:1
 #, python-format
 msgid "[%(site_name)s] Double authentification activée"
 msgstr "[%(site_name)s] Two-factor authentication enabled"
 
-#: apps/accounts/templates/mfa/email/totp_deactivated_message.txt
+#: apps/accounts/templates/mfa/email/totp_deactivated_message.txt:1
 #, python-format
 msgid ""
 "Bonjour,\n"
@@ -789,12 +803,12 @@ msgstr ""
 "\n"
 "Two-factor authentication (TOTP app) has just been disabled on your %(site_name)s account. If your account has a management role, you will need to enable it again to access the management area."
 
-#: apps/accounts/templates/mfa/email/totp_deactivated_subject.txt
+#: apps/accounts/templates/mfa/email/totp_deactivated_subject.txt:1
 #, python-format
 msgid "[%(site_name)s] Double authentification désactivée"
 msgstr "[%(site_name)s] Two-factor authentication disabled"
 
-#: apps/accounts/templates/role/email/invitation_link_message.txt
+#: apps/accounts/templates/role/email/invitation_link_message.txt:1
 #, python-format
 msgid ""
 "Bonjour,\n"
@@ -813,12 +827,12 @@ msgstr ""
 "\n"
 "If you did not make this request, ignore this message: the address will not be linked."
 
-#: apps/accounts/templates/role/email/invitation_link_subject.txt
+#: apps/accounts/templates/role/email/invitation_link_subject.txt:1
 #, python-format
 msgid "[%(site_name)s] Confirmez l'ajout de cette adresse à votre compte"
 msgstr "[%(site_name)s] Confirm adding this address to your account"
 
-#: apps/accounts/templates/role/email/invitation_message.txt
+#: apps/accounts/templates/role/email/invitation_message.txt:1
 #, python-format
 msgid ""
 "Bonjour,\n"
@@ -829,11 +843,11 @@ msgstr ""
 "\n"
 "%(inviter_name)s invites you to join the edition “%(edition_title)s” (%(edition_code)s) of %(site_name)s with the role: %(role_label)s."
 
-#: apps/accounts/templates/role/email/invitation_message.txt
+#: apps/accounts/templates/role/email/invitation_message.txt:5
 msgid "Message de l'invitant :"
 msgstr "Message from the inviter:"
 
-#: apps/accounts/templates/role/email/invitation_message.txt
+#: apps/accounts/templates/role/email/invitation_message.txt:8
 #, python-format
 msgid ""
 "Pour accepter ou refuser, ouvrez ce lien (valable jusqu'au %(expires_on)s) :\n"
@@ -848,12 +862,12 @@ msgstr ""
 "\n"
 "To accept, sign in with an account that holds this address, or create one. If you do not know the sender, ignore this message."
 
-#: apps/accounts/templates/role/email/invitation_subject.txt
+#: apps/accounts/templates/role/email/invitation_subject.txt:1
 #, python-format
 msgid "[%(site_name)s] Invitation à rejoindre une édition"
 msgstr "[%(site_name)s] Invitation to join an edition"
 
-#: apps/accounts/templates/role/email/role_granted_message.txt
+#: apps/accounts/templates/role/email/role_granted_message.txt:1
 #, python-format
 msgid ""
 "Bonjour,\n"
@@ -864,12 +878,12 @@ msgstr ""
 "\n"
 "The role “%(role_label)s” was granted to you for the edition “%(edition_title)s” (%(edition_code)s). If you did not expect this, let the organisers know."
 
-#: apps/accounts/templates/role/email/role_granted_subject.txt
+#: apps/accounts/templates/role/email/role_granted_subject.txt:1
 #, python-format
 msgid "[%(site_name)s] Un rôle vous a été attribué"
 msgstr "[%(site_name)s] A role was granted to you"
 
-#: apps/accounts/templates/role/email/role_revoked_message.txt
+#: apps/accounts/templates/role/email/role_revoked_message.txt:1
 #, python-format
 msgid ""
 "Bonjour,\n"
@@ -880,117 +894,118 @@ msgstr ""
 "\n"
 "The role “%(role_label)s” was revoked for the edition “%(edition_title)s” (%(edition_code)s)."
 
-#: apps/accounts/templates/role/email/role_revoked_message.txt
+#: apps/accounts/templates/role/email/role_revoked_message.txt:4
 #, python-format
 msgid "Motif : %(reason)s"
 msgstr "Reason: %(reason)s"
 
-#: apps/accounts/templates/role/email/role_revoked_subject.txt
+#: apps/accounts/templates/role/email/role_revoked_subject.txt:1
 #, python-format
 msgid "[%(site_name)s] Un rôle vous a été retiré"
 msgstr "[%(site_name)s] A role was revoked"
 
-#: apps/accounts/validators.py
+#: apps/accounts/validators.py:29
 msgid "Identifiant ORCID invalide (forme 0000-0000-0000-000X)."
 msgstr "Invalid ORCID iD (format 0000-0000-0000-000X)."
 
-#: apps/accounts/validators.py
+#: apps/accounts/validators.py:35
 msgid "Code pays ISO 3166-1 inconnu."
 msgstr "Unknown ISO 3166-1 country code."
 
-#: apps/accounts/validators.py
+#: apps/accounts/validators.py:46
 msgid "Adresse https:// complète attendue."
 msgstr "A full https:// address is expected."
 
-#: apps/accounts/views.py
+#: apps/accounts/views.py:251
 msgid "Saisissez exactement l'adresse de votre compte."
 msgstr "Type exactly the email address of your account."
 
-#: apps/communications/models.py
+#: apps/communications/models.py:17
 msgid "en file"
 msgstr "queued"
 
-#: apps/communications/models.py
+#: apps/communications/models.py:18
 msgid "en cours d'envoi"
 msgstr "sending"
 
-#: apps/communications/models.py
+#: apps/communications/models.py:19
 msgid "envoyé"
 msgstr "sent"
 
-#: apps/communications/models.py apps/core/models.py
+#: apps/communications/models.py:20 apps/core/models.py:186
 msgid "en échec"
 msgstr "failed"
 
-#: apps/communications/models.py
+#: apps/communications/models.py:21
 msgid "annulé"
 msgstr "cancelled"
 
-#: apps/communications/models.py
+#: apps/communications/models.py:34
 msgid "destinataire"
 msgstr "recipient"
 
-#: apps/communications/models.py
+#: apps/communications/models.py:37
 msgid "compte destinataire"
 msgstr "recipient account"
 
-#: apps/communications/models.py
+#: apps/communications/models.py:51
 msgid "gabarit"
 msgstr "template"
 
-#: apps/communications/models.py
+#: apps/communications/models.py:53
 msgid "objet"
 msgstr "subject"
 
-#: apps/communications/models.py
+#: apps/communications/models.py:54
 msgid "corps (texte)"
 msgstr "body (text)"
 
-#: apps/communications/models.py
+#: apps/communications/models.py:55
 msgid "corps (HTML)"
 msgstr "body (HTML)"
 
-#: apps/communications/models.py
+#: apps/communications/models.py:56
 msgid "contient un lien à jeton"
 msgstr "contains a token link"
 
-#: apps/communications/models.py apps/core/models.py
+#: apps/communications/models.py:60 apps/core/models.py:212
 msgid "tentatives"
 msgstr "attempts"
 
-#: apps/communications/models.py apps/core/models.py
+#: apps/communications/models.py:61 apps/core/models.py:217
+#: apps/core/models.py:250
 msgid "dernière erreur"
 msgstr "last error"
 
-#: apps/communications/models.py
+#: apps/communications/models.py:62
 msgid "programmé le"
 msgstr "scheduled at"
 
-#: apps/communications/models.py
+#: apps/communications/models.py:63
 msgid "envoyé le"
 msgstr "sent at"
 
-#: apps/communications/models.py
+#: apps/communications/models.py:64
 msgid "corps purgé le"
 msgstr "body purged at"
 
-#: apps/communications/models.py
+#: apps/communications/models.py:66
 msgid "identifiant chez le fournisseur"
 msgstr "provider message ID"
 
-#: apps/communications/models.py apps/core/models.py
+#: apps/communications/models.py:70 apps/core/models.py:220
 msgid "clé d'idempotence"
 msgstr "idempotency key"
 
-#: apps/communications/models.py
+#: apps/communications/models.py:74
 msgid "e-mail envoyé"
 msgstr "sent email"
 
-#: apps/communications/models.py
+#: apps/communications/models.py:75
 msgid "e-mails envoyés"
 msgstr "sent emails"
 
-#: apps/communications/templates/communications/email/test_message.txt
+#: apps/communications/templates/communications/email/test_message.txt:1
 #, python-format
 msgid ""
 "Bonjour,\n"
@@ -1005,245 +1020,256 @@ msgstr ""
 "\n"
 "No action is required on your part."
 
-#: apps/communications/templates/communications/email/test_subject.txt
+#: apps/communications/templates/communications/email/test_subject.txt:1
 #, python-format
 msgid "[%(site_name)s] E-mail de test"
 msgstr "[%(site_name)s] Test email"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py:27 apps/conferences/models.py:74
 msgid "identifiant"
 msgstr "identifier"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py:28 apps/conferences/models.py:175
 msgid "nom (FR)"
 msgstr "name (FR)"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py:29 apps/conferences/models.py:176
 msgid "nom (EN)"
 msgstr "name (EN)"
 
-#: apps/conferences/models.py apps/portal/models.py
+#: apps/conferences/models.py:30 apps/conferences/models.py:177
+#: apps/conferences/models.py:223 apps/portal/models.py:140
 msgid "description (FR)"
 msgstr "description (FR)"
 
-#: apps/conferences/models.py apps/portal/models.py
+#: apps/conferences/models.py:31 apps/conferences/models.py:178
+#: apps/conferences/models.py:224 apps/portal/models.py:141
 msgid "description (EN)"
 msgstr "description (EN)"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py:35
 msgid "édition courante"
 msgstr "current edition"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py:45 apps/conferences/models.py:69
 msgid "conférence"
 msgstr "conference"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py:46
 msgid "conférences"
 msgstr "conferences"
 
-#: apps/conferences/models.py apps/submissions/models.py
+#: apps/conferences/models.py:62 apps/submissions/models.py:24
 msgid "brouillon"
 msgstr "draft"
 
-#: apps/conferences/models.py apps/portal/models.py
+#: apps/conferences/models.py:63 apps/portal/models.py:83
+#: apps/portal/models.py:142 apps/portal/models.py:229
 msgid "publiée"
 msgstr "published"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py:64
 msgid "archivée"
 msgstr "archived"
 
-#: apps/conferences/models.py apps/portal/models.py
+#: apps/conferences/models.py:72 apps/conferences/models.py:174
+#: apps/conferences/models.py:220 apps/conferences/models.py:305
+#: apps/portal/models.py:57
 msgid "code"
 msgstr "code"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py:76
 msgid "année"
 msgstr "year"
 
-#: apps/conferences/models.py apps/core/models.py apps/portal/models.py
+#: apps/conferences/models.py:78 apps/core/models.py:294
+#: apps/portal/models.py:59 apps/portal/models.py:137
 msgid "titre (FR)"
 msgstr "title (FR)"
 
-#: apps/conferences/models.py apps/core/models.py apps/portal/models.py
+#: apps/conferences/models.py:79 apps/core/models.py:295
+#: apps/portal/models.py:60 apps/portal/models.py:138
 msgid "titre (EN)"
 msgstr "title (EN)"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py:80
 msgid "thème (FR)"
 msgstr "theme (FR)"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py:81
 msgid "thème (EN)"
 msgstr "theme (EN)"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py:82
 msgid "début"
 msgstr "start"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py:83
 msgid "fin"
 msgstr "end"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py:84
 msgid "lieu"
 msgstr "venue"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py:85
 msgid "ville"
 msgstr "city"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py:90
 msgid "fuseau horaire"
 msgstr "time zone"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py:95
 msgid "double aveugle"
 msgstr "double blind"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py:98
 msgid "langues des soumissions"
 msgstr "submission languages"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py:101
 msgid "relecteurs par soumission"
 msgstr "reviewers per submission"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py:108
 msgid "publiée le"
 msgstr "published at"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py:109
 msgid "archivée le"
 msgstr "archived at"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py:114
 msgid "affiche"
 msgstr "poster"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py:144
 msgid "éditions"
 msgstr "editions"
 
-#: apps/conferences/models.py apps/core/models.py apps/portal/models.py
-#: apps/submissions/models.py
+#: apps/conferences/models.py:179 apps/conferences/models.py:242
+#: apps/conferences/models.py:311 apps/core/models.py:296
+#: apps/portal/models.py:228 apps/submissions/models.py:128
 msgid "ordre"
 msgstr "order"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py:180
 msgid "active"
 msgstr "active"
 
-#: apps/conferences/models.py apps/submissions/models.py
+#: apps/conferences/models.py:193 apps/submissions/models.py:67
 msgid "thématique"
 msgstr "track"
 
-#: apps/conferences/models.py apps/portal/models.py
+#: apps/conferences/models.py:194 apps/portal/models.py:32
 msgid "thématiques"
 msgstr "tracks"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py:206
 msgid "aucun fichier"
 msgstr "no file"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py:207
 msgid "facultatif"
 msgstr "optional"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py:208
 msgid "obligatoire"
 msgstr "required"
 
-#: apps/conferences/models.py apps/portal/models.py
+#: apps/conferences/models.py:221 apps/conferences/models.py:308
+#: apps/portal/models.py:216
 msgid "libellé (FR)"
 msgstr "label (FR)"
 
-#: apps/conferences/models.py apps/portal/models.py
+#: apps/conferences/models.py:222 apps/conferences/models.py:309
+#: apps/portal/models.py:217
 msgid "libellé (EN)"
 msgstr "label (EN)"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py:227
 msgid "durée par défaut (min)"
 msgstr "default duration (min)"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py:230
 msgid "mots maximum du résumé"
 msgstr "abstract word limit"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py:235
 msgid "fichier PDF"
 msgstr "PDF file"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py:238
 msgid "taille maximale du fichier (Mo)"
 msgstr "maximum file size (MB)"
 
-#: apps/conferences/models.py apps/submissions/models.py
+#: apps/conferences/models.py:260 apps/submissions/models.py:75
 msgid "type de communication"
 msgstr "submission type"
 
-#: apps/conferences/models.py apps/portal/models.py
+#: apps/conferences/models.py:261 apps/portal/models.py:33
 msgid "types de communication"
 msgstr "submission types"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py:282
 msgid "ouverture de l'appel"
 msgstr "call opening"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py:283
 msgid "clôture de l'appel"
 msgstr "call closing"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py:284
 msgid "fin des évaluations"
 msgstr "review deadline"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py:285
 msgid "notification des décisions"
 msgstr "decision notification"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py:286
 msgid "version définitive"
 msgstr "camera-ready version"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py:287
 msgid "ouverture des inscriptions"
 msgstr "registration opening"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py:288
 msgid "fin du tarif préférentiel"
 msgstr "early bird deadline"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py:289
 msgid "clôture des inscriptions"
 msgstr "registration closing"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py:306
 msgid "date (UTC)"
 msgstr "date (UTC)"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py:310
 msgid "publique"
 msgstr "public"
 
-#: apps/conferences/models.py
+#: apps/conferences/models.py:323
 msgid "date clé"
 msgstr "key date"
 
-#: apps/conferences/models.py apps/portal/models.py
+#: apps/conferences/models.py:324 apps/portal/models.py:31
 msgid "dates clés"
 msgstr "key dates"
 
-#: apps/conferences/services.py
+#: apps/conferences/services.py:93 apps/conferences/services.py:474
+#: apps/conferences/services.py:498
 msgid "Ce code est déjà utilisé."
 msgstr "This code is already in use."
 
-#: apps/conferences/services.py
+#: apps/conferences/services.py:133
 msgid "Édition d'une autre conférence."
 msgstr "Edition of another conference."
 
-#: apps/conferences/services.py
+#: apps/conferences/services.py:188
 msgid ""
 "Réglage gelé : des soumissions existent. Seul un administrateur peut le "
 "changer, avec un motif."
@@ -1251,1027 +1277,1092 @@ msgstr ""
 "Setting frozen: submissions exist. Only an administrator can change it, with "
 "a reason."
 
-#: apps/conferences/services.py
+#: apps/conferences/services.py:192
 msgid "Gelé depuis la première soumission."
 msgstr "Frozen since the first submission."
 
-#: apps/conferences/services.py
+#: apps/conferences/services.py:260
 msgid "Titres français et anglais obligatoires pour publier."
 msgstr "French and English titles are required to publish."
 
-#: apps/conferences/services.py
+#: apps/conferences/services.py:262
 msgid "Dates de la conférence obligatoires."
 msgstr "Conference dates are required."
 
-#: apps/conferences/services.py
+#: apps/conferences/services.py:264
 msgid "Au moins une thématique active."
 msgstr "At least one active track."
 
-#: apps/conferences/services.py
+#: apps/conferences/services.py:266
 msgid "Au moins un type de communication actif."
 msgstr "At least one active submission type."
 
-#: apps/conferences/services.py
+#: apps/conferences/services.py:269
 msgid "Ouverture et clôture de l'appel obligatoires."
 msgstr "Call opening and closing dates are required."
 
-#: apps/conferences/services.py
+#: apps/conferences/services.py:283
 msgid "Statut inconnu."
 msgstr "Unknown status."
 
-#: apps/conferences/services.py
+#: apps/conferences/services.py:290
 msgid "Transition de statut non autorisée."
 msgstr "Status transition not allowed."
 
-#: apps/conferences/services.py
+#: apps/conferences/services.py:298
 msgid "L'édition n'est pas prête à être publiée."
 msgstr "The edition is not ready to be published."
 
-#: apps/conferences/services.py
+#: apps/conferences/services.py:308
 msgid "Archivage possible seulement après la fin de la conférence."
 msgstr "An edition can only be archived after the conference has ended."
 
-#: apps/conferences/services.py
+#: apps/conferences/services.py:373
+msgid ""
+"Élément utilisé par des soumissions : désactivez-le plutôt que de le "
+"supprimer."
+msgstr "Item used by submissions: deactivate it instead of deleting it."
+
+#: apps/conferences/services.py:427
 msgid "Heure locale attendue, sans fuseau."
 msgstr "Local time expected, without a time zone."
 
-#: apps/conferences/services.py
+#: apps/conferences/services.py:434
 msgid "Heure ambiguë ou inexistante (changement d'heure)."
 msgstr "Ambiguous or nonexistent time (clock change)."
 
-#: apps/conferences/services.py
+#: apps/conferences/services.py:437
 msgid "Heure inexistante (changement d'heure)."
 msgstr "Nonexistent time (clock change)."
 
-#: apps/conferences/services.py
+#: apps/conferences/services.py:462
 msgid "Libellé obligatoire pour un code libre."
 msgstr "A label is required for a custom code."
 
-#: apps/conferences/services.py
+#: apps/conferences/services.py:470
 msgid "Date et heure locales obligatoires."
 msgstr "Local date and time are required."
 
-#: apps/conferences/services.py
+#: apps/conferences/services.py:526
 #, python-format
 msgid "%(code)s doit suivre %(previous)s."
 msgstr "%(code)s must follow %(previous)s."
 
-#: apps/conferences/validators.py
+#: apps/conferences/validators.py:16
 msgid ""
 "Code invalide : une majuscule, puis 1 à 11 majuscules ou chiffres (ex. GC26)."
 msgstr ""
 "Invalid code: one capital letter, then 1 to 11 capital letters or digits "
 "(e.g. GC26)."
 
-#: apps/conferences/validators.py
+#: apps/conferences/validators.py:26
 msgid "Fuseau horaire inconnu."
 msgstr "Unknown time zone."
 
-#: apps/core/authentication.py
+#: apps/core/authentication.py:41
 msgid "Échec de la vérification CSRF : rechargez la page puis réessayez."
 msgstr "CSRF verification failed: reload the page and try again."
 
-#: apps/core/errors.py
+#: apps/core/errors.py:95
 msgid "Opération refusée."
 msgstr "Operation refused."
 
-#: apps/core/errors.py
+#: apps/core/errors.py:124
 msgid "Opération impossible dans l'état actuel."
 msgstr "This operation is not possible in the current state."
 
-#: apps/core/errors.py
+#: apps/core/errors.py:131
 msgid "Action non autorisée."
 msgstr "Action not allowed."
 
-#: apps/core/errors.py apps/core/exceptions.py
+#: apps/core/errors.py:138 apps/core/exceptions.py:110
 msgid "Données invalides."
 msgstr "Invalid data."
 
-#: apps/core/errors.py
+#: apps/core/errors.py:145
 msgid "Modifié entre-temps (autre onglet ?) : rechargez avant d'enregistrer."
 msgstr "Changed in the meantime (another tab?): reload before saving."
 
-#: apps/core/errors.py
+#: apps/core/errors.py:156
 msgid "Quota atteint."
 msgstr "Quota reached."
 
-#: apps/core/models.py apps/submissions/models.py
+#: apps/core/models.py:85 apps/submissions/models.py:211
+#: apps/submissions/models.py:268
 msgid "date"
 msgstr "date"
 
-#: apps/core/models.py apps/submissions/models.py
+#: apps/core/models.py:88 apps/submissions/models.py:214
+#: apps/submissions/models.py:260
 msgid "acteur"
 msgstr "actor"
 
-#: apps/core/models.py
+#: apps/core/models.py:94
 msgid "type d'acteur"
 msgstr "actor kind"
 
-#: apps/core/models.py apps/submissions/models.py
+#: apps/core/models.py:105 apps/submissions/models.py:266
 msgid "libellé de l'acteur"
 msgstr "actor label"
 
-#: apps/core/models.py
+#: apps/core/models.py:107
 msgid "action"
 msgstr "action"
 
-#: apps/core/models.py
+#: apps/core/models.py:108
 msgid "type d'objet"
 msgstr "object type"
 
-#: apps/core/models.py
+#: apps/core/models.py:109
 msgid "identifiant d'objet"
 msgstr "object ID"
 
-#: apps/core/models.py
+#: apps/core/models.py:110
 msgid "avant"
 msgstr "before"
 
-#: apps/core/models.py
+#: apps/core/models.py:111
 msgid "après"
 msgstr "after"
 
-#: apps/core/models.py apps/submissions/models.py
+#: apps/core/models.py:112 apps/submissions/models.py:267
+#: apps/submissions/models.py:297
 msgid "motif"
 msgstr "reason"
 
-#: apps/core/models.py
+#: apps/core/models.py:114
 msgid "identifiant de requête"
 msgstr "request ID"
 
-#: apps/core/models.py
+#: apps/core/models.py:118
 msgid "navigateur"
 msgstr "user agent"
 
-#: apps/core/models.py
+#: apps/core/models.py:122
 msgid "entrée du journal d'audit"
 msgstr "audit log entry"
 
-#: apps/core/models.py
+#: apps/core/models.py:123
 msgid "journal d'audit"
 msgstr "audit log"
 
-#: apps/core/models.py
+#: apps/core/models.py:184 apps/core/models.py:233
 msgid "en cours"
 msgstr "running"
 
-#: apps/core/models.py
+#: apps/core/models.py:185
 msgid "terminée"
 msgstr "succeeded"
 
-#: apps/core/models.py
+#: apps/core/models.py:193
 msgid "urgente"
 msgstr "urgent"
 
-#: apps/core/models.py
+#: apps/core/models.py:194
 msgid "normale"
 msgstr "normal"
 
-#: apps/core/models.py
+#: apps/core/models.py:195
 msgid "envoi de masse"
 msgstr "bulk sending"
 
-#: apps/core/models.py
+#: apps/core/models.py:206
 msgid "données"
 msgstr "payload"
 
-#: apps/core/models.py
+#: apps/core/models.py:210
 msgid "priorité"
 msgstr "priority"
 
-#: apps/core/models.py
+#: apps/core/models.py:211
 msgid "à exécuter à partir de"
 msgstr "run at"
 
-#: apps/core/models.py
+#: apps/core/models.py:213
 msgid "tentatives maximales"
 msgstr "maximum attempts"
 
-#: apps/core/models.py
+#: apps/core/models.py:214
 msgid "réservée le"
 msgstr "locked at"
 
-#: apps/core/models.py
+#: apps/core/models.py:215
 msgid "réservée par"
 msgstr "locked by"
 
-#: apps/core/models.py
+#: apps/core/models.py:216
 msgid "terminée le"
 msgstr "finished at"
 
-#: apps/core/models.py
+#: apps/core/models.py:224
 msgid "tâche"
 msgstr "job"
 
-#: apps/core/models.py
+#: apps/core/models.py:225
 msgid "tâches"
 msgstr "jobs"
 
-#: apps/core/models.py
+#: apps/core/models.py:234
 msgid "réussi"
 msgstr "succeeded"
 
-#: apps/core/models.py
+#: apps/core/models.py:235
 msgid "en erreur"
 msgstr "failed"
 
-#: apps/core/models.py
+#: apps/core/models.py:242
 msgid "dernier démarrage"
 msgstr "last started at"
 
-#: apps/core/models.py
+#: apps/core/models.py:243
 msgid "dernière fin"
 msgstr "last finished at"
 
-#: apps/core/models.py
+#: apps/core/models.py:244
 msgid "dernier succès"
 msgstr "last success at"
 
-#: apps/core/models.py
+#: apps/core/models.py:246
 msgid "dernier statut"
 msgstr "last status"
 
-#: apps/core/models.py
+#: apps/core/models.py:248
 msgid "dernière durée (ms)"
 msgstr "last duration (ms)"
 
-#: apps/core/models.py
+#: apps/core/models.py:249
 msgid "éléments traités"
 msgstr "processed items"
 
-#: apps/core/models.py
+#: apps/core/models.py:253
 msgid "battement de cœur"
 msgstr "heartbeat"
 
-#: apps/core/models.py
+#: apps/core/models.py:254
 msgid "battements de cœur"
 msgstr "heartbeats"
 
-#: apps/core/models.py
+#: apps/core/models.py:261
 msgid "document"
 msgstr "document"
 
-#: apps/core/models.py apps/portal/models.py
+#: apps/core/models.py:262 apps/portal/models.py:75
 msgid "image"
 msgstr "image"
 
-#: apps/core/models.py
+#: apps/core/models.py:263
 msgid "photo de profil"
 msgstr "profile photo"
 
-#: apps/core/models.py
+#: apps/core/models.py:276
 msgid "identifiant public"
 msgstr "public identifier"
 
-#: apps/core/models.py apps/submissions/models.py
+#: apps/core/models.py:285 apps/submissions/models.py:171
 msgid "nature"
 msgstr "kind"
 
-#: apps/core/models.py apps/submissions/models.py
+#: apps/core/models.py:286 apps/submissions/models.py:173
 msgid "nom de stockage"
 msgstr "storage name"
 
-#: apps/core/models.py apps/submissions/models.py
+#: apps/core/models.py:287 apps/submissions/models.py:174
 msgid "nom d'origine"
 msgstr "original name"
 
-#: apps/core/models.py
+#: apps/core/models.py:288
 msgid "extension"
 msgstr "extension"
 
-#: apps/core/models.py
+#: apps/core/models.py:289
 msgid "type de contenu"
 msgstr "content type"
 
-#: apps/core/models.py apps/submissions/models.py
+#: apps/core/models.py:290 apps/submissions/models.py:175
 msgid "taille (octets)"
 msgstr "size (bytes)"
 
-#: apps/core/models.py apps/submissions/models.py
+#: apps/core/models.py:291 apps/submissions/models.py:176
 msgid "empreinte SHA-256"
 msgstr "SHA-256 digest"
 
-#: apps/core/models.py
+#: apps/core/models.py:292
 msgid "largeur"
 msgstr "width"
 
-#: apps/core/models.py
+#: apps/core/models.py:293
 msgid "hauteur"
 msgstr "height"
 
-#: apps/core/models.py
+#: apps/core/models.py:297
 msgid "publié"
 msgstr "published"
 
-#: apps/core/models.py
+#: apps/core/models.py:313
 msgid "fichier public"
 msgstr "public file"
 
-#: apps/core/models.py
+#: apps/core/models.py:314
 msgid "fichiers publics"
 msgstr "public files"
 
-#: apps/core/models.py
+#: apps/core/models.py:331
 msgid "portée"
 msgstr "scope"
 
-#: apps/core/models.py
+#: apps/core/models.py:332
 msgid "dernière valeur"
 msgstr "last value"
 
-#: apps/core/models.py
+#: apps/core/models.py:335
 msgid "compteur"
 msgstr "counter"
 
-#: apps/core/models.py
+#: apps/core/models.py:336
 msgid "compteurs"
 msgstr "counters"
 
-#: apps/core/public_files.py
+#: apps/core/public_files.py:90
 msgid "Archive illisible."
 msgstr "Unreadable archive."
 
-#: apps/core/public_files.py
+#: apps/core/public_files.py:92
 msgid "Archive trop volumineuse une fois décompressée."
 msgstr "Archive too large once decompressed."
 
-#: apps/core/public_files.py
+#: apps/core/public_files.py:115
 msgid "Type de fichier non accepté."
 msgstr "File type not accepted."
 
-#: apps/core/public_files.py
+#: apps/core/public_files.py:118
 msgid "Type de fichier non accepté pour cet usage."
 msgstr "File type not accepted for this use."
 
-#: apps/core/public_files.py
+#: apps/core/public_files.py:120
 msgid "L'extension du nom ne correspond pas au contenu du fichier."
 msgstr "The file name extension does not match the file content."
 
-#: apps/core/public_files.py
+#: apps/core/public_files.py:135
 msgid "Photo refusée : elle contient des métadonnées (EXIF). Exportez-la sans."
 msgstr "Photo refused: it contains metadata (EXIF). Export it without."
 
-#: apps/core/public_files.py
+#: apps/core/public_files.py:143
 msgid "Image trop grande."
 msgstr "Image too large."
 
-#: apps/core/public_files.py
+#: apps/core/public_files.py:146
 msgid "Image illisible."
 msgstr "Unreadable image."
 
-#: apps/core/public_files.py
+#: apps/core/public_files.py:191
 msgid "Fichier vide."
 msgstr "Empty file."
 
-#: apps/core/public_files.py
+#: apps/core/public_files.py:193
 #, python-format
 msgid "Fichier trop volumineux (%(max)s Mio au plus)."
 msgstr "File too large (%(max)s MiB at most)."
 
-#: apps/core/views.py
+#: apps/core/views.py:165
 msgid "Méthode non autorisée."
 msgstr "Method not allowed."
 
-#: apps/core/views.py
+#: apps/core/views.py:187
 msgid "Requête invalide."
 msgstr "Bad request."
 
-#: apps/core/views.py
+#: apps/core/views.py:191
 msgid "Accès refusé."
 msgstr "Access denied."
 
-#: apps/core/views.py
+#: apps/core/views.py:195
 msgid "Ressource introuvable."
 msgstr "Resource not found."
 
-#: apps/core/views.py
+#: apps/core/views.py:200
 msgid "Erreur interne du serveur."
 msgstr "Internal server error."
 
-#: apps/portal/models.py
+#: apps/portal/models.py:27
 msgid "texte riche"
 msgstr "rich text"
 
-#: apps/portal/models.py
+#: apps/portal/models.py:28
 msgid "bandeau d'appel à l'action"
 msgstr "call-to-action banner"
 
-#: apps/portal/models.py
+#: apps/portal/models.py:29
 msgid "image et texte"
 msgstr "image and text"
 
-#: apps/portal/models.py
+#: apps/portal/models.py:30
 msgid "en-tête de l'édition"
 msgstr "edition header"
 
-#: apps/portal/models.py
+#: apps/portal/models.py:34
 msgid "documents"
 msgstr "documents"
 
-#: apps/portal/models.py
+#: apps/portal/models.py:35
 msgid "comité"
 msgstr "committee"
 
-#: apps/portal/models.py
+#: apps/portal/models.py:61
 msgid "sous-titre (FR)"
 msgstr "subtitle (FR)"
 
-#: apps/portal/models.py
+#: apps/portal/models.py:62
 msgid "sous-titre (EN)"
 msgstr "subtitle (EN)"
 
-#: apps/portal/models.py
+#: apps/portal/models.py:64
 msgid "corps (FR)"
 msgstr "body (FR)"
 
-#: apps/portal/models.py
+#: apps/portal/models.py:65
 msgid "corps (EN)"
 msgstr "body (EN)"
 
-#: apps/portal/models.py
+#: apps/portal/models.py:66
 msgid "bouton 1 (FR)"
 msgstr "button 1 (FR)"
 
-#: apps/portal/models.py
+#: apps/portal/models.py:67
 msgid "bouton 1 (EN)"
 msgstr "button 1 (EN)"
 
-#: apps/portal/models.py
+#: apps/portal/models.py:68
 msgid "lien du bouton 1"
 msgstr "button 1 link"
 
-#: apps/portal/models.py
+#: apps/portal/models.py:69
 msgid "bouton 2 (FR)"
 msgstr "button 2 (FR)"
 
-#: apps/portal/models.py
+#: apps/portal/models.py:70
 msgid "bouton 2 (EN)"
 msgstr "button 2 (EN)"
 
-#: apps/portal/models.py
+#: apps/portal/models.py:71
 msgid "lien du bouton 2"
 msgstr "button 2 link"
 
-#: apps/portal/models.py
+#: apps/portal/models.py:82
 msgid "configuration"
 msgstr "configuration"
 
-#: apps/portal/models.py
+#: apps/portal/models.py:113 apps/portal/models.py:187
 msgid "section"
 msgstr "section"
 
-#: apps/portal/models.py
+#: apps/portal/models.py:114 apps/portal/models.py:144
 msgid "sections"
 msgstr "sections"
 
-#: apps/portal/models.py
+#: apps/portal/models.py:134
 msgid "identifiant d'URL"
 msgstr "URL identifier"
 
-#: apps/portal/models.py
+#: apps/portal/models.py:136
 msgid "page du site"
 msgstr "site page"
 
-#: apps/portal/models.py
+#: apps/portal/models.py:158 apps/portal/models.py:184
+#: apps/portal/models.py:220
 msgid "page"
 msgstr "page"
 
-#: apps/portal/models.py apps/submissions/models.py
+#: apps/portal/models.py:159 apps/submissions/models.py:177
 msgid "pages"
 msgstr "pages"
 
-#: apps/portal/models.py
+#: apps/portal/models.py:189
 msgid "position"
 msgstr "position"
 
-#: apps/portal/models.py
+#: apps/portal/models.py:192
 msgid "section posée"
 msgstr "placed section"
 
-#: apps/portal/models.py
+#: apps/portal/models.py:193
 msgid "sections posées"
 msgstr "placed sections"
 
-#: apps/portal/models.py
+#: apps/portal/models.py:205
 msgid "en-tête"
 msgstr "header"
 
-#: apps/portal/models.py
+#: apps/portal/models.py:206
 msgid "pied de page"
 msgstr "footer"
 
-#: apps/portal/models.py
+#: apps/portal/models.py:215
 msgid "emplacement"
 msgstr "location"
 
-#: apps/portal/models.py
+#: apps/portal/models.py:226
 msgid "adresse"
 msgstr "address"
 
-#: apps/portal/models.py
+#: apps/portal/models.py:227
 msgid "nouvel onglet"
 msgstr "new tab"
 
-#: apps/portal/models.py
+#: apps/portal/models.py:243
 msgid "entrée de menu"
 msgstr "menu item"
 
-#: apps/portal/models.py
+#: apps/portal/models.py:244
 msgid "entrées de menu"
 msgstr "menu items"
 
-#: apps/portal/models.py
+#: apps/portal/models.py:270
 msgid "mis en ligne le"
 msgstr "released on"
 
-#: apps/portal/models.py apps/submissions/models.py
+#: apps/portal/models.py:271 apps/submissions/models.py:172
 msgid "version"
 msgstr "version"
 
-#: apps/portal/models.py
+#: apps/portal/models.py:274
 msgid "mise en ligne du portail"
 msgstr "portal release"
 
-#: apps/portal/models.py
+#: apps/portal/models.py:275
 msgid "mises en ligne du portail"
 msgstr "portal releases"
 
-#: apps/portal/services.py
+#: apps/portal/services.py:162
 msgid "Cette valeur est déjà utilisée."
 msgstr "This value is already in use."
 
-#: apps/portal/services.py
+#: apps/portal/services.py:188
 msgid "Adresse refusée : https:, mailto:, tel: ou chemin interne (/…)."
 msgstr "Address refused: https:, mailto:, tel: or internal path (/…)."
 
-#: apps/portal/services.py
+#: apps/portal/services.py:204
 #, python-format
 msgid "Texte trop long (%(max)s caractères au plus)."
 msgstr "Text too long (%(max)s characters at most)."
 
-#: apps/portal/services.py
+#: apps/portal/services.py:215
 msgid "Configuration invalide."
 msgstr "Invalid configuration."
 
-#: apps/portal/services.py
+#: apps/portal/services.py:226
 #, python-format
 msgid "Configuration invalide : %(names)s."
 msgstr "Invalid configuration: %(names)s."
 
-#: apps/portal/services.py
+#: apps/portal/services.py:232
 msgid "Seule une section « image et texte » porte une image."
 msgstr "Only an “image and text” section carries an image."
 
-#: apps/portal/services.py
+#: apps/portal/services.py:234 apps/portal/services.py:664
 msgid "Choisissez une image publique de l'édition."
 msgstr "Choose a public image of the edition."
 
-#: apps/portal/services.py
+#: apps/portal/services.py:237
 msgid ""
 "Une section de données n'a pas de corps : son contenu vient de l'édition."
 msgstr "A data section has no body: its content comes from the edition."
 
-#: apps/portal/services.py
+#: apps/portal/services.py:261
 msgid "Le type d'une section ne change pas."
 msgstr "The type of a section cannot change."
 
-#: apps/portal/services.py
+#: apps/portal/services.py:296
 #, python-format
 msgid "Section posée sur : %(pages)s. Retirez-la de ces pages d'abord."
 msgstr "Section placed on: %(pages)s. Remove it from these pages first."
 
-#: apps/portal/services.py
+#: apps/portal/services.py:323
 msgid "Identifiant réservé à une page du site."
 msgstr "Identifier reserved for a site page."
 
-#: apps/portal/services.py
+#: apps/portal/services.py:345
 msgid "Figé pour une page du site."
 msgstr "Fixed for a site page."
 
-#: apps/portal/services.py
+#: apps/portal/services.py:372
 msgid "Une page du site ne se supprime pas."
 msgstr "A site page cannot be deleted."
 
-#: apps/portal/services.py
+#: apps/portal/services.py:375
 msgid "Page présente dans un menu : retirez-la du menu d'abord."
 msgstr "Page used in a menu: remove it from the menu first."
 
-#: apps/portal/services.py
+#: apps/portal/services.py:438
 msgid "Section inconnue."
 msgstr "Unknown section."
 
-#: apps/portal/services.py
+#: apps/portal/services.py:441
 msgid "Section déjà posée sur cette page."
 msgstr "Section already placed on this page."
 
-#: apps/portal/services.py
+#: apps/portal/services.py:455
 msgid "Section absente de cette page."
 msgstr "Section not placed on this page."
 
-#: apps/portal/services.py
+#: apps/portal/services.py:469
 msgid "La liste doit contenir exactement les sections posées."
 msgstr "The list must contain exactly the placed sections."
 
-#: apps/portal/services.py
+#: apps/portal/services.py:482
 msgid "Choisissez une page ou une adresse, pas les deux."
 msgstr "Choose a page or an address, not both."
 
-#: apps/portal/services.py
+#: apps/portal/services.py:484
 msgid "Page inconnue."
 msgstr "Unknown page."
 
-#: apps/portal/services.py
+#: apps/portal/services.py:545
 msgid "Emplacement inconnu."
 msgstr "Unknown location."
 
-#: apps/portal/services.py
+#: apps/portal/services.py:550
 msgid "La liste doit contenir exactement les entrées de ce menu."
 msgstr "The list must contain exactly the items of this menu."
 
-#: apps/portal/services.py
+#: apps/portal/services.py:592
 msgid "Nature inconnue."
 msgstr "Unknown kind."
 
-#: apps/portal/services.py
+#: apps/portal/services.py:631
 msgid "affiche de l'édition"
 msgstr "edition poster"
 
-#: apps/portal/services.py
+#: apps/portal/services.py:643
 #, python-format
 msgid "Fichier utilisé (%(uses)s) : retirez-le d'abord."
 msgstr "File in use (%(uses)s): remove it first."
 
-#: apps/portal/services.py
+#: apps/portal/services.py:912
 msgid "Date de build invalide (avec fuseau, et pas dans le futur)."
 msgstr "Invalid build date (with time zone, and not in the future)."
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:25
 msgid "soumise"
 msgstr "submitted"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:26
 msgid "vérification de recevabilité"
 msgstr "screening"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:27
 msgid "en cours d'évaluation"
 msgstr "under review"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:28
 msgid "évaluée"
 msgstr "reviewed"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:30
 msgid "acceptée sous réserve de corrections"
 msgstr "accepted with minor revisions"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:31
 msgid "liste d'attente"
 msgstr "waiting list"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:32
 msgid "rejetée"
 msgstr "rejected"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:33
 msgid "corrections demandées"
 msgstr "revisions requested"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:34
 msgid "version finale reçue"
 msgstr "camera-ready version received"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:35
 msgid "présentation confirmée"
 msgstr "presentation confirmed"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:36
 msgid "programmée"
 msgstr "scheduled"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:37
 msgid "présentée"
 msgstr "presented"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:38
 msgid "publiée dans les actes"
 msgstr "published in the proceedings"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:39
 msgid "retirée"
 msgstr "withdrawn"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:58
 msgid "référence"
 msgstr "reference"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:61
 msgid "soumissionnaire"
 msgstr "submitter"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:83
 msgid "résumé"
 msgstr "abstract"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:84
 msgid "mots-clés"
 msgstr "keywords"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:91
 msgid "soumise le"
 msgstr "submitted on"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:92
 msgid "retirée le"
 msgstr "withdrawn on"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:93
 msgid "motif du retrait"
 msgstr "withdrawal reason"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:96
 msgid "révision"
 msgstr "revision"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:98
 msgid "déclarations"
 msgstr "declarations"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:112 apps/submissions/models.py:126
+#: apps/submissions/models.py:169 apps/submissions/models.py:206
+#: apps/submissions/models.py:248 apps/submissions/models.py:292
 msgid "soumission"
 msgstr "submission"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:113
 msgid "soumissions"
 msgstr "submissions"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:131
 msgid "compte"
 msgstr "account"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:142
 msgid "auteur correspondant"
 msgstr "corresponding author"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:143
 msgid "auteur présentateur"
 msgstr "presenting author"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:147
 msgid "auteurs"
 msgstr "authors"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:159
 msgid "fichier principal"
 msgstr "main file"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:160
 msgid "version finale"
 msgstr "camera-ready version"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:178
 msgid "métadonnées retirées"
 msgstr "metadata removed"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:179
 msgid "courant"
 msgstr "current"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:182
 msgid "déposé par"
 msgstr "uploaded by"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:188
 msgid "fichier de soumission"
 msgstr "submission file"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:189
 msgid "fichiers de soumission"
 msgstr "submission files"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:210
 msgid "numéro"
 msgstr "number"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:220
 msgid "cliché"
 msgstr "snapshot"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:235
 msgid "révision de soumission"
 msgstr "submission revision"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:236
 msgid "révisions de soumission"
 msgstr "submission revisions"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:253
 msgid "statut précédent"
 msgstr "previous status"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:256
 msgid "nouveau statut"
 msgstr "new status"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:282
 msgid "historique de statut"
 msgstr "status history"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:283
 msgid "historiques de statut"
 msgstr "status histories"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:296
 msgid "échéance (UTC)"
 msgstr "deadline (UTC)"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:300
 msgid "accordée par"
 msgstr "granted by"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:306
 msgid "accordée le"
 msgstr "granted on"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:307
 msgid "révoquée le"
 msgstr "revoked on"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:310
 msgid "dérogation"
 msgstr "extension"
 
-#: apps/submissions/models.py
+#: apps/submissions/models.py:311
 msgid "dérogations"
 msgstr "extensions"
 
-#: apps/submissions/pdf.py
+#: apps/submissions/pdf.py:47
 msgid "Le fichier n'est pas un PDF."
 msgstr "The file is not a PDF."
 
-#: apps/submissions/pdf.py
+#: apps/submissions/pdf.py:53 apps/submissions/pdf.py:61
 msgid "PDF illisible ou endommagé."
 msgstr "Unreadable or damaged PDF."
 
-#: apps/submissions/pdf.py
+#: apps/submissions/pdf.py:56
 msgid "PDF protégé par mot de passe : déposez une version sans protection."
 msgstr "Password-protected PDF: upload an unprotected version."
 
-#: apps/submissions/pdf.py
+#: apps/submissions/pdf.py:63
 msgid "PDF sans page."
 msgstr "PDF without any page."
 
-#: apps/submissions/pdf.py
+#: apps/submissions/pdf.py:65
 #, python-format
 msgid "PDF trop long (%(max)s pages au plus)."
 msgstr "PDF too long (%(max)s pages at most)."
 
-#: apps/submissions/pdf.py
+#: apps/submissions/pdf.py:109
 msgid ""
 "Ce PDF ne peut pas être anonymisé automatiquement : réexportez-le puis "
 "réessayez."
 msgstr ""
 "This PDF cannot be anonymised automatically: export it again and retry."
 
-#: apps/submissions/services.py
+#: apps/submissions/services.py:62
 msgid "Titre obligatoire."
 msgstr "Title required."
 
-#: apps/submissions/services.py
+#: apps/submissions/services.py:66
 msgid "Résumé obligatoire."
 msgstr "Abstract required."
 
-#: apps/submissions/services.py
+#: apps/submissions/services.py:70
 #, python-format
 msgid "Résumé trop long : %(words)s mots pour %(max)s au plus."
 msgstr "Abstract too long: %(words)s words for %(max)s at most."
 
-#: apps/submissions/services.py
+#: apps/submissions/services.py:75 apps/submissions/services.py:273
 msgid "De 1 à 6 mots-clés."
 msgstr "From 1 to 6 keywords."
 
-#: apps/submissions/services.py
+#: apps/submissions/services.py:77
 msgid "Choisissez une thématique active."
 msgstr "Choose an active track."
 
-#: apps/submissions/services.py
+#: apps/submissions/services.py:79
 msgid "Choisissez un type de communication actif."
 msgstr "Choose an active submission type."
 
-#: apps/submissions/services.py
+#: apps/submissions/services.py:81
 msgid "Choisissez une langue acceptée par l'édition."
 msgstr "Choose a language accepted by the edition."
 
-#: apps/submissions/services.py
+#: apps/submissions/services.py:85
 msgid "Au moins un auteur."
 msgstr "At least one author."
 
-#: apps/submissions/services.py
+#: apps/submissions/services.py:88
 msgid "Au moins un auteur correspondant."
 msgstr "At least one corresponding author."
 
-#: apps/submissions/services.py
+#: apps/submissions/services.py:90
 msgid "Le soumissionnaire fait partie des auteurs."
 msgstr "The submitter must be one of the authors."
 
-#: apps/submissions/services.py
+#: apps/submissions/services.py:95
 msgid "Fichier PDF obligatoire pour ce type de communication."
 msgstr "A PDF file is required for this submission type."
 
-#: apps/submissions/services.py
+#: apps/submissions/services.py:98
 msgid "Acceptez toutes les déclarations."
 msgstr "Accept all declarations."
 
-#: apps/submissions/services.py
+#: apps/submissions/services.py:153
 msgid "Cette soumission n'est plus modifiable."
 msgstr "This submission can no longer be changed."
 
-#: apps/submissions/services.py apps/submissions/workflow.py
+#: apps/submissions/services.py:156 apps/submissions/services.py:231
+#: apps/submissions/workflow.py:109
 msgid "L'appel à communications est clos."
 msgstr "The call for papers is closed."
 
-#: apps/submissions/services.py
+#: apps/submissions/services.py:227
 msgid ""
 "Complétez votre profil (nom, prénom, institution, pays) avant de soumettre."
 msgstr ""
 "Complete your profile (first name, last name, institution, country) before "
 "submitting."
 
-#: apps/submissions/services.py
+#: apps/submissions/services.py:258
 msgid "Liste attendue."
 msgstr "A list is expected."
 
-#: apps/submissions/services.py
+#: apps/submissions/services.py:267
 #, python-format
 msgid "%(max)s caractères au plus."
 msgstr "%(max)s characters at most."
 
-#: apps/submissions/services.py
+#: apps/submissions/services.py:299
 msgid "Résumé trop long."
 msgstr "Abstract too long."
 
-#: apps/submissions/services.py
+#: apps/submissions/services.py:308
 msgid "Langue non acceptée par l'édition."
 msgstr "Language not accepted by the edition."
 
-#: apps/submissions/services.py
+#: apps/submissions/services.py:315
 msgid "Choix invalide pour cette édition."
 msgstr "Invalid choice for this edition."
 
-#: apps/submissions/services.py
+#: apps/submissions/services.py:322
 msgid "Déclaration inconnue."
 msgstr "Unknown declaration."
 
-#: apps/submissions/services.py
+#: apps/submissions/services.py:371
 msgid "De 1 à 30 auteurs."
 msgstr "From 1 to 30 authors."
 
-#: apps/submissions/services.py
+#: apps/submissions/services.py:381
 msgid "Nom et prénom obligatoires."
 msgstr "First and last names required."
 
-#: apps/submissions/services.py
+#: apps/submissions/services.py:383
 msgid "Adresse e-mail obligatoire."
 msgstr "Email address required."
 
-#: apps/submissions/services.py
+#: apps/submissions/services.py:385
 msgid "Adresse en double."
 msgstr "Duplicate address."
 
-#: apps/submissions/services.py
+#: apps/submissions/services.py:390
 msgid "Pays inconnu."
 msgstr "Unknown country."
 
-#: apps/submissions/services.py
+#: apps/submissions/services.py:442
 msgid "Choisissez d'abord le type de communication."
 msgstr "Choose the submission type first."
 
-#: apps/submissions/services.py
+#: apps/submissions/services.py:444
 msgid "Ce type de communication ne prend pas de fichier."
 msgstr "This submission type takes no file."
 
-#: apps/submissions/services.py
+#: apps/submissions/services.py:446
 msgid "Fichier PDF attendu (.pdf)."
 msgstr "A PDF file (.pdf) is expected."
 
-#: apps/submissions/services.py
+#: apps/submissions/services.py:452
 #, python-format
 msgid "Fichier trop volumineux (%(max)s Mo au plus)."
 msgstr "File too large (%(max)s MB at most)."
 
-#: apps/submissions/services.py
+#: apps/submissions/services.py:532
 msgid "Une soumission envoyée ne se supprime pas : retirez-la."
 msgstr "A submitted submission cannot be deleted: withdraw it."
 
-#: apps/submissions/services.py
+#: apps/submissions/services.py:563
 msgid "Dérogation impossible : la soumission n'est plus modifiable."
 msgstr "Extension impossible: the submission can no longer be changed."
 
-#: apps/submissions/services.py
+#: apps/submissions/services.py:573
 msgid "Échéance dans le futur attendue."
 msgstr "A deadline in the future is expected."
 
-#: apps/submissions/templates/submission/email/coauthor_message.txt
+#: apps/submissions/services.py:667
+msgid "Référence"
+msgstr "Reference"
+
+#: apps/submissions/services.py:668
+msgid "Statut"
+msgstr "Status"
+
+#: apps/submissions/services.py:669
+msgid "Titre"
+msgstr "Title"
+
+#: apps/submissions/services.py:670
+msgid "Thématique"
+msgstr "Track"
+
+#: apps/submissions/services.py:671
+msgid "Type"
+msgstr "Type"
+
+#: apps/submissions/services.py:672
+msgid "Langue"
+msgstr "Language"
+
+#: apps/submissions/services.py:673
+msgid "Auteurs"
+msgstr "Authors"
+
+#: apps/submissions/services.py:674
+msgid "Correspondants"
+msgstr "Corresponding authors"
+
+#: apps/submissions/services.py:675
+msgid "Mots-clés"
+msgstr "Keywords"
+
+#: apps/submissions/services.py:676
+msgid "Résumé"
+msgstr "Abstract"
+
+#: apps/submissions/services.py:677
+msgid "Pages"
+msgstr "Pages"
+
+#: apps/submissions/services.py:678
+msgid "Soumise le"
+msgstr "Submitted on"
+
+#: apps/submissions/services.py:679
+msgid "Modifiée le"
+msgstr "Updated on"
+
+#: apps/submissions/templates/submission/email/coauthor_message.txt:1
 #, python-format
 msgid ""
 "Bonjour,\n"
@@ -2286,12 +2377,12 @@ msgstr ""
 "\n"
 "If this is not the case, or if your address is wrong, please tell %(submitter_name)s or the organisers."
 
-#: apps/submissions/templates/submission/email/coauthor_subject.txt
+#: apps/submissions/templates/submission/email/coauthor_subject.txt:1
 #, python-format
 msgid "[%(site_name)s] Vous êtes déclaré co-auteur d'une soumission"
 msgstr "[%(site_name)s] You have been listed as a co-author of a submission"
 
-#: apps/submissions/templates/submission/email/extension_message.txt
+#: apps/submissions/templates/submission/email/extension_message.txt:1
 #, python-format
 msgid ""
 "Bonjour,\n"
@@ -2306,12 +2397,12 @@ msgstr ""
 "\n"
 "Reason: %(reason)s"
 
-#: apps/submissions/templates/submission/email/extension_subject.txt
+#: apps/submissions/templates/submission/email/extension_subject.txt:1
 #, python-format
 msgid "[%(site_name)s] Délai supplémentaire pour votre soumission"
 msgstr "[%(site_name)s] Extended deadline for your submission"
 
-#: apps/submissions/templates/submission/email/received_message.txt
+#: apps/submissions/templates/submission/email/received_message.txt:1
 #, python-format
 msgid ""
 "Bonjour,\n"
@@ -2326,12 +2417,12 @@ msgstr ""
 "\n"
 "You can change it until the call closes (%(call_close)s) from your space: %(link)s"
 
-#: apps/submissions/templates/submission/email/received_subject.txt
+#: apps/submissions/templates/submission/email/received_subject.txt:1
 #, python-format
 msgid "[%(site_name)s] Soumission reçue"
 msgstr "[%(site_name)s] Submission received"
 
-#: apps/submissions/templates/submission/email/withdrawn_message.txt
+#: apps/submissions/templates/submission/email/withdrawn_message.txt:1
 #, python-format
 msgid ""
 "Bonjour,\n"
@@ -2342,19 +2433,19 @@ msgstr ""
 "\n"
 "Your submission “%(title)s” (%(reference)s) to %(edition_title)s has been withdrawn. It will not be reviewed."
 
-#: apps/submissions/templates/submission/email/withdrawn_subject.txt
+#: apps/submissions/templates/submission/email/withdrawn_subject.txt:1
 #, python-format
 msgid "[%(site_name)s] Soumission retirée"
 msgstr "[%(site_name)s] Submission withdrawn"
 
-#: apps/submissions/workflow.py
+#: apps/submissions/workflow.py:113
 msgid "La soumission est incomplète."
 msgstr "The submission is incomplete."
 
-#: apps/submissions/workflow.py
+#: apps/submissions/workflow.py:121
 msgid "La recevabilité commence à la clôture de l'appel (et des dérogations)."
 msgstr "Screening starts when the call (and any extensions) closes."
 
-#: apps/submissions/workflow.py
+#: apps/submissions/workflow.py:150
 msgid "Changement de statut non autorisé."
 msgstr "Status change not allowed."

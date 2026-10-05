@@ -41,14 +41,17 @@ pytestmark = pytest.mark.django_db
 R, W, PUB, ARC = "edition.read", "edition.write", "edition.publish", "edition.archive"
 MR, MM, AR = "members.read", "members.manage", "audit.read"
 PW = "portal.write"
+SR, SE, SX = "submissions.read", "submissions.extend", "submissions.export"
 
 SPEC: dict[str, set[str]] = {
-    "ADMIN": {R, W, PUB, ARC, MR, MM, AR, PW},
-    "CHAIR": {R, W, PUB, MR, MM, AR, PW},
-    "SC_CHAIR": {R, MR, MM},  # D8 validée : lecture du paramétrage ; membres du CS seulement
-    "OC_MEMBER": {R},  # D8 : lecture seule (fonction « finances »)
-    "OC_COMMUNICATION": {R, PW},  # E11 (plan L2) : le CO « communication » écrit le portail
-    "SC_MEMBER": set(),
+    "ADMIN": {R, W, PUB, ARC, MR, MM, AR, PW, SR, SE, SX},
+    "CHAIR": {R, W, PUB, MR, MM, AR, PW, SR, SE, SX},
+    # D8 validée : lecture du paramétrage ; membres du CS seulement. F10, F8 (plan L3) :
+    # soumissions (lecture, dérogations, export).
+    "SC_CHAIR": {R, MR, MM, SR, SE, SX},
+    "OC_MEMBER": {R, SR},  # D8 : lecture seule (fonction « finances ») ; F10 : soumissions
+    "OC_COMMUNICATION": {R, PW, SR},  # E11 (plan L2) : le CO « communication » écrit le portail
+    "SC_MEMBER": set(),  # F10 : aucun accès aux soumissions avant L4
     "AUTHOR": set(),
 }
 # Profils qui ne sont pas un rôle seul : (rôle, fonction au CO).
@@ -359,6 +362,39 @@ CASES = [
         200,
         "/v1/manage/editions/{e}/portal/files/{file}/content",
     ),
+    # --- Soumissions (lot L3, plan L3 §4) ---------------------------------------------------
+    Case("manage-submissions-list", "GET", SR, 200, "/v1/manage/editions/{e}/submissions"),
+    Case("manage-submissions-stats", "GET", SR, 200, "/v1/manage/editions/{e}/submissions/stats"),
+    Case("manage-submissions-export", "GET", SX, 200, "/v1/manage/editions/{e}/submissions/export"),
+    Case(
+        "manage-submissions-detail",
+        "GET",
+        SR,
+        200,
+        "/v1/manage/editions/{e}/submissions/{submission}",
+    ),
+    Case(
+        "manage-submissions-file-content",
+        "GET",
+        SR,
+        200,
+        "/v1/manage/editions/{e}/submissions/{submission}/files/{submission_file}/content",
+    ),
+    Case(
+        "manage-submissions-extensions",
+        "POST",
+        SE,
+        201,
+        "/v1/manage/editions/{e}/submissions/{submission}/extensions",
+        {"until_local": "2099-04-02T23:59", "reason": "Panne de courant"},
+    ),
+    Case(
+        "manage-submissions-extension-revoke",
+        "POST",
+        SE,
+        200,
+        "/v1/manage/editions/{e}/submissions/{submission}/extensions/{extension}/revoke",
+    ),
     Case("manage-portal-poster", "GET", R, 200, "/v1/manage/editions/{e}/portal/poster"),
     Case(
         "manage-portal-poster",
@@ -454,7 +490,11 @@ def world():
     image = public_files.store(
         data=_png(), name="affiche.png", kind=PublicFileKind.IMAGE, edition=edition
     )
+    submission, submission_file, extension = _submission_with_extension(edition)
     ids = {
+        "submission": submission.pk,
+        "submission_file": submission_file.pk,
+        "extension": extension.pk,
         "file": document.pk,
         "image": image.pk,
         "section": section.pk,
@@ -470,6 +510,38 @@ def world():
         "invitation": invitation.pk,
     }
     return edition, users, ids
+
+
+def _submission_with_extension(edition):
+    """Brouillon avec un PDF et une dérogation, pour les routes de gestion. Un brouillon, et
+    non une soumission : celle-ci gèlerait ``double_blind`` (RG-19) et la case
+    « confidentialité » testerait la règle au lieu du droit."""
+    from apps.submissions import storage
+    from apps.submissions.models import SubmissionExtension, SubmissionFile
+    from apps.submissions.tests.factories import author_user, complete_submission
+
+    # Thématique et type propres : ceux de la matrice restent supprimables (sinon 409 in_use).
+    submission = complete_submission(edition, author_user())
+    name, digest = storage.write(PDF)
+    submission_file = SubmissionFile.objects.create(
+        submission=submission,
+        kind="main",
+        version=1,
+        storage_name=name,
+        original_name="article.pdf",
+        size=len(PDF),
+        sha256=digest,
+        pages=1,
+        is_current=True,
+        uploaded_by=submission.submitter,
+    )
+    extension = SubmissionExtension.objects.create(
+        submission=submission,
+        until=timezone.now() + dt.timedelta(days=2),
+        reason="Accordée",
+        granted_at=timezone.now(),
+    )
+    return submission, submission_file, extension
 
 
 def _png() -> bytes:

@@ -14,6 +14,7 @@ from zoneinfo import ZoneInfo
 
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, models, transaction
+from django.db.models import ProtectedError, RestrictedError
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
@@ -360,11 +361,18 @@ def _update_child(instance, data: Mapping[str, Any], allowed, action: str, actor
 
 
 def _delete_child(instance, action: str, actor: Actor) -> None:
-    """Suppression : possible en L1 (aucune référence) ; à partir de L3, un élément utilisé
-    renverra 409 ``in_use`` et devra être désactivé."""
+    """Suppression d'un élément sans référence. Un élément utilisé (thématique ou type d'une
+    soumission, depuis L3) répond 409 ``in_use`` : il se désactive, il ne se supprime pas.
+    Le refus vient des clés étrangères ``RESTRICT`` : aucune liste de références à tenir."""
     _writable(instance.edition, actor)
     record(action, actor=actor, edition=instance.edition, obj=instance, before=snapshot(instance))
-    instance.delete()
+    try:
+        instance.delete()
+    except (ProtectedError, RestrictedError) as error:
+        raise RuleViolation(
+            _("Élément utilisé par des soumissions : désactivez-le plutôt que de le supprimer."),
+            code=ErrorCode.IN_USE,
+        ) from error
 
 
 @transaction.atomic

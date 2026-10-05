@@ -3,18 +3,22 @@
 
 from __future__ import annotations
 
+import csv
+import io
+import logging
 import re
-from collections.abc import Mapping, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from datetime import datetime
 from typing import Any
+from zoneinfo import ZoneInfo
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.db.models import Max
+from django.db.models import Count, Exists, Max, OuterRef
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from apps.conferences.models import Edition, EditionStatus, FilePolicy, KeyDateCode
+from apps.conferences.models import Edition, EditionStatus, FilePolicy, KeyDate, KeyDateCode
 from apps.conferences.services import is_call_open, key_date
 from apps.core.actor import Actor, ActorKind
 from apps.core.audit import record
@@ -29,6 +33,8 @@ from apps.submissions.models import (
     SubmissionRevision,
     SubmissionStatus,
 )
+
+logger = logging.getLogger(__name__)
 
 KEYWORDS_MIN, KEYWORDS_MAX = 1, 6
 _WORD = re.compile(r"\w+(?:['\u2019-]\w+)*")
@@ -586,7 +592,14 @@ def grant_extension(
 
 @transaction.atomic
 def revoke_extension(extension: SubmissionExtension, *, actor: Actor) -> SubmissionExtension:
-    extension = SubmissionExtension.objects.select_for_update().get(pk=extension.pk)
+    """Révocation (idempotente) ; droit ``submissions.extend`` vérifié par la vue."""
+    extension = (
+        SubmissionExtension.objects.select_for_update()
+        .select_related("submission__edition")
+        .get(pk=extension.pk)
+    )
+    if extension.submission.edition.status == EditionStatus.ARCHIVED:
+        raise RuleViolation(code=ErrorCode.EDITION_ARCHIVED)
     if extension.revoked_at is None:
         extension.revoked_at = timezone.now()
         extension.save(update_fields=["revoked_at", "updated_at"])
@@ -597,3 +610,150 @@ def revoke_extension(extension: SubmissionExtension, *, actor: Actor) -> Submiss
             obj=extension.submission,
         )
     return extension
+
+
+# --- Gestion : compteurs, export, clôture (plan L3 §2.2, §4, F10) ----------------------------
+
+
+def status_counts(edition: Edition) -> dict[str, int]:
+    """Nombre de soumissions par statut (tous les statuts, zéro compris)."""
+    counts = dict.fromkeys(SubmissionStatus.values, 0)
+    rows = (
+        Submission.objects.filter(edition=edition)
+        .values("status")
+        .annotate(count=Count("id"))
+        .order_by()
+    )
+    for row in rows:
+        counts[row["status"]] = row["count"]
+    return counts
+
+
+# Premier caractère qu'un tableur interprète comme le début d'une formule (injection CSV).
+_FORMULA_PREFIXES = ("=", "+", "-", "@", "\t", "\r")
+
+
+def csv_cell(value: Any) -> str:
+    """Valeur d'une cellule, neutralisée : une apostrophe précède toute formule possible."""
+    text = "" if value is None else str(value)
+    return f"'{text}" if text.startswith(_FORMULA_PREFIXES) else text
+
+
+def _author_label(author: SubmissionAuthor) -> str:
+    details = ", ".join(part for part in (author.institution, author.country) if part)
+    name = f"{author.first_name} {author.last_name}".strip()
+    return f"{name} ({details})" if details else name
+
+
+def export_csv(
+    edition: Edition,
+    submissions: Iterable[Submission],
+    *,
+    actor: Actor,
+    filters: Mapping[str, Any],
+) -> str:
+    """Export CSV des soumissions filtrées (``submissions.export``), journalisé (RG-17 :
+    export de masse). Séparateur « ; » et BOM UTF-8 : ouverture directe dans un tableur
+    configuré en français. Dates à l'heure de l'édition."""
+    zone = ZoneInfo(edition.timezone)
+
+    def local(value: datetime | None) -> str:
+        return value.astimezone(zone).strftime("%Y-%m-%d %H:%M") if value else ""
+
+    output = io.StringIO()
+    writer = csv.writer(output, delimiter=";", lineterminator="\r\n")
+    writer.writerow(
+        [
+            str(_("Référence")),
+            str(_("Statut")),
+            str(_("Titre")),
+            str(_("Thématique")),
+            str(_("Type")),
+            str(_("Langue")),
+            str(_("Auteurs")),
+            str(_("Correspondants")),
+            str(_("Mots-clés")),
+            str(_("Résumé")),
+            str(_("Pages")),
+            str(_("Soumise le")),
+            str(_("Modifiée le")),
+        ]
+    )
+    count = 0
+    for submission in submissions:
+        authors = sorted(submission.authors.all(), key=lambda a: a.position)
+        current = next(
+            (
+                f
+                for f in submission.files.all()
+                if f.kind == SubmissionFileKind.MAIN and f.is_current
+            ),
+            None,
+        )
+        writer.writerow(
+            [
+                csv_cell(value)
+                for value in (
+                    submission.reference or "",
+                    submission.get_status_display(),
+                    submission.title,
+                    submission.track.code if submission.track else "",
+                    submission.submission_type.code if submission.submission_type else "",
+                    submission.language,
+                    " ; ".join(_author_label(author) for author in authors),
+                    " ; ".join(a.email for a in authors if a.is_corresponding),
+                    ", ".join(submission.keywords or []),
+                    submission.abstract,
+                    current.pages if current else "",
+                    local(submission.submitted_at),
+                    local(submission.updated_at),
+                )
+            ]
+        )
+        count += 1
+    record(
+        "submission.exported",
+        actor=actor,
+        edition=edition,
+        after={"count": count, "filters": dict(filters)},
+    )
+    return "\ufeff" + output.getvalue()
+
+
+def close_calls(*, now: datetime | None = None, actor: Actor | None = None) -> int:
+    """Clôture de l'appel (plan L3 §2.2), lancée par le cron (``close_call``).
+
+    Fait passer en recevabilité (``SUBMITTED`` → ``SCREENING``) les soumissions des éditions
+    dont la clôture est passée, sauf celles qui ont une dérogation en cours : elles passent
+    au premier lancement qui suit son échéance. Idempotente : une soumission déjà passée
+    n'est plus candidate. Une soumission refusée par ``transition`` (cas limite) est
+    journalisée et laissée en l'état ; les autres sont traitées. Renvoie le nombre de
+    soumissions passées en recevabilité.
+    """
+    from apps.submissions import workflow
+
+    now = now or timezone.now()
+    actor = actor or Actor.system("cron:close_call")
+    closed = (
+        KeyDate.objects.filter(code=KeyDateCode.CALL_CLOSE, at__lte=now)
+        .exclude(edition__status=EditionStatus.ARCHIVED)
+        .values("edition_id")
+    )
+    in_extension = SubmissionExtension.objects.filter(
+        submission=OuterRef("pk"), revoked_at__isnull=True, until__gt=now
+    )
+    candidates = (
+        Submission.objects.filter(status=SubmissionStatus.SUBMITTED, edition_id__in=closed)
+        .exclude(Exists(in_extension))
+        .order_by("edition_id", "id")
+        .values_list("pk", flat=True)
+    )
+    moved = 0
+    for pk in list(candidates):
+        try:
+            workflow.transition(Submission(pk=pk), SubmissionStatus.SCREENING, actor, now=now)
+        except RuleViolation as error:
+            logger.warning("Clôture : soumission %s laissée en l'état (%s)", pk, error.code)
+            continue
+        moved += 1
+    return moved
