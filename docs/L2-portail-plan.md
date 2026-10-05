@@ -1,7 +1,9 @@
 # Lot L2 — Portail public : plan d'implémentation
 
 > **Statut : validé le 5 octobre 2026** (décisions E1 à E14, adaptations du §2.4 et
-> propositions par défaut du §10). L2.0 est faite : résultats au §11.
+> propositions par défaut du §10). **Lot réalisé** (L2.0 à L2.7) : bilans aux §11 à §18,
+> synthèse dans [`L2-portail.md`](L2-portail.md), étude mise à jour (§18). Reste la démo C
+> sur o2switch.
 >
 > **v2** : le plan suit trois compétences imposées par le commanditaire (dépôt
 > `zezesylvain/zds-skills`) :
@@ -658,3 +660,21 @@ base, nettoyage, repli sans Pillow) ; `GESTCONF_FILES_DIR` dans `.env.example`.
   HTTPS.
 - L'aperçu Open Graph réel (Facebook, LinkedIn) n'est vérifiable qu'en production, avec une
   URL publique (démo C, L2.7).
+
+## 18. Bilan de L2.7 (5 octobre 2026)
+
+- **Recette locale** (démo C sans o2switch, Chromium) :
+  - le bandeau compte 78 modifications non publiées ;
+  - publication simulée selon `--portal-only` (pré-rendu contre l'API locale, 30 routes,
+    plan du site, puis `mark_portal_published --built-at`) : « Le portail est à jour » ;
+  - `Ctrl+K` « affiche » ouvre « Documents et images », et `?` affiche sa fiche ;
+  - comités sans le membre non consentant ;
+  - modèle téléchargé en `attachment` ;
+  - aucune erreur dans la console.
+- **Documentation** :
+  - étude §18 « Mises à jour issues du lot L2 » (MD et HTML, version 1.2) ;
+  - `CLAUDE.md` (« Décisions du lot L2 ») ;
+  - bilan du lot [`L2-portail.md`](L2-portail.md) ;
+  - `deploy/README.md` (« Publier le portail », tests de fumée).
+- **Non fait, faute d'accès** : démo C sur o2switch (V28, premier `--portal-only`, aperçu
+  Open Graph réel). C'est le critère de fin de L2.7 du §8 : il reste ouvert.

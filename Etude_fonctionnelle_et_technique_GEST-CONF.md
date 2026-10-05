@@ -3,7 +3,7 @@
 
 | | |
 |---|---|
-| **Version** | 1.1 – document de cadrage, mis à jour après le lot L1 (§17) |
+| **Version** | 1.2 – document de cadrage, mis à jour après les lots L1 (§17) et L2 (§18) |
 | **Date** | 5 octobre 2026 |
 | **Auteur** | Étude réalisée pour ZDS |
 | **Statut** | Pour validation |
@@ -1410,6 +1410,54 @@ Les décisions D1 à D18 du plan [`docs/L1-socle-plan.md`](docs/L1-socle-plan.md
 ### 17.10 Questions ouvertes ajoutées
 
 - Fournisseur d'e-mails et domaine ; durées de conservation par catégorie ; fournisseur anti-robots ; environnement de recette ; version et `sql_mode` de MariaDB, fréquence du cron ; outil de supervision des erreurs ; procédure de vérification d'identité avant `reset_mfa` ; sauvegardes avant les données réelles ; lot d'accueil du déploiement continu ; 2FA des relecteurs (`SC_MEMBER`) ; émetteur affiché dans les applications TOTP (Q15).
+
+## 18. Mises à jour issues du lot L2 (version 1.2)
+
+Les décisions E1 à E14 du plan [`docs/L2-portail-plan.md`](docs/L2-portail-plan.md), les adaptations de son §2.4 et les propositions par défaut de son §10 ont été validées le 5 octobre 2026 et mises en œuvre dans le lot L2. Cette section les reporte dans l'étude ; **en cas de divergence avec les sections précédentes (§17 compris), elle prévaut**. Le détail (justifications, vérifications, écarts constatés) est dans le plan, §2 et §11 à §17 ; le bilan du lot dans [`docs/L2-portail.md`](docs/L2-portail.md).
+
+### 18.1 Portail public (M1)
+
+- **Pré-rendu au build seul** (E1), à partir de l'API publique : aucun serveur Node en production. Une modification faite dans la gestion n'apparaît qu'à la **publication** suivante ; la gestion compte les modifications non publiées (bandeau d'écart). Un contrôle après build refuse de livrer un portail incomplet (routes annoncées par l'API, marqueur de rendu complet dans chaque page).
+- **URL par langue** (E2) : `/fr/…` et `/en/…`, tout bilingue ; `/` redirige vers `/fr/` (302) ; adresses canoniques **avec** barre finale ; `/compte` et `/gestion` inchangés. Pages du site à adresse figée (accueil, appel, dates, thématiques, comités, programme, intervenants, inscription) et pages personnalisées `/fr/p/<slug>/`.
+- **CMS-lite** (compétence `gestion-cms-portail-angular`) : sections typées réutilisables (catalogue fermé : texte riche, bannière d'appel à l'action, image et texte, en-tête de l'édition, dates clés, thématiques, types de communication, documents, comité), pages composées par un composeur à boutons (ordre en liste complète), menus d'en-tête et de pied gérables avec repli codé. **Le CMS ajoute, il ne remplace pas** : les types « données » ne portent que l'habillage, leur contenu vient des services publics.
+- **HTML en liste blanche** (E3), assaini à l'écriture (serveur, `html.parser`) et au rendu (portail, sans DOM).
+- **Programme, intervenants, inscription** (E6) : pages « à venir » éditables par sections ; les vraies pages arrivent avec leurs données (L5, L6). **Écart avec l'étude**, qui plaçait le programme public en L2.
+- **Édition courante seule** (E10) ; compte à rebours calculé dans le navigateur, dans le fuseau de l'édition (E8).
+
+### 18.2 Comités publics et profil
+
+- **Comités** (E5) : membres actifs des comités scientifique (`SC_CHAIR`, `SC_MEMBER`) et d'organisation (`CHAIR`, `OC_MEMBER`) ayant le consentement `directory_listing` ; photo avec le consentement `photo_publication` en plus ; **jamais l'adresse**. Les autres membres sont comptés (« et N autres membres »). Un retrait de consentement s'applique à la publication suivante (compté dans le bandeau d'écart).
+- **Profil** (E12) : photo (réencodée, 800 px, sans EXIF) et liens publics `https` (site web, Google Scholar, LinkedIn) ; nouveau consentement `photo_publication`, dont le retrait a un effet immédiat sur la photo. Export et anonymisation couvrent photo et liens.
+
+### 18.3 Fichiers publics (règle n° 8 adaptée)
+
+- Classe « fichier public » (E4) : documents (PDF, DOCX, ODT, ZIP de modèle LaTeX, 10 Mio), images (PNG, JPEG, WebP, 5 Mio) et photos ; stockage **hors racine web**, nom aléatoire, **type vérifié par le contenu**, images réencodées par **Pillow** (EXIF supprimé). **Adaptation de la règle n° 8** : ces fichiers, publics par nature, sont servis **sans authentification** par `GET /api/v1/public/files/<uuid>/<nom>`, seulement s'ils sont publiés et dans un contexte public (édition courante publiée, ou photo consentie), avec `nosniff`, CSP `sandbox` et `attachment` pour les documents ; jamais par Apache. Les fichiers déposés par les auteurs (L3) restent soumis à la règle n° 8 sans adaptation.
+- Affiche de l'édition (`edition.poster`), utilisée comme image Open Graph. Pillow : roues `manylinux_2_27` ou plus récentes (glibc ≥ 2.27), **à vérifier sur o2switch** (contrôle V28) ; repli sans réencodage prévu.
+
+### 18.4 Droits et ergonomie de la gestion
+
+- Capacité **`portal.write`** (E11) : `ADMIN`, `CHAIR` et `OC_MEMBER` de fonction « communication » (première capacité accordée par une fonction au CO) ; lecture par `edition.read`. Pas de permission de modèle Django ni de console générique (adaptations du §2.4 du plan).
+- Gestion : **rail en catégories rétractables** et **recherche d'écran** `⌘K`/`Ctrl+K` dérivée du rail (E13, compétence `recherche-menu-topbar-angular`) ; **guide intégré** `/gestion/aide` et **aide contextuelle** `?` pour tous les écrans (E14, compétence `guide-utilisateur-integre-angular`), en clés i18n FR/EN. Le rail et la recherche ne sont que le reflet des capacités : les droits restent vérifiés par le serveur.
+
+### 18.5 Référencement (E7)
+
+- Par page : titre, description, adresse canonique, `hreflang` (`fr`, `en`, `x-default` → français), Open Graph (affiche) ; JSON-LD `Event` sur l'accueil, non exécutable et donc hors CSP à empreintes. `sitemap.xml` (variantes de langue) et ligne `Sitemap:` de `robots.txt` écrits au build, une fois le portail jugé complet.
+
+### 18.6 Modèle de données et API
+
+- Nouvelle application `portal` : `portal_section`, `portal_page` (`is_system` pour les pages du site), `portal_page_section`, `portal_menu_item`, `portal_publication` ; `core_public_file` ; `edition.poster` ; `profile.photo`, `website`, `scholar_url`, `linkedin_url`. Écritures par `portal/services.py`, auditées (`portal.*`), adresses masquées dans les clichés du journal.
+- API publique (sans authentification, cache public court) : `/api/v1/public/portal/routes` (routes à pré-rendre et nombre attendu), `pages/<slug>`, `menu`, `site` (édition, documents, affiche, comités, origine publique) et `/api/v1/public/files/…`. API de gestion `…/manage/editions/{id}/portal/…` (sections et aperçu, pages et composition, menus, fichiers, affiche, état de publication) ; compte : `/api/v1/me/photo`.
+
+### 18.7 Exploitation
+
+- **Publication du portail** (E9) : `deploy/deploy.sh --portal-only` (pré-rendu contre l'API de production, contrôle, synchronisation sans toucher à `/gestion/` ni à `/api/`, puis `manage.py mark_portal_published --built-at`, qui remet le compteur à zéro en gardant les modifications faites pendant le build). Le déploiement complet l'enchaîne une fois le backend en ligne. Planifier la publication relève du déploiement continu (D18), non tranché.
+- Variable `GESTCONF_FILES_DIR` (fichiers publics, hors racine web, à sauvegarder avec la base) ; nettoyage des fichiers orphelins par `cleanup`, fichiers manquants signalés par `check_integrity`. Test de fumée étendu (redirection, pages pré-rendues, plan du site, fichier public).
+
+### 18.8 Planning et points ouverts
+
+- Charge de L2 réestimée à 17 – 21,5 j-h (étude : 10 – 14), du fait du CMS-lite complet et de l'ergonomie de toute la gestion.
+- **Budget du portail** : bundle initial de 371,4 kB pour un avertissement à 365 kB (erreur à 380 kB) ; relever l'avertissement ou optimiser : décision du commanditaire.
+- À vérifier sur o2switch : Pillow (V28), aperçu Open Graph réel et démo C en production. Questions ouvertes ajoutées : textes définitifs des consentements « annuaire » et « photo » (Q14), cadence de publication du portail (D18), titres affichés (liste de `ProfileTitle`).
 
 ---
 

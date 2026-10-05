@@ -108,6 +108,18 @@ Les URL Django sont déclarées **sans** le préfixe `/api` (`v1/...`) : `config
 
 Les décisions D1 à D18 du plan [`docs/L1-socle-plan.md`](docs/L1-socle-plan.md) ont été validées le 5 octobre 2026 : elles s'appliquent (notamment D1 : aucun rôle global, autorité de plateforme exercée par des commandes `manage.py` auditées). Elles sont reportées dans l'étude, **§17 « Mises à jour issues du lot L1 »**, qui prévaut sur les sections antérieures en cas de divergence. Bilan du lot et exploitation : [`docs/L1-socle.md`](docs/L1-socle.md).
 
+## Décisions du lot L2
+
+Les décisions E1 à E14 du plan [`docs/L2-portail-plan.md`](docs/L2-portail-plan.md) et les adaptations de son §2.4 ont été validées le 5 octobre 2026. Elles sont reportées dans l'étude, **§18 « Mises à jour issues du lot L2 »**, qui prévaut sur les sections antérieures (§17 compris). Points à retenir :
+
+- portail **pré-rendu au build seul**, `/fr/…` et `/en/…` ; une modification n'est visible qu'à la publication (`deploy/deploy.sh --portal-only`), la gestion compte les modifications non publiées ;
+- contenus du portail par le CMS-lite (`apps/portal`) : sections typées à catalogue fermé, HTML en liste blanche assaini au serveur **et** au rendu ; capacité `portal.write` ;
+- fichiers publics (`core.PublicFile`) : adaptation de la règle n° 8 limitée aux fichiers publics par nature ; les fichiers des auteurs restent soumis à la règle sans adaptation ;
+- comités publics : consentement `directory_listing` (et `photo_publication` pour la photo), jamais d'adresse ;
+- gestion : chaque nouvel écran s'inscrit dans `core/navigation.ts` (rail et recherche) et reçoit sa fiche d'aide (`help/help-sheets.ts`), sous peine d'échec des tests de cohérence.
+
+Bilan du lot : [`docs/L2-portail.md`](docs/L2-portail.md).
+
 ## Questions ouvertes (étude §15, à ne pas trancher seul)
 
 Date de la conférence, mono- ou multi-conférences, niveau de double aveugle, grille et pondérations définitives, résumé seul ou article complet, tarifs et agrégateur de paiement, entité de facturation, actes (DOI/ISBN), sessions hybrides, lettres d'invitation, emplacement de l'espace évaluateur (proposé : application `gestion`).

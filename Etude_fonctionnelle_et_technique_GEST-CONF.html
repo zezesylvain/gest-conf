@@ -155,6 +155,17 @@ hr{border:0;border-top:1px solid var(--line);margin:2em 0}
 <li><a href="#17-10-questions-ouvertes-ajoutees">17.10 Questions ouvertes ajoutées</a></li>
 </ul>
 </li>
+<li><a href="#18-mises-a-jour-issues-du-lot-l2">18. Mises à jour issues du lot L2 (version 1.2)</a><ul>
+<li><a href="#18-1-portail-public-m1">18.1 Portail public (M1)</a></li>
+<li><a href="#18-2-comites-publics-et-profil">18.2 Comités publics et profil</a></li>
+<li><a href="#18-3-fichiers-publics-regle-n-8-adaptee">18.3 Fichiers publics (règle n° 8 adaptée)</a></li>
+<li><a href="#18-4-droits-et-ergonomie-de-la-gestion">18.4 Droits et ergonomie de la gestion</a></li>
+<li><a href="#18-5-referencement-e7">18.5 Référencement (E7)</a></li>
+<li><a href="#18-6-modele-de-donnees-et-api">18.6 Modèle de données et API</a></li>
+<li><a href="#18-7-exploitation">18.7 Exploitation</a></li>
+<li><a href="#18-8-planning-et-points-ouverts">18.8 Planning et points ouverts</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </nav><main><h1 id="etude-fonctionnelle-et-technique">Étude fonctionnelle et technique</h1>
@@ -169,7 +180,7 @@ hr{border:0;border-top:1px solid var(--line);margin:2em 0}
 <tbody>
 <tr>
 <td><strong>Version</strong></td>
-<td>1.1 – document de cadrage, mis à jour après le lot L1 (§17)</td>
+<td>1.2 – document de cadrage, mis à jour après les lots L1 (§17) et L2 (§18)</td>
 </tr>
 <tr>
 <td><strong>Date</strong></td>
@@ -3179,6 +3190,52 @@ def weighted_score(scores, criteria, scale_min, scale_max):
 <h3 id="17-10-questions-ouvertes-ajoutees">17.10 Questions ouvertes ajoutées</h3>
 <ul>
 <li>Fournisseur d'e-mails et domaine ; durées de conservation par catégorie ; fournisseur anti-robots ; environnement de recette ; version et <code>sql_mode</code> de MariaDB, fréquence du cron ; outil de supervision des erreurs ; procédure de vérification d'identité avant <code>reset_mfa</code> ; sauvegardes avant les données réelles ; lot d'accueil du déploiement continu ; 2FA des relecteurs (<code>SC_MEMBER</code>) ; émetteur affiché dans les applications TOTP (Q15).</li>
+</ul>
+<h2 id="18-mises-a-jour-issues-du-lot-l2">18. Mises à jour issues du lot L2 (version 1.2)</h2>
+<p>Les décisions E1 à E14 du plan <a href="docs/L2-portail-plan.md"><code>docs/L2-portail-plan.md</code></a>, les adaptations de son §2.4 et les propositions par défaut de son §10 ont été validées le 5 octobre 2026 et mises en œuvre dans le lot L2. Cette section les reporte dans l'étude ; <strong>en cas de divergence avec les sections précédentes (§17 compris), elle prévaut</strong>. Le détail (justifications, vérifications, écarts constatés) est dans le plan, §2 et §11 à §17 ; le bilan du lot dans <a href="docs/L2-portail.md"><code>docs/L2-portail.md</code></a>.</p>
+<h3 id="18-1-portail-public-m1">18.1 Portail public (M1)</h3>
+<ul>
+<li><strong>Pré-rendu au build seul</strong> (E1), à partir de l'API publique : aucun serveur Node en production. Une modification faite dans la gestion n'apparaît qu'à la <strong>publication</strong> suivante ; la gestion compte les modifications non publiées (bandeau d'écart). Un contrôle après build refuse de livrer un portail incomplet (routes annoncées par l'API, marqueur de rendu complet dans chaque page).</li>
+<li><strong>URL par langue</strong> (E2) : <code>/fr/…</code> et <code>/en/…</code>, tout bilingue ; <code>/</code> redirige vers <code>/fr/</code> (302) ; adresses canoniques <strong>avec</strong> barre finale ; <code>/compte</code> et <code>/gestion</code> inchangés. Pages du site à adresse figée (accueil, appel, dates, thématiques, comités, programme, intervenants, inscription) et pages personnalisées <code>/fr/p/&lt;slug&gt;/</code>.</li>
+<li><strong>CMS-lite</strong> (compétence <code>gestion-cms-portail-angular</code>) : sections typées réutilisables (catalogue fermé : texte riche, bannière d'appel à l'action, image et texte, en-tête de l'édition, dates clés, thématiques, types de communication, documents, comité), pages composées par un composeur à boutons (ordre en liste complète), menus d'en-tête et de pied gérables avec repli codé. <strong>Le CMS ajoute, il ne remplace pas</strong> : les types « données » ne portent que l'habillage, leur contenu vient des services publics.</li>
+<li><strong>HTML en liste blanche</strong> (E3), assaini à l'écriture (serveur, <code>html.parser</code>) et au rendu (portail, sans DOM).</li>
+<li><strong>Programme, intervenants, inscription</strong> (E6) : pages « à venir » éditables par sections ; les vraies pages arrivent avec leurs données (L5, L6). <strong>Écart avec l'étude</strong>, qui plaçait le programme public en L2.</li>
+<li><strong>Édition courante seule</strong> (E10) ; compte à rebours calculé dans le navigateur, dans le fuseau de l'édition (E8).</li>
+</ul>
+<h3 id="18-2-comites-publics-et-profil">18.2 Comités publics et profil</h3>
+<ul>
+<li><strong>Comités</strong> (E5) : membres actifs des comités scientifique (<code>SC_CHAIR</code>, <code>SC_MEMBER</code>) et d'organisation (<code>CHAIR</code>, <code>OC_MEMBER</code>) ayant le consentement <code>directory_listing</code> ; photo avec le consentement <code>photo_publication</code> en plus ; <strong>jamais l'adresse</strong>. Les autres membres sont comptés (« et N autres membres »). Un retrait de consentement s'applique à la publication suivante (compté dans le bandeau d'écart).</li>
+<li><strong>Profil</strong> (E12) : photo (réencodée, 800 px, sans EXIF) et liens publics <code>https</code> (site web, Google Scholar, LinkedIn) ; nouveau consentement <code>photo_publication</code>, dont le retrait a un effet immédiat sur la photo. Export et anonymisation couvrent photo et liens.</li>
+</ul>
+<h3 id="18-3-fichiers-publics-regle-n-8-adaptee">18.3 Fichiers publics (règle n° 8 adaptée)</h3>
+<ul>
+<li>Classe « fichier public » (E4) : documents (PDF, DOCX, ODT, ZIP de modèle LaTeX, 10 Mio), images (PNG, JPEG, WebP, 5 Mio) et photos ; stockage <strong>hors racine web</strong>, nom aléatoire, <strong>type vérifié par le contenu</strong>, images réencodées par <strong>Pillow</strong> (EXIF supprimé). <strong>Adaptation de la règle n° 8</strong> : ces fichiers, publics par nature, sont servis <strong>sans authentification</strong> par <code>GET /api/v1/public/files/&lt;uuid&gt;/&lt;nom&gt;</code>, seulement s'ils sont publiés et dans un contexte public (édition courante publiée, ou photo consentie), avec <code>nosniff</code>, CSP <code>sandbox</code> et <code>attachment</code> pour les documents ; jamais par Apache. Les fichiers déposés par les auteurs (L3) restent soumis à la règle n° 8 sans adaptation.</li>
+<li>Affiche de l'édition (<code>edition.poster</code>), utilisée comme image Open Graph. Pillow : roues <code>manylinux_2_27</code> ou plus récentes (glibc ≥ 2.27), <strong>à vérifier sur o2switch</strong> (contrôle V28) ; repli sans réencodage prévu.</li>
+</ul>
+<h3 id="18-4-droits-et-ergonomie-de-la-gestion">18.4 Droits et ergonomie de la gestion</h3>
+<ul>
+<li>Capacité <strong><code>portal.write</code></strong> (E11) : <code>ADMIN</code>, <code>CHAIR</code> et <code>OC_MEMBER</code> de fonction « communication » (première capacité accordée par une fonction au CO) ; lecture par <code>edition.read</code>. Pas de permission de modèle Django ni de console générique (adaptations du §2.4 du plan).</li>
+<li>Gestion : <strong>rail en catégories rétractables</strong> et <strong>recherche d'écran</strong> <code>⌘K</code>/<code>Ctrl+K</code> dérivée du rail (E13, compétence <code>recherche-menu-topbar-angular</code>) ; <strong>guide intégré</strong> <code>/gestion/aide</code> et <strong>aide contextuelle</strong> <code>?</code> pour tous les écrans (E14, compétence <code>guide-utilisateur-integre-angular</code>), en clés i18n FR/EN. Le rail et la recherche ne sont que le reflet des capacités : les droits restent vérifiés par le serveur.</li>
+</ul>
+<h3 id="18-5-referencement-e7">18.5 Référencement (E7)</h3>
+<ul>
+<li>Par page : titre, description, adresse canonique, <code>hreflang</code> (<code>fr</code>, <code>en</code>, <code>x-default</code> → français), Open Graph (affiche) ; JSON-LD <code>Event</code> sur l'accueil, non exécutable et donc hors CSP à empreintes. <code>sitemap.xml</code> (variantes de langue) et ligne <code>Sitemap:</code> de <code>robots.txt</code> écrits au build, une fois le portail jugé complet.</li>
+</ul>
+<h3 id="18-6-modele-de-donnees-et-api">18.6 Modèle de données et API</h3>
+<ul>
+<li>Nouvelle application <code>portal</code> : <code>portal_section</code>, <code>portal_page</code> (<code>is_system</code> pour les pages du site), <code>portal_page_section</code>, <code>portal_menu_item</code>, <code>portal_publication</code> ; <code>core_public_file</code> ; <code>edition.poster</code> ; <code>profile.photo</code>, <code>website</code>, <code>scholar_url</code>, <code>linkedin_url</code>. Écritures par <code>portal/services.py</code>, auditées (<code>portal.*</code>), adresses masquées dans les clichés du journal.</li>
+<li>API publique (sans authentification, cache public court) : <code>/api/v1/public/portal/routes</code> (routes à pré-rendre et nombre attendu), <code>pages/&lt;slug&gt;</code>, <code>menu</code>, <code>site</code> (édition, documents, affiche, comités, origine publique) et <code>/api/v1/public/files/…</code>. API de gestion <code>…/manage/editions/{id}/portal/…</code> (sections et aperçu, pages et composition, menus, fichiers, affiche, état de publication) ; compte : <code>/api/v1/me/photo</code>.</li>
+</ul>
+<h3 id="18-7-exploitation">18.7 Exploitation</h3>
+<ul>
+<li><strong>Publication du portail</strong> (E9) : <code>deploy/deploy.sh --portal-only</code> (pré-rendu contre l'API de production, contrôle, synchronisation sans toucher à <code>/gestion/</code> ni à <code>/api/</code>, puis <code>manage.py mark_portal_published --built-at</code>, qui remet le compteur à zéro en gardant les modifications faites pendant le build). Le déploiement complet l'enchaîne une fois le backend en ligne. Planifier la publication relève du déploiement continu (D18), non tranché.</li>
+<li>Variable <code>GESTCONF_FILES_DIR</code> (fichiers publics, hors racine web, à sauvegarder avec la base) ; nettoyage des fichiers orphelins par <code>cleanup</code>, fichiers manquants signalés par <code>check_integrity</code>. Test de fumée étendu (redirection, pages pré-rendues, plan du site, fichier public).</li>
+</ul>
+<h3 id="18-8-planning-et-points-ouverts">18.8 Planning et points ouverts</h3>
+<ul>
+<li>Charge de L2 réestimée à 17 – 21,5 j-h (étude : 10 – 14), du fait du CMS-lite complet et de l'ergonomie de toute la gestion.</li>
+<li><strong>Budget du portail</strong> : bundle initial de 371,4 kB pour un avertissement à 365 kB (erreur à 380 kB) ; relever l'avertissement ou optimiser : décision du commanditaire.</li>
+<li>À vérifier sur o2switch : Pillow (V28), aperçu Open Graph réel et démo C en production. Questions ouvertes ajoutées : textes définitifs des consentements « annuaire » et « photo » (Q14), cadence de publication du portail (D18), titres affichés (liste de <code>ProfileTitle</code>).</li>
 </ul>
 <hr />
 <p><em>Fin du document.</em></p></main></div>
