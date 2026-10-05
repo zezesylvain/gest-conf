@@ -133,6 +133,15 @@ def test_o2switch_check_pins_crypto_versions():
     assert all("==" in requirement for requirement in line.group(1).split())
 
 
+def test_o2switch_check_pins_pillow_version():
+    """V28 (lot L2, E4) : la version de Pillow essayée est épinglée et le réencodage testé."""
+    code = CHECK_SCRIPT.read_text(encoding="utf-8")
+    line = re.search(r"^readonly PILLOW_REQUIREMENT='([^']+)'", code, re.M)
+    assert line and "==" in line.group(1)
+    assert "report V28 OK" in code
+    assert 'assert not reread.getexif(), "EXIF conservé"' in code
+
+
 def test_o2switch_check_controls_innodb_row_format():
     """V27 : sans DYNAMIC (ou pages < 8 Kio), migrate échoue sur les index utf8mb4 longs."""
     code = CHECK_SCRIPT.read_text(encoding="utf-8")

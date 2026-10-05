@@ -2,7 +2,7 @@
 # Vérifications de l'hébergement o2switch, étape L1.0 (plan L1 §13 et §14.2).
 #
 # Script en LECTURE SEULE, à lancer en SSH dans le compte o2switch. Résultats à reporter
-# dans docs/L1-verifications-o2switch.md (identifiants V00 à V27).
+# dans docs/L1-verifications-o2switch.md (identifiants V00 à V28).
 #
 #   # Sans copier le script sur le serveur (sortie enregistrée sur le poste local) :
 #   ssh compte@serveur 'bash -s' < deploy/check-o2switch.sh | tee check-o2switch.txt
@@ -44,6 +44,9 @@ readonly PYMYSQL_REQUIREMENT='pymysql==1.2.3 --hash=sha256:14f1c68e2ed859243ae5c
 # la dernière publiée. Venv séparé de celui des contrôles MariaDB : ces paquets (et leurs
 # dépendances, non épinglées) ne s'exécutent jamais à côté des identifiants de la base.
 readonly CRYPTO_REQUIREMENTS=(cryptography==50.0.2 fido2==2.2.1)
+# V28 (lot L2, décision E4) : Pillow pour réencoder photos et images publiques. Les roues de
+# Pillow 12 exigent glibc >= 2.27 (manylinux_2_27/2_28) : voir V02. Même venv jetable que V03.
+readonly PILLOW_REQUIREMENT='pillow==12.3.0'
 
 APP_DIR="$HOME/gestconf-app"
 ENV_FILE=""
@@ -567,12 +570,15 @@ main() {
   local base_python="${app_python:-$best}" venv_python=""
   if ((NETWORK == 0)); then
     report V03 INFO "cryptography et fido2 en roues binaires" "non exécuté (--no-network)"
+    report V28 INFO "Pillow en roue binaire (E4)" "non exécuté (--no-network)"
     report V04 INFO "Dépendances verrouillées installables en roues" "non exécuté (--no-network)"
   elif [[ -z "$base_python" ]]; then
     report V03 ÉCHEC "cryptography et fido2 en roues binaires" "aucun Python 3.12/3.13 pour créer le venv"
+    report V28 ÉCHEC "Pillow en roue binaire (E4)" "aucun Python 3.12/3.13 pour créer le venv"
   elif ! "$base_python" -m venv "$WORK/venv" >"$WORK/venv.log" 2>&1; then
     report V03 ÉCHEC "cryptography et fido2 en roues binaires" \
       "création du venv impossible avec $base_python : $(tail -n 1 "$WORK/venv.log")"
+    report V28 ÉCHEC "Pillow en roue binaire (E4)" "création du venv impossible (voir V03)"
   else
     venv_python="$WORK/venv/bin/python"
     if with_timeout 600 "$venv_python" -m pip install --quiet --no-cache-dir --only-binary=:all: \
@@ -603,6 +609,49 @@ PY
       fi
     else
       report V03 ÉCHEC "cryptography et fido2 en roues binaires" "$(tail -n 2 "$WORK/pip-crypto.log" | paste -sd ' ' -)"
+    fi
+
+    # V28 : roue binaire de Pillow, puis réencodage réel (JPEG avec EXIF -> JPEG et WebP
+    # redimensionnés, sans EXIF), comme le fera le service des fichiers publics (L2.4).
+    if with_timeout 600 "$venv_python" -m pip install --quiet --no-cache-dir --only-binary=:all: \
+      "$PILLOW_REQUIREMENT" >"$WORK/pip-pillow.log" 2>&1; then
+      local pillow_info
+      if pillow_info="$("$venv_python" - 2>&1 <<'PY'
+import importlib.metadata as metadata
+import io
+
+from PIL import Image, features
+
+source = Image.new("RGB", (2400, 1600), (40, 90, 160))
+exif = Image.Exif()
+exif[0x010F] = "gestconf"  # Make
+buffer = io.BytesIO()
+source.save(buffer, "JPEG", exif=exif.tobytes())
+image = Image.open(io.BytesIO(buffer.getvalue()))
+assert image.getexif().get(0x010F) == "gestconf"
+image.thumbnail((1600, 1600))
+outputs = {}
+for fmt in ("JPEG", "WEBP", "PNG"):
+    out = io.BytesIO()
+    image.save(out, fmt)
+    reread = Image.open(io.BytesIO(out.getvalue()))
+    assert reread.size == (1600, 1067), reread.size
+    assert not reread.getexif(), "EXIF conservé"
+    outputs[fmt] = len(out.getvalue())
+wheel = metadata.distribution("pillow").read_text("WHEEL") or ""
+tags = ",".join(line.split(":", 1)[1].strip() for line in wheel.splitlines() if line.startswith("Tag:"))
+print(
+    f"Pillow {metadata.version('pillow')} ({tags}) ; "
+    f"jpeg={features.check('jpg')} webp={features.check('webp')} zlib={features.check('zlib')}"
+)
+PY
+)"; then
+        report V28 OK "Pillow en roue binaire, réencodage JPEG/WebP/PNG sans EXIF (E4)" "$pillow_info"
+      else
+        report V28 ÉCHEC "Pillow en roue binaire (E4)" "installé mais réencodage impossible : $(tail -n 1 <<<"$pillow_info")"
+      fi
+    else
+      report V28 ÉCHEC "Pillow en roue binaire (E4)" "$(tail -n 2 "$WORK/pip-pillow.log" | paste -sd ' ' -)"
     fi
 
     if [[ -f "$APP_DIR/requirements/prod.txt" ]]; then

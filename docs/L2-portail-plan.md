@@ -1,8 +1,7 @@
 # Lot L2 — Portail public : plan d'implémentation
 
-> **Statut : proposition v2 (5 octobre 2026), à valider.** Rien n'est implémenté avant la
-> validation des décisions E1 à E14 (`CLAUDE.md` : plan d'abord pour toute modification large
-> du modèle de données ou des permissions).
+> **Statut : validé le 5 octobre 2026** (décisions E1 à E14, adaptations du §2.4 et
+> propositions par défaut du §10). L2.0 est faite : résultats au §11.
 >
 > **v2** : le plan suit trois compétences imposées par le commanditaire (dépôt
 > `zezesylvain/zds-skills`) :
@@ -281,3 +280,19 @@ hors navigateur). Test de fumée : `/fr/`, `/en/`, `/sitemap.xml`, un fichier pu
    retrait du consentement), E6 (programme en L5), E11 (écriture par le CO « communication »).
 3. Charge de 17 à 21,5 j-h, contre 10 à 14 dans l'étude.
 4. Textes, affiche, nom de domaine de production ; déploiement continu (D18) avant L3.
+
+## 11. Résultats de L2.0 (5 octobre 2026)
+
+| Vérification | Résultat | Conséquence |
+|---|---|---|
+| **Pillow (V28)** | Pillow 12.3.0 ne publie que des roues `manylinux_2_27`/`2_28` (Python 3.12 et 3.13, x86_64) : glibc ≥ 2.27 exigée. Contrôle V28 ajouté à `deploy/check-o2switch.sh` (venv jetable de V03, réencodage réel JPEG avec EXIF → JPEG, WebP, PNG redimensionnés sans EXIF), exécuté avec succès en local ; **reste à lancer sur o2switch** | E4 confirmée sous réserve de V28 ; repli inchangé |
+| **Multipart du client généré** | Preuve avec une vue DRF `MultiPartParser` + `FileField` : drf-spectacular décrit `multipart/form-data` et `format: binary` ; ng-openapi-gen génère un champ `Blob` et envoie un `FormData` sans fixer `Content-Type` (le navigateur ajoute la frontière) ; l'intercepteur CSRF s'applique | Téléversements par le client généré, sans code écrit à la main |
+| **Pré-rendu `/fr`, `/en`, `/:lang/p/:slug` alimenté par une API** | Preuve de concept (copie de travail hors dépôt, API simulée) : `getPrerenderParams` lit les routes dans l'API au build ; 7 pages produites (`/`, `/fr`, `/en`, 2 pages × 2 langues), contenu et langue corrects | E1 et E2 confirmées |
+| API injoignable au build | L'appel des routes échoue → **build en échec** (souhaité) | — |
+| Une composition en erreur (404, 500) | La page est pré-rendue **vide** et le build reste **vert** | Confirme le risque du §9 : en L2.5, contrôle après build (`scripts/check-prerender.mjs`) : nombre de routes attendu fourni par l'API, et marqueur de rendu complet dans chaque page ; sinon refus de livrer |
+| Cache de transfert (réhydratation) | Avec un intercepteur qui préfixe `/api` par l'origine de l'API, la clé du cache est l'URL absolue : le navigateur **redemande** la composition. Corrigé en réécrivant l'URL au niveau du `HttpBackend`, côté serveur seulement (`ServerApiBackend`, après le cache) : aucune requête de composition dans le navigateur (vérifié dans Chromium) | Variable `GESTCONF_PRERENDER_API_ORIGIN` lue au build ; `ServerApiBackend` dans `app.config.server.ts`, aucun code serveur dans `shared` |
+| **Redirection `/`** | Angular produit pour `redirectTo` une page `index.html` à `meta refresh` vers `/fr` | En L2.5 : redirection 302 `^/$` → `/fr/` dans le `.htaccess` (référencement), la page à `meta refresh` restant un repli ; adresses canoniques **avec** barre finale (`/fr/`), comme les sert Apache (`DirectorySlash`) |
+| Budget initial du portail | Routes `:lang` et pages chargées à la demande : bundle initial de 368,3 à 370,4 kB (au lieu de 361,9), par découpage des morceaux communs d'esbuild, non par du code ajouté | En L2.5 : mesurer et ramener sous 365 kB (morceaux communs, `ApiStatus` hors de l'accueil) ; sinon demander un relèvement du budget |
+
+Les écarts de cette étape sont reportés dans les étapes concernées ; aucune décision E1 à E14
+n'est remise en cause.

@@ -6,7 +6,7 @@ serveur réel** : aucune ligne n'a encore été vérifiée sur o2switch. Le crit
 est : fiche remplie, décisions bloquantes (§5) validées.
 
 Deux types de contrôles :
-- **automatiques (V00 à V27)** : `deploy/check-o2switch.sh`, script en lecture seule lancé en SSH ;
+- **automatiques (V00 à V28)** : `deploy/check-o2switch.sh`, script en lecture seule lancé en SSH ;
 - **manuels (M01 à M10)** : cPanel, navigateur ou `curl` depuis le poste local (procédures au §4).
 
 **Mode SQL de MariaDB.** Depuis L1.1, l'application impose son mode SQL à chaque connexion
@@ -83,6 +83,7 @@ Le lancer **deux fois** : avant le premier déploiement de L1.1, puis après (V2
 | V25 | `check --database default --tag database` | Script : `manage.py check --database default --tag database` dans le venv de l'application (sortie filtrée ; contrôles de la base seulement, sans les contrôles de modèles comme `models.W036`) | Après le déploiement de L1.1 : aucun `mysql.W002` | _à remplir_ (avant / après L1.1) | Avant L1.1 avec un serveur non strict : ÉCHEC attendu (code L0 sans `init_command`). Après L1.1 : ÉCHEC = V09 en échec, voir V09 |
 | V26 | Processus et limites du compte | Script : processus Passenger visibles, nombre de CPU, `ulimit` | Informatif | _à remplir_ | À recouper avec M07 |
 | V27 | Format de ligne InnoDB | Script : `@@innodb_default_row_format`, `@@innodb_page_size` et `ROW_FORMAT` des tables InnoDB existantes (`information_schema.TABLES`) | Format `DYNAMIC` (ou `COMPRESSED`), pages ≥ 8 Kio | _à remplir_ | Index utf8mb4 longs : clé primaire `varchar(255)` du cache (1 020 octets), unicité de `django_content_type` (800 octets). En `COMPACT` ou `REDUNDANT` (767 octets) ou avec des pages de 4 Kio (768 octets), `migrate` échoue dès le premier déploiement (erreur 1709, constaté en essai local), puis `createcachetable`. ÉCHEC : **bloquant** ; demander à o2switch le format `DYNAMIC` par défaut, ou `ALTER TABLE … ROW_FORMAT=DYNAMIC` sur les tables existantes (base sans donnée réelle en L1) |
+| V28 | Pillow en roue binaire (lot L2, décision E4) | Script : même venv jetable que V03, `pip install --only-binary=:all: pillow==12.3.0`, puis réencodage réel d'un JPEG portant un EXIF en JPEG, WebP et PNG redimensionnés (1 600 px) | OK, avec la version, l'étiquette de la roue et les modules `jpeg`, `webp`, `zlib` ; EXIF supprimé | _à remplir_ | Les roues de Pillow 12 exigent **glibc ≥ 2.27** (`manylinux_2_27`/`2_28`, vérifié le 2026-10-05) : voir V02. ÉCHEC : repli de E4 (JPEG portant un EXIF refusé, pas de redimensionnement), ou version de Pillow plus ancienne à évaluer (correctifs de sécurité) |
 
 ## 3. Contrôles manuels
 
