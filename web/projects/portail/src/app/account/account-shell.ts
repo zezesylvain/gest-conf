@@ -8,17 +8,16 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
 import { Meta } from '@angular/platform-browser';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import {
   AuthApi,
   LanguageService,
   MeStore,
+  ReauthenticationDialog,
   ReauthenticationPrompt,
   SessionStore,
 } from '@gestconf/shared';
-import { firstValueFrom } from 'rxjs';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { ensureThemeStylesheet } from './theme';
@@ -92,7 +91,7 @@ export class AccountShell implements OnInit, OnDestroy {
   private readonly language = inject(LanguageService);
   private readonly meta = inject(Meta);
   private readonly document = inject(DOCUMENT);
-  private readonly dialog = inject(MatDialog);
+  private readonly reauthenticationDialog = inject(ReauthenticationDialog);
   private readonly reauthentication = inject(ReauthenticationPrompt);
   private unregisterReauthentication: (() => void) | null = null;
 
@@ -129,23 +128,14 @@ export class AccountShell implements OnInit, OnDestroy {
   ngOnInit(): void {
     ensureThemeStylesheet(this.document);
     this.meta.updateTag({ name: 'robots', content: 'noindex, nofollow' });
-    this.unregisterReauthentication = this.reauthentication.register(() => this.openReauthDialog());
+    this.unregisterReauthentication = this.reauthentication.register(() =>
+      this.reauthenticationDialog.open(),
+    );
   }
 
   ngOnDestroy(): void {
     this.meta.removeTag('name="robots"');
     this.unregisterReauthentication?.();
-  }
-
-  private async openReauthDialog(): Promise<boolean> {
-    const { ReauthDialog } = await import('./ui/reauth-dialog');
-    const ref = this.dialog.open(ReauthDialog, { width: '28rem', autoFocus: 'first-tabbable' });
-    const done = await firstValueFrom(ref.afterClosed());
-    if (done === true) {
-      // État 2FA de la session (mfa_verified) à jour après une réauthentification.
-      await this.meStore.load().catch(() => undefined);
-    }
-    return done === true;
   }
 
   /** Déconnexion, puis rechargement complet pour vider l'état des applications (§4.3). */

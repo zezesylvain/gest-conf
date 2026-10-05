@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { RouterLink } from '@angular/router';
-import { apiErrorMessage, MeStore, PageHeader } from '@gestconf/shared';
+import { apiErrorMessage, LanguageService, MeStore, PageHeader } from '@gestconf/shared';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { AccountService } from '../account.service';
@@ -11,7 +11,8 @@ import { PrivacyNotice } from '../ui/privacy-notice';
  * Accueil du compte et première connexion (plan L1 §4.3) : prise de connaissance de la
  * notice d'information et invitation à compléter le profil. Pas de blocage global côté
  * serveur : chaque lot vérifie ses propres prérequis (L3 : profil complet pour soumettre).
- * Rappel de l'état de la double authentification (obligatoire pour la gestion).
+ * Éditions et rôles (accès à la gestion), invitations en attente, état de la double
+ * authentification (obligatoire pour la gestion).
  */
 @Component({
   selector: 'portail-account-home-page',
@@ -51,6 +52,49 @@ import { PrivacyNotice } from '../ui/privacy-notice';
         </p>
       }
 
+      @if (me.pending_invitations.length) {
+        <section class="card" aria-labelledby="pending-title">
+          <h2 id="pending-title">{{ 'portail.account.home.pendingTitle' | translate }}</h2>
+          <ul>
+            @for (item of me.pending_invitations; track $index) {
+              <li>
+                {{ item.edition_code }} —
+                {{
+                  language.current() === 'en' && item.edition_title_en
+                    ? item.edition_title_en
+                    : item.edition_title_fr
+                }}
+                : {{ 'portail.account.invitation.roles.' + item.role | translate }}
+              </li>
+            }
+          </ul>
+          <p>{{ 'portail.account.home.pendingHint' | translate }}</p>
+        </section>
+      }
+
+      @if (me.editions.length) {
+        <section class="card" aria-labelledby="editions-title">
+          <h2 id="editions-title">{{ 'portail.account.home.editionsTitle' | translate }}</h2>
+          <ul>
+            @for (edition of me.editions; track edition.id) {
+              <li>
+                <strong>{{ edition.code }}</strong> —
+                @for (item of edition.roles; track $index) {
+                  <span class="role">{{
+                    'portail.account.invitation.roles.' + item.role | translate
+                  }}</span>
+                }
+                @if (edition.capabilities.length) {
+                  <a [href]="'/gestion/editions/' + edition.id">{{
+                    'portail.account.home.open' | translate
+                  }}</a>
+                }
+              </li>
+            }
+          </ul>
+        </section>
+      }
+
       <p>
         {{
           (me.mfa_enabled ? 'portail.account.home.mfaEnabled' : 'portail.account.home.mfaDisabled')
@@ -83,10 +127,14 @@ import { PrivacyNotice } from '../ui/privacy-notice';
     a {
       color: var(--gc-primary);
     }
+    .role {
+      margin-right: 0.5rem;
+    }
   `,
 })
 export class AccountHomePage {
   protected readonly meStore = inject(MeStore);
+  protected readonly language = inject(LanguageService);
   private readonly account = inject(AccountService);
   private readonly translate = inject(TranslateService);
 

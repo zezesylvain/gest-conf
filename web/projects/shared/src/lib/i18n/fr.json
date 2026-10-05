@@ -75,6 +75,16 @@
     },
     "session": {
       "expired": "Votre session a expiré : reconnectez-vous."
+    },
+    "reauth": {
+      "title": "Confirmez votre identité",
+      "lead": "Cette opération est sensible : confirmez votre mot de passe pour continuer.",
+      "password": "Mot de passe",
+      "code": "Code de double authentification",
+      "useCode": "Utiliser plutôt un code de double authentification",
+      "usePassword": "Utiliser plutôt mon mot de passe",
+      "submit": "Confirmer",
+      "cancel": "Annuler"
     }
   }
 }

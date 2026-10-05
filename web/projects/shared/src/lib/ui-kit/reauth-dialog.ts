@@ -1,28 +1,32 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EnvironmentInjector,
+  inject,
+  signal,
+} from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import {
-  apiErrorMessage,
-  applyAuthErrors,
-  AuthApi,
-  codeMessage,
-  ErrorSummary,
-  fallbackCode,
-  fieldErrorMessage,
-  MeStore,
-} from '@gestconf/shared';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { firstValueFrom } from 'rxjs';
+
+import { AuthApi } from '../auth/auth-api';
+import { MeStore } from '../auth/me.store';
+import { ErrorSummary } from './error-summary';
+import { fallbackCode } from '../http/api-error';
+import { apiErrorMessage, applyAuthErrors, codeMessage, fieldErrorMessage } from './server-errors';
 
 /**
  * Fenêtre de réauthentification (plan L1 §4.3, D12) : mot de passe, ou code de double
  * authentification si elle est activée. Se ferme sur `true` quand la réauthentification
- * aboutit ; l'appel interrompu est alors rejoué une seule fois.
+ * aboutit ; l'appel interrompu est alors rejoué une seule fois. Ouverte par
+ * `ReauthenticationDialog.open()`, enregistrée par la coque de chaque application.
  */
 @Component({
-  selector: 'portail-reauth-dialog',
+  selector: 'gc-reauth-dialog',
   imports: [
     ReactiveFormsModule,
     TranslatePipe,
@@ -34,14 +38,14 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <h2 mat-dialog-title>{{ 'portail.account.reauth.title' | translate }}</h2>
+    <h2 mat-dialog-title>{{ 'shared.reauth.title' | translate }}</h2>
     <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
       <mat-dialog-content>
-        <p>{{ 'portail.account.reauth.lead' | translate }}</p>
+        <p>{{ 'shared.reauth.lead' | translate }}</p>
         <gc-error-summary [messages]="errors()" />
         @if (useCode()) {
           <mat-form-field appearance="outline">
-            <mat-label>{{ 'portail.account.mfa.code' | translate }}</mat-label>
+            <mat-label>{{ 'shared.reauth.code' | translate }}</mat-label>
             <input
               matInput
               formControlName="code"
@@ -53,7 +57,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
           </mat-form-field>
         } @else {
           <mat-form-field appearance="outline">
-            <mat-label>{{ 'portail.account.fields.password' | translate }}</mat-label>
+            <mat-label>{{ 'shared.reauth.password' | translate }}</mat-label>
             <input
               matInput
               type="password"
@@ -66,19 +70,16 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
         }
         @if (mfaEnabled()) {
           <button type="button" class="link-button" (click)="toggle()">
-            {{
-              (useCode() ? 'portail.account.reauth.usePassword' : 'portail.account.reauth.useCode')
-                | translate
-            }}
+            {{ (useCode() ? 'shared.reauth.usePassword' : 'shared.reauth.useCode') | translate }}
           </button>
         }
       </mat-dialog-content>
       <mat-dialog-actions align="end">
         <button mat-button type="button" (click)="dialogRef.close(false)">
-          {{ 'portail.account.reauth.cancel' | translate }}
+          {{ 'shared.reauth.cancel' | translate }}
         </button>
         <button mat-flat-button type="submit" [disabled]="submitting()">
-          {{ 'portail.account.reauth.submit' | translate }}
+          {{ 'shared.reauth.submit' | translate }}
         </button>
       </mat-dialog-actions>
     </form>
@@ -150,4 +151,13 @@ export class ReauthDialog {
       this.submitting.set(false);
     }
   }
+}
+
+/** Ouvre la fenêtre (module chargé à la demande) ; `true` si la réauthentification aboutit. */
+export async function openReauthDialog(injector: EnvironmentInjector): Promise<boolean> {
+  const ref = injector.get(MatDialog).open<ReauthDialog, unknown, boolean>(ReauthDialog, {
+    width: '28rem',
+    autoFocus: 'first-tabbable',
+  });
+  return (await firstValueFrom(ref.afterClosed())) === true;
 }

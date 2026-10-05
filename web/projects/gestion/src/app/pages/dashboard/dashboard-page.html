@@ -1,0 +1,108 @@
+<gc-page-header [heading]="'gestion.dashboard.title' | translate" />
+<div aria-live="polite">
+  @if (status()) {
+    <p class="notice" role="status">{{ status() }}</p>
+  }
+</div>
+<gc-error-summary [messages]="errors()" />
+
+@if (edition(); as current) {
+  <section class="card" aria-labelledby="edition-title">
+    <h2 id="edition-title">{{ current.code }} — {{ title(current) }}</h2>
+    <p>
+      {{ 'gestion.dashboard.statusLabel' | translate }}
+      <span class="badge">{{ 'gestion.status.' + current.status | translate }}</span>
+    </p>
+    @if (current.start_date) {
+      <p class="muted">
+        {{ current.start_date }} → {{ current.end_date }} · {{ current.city }}
+        {{ current.country }} · {{ current.timezone }}
+      </p>
+    }
+    <div class="actions">
+      @if (current.status === 'draft' && can('edition.publish')) {
+        <button
+          mat-flat-button
+          type="button"
+          (click)="changeStatus('published')"
+          [disabled]="busy()"
+        >
+          {{ 'gestion.dashboard.published.action' | translate }}
+        </button>
+      }
+      @if (current.status === 'published' && can('edition.archive')) {
+        <button
+          mat-stroked-button
+          type="button"
+          (click)="changeStatus('archived')"
+          [disabled]="busy()"
+        >
+          {{ 'gestion.dashboard.archived.action' | translate }}
+        </button>
+      }
+    </div>
+  </section>
+
+  @if (current.status === 'draft') {
+    <section class="card" aria-labelledby="check-title">
+      <h2 id="check-title">{{ 'gestion.dashboard.checkTitle' | translate }}</h2>
+      <ul class="checklist">
+        @for (item of checklist(); track item.label) {
+          <li>
+            <span [class]="item.done ? 'ok' : 'ko'" aria-hidden="true">{{
+              item.done ? '✔' : '✘'
+            }}</span>
+            <span class="visually-hidden">
+              {{
+                (item.done ? 'gestion.dashboard.check.done' : 'gestion.dashboard.check.todo')
+                  | translate
+              }}
+            </span>
+            <a [routerLink]="item.link">{{ item.label | translate }}</a>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+
+  <section class="card" aria-labelledby="dates-title">
+    <h2 id="dates-title">{{ 'gestion.dashboard.keyDates' | translate }}</h2>
+    @if (keyDates().length) {
+      <ul>
+        @for (item of keyDates(); track item.id) {
+          <li>
+            <strong>{{
+              item.label_fr || ('gestion.keyDateCodes.' + item.code | translate)
+            }}</strong>
+            — {{ at(item, current) }}
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="muted">{{ 'gestion.dashboard.noKeyDates' | translate }}</p>
+    }
+  </section>
+
+  @if (pendingInvitations() !== null) {
+    <section class="card" aria-labelledby="invitations-title">
+      <h2 id="invitations-title">{{ 'gestion.nav.invitations' | translate }}</h2>
+      <p>
+        {{ 'gestion.dashboard.pendingInvitations' | translate: { count: pendingInvitations() } }}
+        <a [routerLink]="['/editions', current.id, 'comites', 'invitations']">
+          {{ 'gestion.dashboard.seeInvitations' | translate }}
+        </a>
+      </p>
+    </section>
+  }
+
+  <section class="card" aria-labelledby="mfa-title">
+    <h2 id="mfa-title">{{ 'gestion.dashboard.mfaTitle' | translate }}</h2>
+    <p>
+      {{
+        (mfaEnabled() ? 'gestion.dashboard.mfaEnabled' : 'gestion.dashboard.mfaDisabled')
+          | translate
+      }}
+      <a href="/compte/securite">{{ 'gestion.dashboard.manageSecurity' | translate }}</a>
+    </p>
+  </section>
+}

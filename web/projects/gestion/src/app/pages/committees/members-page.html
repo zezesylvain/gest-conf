@@ -1,0 +1,76 @@
+<gc-page-header [heading]="'gestion.members.title' | translate" />
+<div aria-live="polite">
+  @if (status()) {
+    <p class="notice" role="status">{{ status() }}</p>
+  }
+</div>
+<gc-error-summary [messages]="errors()" />
+
+<label class="actions">
+  <input
+    type="checkbox"
+    [checked]="showRevoked()"
+    (change)="showRevoked.set($any($event.target).checked)"
+  />
+  {{ 'gestion.members.showRevoked' | translate }}
+</label>
+
+@if (!loading()) {
+  <div class="table-wrap">
+    <table>
+      <caption class="visually-hidden">
+        {{
+          'gestion.members.title' | translate
+        }}
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">{{ 'gestion.members.name' | translate }}</th>
+          @if (canManage()) {
+            <th scope="col">{{ 'gestion.members.email' | translate }}</th>
+          }
+          <th scope="col">{{ 'gestion.members.role' | translate }}</th>
+          <th scope="col">{{ 'gestion.members.status' | translate }}</th>
+          <th scope="col">{{ 'gestion.members.since' | translate }}</th>
+          <th scope="col">
+            <span class="visually-hidden">{{ 'gestion.settings.actions' | translate }}</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (member of visible(); track member.id) {
+          <tr>
+            <td>{{ member.name }}</td>
+            @if (canManage()) {
+              <td>{{ member.email }}</td>
+            }
+            <td>
+              {{ 'gestion.roles.' + member.role | translate }}
+              @if (member.oc_function) {
+                <span class="muted"
+                  >({{ 'gestion.ocFunctions.' + member.oc_function | translate }})</span
+                >
+              }
+            </td>
+            <td>
+              <span class="badge">{{ 'gestion.memberStatus.' + member.status | translate }}</span>
+            </td>
+            <td>{{ date(member.granted_at) }}</td>
+            <td>
+              @if (canRevoke(member)) {
+                <button mat-button type="button" (click)="revoke(member)">
+                  {{ 'gestion.members.revoke' | translate
+                  }}<span class="visually-hidden"> {{ member.name }}</span>
+                </button>
+              }
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="6" class="muted">{{ 'gestion.settings.empty' | translate }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

@@ -1,9 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { MatDialogRef } from '@angular/material/dialog';
-import { AuthApi, AuthResult, MeStore } from '@gestconf/shared';
-import { TEST_ME, useTestLanguage } from '@gestconf/shared/testing';
-
-import { provideAccountTesting } from '../testing';
+import { provideI18nTesting, TEST_ME, useTestLanguage } from '../../testing';
+import { AuthResult } from '../auth/allauth';
+import { AuthApi } from '../auth/auth-api';
+import { MeStore } from '../auth/me.store';
 import { ReauthDialog } from './reauth-dialog';
 
 function result(partial: Partial<AuthResult>): AuthResult {
@@ -29,7 +29,7 @@ describe('ReauthDialog', () => {
     TestBed.configureTestingModule({
       imports: [ReauthDialog],
       providers: [
-        ...provideAccountTesting(),
+        provideI18nTesting(),
         { provide: AuthApi, useValue: { reauthenticate, mfaReauthenticate } },
         { provide: MatDialogRef, useValue: { close } },
         { provide: MeStore, useValue: { me: () => ({ ...TEST_ME, mfa_enabled: true }) } },

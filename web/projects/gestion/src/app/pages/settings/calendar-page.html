@@ -1,0 +1,140 @@
+<gc-page-header
+  [heading]="'gestion.settings.calendar.title' | translate"
+  [lead]="'gestion.settings.calendar.lead' | translate: { zone: timeZone() }"
+/>
+@if (!canWrite()) {
+  <p class="notice">{{ 'gestion.settings.readOnly' | translate }}</p>
+}
+<div aria-live="polite">
+  @if (status()) {
+    <p class="notice" role="status">{{ status() }}</p>
+  }
+</div>
+<gc-error-summary [messages]="errors()" />
+
+@if (!loading()) {
+  <div class="table-wrap">
+    <table>
+      <caption class="visually-hidden">
+        {{
+          'gestion.settings.calendar.title' | translate
+        }}
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">{{ 'gestion.fields.keyDate' | translate }}</th>
+          <th scope="col">
+            {{ 'gestion.settings.calendar.editionTime' | translate: { zone: timeZone() } }}
+          </th>
+          <th scope="col">
+            {{ 'gestion.settings.calendar.browserTime' | translate: { zone: browserZone } }}
+          </th>
+          <th scope="col">{{ 'gestion.fields.public' | translate }}</th>
+          @if (canWrite()) {
+            <th scope="col">
+              <span class="visually-hidden">{{ 'gestion.settings.actions' | translate }}</span>
+            </th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of items(); track item.id) {
+          <tr>
+            <td>
+              {{ label(item) }} <code class="muted">{{ item.code }}</code>
+            </td>
+            <td>{{ inEdition(item) }}</td>
+            <td>{{ inBrowser(item) }}</td>
+            <td>
+              {{ (item.is_public ? 'gestion.settings.yes' : 'gestion.settings.no') | translate }}
+            </td>
+            @if (canWrite()) {
+              <td class="actions">
+                <button mat-button type="button" (click)="startEdit(item)">
+                  {{ 'gestion.settings.edit' | translate
+                  }}<span class="visually-hidden"> {{ item.code }}</span>
+                </button>
+                <button mat-button type="button" (click)="confirmDelete(item)">
+                  {{ 'gestion.settings.delete' | translate
+                  }}<span class="visually-hidden"> {{ item.code }}</span>
+                </button>
+              </td>
+            }
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="5" class="muted">{{ 'gestion.settings.empty' | translate }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (canWrite()) {
+    @if (editing() === null) {
+      <div class="actions">
+        <button mat-flat-button type="button" (click)="startCreate()">
+          {{ 'gestion.settings.calendar.add' | translate }}
+        </button>
+      </div>
+    } @else {
+      <section class="card" aria-labelledby="date-form-title">
+        <h2 id="date-form-title">
+          {{
+            (editing() ? 'gestion.settings.calendar.editTitle' : 'gestion.settings.calendar.add')
+              | translate
+          }}
+        </h2>
+        <form [formGroup]="form" (ngSubmit)="save()" novalidate>
+          <div class="grid-2">
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.fields.code' | translate }}</mat-label>
+              <input matInput formControlName="code" list="gc-key-date-codes" required />
+              <datalist id="gc-key-date-codes">
+                @for (code of reservedCodes; track code) {
+                  <option [value]="code">{{ 'gestion.keyDateCodes.' + code | translate }}</option>
+                }
+              </datalist>
+              <mat-hint>{{ 'gestion.settings.calendar.codeHint' | translate }}</mat-hint>
+              <mat-error>{{ error('code') }}</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>{{
+                'gestion.settings.calendar.atLocal' | translate: { zone: timeZone() }
+              }}</mat-label>
+              <input matInput type="datetime-local" formControlName="at_local" required />
+              <mat-error>{{ error('at_local') }}</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.fields.labelFr' | translate }}</mat-label>
+              <input matInput formControlName="label_fr" lang="fr" />
+              <mat-hint>{{ 'gestion.settings.calendar.labelHint' | translate }}</mat-hint>
+              <mat-error>{{ error('label_fr') }}</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.fields.labelEn' | translate }}</mat-label>
+              <input matInput formControlName="label_en" lang="en" />
+              <mat-error>{{ error('label_en') }}</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.fields.position' | translate }}</mat-label>
+              <input matInput type="number" formControlName="position" />
+              <mat-error>{{ error('position') }}</mat-error>
+            </mat-form-field>
+          </div>
+          <mat-checkbox formControlName="is_public">{{
+            'gestion.fields.public' | translate
+          }}</mat-checkbox>
+          <div class="actions">
+            <button mat-flat-button type="submit" [disabled]="saving()">
+              {{ 'gestion.settings.save' | translate }}
+            </button>
+            <button mat-button type="button" (click)="cancel()">
+              {{ 'shared.reauth.cancel' | translate }}
+            </button>
+          </div>
+        </form>
+      </section>
+    }
+  }
+}

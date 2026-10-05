@@ -1,0 +1,146 @@
+<gc-page-header [heading]="'portail.account.invitation.title' | translate" />
+<div aria-live="polite">
+  <gc-error-summary [messages]="errors()" />
+</div>
+
+@switch (state()) {
+  @case ('loading') {
+    <p role="status">{{ 'portail.account.home.loading' | translate }}</p>
+  }
+  @case ('missing') {
+    @if (!errors().length) {
+      <p>{{ 'portail.account.invitation.missing' | translate }}</p>
+    }
+  }
+  @case ('details') {
+    @if (invitation(); as invitation) {
+      <div class="notice">
+        <p>
+          {{
+            'portail.account.invitation.summary'
+              | translate
+                : {
+                    inviter: invitation.inviter_name,
+                    role: 'portail.account.invitation.roles.' + invitation.role | translate,
+                    edition: title(),
+                    code: invitation.edition_code,
+                  }
+          }}
+        </p>
+      </div>
+      <p>
+        {{ 'portail.account.invitation.address' | translate: { email: invitation.email_masked } }}
+      </p>
+      <p>{{ 'portail.account.invitation.expires' | translate: { date: expires(invitation) } }}</p>
+      @if (invitation.message) {
+        <figure>
+          <figcaption>{{ 'portail.account.invitation.message' | translate }}</figcaption>
+          <blockquote>{{ invitation.message }}</blockquote>
+        </figure>
+      }
+
+      @if (invitation.status !== 'pending') {
+        <p role="alert">
+          {{ 'portail.account.invitation.notPending.' + invitation.status | translate }}
+        </p>
+      } @else if (!session.authenticated()) {
+        <p>{{ 'portail.account.invitation.signInFirst' | translate }}</p>
+        <div class="actions">
+          <a mat-flat-button routerLink="/compte/connexion" [queryParams]="loginQuery">
+            {{ 'portail.account.login.submit' | translate }}
+          </a>
+          <a mat-stroked-button routerLink="/compte/inscription">
+            {{ 'portail.account.login.signup' | translate }}
+          </a>
+          <button mat-button type="button" (click)="decline()" [disabled]="busy()">
+            {{ 'portail.account.invitation.decline' | translate }}
+          </button>
+        </div>
+        <p class="hint">{{ 'portail.account.invitation.signupHint' | translate }}</p>
+      } @else {
+        @if (invitation.controls_address) {
+          <div class="actions">
+            <button mat-flat-button type="button" (click)="accept()" [disabled]="busy()">
+              {{ 'portail.account.invitation.accept' | translate }}
+            </button>
+            <button mat-button type="button" (click)="decline()" [disabled]="busy()">
+              {{ 'portail.account.invitation.decline' | translate }}
+            </button>
+          </div>
+        } @else {
+          <p>
+            {{
+              'portail.account.invitation.otherAddress'
+                | translate: { email: invitation.email_masked }
+            }}
+          </p>
+          <div class="actions">
+            <button mat-flat-button type="button" (click)="requestLink()" [disabled]="busy()">
+              {{ 'portail.account.invitation.sendLink' | translate }}
+            </button>
+            <button mat-button type="button" (click)="decline()" [disabled]="busy()">
+              {{ 'portail.account.invitation.decline' | translate }}
+            </button>
+          </div>
+          <p class="hint">{{ 'portail.account.invitation.linkHint' | translate }}</p>
+        }
+        @if (offerLink() && invitation.controls_address) {
+          <div class="actions">
+            <button mat-stroked-button type="button" (click)="requestLink()" [disabled]="busy()">
+              {{ 'portail.account.invitation.sendLink' | translate }}
+            </button>
+          </div>
+        }
+      }
+    }
+  }
+  @case ('link') {
+    @if (session.authenticated()) {
+      <p>{{ 'portail.account.invitation.linkLead' | translate }}</p>
+      <div class="actions">
+        <button mat-flat-button type="button" (click)="acceptWithLink()" [disabled]="busy()">
+          {{ 'portail.account.invitation.confirmLink' | translate }}
+        </button>
+      </div>
+      <p class="hint">{{ 'portail.account.invitation.reauthHint' | translate }}</p>
+    } @else {
+      <p>{{ 'portail.account.invitation.linkSignIn' | translate }}</p>
+      <div class="actions">
+        <a mat-flat-button routerLink="/compte/connexion" [queryParams]="loginQuery">
+          {{ 'portail.account.login.submit' | translate }}
+        </a>
+      </div>
+    }
+  }
+  @case ('linkSent') {
+    <div class="notice" role="status">
+      <p>{{ 'portail.account.invitation.linkSent' | translate }}</p>
+    </div>
+  }
+  @case ('declined') {
+    <div class="notice" role="status">
+      <p>{{ 'portail.account.invitation.declined' | translate }}</p>
+    </div>
+  }
+  @case ('accepted') {
+    @if (accepted(); as role) {
+      <div class="notice" role="status">
+        <p>
+          {{
+            'portail.account.invitation.accepted'
+              | translate: { role: 'portail.account.invitation.roles.' + role.role | translate }
+          }}
+        </p>
+      </div>
+      <p>{{ 'portail.account.invitation.mfaReminder' | translate }}</p>
+      <div class="actions">
+        <a mat-flat-button [href]="managementUrl(role)">
+          {{ 'portail.account.home.management' | translate }}
+        </a>
+        <a mat-stroked-button routerLink="/compte/securite">
+          {{ 'portail.account.nav.security' | translate }}
+        </a>
+      </div>
+    }
+  }
+}

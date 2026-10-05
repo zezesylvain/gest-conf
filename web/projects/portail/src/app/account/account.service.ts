@@ -1,7 +1,13 @@
 import { inject, Injectable } from '@angular/core';
 import {
+  AcceptedRole,
   Api,
   ConsentRecord,
+  invitationAccept,
+  invitationDecline,
+  invitationLinkEmail,
+  InvitationLookup,
+  invitationLookup,
   meConsentsCreate,
   meProfile,
   meProfileUpdate,
@@ -33,5 +39,29 @@ export class AccountService {
     return this.api.invoke(meConsentsCreate, {
       body: { kind: 'privacy_notice', granted: true, source: 'first_login' },
     });
+  }
+
+  // --- Invitations (plan L1 §5.7, RG-20) -------------------------------------------------
+
+  lookupInvitation(token: string): Promise<InvitationLookup> {
+    return this.api.invoke(invitationLookup, { body: { token } });
+  }
+
+  declineInvitation(token: string): Promise<void> {
+    return this.api.invoke(invitationDecline, { body: { token } });
+  }
+
+  acceptInvitation(token: string): Promise<AcceptedRole> {
+    return this.api.invoke(invitationAccept, { body: { token } });
+  }
+
+  /** Lien de liaison reçu à l'adresse invitée (`#lier=…`) : réauthentification récente. */
+  acceptInvitationLink(link: string): Promise<AcceptedRole> {
+    return this.api.invoke(invitationAccept, { body: { link } });
+  }
+
+  /** Envoie un lien de confirmation à l'adresse invitée (RG-20, D6 (a)). */
+  requestInvitationLink(token: string): Promise<void> {
+    return this.api.invoke(invitationLinkEmail, { body: { token } });
   }
 }

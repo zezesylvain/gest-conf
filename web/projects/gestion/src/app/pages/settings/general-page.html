@@ -1,0 +1,105 @@
+<gc-page-header [heading]="'gestion.settings.general.title' | translate" />
+@if (!canWrite()) {
+  <p class="notice">{{ 'gestion.settings.readOnly' | translate }}</p>
+}
+<div aria-live="polite">
+  @if (saved()) {
+    <p class="notice" role="status">{{ 'gestion.settings.saved' | translate }}</p>
+  }
+</div>
+<gc-error-summary [messages]="errors()" />
+
+@if (!loading()) {
+  <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <div class="grid-2">
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'gestion.fields.code' | translate }}</mat-label>
+        <input matInput formControlName="code" required />
+        <mat-hint>{{ 'gestion.settings.general.codeHint' | translate }}</mat-hint>
+        <mat-error>{{ error('code') }}</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'gestion.fields.slug' | translate }}</mat-label>
+        <input matInput formControlName="slug" required />
+        <mat-error>{{ error('slug') }}</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'gestion.fields.year' | translate }}</mat-label>
+        <input matInput type="number" formControlName="year" required />
+        <mat-error>{{ error('year') }}</mat-error>
+      </mat-form-field>
+    </div>
+
+    <div class="grid-2">
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'gestion.fields.titleFr' | translate }}</mat-label>
+        <input matInput formControlName="title_fr" lang="fr" required />
+        <mat-error>{{ error('title_fr') }}</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'gestion.fields.titleEn' | translate }}</mat-label>
+        <input matInput formControlName="title_en" lang="en" />
+        <mat-hint>{{ 'gestion.settings.englishRequiredToPublish' | translate }}</mat-hint>
+        <mat-error>{{ error('title_en') }}</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'gestion.fields.themeFr' | translate }}</mat-label>
+        <textarea matInput formControlName="theme_fr" lang="fr" rows="3"></textarea>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'gestion.fields.themeEn' | translate }}</mat-label>
+        <textarea matInput formControlName="theme_en" lang="en" rows="3"></textarea>
+      </mat-form-field>
+    </div>
+
+    <div class="grid-2">
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'gestion.fields.startDate' | translate }}</mat-label>
+        <input matInput type="date" formControlName="start_date" />
+        <mat-error>{{ error('start_date') }}</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'gestion.fields.endDate' | translate }}</mat-label>
+        <input matInput type="date" formControlName="end_date" />
+        <mat-error>{{ error('end_date') }}</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'gestion.fields.venue' | translate }}</mat-label>
+        <input matInput formControlName="venue" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'gestion.fields.city' | translate }}</mat-label>
+        <input matInput formControlName="city" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'gestion.fields.country' | translate }}</mat-label>
+        <mat-select formControlName="country">
+          <mat-option value="">—</mat-option>
+          @for (country of countries(); track country.code) {
+            <mat-option [value]="country.code">{{ country.name }}</mat-option>
+          }
+        </mat-select>
+        <mat-error>{{ error('country') }}</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'gestion.fields.timezone' | translate }}</mat-label>
+        <input matInput formControlName="timezone" list="gc-time-zones" required />
+        <datalist id="gc-time-zones">
+          @for (zone of timeZones; track zone) {
+            <option [value]="zone"></option>
+          }
+        </datalist>
+        <mat-hint>{{ 'gestion.settings.general.timezoneHint' | translate }}</mat-hint>
+        <mat-error>{{ error('timezone') }}</mat-error>
+      </mat-form-field>
+    </div>
+
+    @if (canWrite()) {
+      <div class="actions">
+        <button mat-flat-button type="submit" [disabled]="saving()">
+          {{ 'gestion.settings.save' | translate }}
+        </button>
+      </div>
+    }
+  </form>
+}

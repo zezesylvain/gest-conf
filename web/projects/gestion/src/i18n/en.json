@@ -2,17 +2,273 @@
   "gestion": {
     "layout": {
       "skipToContent": "Skip to content",
-      "area": "Management"
+      "area": "Management",
+      "logout": "Sign out",
+      "edition": "Edition",
+      "activeRole": "Active role",
+      "allRoles": "All my roles"
+    },
+    "nav": {
+      "label": "Edition navigation",
+      "dashboard": "Dashboard",
+      "general": "General information",
+      "tracks": "Tracks",
+      "types": "Submission types",
+      "calendar": "Calendar",
+      "confidentiality": "Confidentiality",
+      "members": "Members",
+      "invitations": "Invitations",
+      "audit": "Audit log"
+    },
+    "status": {
+      "draft": "draft",
+      "published": "published",
+      "archived": "archived"
+    },
+    "roles": {
+      "ADMIN": "Edition administrator",
+      "CHAIR": "Conference chair",
+      "OC_MEMBER": "Organising committee member",
+      "SC_CHAIR": "Scientific committee chair",
+      "SC_MEMBER": "Scientific committee member",
+      "AUTHOR": "Author",
+      "SPEAKER": "Speaker",
+      "SESSION_CHAIR": "Session chair",
+      "ATTENDEE": "Attendee",
+      "SPONSOR": "Sponsor",
+      "VOLUNTEER": "Volunteer"
+    },
+    "ocFunctions": {
+      "finance": "finance",
+      "program": "programme",
+      "logistics": "logistics",
+      "communication": "communication",
+      "external_relations": "external relations",
+      "volunteers": "volunteers",
+      "secretariat": "secretariat"
+    },
+    "memberStatus": {
+      "active": "active",
+      "revoked": "revoked"
+    },
+    "invitationStatus": {
+      "pending": "pending",
+      "accepted": "accepted",
+      "declined": "declined",
+      "cancelled": "cancelled",
+      "expired": "expired"
+    },
+    "keyDateCodes": {
+      "call_open": "Call opens",
+      "call_close": "Call closes",
+      "review_deadline": "Review deadline",
+      "notification": "Decision notification",
+      "camera_ready": "Camera-ready version",
+      "registration_open": "Registration opens",
+      "early_bird_end": "Early-bird deadline",
+      "registration_close": "Registration closes"
+    },
+    "editions": {
+      "title": "My editions",
+      "none": "Your account has no management role in any edition.",
+      "toAccount": "Back to my account"
+    },
+    "forbidden": {
+      "title": "Access denied",
+      "lead": "Your roles do not give access to this page of the edition.",
+      "backToEditions": "Back to my editions"
     },
     "dashboard": {
       "title": "Dashboard",
-      "heading": "Management area",
-      "lead": "Scientific and organising committees, edition administration."
+      "statusLabel": "Status:",
+      "checkTitle": "Setup to complete before publication",
+      "check": {
+        "titles": "Titles in French and English",
+        "dates": "Conference dates",
+        "tracks": "At least one active track",
+        "types": "At least one active submission type",
+        "call": "Call opening and closing",
+        "done": "done:",
+        "todo": "to do:"
+      },
+      "keyDates": "Key dates (edition time)",
+      "noKeyDates": "No key dates.",
+      "pendingInvitations": "Pending invitations: {{count}}.",
+      "seeInvitations": "See invitations",
+      "mfaTitle": "Two-factor authentication",
+      "mfaEnabled": "Enabled on your account.",
+      "mfaDisabled": "Not enabled: it is required for management.",
+      "manageSecurity": "Manage account security",
+      "published": {
+        "action": "Publish the edition",
+        "title": "Publish the edition?",
+        "message": "The edition and its public dates will appear on the portal. The server first checks that the setup is complete.",
+        "confirm": "Publish",
+        "done": "Edition published."
+      },
+      "archived": {
+        "action": "Archive the edition",
+        "title": "Archive the edition?",
+        "message": "The edition will become read-only. Only possible after the conference has ended.",
+        "confirm": "Archive",
+        "done": "Edition archived."
+      }
+    },
+    "fields": {
+      "code": "Code",
+      "slug": "URL identifier",
+      "year": "Year",
+      "titleFr": "Title (French)",
+      "titleEn": "Title (English)",
+      "themeFr": "Theme (French)",
+      "themeEn": "Theme (English)",
+      "startDate": "Start",
+      "endDate": "End",
+      "venue": "Venue",
+      "city": "City",
+      "country": "Country",
+      "timezone": "Time zone",
+      "position": "Order",
+      "nameFr": "Name (French)",
+      "nameEn": "Name (English)",
+      "labelFr": "Label (French)",
+      "labelEn": "Label (English)",
+      "descriptionFr": "Description (French)",
+      "descriptionEn": "Description (English)",
+      "active": "Active",
+      "duration": "Default duration (min)",
+      "abstractMaxWords": "Abstract word limit",
+      "keyDate": "Key date",
+      "public": "Shown on the portal"
+    },
+    "settings": {
+      "readOnly": "Read only: your roles do not allow changing the setup.",
+      "saved": "Changes saved.",
+      "save": "Save",
+      "edit": "Edit",
+      "delete": "Delete",
+      "deleted": "Item deleted.",
+      "deleteTitle": "Delete this item?",
+      "deleteMessage": "“{{name}}” will be deleted. This action is logged.",
+      "empty": "No items.",
+      "actions": "Actions",
+      "yes": "yes",
+      "no": "no",
+      "englishRequiredToPublish": "Required to publish the edition.",
+      "general": {
+        "title": "General information",
+        "codeHint": "One capital letter, then 1 to 11 capital letters or digits (e.g. GC27).",
+        "codeFormat": "Expected format: one capital letter, then 1 to 11 capital letters or digits.",
+        "timezoneHint": "IANA time zone (e.g. Africa/Abidjan): deadlines are entered in this time zone."
+      },
+      "tracks": {
+        "title": "Tracks",
+        "lead": "Tracks offered to authors, in French and English.",
+        "add": "Add a track",
+        "editTitle": "Edit the track"
+      },
+      "types": {
+        "title": "Submission types",
+        "lead": "Formats offered to authors (oral presentation, poster…).",
+        "add": "Add a type",
+        "editTitle": "Edit the type"
+      },
+      "calendar": {
+        "title": "Calendar",
+        "lead": "Deadlines are entered in the edition's time ({{zone}}); the server converts them to UTC.",
+        "add": "Add a key date",
+        "editTitle": "Edit the key date",
+        "editionTime": "Edition time ({{zone}})",
+        "browserTime": "Your time ({{zone}})",
+        "atLocal": "Date and time ({{zone}})",
+        "codeHint": "Reserved code (list) or custom code; the order of reserved codes is checked.",
+        "labelHint": "Required for a custom code."
+      },
+      "confidentiality": {
+        "title": "Review confidentiality",
+        "doubleBlind": "Double-blind review",
+        "doubleBlindHint": "Reviewers see neither the name, the email address nor the affiliation of authors.",
+        "reviewers": "Reviewers per submission (1 to 10)",
+        "sensitive": "Sensitive change: you may be asked to confirm your identity; it is logged."
+      }
+    },
+    "members": {
+      "title": "Members",
+      "showRevoked": "Show revoked roles",
+      "name": "Name",
+      "email": "Email address",
+      "role": "Role",
+      "status": "Status",
+      "since": "Since",
+      "revoke": "Revoke the role",
+      "revokeTitle": "Revoke this role?",
+      "revokeMessage": "{{name}} will lose the role “{{role}}” in this edition and will be notified by email.",
+      "reason": "Reason (logged)",
+      "revoked": "Role revoked."
+    },
+    "invitations": {
+      "title": "Invitations",
+      "newTitle": "Invite members",
+      "emails": "Email addresses",
+      "emailsHint": "One per line, or separated by commas (at most 50).",
+      "invalidEmails": "Invalid addresses: {{emails}}",
+      "tooMany": "At most {{max}} addresses.",
+      "ocFunction": "Organising committee function",
+      "locale": "Invitation language",
+      "message": "Personal message (optional)",
+      "messageHint": "At most 1,000 characters; included in the invitation email.",
+      "send": "Send invitations",
+      "sent": "Invitations sent: {{count}}.",
+      "skippedTitle": "Skipped addresses:",
+      "skipped": {
+        "already_pending": "invitation already pending",
+        "already_member": "role already active"
+      },
+      "filter": "Status:",
+      "all": "All",
+      "invitedBy": "Invited by",
+      "expires": "Expires",
+      "resend": "Resend",
+      "resent": "Invitation resent.",
+      "cancel": "Cancel the invitation",
+      "cancelTitle": "Cancel this invitation?",
+      "cancelMessage": "The link sent to {{email}} will stop working.",
+      "cancelled": "Invitation cancelled."
+    },
+    "audit": {
+      "title": "Audit log",
+      "lead": "Actions logged in this edition (before/after), without IP addresses.",
+      "action": "Action",
+      "actionHint": "Exact (edition.updated) or prefix (role.)",
+      "objectType": "Object type",
+      "since": "From",
+      "until": "To (inclusive)",
+      "search": "Filter",
+      "count": "{{count}} entries.",
+      "at": "Date",
+      "actor": "Actor",
+      "object": "Object",
+      "details": "Details",
+      "reason": "Reason:",
+      "beforeAfter": "Before / after",
+      "before": "Before",
+      "after": "After",
+      "actorKind": {
+        "user": "User",
+        "command": "Operator command",
+        "system": "System"
+      }
+    },
+    "pagination": {
+      "label": "Pagination",
+      "previous": "Previous page",
+      "next": "Next page",
+      "status": "Page {{page}} of {{pages}}"
     },
     "notFound": {
       "title": "Page not found",
       "heading": "This page does not exist.",
-      "backHome": "Back to dashboard"
+      "backHome": "Back to management home"
     }
   }
 }

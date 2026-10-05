@@ -75,6 +75,16 @@
     },
     "session": {
       "expired": "Your session has expired: please sign in again."
+    },
+    "reauth": {
+      "title": "Confirm your identity",
+      "lead": "This is a sensitive operation: confirm your password to continue.",
+      "password": "Password",
+      "code": "Two-factor authentication code",
+      "useCode": "Use a two-factor authentication code instead",
+      "usePassword": "Use my password instead",
+      "submit": "Confirm",
+      "cancel": "Cancel"
     }
   }
 }

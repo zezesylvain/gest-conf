@@ -1,0 +1,99 @@
+<gc-page-header
+  [heading]="'gestion.audit.title' | translate"
+  [lead]="'gestion.audit.lead' | translate"
+/>
+<gc-error-summary [messages]="errors()" />
+
+<form [formGroup]="form" (ngSubmit)="search()" novalidate class="card">
+  <div class="grid-2">
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'gestion.audit.action' | translate }}</mat-label>
+      <input matInput formControlName="action" />
+      <mat-hint>{{ 'gestion.audit.actionHint' | translate }}</mat-hint>
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'gestion.audit.objectType' | translate }}</mat-label>
+      <input matInput formControlName="object_type" />
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'gestion.audit.since' | translate }}</mat-label>
+      <input matInput type="date" formControlName="since" />
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'gestion.audit.until' | translate }}</mat-label>
+      <input matInput type="date" formControlName="until" />
+    </mat-form-field>
+  </div>
+  <div class="actions">
+    <button mat-flat-button type="submit">{{ 'gestion.audit.search' | translate }}</button>
+  </div>
+</form>
+
+@if (!loading()) {
+  <p class="muted" role="status">{{ 'gestion.audit.count' | translate: { count: count() } }}</p>
+  <div class="table-wrap">
+    <table>
+      <caption class="visually-hidden">
+        {{
+          'gestion.audit.title' | translate
+        }}
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">{{ 'gestion.audit.at' | translate }}</th>
+          <th scope="col">{{ 'gestion.audit.action' | translate }}</th>
+          <th scope="col">{{ 'gestion.audit.actor' | translate }}</th>
+          <th scope="col">{{ 'gestion.audit.object' | translate }}</th>
+          <th scope="col">{{ 'gestion.audit.details' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (entry of entries(); track entry.id) {
+          <tr>
+            <td>{{ date(entry.at) }}</td>
+            <td>
+              <code>{{ entry.action }}</code>
+            </td>
+            <td>{{ actor(entry) }}</td>
+            <td>{{ entry.object_type }} #{{ entry.object_id }}</td>
+            <td>
+              @if (entry.reason) {
+                <p>{{ 'gestion.audit.reason' | translate }} {{ entry.reason }}</p>
+              }
+              @if (entry.before || entry.after) {
+                <details>
+                  <summary>{{ 'gestion.audit.beforeAfter' | translate }}</summary>
+                  <div class="grid-2">
+                    <div>
+                      <strong>{{ 'gestion.audit.before' | translate }}</strong>
+                      <pre>{{ json(entry.before) }}</pre>
+                    </div>
+                    <div>
+                      <strong>{{ 'gestion.audit.after' | translate }}</strong>
+                      <pre>{{ json(entry.after) }}</pre>
+                    </div>
+                  </div>
+                </details>
+              }
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="5" class="muted">{{ 'gestion.settings.empty' | translate }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  @if (pages() > 1) {
+    <nav class="actions" [attr.aria-label]="'gestion.pagination.label' | translate">
+      <button mat-button type="button" [disabled]="page() <= 1" (click)="goTo(page() - 1)">
+        {{ 'gestion.pagination.previous' | translate }}
+      </button>
+      <span>{{ 'gestion.pagination.status' | translate: { page: page(), pages: pages() } }}</span>
+      <button mat-button type="button" [disabled]="page() >= pages()" (click)="goTo(page() + 1)">
+        {{ 'gestion.pagination.next' | translate }}
+      </button>
+    </nav>
+  }
+}

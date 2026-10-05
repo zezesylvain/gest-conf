@@ -22,12 +22,12 @@ import {
   LanguageService,
   MeStore,
   PageHeader,
+  countryOptions,
   ProfileTitle,
 } from '@gestconf/shared';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { AccountService } from '../account.service';
-import { countryOptions } from '../countries';
 
 const ORCID_PATTERN = /^\d{4}-\d{4}-\d{4}-\d{3}[\dXx]$/;
 // « '' » : aucun titre (BlankEnum dans le schéma).

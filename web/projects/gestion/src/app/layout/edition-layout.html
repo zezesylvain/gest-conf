@@ -1,0 +1,45 @@
+<div class="edition-bar">
+  <label class="field">
+    <span>{{ 'gestion.layout.edition' | translate }}</span>
+    <select [value]="editionId()" (change)="selectEdition($any($event.target).value)">
+      @for (item of editions(); track item.id) {
+        <option [value]="item.id">{{ item.code }} — {{ title(item) }}</option>
+      }
+    </select>
+  </label>
+  @if (managementRoles().length > 1) {
+    <label class="field">
+      <span>{{ 'gestion.layout.activeRole' | translate }}</span>
+      <select [value]="activeRole() ?? ''" (change)="selectRole($any($event.target).value)">
+        <option value="">{{ 'gestion.layout.allRoles' | translate }}</option>
+        @for (role of managementRoles(); track role) {
+          <option [value]="role">{{ 'gestion.roles.' + role | translate }}</option>
+        }
+      </select>
+    </label>
+  }
+  @if (edition(); as current) {
+    <span class="badge">{{ 'gestion.status.' + current.status | translate }}</span>
+  }
+</div>
+
+<div class="edition-body">
+  <nav class="edition-nav" [attr.aria-label]="'gestion.nav.label' | translate">
+    <ul>
+      @for (item of nav(); track item.path) {
+        <li>
+          <a [routerLink]="item.path" routerLinkActive="active" ariaCurrentWhenActive="page">
+            {{ item.label | translate }}
+          </a>
+        </li>
+      }
+    </ul>
+  </nav>
+  <section class="edition-content">
+    @if (edition()) {
+      <router-outlet />
+    } @else {
+      <p role="alert">{{ 'gestion.forbidden.lead' | translate }}</p>
+    }
+  </section>
+</div>

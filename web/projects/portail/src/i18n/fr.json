@@ -84,7 +84,11 @@
         "management": "Accéder à l'espace de gestion",
         "mfaEnabled": "Double authentification : activée.",
         "mfaDisabled": "Double authentification : non activée.",
-        "security": "Gérer la sécurité du compte"
+        "security": "Gérer la sécurité du compte",
+        "pendingTitle": "Invitations en attente",
+        "pendingHint": "Pour répondre, ouvrez le lien reçu par e-mail.",
+        "editionsTitle": "Mes éditions",
+        "open": "Ouvrir dans la gestion"
       },
       "profile": {
         "title": "Profil",
@@ -128,14 +132,6 @@
         "codeHint": "Code à 6 chiffres, ou code de secours à 8 chiffres.",
         "submit": "Vérifier",
         "backToLogin": "Retour à la connexion"
-      },
-      "reauth": {
-        "title": "Confirmez votre identité",
-        "lead": "Cette opération est sensible : confirmez votre mot de passe pour continuer.",
-        "useCode": "Utiliser plutôt un code de double authentification",
-        "usePassword": "Utiliser plutôt mon mot de passe",
-        "submit": "Confirmer",
-        "cancel": "Annuler"
       },
       "security": {
         "title": "Sécurité",
@@ -181,7 +177,52 @@
         "addEmail": "Ajouter l'adresse",
         "added": "Adresse ajoutée : un lien de vérification lui a été envoyé.",
         "removed": "Adresse retirée.",
-        "primaryChanged": "Adresse principale modifiée."
+        "primaryChanged": "Adresse principale modifiée.",
+        "cancel": "Annuler"
+      },
+      "invitation": {
+        "title": "Invitation",
+        "missing": "Ouvrez le lien reçu par e-mail pour consulter votre invitation.",
+        "notFound": "Cette invitation est introuvable : le lien est incomplet, ou l'invitation a été remplacée par une plus récente.",
+        "summary": "{{inviter}} vous invite à rejoindre l'édition « {{edition}} » ({{code}}) en tant que {{role}}.",
+        "address": "Adresse invitée : {{email}}",
+        "expires": "Valable jusqu'au {{date}}.",
+        "message": "Message de l'invitant :",
+        "signInFirst": "Pour accepter, connectez-vous avec un compte qui porte l'adresse invitée, ou créez-en un.",
+        "signupHint": "Après la création d'un compte et la vérification de votre adresse, rouvrez le lien de l'invitation.",
+        "accept": "Accepter l'invitation",
+        "decline": "Refuser l'invitation",
+        "otherAddress": "Votre compte ne porte pas l'adresse invitée ({{email}}), ou elle n'est pas vérifiée. Pour accepter avec ce compte, recevez un lien de confirmation à cette adresse.",
+        "sendLink": "Recevoir un lien de confirmation à l'adresse invitée",
+        "linkHint": "Le lien est valable une heure et doit être ouvert depuis ce compte ; votre mot de passe peut vous être redemandé.",
+        "linkSent": "Un lien de confirmation a été envoyé à l'adresse invitée. Ouvrez-le depuis ce compte, dans l'heure.",
+        "linkLead": "Vous avez demandé à rattacher l'adresse invitée à votre compte. Confirmez pour l'ajouter (vérifiée) et accepter l'invitation.",
+        "confirmLink": "Confirmer l'adresse et accepter",
+        "reauthHint": "Si votre dernière confirmation de mot de passe date de plus de 5 minutes, elle vous sera redemandée.",
+        "linkSignIn": "Connectez-vous avec le compte qui a demandé ce lien, puis rouvrez-le.",
+        "declined": "Invitation refusée.",
+        "accepted": "Bienvenue ! Vous avez maintenant le rôle « {{role}} ».",
+        "mfaReminder": "Les rôles de gestion exigent la double authentification : activez-la dans « Sécurité » si ce n'est pas déjà fait.",
+        "notPending": {
+          "pending": "En attente.",
+          "accepted": "Cette invitation a déjà été acceptée.",
+          "declined": "Cette invitation a été refusée.",
+          "cancelled": "Cette invitation a été annulée.",
+          "expired": "Cette invitation a expiré : demandez-en une nouvelle aux organisateurs."
+        },
+        "roles": {
+          "ADMIN": "administrateur de l'édition",
+          "CHAIR": "président de la conférence",
+          "OC_MEMBER": "membre du comité d'organisation",
+          "SC_CHAIR": "président du comité scientifique",
+          "SC_MEMBER": "membre du comité scientifique",
+          "AUTHOR": "auteur",
+          "SPEAKER": "intervenant",
+          "SESSION_CHAIR": "président de session",
+          "ATTENDEE": "participant",
+          "SPONSOR": "partenaire",
+          "VOLUNTEER": "bénévole"
+        }
       }
     }
   }

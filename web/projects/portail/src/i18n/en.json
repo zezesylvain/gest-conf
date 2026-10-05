@@ -84,7 +84,11 @@
         "management": "Go to the management area",
         "mfaEnabled": "Two-factor authentication: enabled.",
         "mfaDisabled": "Two-factor authentication: not enabled.",
-        "security": "Manage account security"
+        "security": "Manage account security",
+        "pendingTitle": "Pending invitations",
+        "pendingHint": "To respond, open the link you received by email.",
+        "editionsTitle": "My editions",
+        "open": "Open in management"
       },
       "profile": {
         "title": "Profile",
@@ -128,14 +132,6 @@
         "codeHint": "6-digit code, or 8-digit recovery code.",
         "submit": "Verify",
         "backToLogin": "Back to sign in"
-      },
-      "reauth": {
-        "title": "Confirm your identity",
-        "lead": "This is a sensitive operation: confirm your password to continue.",
-        "useCode": "Use a two-factor authentication code instead",
-        "usePassword": "Use my password instead",
-        "submit": "Confirm",
-        "cancel": "Cancel"
       },
       "security": {
         "title": "Security",
@@ -181,7 +177,52 @@
         "addEmail": "Add the address",
         "added": "Address added: a verification link has been sent to it.",
         "removed": "Address removed.",
-        "primaryChanged": "Primary address changed."
+        "primaryChanged": "Primary address changed.",
+        "cancel": "Cancel"
+      },
+      "invitation": {
+        "title": "Invitation",
+        "missing": "Open the link you received by email to see your invitation.",
+        "notFound": "This invitation cannot be found: the link is incomplete, or the invitation was replaced by a newer one.",
+        "summary": "{{inviter}} invites you to join the edition “{{edition}}” ({{code}}) as {{role}}.",
+        "address": "Invited address: {{email}}",
+        "expires": "Valid until {{date}}.",
+        "message": "Message from the inviter:",
+        "signInFirst": "To accept, sign in with an account that holds the invited address, or create one.",
+        "signupHint": "After creating an account and verifying your address, open the invitation link again.",
+        "accept": "Accept the invitation",
+        "decline": "Decline the invitation",
+        "otherAddress": "Your account does not hold the invited address ({{email}}), or it is not verified. To accept with this account, receive a confirmation link at that address.",
+        "sendLink": "Receive a confirmation link at the invited address",
+        "linkHint": "The link is valid for one hour and must be opened from this account; you may be asked for your password again.",
+        "linkSent": "A confirmation link was sent to the invited address. Open it from this account within the hour.",
+        "linkLead": "You asked to link the invited address to your account. Confirm to add it (verified) and accept the invitation.",
+        "confirmLink": "Confirm the address and accept",
+        "reauthHint": "If you last confirmed your password more than 5 minutes ago, you will be asked again.",
+        "linkSignIn": "Sign in with the account that requested this link, then open it again.",
+        "declined": "Invitation declined.",
+        "accepted": "Welcome! You now have the role “{{role}}”.",
+        "mfaReminder": "Management roles require two-factor authentication: enable it under “Security” if you have not already.",
+        "notPending": {
+          "pending": "Pending.",
+          "accepted": "This invitation has already been accepted.",
+          "declined": "This invitation was declined.",
+          "cancelled": "This invitation was cancelled.",
+          "expired": "This invitation has expired: ask the organisers for a new one."
+        },
+        "roles": {
+          "ADMIN": "edition administrator",
+          "CHAIR": "conference chair",
+          "OC_MEMBER": "organising committee member",
+          "SC_CHAIR": "scientific committee chair",
+          "SC_MEMBER": "scientific committee member",
+          "AUTHOR": "author",
+          "SPEAKER": "speaker",
+          "SESSION_CHAIR": "session chair",
+          "ATTENDEE": "attendee",
+          "SPONSOR": "sponsor",
+          "VOLUNTEER": "volunteer"
+        }
       }
     }
   }

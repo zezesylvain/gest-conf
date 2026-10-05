@@ -2,17 +2,273 @@
   "gestion": {
     "layout": {
       "skipToContent": "Aller au contenu",
-      "area": "Gestion"
+      "area": "Gestion",
+      "logout": "Se déconnecter",
+      "edition": "Édition",
+      "activeRole": "Rôle actif",
+      "allRoles": "Tous mes rôles"
+    },
+    "nav": {
+      "label": "Navigation de l'édition",
+      "dashboard": "Tableau de bord",
+      "general": "Informations générales",
+      "tracks": "Thématiques",
+      "types": "Types de communication",
+      "calendar": "Calendrier",
+      "confidentiality": "Confidentialité",
+      "members": "Membres",
+      "invitations": "Invitations",
+      "audit": "Journal"
+    },
+    "status": {
+      "draft": "brouillon",
+      "published": "publiée",
+      "archived": "archivée"
+    },
+    "roles": {
+      "ADMIN": "Administrateur de l'édition",
+      "CHAIR": "Président de la conférence",
+      "OC_MEMBER": "Membre du comité d'organisation",
+      "SC_CHAIR": "Président du comité scientifique",
+      "SC_MEMBER": "Membre du comité scientifique",
+      "AUTHOR": "Auteur",
+      "SPEAKER": "Intervenant",
+      "SESSION_CHAIR": "Président de session",
+      "ATTENDEE": "Participant",
+      "SPONSOR": "Partenaire",
+      "VOLUNTEER": "Bénévole"
+    },
+    "ocFunctions": {
+      "finance": "finances",
+      "program": "programme",
+      "logistics": "logistique",
+      "communication": "communication",
+      "external_relations": "relations extérieures",
+      "volunteers": "bénévoles",
+      "secretariat": "secrétariat"
+    },
+    "memberStatus": {
+      "active": "actif",
+      "revoked": "retiré"
+    },
+    "invitationStatus": {
+      "pending": "en attente",
+      "accepted": "acceptée",
+      "declined": "refusée",
+      "cancelled": "annulée",
+      "expired": "expirée"
+    },
+    "keyDateCodes": {
+      "call_open": "Ouverture de l'appel",
+      "call_close": "Clôture de l'appel",
+      "review_deadline": "Fin des évaluations",
+      "notification": "Notification des décisions",
+      "camera_ready": "Version définitive",
+      "registration_open": "Ouverture des inscriptions",
+      "early_bird_end": "Fin du tarif préférentiel",
+      "registration_close": "Clôture des inscriptions"
+    },
+    "editions": {
+      "title": "Mes éditions",
+      "none": "Votre compte n'a aucun rôle de gestion dans une édition.",
+      "toAccount": "Retour à mon compte"
+    },
+    "forbidden": {
+      "title": "Accès refusé",
+      "lead": "Vos rôles ne donnent pas accès à cette page de l'édition.",
+      "backToEditions": "Retour à mes éditions"
     },
     "dashboard": {
       "title": "Tableau de bord",
-      "heading": "Espace de gestion",
-      "lead": "Comités scientifique et d'organisation, administration de l'édition."
+      "statusLabel": "Statut :",
+      "checkTitle": "Paramétrage à compléter avant publication",
+      "check": {
+        "titles": "Titres en français et en anglais",
+        "dates": "Dates de la conférence",
+        "tracks": "Au moins une thématique active",
+        "types": "Au moins un type de communication actif",
+        "call": "Ouverture et clôture de l'appel",
+        "done": "fait :",
+        "todo": "à faire :"
+      },
+      "keyDates": "Dates clés (heure de l'édition)",
+      "noKeyDates": "Aucune date clé.",
+      "pendingInvitations": "Invitations en attente : {{count}}.",
+      "seeInvitations": "Voir les invitations",
+      "mfaTitle": "Double authentification",
+      "mfaEnabled": "Activée sur votre compte.",
+      "mfaDisabled": "Non activée : elle est exigée pour la gestion.",
+      "manageSecurity": "Gérer la sécurité du compte",
+      "published": {
+        "action": "Publier l'édition",
+        "title": "Publier l'édition ?",
+        "message": "L'édition et ses dates publiques apparaîtront sur le portail. Le serveur vérifie d'abord que le paramétrage est complet.",
+        "confirm": "Publier",
+        "done": "Édition publiée."
+      },
+      "archived": {
+        "action": "Archiver l'édition",
+        "title": "Archiver l'édition ?",
+        "message": "L'édition passera en lecture seule. Possible seulement après la fin de la conférence.",
+        "confirm": "Archiver",
+        "done": "Édition archivée."
+      }
+    },
+    "fields": {
+      "code": "Code",
+      "slug": "Identifiant d'URL",
+      "year": "Année",
+      "titleFr": "Titre (français)",
+      "titleEn": "Titre (anglais)",
+      "themeFr": "Thème (français)",
+      "themeEn": "Thème (anglais)",
+      "startDate": "Début",
+      "endDate": "Fin",
+      "venue": "Lieu",
+      "city": "Ville",
+      "country": "Pays",
+      "timezone": "Fuseau horaire",
+      "position": "Ordre",
+      "nameFr": "Nom (français)",
+      "nameEn": "Nom (anglais)",
+      "labelFr": "Libellé (français)",
+      "labelEn": "Libellé (anglais)",
+      "descriptionFr": "Description (français)",
+      "descriptionEn": "Description (anglais)",
+      "active": "Active",
+      "duration": "Durée par défaut (min)",
+      "abstractMaxWords": "Mots maximum du résumé",
+      "keyDate": "Date clé",
+      "public": "Visible sur le portail"
+    },
+    "settings": {
+      "readOnly": "Lecture seule : vos rôles ne permettent pas de modifier le paramétrage.",
+      "saved": "Modifications enregistrées.",
+      "save": "Enregistrer",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "deleted": "Élément supprimé.",
+      "deleteTitle": "Supprimer cet élément ?",
+      "deleteMessage": "« {{name}} » sera supprimé. Cette action est journalisée.",
+      "empty": "Aucun élément.",
+      "actions": "Actions",
+      "yes": "oui",
+      "no": "non",
+      "englishRequiredToPublish": "Obligatoire pour publier l'édition.",
+      "general": {
+        "title": "Informations générales",
+        "codeHint": "Une majuscule, puis 1 à 11 majuscules ou chiffres (ex. GC27).",
+        "codeFormat": "Format attendu : une majuscule, puis 1 à 11 majuscules ou chiffres.",
+        "timezoneHint": "Fuseau IANA (ex. Africa/Abidjan) : les échéances se saisissent dans ce fuseau."
+      },
+      "tracks": {
+        "title": "Thématiques",
+        "lead": "Thématiques proposées aux auteurs, en français et en anglais.",
+        "add": "Ajouter une thématique",
+        "editTitle": "Modifier la thématique"
+      },
+      "types": {
+        "title": "Types de communication",
+        "lead": "Formats proposés aux auteurs (communication orale, poster…).",
+        "add": "Ajouter un type",
+        "editTitle": "Modifier le type"
+      },
+      "calendar": {
+        "title": "Calendrier",
+        "lead": "Échéances saisies à l'heure de l'édition ({{zone}}) ; le serveur les convertit en UTC.",
+        "add": "Ajouter une date clé",
+        "editTitle": "Modifier la date clé",
+        "editionTime": "Heure de l'édition ({{zone}})",
+        "browserTime": "Votre heure ({{zone}})",
+        "atLocal": "Date et heure ({{zone}})",
+        "codeHint": "Code réservé (liste) ou code libre ; l'ordre des codes réservés est contrôlé.",
+        "labelHint": "Obligatoire pour un code libre."
+      },
+      "confidentiality": {
+        "title": "Confidentialité de l'évaluation",
+        "doubleBlind": "Évaluation en double aveugle",
+        "doubleBlindHint": "Les relecteurs ne voient ni le nom, ni l'adresse, ni l'affiliation des auteurs.",
+        "reviewers": "Relecteurs par soumission (1 à 10)",
+        "sensitive": "Changement sensible : une confirmation de votre identité peut être demandée ; il est journalisé."
+      }
+    },
+    "members": {
+      "title": "Membres",
+      "showRevoked": "Afficher les rôles retirés",
+      "name": "Nom",
+      "email": "Adresse e-mail",
+      "role": "Rôle",
+      "status": "Statut",
+      "since": "Depuis",
+      "revoke": "Retirer le rôle",
+      "revokeTitle": "Retirer ce rôle ?",
+      "revokeMessage": "{{name}} perdra le rôle « {{role}} » dans cette édition et en sera averti par e-mail.",
+      "reason": "Motif (journalisé)",
+      "revoked": "Rôle retiré."
+    },
+    "invitations": {
+      "title": "Invitations",
+      "newTitle": "Inviter des membres",
+      "emails": "Adresses e-mail",
+      "emailsHint": "Une par ligne, ou séparées par des virgules (50 au plus).",
+      "invalidEmails": "Adresses invalides : {{emails}}",
+      "tooMany": "{{max}} adresses au plus.",
+      "ocFunction": "Fonction au comité d'organisation",
+      "locale": "Langue de l'invitation",
+      "message": "Message personnel (facultatif)",
+      "messageHint": "1 000 caractères au plus ; joint à l'e-mail d'invitation.",
+      "send": "Envoyer les invitations",
+      "sent": "Invitations envoyées : {{count}}.",
+      "skippedTitle": "Adresses ignorées :",
+      "skipped": {
+        "already_pending": "invitation déjà en attente",
+        "already_member": "rôle déjà actif"
+      },
+      "filter": "Statut :",
+      "all": "Tous",
+      "invitedBy": "Invité par",
+      "expires": "Expire le",
+      "resend": "Relancer",
+      "resent": "Invitation renvoyée.",
+      "cancel": "Annuler l'invitation",
+      "cancelTitle": "Annuler cette invitation ?",
+      "cancelMessage": "Le lien envoyé à {{email}} ne fonctionnera plus.",
+      "cancelled": "Invitation annulée."
+    },
+    "audit": {
+      "title": "Journal",
+      "lead": "Actions journalisées dans cette édition (avant/après), sans adresse IP.",
+      "action": "Action",
+      "actionHint": "Exacte (edition.updated) ou préfixe (role.)",
+      "objectType": "Type d'objet",
+      "since": "Du",
+      "until": "Au (inclus)",
+      "search": "Filtrer",
+      "count": "{{count}} entrée(s).",
+      "at": "Date",
+      "actor": "Acteur",
+      "object": "Objet",
+      "details": "Détail",
+      "reason": "Motif :",
+      "beforeAfter": "Avant / après",
+      "before": "Avant",
+      "after": "Après",
+      "actorKind": {
+        "user": "Utilisateur",
+        "command": "Commande d'exploitation",
+        "system": "Système"
+      }
+    },
+    "pagination": {
+      "label": "Pagination",
+      "previous": "Page précédente",
+      "next": "Page suivante",
+      "status": "Page {{page}} sur {{pages}}"
     },
     "notFound": {
       "title": "Page introuvable",
       "heading": "Cette page n'existe pas.",
-      "backHome": "Retour au tableau de bord"
+      "backHome": "Retour à l'accueil de la gestion"
     }
   }
 }
