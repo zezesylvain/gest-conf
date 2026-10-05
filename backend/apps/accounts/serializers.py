@@ -179,3 +179,11 @@ def consent_states(states: dict) -> list[dict]:
         }
         for kind, consent in states.items()
     ]
+
+
+class AnonymizationSerializer(serializers.Serializer):
+    """Confirmation explicite : l'adresse du compte, saisie à nouveau (plan L1 §4.9)."""
+
+    confirmation = serializers.CharField(
+        max_length=254, help_text="Adresse e-mail du compte, saisie pour confirmer."
+    )

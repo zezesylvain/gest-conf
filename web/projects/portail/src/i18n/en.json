@@ -23,7 +23,9 @@
         "home": "Home",
         "profile": "Profile",
         "logout": "Sign out",
-        "security": "Security"
+        "security": "Security",
+        "privacy": "Privacy",
+        "myData": "My data"
       },
       "fields": {
         "email": "Email address",
@@ -223,6 +225,37 @@
           "SPONSOR": "sponsor",
           "VOLUNTEER": "volunteer"
         }
+      },
+      "privacy": {
+        "title": "Privacy",
+        "directoryTitle": "Public committee directory",
+        "directoryLead": "Optional: if you agree, your name and institution may appear in the public list of the conference committees. You can withdraw your consent at any time.",
+        "granted": "You agreed to appear in the directory.",
+        "notGranted": "You do not appear in the directory.",
+        "grant": "Appear in the directory",
+        "withdraw": "Withdraw my consent",
+        "saved": "Your choice has been saved.",
+        "historyTitle": "History of your choices",
+        "kinds": {
+          "privacy_notice": "Privacy notice (acknowledged)",
+          "directory_listing": "Public directory"
+        },
+        "yes": "yes",
+        "no": "no"
+      },
+      "myData": {
+        "title": "My data",
+        "exportTitle": "Download my data",
+        "exportLead": "JSON file with your account, profile, addresses, two-factor authentication status (without any secret), roles, invitations, consents, emails received and your actions over the last 12 months.",
+        "download": "Download (JSON)",
+        "downloaded": "Export downloaded.",
+        "anonymizeTitle": "Anonymize my account",
+        "anonymizeLead": "Immediate and permanent: your address, profile, two-factor authentication and sessions are erased, your roles revoked, and you will no longer be able to sign in.",
+        "anonymizeKept": "The action log and the history of your consents are kept as evidence, without your address or name. If you have an active management role, hand it over first.",
+        "confirmation": "Account email address",
+        "confirmationHint": "Type {{email}} to confirm.",
+        "understood": "I understand that this operation is permanent.",
+        "anonymize": "Permanently anonymize my account"
       }
     }
   }

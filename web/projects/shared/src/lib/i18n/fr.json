@@ -60,7 +60,8 @@
       "incorrect_code": "Code incorrect.",
       "unverified_email": "Vérifiez d'abord toutes les adresses e-mail de votre compte (ou supprimez celles qui ne le sont pas).",
       "add_email_blocked": "Votre compte est protégé par la double authentification : l'ajout d'une adresse passe par une invitation à cette adresse.",
-      "unverified_primary_email": "Votre adresse e-mail principale doit être vérifiée."
+      "unverified_primary_email": "Votre adresse e-mail principale doit être vérifiée.",
+      "account_has_active_duties": "Transmettez d'abord vos rôles de gestion actifs."
     },
     "form": {
       "errorSummary": "Le formulaire contient des erreurs :",

@@ -3,7 +3,7 @@
 
 | | |
 |---|---|
-| **Version** | 1.0 – document de cadrage |
+| **Version** | 1.1 – document de cadrage, mis à jour après le lot L1 (§17) |
 | **Date** | 5 octobre 2026 |
 | **Auteur** | Étude réalisée pour ZDS |
 | **Statut** | Pour validation |
@@ -206,7 +206,7 @@ Site vitrine de l'événement, bilingue FR/EN.
 - Inscription par e-mail avec **vérification de l'adresse**, réinitialisation du mot de passe ;
 - **Connexion ORCID** (identifiant chercheur standard, apprécié des auteurs) — P2 ;
 - Profil : titre, nom, prénom, institution, pays, spécialités, biographie, photo, ORCID, réseaux professionnels ;
-- **Authentification à deux facteurs (TOTP)** obligatoire pour comités et administrateurs — P2 ;
+- **Authentification à deux facteurs (TOTP)** obligatoire pour les rôles de gestion (`ADMIN`, `CHAIR`, `SC_CHAIR`, `OC_MEMBER`) — **P1** (lot L1, voir §17) ;
 - Un compte unique pour tous les rôles, sélecteur de rôle actif dans l'interface ;
 - Consentements (données personnelles, publication de la photo et du résumé) horodatés ;
 - Suppression / anonymisation de compte sur demande.
@@ -562,7 +562,9 @@ flowchart LR
 | **RG-15** | Un paiement n'est considéré valide que sur confirmation signée de l'agrégateur (webhook vérifié), jamais sur simple retour du navigateur. |
 | **RG-16** | Une attestation n'est délivrée qu'aux personnes dont la présence est enregistrée (ou, pour les auteurs, la communication marquée `PRESENTED`). |
 | **RG-17** | Toute action sensible (décision, changement de rôle, export de masse, consultation de l'identité en double aveugle, modification après clôture) est inscrite au journal d'audit (qui, quoi, quand, avant/après). |
-| **RG-18** | Les données personnelles d'une édition sont anonymisées ou supprimées à l'issue de la durée de conservation paramétrée. |
+| **RG-18** | Les données personnelles d'une édition sont anonymisées ou supprimées à l'issue de la durée de conservation paramétrée (précisée au §17 : compte et données d'édition distingués). |
+| **RG-19** | *(Proposée, L3.)* Le double aveugle et le code de l'édition sont gelés après l'ouverture de l'appel ; modification par un `ADMIN`, avec motif et audit. |
+| **RG-20** | Une invitation ne s'accepte que depuis un compte qui contrôle l'adresse invitée (adresse vérifiée, ou lien de confirmation envoyé à cette adresse avec réauthentification récente) ; le jeton seul ne suffit jamais. |
 
 ---
 
@@ -609,7 +611,7 @@ flowchart TB
 | Framework | **Django** (version LTS en cours) + **Django REST Framework** | `django.contrib.admin` **retiré** de `INSTALLED_APPS` et des URL |
 | Documentation d'API | `drf-spectacular` (OpenAPI 3) | Génère le client TypeScript utilisé par Angular |
 | Authentification | `django-allauth` (e-mail, ORCID, mode headless) + sessions + CSRF | Pas de JWT stocké dans le navigateur |
-| 2FA | `django-otp` (TOTP) | Obligatoire pour comités et admins |
+| 2FA | `allauth.mfa` (TOTP et codes de secours, secret chiffré) | Imposée aux rôles de gestion ; `django-otp` abandonné (décision D2, voir §17) |
 | Base de données | **MariaDB** (version fournie par o2switch) | Django supporte MariaDB ; jeu de caractères `utf8mb4` |
 | Pilote MariaDB | `PyMySQL` (pur Python) en première intention | `mysqlclient` nécessite une compilation, accès au compilateur à demander au support o2switch (cf. FAQ) |
 | Tâches asynchrones | File en base (modèle `Job`) + commande `manage.py run_jobs` lancée par **cron** | Pas de Celery/Redis sur mutualisé |
@@ -621,7 +623,7 @@ flowchart TB
 | UI | Angular Material **ou** PrimeNG | PrimeNG est riche en tableaux/planning ; Material est sobre et accessible |
 | Planning (agenda) | FullCalendar (resource timeline) ou composant maison | À trancher en prototype |
 | i18n | `@ngx-translate` (changement de langue sans rechargement) | Alternative : i18n natif Angular (un build par langue) |
-| Tests | `pytest-django`, `factory_boy` ; Jest/Karma ; Playwright (E2E) | |
+| Tests | `pytest-django`, `factory_boy` ; Vitest ; Playwright (E2E) | |
 | Qualité | `ruff`, `mypy` (optionnel), ESLint, pre-commit | |
 | CI/CD | GitHub Actions → build Angular + déploiement SSH/rsync | o2switch fournit l'accès SSH |
 
@@ -740,7 +742,7 @@ Les types sont indicatifs. Toutes les tables ont `id` (BIGINT), `created_at`, `u
 
 | Table | Champs clés |
 |---|---|
-| `user` | email (unique), password, is_active, email_verified_at, locale, last_login, totp_enabled |
+| `user` | email (unique), password, is_active, locale, last_login, anonymized_at — vérification d'adresse et 2FA dans les tables d'allauth (voir §17) |
 | `profile` | user_id, civility, first_name, last_name, institution, department, country, orcid, bio, photo, expertise_keywords (JSON), consent_directory, consent_at |
 | `user_role` | user_id, edition_id, role (enum), oc_function (nullable), status (invited / active / declined), invited_at, accepted_at — **unique (user, edition, role)** |
 
@@ -1271,7 +1273,7 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'allauth', 'allauth.account', 'allauth.socialaccount',
     'allauth.socialaccount.providers.orcid',
-    'django_otp', 'django_otp.plugins.otp_totp',
+    'allauth.headless', 'allauth.mfa',   # 2FA (voir §17 ; django-otp abandonné)
     'apps.core', 'apps.accounts', 'apps.conferences', 'apps.committees',
     'apps.submissions', 'apps.reviews', 'apps.program', 'apps.registrations',
     'apps.payments', 'apps.events', 'apps.communications',
@@ -1341,9 +1343,73 @@ def weighted_score(scores, criteria, scale_min, scale_max):
 | Unitaire | Calcul de score, transitions de statut, détection de conflits, numérotation | `pytest` |
 | API | Droits par rôle (matrice), double aveugle, filtres, erreurs | `pytest-django` + client DRF |
 | Intégration | Paiement (webhook simulé), e-mails, génération PDF, cron | `pytest` + doubles |
-| Front | Composants critiques (formulaire d'évaluation, planificateur) | Jest / Karma |
+| Front | Composants critiques (formulaire d'évaluation, planificateur) | Vitest |
 | E2E | Parcours auteur complet, évaluation, décision, inscription, check-in | Playwright |
 | Non fonctionnel | Charge, accessibilité, sécurité | k6 / Lighthouse / axe / ZAP |
+
+---
+
+## 17. Mises à jour issues du lot L1 (version 1.1)
+
+Les décisions D1 à D18 du plan [`docs/L1-socle-plan.md`](docs/L1-socle-plan.md) ont été validées le 5 octobre 2026 et mises en œuvre dans le lot L1. Cette section les reporte dans l'étude ; **en cas de divergence avec les sections précédentes, elle prévaut**. Le détail (justifications, vérifications, écarts constatés) est dans le plan, §2, §15 et §16.
+
+### 17.1 Stack, authentification et sécurité
+
+- **2FA par `allauth.mfa`** (TOTP et codes de secours) au lieu de `django-otp`, qui n'a aucune intégration avec allauth *headless* (D2). Secrets chiffrés en base (`MultiFernet`, clés `GESTCONF_MFA_ENCRYPTION_KEYS`, rotation par `rotate_mfa_keys`) ; QR code d'enrôlement produit par le serveur avec `qrcode`. Dépendances binaires `cryptography` et `fido2` (roues manylinux, à confirmer sur o2switch). `django.contrib.messages` et `contrib.sites` sont inutiles.
+- **2FA en P1 (lot L1)**, imposée côté serveur aux rôles `ADMIN`, `CHAIR`, `SC_CHAIR` et `OC_MEMBER`, vérifiée à chaque requête de gestion (*step-up*) : 403 `mfa_enrollment_required` puis `mfa_required`. `SC_MEMBER` : décision à prendre avant L4 (D3). Perte d'appareil : codes de secours, sinon `reset_mfa` par l'opérateur, avec motif.
+- Authentification servie par allauth *headless* (client `browser` seul) sous `/api/_allauth/browser/v1/…` ; déconnexion par `DELETE auth/session` ; renvoi du lien de vérification par une nouvelle connexion (mode « lien »).
+- **Sessions de 12 h absolues** imposées par un middleware ; **réauthentification de moins de 5 min** pour les opérations sensibles (export et anonymisation du compte, révocation de rôle, invitation d'un `ADMIN` ou d'un `CHAIR`, publication et archivage, confidentialité, gestion des adresses e-mail, liaison d'une adresse invitée) ; notification de tout ajout d'adresse.
+- Le « verrouillage progressif » devient une **limitation temporaire** par compte et par IP, avec alerte, sans verrouillage permanent. Cache partagé **en base** obligatoire (limites de débit, anti-rejeu TOTP). Anti-énumération y compris par le temps de réponse. CSRF des POST anonymes par une permission dédiée. Quota d'invitations (100 adresses par heure).
+
+### 17.2 Rôles, autorité et matrice des droits
+
+- **Aucun rôle global** (D1) : l'autorité de plateforme s'exerce par des commandes `manage.py` auditées (`create_conference`, `create_edition --admin-email`, `grant_role`, `revoke_role`, `reset_mfa`, `deactivate_user`, `reactivate_user`, `export_user_data`, `anonymize_user`, `rotate_mfa_keys`). `create_platform_admin` est abandonnée ; `ADMIN` est un rôle d'édition.
+- Les droits sont des **capacités par édition** (`edition.read`, `edition.write`, `edition.publish`, `edition.archive`, `members.read`, `members.manage`, `audit.read`) et une **matrice d'attribution** (qui attribue quel rôle), codées et non paramétrables (plan L1 §5.2, §5.5). Le CO lit le paramétrage ; le président du CS lit le paramétrage et gère le comité scientifique (D8).
+- Les invitations génériques vivent dans `accounts` (`RoleInvitation`) ; `committees` (L4) ne portera que les données propres aux comités. Un rôle est `active` ou `revoked` ; l'édition est désignée par le chemin (`/api/v1/manage/editions/{id}/…`).
+
+### 17.3 Règles de gestion
+
+- **RG-17 (précisée)** : catalogue d'actions journalisées (plan L1 §7.3) ; aucune donnée personnelle ni adresse en clair dans les clichés avant/après ; IP et navigateur effaçables par des méthodes nommées ; journal en ajout seul.
+- **RG-18 (précisée)** : distinguer le **compte**, transverse aux éditions, des **données d'une édition**. L'anonymisation d'un compte couvre aussi le registre d'envoi des e-mails, les invitations et les sessions ; elle est refusée tant que la personne détient un rôle de gestion actif. Les conflits avec les conservations légales (factures RG-14, actes) restent à trancher.
+- **RG-19 (proposée, L3)** : `double_blind` et le code de l'édition sont gelés après l'ouverture de l'appel ; modification par un `ADMIN`, avec motif et audit.
+- **RG-20 (adoptée)** : une invitation ne s'accepte que depuis un compte qui **contrôle l'adresse invitée** : adresse vérifiée correspondante, ou lien de confirmation envoyé à cette adresse, lié au compte demandeur et soumis à une réauthentification récente. Le jeton d'invitation seul ne suffit jamais.
+
+### 17.4 Modèle de données
+
+- Limites de MariaDB : pas d'unicité conditionnelle (convention de la « clé d'unicité nullable », en empreinte de longueur fixe ; contrôles par `check_integrity`), NULL distincts, pas d'index sur expression, `sql_mode` à vérifier.
+- `user` : plus de `email_verified_at` ni de `totp_enabled` (tables d'allauth et d'`allauth.mfa`) ; ajout de `anonymized_at`. `profile` : « titre » au lieu de « civilité » ; photo et réseaux en L2, spécialités en L4. `user_role` : statut `active`/`revoked`, unicité (compte, édition, rôle, fonction au CO) ; invitations dans une table séparée.
+- Échéances stockées en UTC, **saisies à l'heure de l'édition** et converties par le serveur, qui refuse une heure inexistante ou ambiguë (D13) ; contenus paramétrés en colonnes `_fr` / `_en`, l'anglais étant exigé pour publier (D14). Pas de table générique de paramètres.
+
+### 17.5 API
+
+- 401 pour une session absente ; erreurs normalisées `{code, message, fields}` avec un catalogue de codes stables (dont `csrf_failed`, `reauthentication_required`, `mfa_required`, `mfa_enrollment_required`, `invitation_*`, `edition_*`, `account_has_active_duties`) ; l'enveloppe d'erreur d'allauth est normalisée côté client, un 401 d'allauth étant un état du protocole.
+- Endpoints `/api/v1/me/*` (profil, préférences, consentements, `totp-qr`, `data-export`, `anonymization`), `/api/v1/invitations/*` (dont `link-email`), `/api/v1/manage/editions/{id}/…` (paramétrage, membres, invitations, journal) et `/api/v1/public/editions/current`, qui intègre les dates clés publiques.
+
+### 17.6 Écrans
+
+- Espace compte dans le **portail** (`/compte/…`, D11) : connexion avec étape 2FA, inscription, vérification, mot de passe oublié, double authentification, sécurité (2FA, mot de passe, adresses), profil, confidentialité, **mes données** (export, anonymisation) et **invitation**.
+- Gestion : sélecteur d'édition, rôle actif (filtre de menu seulement), tableau de bord, paramétrage (informations générales, thématiques, types, calendrier, confidentialité), **membres et rôles**, invitations, journal. Pas d'écran « Utilisateurs » global ; « Exports RGPD » en libre-service, plus une commande opérateur.
+
+### 17.7 Exploitation
+
+- `deploy/cron.sh` lance trois commandes verrouillées (`LockedCommand`) et idempotentes : `run_jobs` (file d'e-mails, voie rapide en liste blanche), `cleanup` (sessions, conservation selon D15) et `check_integrity`, **quotidienne**. Battement de cœur dans `/health`.
+- Déploiement : `npm run build` (CSP à empreintes), `createcachetable` après `migrate`, catalogues `.mo` versionnés, sauvegarde avant `migrate`, tests de fumée sans compte de production. Le **déploiement continu sort de L1** (D18) ; L1 garde l'intégration continue.
+- Points à vérifier sur o2switch : MariaDB ≥ 10.5 et `sql_mode`, glibc et roues binaires, IP réelle derrière le proxy, `flock` et `GET_LOCK`, fréquence du cron, SSH depuis la CI (`docs/L1-verifications-o2switch.md`).
+
+### 17.8 Données personnelles et durées de conservation (D15)
+
+- Notice d'information versionnée (prise de connaissance enregistrée) et consentements facultatifs, désactivés par défaut et retirables ; historique en ajout seul.
+- Durées proposées, **appliquées en simulation tant qu'elles ne sont pas validées** (`GESTCONF_RETENTION_ENFORCED`) : corps d'e-mails à jeton purgés dès l'envoi (24 h au plus en cas d'échec) ; autres corps 30 jours, registre d'envoi 12 mois ; IP et navigateur 6 mois ; lignes du journal 3 ans ; adresse et message des invitations refusées, annulées ou expirées 12 mois ; tâches terminées 30 jours ; sessions 12 h.
+- Le journal d'audit et les consentements sont conservés après l'anonymisation, comme preuves, sans adresse en clair.
+
+### 17.9 Tests et planning
+
+- Tests front avec **Vitest** (au lieu de Jest ou Karma) ; tests E2E automatisés à partir de L3. Un test par case sensible de la matrice des droits, test d'introspection du registre des données personnelles et test de balayage après anonymisation.
+- Charge de L1 réestimée à 22,75 – 28 j-h, dont 8 à 10 j-h d'écrans ; choix du fournisseur d'e-mails déplacé en L1 (D10) ; préparation spécifique de RG-04 au début de L4.
+
+### 17.10 Questions ouvertes ajoutées
+
+- Fournisseur d'e-mails et domaine ; durées de conservation par catégorie ; fournisseur anti-robots ; environnement de recette ; version et `sql_mode` de MariaDB, fréquence du cron ; outil de supervision des erreurs ; procédure de vérification d'identité avant `reset_mfa` ; sauvegardes avant les données réelles ; lot d'accueil du déploiement continu ; 2FA des relecteurs (`SC_MEMBER`) ; émetteur affiché dans les applications TOTP (Q15).
 
 ---
 

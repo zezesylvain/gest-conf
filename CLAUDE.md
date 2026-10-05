@@ -76,6 +76,7 @@ npm run build               # portail pré-rendu + gestion + CSP à empreintes
 npm run api:generate        # régénérer le client TypeScript après chaque évolution du schéma
 
 # Déploiement : deploy/deploy.sh puis deploy/smoke-test.sh (voir deploy/README.md)
+# Cron (deploy/cron.sh) : run_jobs (toutes les 5 min), cleanup et check_integrity (quotidiennes)
 ```
 
 Les URL Django sont déclarées **sans** le préfixe `/api` (`v1/...`) : `config/mount.py` gère le montage.
@@ -105,7 +106,7 @@ Les URL Django sont déclarées **sans** le préfixe `/api` (`v1/...`) : `config
 
 ## Décisions du lot L1
 
-Les décisions D1 à D18 du plan [`docs/L1-socle-plan.md`](docs/L1-socle-plan.md) ont été validées le 5 octobre 2026 : elles s'appliquent (notamment D1 : aucun rôle global, autorité de plateforme exercée par des commandes `manage.py` auditées). La mise à jour correspondante de l'étude est prévue en fin de lot (étape L1.8).
+Les décisions D1 à D18 du plan [`docs/L1-socle-plan.md`](docs/L1-socle-plan.md) ont été validées le 5 octobre 2026 : elles s'appliquent (notamment D1 : aucun rôle global, autorité de plateforme exercée par des commandes `manage.py` auditées). Elles sont reportées dans l'étude, **§17 « Mises à jour issues du lot L1 »**, qui prévaut sur les sections antérieures en cas de divergence. Bilan du lot et exploitation : [`docs/L1-socle.md`](docs/L1-socle.md).
 
 ## Questions ouvertes (étude §15, à ne pas trancher seul)
 

@@ -23,7 +23,9 @@
         "home": "Accueil",
         "profile": "Profil",
         "logout": "Se déconnecter",
-        "security": "Sécurité"
+        "security": "Sécurité",
+        "privacy": "Confidentialité",
+        "myData": "Mes données"
       },
       "fields": {
         "email": "Adresse e-mail",
@@ -223,6 +225,37 @@
           "SPONSOR": "partenaire",
           "VOLUNTEER": "bénévole"
         }
+      },
+      "privacy": {
+        "title": "Confidentialité",
+        "directoryTitle": "Annuaire public des comités",
+        "directoryLead": "Facultatif : si vous l'acceptez, votre nom et votre institution peuvent apparaître dans la liste publique des comités de la conférence. Vous pouvez retirer votre accord à tout moment.",
+        "granted": "Vous avez accepté d'apparaître dans l'annuaire.",
+        "notGranted": "Vous n'apparaissez pas dans l'annuaire.",
+        "grant": "Apparaître dans l'annuaire",
+        "withdraw": "Retirer mon accord",
+        "saved": "Votre choix est enregistré.",
+        "historyTitle": "Historique de vos choix",
+        "kinds": {
+          "privacy_notice": "Notice d'information (prise de connaissance)",
+          "directory_listing": "Annuaire public"
+        },
+        "yes": "oui",
+        "no": "non"
+      },
+      "myData": {
+        "title": "Mes données",
+        "exportTitle": "Télécharger mes données",
+        "exportLead": "Fichier JSON contenant votre compte, votre profil, vos adresses, l'état de votre double authentification (sans aucun secret), vos rôles, vos invitations, vos consentements, les e-mails reçus et vos actions des 12 derniers mois.",
+        "download": "Télécharger (JSON)",
+        "downloaded": "Export téléchargé.",
+        "anonymizeTitle": "Anonymiser mon compte",
+        "anonymizeLead": "Opération immédiate et définitive : votre adresse, votre profil, votre double authentification et vos sessions sont effacés, vos rôles retirés, et vous ne pourrez plus vous connecter.",
+        "anonymizeKept": "Le journal des actions et l'historique de vos consentements sont conservés comme preuves, sans votre adresse ni votre nom. Si vous avez un rôle de gestion actif, transmettez-le d'abord.",
+        "confirmation": "Adresse e-mail du compte",
+        "confirmationHint": "Saisissez {{email}} pour confirmer.",
+        "understood": "Je comprends que cette opération est définitive.",
+        "anonymize": "Anonymiser définitivement mon compte"
       }
     }
   }

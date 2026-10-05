@@ -49,6 +49,12 @@ import { ensureThemeStylesheet } from './theme';
         <a routerLink="/compte/securite" routerLinkActive="active">
           {{ 'portail.account.nav.security' | translate }}
         </a>
+        <a routerLink="/compte/confidentialite" routerLinkActive="active">
+          {{ 'portail.account.nav.privacy' | translate }}
+        </a>
+        <a routerLink="/compte/mes-donnees" routerLinkActive="active">
+          {{ 'portail.account.nav.myData' | translate }}
+        </a>
         <button type="button" class="link-button" (click)="logout()" [disabled]="loggingOut()">
           {{ 'portail.account.nav.logout' | translate }}
         </button>

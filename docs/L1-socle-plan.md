@@ -2200,7 +2200,7 @@ Ces mises à jour seront livrées par une PR de documentation en L1.8, **après 
 
 ---
 
-## 16. Écarts constatés pendant l'implémentation (L1.0 à L1.7)
+## 16. Écarts constatés pendant l'implémentation (L1.0 à L1.8)
 
 Consignés ici pour ne pas dériver en silence (CLAUDE.md). Les écarts marqués **à valider** attendent
 l'accord du commanditaire ; les autres sont des précisions sans effet sur les décisions D1 à D18.
@@ -2541,4 +2541,42 @@ Ils seront repris dans la PR de documentation de L1.8 (§15).
     journal montre l'avant/après. **Reste à faire sur o2switch**, avec l'inscription d'un
     invité sans compte et l'invitation d'un relecteur (403 attendu sur le paramétrage).
     Le test E2E automatisé dans le dépôt reste prévu en L3 (§12.4).
+
+### Étape L1.8 (données personnelles et clôture)
+
+66. **§4.9, registre.** `apps.core.personal_data` : chaque application déclare ses modèles, son
+    export et son anonymisation dans `ready()` ; le compte passe en dernier (les autres
+    traitements lisent encore ses adresses). Le test d'introspection couvre les modèles ayant une
+    clé vers `User` ou un `EmailField`, tables tierces comprises (`account.EmailAddress`,
+    `mfa.Authenticator`) ; aucune exemption n'a été nécessaire.
+67. **§4.9, balayage (complément).** Le test a révélé un cas non prévu : les e-mails envoyés
+    **à des tiers** citent le nom de l'invitant (corps de l'invitation). L'anonymisation purge
+    donc aussi le corps et l'objet de toute ligne du registre d'envoi qui contient l'une de ses
+    adresses ou son nom (recherche textuelle, 3 caractères au moins). Effet de bord assumé :
+    quelques corps de tiers perdus, sans conséquence (ils ne servent qu'au diagnostic).
+68. **§4.9, confirmation.** La « phrase de confirmation » est l'**adresse du compte**, saisie à
+    nouveau (indépendante de la langue), avec une case « je comprends » côté interface. La
+    session est fermée ; l'interface recharge le portail.
+69. **§4.9, responsabilités.** `account_has_active_duties` (409) liste les rôles à transmettre
+    (`CODE:RÔLE`) : rôle actif autre qu'auteur ou participant dans une édition non archivée, ou
+    dernier `ADMIN` d'une édition, même archivée.
+70. **§9.4, `reactivate_user`.** Ajoutée (prévue au §9.4) ; refusée pour un compte anonymisé.
+71. **§8.4, conservation.** Tâches ajoutées à `cleanup`, toutes **en simulation** tant que D15
+    n'est pas validée : IP du journal et des consentements (6 mois), lignes du journal (3 ans),
+    adresse et message des invitations traitées (12 mois, adresse remplacée par
+    `redacted-invitation-<id>@anonymized.invalid`), registre d'envoi (12 mois).
+72. **§8.4, `check_integrity`.** Registre de contrôles (`apps.core.integrity`) : doublons
+    d'adresses vérifiées et d'authentificateurs 2FA (W036), invitations acceptées sans rôle et
+    clés d'unicité incohérentes, taille du cache (seuil 20 000), tâches en échec. Alerte aux
+    opérateurs sans donnée personnelle ; troisième ligne du cron.
+73. **§15, mise à jour de l'étude.** Faite par une section **§17 « Mises à jour issues du lot
+    L1 »** qui prévaut sur les sections antérieures, plus des corrections ciblées (2FA en P1 par
+    `allauth.mfa`, table `user`, extrait de configuration, RG-19 et RG-20, Vitest). La version
+    HTML est mise à jour à l'identique (aucun générateur n'est versionné dans le dépôt).
+    `CLAUDE.md` renvoie à cette section et à `docs/L1-socle.md`.
+74. **Critères de fin de L1.8.** `test_rg18_*`, test d'introspection et test de balayage au vert
+    (SQLite et MariaDB). **Reste à faire sur o2switch** : tests de fumée en production et cron
+    actifs depuis 48 h sans battement de cœur en retard. Couverture mesurée en local
+    (`pytest --cov=apps`) : 94 % au total ; permissions 91 %, rôles 96 %, invitations 89 %,
+    2FA 90 %, données personnelles 99 %, services de l'édition 93 %, audit 86 %.
 

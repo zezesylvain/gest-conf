@@ -5,6 +5,7 @@
 # décalées pour éviter les heures pleines ; intervalle de run_jobs selon H-6/M01) :
 #   */5 * * * *  $HOME/gestconf-app/deploy/cron.sh run_jobs --max-seconds 240
 #   17 3 * * *   $HOME/gestconf-app/deploy/cron.sh cleanup
+#   47 3 * * *   $HOME/gestconf-app/deploy/cron.sh check_integrity
 #
 # Charge le MÊME venv que Passenger (chemin écrit par deploy.sh dans VENV_ACTIVATE) et le
 # même .env (lu par config.settings.prod). Toute la sortie va dans logs/cron-<commande>.log :
@@ -18,7 +19,7 @@ command="${1:?Usage : $0 <commande> [options]}"
 
 # Liste fermée : ce script n'est pas un accès générique à manage.py.
 case "$command" in
-  run_jobs | cleanup) ;;
+  run_jobs | cleanup | check_integrity) ;;
   *)
     echo "Commande non planifiable : $command" >&2
     exit 2

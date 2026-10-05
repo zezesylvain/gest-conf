@@ -177,3 +177,28 @@ def deactivate_user(user: User, *, reason: str, actor: Actor) -> int:
         reason=reason,
     )
     return closed
+
+
+@transaction.atomic
+def reactivate_user(user: User, *, reason: str, actor: Actor) -> User:
+    """Réactive un compte désactivé ; un compte anonymisé ne se réactive jamais (RG-18)."""
+    from apps.core.errors import ErrorCode, RuleViolation
+
+    if not reason.strip():
+        raise Invalid(fields={"reason": [_("Motif obligatoire.")]})
+    if user.anonymized_at is not None:
+        raise RuleViolation(
+            _("Un compte anonymisé ne peut pas être réactivé."), code=ErrorCode.INVALID_TRANSITION
+        )
+    if not user.is_active:
+        user.is_active = True
+        user.save(update_fields=["is_active", "updated_at"])
+        record(
+            "account.reactivated",
+            actor=actor,
+            obj=user,
+            before={"is_active": False},
+            after={"is_active": True},
+            reason=reason,
+        )
+    return user

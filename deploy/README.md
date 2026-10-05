@@ -94,7 +94,13 @@ dossier de l'application et y écrit le chemin du venv (`VENV_ACTIVATE`) : le cr
 ```text
 */5 * * * *  $HOME/gestconf-app/deploy/cron.sh run_jobs --max-seconds 240
 17 3 * * *   $HOME/gestconf-app/deploy/cron.sh cleanup
+47 3 * * *   $HOME/gestconf-app/deploy/cron.sh check_integrity
 ```
+
+- `check_integrity` (quotidienne, lecture seule) : doublons d'adresses vérifiées et de 2FA
+  (contraintes que MariaDB ne crée pas), cohérence invitations/rôles, taille du cache, tâches
+  en échec. Les anomalies partent par e-mail aux opérateurs (`GESTCONF_OPERATORS`), sans
+  donnée personnelle ; résumé dans le journal (`integrity.checked`).
 
 - Sorties dans `~/gestconf-app/logs/cron-<commande>.log` (rotation à 5 Mio), jamais sur la
   sortie standard : cron n'envoie pas d'e-mail à chaque passage.
@@ -109,6 +115,18 @@ dossier de l'application et y écrit le chemin du venv (`VENV_ACTIVATE`) : le cr
   `DJANGO_SETTINGS_MODULE=config.settings.prod`) met un e-mail en file ; le passage suivant du
   cron l'envoie. Contrôler la réception (SPF et DKIM valides dans les en-têtes), puis
   `python manage.py outbox` (statut `sent`).
+
+### Données personnelles (plan L1 §4.9, RG-18)
+
+- Les personnes exportent et anonymisent leur compte elles-mêmes (`/compte/mes-donnees`).
+- Demande reçue par courrier ou e-mail, après vérification de l'identité :
+  `python manage.py export_user_data --email … --output fichier.json` (droits 600 ; à
+  transmettre par un canal sûr, puis à supprimer) et
+  `python manage.py anonymize_user --email … --reason …` (irréversible ; refusée tant que la
+  personne a un rôle de gestion actif : `revoke_role` d'abord).
+- Durées de conservation (D15) : `cleanup` les applique **en simulation** tant que
+  `GESTCONF_RETENTION_ENFORCED` est faux ; le résumé (`retention.applied`) indique ce qui
+  serait purgé. Ne l'activer qu'après validation des durées par le commanditaire.
 
 ### Clés de la 2FA (plan L1 §4.10)
 

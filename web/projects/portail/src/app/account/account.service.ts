@@ -2,7 +2,12 @@ import { inject, Injectable } from '@angular/core';
 import {
   AcceptedRole,
   Api,
+  ConsentKind,
   ConsentRecord,
+  Consents,
+  meAnonymization,
+  meConsents,
+  meDataExport,
   invitationAccept,
   invitationDecline,
   invitationLinkEmail,
@@ -63,5 +68,25 @@ export class AccountService {
   /** Envoie un lien de confirmation à l'adresse invitée (RG-20, D6 (a)). */
   requestInvitationLink(token: string): Promise<void> {
     return this.api.invoke(invitationLinkEmail, { body: { token } });
+  }
+
+  // --- Confidentialité et données personnelles (plan L1 §4.8, §4.9) ----------------------
+
+  consents(): Promise<Consents> {
+    return this.api.invoke(meConsents);
+  }
+
+  setConsent(kind: ConsentKind, granted: boolean): Promise<ConsentRecord> {
+    return this.api.invoke(meConsentsCreate, { body: { kind, granted, source: 'account' } });
+  }
+
+  /** Export JSON (réauthentification récente : la fenêtre s'ouvre d'elle-même). */
+  exportData(): Promise<Record<string, unknown>> {
+    return this.api.invoke(meDataExport);
+  }
+
+  /** Anonymisation définitive ; `confirmation` : l'adresse du compte. */
+  anonymize(confirmation: string): Promise<void> {
+    return this.api.invoke(meAnonymization, { body: { confirmation } });
   }
 }

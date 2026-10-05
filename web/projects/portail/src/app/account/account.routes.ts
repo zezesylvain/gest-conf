@@ -63,6 +63,18 @@ export const accountRoutes: Routes = [
         loadComponent: () => import('./pages/invitation-page').then((m) => m.InvitationPage),
       },
       {
+        path: 'confidentialite',
+        title: 'portail.account.privacy.title',
+        canMatch: [authGuard],
+        loadComponent: () => import('./pages/privacy-page').then((m) => m.PrivacyPage),
+      },
+      {
+        path: 'mes-donnees',
+        title: 'portail.account.myData.title',
+        canMatch: [authGuard],
+        loadComponent: () => import('./pages/my-data-page').then((m) => m.MyDataPage),
+      },
+      {
         path: 'profil',
         title: 'portail.account.profile.title',
         canMatch: [authGuard],

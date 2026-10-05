@@ -60,7 +60,8 @@
       "incorrect_code": "Incorrect code.",
       "unverified_email": "First verify every email address of your account (or remove the unverified ones).",
       "add_email_blocked": "Your account is protected by two-factor authentication: adding an address goes through an invitation to that address.",
-      "unverified_primary_email": "Your primary email address must be verified."
+      "unverified_primary_email": "Your primary email address must be verified.",
+      "account_has_active_duties": "First hand over your active management roles."
     },
     "form": {
       "errorSummary": "The form contains errors:",

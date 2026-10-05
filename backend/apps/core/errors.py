@@ -67,6 +67,9 @@ class ErrorCode(models.TextChoices):
     EDITION_ARCHIVED = "edition_archived"
     INVALID_TRANSITION = "invalid_transition"
     EDITION_INCOMPLETE = "edition_incomplete"
+    # Données personnelles (plan L1 §4.9) : anonymisation refusée tant que des
+    # responsabilités (rôles de gestion actifs, dernier ADMIN) n'ont pas été transmises.
+    ACCOUNT_HAS_ACTIVE_DUTIES = "account_has_active_duties"
 
 
 class DomainError(Exception):

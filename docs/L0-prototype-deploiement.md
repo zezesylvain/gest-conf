@@ -57,7 +57,7 @@ La validation sur l'hébergement réel reste à faire : voir la liste de
 
 1. **§11.2** : ajouter « MariaDB ≥ 10.5 » (exigence de Django 5.2) aux points à vérifier.
 2. **§8.2, table `user`** : `email_verified_at` et `totp_enabled` sont gérés par
-   `django-allauth` (adresse vérifiée) et `django-otp` (appareils TOTP) dans leurs
+   `django-allauth` (adresse vérifiée) et `allauth.mfa` (2FA, décision D2 du lot L1) dans leurs
    propres tables ; proposer de les retirer de `user` pour éviter les doublons.
 3. **§3.1 / §3.2** : l'« administrateur technique » a un périmètre global
    (paramétrage, comptes, audit) alors que tous les rôles sont rattachés à une

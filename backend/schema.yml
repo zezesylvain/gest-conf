@@ -951,6 +951,28 @@ paths:
               schema:
                 $ref: '#/components/schemas/Me'
           description: ''
+  /v1/me/anonymization:
+    post:
+      operationId: me_anonymization
+      description: |-
+        ``POST /v1/me/anonymization`` : anonymisation immédiate et définitive (plan §4.9).
+
+        Réauthentification récente, adresse du compte saisie pour confirmer, limite
+        ``account_deletion``. Refusée (409 ``account_has_active_duties``) tant que des rôles
+        de gestion sont actifs. La session est fermée.
+      tags:
+      - me
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnonymizationRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
   /v1/me/consents:
     get:
       operationId: me_consents
@@ -984,6 +1006,24 @@ paths:
               schema:
                 $ref: '#/components/schemas/ConsentRecord'
           description: ''
+  /v1/me/data-export:
+    get:
+      operationId: me_data_export
+      description: |-
+        ``GET /v1/me/data-export`` : toutes ses données en JSON (plan L1 §4.9), sans secret.
+        Réauthentification récente, limite ``data_export``, audit ``account.exported``.
+      tags:
+      - me
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Export JSON.
   /v1/me/preferences:
     patch:
       operationId: me_preferences_update
@@ -1105,6 +1145,18 @@ components:
         * `user` - utilisateur
         * `command` - commande
         * `system` - système
+    AnonymizationRequest:
+      type: object
+      description: 'Confirmation explicite : l''adresse du compte, saisie à nouveau
+        (plan L1 §4.9).'
+      properties:
+        confirmation:
+          type: string
+          minLength: 1
+          description: Adresse e-mail du compte, saisie pour confirmer.
+          maxLength: 254
+      required:
+      - confirmation
     ApiError:
       type: object
       description: 'Format de toute réponse d''erreur de l''API : {code, message,
@@ -1494,6 +1546,7 @@ components:
       - edition_archived
       - invalid_transition
       - edition_incomplete
+      - account_has_active_duties
       type: string
       description: |-
         * `validation_error` - Validation Error
@@ -1524,6 +1577,7 @@ components:
         * `edition_archived` - Edition Archived
         * `invalid_transition` - Invalid Transition
         * `edition_incomplete` - Edition Incomplete
+        * `account_has_active_duties` - Account Has Active Duties
     Health:
       type: object
       properties:

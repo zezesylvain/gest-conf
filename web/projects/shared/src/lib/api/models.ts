@@ -4,6 +4,7 @@
 export type { AcceptedRole } from './models/accepted-role';
 export type { AcceptRequest } from './models/accept-request';
 export type { ActorKind } from './models/actor-kind';
+export type { AnonymizationRequest } from './models/anonymization-request';
 export type { ApiError } from './models/api-error';
 export type { AuditEntry } from './models/audit-entry';
 export type { BlankEnum } from './models/blank-enum';

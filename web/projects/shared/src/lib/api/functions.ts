@@ -69,10 +69,14 @@ export type { ManageEditionsTracksPartialUpdate$Params as ManageEditionsTracksPa
 export { manageEditionsTracksPartialUpdate as manageEditionsTracksPartialUpdate } from './fn/manage/manage-editions-tracks-partial-update';
 export type { Me$Params as Me$Params } from './fn/me/me';
 export { me as me } from './fn/me/me';
+export type { MeAnonymization$Params as MeAnonymization$Params } from './fn/me/me-anonymization';
+export { meAnonymization as meAnonymization } from './fn/me/me-anonymization';
 export type { MeConsents$Params as MeConsents$Params } from './fn/me/me-consents';
 export { meConsents as meConsents } from './fn/me/me-consents';
 export type { MeConsentsCreate$Params as MeConsentsCreate$Params } from './fn/me/me-consents-create';
 export { meConsentsCreate as meConsentsCreate } from './fn/me/me-consents-create';
+export type { MeDataExport$Params as MeDataExport$Params } from './fn/me/me-data-export';
+export { meDataExport as meDataExport } from './fn/me/me-data-export';
 export type { MePreferencesUpdate$Params as MePreferencesUpdate$Params } from './fn/me/me-preferences-update';
 export { mePreferencesUpdate as mePreferencesUpdate } from './fn/me/me-preferences-update';
 export type { MeProfile$Params as MeProfile$Params } from './fn/me/me-profile';

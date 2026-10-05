@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gestconf-backend\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-05 16:49+0000\n"
+"POT-Creation-Date: 2026-10-05 17:20+0000\n"
 "PO-Revision-Date: 2026-10-05 11:00+0000\n"
 "Last-Translator: GEST-CONF\n"
 "Language-Team: GEST-CONF\n"
@@ -370,9 +370,14 @@ msgid "La prise de connaissance ne se retire pas."
 msgstr "Acknowledging the notice cannot be withdrawn."
 
 #: apps/accounts/services/account.py apps/accounts/services/mfa.py
-#: apps/accounts/services/roles.py apps/conferences/services.py
+#: apps/accounts/services/personal_data.py apps/accounts/services/roles.py
+#: apps/conferences/services.py
 msgid "Motif obligatoire."
 msgstr "A reason is required."
+
+#: apps/accounts/services/account.py
+msgid "Un compte anonymisé ne peut pas être réactivé."
+msgstr "An anonymized account cannot be reactivated."
 
 #: apps/accounts/services/invitations.py
 msgid "invitation déjà en attente"
@@ -447,6 +452,10 @@ msgstr "Your account already has the maximum number of addresses."
 #: apps/accounts/services/invitations.py
 msgid "Nombre maximal de renvois atteint."
 msgstr "Maximum number of resends reached."
+
+#: apps/accounts/services/personal_data.py
+msgid "Transmettez d'abord vos rôles de gestion actifs."
+msgstr "First hand over your active management roles."
 
 #: apps/accounts/services/roles.py
 msgid "Rôle inconnu."
@@ -864,6 +873,10 @@ msgstr "Invalid ORCID iD (format 0000-0000-0000-000X)."
 #: apps/accounts/validators.py
 msgid "Code pays ISO 3166-1 inconnu."
 msgstr "Unknown ISO 3166-1 country code."
+
+#: apps/accounts/views.py
+msgid "Saisissez exactement l'adresse de votre compte."
+msgstr "Type exactly the email address of your account."
 
 #: apps/communications/models.py
 msgid "en file"
