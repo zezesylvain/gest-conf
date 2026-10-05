@@ -41,7 +41,20 @@
       "password_too_short": "Password too short (at least 12 characters).",
       "password_too_common": "This password is too common.",
       "password_entirely_numeric": "The password cannot be entirely numeric.",
-      "password_too_similar": "The password is too similar to your email address."
+      "password_too_similar": "The password is too similar to your email address.",
+      "reauthentication_required": "Confirm your password to continue.",
+      "last_admin": "The last administrator of the edition cannot be removed.",
+      "invitation_expired": "This invitation has expired.",
+      "invitation_not_pending": "This invitation is no longer pending.",
+      "invitation_email_mismatch": "Sign in with the account that holds the invited address.",
+      "invitation_email_unverified": "Your account does not control the invited address: link it to your account first.",
+      "invitation_link_invalid": "This link is invalid or has expired.",
+      "invitation_self_accept": "You cannot accept an invitation you sent.",
+      "invitation_resend_limit": "Maximum number of resends reached.",
+      "email_address_limit": "Your account already has the maximum number of addresses.",
+      "edition_archived": "Archived edition: read only.",
+      "invalid_transition": "Status change not allowed.",
+      "edition_incomplete": "The edition is not ready to be published."
     },
     "form": {
       "errorSummary": "The form contains errors:",

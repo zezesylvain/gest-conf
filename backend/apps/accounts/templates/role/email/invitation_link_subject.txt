@@ -1,0 +1,1 @@
+{% load i18n %}{% blocktranslate %}[{{ site_name }}] Confirmez l'ajout de cette adresse à votre compte{% endblocktranslate %}

@@ -41,7 +41,20 @@
       "password_too_short": "Mot de passe trop court (12 caractères au moins).",
       "password_too_common": "Ce mot de passe est trop courant.",
       "password_entirely_numeric": "Le mot de passe ne peut pas être entièrement numérique.",
-      "password_too_similar": "Le mot de passe est trop proche de votre adresse e-mail."
+      "password_too_similar": "Le mot de passe est trop proche de votre adresse e-mail.",
+      "reauthentication_required": "Confirmez votre mot de passe pour continuer.",
+      "last_admin": "Le dernier administrateur de l'édition ne peut pas être retiré.",
+      "invitation_expired": "Cette invitation a expiré.",
+      "invitation_not_pending": "Cette invitation n'est plus en attente.",
+      "invitation_email_mismatch": "Connectez-vous avec le compte qui porte l'adresse invitée.",
+      "invitation_email_unverified": "Votre compte ne contrôle pas l'adresse invitée : liez-la d'abord à votre compte.",
+      "invitation_link_invalid": "Ce lien est invalide ou a expiré.",
+      "invitation_self_accept": "Vous ne pouvez pas accepter une invitation que vous avez envoyée.",
+      "invitation_resend_limit": "Nombre maximal de renvois atteint.",
+      "email_address_limit": "Votre compte porte déjà le nombre maximal d'adresses.",
+      "edition_archived": "Édition archivée : lecture seule.",
+      "invalid_transition": "Changement de statut non autorisé.",
+      "edition_incomplete": "L'édition n'est pas prête à être publiée."
     },
     "form": {
       "errorSummary": "Le formulaire contient des erreurs :",

@@ -19,16 +19,37 @@ from apps.accounts.serializers import (
     ProfileSerializer,
     consent_states,
 )
+from apps.accounts.services.access import editions_with_roles
+from apps.accounts.services.invitations import pending_for_user
 from apps.core.actor import Actor
 
 
 def me_payload(user) -> dict:
+    editions = [
+        {
+            "id": access.edition.pk,
+            "code": access.edition.code,
+            "title_fr": access.edition.title_fr,
+            "title_en": access.edition.title_en,
+            "year": access.edition.year,
+            "status": access.edition.status,
+            "roles": [
+                {"role": role, "oc_function": oc_function}
+                for role, oc_function in sorted(access.roles)
+            ],
+            "capabilities": sorted(access.capabilities),
+            "mfa_required": access.mfa_required,
+        }
+        for access in editions_with_roles(user).values()
+    ]
     return {
         "id": user.pk,
         "email": user.email,
         "locale": user.locale,
         "profile_complete": services.profile_complete(user),
         "privacy_notice_pending": services.privacy_notice_pending(user),
+        "editions": editions,
+        "pending_invitations": pending_for_user(user),
     }
 
 

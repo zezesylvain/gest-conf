@@ -1,0 +1,9 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate %}Bonjour,
+
+Une personne connectée à {{ site_name }} demande à rattacher cette adresse à son compte pour accepter une invitation à l'édition {{ edition_code }}. Si c'est vous, ouvrez ce lien depuis le même compte, dans l'heure :
+
+{{ link_url }}
+
+Si vous n'êtes pas à l'origine de cette demande, ignorez ce message : l'adresse ne sera pas rattachée.{% endblocktranslate %}
+
+{% include "account/email/_signature.txt" %}{% endautoescape %}

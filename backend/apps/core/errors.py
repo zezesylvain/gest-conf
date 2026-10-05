@@ -46,6 +46,23 @@ class ErrorCode(models.TextChoices):
     CSRF_FAILED = "csrf_failed"
     # Règle métier : objet encore utilisé (par exemple une grille déjà employée).
     IN_USE = "in_use"
+    # Réauthentification récente exigée (RecentAuthRequired, plan L1 §4.5).
+    REAUTHENTICATION_REQUIRED = "reauthentication_required"
+    # Rôles et invitations (plan L1 §5.5, §5.7, RG-20).
+    LAST_ADMIN = "last_admin"
+    INVITATION_EXPIRED = "invitation_expired"
+    INVITATION_NOT_PENDING = "invitation_not_pending"
+    INVITATION_EMAIL_MISMATCH = "invitation_email_mismatch"
+    INVITATION_EMAIL_UNVERIFIED = "invitation_email_unverified"
+    INVITATION_LINK_INVALID = "invitation_link_invalid"
+    INVITATION_SELF_ACCEPT = "invitation_self_accept"
+    INVITATION_RESEND_LIMIT = "invitation_resend_limit"
+    EMAIL_ADDRESS_LIMIT = "email_address_limit"
+    # Édition (plan L1 §6.3) : écriture sur une édition archivée, transition illégale,
+    # préconditions de publication non remplies.
+    EDITION_ARCHIVED = "edition_archived"
+    INVALID_TRANSITION = "invalid_transition"
+    EDITION_INCOMPLETE = "edition_incomplete"
 
 
 class DomainError(Exception):

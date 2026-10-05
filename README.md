@@ -72,6 +72,12 @@ gestion des adresses) ; les liens des e-mails pointent vers le portail
 (`GESTCONF_PUBLIC_URL`, `http://localhost:4200` par défaut). Les comptes créés avant allauth
 (lot L0) reçoivent leur adresse par `python manage.py sync_email_addresses --verified`.
 
+Il n'y a pas de rôle global (décision D1) : la conférence, ses éditions et le premier
+administrateur d'une édition se créent par commande (`create_conference`, puis
+`create_edition --admin-email …` : rôle attribué si l'adresse est vérifiée sur un compte,
+invitation sinon). Tout le reste se fait ensuite dans l'espace de gestion, édition par édition
+(`/api/v1/manage/editions/{id}/…`).
+
 Le cache partagé (limites de débit, sonde `/health`) est une table en base : sans
 `createcachetable`, `/api/v1/health` répond 503 avec `"cache": "error"`. La commande est
 sans effet si la table existe déjà ; elle se relance après chaque `migrate` (déploiement compris).
@@ -100,6 +106,8 @@ Les deux serveurs de développement relaient `/api` vers `runserver` (`web/proxy
 | Cache partagé | `python manage.py createcachetable` (après chaque `migrate`) |
 | File de tâches | `python manage.py run_jobs` (cron en production : `deploy/cron.sh`) |
 | E-mails | `python manage.py send_test_email <adresse>` puis `run_jobs` ; suivi : `python manage.py outbox [--status failed] [--retry ID]` |
+| Éditions (opérateur) | `create_conference --slug … --name-fr …`, `create_edition --conference … --code GC27 --slug … --year … --title-fr … [--admin-email …] [--current]`, `set_current_edition CODE`, `set_edition_status CODE published\|archived\|draft --reason …` |
+| Rôles (opérateur) | `grant_role --email … --edition CODE --role CHAIR --reason …`, `revoke_role` (mêmes options) |
 | Comptes (opérateur) | `sync_email_addresses [--verified]`, `deactivate_user --email … --reason …`, `audit_query [--action auth.] [--email …] [--since AAAA-MM-JJ]` |
 | Schéma OpenAPI | `python manage.py spectacular --file schema.yml --validate --fail-on-warn` |
 | Traductions de l'API | voir ci-dessous |

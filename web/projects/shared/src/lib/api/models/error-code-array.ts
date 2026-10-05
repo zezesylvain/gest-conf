@@ -19,5 +19,18 @@ export const ERROR_CODE: ErrorCode[] = [
   'not_acceptable',
   'unsupported_media_type',
   'csrf_failed',
-  'in_use'
+  'in_use',
+  'reauthentication_required',
+  'last_admin',
+  'invitation_expired',
+  'invitation_not_pending',
+  'invitation_email_mismatch',
+  'invitation_email_unverified',
+  'invitation_link_invalid',
+  'invitation_self_accept',
+  'invitation_resend_limit',
+  'email_address_limit',
+  'edition_archived',
+  'invalid_transition',
+  'edition_incomplete'
 ];

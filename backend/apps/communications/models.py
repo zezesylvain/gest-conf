@@ -3,7 +3,7 @@
 ``OutboxEmail`` n'est pas une seconde file : chaque e-mail est envoyé par un job
 ``communications.send_email`` de la file unique (``apps.core.jobs``). La table
 sert de journal d'envoi, de base aux statistiques d'échec et à l'anonymisation.
-La clé étrangère vers ``Edition`` arrive en L1.5 (``communications/0002``).
+La clé étrangère vers ``Edition`` est ajoutée en L1.5 (``communications/0002``).
 """
 
 from django.conf import settings
@@ -35,6 +35,14 @@ class OutboxEmail(TimeStampedModel):
     to_user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_("compte destinataire"),
+        null=True,
+        blank=True,
+        on_delete=models.RESTRICT,
+        related_name="+",
+    )
+    edition = models.ForeignKey(
+        "conferences.Edition",
+        verbose_name=_("édition"),
         null=True,
         blank=True,
         on_delete=models.RESTRICT,

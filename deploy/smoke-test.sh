@@ -92,6 +92,13 @@ check "API : auth/session pose le cookie csrftoken" "$(has_header "$auth" set-co
 check "API : client « app » d'allauth absent (404)" \
   "$([[ "$(status_of "$BASE_URL/api/_allauth/app/v1/config")" == "404" ]] && echo 1)"
 
+# Édition publique courante (étape L1.5) : 200 si une édition est publiée et désignée
+# courante, 404 JSON sinon (premier déploiement) ; jamais le repli SPA ni une erreur 500.
+current=$("${CURL[@]}" -w '\n%{http_code}' "$BASE_URL/api/v1/public/editions/current")
+check "API : édition publique courante -> 200 ou 404 JSON" \
+  "$({ [[ "${current##*$'\n'}" == "200" ]] && json_has "$current" code '"[A-Z]'; } \
+    || { [[ "${current##*$'\n'}" == "404" ]] && json_has "$current" code '"not_found"'; } && echo 1)"
+
 body=$("${CURL[@]}" -w '\n%{http_code}' "$BASE_URL/api/v1/route-inexistante")
 check "API : URL inconnue -> 404 JSON (non interceptée par le repli SPA)" \
   "$([[ "${body##*$'\n'}" == "404" ]] && json_has "$body" code '"not_found"' && echo 1)"

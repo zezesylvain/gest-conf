@@ -16,6 +16,19 @@
  * * `unsupported_media_type` - Unsupported Media Type
  * * `csrf_failed` - Csrf Failed
  * * `in_use` - In Use
+ * * `reauthentication_required` - Reauthentication Required
+ * * `last_admin` - Last Admin
+ * * `invitation_expired` - Invitation Expired
+ * * `invitation_not_pending` - Invitation Not Pending
+ * * `invitation_email_mismatch` - Invitation Email Mismatch
+ * * `invitation_email_unverified` - Invitation Email Unverified
+ * * `invitation_link_invalid` - Invitation Link Invalid
+ * * `invitation_self_accept` - Invitation Self Accept
+ * * `invitation_resend_limit` - Invitation Resend Limit
+ * * `email_address_limit` - Email Address Limit
+ * * `edition_archived` - Edition Archived
+ * * `invalid_transition` - Invalid Transition
+ * * `edition_incomplete` - Edition Incomplete
  */
-export type ErrorCode = 'validation_error' | 'bad_request' | 'not_authenticated' | 'permission_denied' | 'not_found' | 'throttled' | 'server_error' | 'parse_error' | 'method_not_allowed' | 'not_acceptable' | 'unsupported_media_type' | 'csrf_failed' | 'in_use';
+export type ErrorCode = 'validation_error' | 'bad_request' | 'not_authenticated' | 'permission_denied' | 'not_found' | 'throttled' | 'server_error' | 'parse_error' | 'method_not_allowed' | 'not_acceptable' | 'unsupported_media_type' | 'csrf_failed' | 'in_use' | 'reauthentication_required' | 'last_admin' | 'invitation_expired' | 'invitation_not_pending' | 'invitation_email_mismatch' | 'invitation_email_unverified' | 'invitation_link_invalid' | 'invitation_self_accept' | 'invitation_resend_limit' | 'email_address_limit' | 'edition_archived' | 'invalid_transition' | 'edition_incomplete';
 

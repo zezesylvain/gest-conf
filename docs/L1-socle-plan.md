@@ -2200,7 +2200,7 @@ Ces mises à jour seront livrées par une PR de documentation en L1.8, **après 
 
 ---
 
-## 16. Écarts constatés pendant l'implémentation (L1.0 à L1.4)
+## 16. Écarts constatés pendant l'implémentation (L1.0 à L1.5)
 
 Consignés ici pour ne pas dériver en silence (CLAUDE.md). Les écarts marqués **à valider** attendent
 l'accord du commanditaire ; les autres sont des précisions sans effet sur les décisions D1 à D18.
@@ -2401,3 +2401,53 @@ Ils seront repris dans la PR de documentation de L1.8 (§15).
     Le test E2E automatisé reste prévu en L3. Limite constatée : coller un nouveau lien de
     vérification dans l'onglet déjà ouvert sur `/compte/verifier-email` ne change que le fragment
     et n'est pas pris en compte ; le clic depuis l'e-mail, qui charge la page, fonctionne.
+
+### Étape L1.5 (éditions, rôles et permissions)
+
+39. **§9.1, catalogue `ErrorCode`.** Quatre codes s'ajoutent à ceux que prévoyait le §9.1 :
+    `invitation_not_pending` (accepter, refuser, renvoyer ou annuler une invitation déjà traitée),
+    `invitation_resend_limit` (trois envois au plus par invitation), `invalid_transition` (statut
+    d'édition) et `edition_incomplete` (publication refusée, détail par champ dans `fields`). Les
+    codes `mfa_required`, `mfa_enrollment_required` et `account_has_active_duties` n'entrent au
+    catalogue qu'avec le code qui les émet (L1.6, L1.8). Traductions FR/EN ajoutées côté Angular.
+40. **§5.7, invitations groupées.** La création renvoie les invitations créées et les adresses
+    ignorées, masquées, avec un motif `SkippedReason` : `already_pending` ou `already_member`.
+    Plafonds : 50 adresses par requête, 100 adresses par heure et par édition (`QuotaExceeded`,
+    429), 3 envois par invitation.
+41. **§6.2, `tzdata` (vérifié).** Version 2026.5, licence **Apache-2.0**, pur Python, sans
+    dépendance système. La conversion `at_local` → `at` refuse une heure inexistante ou ambiguë
+    (testé sur `Europe/Paris` ; `Africa/Abidjan` n'a pas d'heure d'été). Côté DRF, un champ
+    `LocalDateTimeField` empêche DRF de rendre la valeur consciente du fuseau du serveur avant la
+    conversion par le service.
+42. **§5.5, `last_admin`.** Par l'API, le cas n'arrive qu'en concurrence : on ne retire jamais son
+    propre rôle, et révoquer un autre ADMIN suppose d'en être un, donc d'être deux. Deux ADMIN qui
+    se révoquent l'un l'autre en même temps verrouillent chacun une ligne différente : sans autre
+    précaution, chacun compterait deux ADMIN et l'édition n'en aurait plus aucun. `revoke_role`
+    verrouille donc d'abord la ligne de l'édition, puis compte les ADMIN par lecture verrouillante
+    (dernier état validé). Test MariaDB à deux transactions concurrentes ; il échoue sans verrou
+    (vérifié). La protection existait déjà par effet de bord (le `select_related` du
+    `SELECT … FOR UPDATE` verrouille aussi l'édition) : elle est rendue explicite. La commande
+    `revoke_role` peut retirer le dernier ADMIN, avec motif.
+43. **§5.3, `MfaVerified` inactive.** Elle figure dans `ManageViewSet` mais reste sans effet tant
+    qu'`allauth.mfa` n'est pas installé (L1.6). La matrice des droits est donc au vert **sans**
+    la 2FA ; L1.6 ajoutera les cases `mfa_enrollment_required` et `mfa_required`.
+44. **Import circulaire d'allauth.** `allauth.account.authentication` ne peut pas être importé au
+    chargement de `apps.accounts.permissions` (cycle avec les modèles d'allauth) : l'import est fait
+    dans la fonction qui lit les méthodes d'authentification de la session. Le délai de
+    réauthentification est lu dans `allauth.account.app_settings` (il n'existe pas de réglage
+    Django `ACCOUNT_REAUTHENTICATION_TIMEOUT` lisible tel quel).
+45. **§9.3, édition publique courante (hypothèse Q2).** `GET /v1/public/editions/current` prend
+    l'édition courante publiée de la **première** conférence : hypothèse mono-conférence, à revoir
+    si la question ouverte Q2 (mono- ou multi-conférences) est tranchée autrement. Réponse
+    cachable 5 minutes (`Cache-Control: public, max-age=300`), 404 JSON sinon. Le test de fumée
+    accepte 200 ou 404.
+46. **§6.1, suppression des tracks et types.** Possible en L1, faute de référence ; à partir de
+    L3, un élément utilisé renverra 409 `in_use` et devra être désactivé (§6.1 inchangé).
+47. **§5.3, garde-fous automatisés.** Trois méta-tests s'ajoutent : toute route de `v1/manage/`
+    hérite de `ManageViewSet` (seule exception : `ManageEditionListView`) ; liste blanche des vues
+    ouvertes aux anonymes (`health`, `public/editions/current`, `invitations/lookup` et
+    `invitations/decline`, ces deux dernières avec `CsrfEnforced`) ; client allauth `browser`
+    seul et réauthentification exigée.
+48. **§13, critère « test de fumée ».** Vérifié en local seulement (script rejoué contre des
+    réponses simulées 200, 404, HTML et 500). **Reste à faire sur o2switch** avec le déploiement.
+

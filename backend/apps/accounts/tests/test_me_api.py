@@ -46,6 +46,8 @@ def test_me_returns_own_identity(me_client, user):
         "locale": "fr",
         "profile_complete": False,
         "privacy_notice_pending": True,
+        "editions": [],
+        "pending_invitations": [],
     }
 
 

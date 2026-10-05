@@ -35,6 +35,8 @@ export const TEST_ME: Me = {
   locale: 'fr',
   profile_complete: false,
   privacy_notice_pending: true,
+  editions: [],
+  pending_invitations: [],
 };
 
 /**

@@ -1,0 +1,14 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate %}Bonjour,
+
+{{ inviter_name }} vous invite à rejoindre l'édition « {{ edition_title }} » ({{ edition_code }}) de {{ site_name }} avec le rôle : {{ role_label }}.{% endblocktranslate %}
+{% if message %}
+{% blocktranslate %}Message de l'invitant :{% endblocktranslate %}
+{{ message }}
+{% endif %}
+{% blocktranslate %}Pour accepter ou refuser, ouvrez ce lien (valable jusqu'au {{ expires_on }}) :
+
+{{ invite_url }}
+
+Pour accepter, connectez-vous avec un compte qui porte cette adresse, ou créez-en un. Si vous ne connaissez pas l'expéditeur, ignorez ce message.{% endblocktranslate %}
+
+{% include "account/email/_signature.txt" %}{% endautoescape %}

@@ -222,3 +222,59 @@ def test_csrf_meta_test_detects_unprotected_views():
     assert "ProtectedView" not in offenders
     assert "ScopedThrottleView" not in offenders
     assert "csrf_protected_django_view" not in offenders
+
+
+# --- Rôles par édition et vues ouvertes (plan L1 §5.3, §5.9) ------------------------------
+
+# Vues DRF accessibles sans authentification, avec la justification. Toute nouvelle entrée
+# se justifie en revue (règle n° 2).
+ANONYMOUS_VIEWS = {
+    "apps.core.views.HealthView": "supervision et test de fumée",
+    "apps.accounts.manage_views.InvitationLookupView": "jeton d'invitation (lecture)",
+    "apps.accounts.manage_views.InvitationDeclineView": "jeton d'invitation (refus)",
+    "apps.conferences.views.PublicCurrentEditionView": "portail public",
+}
+
+# Seule vue de ``v1/manage/`` hors ``ManageViewSet`` : sélecteur d'édition.
+MANAGE_EXCEPTIONS = {"apps.conferences.views.ManageEditionListView"}
+
+
+def _drf_routes():
+    for route, callback in _iter_callbacks(get_resolver(settings.ROOT_URLCONF).url_patterns):
+        view_class = getattr(callback, "cls", None)
+        if isinstance(view_class, type) and issubclass(view_class, APIView):
+            yield route, view_class, f"{view_class.__module__}.{view_class.__qualname__}"
+
+
+def test_anonymous_views_are_whitelisted():
+    """Règle n° 2 : toute vue DRF sans ``IsAuthenticated`` figure dans la liste blanche."""
+    opened = {
+        name
+        for _route, view_class, name in _drf_routes()
+        if not _requires_authentication(view_class.permission_classes)
+    }
+    assert opened == set(ANONYMOUS_VIEWS)
+
+
+def test_every_edition_route_inherits_manage_viewset():
+    """§5.3 : toute route de ``v1/manage/`` charge l'édition, vérifie la capacité et la 2FA."""
+    from apps.accounts.permissions import ManageViewSet
+
+    manage_routes = [
+        (route, view_class, name)
+        for route, view_class, name in _drf_routes()
+        if route.startswith("v1/manage/")
+    ]
+    assert manage_routes
+    for route, view_class, name in manage_routes:
+        if name in MANAGE_EXCEPTIONS:
+            continue
+        assert issubclass(view_class, ManageViewSet), route
+        assert route.startswith("v1/manage/editions/<int:edition_id>"), route
+
+
+def test_headless_browser_client_only_and_reauthentication():
+    """D4, §4.5 : client ``browser`` seul (pas de jeton applicatif), réauthentification
+    exigée pour les opérations sensibles."""
+    assert tuple(settings.HEADLESS_CLIENTS) == ("browser",)
+    assert settings.ACCOUNT_REAUTHENTICATION_REQUIRED is True

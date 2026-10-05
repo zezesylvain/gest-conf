@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gestconf-backend\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-05 14:50+0000\n"
+"POT-Creation-Date: 2026-10-05 16:26+0000\n"
 "PO-Revision-Date: 2026-10-05 11:00+0000\n"
 "Last-Translator: GEST-CONF\n"
 "Language-Team: GEST-CONF\n"
@@ -19,7 +19,7 @@ msgstr ""
 msgid "adresse e-mail"
 msgstr "email address"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py apps/conferences/models.py
 msgid "actif"
 msgstr "active"
 
@@ -79,7 +79,7 @@ msgstr "institution"
 msgid "département"
 msgstr "department"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py apps/conferences/models.py
 msgid "pays"
 msgstr "country"
 
@@ -151,21 +151,323 @@ msgstr "consent"
 msgid "consentements"
 msgstr "consents"
 
-#: apps/accounts/services.py
+#: apps/accounts/models.py
+msgid "révoqué"
+msgstr "revoked"
+
+#: apps/accounts/models.py
+msgid "invitation"
+msgstr "invitation"
+
+#: apps/accounts/models.py apps/core/actor.py
+msgid "système"
+msgstr "system"
+
+#: apps/accounts/models.py apps/communications/models.py
+#: apps/conferences/models.py apps/core/models.py
+msgid "édition"
+msgstr "edition"
+
+#: apps/accounts/models.py
+msgid "rôle"
+msgstr "role"
+
+#: apps/accounts/models.py
+msgid "fonction au CO"
+msgstr "organising committee function"
+
+#: apps/accounts/models.py apps/communications/models.py
+#: apps/conferences/models.py apps/core/models.py
+msgid "statut"
+msgstr "status"
+
+#: apps/accounts/models.py
+msgid "attribué le"
+msgstr "granted at"
+
+#: apps/accounts/models.py
+msgid "attribué par"
+msgstr "granted by"
+
+#: apps/accounts/models.py
+msgid "révoqué le"
+msgstr "revoked at"
+
+#: apps/accounts/models.py
+msgid "révoqué par"
+msgstr "revoked by"
+
+#: apps/accounts/models.py
+msgid "motif de révocation"
+msgstr "revocation reason"
+
+#: apps/accounts/models.py
+msgid "rôles"
+msgstr "roles"
+
+#: apps/accounts/models.py apps/core/models.py
+msgid "en attente"
+msgstr "pending"
+
+#: apps/accounts/models.py
+msgid "acceptée"
+msgstr "accepted"
+
+#: apps/accounts/models.py
+msgid "refusée"
+msgstr "declined"
+
+#: apps/accounts/models.py apps/core/models.py
+msgid "annulée"
+msgstr "cancelled"
+
+#: apps/accounts/models.py
+msgid "expirée"
+msgstr "expired"
+
+#: apps/accounts/models.py
+msgid "adresse invitée"
+msgstr "invited address"
+
+#: apps/accounts/models.py
+msgid "empreinte du jeton"
+msgstr "token hash"
+
+#: apps/accounts/models.py
+msgid "clé d'unicité en attente"
+msgstr "pending uniqueness key"
+
+#: apps/accounts/models.py
+msgid "invité par"
+msgstr "invited by"
+
+#: apps/accounts/models.py
+msgid "expire le"
+msgstr "expires at"
+
+#: apps/accounts/models.py
+msgid "message"
+msgstr "message"
+
+#: apps/accounts/models.py
+msgid "envois"
+msgstr "sends"
+
+#: apps/accounts/models.py
+msgid "dernier envoi"
+msgstr "last sent at"
+
+#: apps/accounts/models.py
+msgid "répondu le"
+msgstr "answered at"
+
+#: apps/accounts/models.py
+msgid "acceptée par"
+msgstr "accepted by"
+
+#: apps/accounts/models.py
+msgid "invitations"
+msgstr "invitations"
+
+#: apps/accounts/permissions.py
+msgid "Confirmez votre mot de passe pour continuer."
+msgstr "Confirm your password to continue."
+
+#: apps/accounts/roles.py
+msgid "administrateur de l'édition"
+msgstr "edition administrator"
+
+#: apps/accounts/roles.py
+msgid "président de la conférence"
+msgstr "conference chair"
+
+#: apps/accounts/roles.py
+msgid "membre du comité d'organisation"
+msgstr "organising committee member"
+
+#: apps/accounts/roles.py
+msgid "président du comité scientifique"
+msgstr "scientific committee chair"
+
+#: apps/accounts/roles.py
+msgid "membre du comité scientifique"
+msgstr "scientific committee member"
+
+#: apps/accounts/roles.py
+msgid "auteur"
+msgstr "author"
+
+#: apps/accounts/roles.py
+msgid "intervenant"
+msgstr "speaker"
+
+#: apps/accounts/roles.py
+msgid "président de session"
+msgstr "session chair"
+
+#: apps/accounts/roles.py
+msgid "participant"
+msgstr "attendee"
+
+#: apps/accounts/roles.py
+msgid "partenaire"
+msgstr "sponsor"
+
+#: apps/accounts/roles.py
+msgid "bénévole"
+msgstr "volunteer"
+
+#: apps/accounts/roles.py
+msgid "aucune"
+msgstr "none"
+
+#: apps/accounts/roles.py
+msgid "finances"
+msgstr "finance"
+
+#: apps/accounts/roles.py
+msgid "programme"
+msgstr "programme"
+
+#: apps/accounts/roles.py
+msgid "logistique"
+msgstr "logistics"
+
+#: apps/accounts/roles.py
+msgid "communication"
+msgstr "communication"
+
+#: apps/accounts/roles.py
+msgid "relations extérieures"
+msgstr "external relations"
+
+#: apps/accounts/roles.py
+msgid "bénévoles"
+msgstr "volunteers"
+
+#: apps/accounts/roles.py
+msgid "secrétariat"
+msgstr "secretariat"
+
+#: apps/accounts/services/account.py apps/conferences/services.py
 msgid "Champ non modifiable."
 msgstr "This field cannot be changed."
 
-#: apps/accounts/services.py
+#: apps/accounts/services/account.py
 msgid "Type de consentement inconnu."
 msgstr "Unknown consent type."
 
-#: apps/accounts/services.py
+#: apps/accounts/services/account.py
 msgid "La prise de connaissance ne se retire pas."
 msgstr "Acknowledging the notice cannot be withdrawn."
 
-#: apps/accounts/services.py
+#: apps/accounts/services/account.py apps/accounts/services/roles.py
+#: apps/conferences/services.py
 msgid "Motif obligatoire."
 msgstr "A reason is required."
+
+#: apps/accounts/services/invitations.py
+msgid "invitation déjà en attente"
+msgstr "invitation already pending"
+
+#: apps/accounts/services/invitations.py
+msgid "rôle déjà actif"
+msgstr "role already active"
+
+#: apps/accounts/services/invitations.py
+msgid "Quota d'invitations atteint pour cette heure."
+msgstr "Invitation quota reached for this hour."
+
+#: apps/accounts/services/invitations.py
+#, python-format
+msgid "Adresse invalide : %(email)s"
+msgstr "Invalid address: %(email)s"
+
+#: apps/accounts/services/invitations.py
+msgid "Au moins une adresse."
+msgstr "At least one address."
+
+#: apps/accounts/services/invitations.py
+#, python-format
+msgid "%(max)s adresses au plus."
+msgstr "At most %(max)s addresses."
+
+#: apps/accounts/services/invitations.py
+msgid "Rôle non invitable."
+msgstr "This role cannot be invited."
+
+#: apps/accounts/services/invitations.py
+msgid "1 000 caractères au plus."
+msgstr "At most 1,000 characters."
+
+#: apps/accounts/services/invitations.py
+msgid "Invitation expirée."
+msgstr "Invitation expired."
+
+#: apps/accounts/services/invitations.py
+msgid "Cette invitation n'est plus en attente."
+msgstr "This invitation is no longer pending."
+
+#: apps/accounts/services/invitations.py
+msgid "Vous ne pouvez pas accepter une invitation que vous avez envoyée."
+msgstr "You cannot accept an invitation you sent."
+
+#: apps/accounts/services/invitations.py
+msgid "Connectez-vous avec le compte qui porte l'adresse invitée."
+msgstr "Sign in with the account that holds the invited address."
+
+#: apps/accounts/services/invitations.py
+msgid ""
+"Votre compte ne contrôle pas l'adresse invitée : liez-la d'abord à votre "
+"compte."
+msgstr ""
+"Your account does not control the invited address: link it to your account "
+"first."
+
+#: apps/accounts/services/invitations.py
+msgid "Lien invalide ou expiré."
+msgstr "Invalid or expired link."
+
+#: apps/accounts/services/invitations.py
+msgid "Cette adresse est déjà vérifiée sur un autre compte."
+msgstr "This address is already verified on another account."
+
+#: apps/accounts/services/invitations.py
+msgid "Votre compte porte déjà le nombre maximal d'adresses."
+msgstr "Your account already has the maximum number of addresses."
+
+#: apps/accounts/services/invitations.py
+msgid "Nombre maximal de renvois atteint."
+msgstr "Maximum number of resends reached."
+
+#: apps/accounts/services/roles.py
+msgid "Rôle inconnu."
+msgstr "Unknown role."
+
+#: apps/accounts/services/roles.py
+msgid "Fonction inconnue."
+msgstr "Unknown function."
+
+#: apps/accounts/services/roles.py
+msgid "Fonction obligatoire pour le CO, interdite sinon."
+msgstr ""
+"A function is required for the organising committee and forbidden otherwise."
+
+#: apps/accounts/services/roles.py
+msgid "Édition archivée : lecture seule."
+msgstr "Archived edition: read only."
+
+#: apps/accounts/services/roles.py
+msgid "Vous ne pouvez pas attribuer ni retirer ce rôle."
+msgstr "You cannot grant or revoke this role."
+
+#: apps/accounts/services/roles.py
+msgid "Vous ne pouvez pas modifier vos propres rôles."
+msgstr "You cannot change your own roles."
+
+#: apps/accounts/services/roles.py
+msgid "Le dernier administrateur de l'édition ne se retire que par commande."
+msgstr "The last administrator of the edition can only be removed by command."
 
 #: apps/accounts/templates/account/email/_security_footer.txt
 #, python-format
@@ -383,6 +685,102 @@ msgstr ""
 msgid "[%(site_name)s] Un mot de passe a été défini pour votre compte"
 msgstr "[%(site_name)s] A password was set for your account"
 
+#: apps/accounts/templates/role/email/invitation_link_message.txt
+#, python-format
+msgid ""
+"Bonjour,\n"
+"\n"
+"Une personne connectée à %(site_name)s demande à rattacher cette adresse à son compte pour accepter une invitation à l'édition %(edition_code)s. Si c'est vous, ouvrez ce lien depuis le même compte, dans l'heure :\n"
+"\n"
+"%(link_url)s\n"
+"\n"
+"Si vous n'êtes pas à l'origine de cette demande, ignorez ce message : l'adresse ne sera pas rattachée."
+msgstr ""
+"Hello,\n"
+"\n"
+"Someone signed in to %(site_name)s asks to link this address to their account to accept an invitation to edition %(edition_code)s. If this is you, open this link from the same account within the hour:\n"
+"\n"
+"%(link_url)s\n"
+"\n"
+"If you did not make this request, ignore this message: the address will not be linked."
+
+#: apps/accounts/templates/role/email/invitation_link_subject.txt
+#, python-format
+msgid "[%(site_name)s] Confirmez l'ajout de cette adresse à votre compte"
+msgstr "[%(site_name)s] Confirm adding this address to your account"
+
+#: apps/accounts/templates/role/email/invitation_message.txt
+#, python-format
+msgid ""
+"Bonjour,\n"
+"\n"
+"%(inviter_name)s vous invite à rejoindre l'édition « %(edition_title)s » (%(edition_code)s) de %(site_name)s avec le rôle : %(role_label)s."
+msgstr ""
+"Hello,\n"
+"\n"
+"%(inviter_name)s invites you to join the edition “%(edition_title)s” (%(edition_code)s) of %(site_name)s with the role: %(role_label)s."
+
+#: apps/accounts/templates/role/email/invitation_message.txt
+msgid "Message de l'invitant :"
+msgstr "Message from the inviter:"
+
+#: apps/accounts/templates/role/email/invitation_message.txt
+#, python-format
+msgid ""
+"Pour accepter ou refuser, ouvrez ce lien (valable jusqu'au %(expires_on)s) :\n"
+"\n"
+"%(invite_url)s\n"
+"\n"
+"Pour accepter, connectez-vous avec un compte qui porte cette adresse, ou créez-en un. Si vous ne connaissez pas l'expéditeur, ignorez ce message."
+msgstr ""
+"To accept or decline, open this link (valid until %(expires_on)s):\n"
+"\n"
+"%(invite_url)s\n"
+"\n"
+"To accept, sign in with an account that holds this address, or create one. If you do not know the sender, ignore this message."
+
+#: apps/accounts/templates/role/email/invitation_subject.txt
+#, python-format
+msgid "[%(site_name)s] Invitation à rejoindre une édition"
+msgstr "[%(site_name)s] Invitation to join an edition"
+
+#: apps/accounts/templates/role/email/role_granted_message.txt
+#, python-format
+msgid ""
+"Bonjour,\n"
+"\n"
+"Le rôle « %(role_label)s » vous a été attribué pour l'édition « %(edition_title)s » (%(edition_code)s). Si vous ne vous y attendiez pas, prévenez les organisateurs."
+msgstr ""
+"Hello,\n"
+"\n"
+"The role “%(role_label)s” was granted to you for the edition “%(edition_title)s” (%(edition_code)s). If you did not expect this, let the organisers know."
+
+#: apps/accounts/templates/role/email/role_granted_subject.txt
+#, python-format
+msgid "[%(site_name)s] Un rôle vous a été attribué"
+msgstr "[%(site_name)s] A role was granted to you"
+
+#: apps/accounts/templates/role/email/role_revoked_message.txt
+#, python-format
+msgid ""
+"Bonjour,\n"
+"\n"
+"Le rôle « %(role_label)s » vous a été retiré pour l'édition « %(edition_title)s » (%(edition_code)s)."
+msgstr ""
+"Hello,\n"
+"\n"
+"The role “%(role_label)s” was revoked for the edition “%(edition_title)s” (%(edition_code)s)."
+
+#: apps/accounts/templates/role/email/role_revoked_message.txt
+#, python-format
+msgid "Motif : %(reason)s"
+msgstr "Reason: %(reason)s"
+
+#: apps/accounts/templates/role/email/role_revoked_subject.txt
+#, python-format
+msgid "[%(site_name)s] Un rôle vous a été retiré"
+msgstr "[%(site_name)s] A role was revoked"
+
 #: apps/accounts/validators.py
 msgid "Identifiant ORCID invalide (forme 0000-0000-0000-000X)."
 msgstr "Invalid ORCID iD (format 0000-0000-0000-000X)."
@@ -440,10 +838,6 @@ msgid "contient un lien à jeton"
 msgstr "contains a token link"
 
 #: apps/communications/models.py apps/core/models.py
-msgid "statut"
-msgstr "status"
-
-#: apps/communications/models.py apps/core/models.py
 msgid "tentatives"
 msgstr "attempts"
 
@@ -484,16 +878,13 @@ msgstr "sent emails"
 msgid ""
 "Bonjour,\n"
 "\n"
-"Ce message de test a été envoyé par la file d'envoi de %(site_name)s. Sa "
-"réception confirme que la tâche planifiée (cron) et le fournisseur d'e-mails "
-"fonctionnent.\n"
+"Ce message de test a été envoyé par la file d'envoi de %(site_name)s. Sa réception confirme que la tâche planifiée (cron) et le fournisseur d'e-mails fonctionnent.\n"
 "\n"
 "Aucune action n'est attendue de votre part."
 msgstr ""
 "Hello,\n"
 "\n"
-"This test message was sent by the %(site_name)s sending queue. Receiving it "
-"confirms that the scheduled task (cron) and the email provider are working.\n"
+"This test message was sent by the %(site_name)s sending queue. Receiving it confirms that the scheduled task (cron) and the email provider are working.\n"
 "\n"
 "No action is required on your part."
 
@@ -502,9 +893,281 @@ msgstr ""
 msgid "[%(site_name)s] E-mail de test"
 msgstr "[%(site_name)s] Test email"
 
-#: apps/core/actor.py
-msgid "système"
-msgstr "system"
+#: apps/conferences/models.py
+msgid "identifiant"
+msgstr "identifier"
+
+#: apps/conferences/models.py
+msgid "nom (FR)"
+msgstr "name (FR)"
+
+#: apps/conferences/models.py
+msgid "nom (EN)"
+msgstr "name (EN)"
+
+#: apps/conferences/models.py
+msgid "description (FR)"
+msgstr "description (FR)"
+
+#: apps/conferences/models.py
+msgid "description (EN)"
+msgstr "description (EN)"
+
+#: apps/conferences/models.py
+msgid "édition courante"
+msgstr "current edition"
+
+#: apps/conferences/models.py
+msgid "conférence"
+msgstr "conference"
+
+#: apps/conferences/models.py
+msgid "conférences"
+msgstr "conferences"
+
+#: apps/conferences/models.py
+msgid "brouillon"
+msgstr "draft"
+
+#: apps/conferences/models.py
+msgid "publiée"
+msgstr "published"
+
+#: apps/conferences/models.py
+msgid "archivée"
+msgstr "archived"
+
+#: apps/conferences/models.py
+msgid "code"
+msgstr "code"
+
+#: apps/conferences/models.py
+msgid "année"
+msgstr "year"
+
+#: apps/conferences/models.py
+msgid "titre (FR)"
+msgstr "title (FR)"
+
+#: apps/conferences/models.py
+msgid "titre (EN)"
+msgstr "title (EN)"
+
+#: apps/conferences/models.py
+msgid "thème (FR)"
+msgstr "theme (FR)"
+
+#: apps/conferences/models.py
+msgid "thème (EN)"
+msgstr "theme (EN)"
+
+#: apps/conferences/models.py
+msgid "début"
+msgstr "start"
+
+#: apps/conferences/models.py
+msgid "fin"
+msgstr "end"
+
+#: apps/conferences/models.py
+msgid "lieu"
+msgstr "venue"
+
+#: apps/conferences/models.py
+msgid "ville"
+msgstr "city"
+
+#: apps/conferences/models.py
+msgid "fuseau horaire"
+msgstr "time zone"
+
+#: apps/conferences/models.py
+msgid "double aveugle"
+msgstr "double blind"
+
+#: apps/conferences/models.py
+msgid "relecteurs par soumission"
+msgstr "reviewers per submission"
+
+#: apps/conferences/models.py
+msgid "publiée le"
+msgstr "published at"
+
+#: apps/conferences/models.py
+msgid "archivée le"
+msgstr "archived at"
+
+#: apps/conferences/models.py
+msgid "éditions"
+msgstr "editions"
+
+#: apps/conferences/models.py
+msgid "ordre"
+msgstr "order"
+
+#: apps/conferences/models.py
+msgid "active"
+msgstr "active"
+
+#: apps/conferences/models.py
+msgid "thématique"
+msgstr "track"
+
+#: apps/conferences/models.py
+msgid "thématiques"
+msgstr "tracks"
+
+#: apps/conferences/models.py
+msgid "libellé (FR)"
+msgstr "label (FR)"
+
+#: apps/conferences/models.py
+msgid "libellé (EN)"
+msgstr "label (EN)"
+
+#: apps/conferences/models.py
+msgid "durée par défaut (min)"
+msgstr "default duration (min)"
+
+#: apps/conferences/models.py
+msgid "mots maximum du résumé"
+msgstr "abstract word limit"
+
+#: apps/conferences/models.py
+msgid "type de communication"
+msgstr "submission type"
+
+#: apps/conferences/models.py
+msgid "types de communication"
+msgstr "submission types"
+
+#: apps/conferences/models.py
+msgid "ouverture de l'appel"
+msgstr "call opening"
+
+#: apps/conferences/models.py
+msgid "clôture de l'appel"
+msgstr "call closing"
+
+#: apps/conferences/models.py
+msgid "fin des évaluations"
+msgstr "review deadline"
+
+#: apps/conferences/models.py
+msgid "notification des décisions"
+msgstr "decision notification"
+
+#: apps/conferences/models.py
+msgid "version définitive"
+msgstr "camera-ready version"
+
+#: apps/conferences/models.py
+msgid "ouverture des inscriptions"
+msgstr "registration opening"
+
+#: apps/conferences/models.py
+msgid "fin du tarif préférentiel"
+msgstr "early bird deadline"
+
+#: apps/conferences/models.py
+msgid "clôture des inscriptions"
+msgstr "registration closing"
+
+#: apps/conferences/models.py
+msgid "date (UTC)"
+msgstr "date (UTC)"
+
+#: apps/conferences/models.py
+msgid "publique"
+msgstr "public"
+
+#: apps/conferences/models.py
+msgid "date clé"
+msgstr "key date"
+
+#: apps/conferences/models.py
+msgid "dates clés"
+msgstr "key dates"
+
+#: apps/conferences/services.py
+msgid "Ce code est déjà utilisé."
+msgstr "This code is already in use."
+
+#: apps/conferences/services.py
+msgid "Édition d'une autre conférence."
+msgstr "Edition of another conference."
+
+#: apps/conferences/services.py
+msgid "Titres français et anglais obligatoires pour publier."
+msgstr "French and English titles are required to publish."
+
+#: apps/conferences/services.py
+msgid "Dates de la conférence obligatoires."
+msgstr "Conference dates are required."
+
+#: apps/conferences/services.py
+msgid "Au moins une thématique active."
+msgstr "At least one active track."
+
+#: apps/conferences/services.py
+msgid "Au moins un type de communication actif."
+msgstr "At least one active submission type."
+
+#: apps/conferences/services.py
+msgid "Ouverture et clôture de l'appel obligatoires."
+msgstr "Call opening and closing dates are required."
+
+#: apps/conferences/services.py
+msgid "Statut inconnu."
+msgstr "Unknown status."
+
+#: apps/conferences/services.py
+msgid "Transition de statut non autorisée."
+msgstr "Status transition not allowed."
+
+#: apps/conferences/services.py
+msgid "L'édition n'est pas prête à être publiée."
+msgstr "The edition is not ready to be published."
+
+#: apps/conferences/services.py
+msgid "Archivage possible seulement après la fin de la conférence."
+msgstr "An edition can only be archived after the conference has ended."
+
+#: apps/conferences/services.py
+msgid "Heure locale attendue, sans fuseau."
+msgstr "Local time expected, without a time zone."
+
+#: apps/conferences/services.py
+msgid "Heure ambiguë ou inexistante (changement d'heure)."
+msgstr "Ambiguous or nonexistent time (clock change)."
+
+#: apps/conferences/services.py
+msgid "Heure inexistante (changement d'heure)."
+msgstr "Nonexistent time (clock change)."
+
+#: apps/conferences/services.py
+msgid "Libellé obligatoire pour un code libre."
+msgstr "A label is required for a custom code."
+
+#: apps/conferences/services.py
+msgid "Date et heure locales obligatoires."
+msgstr "Local date and time are required."
+
+#: apps/conferences/services.py
+#, python-format
+msgid "%(code)s doit suivre %(previous)s."
+msgstr "%(code)s must follow %(previous)s."
+
+#: apps/conferences/validators.py
+msgid ""
+"Code invalide : une majuscule, puis 1 à 11 majuscules ou chiffres (ex. GC26)."
+msgstr ""
+"Invalid code: one capital letter, then 1 to 11 capital letters or digits "
+"(e.g. GC26)."
+
+#: apps/conferences/validators.py
+msgid "Fuseau horaire inconnu."
+msgstr "Unknown time zone."
 
 #: apps/core/authentication.py
 msgid "Échec de la vérification CSRF : rechargez la page puis réessayez."
@@ -587,20 +1250,12 @@ msgid "journal d'audit"
 msgstr "audit log"
 
 #: apps/core/models.py
-msgid "en attente"
-msgstr "pending"
-
-#: apps/core/models.py
 msgid "en cours"
 msgstr "running"
 
 #: apps/core/models.py
 msgid "terminée"
 msgstr "succeeded"
-
-#: apps/core/models.py
-msgid "annulée"
-msgstr "cancelled"
 
 #: apps/core/models.py
 msgid "urgente"

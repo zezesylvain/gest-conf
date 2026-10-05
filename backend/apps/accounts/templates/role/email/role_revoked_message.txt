@@ -1,0 +1,6 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate %}Bonjour,
+
+Le rôle « {{ role_label }} » vous a été retiré pour l'édition « {{ edition_title }} » ({{ edition_code }}).{% endblocktranslate %}
+{% if reason %}{% blocktranslate %}Motif : {{ reason }}{% endblocktranslate %}
+{% endif %}
+{% include "account/email/_signature.txt" %}{% endautoescape %}
