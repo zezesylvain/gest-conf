@@ -1,7 +1,7 @@
 # Lot L3 — Soumission : plan d'implémentation
 
-> **Statut : proposition à valider** (5 octobre 2026). Ce lot touche le modèle de données, les
-> droits et le workflow des statuts : rien n'est codé avant validation (`CLAUDE.md`).
+> **Statut : validé le 5 octobre 2026** (décisions F1 à F17 telles que proposées, sans
+> correction). L3.0 est faite : résultats au §11.
 >
 > Sources :
 > - étude §4 M4, §5.1, §6 (RG-01, RG-02, RG-04, RG-17, RG-18, RG-19), §8.2, §9.2, §9.3,
@@ -249,3 +249,19 @@ endpoint relecteur.
 3. Textes définitifs : notice d'information et déclarations ; fournisseur d'e-mails ;
    déploiement continu (D18) avant l'ouverture de l'appel.
 4. Charge de 16 à 19,5 j-h, contre 12 à 16 dans l'étude.
+
+## 11. Résultats de L3.0 (5 octobre 2026)
+
+| Vérification | Résultat | Conséquence |
+|---|---|---|
+| **`pypdf` (F2)** | `pypdf` 6.19.0, pur Python (roue `py3-none-any`), ajouté seul aux dépendances verrouillées. | Pas de contrôle o2switch supplémentaire |
+| Corpus de PDF porteurs d'identité | Le module Writer de LibreOffice est absent du conteneur : pas de PDF Word ou LibreOffice réels. Corpus : un PDF Chromium réel, et des variantes qui reproduisent ce que laissent ces logiciels. Variantes : `/Info` (auteur, titre, créateur), XMP `dc:creator`, mise à jour incrémentale, annotation de commentaire signée (`/T`), fichier joint, objets compressés, PDF chiffré, faux PDF. | À rejouer en L3.1 sur des PDF Word, LibreOffice et LaTeX réels (jeu de tests versionné) |
+| Mise à jour incrémentale | `pdfinfo` affiche « Anonyme », mais l'ancien `/Info` (« Awa Zadi ») reste dans les octets du fichier. | Confirme qu'il faut **réécrire** le PDF, pas modifier `/Info` |
+| Nettoyage prototype | Nouveau document construit **à partir des pages seules** :<br>• sans catalogue d'origine, donc sans XMP, fichiers joints, formulaires ni JavaScript ;<br>• sans `/Info` ;<br>• `/Metadata`, `/PieceInfo` et `/Thumb` retirés des pages ;<br>• annotations réduites aux liens, sans auteur ni date.<br>Vérifié par recherche dans les octets et par `pdfinfo` : aucune trace du nom, aucune métadonnée, texte intact (`pdftotext`). | Algorithme retenu pour L3.1 |
+| Défaut trouvé | Une annotation copiée puis retirée restait écrite dans le fichier, comme objet orphelin. | Filtrer **avant** la copie, puis supprimer les objets orphelins (`compress_identical_objects(remove_unreferenced=True)`) ; test dédié en L3.1 |
+| Refus | PDF chiffré refusé (`is_encrypted`) ; faux PDF refusé (`PdfReadError`). | Messages clairs côté auteur |
+| Performance | 300 pages avec liens : 0,2 s ; liens conservés. | Traitement synchrone au dépôt (pas de tâche différée) |
+| Limites connues | Le **texte** du document (nom dans le corps ou en en-tête de page) et les EXIF d'images JPEG incorporées ne sont pas traités. | Consigne affichée à l'auteur ; contrôle assisté du texte en P2 (étude M4) |
+| **Stockage privé** | Décision de conception, sans vérification hors ligne possible : `GESTCONF_PRIVATE_FILES_DIR`, distinct des fichiers publics, hors racine web, à sauvegarder avec la base. | Ajouté à `.env.example` et à `deploy/README.md` en L3.1 |
+| **Playwright en CI (F14)** | `@playwright/test` 1.63.0 (dans `web/`, lockfile produit avec npm 11 comme la CI). `web/e2e/playwright.config.ts` lance Django (SQLite dédiée, `migrate`, `createcachetable`) et le portail (`ng serve`, mandataire `/api`). Deux tests de fumée passent en local. Nouveau job CI « E2E (Playwright) ». | Le parcours auteur complet s'y ajoute en L3.6 |
+| Défaut trouvé | Sans `createcachetable`, `/health` répond 503. | Commande ajoutée au démarrage E2E |

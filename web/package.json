@@ -16,7 +16,8 @@
     "lint": "ng lint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "api:generate": "ng-openapi-gen -c ng-openapi-gen.json"
+    "api:generate": "ng-openapi-gen -c ng-openapi-gen.json",
+    "e2e": "playwright test -c e2e/playwright.config.ts"
   },
   "dependencies": {
     "@angular/cdk": "^22.2.1",
@@ -38,6 +39,7 @@
     "@angular/cli": "^22.2.1",
     "@angular/compiler-cli": "^22.2.0",
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "1.63.0",
     "@types/node": "^22.12.0",
     "angular-eslint": "22.5.0",
     "eslint": "^10.9.1",
