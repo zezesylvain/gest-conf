@@ -1,0 +1,19 @@
+{
+  "portail": {
+    "layout": {
+      "skipToContent": "Aller au contenu",
+      "footer": "Plateforme de gestion de conférences scientifiques"
+    },
+    "home": {
+      "title": "Accueil",
+      "heading": "Conférence scientifique",
+      "lead": "Appel à communications, programme et inscriptions.",
+      "managementLink": "Accéder à l'espace de gestion"
+    },
+    "notFound": {
+      "title": "Page introuvable",
+      "heading": "Cette page n'existe pas.",
+      "backHome": "Retour à l'accueil"
+    }
+  }
+}

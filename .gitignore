@@ -1,0 +1,28 @@
+# Secrets et configuration locale : jamais dans le dépôt
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+backend/db.sqlite3
+backend/RELEASE
+backend/tmp/
+
+# Angular (complète web/.gitignore)
+web/node_modules/
+web/dist/
+web/.angular/
+
+# Déploiement : sauvegardes locales du .htaccess de production
+deploy/backups/
+
+# Éditeurs et systèmes
+.idea/
+.DS_Store

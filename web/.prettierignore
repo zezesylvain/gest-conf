@@ -1,0 +1,6 @@
+# Client API généré par ng-openapi-gen
+projects/shared/src/lib/api/
+dist/
+.angular/
+node_modules/
+package-lock.json

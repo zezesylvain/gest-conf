@@ -1,0 +1,32 @@
+[project]
+name = "gestconf-backend"
+version = "0.1.0"
+description = "API Django de la plateforme GEST-CONF"
+requires-python = ">=3.12"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+extend-exclude = ["**/migrations/*.py"]
+
+[tool.ruff.lint]
+select = [
+    "E", "W", "F",  # pycodestyle, pyflakes
+    "I",            # tri des imports
+    "B",            # bugbear
+    "UP",           # syntaxe Python moderne
+    "DJ",           # règles Django
+    "S",            # sécurité (bandit)
+    "SIM",          # simplifications
+    "RUF",          # règles propres à ruff
+]
+
+[tool.ruff.lint.per-file-ignores]
+"config/settings/*.py" = ["F403", "F405"]  # import * entre fichiers de configuration
+"**/tests/**/*.py" = ["S101", "S105", "S106"]  # assert et mots de passe factices
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.test"
+testpaths = ["apps", "tests"]
+python_files = ["test_*.py"]
+addopts = "--strict-markers"

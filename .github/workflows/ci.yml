@@ -1,0 +1,123 @@
+# Intégration continue : qualité, tests et builds (étude §7.2, §9.3, annexe A6).
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend (Python ${{ matrix.python }})
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        # o2switch propose Python jusqu'à 3.13 (étude §7.2).
+        python: ["3.12", "3.13"]
+    services:
+      mariadb:
+        # Version à aligner sur celle fournie par o2switch (non vérifiée ; Django 5.2 exige >= 10.5).
+        image: mariadb:10.11
+        env:
+          MARIADB_ROOT_PASSWORD: root
+          MARIADB_DATABASE: gestconf
+        ports: ["3306:3306"]
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+    env:
+      DATABASE_URL: mysql://root:root@127.0.0.1:3306/gestconf
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: backend/requirements/*.txt
+      - run: pip install -r requirements/dev.txt
+
+      - name: Lint et formatage (ruff)
+        run: |
+          ruff check . ../deploy
+          ruff format --check . ../deploy
+
+      - name: Migrations à jour
+        run: python manage.py makemigrations --check --dry-run
+
+      - name: Tests (pytest, MariaDB)
+        run: pytest
+
+      - name: Tests du script de fusion .htaccess
+        working-directory: deploy
+        run: python -m pytest -p no:django -p no:cacheprovider test_htaccess_merge.py
+
+      - name: Contrôles de sécurité Django en configuration de production
+        env:
+          DJANGO_SETTINGS_MODULE: config.settings.prod
+          DJANGO_SECRET_KEY: ci-only-${{ github.run_id }}-not-a-real-secret-key-0123456789abcdef
+          DJANGO_ALLOWED_HOSTS: conference.exemple.org
+          DJANGO_CSRF_TRUSTED_ORIGINS: https://conference.exemple.org
+        run: python manage.py check --deploy --fail-level WARNING
+
+      - name: Schéma OpenAPI à jour (source du client Angular)
+        run: |
+          python manage.py spectacular --file /tmp/schema.yml --validate --fail-on-warn
+          diff -u schema.yml /tmp/schema.yml
+
+      - name: Audit des dépendances
+        run: pip-audit -r requirements/prod.txt
+
+  frontend:
+    name: Frontend (Angular)
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: web/.nvmrc
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+
+      - name: Client API généré à jour
+        run: |
+          npm run api:generate
+          git status --porcelain -- projects/shared/src/lib/api | tee /tmp/api-diff
+          test ! -s /tmp/api-diff || (echo "Client API obsolète : lancer npm run api:generate" && exit 1)
+
+      - name: Formatage (prettier)
+        run: npm run format:check
+
+      - name: Lint (ESLint, dont règles d'accessibilité)
+        run: npm run lint
+
+      - name: Tests unitaires
+        run: npm test
+
+      - name: Build (portail pré-rendu + gestion) et CSP
+        run: npm run build
+
+      - name: Audit des dépendances
+        run: npm audit --omit=dev --audit-level=high
+
+  shell:
+    name: Scripts de déploiement
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - name: ShellCheck
+        run: shellcheck deploy/*.sh

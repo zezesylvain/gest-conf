@@ -1,0 +1,27 @@
+"""Routes de l'API.
+
+L'application est montée sous /api (voir config/mount.py) : les chemins
+ci-dessous sont relatifs à ce préfixe. « v1/health » répond donc à /api/v1/health.
+Aucune route d'administration Django (règle n° 1 de CLAUDE.md).
+"""
+
+from django.conf import settings
+from django.urls import include, path
+
+urlpatterns = [
+    path("v1/", include("apps.core.urls")),
+]
+
+if settings.DEBUG:
+    # Schéma OpenAPI publié uniquement en développement (étude §9.1).
+    from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+
+    urlpatterns += [
+        path("v1/schema", SpectacularAPIView.as_view(), name="schema"),
+        path("v1/docs", SpectacularSwaggerView.as_view(url_name="schema"), name="docs"),
+    ]
+
+handler400 = "apps.core.views.bad_request"
+handler403 = "apps.core.views.permission_denied"
+handler404 = "apps.core.views.not_found"
+handler500 = "apps.core.views.server_error"

@@ -1,0 +1,18 @@
+{
+  "gestion": {
+    "layout": {
+      "skipToContent": "Skip to content",
+      "area": "Management"
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "heading": "Management area",
+      "lead": "Scientific and organising committees, edition administration."
+    },
+    "notFound": {
+      "title": "Page not found",
+      "heading": "This page does not exist.",
+      "backHome": "Back to dashboard"
+    }
+  }
+}

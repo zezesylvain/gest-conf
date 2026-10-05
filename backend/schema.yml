@@ -1,0 +1,63 @@
+openapi: 3.0.3
+info:
+  title: GEST-CONF API
+  version: 1.0.0
+  description: API de la plateforme de gestion de conférences scientifiques.
+paths:
+  /v1/health:
+    get:
+      operationId: health
+      description: Sonde de disponibilité (supervision externe et tests de fumée du
+        déploiement).
+      tags:
+      - health
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+          description: ''
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+          description: ''
+components:
+  schemas:
+    DatabaseEnum:
+      enum:
+      - ok
+      - error
+      type: string
+      description: |-
+        * `ok` - ok
+        * `error` - error
+    Health:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        database:
+          $ref: '#/components/schemas/DatabaseEnum'
+        secure:
+          type: boolean
+          description: Vrai si Django voit la requête comme HTTPS (contrôle du déploiement).
+        release:
+          type: string
+      required:
+      - database
+      - release
+      - secure
+      - status
+    StatusEnum:
+      enum:
+      - ok
+      - degraded
+      type: string
+      description: |-
+        * `ok` - ok
+        * `degraded` - degraded
+servers:
+- url: /api

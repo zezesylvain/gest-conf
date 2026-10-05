@@ -1,0 +1,16 @@
+{
+  "shared": {
+    "appName": "GEST-CONF",
+    "language": {
+      "label": "Language",
+      "fr": "Français",
+      "en": "English"
+    },
+    "apiStatus": {
+      "checking": "Checking the API…",
+      "ok": "API operational",
+      "degraded": "API degraded: database unavailable",
+      "unreachable": "API unreachable"
+    }
+  }
+}

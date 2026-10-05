@@ -57,24 +57,28 @@ Chaque app Django : `models.py`, `services.py` (logique métier), `serializers.p
 - **Angular** : composants autonomes, lazy loading par route, formulaires réactifs typés, état local en signaux, client API **généré** (ne pas l'éditer à la main), accessibilité WCAG 2.1 AA.
 - **Portail** : pré-rendu statique (SSG), pas de SSR ; budget de bundle surveillé.
 
-## Commandes (à adapter une fois les projets créés)
+## Commandes
 
 ```bash
-# Backend
-cd backend && python -m venv .venv && source .venv/bin/activate
+# Backend (Python 3.12/3.13)
+cd backend && python3.12 -m venv .venv && source .venv/bin/activate
 pip install -r requirements/dev.txt
-python manage.py migrate && python manage.py runserver
-pytest                      # tests
-ruff check . && ruff format --check .
-python manage.py spectacular --file schema.yml   # schéma OpenAPI
+python manage.py migrate && python manage.py runserver   # http://localhost:8000/api/v1/health
+pytest                      # SQLite par défaut ; DATABASE_URL=mysql://... pour MariaDB (fait foi en CI)
+ruff check . ../deploy && ruff format --check . ../deploy
+python manage.py spectacular --file schema.yml --validate   # schéma OpenAPI (versionné)
 
-# Frontend
-cd web && npm install
-ng serve portail            # ou: ng serve gestion
-ng test && ng lint
-ng build portail && ng build gestion
-# Régénérer le client TypeScript après chaque évolution du schéma OpenAPI
+# Frontend (Node >= 22.22.3 ou >= 24.15, exigence d'Angular 22)
+cd web && npm ci
+npm run start:portail       # :4200 ; npm run start:gestion -> :4201/gestion/ (proxy /api -> :8000)
+npm test && npm run lint && npm run format:check
+npm run build               # portail pré-rendu + gestion + CSP à empreintes
+npm run api:generate        # régénérer le client TypeScript après chaque évolution du schéma
+
+# Déploiement : deploy/deploy.sh puis deploy/smoke-test.sh (voir deploy/README.md)
 ```
+
+Les URL Django sont déclarées **sans** le préfixe `/api` (`v1/...`) : `config/mount.py` gère le montage.
 
 ## Tests (exigés)
 

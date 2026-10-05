@@ -1,0 +1,40 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -3rem;
+  padding: 0.5rem 1rem;
+  background: var(--gc-surface);
+  color: var(--gc-primary);
+  z-index: 10;
+
+  &:focus {
+    top: 1rem;
+  }
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--gc-primary);
+  color: var(--gc-on-primary);
+}
+
+.brand {
+  color: inherit;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.app-main {
+  flex: 1;
+  padding: 1.5rem;
+}
