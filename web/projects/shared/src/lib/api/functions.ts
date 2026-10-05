@@ -3,3 +3,15 @@
 
 export type { Health$Params as Health$Params } from './fn/health/health';
 export { health as health } from './fn/health/health';
+export type { Me$Params as Me$Params } from './fn/me/me';
+export { me as me } from './fn/me/me';
+export type { MeConsents$Params as MeConsents$Params } from './fn/me/me-consents';
+export { meConsents as meConsents } from './fn/me/me-consents';
+export type { MeConsentsCreate$Params as MeConsentsCreate$Params } from './fn/me/me-consents-create';
+export { meConsentsCreate as meConsentsCreate } from './fn/me/me-consents-create';
+export type { MePreferencesUpdate$Params as MePreferencesUpdate$Params } from './fn/me/me-preferences-update';
+export { mePreferencesUpdate as mePreferencesUpdate } from './fn/me/me-preferences-update';
+export type { MeProfile$Params as MeProfile$Params } from './fn/me/me-profile';
+export { meProfile as meProfile } from './fn/me/me-profile';
+export type { MeProfileUpdate$Params as MeProfileUpdate$Params } from './fn/me/me-profile-update';
+export { meProfileUpdate as meProfileUpdate } from './fn/me/me-profile-update';

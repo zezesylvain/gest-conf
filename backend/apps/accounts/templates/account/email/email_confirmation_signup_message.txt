@@ -1,0 +1,9 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate %}Bonjour,
+
+Un compte {{ site_name }} vient d'être créé avec cette adresse. Pour l'activer, confirmez votre adresse en ouvrant ce lien :
+
+{{ activate_url }}
+
+Si vous n'avez pas créé de compte, ignorez ce message : aucun compte ne sera activé.{% endblocktranslate %}
+
+{% include "account/email/_signature.txt" %}{% endautoescape %}

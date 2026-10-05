@@ -1,0 +1,7 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate %}Bonjour,
+
+L'adresse {{ added_email }} vient d'être ajoutée à votre compte {{ site_name }}. Elle ne pourra servir qu'une fois confirmée par le lien qui lui a été envoyé.{% endblocktranslate %}
+
+{% include "account/email/_security_footer.txt" %}
+
+{% include "account/email/_signature.txt" %}{% endautoescape %}

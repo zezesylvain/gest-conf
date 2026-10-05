@@ -1,9 +1,12 @@
 """Configuration de production (o2switch).
 
 Variables d'environnement obligatoires : DJANGO_SECRET_KEY, DJANGO_ALLOWED_HOSTS,
-DJANGO_CSRF_TRUSTED_ORIGINS, DATABASE_URL, GESTCONF_EMAIL_BACKEND, DEFAULT_FROM_EMAIL.
+DJANGO_CSRF_TRUSTED_ORIGINS, DATABASE_URL, GESTCONF_EMAIL_BACKEND, DEFAULT_FROM_EMAIL,
+GESTCONF_PUBLIC_URL.
 Voir .env.example.
 """
+
+from django.core.exceptions import ImproperlyConfigured
 
 from .base import *
 
@@ -20,6 +23,11 @@ DATABASES = {"default": database_from_env()}
 # E-mails : fournisseur obligatoire (D10), jamais le backend « console » par défaut.
 EMAIL_BACKEND = env.str("GESTCONF_EMAIL_BACKEND")
 DEFAULT_FROM_EMAIL = env.str("DEFAULT_FROM_EMAIL")
+
+# Liens des e-mails (vérification, réinitialisation) : domaine officiel en HTTPS,
+# obligatoire (lu par base.py, qui construit HEADLESS_FRONTEND_URLS).
+if not env.str("GESTCONF_PUBLIC_URL", default="").startswith("https://"):
+    raise ImproperlyConfigured("GESTCONF_PUBLIC_URL (https://…) est obligatoire en production.")
 
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True

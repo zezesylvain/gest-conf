@@ -147,7 +147,9 @@ def _check_context(context: Mapping[str, str]) -> dict[str, str]:
     return checked
 
 
-def _resolve_locale(locale: str | None, to_user: AbstractBaseUser | None) -> str:
+def resolve_locale(locale: str | None, to_user: AbstractBaseUser | None) -> str:
+    """Langue d'un e-mail : ``locale`` explicite, sinon celle du compte destinataire,
+    sinon celle de la requête en cours ; ramenée à une langue disponible (``fr``, ``en``)."""
     candidate = locale or getattr(to_user, "locale", None) or translation.get_language()
     candidate = (candidate or settings.LANGUAGE_CODE).split("-")[0].lower()
     available = {code for code, _name in settings.LANGUAGES}
@@ -191,7 +193,7 @@ def queue_email(
         existing = OutboxEmail.objects.filter(idempotency_key=idempotency_key).first()
         if existing is not None:
             return existing
-    resolved_locale = _resolve_locale(locale, to_user)
+    resolved_locale = resolve_locale(locale, to_user)
     subject, body_text, body_html = render_email(template_code, context or {}, resolved_locale)
     now = timezone.now()
     email = OutboxEmail.objects.create(

@@ -24,6 +24,104 @@ paths:
               schema:
                 $ref: '#/components/schemas/Health'
           description: ''
+  /v1/me:
+    get:
+      operationId: me
+      tags:
+      - me
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Me'
+          description: ''
+  /v1/me/consents:
+    get:
+      operationId: me_consents
+      tags:
+      - me
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Consents'
+          description: ''
+    post:
+      operationId: me_consents_create
+      tags:
+      - me
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConsentCreateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsentRecord'
+          description: ''
+  /v1/me/preferences:
+    patch:
+      operationId: me_preferences_update
+      tags:
+      - me
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPreferencesRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Me'
+          description: ''
+  /v1/me/profile:
+    get:
+      operationId: me_profile
+      tags:
+      - me
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+          description: ''
+    patch:
+      operationId: me_profile_update
+      tags:
+      - me
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProfileRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+          description: ''
 components:
   schemas:
     ApiError:
@@ -45,6 +143,104 @@ components:
       - code
       - fields
       - message
+    BlankEnum:
+      enum:
+      - ''
+    ConsentCreateRequest:
+      type: object
+      properties:
+        kind:
+          $ref: '#/components/schemas/ConsentKind'
+        granted:
+          type: boolean
+        source:
+          allOf:
+          - $ref: '#/components/schemas/ConsentRequestSource'
+          default: account
+      required:
+      - granted
+      - kind
+    ConsentKind:
+      enum:
+      - privacy_notice
+      - directory_listing
+      type: string
+      description: |-
+        * `privacy_notice` - notice d'information
+        * `directory_listing` - annuaire public
+    ConsentRecord:
+      type: object
+      properties:
+        kind:
+          $ref: '#/components/schemas/ConsentKind'
+        granted:
+          type: boolean
+        text_version:
+          type: string
+        recorded_at:
+          type: string
+          format: date-time
+        source:
+          $ref: '#/components/schemas/ConsentSource'
+      required:
+      - granted
+      - kind
+      - recorded_at
+      - source
+      - text_version
+    ConsentRequestSource:
+      enum:
+      - first_login
+      - account
+      type: string
+      description: |-
+        * `first_login` - première connexion
+        * `account` - espace compte
+    ConsentSource:
+      enum:
+      - first_login
+      - account
+      - command
+      type: string
+      description: |-
+        * `first_login` - première connexion
+        * `account` - espace compte
+        * `command` - commande
+    ConsentState:
+      type: object
+      properties:
+        kind:
+          $ref: '#/components/schemas/ConsentKind'
+        granted:
+          type: boolean
+        text_version:
+          type: string
+        recorded_at:
+          type: string
+          format: date-time
+          nullable: true
+        current_text_version:
+          type: string
+      required:
+      - current_text_version
+      - granted
+      - kind
+      - recorded_at
+      - text_version
+    Consents:
+      type: object
+      properties:
+        states:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConsentState'
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConsentRecord'
+      required:
+      - history
+      - states
     ErrorCode:
       enum:
       - validation_error
@@ -116,6 +312,126 @@ components:
         * `ok` - Ok
         * `late` - Late
         * `unknown` - Unknown
+    Locale:
+      enum:
+      - fr
+      - en
+      type: string
+      description: |-
+        * `fr` - Français
+        * `en` - English
+    Me:
+      type: object
+      description: Compte connecté. Rôles, capacités, invitations (L1.5) et état 2FA
+        (L1.6) s'y ajouteront.
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+          format: email
+        locale:
+          $ref: '#/components/schemas/Locale'
+        profile_complete:
+          type: boolean
+          description: Nom, prénom, institution et pays renseignés.
+        privacy_notice_pending:
+          type: boolean
+          description: Vrai tant que la version courante de la notice n'a pas été
+            lue.
+      required:
+      - email
+      - id
+      - locale
+      - privacy_notice_pending
+      - profile_complete
+    PatchedPreferencesRequest:
+      type: object
+      properties:
+        locale:
+          $ref: '#/components/schemas/Locale'
+    PatchedProfileRequest:
+      type: object
+      properties:
+        title:
+          oneOf:
+          - $ref: '#/components/schemas/ProfileTitle'
+          - $ref: '#/components/schemas/BlankEnum'
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        institution:
+          type: string
+          maxLength: 255
+        department:
+          type: string
+          maxLength: 255
+        country:
+          type: string
+          description: Code ISO 3166-1 alpha-2 (« CI », « FR »...), majuscules ou
+            minuscules.
+          maxLength: 2
+        orcid:
+          type: string
+          description: Forme 0000-0000-0000-000X, clé de contrôle vérifiée.
+          maxLength: 19
+        bio:
+          type: string
+          description: Texte brut.
+          maxLength: 2000
+    Profile:
+      type: object
+      properties:
+        title:
+          oneOf:
+          - $ref: '#/components/schemas/ProfileTitle'
+          - $ref: '#/components/schemas/BlankEnum'
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        institution:
+          type: string
+          maxLength: 255
+        department:
+          type: string
+          maxLength: 255
+        country:
+          type: string
+          description: Code ISO 3166-1 alpha-2 (« CI », « FR »...), majuscules ou
+            minuscules.
+          maxLength: 2
+        orcid:
+          type: string
+          description: Forme 0000-0000-0000-000X, clé de contrôle vérifiée.
+          maxLength: 19
+        bio:
+          type: string
+          description: Texte brut.
+          maxLength: 2000
+        is_complete:
+          type: boolean
+          readOnly: true
+      required:
+      - is_complete
+    ProfileTitle:
+      enum:
+      - dr
+      - pr
+      - mr
+      - ms
+      type: string
+      description: |-
+        * `` - aucun
+        * `dr` - Dr
+        * `pr` - Pr
+        * `mr` - M.
+        * `ms` - Mme
     ServiceStatus:
       enum:
       - ok
@@ -124,5 +440,10 @@ components:
       description: |-
         * `ok` - Ok
         * `error` - Error
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
 servers:
 - url: /api

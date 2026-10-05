@@ -166,3 +166,10 @@ def test_cron_script_only_runs_scheduled_commands():
 def test_smoke_test_checks_the_job_queue():
     code = shell_code(REPO_DIR / "deploy" / "smoke-test.sh")
     assert 'json_has "$health" jobs \'"ok"\'' in code
+
+
+def test_smoke_test_checks_the_allauth_bootstrap():
+    """Étape L1.3 (plan §11) : amorçage anonyme 401 JSON et cookie CSRF posé."""
+    code = shell_code(REPO_DIR / "deploy" / "smoke-test.sh")
+    assert '"$BASE_URL/api/_allauth/browser/v1/auth/session"' in code
+    assert "set-cookie 'csrftoken='" in code

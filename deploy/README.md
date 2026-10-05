@@ -25,7 +25,8 @@ Topologie (étude §11.3) : un seul domaine, Angular en fichiers statiques dans
 3. **Fichier `.env`** de production dans `~/gestconf-app/.env` (droits `600`), à
    partir de `backend/.env.example` : `DJANGO_SECRET_KEY`, `DATABASE_URL`,
    `DJANGO_ALLOWED_HOSTS`, `DJANGO_CSRF_TRUSTED_ORIGINS`, `GESTCONF_EMAIL_BACKEND`,
-   `DEFAULT_FROM_EMAIL` et la clé du fournisseur d'e-mails (D10), `GESTCONF_OPERATORS`
+   `DEFAULT_FROM_EMAIL` et la clé du fournisseur d'e-mails (D10), `GESTCONF_PUBLIC_URL`
+   (URL publique en `https://`, base des liens envoyés par e-mail), `GESTCONF_OPERATORS`
    (alertes, D17), `GESTCONF_CRON_INTERVAL_SECONDS`. Ne jamais le committer.
 4. **HTTPS** : vérifier le certificat AutoSSL et activer « Forcer la redirection
    HTTPS » dans cPanel › Domaines. La redirection n'est pas faite dans notre
@@ -118,6 +119,9 @@ Vérifie :
   (pages `/compte/*`), en-tête CSP, repli SPA, `robots.txt` servi tel quel (texte) et
   excluant `/api/`, `/gestion/` et `/compte/` ;
 - gestion : `base href`, **CSP en `<meta>`**, `X-Robots-Tag: noindex`, repli SPA ;
+- authentification : `/api/_allauth/browser/v1/auth/session` répond 401 JSON
+  (`is_authenticated: false`) et pose le cookie `csrftoken` ; le client « app » d'allauth est
+  absent (404) ;
 - API : `/api/v1/health` en 200 avec **base et cache OK** (un `createcachetable` oublié donne
   503 et `cache: error`) et **file de tâches OK** (`jobs: ok` : le cron `run_jobs` est passé
   récemment ; échoue au tout premier déploiement, avant que la crontab ait tourné), `X-Robots-Tag: noindex`, HTTPS vu par Django, version déployée,

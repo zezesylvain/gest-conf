@@ -2200,7 +2200,7 @@ Ces mises à jour seront livrées par une PR de documentation en L1.8, **après 
 
 ---
 
-## 16. Écarts constatés pendant l'implémentation (L1.0 à L1.2)
+## 16. Écarts constatés pendant l'implémentation (L1.0 à L1.3)
 
 Consignés ici pour ne pas dériver en silence (CLAUDE.md). Les écarts marqués **à valider** attendent
 l'accord du commanditaire ; les autres sont des précisions sans effet sur les décisions D1 à D18.
@@ -2316,3 +2316,52 @@ Ils seront repris dans la PR de documentation de L1.8 (§15).
     battement de cœur donne `jobs: ok`, les verrous et l'exclusivité sont testés (y compris
     `GET_LOCK` sur MariaDB 10.11). **Reste à faire sur o2switch**, avec un accès au compte : la
     crontab, le fournisseur (D10, clé et domaine SPF/DKIM) et la réception réelle de l'e-mail.
+
+### Étape L1.3 (comptes, backend)
+
+23. **§9.2, routes téléphone d'allauth (vérifié par essai).** `account/phone`,
+    `auth/phone/verify` et `auth/phone/verify/resend` sont montées sans condition par allauth
+    65.19.7. Sans adaptateur de téléphone, un appel authentifié lève `NotImplementedError` :
+    **erreur 500** (et alerte aux opérateurs). Elles sont neutralisées dans `config/urls.py`
+    (`DISABLED_ALLAUTH_ROUTES`, déclarées avant l'inclusion d'allauth) et répondent 404 JSON.
+    Les autres routes non configurées sont déjà inertes : client `app` et `auth/2fa/trust`
+    absents (404), `auth/code/confirm` et `auth/email/verify/resend` en 409. Le « moyen de
+    neutralisation à vérifier » du §9.2 est ainsi tranché.
+24. **§3.8, comptes sans `EmailAddress` (vérifié par essai).** À la connexion d'un compte créé
+    avant allauth, allauth crée lui-même une adresse **non vérifiée** et envoie un lien de
+    vérification (401 `verify_email`). `sync_email_addresses` reste utile pour les marquer
+    vérifiées d'emblée (`--verified`) ; `--dry-run` compte sans créer.
+25. **§4.3, inscription répétée (vérifié par essai).** La limite `confirm_email` d'allauth
+    (1 envoi par 180 s et par adresse) s'applique aussi à l'e-mail « compte existant » : une
+    seconde inscription avec la même adresse dans les 180 s n'envoie rien. Pas d'oracle : au
+    second essai, l'adresse existe dans les deux cas (créée par le premier).
+26. **§9.3, `/v1/me` en L1.3.** Champs livrés : `id`, `email`, `locale`, `profile_complete`,
+    `privacy_notice_pending`. Rôles, capacités et invitations (L1.5) et état de la 2FA (L1.6)
+    s'y ajouteront sans rupture. `GET /v1/me/consents` renvoie `{states, history}` (état courant
+    par type, avec la version courante du texte, et historique sans IP). `POST` n'accepte que
+    les origines `first_login` et `account` : énumération distincte `ConsentRequestSource`,
+    sans quoi drf-spectacular signalerait une collision sur le champ `source`.
+27. **§3.3, textes et listes.** Versions courantes des textes : `apps/accounts/consents.py`
+    (`2026-10-v0`, notice provisoire). Titres `""`, `dr`, `pr`, `mr`, `ms` : liste toujours
+    **à valider**. Pays : 249 codes ISO 3166-1 alpha-2, liste versionnée
+    (`apps/accounts/countries.py`, source `iso-codes` 4.16.0). La notice ne se « retire » pas
+    (400) : c'est une prise de connaissance.
+28. **§4.2, gabarits d'e-mails du compte.** Surchargés en FR (source) et EN (catalogue) :
+    vérification (inscription, ajout), compte existant, réinitialisation, et les notifications
+    `password_reset`, `password_changed`, `password_set`, `email_changed`, `email_deleted`,
+    `email_added`. Sensibles : les vérifications et `password_reset_key`. Voie rapide : toutes
+    sauf `password_reset_key`. `account_already_exists` n'est pas sensible (aucun jeton : le
+    lien mène à la page « mot de passe oublié »).
+29. **§7.2, audit des échecs de connexion.** Écrit par le crochet
+    `AccountAdapter.authentication_failed` d'allauth, et non par le signal Django
+    `user_login_failed`, dont les identifiants contiennent l'adresse saisie. Compte connu :
+    rattaché comme objet de l'entrée ; inconnu : IP seulement.
+30. **§4.7, valeurs proposées appliquées.** `ACCOUNT_RATE_LIMITS` resserrées (`signup`
+    100/h/IP, `reset_password` 3/h/adresse) et `PASSWORD_RESET_TIMEOUT` = 2 h (clé à usage
+    unique, vérifié par test).
+31. **§9.4, commandes.** `deactivate_user` ferme aussi les sessions du compte. `audit_query`
+    (`--action` exact ou préfixe terminé par « . », `--email` acteur **ou** objet, `--since`)
+    journalise sa propre consultation (`audit.queried`, adresse masquée).
+32. **§3.8.** `accounts/0002` regroupe `anonymized_at`, `Profile` et `Consent`, comme le prévoit
+    le tableau des migrations. `GESTCONF_PUBLIC_URL` est obligatoire en production, en
+    `https://` (contrôle au démarrage).

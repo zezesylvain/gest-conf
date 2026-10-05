@@ -29,7 +29,9 @@ backend/            Django 5.2 LTS + DRF (sans admin Django)
                     journal d'audit (RG-17), file de tâches (Job, run_jobs), commandes
                     cron verrouillées (LockedCommand), alertes aux opérateurs
   apps/communications/  registre d'envoi des e-mails (OutboxEmail), gabarits FR/EN
-  apps/accounts/    utilisateur (identifié par e-mail)
+  apps/accounts/    comptes : allauth headless (inscription, vérification, connexion,
+                    réinitialisation), sessions de 12 h absolues, profil,
+                    consentements, /v1/me…, commandes de l'opérateur
   locale/           catalogue « en » des messages de l'API (.po et .mo versionnés)
   requirements/     *.in (sources) → *.txt verrouillés avec empreintes (pip-tools)
   schema.yml        schéma OpenAPI (généré, source du client TypeScript)
@@ -64,6 +66,12 @@ par cron en production. En développement, lancer `run_jobs` à la main : les e-
 s'affichent dans le terminal (backend `console`). Seuls les e-mails de la « voie rapide »
 (vérification d'adresse, invitations…) partent pendant la requête.
 
+L'authentification est servie par django-allauth en mode *headless* sous
+`/api/_allauth/browser/v1/…` (inscription, vérification, connexion, réinitialisation,
+gestion des adresses) ; les liens des e-mails pointent vers le portail
+(`GESTCONF_PUBLIC_URL`, `http://localhost:4200` par défaut). Les comptes créés avant allauth
+(lot L0) reçoivent leur adresse par `python manage.py sync_email_addresses --verified`.
+
 Le cache partagé (limites de débit, sonde `/health`) est une table en base : sans
 `createcachetable`, `/api/v1/health` répond 503 avec `"cache": "error"`. La commande est
 sans effet si la table existe déjà ; elle se relance après chaque `migrate` (déploiement compris).
@@ -92,6 +100,7 @@ Les deux serveurs de développement relaient `/api` vers `runserver` (`web/proxy
 | Cache partagé | `python manage.py createcachetable` (après chaque `migrate`) |
 | File de tâches | `python manage.py run_jobs` (cron en production : `deploy/cron.sh`) |
 | E-mails | `python manage.py send_test_email <adresse>` puis `run_jobs` ; suivi : `python manage.py outbox [--status failed] [--retry ID]` |
+| Comptes (opérateur) | `sync_email_addresses [--verified]`, `deactivate_user --email … --reason …`, `audit_query [--action auth.] [--email …] [--since AAAA-MM-JJ]` |
 | Schéma OpenAPI | `python manage.py spectacular --file schema.yml --validate --fail-on-warn` |
 | Traductions de l'API | voir ci-dessous |
 | Dépendances Python | `requirements/compile.sh` — voir ci-dessous |
