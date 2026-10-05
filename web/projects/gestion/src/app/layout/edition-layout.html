@@ -24,16 +24,33 @@
 </div>
 
 <div class="edition-body">
-  <nav class="edition-nav" [attr.aria-label]="'gestion.nav.label' | translate">
-    <ul>
-      @for (item of nav(); track item.path) {
-        <li>
-          <a [routerLink]="item.path" routerLinkActive="active" ariaCurrentWhenActive="page">
-            {{ item.label | translate }}
-          </a>
-        </li>
-      }
-    </ul>
+  <nav class="rail" [attr.aria-label]="'gestion.nav.label' | translate">
+    @for (group of groups(); track group.key) {
+      <div class="rail-group">
+        <h2 class="rail-heading">
+          <button
+            type="button"
+            class="rail-toggle"
+            [attr.aria-expanded]="open() === group.key"
+            [attr.aria-controls]="'rail-' + group.key"
+            (click)="toggle(group.key)"
+          >
+            <span>{{ group.label | translate }}</span>
+            <span class="chevron" aria-hidden="true"></span>
+          </button>
+        </h2>
+        <!-- [hidden] et non @if : les liens restent dans le DOM, routerLinkActive marque l'entrée. -->
+        <ul [id]="'rail-' + group.key" [hidden]="open() !== group.key">
+          @for (entry of group.entries; track entry.key) {
+            <li>
+              <a [routerLink]="entry.url" routerLinkActive="active" ariaCurrentWhenActive="page">
+                {{ entry.label | translate }}
+              </a>
+            </li>
+          }
+        </ul>
+      </div>
+    }
   </nav>
   <section class="edition-content">
     @if (edition()) {

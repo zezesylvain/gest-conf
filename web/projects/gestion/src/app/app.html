@@ -4,6 +4,9 @@
   <a class="brand" routerLink="/">
     {{ 'shared.appName' | translate }} · {{ 'gestion.layout.area' | translate }}
   </a>
+  @if (navigation.entries().length) {
+    <gestion-screen-search />
+  }
   <div class="header-tools">
     @if (email()) {
       <a class="account" href="/compte">{{ email() }}</a>
@@ -20,3 +23,5 @@
 <main id="contenu" class="app-main" tabindex="-1">
   <router-outlet />
 </main>
+
+<gestion-context-help />

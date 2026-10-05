@@ -78,6 +78,11 @@ export const routes: Routes = [
     ],
   },
   {
+    path: 'aide',
+    title: 'gestion.help.title',
+    loadComponent: () => import('./help/help-page').then((m) => m.HelpPage),
+  },
+  {
     path: 'acces-refuse',
     title: 'gestion.forbidden.title',
     loadComponent: () => import('./pages/forbidden/forbidden-page').then((m) => m.ForbiddenPage),

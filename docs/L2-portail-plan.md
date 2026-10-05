@@ -296,3 +296,68 @@ hors navigateur). Test de fumée : `/fr/`, `/en/`, `/sitemap.xml`, un fichier pu
 
 Les écarts de cette étape sont reportés dans les étapes concernées ; aucune décision E1 à E14
 n'est remise en cause.
+
+## 12. Bilan de L2.1 (5 octobre 2026)
+
+**Livré dans la gestion** (toute la gestion, écrans L1 compris) :
+
+- **Table de navigation unique** `gestion/src/app/core/navigation.ts` (sans import Angular) :
+  `SCREENS`, `buildNavigation(editionId, capabilities, activeRole)`, `catalogue`, `activeGroup`
+  et `entryForUrl` (plus long préfixe), `helpForUrl`. Elle remplace les constantes `NAV` et
+  `ROLE_SECTIONS` de L1.7. `NavigationStore` partage l'édition et le rôle actif entre le rail
+  et la barre haute.
+- **Rail en accordéon** : catégories Pilotage, Paramétrage, Comités, Contrôle, Aide (la
+  catégorie Portail arrive en L2.3). Une seule ouverte, celle de l'écran courant. Repli sur la
+  catégorie déjà ouverte, puis sur la première. En-têtes en `<button aria-expanded
+  aria-controls>`, corps masqués par `[hidden]` avec la règle globale
+  `[hidden]{display:none !important}`.
+- **Recherche d'écran** dans la barre haute (`core/search.ts`, `layout/screen-search.ts`) :
+  - catalogue dérivé du rail ; normalisation NFD ; rangs 0 à 5 ; tri stable ;
+  - saisie vide : tout le catalogue ; une lettre : rien ;
+  - combobox ARIA écrite à la main, `⌘K`/`Ctrl+K`, `(mousedown)` sur les résultats.
+  
+  Mots-clés métier en clés i18n `gestion.nav.keywords.*` (écrans fixes : pas de registre
+  serveur).
+- **Guide** :
+  - fiches en données typées, avec des clés i18n FR/EN (`help/help-sheets.ts`) :
+    - 3 fiches transversales : premiers pas, double authentification et confirmation
+      d'identité, rôles et droits ;
+    - 8 fiches d'écran, dont une partagée par Thématiques et Types ;
+  - page `/aide` : sommaire suiveur (`IntersectionObserver`, marge `-10% 0px -70% 0px`),
+    index par profil et par écran, impression, `?fiche=<id>` ;
+  - bouton `?` et tiroir montés une fois dans la coque ; la fiche se déduit de l'URL
+    (`/editions` : premiers pas) ; pas de bouton sur `/aide` ni sur un écran sans fiche ;
+    `Échap` et un clic sur le fond referment le tiroir.
+
+  Les fiches ont été rédigées d'après le code : préconditions de publication, 14 jours de
+  validité d'une invitation, trois envois au plus, réauthentification pour publier ou
+  archiver, pour la confidentialité, pour tout retrait de rôle et pour inviter un ADMIN ou
+  un CHAIR.
+
+**Écarts avec le §2.3** :
+
+- `/aide` est hors de la mise en page de l'édition (le guide ne dépend d'aucune édition) : le
+  rail n'y est pas affiché, et la page propose un lien « Retour à la gestion ».
+- La fiche « publier le portail » viendra avec la rubrique Portail (L2.3).
+
+**Vérifications** :
+
+- **Tests Vitest de la gestion : 56** (17 de plus) :
+  - navigation : profils, rôle actif, plus long préfixe, repli, catalogue dérivé ;
+  - recherche : NFD et ligature, rangs, tri stable ;
+  - cohérence des fiches : chaque écran pointe une fiche existante, aucune fiche orpheline
+    hors `TRANSVERSAL`, toutes les clés présentes en FR et en EN, aucune clé inutilisée ;
+  - composants : combobox, clavier, souris, `⌘K`, profil restreint, tiroir, guide.
+- **Dans Chromium** (Playwright, serveurs locaux, comptes ADMIN et OC_MEMBER avec 2FA) :
+  - une seule catégorie visible à l'écran, et un clic en ouvre une autre ;
+  - `Ctrl+K`, puis « echeance » et Entrée, mène au Calendrier ; le rail suit ;
+  - un clic souris sur un résultat navigue ;
+  - le tiroir montre la fiche de l'écran, focus sur son titre ; `Échap` le referme ;
+  - « Voir le guide complet » mène à la fiche ;
+  - le sommaire défile sans écrire dans l'historique ;
+  - à l'impression, l'en-tête, le rail et le sommaire sont masqués ;
+  - aucun débordement horizontal de 1 280 à 375 px ;
+  - pour le CO, « journal » et « invit » ne trouvent rien ;
+  - aucune erreur dans la console.
+- **Bundle initial de la gestion** : 356,6 kB (336,7 avant), budget de 500 kB. Celui du
+  portail est inchangé.

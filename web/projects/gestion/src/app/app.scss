@@ -20,6 +20,7 @@
 
 .app-header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
@@ -58,4 +59,15 @@
   border-radius: 0.25rem;
   padding: 0.25rem 0.75rem;
   cursor: pointer;
+}
+
+@media print {
+  .app-header,
+  .skip-link {
+    display: none;
+  }
+
+  .app-main {
+    padding: 0;
+  }
 }

@@ -23,3 +23,18 @@ body {
   outline: 3px solid var(--gc-primary);
   outline-offset: 2px;
 }
+
+/* L'attribut hidden perd contre toute règle d'auteur (display: flex, grid…) : sans cette
+   règle, un élément masqué par [hidden] reste affiché (rail entièrement déplié). */
+[hidden] {
+  display: none !important;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

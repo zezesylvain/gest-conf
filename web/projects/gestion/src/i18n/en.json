@@ -18,7 +18,27 @@
       "confidentiality": "Confidentiality",
       "members": "Members",
       "invitations": "Invitations",
-      "audit": "Audit log"
+      "audit": "Audit log",
+      "guide": "Guide",
+      "groups": {
+        "steering": "Overview",
+        "settings": "Settings",
+        "committees": "Committees",
+        "control": "Oversight",
+        "help": "Help"
+      },
+      "keywords": {
+        "dashboard": "home, status, publish, publication, archive, state, summary",
+        "general": "title, theme, dates, venue, city, country, time zone, code, edition",
+        "tracks": "themes, topics, subjects, areas",
+        "types": "formats, oral, poster, workshop, presentation, abstract, duration",
+        "calendar": "key dates, deadlines, call, opening, closing, registration, notification",
+        "confidentiality": "double blind, anonymity, reviewers, review",
+        "members": "roles, committee, users, team, remove, revoke, people",
+        "invitations": "invite, add, member, reminder, email, committee",
+        "audit": "history, log, trail, who did, changes, audit",
+        "guide": "help, documentation, manual, how to, tutorial"
+      }
     },
     "status": {
       "draft": "draft",
@@ -269,6 +289,181 @@
       "title": "Page not found",
       "heading": "This page does not exist.",
       "backHome": "Back to management home"
+    },
+    "search": {
+      "label": "Search for a screen",
+      "placeholder": "Search for a screen (Ctrl+K)",
+      "hint": "Arrows to browse, Enter to open, Escape to close.",
+      "tooShort": "Type at least two letters.",
+      "none": "No matching screen."
+    },
+    "help": {
+      "title": "Management guide",
+      "lead": "How to use the management screens, by profile and by screen. This guide is the software documentation: it changes with each release and cannot be edited from the management area.",
+      "print": "Print the guide",
+      "toc": "Contents",
+      "byProfile": "Index by profile",
+      "byScreen": "Index by screen",
+      "transversal": "General sheets",
+      "back": "Back to management",
+      "open": "Help for this screen",
+      "close": "Close help",
+      "fullGuide": "See the full guide",
+      "access": "Access:",
+      "tones": {
+        "info": "Information",
+        "tip": "Tip",
+        "warning": "Warning",
+        "danger": "Important"
+      },
+      "sheets": {
+        "first-steps": {
+          "title": "Getting started",
+          "summary": "Choose an edition, find your way in the side menu, find a screen, get help.",
+          "path": "Top bar › Edition",
+          "intro": "Management is organised by edition: each screen works on the chosen edition, and your rights are those of your roles in that edition.",
+          "chooseTitle": "Choose the edition",
+          "chooseBody": "The “Edition” selector lists the editions where you hold a management role. The last one used reopens when you come back.",
+          "railTitle": "Find your way in the side menu",
+          "railBody": "Screens are grouped into categories; only the current screen's category is open. Click a heading to explore another one: the next navigation returns to the screen's category.",
+          "searchTitle": "Find a screen",
+          "searchBody": "Ctrl+K (⌘K on Mac) moves the cursor to the search box in the top bar. Type a screen name or a business word (“deadline”, “reviewer”), then Enter, or pick with the arrow keys.",
+          "helpTitle": "Get help",
+          "helpBody": "The “?” button at the bottom right opens the current screen's sheet. The full guide is in the Help category of the side menu.",
+          "activeRoleTitle": "Active role",
+          "activeRoleText": "If you hold several roles in the edition, the “Active role” selector narrows the side menu to that role's categories. It is a display filter: your rights remain those of all your roles, checked by the server.",
+          "versionedTitle": "A versioned guide",
+          "versionedText": "This guide documents the software: it cannot be edited from the management area and changes with each release."
+        },
+        "security": {
+          "title": "Two-factor authentication and identity confirmation",
+          "summary": "Why management asks for a code, and when it asks for your password again.",
+          "path": "My account › Security",
+          "intro": "Two-factor authentication (a six-digit code from an app such as FreeOTP or Google Authenticator) is mandatory for management roles. The server checks it on every request: without it, management is refused.",
+          "enableTitle": "Enable two-factor authentication",
+          "enableBody": "My account › Security › Enable: scan the QR code, enter the code shown by the app, then keep the recovery codes somewhere safe.",
+          "stepUpTitle": "Validate the session",
+          "stepUpBody": "At each sign-in, enter the code from the app. A session stays valid for 12 hours at most.",
+          "reauthTitle": "Identity confirmation",
+          "reauthText": "Some operations require an authentication less than 5 minutes old: publishing or archiving the edition, changing review confidentiality, removing a role, inviting an administrator or a conference chair. A window then asks for your password again, and the operation resumes by itself.",
+          "lostTitle": "Lost phone",
+          "lostText": "Use a recovery code. Without one, only the platform operator can reset your two-factor authentication, after checking your identity."
+        },
+        "roles": {
+          "title": "Roles and rights",
+          "summary": "What each management role allows in an edition, and who can grant it.",
+          "path": "Committees › Members",
+          "intro": "Rights belong to an edition: a role in one edition gives nothing in another. There is no global role.",
+          "admin": "Edition administrator: all rights, including archiving.",
+          "chair": "Conference chair: settings, publication, members and invitations, audit log.",
+          "scChair": "Scientific committee chair: read-only settings; members and invitations of the scientific committee only.",
+          "ocMember": "Organising committee member: read-only settings.",
+          "grantorsTitle": "Who grants what",
+          "grantorsText": "Administrator and conference chair: by an administrator. Scientific committee chair and organising committee members: by an administrator or the conference chair. Scientific committee members: also by that committee's chair.",
+          "lastAdminTitle": "Last administrator",
+          "lastAdminText": "The last active administrator of an edition cannot be removed from the management area: only the platform operator can, through a logged command."
+        },
+        "dashboard": {
+          "title": "Dashboard",
+          "summary": "Edition status, remaining settings, key dates, publication and archiving.",
+          "path": "Overview › Dashboard",
+          "intro": "The dashboard summarises the edition: status, settings to complete before publication, key dates in the edition's time, pending invitations and the state of your two-factor authentication.",
+          "publishTitle": "Publish",
+          "publishBody": "Possible once the list is complete: titles in French and English, conference dates, at least one active track and one active presentation type, call opening and closing dates. The server checks again and refuses otherwise, naming what is missing.",
+          "archiveTitle": "Archive",
+          "archiveBody": "Only possible after the end of the conference: the edition then becomes read-only.",
+          "noReturnTitle": "No going back",
+          "noReturnText": "A published edition does not return to draft, and an archived edition cannot be reopened from the management area: only the operator can do so, with a logged reason.",
+          "whoTitle": "Who can do it",
+          "whoText": "Publish: administrator or conference chair. Archive: administrator. Both require a recent identity confirmation."
+        },
+        "settings-general": {
+          "title": "General information",
+          "summary": "Code, titles, theme, dates, venue and time zone of the edition.",
+          "path": "Settings › General information",
+          "intro": "Titles and themes are entered in French and English; English is required to publish. The time zone (IANA name, for example Africa/Abidjan) is the one in which deadlines are entered and displayed.",
+          "timezoneTitle": "Changing the time zone",
+          "timezoneText": "Deadlines already entered keep their instant: their displayed local times shift. Check the calendar after any time zone change.",
+          "readOnlyTitle": "Read-only",
+          "readOnlyText": "Only the administrator and the conference chair change the settings; other roles view them. An archived edition can no longer be changed."
+        },
+        "settings-lists": {
+          "title": "Tracks and presentation types",
+          "summary": "Lists offered to authors: bilingual, ordered, can be deactivated.",
+          "path": "Settings › Tracks; Settings › Presentation types",
+          "intro": "Each item has a name in French and English, a display order and an active state. Types also carry a default duration and a maximum number of words for the abstract.",
+          "addTitle": "Add",
+          "addBody": "“Add” button, then “Save”: the item takes its place according to its order.",
+          "editTitle": "Edit or delete",
+          "editBody": "Row buttons. Every change and every deletion is logged.",
+          "deactivateTitle": "Deactivate rather than delete",
+          "deactivateText": "Once submissions exist, an item in use can no longer be deleted: it will have to be deactivated.",
+          "publishTitle": "Publication requirement",
+          "publishText": "At least one active track and one active presentation type are required to publish the edition."
+        },
+        "settings-calendar": {
+          "title": "Calendar",
+          "summary": "Key dates of the edition, entered in the edition's time.",
+          "path": "Settings › Calendar",
+          "intro": "Deadlines are entered in the edition's time zone; the server stores them in universal time. The screen also shows your local time when it differs.",
+          "reserved": "Reserved codes (call opening and closing, end of reviews, notification, camera-ready version, registration): their chronological order is checked.",
+          "free": "Free code: a label is then required.",
+          "public": "“Visible on the portal”: the date appears among the edition's public dates.",
+          "orderTitle": "Order refused",
+          "orderText": "A call closing date earlier than its opening, for example, is refused, with a message on the field concerned.",
+          "publishTitle": "Publication requirement",
+          "publishText": "Call opening and closing dates are required to publish the edition."
+        },
+        "settings-confidentiality": {
+          "title": "Review confidentiality",
+          "summary": "Double-blind review and number of reviewers per submission.",
+          "path": "Settings › Confidentiality",
+          "intro": "In double-blind review, reviewers see neither the name, nor the address, nor the affiliation of the authors. The server removes this information, not the display.",
+          "reviewers": "Reviewers per submission: from 1 to 10.",
+          "sensitiveTitle": "Sensitive change",
+          "sensitiveText": "The change requires a recent identity confirmation; it is logged with the before and after values."
+        },
+        "members": {
+          "title": "Members",
+          "summary": "Active and removed roles of the edition; removing a role.",
+          "path": "Committees › Members",
+          "intro": "The list shows each role held in the edition. The scientific committee chair only sees that committee's members. The email address is only shown to those who manage members.",
+          "revokeTitle": "Remove a role",
+          "revokeBody": "“Remove role” button, optional reason (logged), then identity confirmation. The person is notified by email.",
+          "historyTitle": "See the history",
+          "historyBody": "“Show removed roles” also lists removed roles, with their date.",
+          "addTitle": "Adding a member",
+          "addText": "Members are not added directly: they are invited (Committees › Invitations).",
+          "refusalsTitle": "Refused removals",
+          "refusalsText": "You can only remove roles you can grant, and the edition's last administrator cannot be removed here."
+        },
+        "invitations": {
+          "title": "Invitations",
+          "summary": "Invite people to a role; follow up, resend or cancel.",
+          "path": "Committees › Invitations",
+          "inviteTitle": "Invite",
+          "inviteBody": "Enter up to 50 addresses, the role (and the organising committee function), the email language and an optional message. Addresses already invited or already members are skipped and reported.",
+          "followTitle": "Follow up",
+          "followBody": "Filter by status: pending, accepted, declined, cancelled, expired. An invitation expires after 14 days.",
+          "resendTitle": "Resend or cancel",
+          "resendBody": "An invitation is sent three times at most. Cancelling makes the link unusable.",
+          "linkTitle": "The link alone grants no role",
+          "linkText": "The person must sign in, or create an account, with the invited and verified address before accepting.",
+          "sensitiveTitle": "Sensitive roles",
+          "sensitiveText": "Inviting an administrator or a conference chair requires a recent identity confirmation."
+        },
+        "audit": {
+          "title": "Audit log",
+          "summary": "Who did what and when, with the before and after values.",
+          "path": "Oversight › Audit log",
+          "intro": "The log records the edition's management actions: settings, status, roles, invitations. It contains neither IP addresses nor plain email addresses.",
+          "action": "Filter by action: exact (edition.updated) or by prefix (role.).",
+          "filters": "Filters by object type and by period, dates included.",
+          "actor": "Actor: a user, an operations command or the system.",
+          "immutableTitle": "Unalterable",
+          "immutableText": "A log entry can be neither changed nor deleted, not even by an administrator."
+        }
+      }
     }
   }
 }

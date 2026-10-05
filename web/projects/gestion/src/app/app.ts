@@ -20,14 +20,19 @@ import {
 } from '@gestconf/shared';
 import { TranslatePipe } from '@ngx-translate/core';
 
+import { NavigationStore } from './core/navigation-store';
+import { ContextHelp } from './help/context-help';
+import { ScreenSearch } from './layout/screen-search';
+
 /**
- * Coque de la gestion : en-tête (compte, langue, déconnexion), lien d'évitement. La langue
+ * Coque de la gestion : en-tête (recherche d'écran, compte, langue, déconnexion), lien
+ * d'évitement, aide contextuelle « ? » (montée une fois, plan L2 §2.3). La langue
  * du compte est adoptée au démarrage ; un changement est enregistré dans le compte. Fournit
  * la fenêtre de réauthentification (rejouée une fois, plan L1 §10.1).
  */
 @Component({
   selector: 'gestion-root',
-  imports: [RouterOutlet, RouterLink, TranslatePipe, LanguageSwitcher],
+  imports: [RouterOutlet, RouterLink, TranslatePipe, LanguageSwitcher, ScreenSearch, ContextHelp],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './app.html',
   styleUrl: './app.scss',
@@ -40,6 +45,7 @@ export class App implements OnInit, OnDestroy {
   private readonly reauthenticationDialog = inject(ReauthenticationDialog);
   private unregister: (() => void) | null = null;
   protected readonly meStore = inject(MeStore);
+  protected readonly navigation = inject(NavigationStore);
   protected readonly loggingOut = signal(false);
   protected readonly email = computed(() => this.meStore.me()?.email ?? '');
 

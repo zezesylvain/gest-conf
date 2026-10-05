@@ -18,7 +18,27 @@
       "confidentiality": "Confidentialité",
       "members": "Membres",
       "invitations": "Invitations",
-      "audit": "Journal"
+      "audit": "Journal",
+      "guide": "Guide",
+      "groups": {
+        "steering": "Pilotage",
+        "settings": "Paramétrage",
+        "committees": "Comités",
+        "control": "Contrôle",
+        "help": "Aide"
+      },
+      "keywords": {
+        "dashboard": "accueil, statut, publier, publication, archiver, état, résumé",
+        "general": "titre, thème, dates, lieu, ville, pays, fuseau horaire, code, édition",
+        "tracks": "thèmes, axes, sujets, domaines",
+        "types": "formats, oral, poster, atelier, communication, résumé, durée",
+        "calendar": "dates clés, échéances, appel, ouverture, clôture, inscriptions, notification",
+        "confidentiality": "double aveugle, anonymat, relecteurs, évaluateurs, évaluation",
+        "members": "rôles, comité, utilisateurs, équipe, retirer, révoquer, personnes",
+        "invitations": "inviter, ajouter, membre, relance, e-mail, comité",
+        "audit": "historique, traces, qui a fait, modifications, audit",
+        "guide": "aide, documentation, manuel, mode d'emploi, tutoriel"
+      }
     },
     "status": {
       "draft": "brouillon",
@@ -269,6 +289,181 @@
       "title": "Page introuvable",
       "heading": "Cette page n'existe pas.",
       "backHome": "Retour à l'accueil de la gestion"
+    },
+    "search": {
+      "label": "Rechercher un écran",
+      "placeholder": "Rechercher un écran (Ctrl+K)",
+      "hint": "Flèches pour parcourir, Entrée pour ouvrir, Échap pour fermer.",
+      "tooShort": "Tapez au moins deux lettres.",
+      "none": "Aucun écran ne correspond."
+    },
+    "help": {
+      "title": "Guide de la gestion",
+      "lead": "Mode d'emploi des écrans de gestion, par profil et par écran. Ce guide est la documentation du logiciel : il évolue avec chaque version et ne se modifie pas depuis la gestion.",
+      "print": "Imprimer le guide",
+      "toc": "Sommaire",
+      "byProfile": "Index par profil",
+      "byScreen": "Index par écran",
+      "transversal": "Fiches générales",
+      "back": "Retour à la gestion",
+      "open": "Aide sur cet écran",
+      "close": "Fermer l'aide",
+      "fullGuide": "Voir le guide complet",
+      "access": "Accès :",
+      "tones": {
+        "info": "Information",
+        "tip": "Astuce",
+        "warning": "Attention",
+        "danger": "Important"
+      },
+      "sheets": {
+        "first-steps": {
+          "title": "Premiers pas dans la gestion",
+          "summary": "Choisir une édition, se repérer dans le rail, trouver un écran, obtenir de l'aide.",
+          "path": "Barre haute › Édition",
+          "intro": "La gestion s'organise par édition : chaque écran porte sur l'édition choisie, et vos droits sont ceux de vos rôles dans cette édition.",
+          "chooseTitle": "Choisir l'édition",
+          "chooseBody": "Le sélecteur « Édition » liste les éditions où vous avez un rôle de gestion. La dernière utilisée est rouverte à votre retour.",
+          "railTitle": "Se repérer dans le rail",
+          "railBody": "Les écrans sont groupés en catégories ; seule celle de l'écran courant est ouverte. Cliquez un en-tête pour en explorer une autre : la navigation suivante revient à la catégorie de l'écran.",
+          "searchTitle": "Trouver un écran",
+          "searchBody": "Ctrl+K (⌘K sur Mac) place le curseur dans la recherche de la barre haute. Tapez un nom d'écran ou un mot du métier (« échéance », « relecteur »), puis Entrée, ou choisissez avec les flèches.",
+          "helpTitle": "Obtenir de l'aide",
+          "helpBody": "Le bouton « ? » en bas à droite ouvre la fiche de l'écran courant. Le guide complet est dans la catégorie Aide du rail.",
+          "activeRoleTitle": "Rôle actif",
+          "activeRoleText": "Si vous avez plusieurs rôles dans l'édition, le sélecteur « Rôle actif » réduit le rail aux catégories de ce rôle. C'est un filtre d'affichage : vos droits restent ceux de tous vos rôles, vérifiés par le serveur.",
+          "versionedTitle": "Un guide versionné",
+          "versionedText": "Ce guide documente le logiciel : il ne se modifie pas depuis la gestion et évolue avec chaque version."
+        },
+        "security": {
+          "title": "Double authentification et confirmation d'identité",
+          "summary": "Pourquoi la gestion demande un code, et quand elle redemande votre mot de passe.",
+          "path": "Mon compte › Sécurité",
+          "intro": "La double authentification (un code à six chiffres donné par une application comme FreeOTP ou Google Authenticator) est obligatoire pour les rôles de gestion. Le serveur la vérifie à chaque requête : sans elle, la gestion est refusée.",
+          "enableTitle": "Activer la double authentification",
+          "enableBody": "Mon compte › Sécurité › Activer : scannez le QR code, saisissez le code affiché par l'application, puis conservez les codes de secours en lieu sûr.",
+          "stepUpTitle": "Valider la session",
+          "stepUpBody": "À chaque connexion, saisissez le code de l'application. Une session reste valide 12 heures au plus.",
+          "reauthTitle": "Confirmation d'identité",
+          "reauthText": "Certaines opérations exigent une authentification de moins de 5 minutes : publier ou archiver l'édition, modifier la confidentialité de l'évaluation, retirer un rôle, inviter un administrateur ou un président de la conférence. Une fenêtre redemande alors votre mot de passe, puis l'opération reprend d'elle-même.",
+          "lostTitle": "Téléphone perdu",
+          "lostText": "Utilisez un code de secours. Sans code de secours, seul l'exploitant de la plateforme peut réinitialiser votre double authentification, après vérification de votre identité."
+        },
+        "roles": {
+          "title": "Rôles et droits",
+          "summary": "Ce que chaque rôle de gestion permet dans une édition, et qui peut l'attribuer.",
+          "path": "Comités › Membres",
+          "intro": "Les droits sont attachés à une édition : un rôle dans une édition ne donne rien dans une autre. Il n'existe aucun rôle global.",
+          "admin": "Administrateur de l'édition : tous les droits, dont l'archivage.",
+          "chair": "Président de la conférence : paramétrage, publication, membres et invitations, journal.",
+          "scChair": "Président du comité scientifique : lecture du paramétrage ; membres et invitations du comité scientifique seulement.",
+          "ocMember": "Membre du comité d'organisation : lecture du paramétrage.",
+          "grantorsTitle": "Qui attribue quoi",
+          "grantorsText": "Administrateur et président de la conférence : par un administrateur. Président du comité scientifique et membres du comité d'organisation : par un administrateur ou le président de la conférence. Membres du comité scientifique : aussi par le président de ce comité.",
+          "lastAdminTitle": "Dernier administrateur",
+          "lastAdminText": "Le dernier administrateur actif d'une édition ne peut pas être retiré depuis la gestion : seul l'exploitant de la plateforme le peut, par une commande journalisée."
+        },
+        "dashboard": {
+          "title": "Tableau de bord",
+          "summary": "État de l'édition, paramétrage restant, dates clés, publication et archivage.",
+          "path": "Pilotage › Tableau de bord",
+          "intro": "Le tableau de bord résume l'édition : statut, paramétrage à compléter avant publication, dates clés à l'heure de l'édition, invitations en attente et état de votre double authentification.",
+          "publishTitle": "Publier",
+          "publishBody": "Possible quand la liste est complète : titres en français et en anglais, dates de la conférence, au moins une thématique et un type de communication actifs, ouverture et clôture de l'appel. Le serveur revérifie et refuse sinon, en nommant ce qui manque.",
+          "archiveTitle": "Archiver",
+          "archiveBody": "Possible seulement après la fin de la conférence : l'édition passe alors en lecture seule.",
+          "noReturnTitle": "Pas de retour en arrière",
+          "noReturnText": "Une édition publiée ne redevient pas brouillon, et une édition archivée ne se rouvre pas depuis la gestion : seul l'exploitant peut le faire, avec un motif journalisé.",
+          "whoTitle": "Qui peut le faire",
+          "whoText": "Publier : administrateur ou président de la conférence. Archiver : administrateur. Les deux demandent une confirmation d'identité récente."
+        },
+        "settings-general": {
+          "title": "Informations générales",
+          "summary": "Code, titres, thème, dates, lieu et fuseau horaire de l'édition.",
+          "path": "Paramétrage › Informations générales",
+          "intro": "Les titres et thèmes se saisissent en français et en anglais ; l'anglais est obligatoire pour publier. Le fuseau horaire (nom IANA, par exemple Africa/Abidjan) est celui dans lequel les échéances se saisissent et s'affichent.",
+          "timezoneTitle": "Changer de fuseau",
+          "timezoneText": "Les échéances déjà saisies gardent leur instant : leurs heures locales affichées se décalent. Vérifiez le calendrier après tout changement de fuseau.",
+          "readOnlyTitle": "Lecture seule",
+          "readOnlyText": "Seuls l'administrateur et le président de la conférence modifient le paramétrage ; les autres rôles le consultent. Une édition archivée n'est plus modifiable."
+        },
+        "settings-lists": {
+          "title": "Thématiques et types de communication",
+          "summary": "Listes proposées aux auteurs : bilingues, ordonnées, activables.",
+          "path": "Paramétrage › Thématiques ; Paramétrage › Types de communication",
+          "intro": "Chaque élément a un nom en français et en anglais, un ordre d'affichage et un état actif. Les types portent aussi une durée par défaut et un nombre maximal de mots pour le résumé.",
+          "addTitle": "Ajouter",
+          "addBody": "Bouton « Ajouter », puis « Enregistrer » : l'élément prend sa place selon son ordre.",
+          "editTitle": "Modifier ou supprimer",
+          "editBody": "Boutons de la ligne. Toute modification et toute suppression sont journalisées.",
+          "deactivateTitle": "Désactiver plutôt que supprimer",
+          "deactivateText": "Dès que des soumissions existeront, un élément utilisé ne pourra plus être supprimé : il faudra le désactiver.",
+          "publishTitle": "Condition de publication",
+          "publishText": "Au moins une thématique et un type de communication actifs sont exigés pour publier l'édition."
+        },
+        "settings-calendar": {
+          "title": "Calendrier",
+          "summary": "Dates clés de l'édition, saisies à l'heure de l'édition.",
+          "path": "Paramétrage › Calendrier",
+          "intro": "Les échéances se saisissent dans le fuseau de l'édition ; le serveur les enregistre en temps universel. L'écran affiche aussi votre heure locale quand elle diffère.",
+          "reserved": "Codes réservés (ouverture et clôture de l'appel, fin des évaluations, notification, version définitive, inscriptions) : leur ordre chronologique est contrôlé.",
+          "free": "Code libre : un libellé est alors obligatoire.",
+          "public": "« Visible sur le portail » : la date figure parmi les dates publiques de l'édition.",
+          "orderTitle": "Ordre refusé",
+          "orderText": "Une clôture de l'appel antérieure à son ouverture, par exemple, est refusée, avec un message sur le champ concerné.",
+          "publishTitle": "Condition de publication",
+          "publishText": "L'ouverture et la clôture de l'appel sont exigées pour publier l'édition."
+        },
+        "settings-confidentiality": {
+          "title": "Confidentialité de l'évaluation",
+          "summary": "Double aveugle et nombre de relecteurs par soumission.",
+          "path": "Paramétrage › Confidentialité",
+          "intro": "En double aveugle, les relecteurs ne voient ni le nom, ni l'adresse, ni l'affiliation des auteurs. C'est le serveur qui retire ces informations, pas l'affichage.",
+          "reviewers": "Relecteurs par soumission : de 1 à 10.",
+          "sensitiveTitle": "Changement sensible",
+          "sensitiveText": "La modification demande une confirmation d'identité récente ; elle est journalisée avec l'avant et l'après."
+        },
+        "members": {
+          "title": "Membres",
+          "summary": "Les rôles actifs et retirés de l'édition ; retrait d'un rôle.",
+          "path": "Comités › Membres",
+          "intro": "La liste montre chaque rôle détenu dans l'édition. Le président du comité scientifique ne voit que les membres de ce comité. L'adresse e-mail n'est affichée qu'à ceux qui gèrent les membres.",
+          "revokeTitle": "Retirer un rôle",
+          "revokeBody": "Bouton « Retirer le rôle », motif facultatif (journalisé), puis confirmation d'identité. La personne en est avertie par e-mail.",
+          "historyTitle": "Voir l'historique",
+          "historyBody": "« Afficher les rôles retirés » montre aussi les rôles retirés, avec leur date.",
+          "addTitle": "Ajouter un membre",
+          "addText": "On n'ajoute pas un membre directement : on l'invite (Comités › Invitations).",
+          "refusalsTitle": "Retraits refusés",
+          "refusalsText": "Vous ne pouvez retirer que les rôles que vous pouvez attribuer, et le dernier administrateur de l'édition ne se retire pas ici."
+        },
+        "invitations": {
+          "title": "Invitations",
+          "summary": "Inviter des personnes à un rôle ; suivre, relancer ou annuler.",
+          "path": "Comités › Invitations",
+          "inviteTitle": "Inviter",
+          "inviteBody": "Saisissez jusqu'à 50 adresses, le rôle (et la fonction au comité d'organisation), la langue de l'e-mail et un message facultatif. Les adresses déjà invitées ou déjà membres sont ignorées et signalées.",
+          "followTitle": "Suivre",
+          "followBody": "Filtrez par statut : en attente, acceptée, refusée, annulée, expirée. Une invitation expire après 14 jours.",
+          "resendTitle": "Relancer ou annuler",
+          "resendBody": "Une invitation s'envoie trois fois au plus. Annuler rend le lien inutilisable.",
+          "linkTitle": "Le lien seul ne donne aucun rôle",
+          "linkText": "La personne doit se connecter, ou créer son compte, avec l'adresse invitée vérifiée, avant d'accepter.",
+          "sensitiveTitle": "Rôles sensibles",
+          "sensitiveText": "Inviter un administrateur ou un président de la conférence demande une confirmation d'identité récente."
+        },
+        "audit": {
+          "title": "Journal",
+          "summary": "Qui a fait quoi et quand, avec l'avant et l'après.",
+          "path": "Contrôle › Journal",
+          "intro": "Le journal enregistre les actions de gestion de l'édition : paramétrage, statut, rôles, invitations. Il ne contient ni adresse IP ni adresse e-mail en clair.",
+          "action": "Filtre par action : exacte (edition.updated) ou par préfixe (role.).",
+          "filters": "Filtres par type d'objet et par période, dates incluses.",
+          "actor": "Acteur : un utilisateur, une commande d'exploitation ou le système.",
+          "immutableTitle": "Inaltérable",
+          "immutableText": "Une entrée du journal ne se modifie ni ne se supprime, y compris par un administrateur."
+        }
+      }
     }
   }
 }
