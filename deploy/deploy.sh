@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
 # Déploiement de GEST-CONF sur o2switch (rsync + SSH), étude §11.4.
 #
+# Usage : deploy/deploy.sh                 déploiement complet, puis publication du portail
+#         deploy/deploy.sh --portal-only   republication du portail seul (E9, plan L2)
+#
+# Publication du portail : le portail est pré-rendu à partir de l'API publique de
+# production (GESTCONF_PRERENDER_API_ORIGIN, défaut DEPLOY_BASE_URL), contrôlé (toutes les
+# routes annoncées, marqueur de rendu, CSP), synchronisé sans toucher à /gestion/ ni à
+# /api/, puis la mise en ligne est enregistrée (manage.py mark_portal_published, datée du
+# début du build) : le bandeau « modifications non publiées » de la gestion repart de zéro.
+#
 # Prérequis côté serveur (une seule fois, voir deploy/README.md) :
 #   - application Python créée dans cPanel (« Setup Python App », URL /api) ;
 #   - fichier .env de production déposé dans le dossier de l'application ;
@@ -13,9 +22,23 @@
 #   DEPLOY_APP_DIR        dossier de l'application Django (défaut : gestconf-app)
 #   DEPLOY_PUBLIC_DIR     racine web (défaut : public_html)
 #   DEPLOY_BASE_URL       URL publique pour les tests de fumée, ex. https://conference.exemple.org
-#   SKIP_BUILD=1          réutiliser les builds Angular existants (web/dist)
+#   SKIP_BUILD=1          réutiliser les builds Angular existants (web/dist) ; sans effet
+#                         sur la publication du portail, toujours reconstruit
+#   GESTCONF_PRERENDER_API_ORIGIN  origine de l'API lue au pré-rendu (défaut : DEPLOY_BASE_URL)
+#   SKIP_PORTAL=1         déploiement complet sans publication du portail (portail rendu
+#                         dans le navigateur jusqu'au prochain --portal-only)
 
 set -euo pipefail
+
+PORTAL_ONLY=0
+case "${1:-}" in
+  "") ;;
+  --portal-only) PORTAL_ONLY=1 ;;
+  *)
+    echo "Option inconnue : $1 (seule --portal-only est reconnue)." >&2
+    exit 2
+    ;;
+esac
 
 : "${DEPLOY_SSH:?Définir DEPLOY_SSH (compte@serveur)}"
 : "${DEPLOY_VENV_ACTIVATE:?Définir DEPLOY_VENV_ACTIVATE (script activate du venv cPanel)}"
@@ -32,6 +55,68 @@ step() { printf '\n==> %s\n' "$*"; }
 if [[ -n "$(git -C "$ROOT" status --porcelain)" ]]; then
   echo "Arbre de travail modifié : committer avant de déployer (version tracée = commit)." >&2
   exit 1
+fi
+
+# Publication du portail pré-rendu (E9). Lit l'API publique de production : à lancer une
+# fois le backend de cette version en ligne.
+publish_portal() {
+  local origin="${GESTCONF_PRERENDER_API_ORIGIN:-${DEPLOY_BASE_URL:-}}"
+  if [[ -z "$origin" ]]; then
+    echo "Publication du portail : définir DEPLOY_BASE_URL (ou GESTCONF_PRERENDER_API_ORIGIN)." >&2
+    exit 1
+  fi
+  origin="${origin%/}"
+  step "Pré-rendu du portail à partir de $origin"
+  local edition_code built_at
+  # Édition courante lue AVANT le build : la mise en ligne est enregistrée pour elle.
+  edition_code="$(curl -fsS "$origin/api/v1/public/portal/site" \
+    | python3 -c 'import json, sys; print(json.load(sys.stdin)["edition"]["code"])')"
+  built_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  # build:portail = pré-rendu, contrôle de complétude (refus de livrer un portail
+  # incomplet), plan du site, CSP à empreintes.
+  (cd "$ROOT/web" && { [[ -d node_modules ]] || npm ci; } \
+    && GESTCONF_PRERENDER_API_ORIGIN="$origin" npm run build:portail)
+  local pages_without_csp
+  pages_without_csp="$(find "$ROOT/web/dist/portail" -name '*.html' -type f \
+    -exec grep -L 'http-equiv="Content-Security-Policy"' {} + || true)"
+  if [[ -n "$pages_without_csp" ]]; then
+    printf 'CSP absente de : %s\n' "$pages_without_csp" >&2
+    exit 1
+  fi
+  [[ -f "$ROOT/web/dist/portail/browser/sitemap.xml" ]] || {
+    echo "Plan du site absent : pré-rendu non effectué." >&2
+    exit 1
+  }
+
+  step "Envoi du portail vers ~/$DEPLOY_PUBLIC_DIR (gestion/ et api/ intacts)"
+  rsync -az --delete \
+    --exclude '/.htaccess' --exclude '/api/' --exclude '/gestion/' --exclude '/.well-known/' \
+    --exclude '/cgi-bin/' \
+    "$ROOT/web/dist/portail/browser/" "$DEPLOY_SSH:$DEPLOY_PUBLIC_DIR/"
+
+  step "Mise en ligne enregistrée ($edition_code, données du $built_at)"
+  # shellcheck disable=SC2029  # développement côté client voulu
+  ssh "$DEPLOY_SSH" "bash -s -- $(printf '%q ' "$DEPLOY_VENV_ACTIVATE" "$DEPLOY_APP_DIR" \
+    "$edition_code" "$RELEASE" "$built_at")" <<'REMOTE'
+set -euo pipefail
+venv_activate="$1" app_dir="$2" code="$3" release="$4" built_at="$5"
+# shellcheck disable=SC1090
+source "$venv_activate"
+cd "$app_dir"
+export DJANGO_SETTINGS_MODULE=config.settings.prod
+python manage.py mark_portal_published "$code" --release "$release" --built-at "$built_at"
+REMOTE
+}
+
+if [[ "$PORTAL_ONLY" == "1" ]]; then
+  publish_portal
+  if [[ -n "${DEPLOY_BASE_URL:-}" ]]; then
+    step "Tests de fumée sur $DEPLOY_BASE_URL"
+    # Sans version attendue : le backend en ligne peut être d'une version antérieure.
+    "$ROOT/deploy/smoke-test.sh" "$DEPLOY_BASE_URL"
+  fi
+  step "Portail publié ($RELEASE)"
+  exit 0
 fi
 
 # --- 1. Build des applications Angular ------------------------------------------------
@@ -140,7 +225,16 @@ python3 "$ROOT/deploy/htaccess_merge.py" "$STAGING/htaccess.current" \
   "$ROOT/deploy/apache/public_html.htaccess" > "$STAGING/htaccess.new"
 rsync -az "$STAGING/htaccess.new" "$DEPLOY_SSH:$DEPLOY_PUBLIC_DIR/.htaccess"
 
-# --- 4. Tests de fumée ---------------------------------------------------------------
+# --- 4. Portail pré-rendu (backend de cette version désormais en ligne) ---------------
+if [[ "${SKIP_PORTAL:-0}" == "1" ]]; then
+  echo "SKIP_PORTAL=1 : portail rendu dans le navigateur jusqu'au prochain --portal-only."
+elif [[ -z "${GESTCONF_PRERENDER_API_ORIGIN:-${DEPLOY_BASE_URL:-}}" ]]; then
+  echo "Avertissement : DEPLOY_BASE_URL absent, portail non pré-rendu (lancer --portal-only)." >&2
+else
+  publish_portal
+fi
+
+# --- 5. Tests de fumée ---------------------------------------------------------------
 if [[ -n "${DEPLOY_BASE_URL:-}" ]]; then
   step "Tests de fumée sur $DEPLOY_BASE_URL"
   "$ROOT/deploy/smoke-test.sh" "$DEPLOY_BASE_URL" "$RELEASE"

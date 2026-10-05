@@ -50,6 +50,26 @@ check "portail : CSP à empreintes en <meta> sur /fr/" "$(has_meta_csp "$body" &
 headers=$("${CURL[@]}" -D - -o /dev/null "$BASE_URL/fr/")
 check "portail : en-tête CSP présent" "$(has_header "$headers" content-security-policy 'frame-ancestors' && echo 1)"
 
+# Portail pré-rendu (deploy.sh, E9) : page complète, référencement, plan du site. Un portail
+# rendu dans le navigateur (SKIP_PORTAL=1, pas encore de --portal-only) est signalé, pas
+# compté en échec.
+if [[ "$body" == *'data-gc-rendered="fr:home"'* ]]; then
+  check "portail : /fr/ pré-rendue avec adresse canonique et variantes hreflang" \
+    "$(grep -Eq '<link[^>]*rel="canonical"[^>]*href="https?://[^"]*/fr/"' <<<"$body" \
+      && grep -Eq 'hreflang="en"' <<<"$body" && echo 1)"
+  check "portail : Open Graph sur /fr/" "$(grep -Eq 'property="og:title"' <<<"$body" && echo 1)"
+  page=$("${CURL[@]}" "$BASE_URL/en/call/")
+  check "portail : /en/call/ pré-rendue" "$([[ "$page" == *'data-gc-rendered="en:call"'* ]] && echo 1)"
+  sitemap=$("${CURL[@]}" -D - "$BASE_URL/sitemap.xml")
+  check "portail : /sitemap.xml (XML, variantes de langue)" \
+    "$(has_header "$sitemap" content-type 'xml' && [[ "$sitemap" == *"<urlset"* ]] \
+      && [[ "$sitemap" == *'hreflang="en"'* ]] && echo 1)"
+  check "portail : robots.txt annonce le plan du site" \
+    "$(grep -Eq '^Sitemap:[[:space:]]*https?://.*/sitemap\.xml' <<<"$("${CURL[@]}" "$BASE_URL/robots.txt")" && echo 1)"
+else
+  printf '  INFO    %s\n' "portail rendu dans le navigateur (non pré-rendu) : lancer deploy.sh --portal-only"
+fi
+
 body=$("${CURL[@]}" "$BASE_URL/une-page-qui-n-existe-pas")
 check "portail : repli SPA (index.csr.html)" "$([[ "$body" == *"<portail-root"* ]] && echo 1)"
 check "portail : CSP en <meta> sur le repli SPA (pages /compte/*)" "$(has_meta_csp "$body" && echo 1)"
@@ -102,6 +122,20 @@ current=$("${CURL[@]}" -w '\n%{http_code}' "$BASE_URL/api/v1/public/editions/cur
 check "API : édition publique courante -> 200 ou 404 JSON" \
   "$({ [[ "${current##*$'\n'}" == "200" ]] && json_has "$current" code '"[A-Z]'; } \
     || { [[ "${current##*$'\n'}" == "404" ]] && json_has "$current" code '"not_found"'; } && echo 1)"
+
+# Fichier public (L2.4) : le premier document ou l'affiche publiés, servi par Django
+# (jamais par Apache) avec « nosniff ». Sans fichier publié : rien à vérifier.
+file_path=$("${CURL[@]}" "$BASE_URL/api/v1/public/portal/site" 2>/dev/null \
+  | grep -Eo '"url"[[:space:]]*:[[:space:]]*"/api/v1/public/files/[^"]+"' | head -n 1 \
+  | sed -E 's/.*"(\/api\/[^"]+)"$/\1/')
+if [[ -n "$file_path" ]]; then
+  file_headers=$("${CURL[@]}" -D - -o /dev/null "$BASE_URL$file_path")
+  check "API : fichier public servi (200, nosniff)" \
+    "$(grep -Eq '^HTTP/[0-9.]+ 200' <<<"$file_headers" \
+      && has_header "$file_headers" x-content-type-options 'nosniff' && echo 1)"
+fi
+check "API : fichier public inconnu -> 404" \
+  "$([[ "$(status_of "$BASE_URL/api/v1/public/files/00000000-0000-0000-0000-000000000000/x.pdf")" == "404" ]] && echo 1)"
 
 body=$("${CURL[@]}" -w '\n%{http_code}' "$BASE_URL/api/v1/route-inexistante")
 check "API : URL inconnue -> 404 JSON (non interceptée par le repli SPA)" \

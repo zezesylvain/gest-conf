@@ -8,6 +8,7 @@ Aucune pagination (``pagination_class = None``) : listes courtes, lues en entier
 
 from __future__ import annotations
 
+from django.conf import settings
 from django.db.models import Prefetch
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404
@@ -423,14 +424,15 @@ class _PublicPortalView(APIView):
 
 
 def _site_data(edition) -> dict:
-    """Données des gabarits et des sections « données » : une seule lecture de l'édition.
-    Comités (avec consentements) : L2.6."""
+    """Données des gabarits et des sections « données » : une seule lecture de l'édition."""
     poster = edition.poster if edition.poster_id else None
     return {
         "edition": PublicEditionSerializer(edition).data,
         "poster": PublicFileRefSerializer(poster).data if poster and poster.published else None,
         "documents": PublicFileRefSerializer(services.public_documents(edition), many=True).data,
-        "committees": {"scientific": [], "organizing": []},
+        "committees": services.public_committees(edition),
+        # Origine publique (adresses canoniques, Open Graph, plan du site : E7).
+        "site_url": settings.GESTCONF_PUBLIC_URL,
     }
 
 

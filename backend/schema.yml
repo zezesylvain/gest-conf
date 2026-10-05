@@ -3866,6 +3866,83 @@ components:
         * `pr` - Pr
         * `mr` - M.
         * `ms` - Mme
+    PublicCommittee:
+      type: object
+      properties:
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicCommitteeMember'
+        others:
+          type: integer
+          description: Membres sans consentement à l'annuaire.
+      required:
+      - members
+      - others
+    PublicCommitteeMember:
+      type: object
+      description: 'Fiche publique d''un membre consentant (E5) : jamais d''adresse
+        e-mail.'
+      properties:
+        title:
+          oneOf:
+          - $ref: '#/components/schemas/ProfileTitle'
+          - $ref: '#/components/schemas/BlankEnum'
+        name:
+          type: string
+        chair:
+          type: boolean
+          description: Présidence (CHAIR ou SC_CHAIR).
+        function:
+          description: |-
+            Fonction au CO, vide hors CO.
+
+            * `` - aucune
+            * `finance` - finances
+            * `program` - programme
+            * `logistics` - logistique
+            * `communication` - communication
+            * `external_relations` - relations extérieures
+            * `volunteers` - bénévoles
+            * `secretariat` - secrétariat
+          oneOf:
+          - $ref: '#/components/schemas/OcFunction'
+          - $ref: '#/components/schemas/BlankEnum'
+        institution:
+          type: string
+        country:
+          type: string
+          description: Code ISO 3166-1 alpha-2 ou vide.
+        website:
+          type: string
+        scholar_url:
+          type: string
+        linkedin_url:
+          type: string
+        photo_url:
+          type: string
+          nullable: true
+      required:
+      - chair
+      - country
+      - function
+      - institution
+      - linkedin_url
+      - name
+      - photo_url
+      - scholar_url
+      - title
+      - website
+    PublicCommittees:
+      type: object
+      properties:
+        scientific:
+          $ref: '#/components/schemas/PublicCommittee'
+        organizing:
+          $ref: '#/components/schemas/PublicCommittee'
+      required:
+      - organizing
+      - scientific
     PublicComposition:
       type: object
       properties:
@@ -4341,17 +4418,16 @@ components:
           items:
             $ref: '#/components/schemas/PublicFileRef'
         committees:
-          type: object
-          additionalProperties:
-            type: array
-            items:
-              type: object
-              additionalProperties: {}
+          $ref: '#/components/schemas/PublicCommittees'
+        site_url:
+          type: string
+          description: Origine publique du portail, sans barre finale.
       required:
       - committees
       - documents
       - edition
       - poster
+      - site_url
     PublicSubmissionType:
       type: object
       properties:

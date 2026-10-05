@@ -310,6 +310,33 @@
       "nav": {
         "header": "Navigation principale",
         "footer": "Liens de pied de page"
+      },
+      "scientificCommittee": "Comité scientifique",
+      "organizingCommittee": "Comité d'organisation",
+      "chair": "Présidence",
+      "othersOne": "et 1 autre membre",
+      "othersMany": "et {{count}} autres membres",
+      "membersOne": "1 membre",
+      "membersMany": "{{count}} membres",
+      "titles": {
+        "dr": "Dr",
+        "pr": "Pr",
+        "mr": "M.",
+        "ms": "Mme"
+      },
+      "functions": {
+        "finance": "Finances",
+        "program": "Programme",
+        "logistics": "Logistique",
+        "communication": "Communication",
+        "external_relations": "Relations extérieures",
+        "volunteers": "Bénévoles",
+        "secretariat": "Secrétariat"
+      },
+      "links": {
+        "website": "Site web",
+        "scholar": "Google Scholar",
+        "linkedin": "LinkedIn"
       }
     }
   }

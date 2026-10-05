@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import {
   formatInZone,
+  PublicCommittee,
+  PublicCommitteeMember,
   PublicEdition,
   PublicFileRef,
   PublicKeyDate,
@@ -9,6 +11,7 @@ import {
 } from '@gestconf/shared';
 import { TranslatePipe } from '@ngx-translate/core';
 
+import { safeHref } from './sanitize';
 import { localized, SiteLanguage } from './site-pages';
 
 /** « 2027-06-01 » → « 1 juin 2027 » (date civile, sans fuseau). */
@@ -221,5 +224,99 @@ export class DocumentsList {
     }
     const number = new Intl.NumberFormat(this.language(), { maximumFractionDigits: 1 });
     return `${number.format(value)} ${units[unit]}`;
+  }
+}
+
+/**
+ * Membres d'un comité ayant consenti à l'annuaire (E5) ; jamais d'adresse. Les autres
+ * membres sont comptés (« et N autres membres »).
+ */
+@Component({
+  selector: 'portail-committee-list',
+  imports: [TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    @let data = committee();
+    @if (data.members.length) {
+      <ul class="people">
+        @for (person of data.members; track $index) {
+          <li>
+            @if (person.photo_url) {
+              <img [src]="person.photo_url" alt="" width="72" height="72" loading="lazy" />
+            }
+            <div>
+              <h3>
+                @if (person.title) {
+                  {{ 'portail.site.titles.' + person.title | translate }}
+                }
+                {{ person.name }}
+              </h3>
+              @if (person.chair || person.function) {
+                <p class="role">
+                  {{
+                    (person.chair
+                      ? 'portail.site.chair'
+                      : 'portail.site.functions.' + person.function
+                    ) | translate
+                  }}
+                </p>
+              }
+              @if (affiliation(person)) {
+                <p class="muted">{{ affiliation(person) }}</p>
+              }
+              @if (links(person).length) {
+                <p class="links">
+                  @for (link of links(person); track link.key) {
+                    <a [href]="link.href" rel="noopener noreferrer" target="_blank">{{
+                      'portail.site.links.' + link.key | translate
+                    }}</a>
+                  }
+                </p>
+              }
+            </div>
+          </li>
+        }
+      </ul>
+    }
+    @if (data.others) {
+      <p class="muted">
+        {{
+          (data.members.length
+            ? data.others === 1
+              ? 'portail.site.othersOne'
+              : 'portail.site.othersMany'
+            : data.others === 1
+              ? 'portail.site.membersOne'
+              : 'portail.site.membersMany'
+          ) | translate: { count: data.others }
+        }}
+      </p>
+    } @else if (!data.members.length) {
+      <p class="muted">{{ 'portail.site.committeeSoon' | translate }}</p>
+    }
+  `,
+  styleUrl: './site.scss',
+})
+export class CommitteeList {
+  readonly committee = input.required<PublicCommittee>();
+  readonly language = input.required<SiteLanguage>();
+
+  protected affiliation(person: PublicCommitteeMember): string {
+    return [person.institution, countryName(person.country, this.language())]
+      .filter(Boolean)
+      .join(', ');
+  }
+
+  /** Liens https vérifiés au serveur, revérifiés ici (défense en profondeur). */
+  protected links(person: PublicCommitteeMember): { key: string; href: string }[] {
+    const candidates: [string, string][] = [
+      ['website', person.website],
+      ['scholar', person.scholar_url],
+      ['linkedin', person.linkedin_url],
+    ];
+    return candidates.flatMap(([key, raw]) => {
+      const href = raw ? safeHref(raw) : null;
+      return href?.startsWith('https://') ? [{ key, href }] : [];
+    });
   }
 }

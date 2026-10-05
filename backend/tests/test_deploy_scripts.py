@@ -191,3 +191,40 @@ def test_smoke_test_checks_the_public_current_edition():
     """Étape L1.5 (plan §11) : édition publique courante, 200 ou 404 JSON."""
     code = shell_code(REPO_DIR / "deploy" / "smoke-test.sh")
     assert '"$BASE_URL/api/v1/public/editions/current"' in code
+
+
+def test_npm_build_portail_checks_the_prerender_then_injects_the_csp():
+    """E9 (plan L2) : la republication du portail contrôle la complétude puis pose la CSP."""
+    package = json.loads((REPO_DIR / "web" / "package.json").read_text(encoding="utf-8"))
+    for name in ("build", "build:portail"):
+        steps = [step.strip() for step in package["scripts"][name].split("&&")]
+        check = steps.index("node scripts/check-prerender.mjs dist/portail/browser")
+        assert steps[check - 1] == "ng build portail"
+        assert steps[-1].startswith("node scripts/inject-csp.mjs dist/portail/browser")
+
+
+def test_portal_only_publication_spares_gestion_and_api_then_marks_published():
+    """E9 : --portal-only ne touche ni /gestion/ ni /api/, puis enregistre la mise en ligne
+    datée du début du build (une modification faite pendant le build reste à publier)."""
+    code = shell_code(DEPLOY_SCRIPT)
+    function = code[
+        code.index("publish_portal() {") : code.index("\n}\n", code.index("publish_portal() {"))
+    ]
+    assert "npm run build:portail" in function
+    assert 'GESTCONF_PRERENDER_API_ORIGIN="$origin"' in function
+    rsync = function[function.index("rsync -az --delete") :]
+    assert "--exclude '/gestion/'" in rsync and "--exclude '/api/'" in rsync
+    assert "--exclude '/.htaccess'" in rsync
+    assert function.index("rsync -az --delete") < function.index("mark_portal_published")
+    assert '--built-at "$built_at"' in function
+    assert function.index("built_at=") < function.index("npm run build:portail")
+    # Déploiement complet : portail publié après la mise en ligne du backend.
+    assert code.index("touch tmp/restart.txt") < code.rindex("publish_portal\n")
+
+
+def test_smoke_test_checks_the_prerendered_portal_and_public_files():
+    """L2.6 : pages pré-rendues, canonique, plan du site, fichier public."""
+    code = shell_code(REPO_DIR / "deploy" / "smoke-test.sh")
+    assert '"$BASE_URL/sitemap.xml"' in code
+    assert 'data-gc-rendered="en:call"' in code
+    assert "/api/v1/public/files/00000000-0000-0000-0000-000000000000/x.pdf" in code

@@ -47,7 +47,7 @@ DirectoryIndex index.html
   </FilesMatch>
   # Fichiers sans empreinte : HTML et feuille du thème Material (gc-theme.css, produite
   # non injectée par Angular, donc sans nom haché) : revalidés à chaque chargement.
-  <FilesMatch "(\.html|^gc-theme\.css)$">
+  <FilesMatch "(\.html|^gc-theme\.css|^sitemap\.xml)$">
     Header set Cache-Control "no-cache"
   </FilesMatch>
 </IfModule>

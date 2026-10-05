@@ -1,12 +1,18 @@
 import { NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { PublicSection } from '@gestconf/shared';
-import { TranslatePipe } from '@ngx-translate/core';
 
 import { Countdown } from './countdown';
 import { sanitizeHtml } from './sanitize';
 import { localized, SiteLanguage } from './site-pages';
-import { DatesList, DocumentsList, EditionHero, SubmissionTypesList, TracksList } from './widgets';
+import {
+  CommitteeList,
+  DatesList,
+  DocumentsList,
+  EditionHero,
+  SubmissionTypesList,
+  TracksList,
+} from './widgets';
 
 /**
  * Rendu des sections d'une page (plan L2 §2.2) : un bloc par type, **type inconnu ignoré**
@@ -16,13 +22,13 @@ import { DatesList, DocumentsList, EditionHero, SubmissionTypesList, TracksList 
   selector: 'portail-sections',
   imports: [
     NgTemplateOutlet,
-    TranslatePipe,
     Countdown,
     EditionHero,
     DatesList,
     TracksList,
     SubmissionTypesList,
     DocumentsList,
+    CommitteeList,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -104,8 +110,8 @@ import { DatesList, DocumentsList, EditionHero, SubmissionTypesList, TracksList 
         @case ('committee') {
           <section class="block" [attr.data-section]="section.code">
             <ng-container *ngTemplateOutlet="heading; context: { $implicit: section }" />
-            @if (!section.data?.length) {
-              <p class="muted">{{ 'portail.site.committeeSoon' | translate }}</p>
+            @if (section.data; as committee) {
+              <portail-committee-list [committee]="committee" [language]="language()" />
             }
           </section>
         }

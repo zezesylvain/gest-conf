@@ -164,6 +164,7 @@ export const HELP_SHEETS: readonly HelpSheet[] = [
     text(k('intro')),
     steps(k, 'edit', 'banner', 'deploy'),
     callout('warning', k, 'delay'),
+    callout('info', k, 'committees'),
     callout('info', k, 'who'),
   ]),
   sheet('audit', SETTINGS_WRITERS, (k) => [

@@ -1,7 +1,8 @@
 """Services du CMS du portail (plan L2 §2.2, §7)."""
 
 import pytest
-from django.core.management import call_command
+from django.core.management import CommandError, call_command
+from django.utils import timezone
 
 from apps.conferences.models import EditionStatus
 from apps.conferences.services import update_edition
@@ -352,3 +353,16 @@ def test_site_pages_are_identical_in_the_portal():
         for page in SITE_PAGES
     ]
     assert json.loads(path.read_text(encoding="utf-8")) == expected
+
+
+def test_changes_made_during_the_build_stay_pending():
+    """E9 : la mise en ligne est datée du début du pré-rendu (``--built-at``)."""
+    edition = EditionFactory()
+    built_at = timezone.now()
+    rich(edition)  # modifiée pendant le build : peut-être absente du portail publié
+    call_command("mark_portal_published", edition.code, "--built-at", built_at.isoformat())
+    assert services.publication_status(edition)["pending_changes"] == 1
+    with pytest.raises(CommandError):
+        call_command("mark_portal_published", edition.code, "--built-at", "2026-10-05T10:00")
+    with pytest.raises(CommandError):
+        call_command("mark_portal_published", edition.code, "--built-at", "hier")

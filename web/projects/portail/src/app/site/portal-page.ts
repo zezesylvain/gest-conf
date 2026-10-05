@@ -3,6 +3,7 @@ import {
   Component,
   computed,
   DestroyRef,
+  DOCUMENT,
   inject,
   OnDestroy,
   OnInit,
@@ -19,6 +20,7 @@ import { Countdown } from './countdown';
 import { PortalData } from './portal-data';
 import { PageContext } from './public-portal';
 import { SectionsView } from './sections';
+import { applySeo, clearSeo } from './seo';
 import {
   customPagePath,
   localized,
@@ -26,7 +28,14 @@ import {
   sitePagePath,
   SiteLanguage,
 } from './site-pages';
-import { DatesList, DocumentsList, EditionHero, SubmissionTypesList, TracksList } from './widgets';
+import {
+  CommitteeList,
+  DatesList,
+  DocumentsList,
+  EditionHero,
+  SubmissionTypesList,
+  TracksList,
+} from './widgets';
 
 /** Dates clés reprises par la page « Appel à communications ». */
 const CALL_DATES = ['call_open', 'call_close', 'review_deadline', 'notification', 'camera_ready'];
@@ -49,6 +58,7 @@ const CALL_DATES = ['call_open', 'call_close', 'review_deadline', 'notification'
     TracksList,
     SubmissionTypesList,
     DocumentsList,
+    CommitteeList,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './portal-page.html',
@@ -70,6 +80,7 @@ export class PortalPage implements OnInit, OnDestroy {
   private readonly translate = inject(TranslateService);
   private readonly title = inject(Title);
   private readonly meta = inject(Meta);
+  private readonly document = inject(DOCUMENT);
 
   protected readonly composition = signal<PublicComposition | null>(null);
   protected readonly site = signal<PublicSite | null>(null);
@@ -127,12 +138,14 @@ export class PortalPage implements OnInit, OnDestroy {
       } catch (error) {
         this.state.set(error instanceof GcApiError && error.status === 404 ? 'missing' : 'error');
         this.title.setTitle(this.translate.instant('portail.notFound.title'));
+        clearSeo(this.document);
       }
     });
   }
 
   ngOnDestroy(): void {
     this.context.clear();
+    clearSeo(this.document);
   }
 
   protected text(item: object, field: string): string {
@@ -143,7 +156,7 @@ export class PortalPage implements OnInit, OnDestroy {
     return sitePagePath(slug, this.lang());
   }
 
-  /** Titre de l'onglet et description (référencement complet : L2.6). */
+  /** Titre de l'onglet, description et référencement (E7). */
   private describe(): void {
     const lang = this.lang();
     const edition = this.site()?.edition;
@@ -157,6 +170,30 @@ export class PortalPage implements OnInit, OnDestroy {
       '';
     if (description) {
       this.meta.updateTag({ name: 'description', content: description });
+    } else {
+      this.meta.removeTag('name="description"');
     }
+    const site = this.site();
+    if (this.state() !== 'ready' || !site || !edition) {
+      clearSeo(this.document);
+      return;
+    }
+    const slug = this.slug();
+    applySeo(this.document, {
+      siteUrl: site.site_url,
+      language: lang,
+      paths: this.custom()
+        ? { fr: customPagePath(slug, 'fr'), en: customPagePath(slug, 'en') }
+        : { fr: sitePagePath(slug, 'fr'), en: sitePagePath(slug, 'en') },
+      // Accueil : le titre de l'édition ; ailleurs, « page · édition » (comme l'onglet).
+      title:
+        slug === 'home' && !this.custom()
+          ? editionTitle
+          : [pageTitle, editionTitle].filter(Boolean).join(' · '),
+      description,
+      edition,
+      poster: site.poster,
+      event: !this.custom() && slug === 'home',
+    });
   }
 }

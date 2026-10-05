@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
 
-import { pageFile, problems } from './check-prerender.mjs';
+import { pageFile, problems, sitemap } from './check-prerender.mjs';
 
 async function site(pages) {
   const directory = await mkdtemp(join(tmpdir(), 'prerender-'));
@@ -36,4 +36,16 @@ test('page absente, page sans marqueur, compte inférieur à l’attendu : refus
   assert.match(found.join(' '), /2 routes reçues, 3 attendues/);
   assert.match(found.join(' '), /\/fr\/ : page pré-rendue incomplète/);
   assert.match(found.join(' '), /\/en\/ : page absente/);
+});
+
+test('plan du site : chaque adresse avec ses variantes de langue (E7)', () => {
+  const xml = sitemap('https://conf.example', [
+    { slug: 'call', paths: { fr: '/fr/appel/', en: '/en/call/' } },
+    { slug: 'a&b', paths: { fr: '/fr/p/a&b/', en: '/en/p/a&b/' } },
+  ]);
+  assert.equal(xml.match(/<url>/g).length, 4);
+  assert.match(xml, /<loc>https:\/\/conf\.example\/en\/call\/<\/loc>/);
+  assert.match(xml, /hreflang="x-default" href="https:\/\/conf\.example\/fr\/appel\/"/);
+  assert.match(xml, /\/fr\/p\/a&amp;b\//);
+  assert.doesNotMatch(xml, /a&b/);
 });

@@ -60,9 +60,22 @@
               <h1>{{ heading() }}</h1>
               <portail-tracks-list [tracks]="edition.tracks" [language]="lang()" />
             }
+            @case ('committees') {
+              <h1>{{ heading() }}</h1>
+              <h2>{{ 'portail.site.scientificCommittee' | translate }}</h2>
+              <portail-committee-list
+                [committee]="data.committees.scientific"
+                [language]="lang()"
+              />
+              <h2>{{ 'portail.site.organizingCommittee' | translate }}</h2>
+              <portail-committee-list
+                [committee]="data.committees.organizing"
+                [language]="lang()"
+              />
+            }
             @default {
               <h1>{{ heading() }}</h1>
-              @if (page.coming_soon || page.slug === 'committees') {
+              @if (page.coming_soon) {
                 <p class="soon">{{ 'portail.site.comingSoon' | translate }}</p>
               }
             }

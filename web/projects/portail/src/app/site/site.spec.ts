@@ -42,7 +42,11 @@ const SITE: PublicSite = {
   },
   poster: null,
   documents: [],
-  committees: { scientific: [], organizing: [] },
+  committees: {
+    scientific: { members: [], others: 0 },
+    organizing: { members: [], others: 0 },
+  },
+  site_url: 'https://conf.example',
 };
 
 function section(overrides: Partial<PublicSection>): PublicSection {
@@ -120,6 +124,9 @@ describe('PortalPage', () => {
     expect(root.textContent).toContain('Formats de communication');
     expect(TestBed.inject(PageContext).paths()).toEqual({ fr: '/fr/appel/', en: '/en/call/' });
     expect(document.title).toBe('Appel modifié · GEST-CONF 2027');
+    expect(document.head.querySelector('link[rel=canonical]')?.getAttribute('href')).toBe(
+      'https://conf.example/fr/appel/',
+    );
   });
 
   it('page du site sans composition (404) : gabarit seul, page complète', async () => {
@@ -180,6 +187,38 @@ describe('SectionsView', () => {
     ]);
     expect(root.querySelector('[data-section=a] .prose')?.innerHTML).toBe('<p>ok</p>');
     expect(root.querySelector('[data-section=b]')).toBeNull();
+  });
+
+  it('comité (E5) : membres consentants, liens https seulement, autres membres comptés', async () => {
+    const member = {
+      title: 'pr' as const,
+      name: 'Koffi Yao',
+      chair: true,
+      function: '' as const,
+      institution: 'Univ. FHB',
+      country: 'CI',
+      website: 'https://koffi.example',
+      scholar_url: 'javascript:alert(1)',
+      linkedin_url: '',
+      photo_url: '/api/v1/public/files/u/photo.jpg',
+    };
+    const root = await render([
+      section({
+        code: 'sc',
+        section_type: 'committee',
+        data: { members: [member], others: 2 },
+      }),
+    ]);
+    const item = root.querySelector('[data-section=sc] .people li') as HTMLElement;
+    expect(item.querySelector('h3')?.textContent?.replace(/\s+/g, ' ').trim()).toBe('Pr Koffi Yao');
+    expect(item.querySelector('.role')?.textContent?.trim()).toBe('Présidence');
+    expect(item.textContent).toContain('Univ. FHB, Côte d’Ivoire');
+    expect(
+      Array.from(item.querySelectorAll('.links a')).map((a) => a.getAttribute('href')),
+    ).toEqual(['https://koffi.example']);
+    expect(
+      root.querySelector('[data-section=sc] portail-committee-list > p.muted')?.textContent?.trim(),
+    ).toBe('et 2 autres membres');
   });
 
   it('anglais vide : repli sur le français ; boutons seulement complets', async () => {

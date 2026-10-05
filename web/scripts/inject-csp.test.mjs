@@ -7,12 +7,13 @@ import { injectCsp, inlineScriptHashes } from './inject-csp.mjs';
 const sha = (text) => `'sha256-${createHash('sha256').update(text, 'utf8').digest('base64')}'`;
 
 describe('inlineScriptHashes', () => {
-  it('calcule l’empreinte des seuls scripts en ligne exécutables', () => {
+  it('calcule l’empreinte des seuls scripts en ligne exécutables (ni état, ni JSON-LD : E7)', () => {
     const html = `
       <script src="main.js" type="module"></script>
       <script>window.boot();</script>
       <script type="text/javascript" id="contract">(()=>{})()</script>
-      <script id="ng-state" type="application/json">{"a":1}</script>`;
+      <script id="ng-state" type="application/json">{"a":1}</script>
+      <script type="application/ld+json">{"@type":"Event"}</script>`;
     assert.deepEqual(inlineScriptHashes(html), [sha('window.boot();'), sha('(()=>{})()')]);
   });
 

@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import re
 from collections.abc import Iterable, Mapping, Sequence
+from datetime import datetime
 from typing import Any
 
 from django.core.exceptions import ValidationError
@@ -100,6 +101,14 @@ PORTAL_AFFECTING_ACTIONS = (
     "track.",
     "submission_type.",
     "key_date.",
+)
+
+# Actions sur un compte (sans édition) qui changent la fiche publique d'un membre de comité.
+COMMITTEE_MEMBER_ACTIONS = (
+    "profile.updated",
+    "profile.photo_changed",
+    "consent.granted",
+    "consent.withdrawn",
 )
 
 
@@ -699,6 +708,100 @@ def public_documents(edition: Edition) -> list[PublicFile]:
     )
 
 
+# --- Comités publics (E5) ---------------------------------------------------------------------
+
+# Rôles publiés par comité ; les présidences d'abord. Le CHAIR (présidence générale) figure
+# au comité d'organisation.
+COMMITTEE_ROLES: Mapping[str, tuple[str, ...]] = {
+    "scientific": ("SC_CHAIR", "SC_MEMBER"),
+    "organizing": ("CHAIR", "OC_MEMBER"),
+}
+CHAIR_ROLES = frozenset({"CHAIR", "SC_CHAIR"})
+
+
+def _committee_role_rows(edition: Edition) -> QuerySet:
+    """Rôles actifs des comités publics, comptes actifs et non anonymisés."""
+    from apps.accounts.models import UserRole, UserRoleStatus
+
+    return UserRole.objects.filter(
+        edition=edition,
+        status=UserRoleStatus.ACTIVE,
+        role__in={role for codes in COMMITTEE_ROLES.values() for role in codes},
+        user__is_active=True,
+        user__anonymized_at__isnull=True,
+    )
+
+
+def public_committees(edition: Edition) -> dict[str, dict[str, Any]]:
+    """Membres actifs ayant consenti à l'annuaire public (``directory_listing``), par comité,
+    et nombre des autres membres (« et N autres »). Jamais l'adresse ; photo seulement avec
+    le consentement ``photo_publication`` (et publiée) ; consentements lus dans la requête,
+    retrait visible au prochain build (bandeau d'écart, E5).
+
+    Trois requêtes quel que soit le nombre de membres (rôles, profils, consentements).
+    """
+    from apps.accounts.models import Consent, ConsentKind, Profile
+
+    roles = list(_committee_role_rows(edition).values("user_id", "role", "oc_function"))
+    user_ids = {row["user_id"] for row in roles}
+    profiles = {
+        profile.user_id: profile
+        for profile in Profile.objects.filter(user_id__in=user_ids).select_related("photo")
+    }
+    consents: dict[tuple[int, str], bool] = {}
+    for consent in Consent.objects.filter(
+        user_id__in=user_ids,
+        kind__in=(ConsentKind.DIRECTORY_LISTING, ConsentKind.PHOTO_PUBLICATION),
+    ).order_by("recorded_at", "id"):
+        consents[(consent.user_id, consent.kind)] = consent.granted
+
+    result: dict[str, dict[str, Any]] = {}
+    for committee, codes in COMMITTEE_ROLES.items():
+        # Un compte par comité, à son rôle le plus élevé (présidence d'abord).
+        held: dict[int, dict[str, Any]] = {}
+        rows = sorted(
+            (row for row in roles if row["role"] in codes), key=lambda r: codes.index(r["role"])
+        )
+        for row in rows:
+            held.setdefault(row["user_id"], row)
+        members, others = [], 0
+        for user_id, row in held.items():
+            profile = profiles.get(user_id)
+            if (
+                profile is None
+                or not (profile.first_name or profile.last_name)
+                or not consents.get((user_id, ConsentKind.DIRECTORY_LISTING), False)
+            ):
+                others += 1
+                continue
+            photo = profile.photo
+            members.append(
+                {
+                    # Titre en code (« dr », « pr »…) : le portail le traduit.
+                    "title": profile.title,
+                    "name": " ".join(p for p in (profile.first_name, profile.last_name) if p),
+                    "sort_key": (profile.last_name.casefold(), profile.first_name.casefold()),
+                    "chair": row["role"] in CHAIR_ROLES,
+                    "function": row["oc_function"],
+                    "institution": profile.institution,
+                    "country": profile.country,
+                    "website": profile.website,
+                    "scholar_url": profile.scholar_url,
+                    "linkedin_url": profile.linkedin_url,
+                    "photo_url": public_file_url(photo)
+                    if photo is not None
+                    and photo.published
+                    and consents.get((user_id, ConsentKind.PHOTO_PUBLICATION), False)
+                    else None,
+                }
+            )
+        members.sort(key=lambda member: (not member["chair"], member["sort_key"]))
+        for member in members:
+            del member["sort_key"]
+        result[committee] = {"members": members, "others": others}
+    return result
+
+
 # --- Seed --------------------------------------------------------------------------------
 
 
@@ -757,9 +860,24 @@ def pending_changes(edition: Edition) -> QuerySet[AuditLog]:
     condition = Q()
     for prefix in PORTAL_AFFECTING_ACTIONS:
         condition |= Q(action__startswith=prefix) if prefix.endswith(".") else Q(action=prefix)
-    queryset = AuditLog.objects.filter(condition, edition=edition).exclude(
-        action="portal.published"
+    members = [
+        str(user_id)
+        for user_id in _committee_role_rows(edition).values_list("user_id", flat=True).distinct()
+    ]
+    member_changes = Q(
+        action__in=COMMITTEE_MEMBER_ACTIONS,
+        object_type="accounts.user",
+        object_id__in=members,
     )
+    # Composition des comités : attributions et retraits des seuls rôles publiés (un rôle
+    # AUTHOR attribué par le système ne change pas le portail).
+    committee_roles = Q(
+        action__in=("role.granted", "role.reactivated", "role.revoked"),
+        after__role__in=sorted({role for codes in COMMITTEE_ROLES.values() for role in codes}),
+    )
+    queryset = AuditLog.objects.filter(
+        ((condition | committee_roles) & Q(edition=edition)) | member_changes
+    ).exclude(action="portal.published")
     last = last_publication(edition)
     if last is not None:
         queryset = queryset.filter(at__gt=last.published_at)
@@ -779,11 +897,21 @@ def publication_status(edition: Edition) -> dict[str, Any]:
 
 
 @transaction.atomic
-def mark_published(edition: Edition, *, release: str = "", actor: Actor) -> Publication:
+def mark_published(
+    edition: Edition, *, release: str = "", built_at: datetime | None = None, actor: Actor
+) -> Publication:
     """Enregistre une mise en ligne (après ``deploy.sh --portal-only``) : le compteur de
-    modifications non publiées repart de zéro."""
+    modifications non publiées repart de zéro.
+
+    ``built_at`` : début du pré-rendu, quand les données ont été lues. Une modification
+    faite pendant le build reste alors comptée comme non publiée (elle n'y figure peut-être
+    pas). Par défaut : maintenant.
+    """
+    now = timezone.now()
+    if built_at is not None and (timezone.is_naive(built_at) or built_at > now):
+        raise Invalid(_("Date de build invalide (avec fuseau, et pas dans le futur)."))
     publication = Publication.objects.create(
-        edition=edition, published_at=timezone.now(), release=release[:64]
+        edition=edition, published_at=built_at or now, release=release[:64]
     )
     record(
         "portal.published",

@@ -132,7 +132,8 @@ def test_site_data(public_edition):
     body = _public("site").json()
     assert body["edition"]["code"] == public_edition.code
     assert body["documents"] == []
-    assert body["committees"] == {"scientific": [], "organizing": []}
+    empty = {"members": [], "others": 0}
+    assert body["committees"] == {"scientific": empty, "organizing": empty}
 
 
 # --- Gestion ------------------------------------------------------------------------------------

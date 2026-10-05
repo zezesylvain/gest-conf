@@ -310,6 +310,33 @@
       "nav": {
         "header": "Main navigation",
         "footer": "Footer links"
+      },
+      "scientificCommittee": "Scientific committee",
+      "organizingCommittee": "Organising committee",
+      "chair": "Chair",
+      "othersOne": "and 1 other member",
+      "othersMany": "and {{count}} other members",
+      "membersOne": "1 member",
+      "membersMany": "{{count}} members",
+      "titles": {
+        "dr": "Dr",
+        "pr": "Prof.",
+        "mr": "Mr",
+        "ms": "Ms"
+      },
+      "functions": {
+        "finance": "Finance",
+        "program": "Programme",
+        "logistics": "Logistics",
+        "communication": "Communication",
+        "external_relations": "External relations",
+        "volunteers": "Volunteers",
+        "secretariat": "Secretariat"
+      },
+      "links": {
+        "website": "Website",
+        "scholar": "Google Scholar",
+        "linkedin": "LinkedIn"
       }
     }
   }

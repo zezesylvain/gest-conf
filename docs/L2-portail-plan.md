@@ -589,3 +589,72 @@ base, nettoyage, repli sans Pillow) ; `GESTCONF_FILES_DIR` dans `.env.example`.
   (`fr/appel/index.html`) ; Apache redirige `/fr/appel` vers `/fr/appel/`. Les liens internes
   du routeur restent sans barre (navigation client, sans effet). Les adresses canoniques avec
   barre finale sont traitées en L2.6 (référencement).
+
+## 17. Bilan de L2.6 (5 octobre 2026)
+
+**Livré** :
+
+- **Comités publics (E5)** : `services.public_committees` (trois requêtes quel que soit le
+  nombre de membres) :
+  - membres **actifs** des comités scientifique (`SC_CHAIR`, `SC_MEMBER`) et d'organisation
+    (`CHAIR`, `OC_MEMBER`), comptes actifs et non anonymisés ;
+  - fiche publiée seulement avec le consentement `directory_listing` courant ; photo avec
+    `photo_publication` en plus ; jamais d'adresse ;
+  - titre et fonction au CO en codes, traduits par le portail ; présidences d'abord, puis
+    par nom ; un compte par comité ;
+  - les autres membres sont comptés (« et N autres membres ») ;
+  - schéma typé (`PublicCommittee`, `PublicCommitteeMember`), page « Comités » et section
+    `committee`.
+- **Bandeau d'écart** : attributions et retraits des rôles de comité, et changements de
+  profil, de photo ou de consentement d'un membre de comité, comptent comme modifications
+  non publiées (E5 : retrait visible au prochain build). Les rôles hors comité (ex. `AUTHOR`)
+  ne comptent pas.
+- **Référencement (E7)**, écrit dans `<head>` au pré-rendu et remplacé à chaque navigation :
+  - adresse canonique avec barre finale ;
+  - `hreflang` `fr`, `en` et `x-default` (français) ;
+  - Open Graph (affiche de l'édition, si publiée, en `og:image`) et carte Twitter ;
+  - JSON-LD `Event` sur l'accueil, sérialisé sans `<` littéral ; ignoré par la CSP à
+    empreintes (test ajouté) ;
+  - tout est retiré en quittant le site public (espace compte) ;
+  - `site_url` (réglage `GESTCONF_PUBLIC_URL`) ajouté à `/v1/public/portal/site`.
+- **Plan du site** : `sitemap.xml` (variantes de langue) et ligne `Sitemap:` de `robots.txt`,
+  écrits par `check-prerender.mjs` une fois le portail jugé complet ; `sitemap.xml` en
+  `no-cache` dans le `.htaccess`.
+- **Publication (E9)** :
+  - `deploy.sh --portal-only` et `npm run build:portail` ;
+  - le déploiement complet publie le portail une fois le backend en ligne ;
+  - `mark_portal_published --built-at` : la mise en ligne est datée du début du build, une
+    modification faite pendant le build reste comptée.
+- **Test de fumée** :
+  - pages pré-rendues, canonique, Open Graph, plan du site ;
+  - fichier public servi avec `nosniff`, fichier inconnu en 404 ;
+  - portail non pré-rendu signalé sans échec.
+- **Aide** : fiche « Publier le portail » complétée (comités, consentements).
+
+**Vérifications** :
+
+- **Backend** : 1 345 tests sous SQLite, 1 351 sous MariaDB :
+  - 8 tests des comités (dont 4 `rg_e5`) ;
+  - écart de publication et `--built-at` ;
+  - 3 garde-fous de `deploy.sh` et du test de fumée.
+- **Front** : portail 84 (comités, référencement), gestion 74, shared 76 ; 8 tests des
+  scripts de build (plan du site, JSON-LD ignoré par la CSP).
+- **Build pré-rendu contre l'API locale** : 30 routes, plan du site et `robots.txt` écrits ;
+  bundle initial inchangé (371,4 kB, voir §16).
+- **Dans Chromium** :
+  - page « Comités » FR et EN : présidence en tête, titres traduits (Pr / Prof.),
+    affiliation et pays ;
+  - seuls les liens `https` sont affichés ; photo affichée seulement avec son consentement ;
+  - « et 1 autre membre » ;
+  - canonique et `hreflang` justes après navigation client ; JSON-LD sur l'accueil seul ;
+    aucun élément de référencement dans l'espace compte ;
+  - aucun débordement à 375 px ;
+  - console limitée aux 401 attendus.
+- **Test de fumée local** : les 7 nouvelles vérifications passent contre le build servi.
+
+**Hypothèses non vérifiées** :
+
+- Le pré-rendu sur le poste de déploiement suppose que ce poste joint l'API de production en
+  HTTPS.
+- L'aperçu Open Graph réel (Facebook, LinkedIn) n'est vérifiable qu'en production, avec une
+  URL publique (démo C, L2.7).

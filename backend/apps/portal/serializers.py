@@ -7,6 +7,8 @@ from typing import Any, ClassVar
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
+from apps.accounts.models import ProfileTitle
+from apps.accounts.roles import OcFunction
 from apps.conferences.serializers import PublicEditionSerializer
 from apps.core.models import PublicFile
 from apps.portal.models import MenuItem, MenuLocation, Page, PageSection, Section, SectionType
@@ -357,7 +359,7 @@ class PublicSectionSerializer(serializers.ModelSerializer):
             documents = site["documents"]
             return documents[:limit] if limit else documents
         if section.section_type == SectionType.COMMITTEE:
-            return site["committees"].get(section.config.get("committee"), [])
+            return site["committees"].get(section.config.get("committee"))
         return None
 
 
@@ -383,8 +385,36 @@ class PublicMenuItemSerializer(serializers.Serializer):
     page = serializers.CharField(allow_null=True, help_text="Slug de la page visée, sinon null.")
 
 
+class PublicCommitteeMemberSerializer(serializers.Serializer):
+    """Fiche publique d'un membre consentant (E5) : jamais d'adresse e-mail."""
+
+    title = serializers.ChoiceField(choices=ProfileTitle.choices)
+    name = serializers.CharField()
+    chair = serializers.BooleanField(help_text="Présidence (CHAIR ou SC_CHAIR).")
+    function = serializers.ChoiceField(
+        choices=OcFunction.choices, help_text="Fonction au CO, vide hors CO."
+    )
+    institution = serializers.CharField()
+    country = serializers.CharField(help_text="Code ISO 3166-1 alpha-2 ou vide.")
+    website = serializers.CharField()
+    scholar_url = serializers.CharField()
+    linkedin_url = serializers.CharField()
+    photo_url = serializers.CharField(allow_null=True)
+
+
+class PublicCommitteeSerializer(serializers.Serializer):
+    members = PublicCommitteeMemberSerializer(many=True)
+    others = serializers.IntegerField(help_text="Membres sans consentement à l'annuaire.")
+
+
+class PublicCommitteesSerializer(serializers.Serializer):
+    scientific = PublicCommitteeSerializer()
+    organizing = PublicCommitteeSerializer()
+
+
 class PublicSiteSerializer(serializers.Serializer):
     edition = PublicEditionSerializer()
     poster = PublicFileRefSerializer(allow_null=True)
     documents = PublicFileRefSerializer(many=True)
-    committees = serializers.DictField(child=serializers.ListField(child=serializers.DictField()))
+    committees = PublicCommitteesSerializer()
+    site_url = serializers.CharField(help_text="Origine publique du portail, sans barre finale.")
