@@ -25,8 +25,11 @@ DirectoryIndex index.html
 
 <IfModule mod_headers.c>
   # En-têtes de sécurité (étude §9.3). Les scripts sont encadrés par la CSP à
-  # empreintes générée par Angular (autoCsp, balise <meta>) ; cet en-tête couvre
-  # les autres directives, dont frame-ancestors qui n'existe pas en <meta>.
+  # empreintes (script-src) ajoutée en balise <meta> dans chaque page HTML par
+  # web/scripts/inject-csp.mjs, lancé par « npm run build » (l'option autoCsp
+  # d'Angular est incompatible avec le pré-rendu). Le navigateur applique les deux
+  # politiques à la fois : cet en-tête couvre les autres directives, dont
+  # frame-ancestors, qui n'a pas d'effet en <meta>.
   Header always set Content-Security-Policy "object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; frame-src 'none'; img-src 'self' data:; font-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; media-src 'self'; manifest-src 'self'; worker-src 'self'"
   Header always set X-Content-Type-Options "nosniff"
   Header always set X-Frame-Options "DENY"

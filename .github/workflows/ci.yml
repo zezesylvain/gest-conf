@@ -45,7 +45,10 @@ jobs:
           python-version: ${{ matrix.python }}
           cache: pip
           cache-dependency-path: backend/requirements/*.txt
-      - run: pip install -r requirements/dev.txt
+      - name: Dépendances verrouillées (avec empreintes)
+        # --require-hashes : refuse tout paquet non épinglé ou dont l'empreinte diffère
+        # du fichier verrouillé (requirements/compile.sh, pip-tools --generate-hashes).
+        run: pip install --require-hashes -r requirements/dev.txt
 
       - name: Lint et formatage (ruff)
         run: |
@@ -55,8 +58,40 @@ jobs:
       - name: Migrations à jour
         run: python manage.py makemigrations --check --dry-run
 
-      - name: Tests (pytest, MariaDB)
-        run: pytest
+      - name: Tests (pytest, MariaDB) et couverture
+        # GESTCONF_REQUIRE_MARIADB : la suite refuse de démarrer si la base de test n'est
+        # pas MariaDB (conftest.py), au lieu de passer en silence sur SQLite en ignorant
+        # les tests mariadb_only. -rs : motifs des tests ignorés dans le journal.
+        env:
+          GESTCONF_REQUIRE_MARIADB: "1"
+        run: pytest -rs --cov --cov-report=term
+
+      - name: Tests (pytest, SQLite)
+        # Plan L1 §11 et §13 : pytest sur SQLite ET sur MariaDB. SQLite est le moteur par
+        # défaut du poste de développement (CLAUDE.md) ; les tests marqués « mariadb »
+        # s'exécutent sur les deux moteurs, les tests « mariadb_only » sont ignorés ici.
+        env:
+          DATABASE_URL: "sqlite://:memory:"
+        run: pytest -q -rs
+
+      - name: Dépendances de production installables en roues manylinux2014 (comme deploy.sh)
+        # deploy.sh installe prod.txt avec --only-binary=:all: sur o2switch : une dépendance
+        # publiée seulement en sdist, ou seulement en manylinux_2_28 et plus, ferait échouer
+        # le déploiement. Plateforme minimale à ajuster selon la glibc relevée par V02
+        # (docs/L1-verifications-o2switch.md).
+        run: >-
+          pip download --quiet -d /tmp/wheels --only-binary=:all: --require-hashes
+          --platform manylinux2014_x86_64 --python-version ${{ matrix.python }} --implementation cp
+          -r requirements/prod.txt
+
+      - name: Traductions de l'API à jour (.po et .mo versionnés)
+        # .mo comparés décompilés (msgunfmt) et non octet par octet : le binaire dépend de
+        # la version de msgfmt. .po contrôlés par makemessages sur une copie, puis msgattrib
+        # (ni entrée non traduite, ni approximative, ni obsolète). Détails : locale/check.sh.
+        run: |
+          command -v msgfmt >/dev/null || (sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends gettext)
+          msgfmt --version | sed -n 1p
+          locale/check.sh
 
       - name: Tests du script de fusion .htaccess
         working-directory: deploy
@@ -68,7 +103,11 @@ jobs:
           DJANGO_SECRET_KEY: ci-only-${{ github.run_id }}-not-a-real-secret-key-0123456789abcdef
           DJANGO_ALLOWED_HOSTS: conference.exemple.org
           DJANGO_CSRF_TRUSTED_ORIGINS: https://conference.exemple.org
-        run: python manage.py check --deploy --fail-level WARNING
+        # Comme deploy.sh : sécurité sans --database (sinon models.W036, plan L1 §3.7), puis
+        # contrôles de la base seuls (--tag database : connexion, mysql.W002 mode strict).
+        run: |
+          python manage.py check --deploy --fail-level WARNING
+          python manage.py check --database default --tag database --fail-level WARNING
 
       - name: Schéma OpenAPI à jour (source du client Angular)
         run: |
@@ -108,8 +147,25 @@ jobs:
       - name: Tests unitaires
         run: npm test
 
-      - name: Build (portail pré-rendu + gestion) et CSP
+      - name: Build (portail pré-rendu + gestion), CSP et budgets
+        # Les budgets d'angular.json (dont le CSS initial du portail) font échouer le build.
         run: npm run build
+
+      - name: robots.txt à la racine du portail
+        run: |
+          for path in /api/ /gestion/ /compte/; do
+            grep -qx "Disallow: $path" dist/portail/browser/robots.txt
+          done
+
+      - name: Publication du build Angular (artefact)
+        # Plan L1 §11 (D18) : en L1, deploy.sh reste manuel ; la CI publie le dist comme
+        # artefact (CSP à empreintes déjà injectée par npm run build).
+        uses: actions/upload-artifact@v7
+        with:
+          name: web-dist
+          path: web/dist/
+          if-no-files-found: error
+          retention-days: 14
 
       - name: Audit des dépendances
         run: npm audit --omit=dev --audit-level=high
@@ -120,4 +176,4 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - name: ShellCheck
-        run: shellcheck deploy/*.sh
+        run: shellcheck deploy/*.sh backend/requirements/compile.sh backend/locale/check.sh

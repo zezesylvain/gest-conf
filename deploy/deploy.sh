@@ -36,8 +36,30 @@ fi
 
 # --- 1. Build des applications Angular ------------------------------------------------
 if [[ "${SKIP_BUILD:-0}" != "1" ]]; then
-  step "Build Angular (portail pré-rendu + gestion)"
-  (cd "$ROOT/web" && npm ci && npx ng build portail && npx ng build gestion)
+  step "Build Angular (portail pré-rendu + gestion + CSP à empreintes)"
+  # « npm run build » et non « ng build » : le script npm ajoute ensuite la CSP à
+  # empreintes en <meta> dans chaque page HTML (web/scripts/inject-csp.mjs). Sans
+  # elle, aucune restriction des scripts n'est appliquée en production (bug L0).
+  (cd "$ROOT/web" && npm ci && npm run build)
+fi
+
+# Garde-fou, y compris avec SKIP_BUILD=1 : ne jamais publier une page sans sa CSP. Toutes
+# les pages HTML du build sont contrôlées (inject-csp.mjs les traite toutes), y compris les
+# pages pré-rendues à venir du portail (dist/portail/browser/<route>/index.html).
+for page in "$ROOT/web/dist/portail/browser/index.html" "$ROOT/web/dist/portail/browser/index.csr.html" \
+  "$ROOT/web/dist/gestion/browser/index.html"; do
+  if [[ ! -f "$page" ]]; then
+    echo "Page attendue absente : $page (relancer « npm run build » dans web/)." >&2
+    exit 1
+  fi
+done
+# « || true » : grep -L sort en code 1 quand il ne liste aucun fichier (cas normal), ce qui
+# arrêterait le script (set -e) ; seule la liste produite compte.
+pages_without_csp="$(find "$ROOT/web/dist" -name '*.html' -type f \
+  -exec grep -L 'http-equiv="Content-Security-Policy"' {} + || true)"
+if [[ -n "$pages_without_csp" ]]; then
+  printf 'CSP absente de : %s\nRelancer « npm run build » dans web/.\n' "$pages_without_csp" >&2
+  exit 1
 fi
 
 step "Préparation des fichiers statiques"
@@ -48,15 +70,19 @@ cp "$ROOT/deploy/apache/gestion.htaccess" "$STAGING/public/gestion/.htaccess"
 
 # --- 2. Backend Django ---------------------------------------------------------------
 step "Envoi du code Django vers ~/$DEPLOY_APP_DIR (version $RELEASE)"
+# Seul le contenu versionné du commit déployé est envoyé (git archive) : aucun fichier
+# ignoré par git présent sur le poste (.coverage, htmlcov/, .env.local, db.sqlite3...)
+# ne peut partir sur le serveur.
+git -C "$ROOT" archive --format=tar "$RELEASE" backend | tar -x -C "$STAGING"
 # --delete évite qu'une migration supprimée du dépôt reste sur le serveur ; les
 # exclusions protègent ce qui n'appartient qu'au serveur (.env, journaux, fichiers cPanel).
 rsync -az --delete \
   --exclude '.venv/' --exclude '__pycache__/' --exclude '.pytest_cache/' --exclude '.ruff_cache/' \
   --exclude '/.env' --exclude '/db.sqlite3' --exclude '/tmp/' --exclude '/RELEASE' \
   --exclude '/public/' --exclude '*.log' \
-  "$ROOT/backend/" "$DEPLOY_SSH:$DEPLOY_APP_DIR/"
+  "$STAGING/backend/" "$DEPLOY_SSH:$DEPLOY_APP_DIR/"
 
-step "Dépendances, migrations, contrôles, redémarrage de Passenger"
+step "Dépendances, migrations, table de cache, contrôles, redémarrage de Passenger"
 # Le .env de production (hors dépôt) est lu par config.settings.prod.
 # Les valeurs locales sont passées en arguments échappés (printf %q) au script distant.
 # shellcheck disable=SC2029  # développement côté client voulu
@@ -67,9 +93,25 @@ venv_activate="$1" app_dir="$2" release="$3"
 source "$venv_activate"
 cd "$app_dir"
 export DJANGO_SETTINGS_MODULE=config.settings.prod
-pip install --quiet -r requirements/prod.txt
-python manage.py migrate --noinput
+# Fichier verrouillé avec empreintes (requirements/compile.sh) : --require-hashes refuse
+# tout paquet non épinglé ou altéré ; --only-binary interdit toute compilation sur
+# l'hébergement (roues manylinux2014 disponibles pour toutes les dépendances, vérifié
+# pour Python 3.12 et 3.13 ; contrôle V04 de docs/L1-verifications-o2switch.md).
+pip install --quiet --require-hashes --only-binary=:all: -r requirements/prod.txt
+# Contrôles AVANT toute modification de la base : un avertissement arrête le déploiement
+# sans migration appliquée (le DDL n'est pas transactionnel sous MariaDB). Le nouveau code
+# est toutefois déjà sur le disque (rsync) : voir deploy/README.md, « Échec en cours de
+# déploiement ». Deux commandes distinctes :
+# - sécurité (--deploy), SANS --database : avec --database, Django lancerait aussi les
+#   contrôles de contraintes des modèles, dont models.W036, que déclenchent les
+#   contraintes conditionnelles d'allauth ignorées par MariaDB (plan L1 §3.7) ;
+# - base de données seulement (--tag database) : connexion et mode strict (mysql.W002).
 python manage.py check --deploy --fail-level WARNING
+python manage.py check --database default --tag database --fail-level WARNING
+python manage.py migrate --noinput
+# Tables du cache partagé (DatabaseCache : gestconf_cache et gestconf_throttle_cache).
+# Elles ne sont pas créées par une migration ; la commande est sans effet si elles existent.
+python manage.py createcachetable
 echo "$release" > RELEASE
 mkdir -p tmp && touch tmp/restart.txt
 REMOTE

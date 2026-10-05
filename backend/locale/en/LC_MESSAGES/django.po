@@ -1,0 +1,87 @@
+# Catalogue anglais des messages de l'API GEST-CONF (sources en français).
+# Mise à jour : voir « Traductions de l'API » dans le README principal.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: gestconf-backend\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-05 10:57+0000\n"
+"PO-Revision-Date: 2026-10-05 11:00+0000\n"
+"Last-Translator: GEST-CONF\n"
+"Language-Team: GEST-CONF\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+#: apps/accounts/models.py
+msgid "adresse e-mail"
+msgstr "email address"
+
+#: apps/accounts/models.py
+msgid "actif"
+msgstr "active"
+
+#: apps/accounts/models.py
+msgid "langue"
+msgstr "language"
+
+#: apps/accounts/models.py apps/core/actor.py
+msgid "utilisateur"
+msgstr "user"
+
+#: apps/accounts/models.py
+msgid "utilisateurs"
+msgstr "users"
+
+#: apps/core/actor.py
+msgid "commande"
+msgstr "command"
+
+#: apps/core/actor.py
+msgid "système"
+msgstr "system"
+
+#: apps/core/authentication.py
+msgid "Échec de la vérification CSRF : rechargez la page puis réessayez."
+msgstr "CSRF verification failed: reload the page and try again."
+
+#: apps/core/errors.py
+msgid "Opération refusée."
+msgstr "Operation refused."
+
+#: apps/core/errors.py
+msgid "Opération impossible dans l'état actuel."
+msgstr "This operation is not possible in the current state."
+
+#: apps/core/errors.py
+msgid "Action non autorisée."
+msgstr "Action not allowed."
+
+#: apps/core/errors.py apps/core/exceptions.py
+msgid "Données invalides."
+msgstr "Invalid data."
+
+#: apps/core/errors.py
+msgid "Quota atteint."
+msgstr "Quota reached."
+
+#: apps/core/views.py
+msgid "Méthode non autorisée."
+msgstr "Method not allowed."
+
+#: apps/core/views.py
+msgid "Requête invalide."
+msgstr "Bad request."
+
+#: apps/core/views.py
+msgid "Accès refusé."
+msgstr "Access denied."
+
+#: apps/core/views.py
+msgid "Ressource introuvable."
+msgstr "Resource not found."
+
+#: apps/core/views.py
+msgid "Erreur interne du serveur."
+msgstr "Internal server error."

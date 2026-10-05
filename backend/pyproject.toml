@@ -30,3 +30,21 @@ DJANGO_SETTINGS_MODULE = "config.settings.test"
 testpaths = ["apps", "tests"]
 python_files = ["test_*.py"]
 addopts = "--strict-markers"
+markers = [
+    "mariadb: comportement propre au moteur de base ; exécuté sur SQLite ET sur MariaDB (la CI fait foi)",
+    "mariadb_only: sans objet hors MariaDB ; ignoré sous SQLite",
+]
+
+# Couverture : « pytest --cov » (rapport dans le terminal ; « --cov-report=html » pour le
+# détail). Le seuil de 80 % (CLAUDE.md) s'appliquera aux modules critiques à mesure
+# qu'ils arrivent (plan L1 §11) : pas de fail_under global à ce stade.
+[tool.coverage.run]
+source = ["apps", "config"]
+branch = true
+omit = ["*/migrations/*", "*/tests/*", "config/settings/dev.py", "config/settings/prod.py"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+skip_empty = true
+exclude_also = ["if TYPE_CHECKING:", "raise NotImplementedError"]

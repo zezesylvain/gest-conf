@@ -27,24 +27,52 @@ status_of() { "${CURL[@]}" -o /dev/null -w '%{http_code}' "$1"; }
 # json_has <texte> <clé> <valeur JSON> : tolère les espaces autour de « : ».
 json_has() { grep -Eq "\"$2\"[[:space:]]*:[[:space:]]*$3" <<<"$1"; }
 
+# has_meta_csp <html> : CSP à empreintes ajoutée par web/scripts/inject-csp.mjs (balise
+# <meta http-equiv="Content-Security-Policy"> portant script-src). Insensible à la casse
+# et à l'ordre des attributs. Le dernier grep lit toute son entrée (pas de -q) : avec
+# pipefail, une sortie anticipée pourrait faire échouer le grep précédent (SIGPIPE).
+has_meta_csp() {
+  grep -Eio '<meta[^>]*>' <<<"$1" | grep -Ei 'http-equiv=["'"'"']?content-security-policy' \
+    | grep -i 'script-src' >/dev/null
+}
+
+# has_header <en-têtes> <nom> <motif ERE de la valeur> : insensible à la casse.
+has_header() { grep -Eiq "^$2:[[:space:]]*.*$3" <<<"$1"; }
+
 body=$("${CURL[@]}" "$BASE_URL/")
 check "portail : / renvoie la page pré-rendue" "$([[ "$body" == *"<portail-root"* && "$body" == *"<h1"* ]] && echo 1)"
+check "portail : CSP à empreintes en <meta> sur /" "$(has_meta_csp "$body" && echo 1)"
 
 headers=$("${CURL[@]}" -D - -o /dev/null "$BASE_URL/")
-check "portail : en-tête CSP présent" "$(grep -qi '^content-security-policy:.*frame-ancestors' <<<"$headers" && echo 1)"
+check "portail : en-tête CSP présent" "$(has_header "$headers" content-security-policy 'frame-ancestors' && echo 1)"
 
 body=$("${CURL[@]}" "$BASE_URL/une-page-qui-n-existe-pas")
 check "portail : repli SPA (index.csr.html)" "$([[ "$body" == *"<portail-root"* ]] && echo 1)"
+check "portail : CSP en <meta> sur le repli SPA (pages /compte/*)" "$(has_meta_csp "$body" && echo 1)"
+
+robots=$("${CURL[@]}" -D - "$BASE_URL/robots.txt")
+check "portail : /robots.txt servi tel quel (texte, pas le repli SPA)" \
+  "$(has_header "$robots" content-type 'text/plain' && [[ "$robots" != *"<portail-root"* ]] && echo 1)"
+check "portail : robots.txt exclut /api/, /gestion/ et /compte/" \
+  "$(grep -Eq '^Disallow:[[:space:]]*/api/' <<<"$robots" && grep -Eq '^Disallow:[[:space:]]*/gestion/' <<<"$robots" \
+    && grep -Eq '^Disallow:[[:space:]]*/compte/' <<<"$robots" && echo 1)"
 
 body=$("${CURL[@]}" "$BASE_URL/gestion/")
 check "gestion : /gestion/ servie avec base href /gestion/" "$([[ "$body" == *'<base href="/gestion/"'* ]] && echo 1)"
+check "gestion : CSP à empreintes en <meta> sur /gestion/" "$(has_meta_csp "$body" && echo 1)"
+
+headers=$("${CURL[@]}" -D - -o /dev/null "$BASE_URL/gestion/")
+check "gestion : en-tête X-Robots-Tag noindex" "$(has_header "$headers" x-robots-tag 'noindex' && echo 1)"
 
 body=$("${CURL[@]}" "$BASE_URL/gestion/une/route/profonde")
 check "gestion : repli SPA sous /gestion/" "$([[ "$body" == *"<gestion-root"* ]] && echo 1)"
 
-health=$("${CURL[@]}" -w '\n%{http_code}' "$BASE_URL/api/v1/health")
-check "API : /api/v1/health répond 200 et base OK" \
-  "$([[ "${health##*$'\n'}" == "200" ]] && json_has "$health" database '"ok"' && echo 1)"
+# Une seule requête : en-têtes, corps et code HTTP (dernière ligne).
+health=$("${CURL[@]}" -D - -w '\n%{http_code}' "$BASE_URL/api/v1/health")
+check "API : /api/v1/health répond 200" "$([[ "${health##*$'\n'}" == "200" ]] && echo 1)"
+check "API : health -> base de données OK" "$(json_has "$health" database '"ok"' && echo 1)"
+check "API : health -> cache OK (table créée par createcachetable)" "$(json_has "$health" cache '"ok"' && echo 1)"
+check "API : en-tête X-Robots-Tag noindex sur /api/" "$(has_header "$health" x-robots-tag 'noindex' && echo 1)"
 if [[ "$BASE_URL" == https://* ]]; then
   check "API : Django voit la requête en HTTPS (secure=true)" "$(json_has "$health" secure true && echo 1)"
 fi
@@ -57,6 +85,12 @@ check "API : URL inconnue -> 404 JSON (non interceptée par le repli SPA)" \
   "$([[ "${body##*$'\n'}" == "404" ]] && json_has "$body" code '"not_found"' && echo 1)"
 
 check "API : pas d'admin Django (/api/admin/ -> 404)" "$([[ "$(status_of "$BASE_URL/api/admin/")" == "404" ]] && echo 1)"
+
+# Diagnostic de l'étape L1.0 (M04, M05) : public, anonyme, sans limite de débit, il expose
+# REMOTE_ADDR et les adresses des mandataires. Un GESTCONF_DIAGNOSTICS=1 oublié dans le .env
+# après la mesure fait échouer chaque déploiement (M09 automatisé).
+check "API : diagnostic désactivé (/api/v1/diagnostics/request -> 404)" \
+  "$([[ "$(status_of "$BASE_URL/api/v1/diagnostics/request")" == "404" ]] && echo 1)"
 
 if ((failures > 0)); then
   echo "$failures test(s) de fumée en échec." >&2

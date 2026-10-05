@@ -1,0 +1,4 @@
+# Dépendances de production (o2switch) : celles de base.in, aux mêmes versions.
+# Fichier source de pip-tools : le fichier verrouillé est prod.txt (avec empreintes).
+-c base.txt
+-r base.in

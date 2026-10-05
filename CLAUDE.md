@@ -12,8 +12,8 @@ Plateforme de gestion de conférences scientifiques : portail public, espace de 
 | Frontend | Angular (version stable courante), composants autonomes, signaux — workspace avec 2 applications (`portail`, `gestion`) + bibliothèque `shared` |
 | Base de données | MariaDB, InnoDB, `utf8mb4` |
 | Hébergement | o2switch mutualisé, **un seul domaine** : `/` portail, `/gestion/` back-office, `/api/` Django via Passenger |
-| Auth | `django-allauth` + sessions + CSRF (pas de JWT dans le navigateur), 2FA TOTP (`django-otp`) pour comités/admins, ORCID |
-| API | REST `/api/v1/`, OpenAPI via `drf-spectacular`, client TypeScript généré pour Angular |
+| Auth | `django-allauth` en mode *headless* (client `browser` seul) + sessions + CSRF (pas de JWT dans le navigateur), 2FA TOTP par `allauth.mfa` (décision D2 ; `django-otp` abandonné, faute d'intégration headless) imposée côté serveur aux rôles de gestion, ORCID (P2) |
+| API | REST `/api/v1/`, OpenAPI via `drf-spectacular`, client TypeScript généré pour Angular. Authentification : endpoints allauth tels quels sous `/api/_allauth/browser/v1/`, consommés par une façade TypeScript écrite à la main et couverte par des tests de contrat (décision D4) |
 
 ## Règles non négociables
 
@@ -51,7 +51,7 @@ Chaque app Django : `models.py`, `services.py` (logique métier), `serializers.p
 ## Conventions de code
 
 - **Langue** : identifiants (code, tables, champs, endpoints) en **anglais** ; commentaires, documentation et messages de commit en **français** ; textes d'interface via i18n (FR/EN, clés de traduction, aucune chaîne en dur).
-- **Python** : `ruff` (lint + format), typage des signatures publiques des services, `Decimal` pour tout montant et tout score, dates en UTC (conversion en fuseau de l'édition côté interface).
+- **Python** : `ruff` (lint + format), typage des signatures publiques des services, `Decimal` pour tout montant et tout score, dates stockées en UTC ; affichage converti dans le fuseau de l'édition côté interface, mais **saisie** des échéances en heure locale de l'édition, convertie côté serveur (décision D13).
 - **Django** : requêtes optimisées (`select_related` / `prefetch_related`, pas de N+1), migrations rétro-compatibles (ajout puis suppression en deux temps), FK `ON DELETE RESTRICT` par défaut, suppression logique ou anonymisation pour les données personnelles. Numérotation (références, factures) via compteur verrouillé en transaction.
 - **DRF** : erreurs normalisées `{code, message, fields}`, pagination/filtre/tri uniformes (`django-filter`), throttling sur auth, inscription, contact, vérification d'attestation.
 - **Angular** : composants autonomes, lazy loading par route, formulaires réactifs typés, état local en signaux, client API **généré** (ne pas l'éditer à la main), accessibilité WCAG 2.1 AA.
@@ -102,6 +102,10 @@ Les URL Django sont déclarées **sans** le préfixe `/api` (`v1/...`) : `config
 - Avant toute modification large (modèle de données, permissions, workflow de statuts), proposer le plan et attendre validation.
 - Une règle de gestion (RG-xx) implémentée = un test qui la référence dans son nom ou sa docstring.
 - Être rigoureux et critique : signaler les incohérences de l'étude, les risques de sécurité et les hypothèses non vérifiées plutôt que de les contourner. Ne pas inventer d'API de bibliothèque : vérifier dans la documentation ou le code installé.
+
+## Décisions du lot L1
+
+Les décisions D1 à D18 du plan [`docs/L1-socle-plan.md`](docs/L1-socle-plan.md) ont été validées le 5 octobre 2026 : elles s'appliquent (notamment D1 : aucun rôle global, autorité de plateforme exercée par des commandes `manage.py` auditées). La mise à jour correspondante de l'étude est prévue en fin de lot (étape L1.8).
 
 ## Questions ouvertes (étude §15, à ne pas trancher seul)
 

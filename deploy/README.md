@@ -41,9 +41,33 @@ export DEPLOY_BASE_URL=https://conference.exemple.org
 deploy/deploy.sh
 ```
 
-Étapes (étude §11.4) : build Angular → envoi du code Django → `pip install`,
-`migrate`, `check --deploy` → redémarrage de Passenger (`tmp/restart.txt`) →
-envoi des fichiers statiques → fusion du `.htaccess` racine → tests de fumée.
+Étapes (étude §11.4) :
+1. build Angular par `npm run build` : portail pré-rendu, gestion, puis **CSP à empreintes**
+   ajoutée en `<meta>` dans chaque page HTML (`web/scripts/inject-csp.mjs`). Le script
+   refuse de publier une page sans cette CSP, y compris avec `SKIP_BUILD=1` ;
+2. envoi du code Django (dont les catalogues de traduction `.po` et `.mo` de `locale/`) :
+   **contenu versionné du commit déployé uniquement** (`git archive`), jamais un fichier
+   ignoré par git du poste local (`.coverage`, `htmlcov/`, `.env.local`…) ;
+3. `pip install --require-hashes --only-binary=:all: -r requirements/prod.txt` : fichier
+   verrouillé avec empreintes, aucune compilation sur l'hébergement ;
+4. **avant** toute modification de la base : `check --deploy --fail-level WARNING`
+   (sécurité), puis `check --database default --tag database --fail-level WARNING`
+   (connexion et mode strict `mysql.W002` ; sans les contrôles de modèles, dont `models.W036`
+   que déclencheront les contraintes conditionnelles d'allauth ignorées par MariaDB) ; puis
+   `migrate`, puis `createcachetable` (tables `gestconf_cache` et `gestconf_throttle_cache`
+   du cache partagé, sans effet si elles existent) ;
+5. redémarrage de Passenger (`tmp/restart.txt`) ;
+6. envoi des fichiers statiques, fusion du `.htaccess` racine, tests de fumée.
+
+### Échec en cours de déploiement
+
+Il n'y a **pas de retour arrière automatique**. Si une commande distante échoue après l'envoi
+du code (étape 2), le nouveau code est déjà sur le disque, mais Passenger n'est pas redémarré
+et `RELEASE` garde l'ancienne valeur. Un processus Passenger créé ensuite (montée en charge,
+recyclage) chargera pourtant le nouveau code, éventuellement avec une base non migrée. Corriger
+la cause et relancer `deploy.sh` (toutes les étapes sont idempotentes), ou redéployer l'ancien
+commit (`git checkout <ancien commit>` puis `deploy.sh`). Les contrôles passent avant `migrate`
+pour qu'un avertissement n'arrête jamais le déploiement entre deux migrations appliquées.
 
 ### Le `.htaccess` racine
 
@@ -59,15 +83,40 @@ donc **que** le bloc délimité par `# BEGIN GEST-CONF` / `# END GEST-CONF`
 deploy/smoke-test.sh https://conference.exemple.org [version]
 ```
 
-Vérifie : page pré-rendue, en-tête CSP, replis SPA du portail et de la gestion,
-santé de l'API et de la base, HTTPS vu par Django, version déployée, **404 JSON
-sur une URL d'API inconnue** (preuve que le repli SPA n'intercepte pas `/api/`),
-absence d'admin Django.
+Vérifie :
+- portail : page pré-rendue, **CSP à empreintes en `<meta>`** sur `/` et sur le repli SPA
+  (pages `/compte/*`), en-tête CSP, repli SPA, `robots.txt` servi tel quel (texte) et
+  excluant `/api/`, `/gestion/` et `/compte/` ;
+- gestion : `base href`, **CSP en `<meta>`**, `X-Robots-Tag: noindex`, repli SPA ;
+- API : `/api/v1/health` en 200 avec **base et cache OK** (un `createcachetable` oublié donne
+  503 et `cache: error`), `X-Robots-Tag: noindex`, HTTPS vu par Django, version déployée,
+  **404 JSON sur une URL d'API inconnue** (preuve que le repli SPA n'intercepte pas
+  `/api/`), absence d'admin Django, **diagnostic de l'étape L1.0 désactivé** (404 sur
+  `/api/v1/diagnostics/request` : un `GESTCONF_DIAGNOSTICS=1` oublié fait échouer le test).
 
-## 4. Points à valider sur l'hébergement réel (lot L0)
+Les en-têtes JSON sont lus avec tolérance aux espaces. Validé localement contre le build de
+production et Django en réglages de production (y compris les contre-épreuves : pages sans
+CSP, `robots.txt` absent, table de cache absente) ; pas encore sur o2switch.
+
+## 4. Vérifications de l'hébergement (étape L1.0)
+
+Le script **en lecture seule** `deploy/check-o2switch.sh`, lancé en SSH, relève ce qui doit
+l'être sur le serveur (Python, glibc, roues binaires de `cryptography`, MariaDB et son mode
+SQL, verrous, outils, accès HTTPS sortants, venv cPanel, bloc Passenger…) sans afficher aucun
+secret :
+
+```bash
+ssh compte@serveur 'bash -s' < deploy/check-o2switch.sh | tee check-o2switch.txt
+```
+
+Résultats et contrôles manuels (cron, upload, mesure de `GESTCONF_TRUSTED_PROXY_COUNT`,
+sauvegardes…) : fiche [`docs/L1-verifications-o2switch.md`](../docs/L1-verifications-o2switch.md).
+
+### Points hérités du lot L0
 
 Ils ont été validés sur une simulation locale (Apache 2.4 + `.htaccess`, Django
-en configuration de production, Chromium), **pas encore sur o2switch** :
+en configuration de production, Chromium), **pas encore sur o2switch**. Chacun est repris
+dans la fiche L1.0 (dans l'ordre : M02 ; M05 ; M05 ; V06 et V04 ; M10 ; M01) :
 
 - [ ] Emplacement exact du bloc Passenger écrit par cPanel (`public_html/.htaccess`
       ou `public_html/api/.htaccess`) et absence de conflit avec nos règles.
