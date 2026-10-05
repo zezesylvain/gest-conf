@@ -56,6 +56,12 @@ def _fresh_health_cache_probe():
     reset_cache_probe()
 
 
+@pytest.fixture(autouse=True)
+def _isolated_command_locks(settings, tmp_path):
+    """Verrous des commandes cron dans un dossier propre au test, jamais dans backend/tmp."""
+    settings.GESTCONF_LOCK_DIR = tmp_path / "locks"
+
+
 @pytest.fixture
 def api_client() -> APIClient:
     """Client DRF anonyme (contrôle CSRF désactivé, comme le client de Django)."""

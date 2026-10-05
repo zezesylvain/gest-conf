@@ -20,6 +20,7 @@ def test_health_ok_without_authentication(client):
         "status": "ok",
         "database": "ok",
         "cache": "ok",
+        "jobs": "unknown",
         "secure": False,
         "release": "dev",
     }
@@ -48,6 +49,7 @@ def test_health_degraded_when_cache_is_down(client, monkeypatch):
         "status": "degraded",
         "database": "ok",
         "cache": "error",
+        "jobs": "unknown",
         "secure": False,
         "release": "dev",
     }
@@ -132,3 +134,38 @@ def test_cache_probe_failure_is_reported_until_it_expires(client, monkeypatch):
     assert client.get(reverse("core:health")).status_code == 503
     clock[0] += views.HEALTH_CACHE_PROBE_TTL
     assert client.get(reverse("core:health")).status_code == 200
+
+
+# --- État de la file (plan L1 §8.4) ---------------------------------------------------------
+
+
+def _beat(**fields):
+    from apps.core.models import CronHeartbeat
+
+    CronHeartbeat.objects.create(name="run_jobs", **fields)
+
+
+def test_health_jobs_ok_after_recent_run(client):
+    from django.core.management import call_command
+
+    call_command("run_jobs", verbosity=0)
+    response = client.get(reverse("core:health"))
+    assert response.json()["jobs"] == "ok"
+
+
+def test_health_jobs_late_after_three_intervals(client, settings):
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    settings.GESTCONF_CRON_INTERVAL_SECONDS = 60
+    _beat(last_success_at=timezone.now() - timedelta(seconds=181))
+    response = client.get(reverse("core:health"))
+    # Un cron en retard ne rend pas l'API indisponible.
+    assert response.status_code == 200
+    assert response.json()["jobs"] == "late"
+
+
+def test_health_jobs_unknown_without_success(client):
+    _beat(last_status="error")
+    assert client.get(reverse("core:health")).json()["jobs"] == "unknown"

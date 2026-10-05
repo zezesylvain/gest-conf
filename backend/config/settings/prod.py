@@ -1,7 +1,8 @@
 """Configuration de production (o2switch).
 
 Variables d'environnement obligatoires : DJANGO_SECRET_KEY, DJANGO_ALLOWED_HOSTS,
-DJANGO_CSRF_TRUSTED_ORIGINS, DATABASE_URL. Voir .env.example.
+DJANGO_CSRF_TRUSTED_ORIGINS, DATABASE_URL, GESTCONF_EMAIL_BACKEND, DEFAULT_FROM_EMAIL.
+Voir .env.example.
 """
 
 from .base import *
@@ -15,6 +16,10 @@ ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS")
 CSRF_TRUSTED_ORIGINS = env.list("DJANGO_CSRF_TRUSTED_ORIGINS")
 
 DATABASES = {"default": database_from_env()}
+
+# E-mails : fournisseur obligatoire (D10), jamais le backend « console » par défaut.
+EMAIL_BACKEND = env.str("GESTCONF_EMAIL_BACKEND")
+DEFAULT_FROM_EMAIL = env.str("DEFAULT_FROM_EMAIL")
 
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True

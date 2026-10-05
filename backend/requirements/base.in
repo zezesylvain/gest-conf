@@ -8,3 +8,4 @@ drf-spectacular==0.30.0       # schéma OpenAPI -> client TypeScript Angular
 django-filter==26.2
 django-environ==0.14.0        # configuration par variables d'environnement
 PyMySQL==1.2.3                # pilote MariaDB pur Python (pas de compilation sur o2switch)
+django-anymail==15.2          # e-mails transactionnels par API (Brevo ou Mailjet, décision D10)

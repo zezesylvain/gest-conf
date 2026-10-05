@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gestconf-backend\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-05 10:57+0000\n"
+"POT-Creation-Date: 2026-10-05 14:25+0000\n"
 "PO-Revision-Date: 2026-10-05 11:00+0000\n"
 "Last-Translator: GEST-CONF\n"
 "Language-Team: GEST-CONF\n"
@@ -14,6 +14,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
 #: apps/accounts/models.py
 msgid "adresse e-mail"
 msgstr "email address"
@@ -22,7 +23,7 @@ msgstr "email address"
 msgid "actif"
 msgstr "active"
 
-#: apps/accounts/models.py
+#: apps/accounts/models.py apps/communications/models.py
 msgid "langue"
 msgstr "language"
 
@@ -34,7 +35,118 @@ msgstr "user"
 msgid "utilisateurs"
 msgstr "users"
 
-#: apps/core/actor.py
+#: apps/communications/models.py
+msgid "en file"
+msgstr "queued"
+
+#: apps/communications/models.py
+msgid "en cours d'envoi"
+msgstr "sending"
+
+#: apps/communications/models.py
+msgid "envoyé"
+msgstr "sent"
+
+#: apps/communications/models.py apps/core/models.py
+msgid "en échec"
+msgstr "failed"
+
+#: apps/communications/models.py
+msgid "annulé"
+msgstr "cancelled"
+
+#: apps/communications/models.py
+msgid "destinataire"
+msgstr "recipient"
+
+#: apps/communications/models.py
+msgid "compte destinataire"
+msgstr "recipient account"
+
+#: apps/communications/models.py
+msgid "gabarit"
+msgstr "template"
+
+#: apps/communications/models.py
+msgid "objet"
+msgstr "subject"
+
+#: apps/communications/models.py
+msgid "corps (texte)"
+msgstr "body (text)"
+
+#: apps/communications/models.py
+msgid "corps (HTML)"
+msgstr "body (HTML)"
+
+#: apps/communications/models.py
+msgid "contient un lien à jeton"
+msgstr "contains a token link"
+
+#: apps/communications/models.py apps/core/models.py
+msgid "statut"
+msgstr "status"
+
+#: apps/communications/models.py apps/core/models.py
+msgid "tentatives"
+msgstr "attempts"
+
+#: apps/communications/models.py apps/core/models.py
+msgid "dernière erreur"
+msgstr "last error"
+
+#: apps/communications/models.py
+msgid "programmé le"
+msgstr "scheduled at"
+
+#: apps/communications/models.py
+msgid "envoyé le"
+msgstr "sent at"
+
+#: apps/communications/models.py
+msgid "corps purgé le"
+msgstr "body purged at"
+
+#: apps/communications/models.py
+msgid "identifiant chez le fournisseur"
+msgstr "provider message ID"
+
+#: apps/communications/models.py apps/core/models.py
+msgid "clé d'idempotence"
+msgstr "idempotency key"
+
+#: apps/communications/models.py
+msgid "e-mail envoyé"
+msgstr "sent email"
+
+#: apps/communications/models.py
+msgid "e-mails envoyés"
+msgstr "sent emails"
+
+#: apps/communications/templates/communications/email/test_message.txt
+#, python-format
+msgid ""
+"Bonjour,\n"
+"\n"
+"Ce message de test a été envoyé par la file d'envoi de %(site_name)s. Sa "
+"réception confirme que la tâche planifiée (cron) et le fournisseur d'e-mails "
+"fonctionnent.\n"
+"\n"
+"Aucune action n'est attendue de votre part."
+msgstr ""
+"Hello,\n"
+"\n"
+"This test message was sent by the %(site_name)s sending queue. Receiving it "
+"confirms that the scheduled task (cron) and the email provider are working.\n"
+"\n"
+"No action is required on your part."
+
+#: apps/communications/templates/communications/email/test_subject.txt
+#, python-format
+msgid "[%(site_name)s] E-mail de test"
+msgstr "[%(site_name)s] Test email"
+
+#: apps/core/actor.py apps/core/models.py
 msgid "commande"
 msgstr "command"
 
@@ -65,6 +177,174 @@ msgstr "Invalid data."
 #: apps/core/errors.py
 msgid "Quota atteint."
 msgstr "Quota reached."
+
+#: apps/core/models.py
+msgid "date"
+msgstr "date"
+
+#: apps/core/models.py
+msgid "acteur"
+msgstr "actor"
+
+#: apps/core/models.py
+msgid "type d'acteur"
+msgstr "actor kind"
+
+#: apps/core/models.py
+msgid "libellé de l'acteur"
+msgstr "actor label"
+
+#: apps/core/models.py
+msgid "action"
+msgstr "action"
+
+#: apps/core/models.py
+msgid "type d'objet"
+msgstr "object type"
+
+#: apps/core/models.py
+msgid "identifiant d'objet"
+msgstr "object ID"
+
+#: apps/core/models.py
+msgid "avant"
+msgstr "before"
+
+#: apps/core/models.py
+msgid "après"
+msgstr "after"
+
+#: apps/core/models.py
+msgid "motif"
+msgstr "reason"
+
+#: apps/core/models.py
+msgid "identifiant de requête"
+msgstr "request ID"
+
+#: apps/core/models.py
+msgid "adresse IP"
+msgstr "IP address"
+
+#: apps/core/models.py
+msgid "navigateur"
+msgstr "user agent"
+
+#: apps/core/models.py
+msgid "entrée du journal d'audit"
+msgstr "audit log entry"
+
+#: apps/core/models.py
+msgid "journal d'audit"
+msgstr "audit log"
+
+#: apps/core/models.py
+msgid "en attente"
+msgstr "pending"
+
+#: apps/core/models.py
+msgid "en cours"
+msgstr "running"
+
+#: apps/core/models.py
+msgid "terminée"
+msgstr "succeeded"
+
+#: apps/core/models.py
+msgid "annulée"
+msgstr "cancelled"
+
+#: apps/core/models.py
+msgid "urgente"
+msgstr "urgent"
+
+#: apps/core/models.py
+msgid "normale"
+msgstr "normal"
+
+#: apps/core/models.py
+msgid "envoi de masse"
+msgstr "bulk sending"
+
+#: apps/core/models.py
+msgid "type"
+msgstr "kind"
+
+#: apps/core/models.py
+msgid "données"
+msgstr "payload"
+
+#: apps/core/models.py
+msgid "priorité"
+msgstr "priority"
+
+#: apps/core/models.py
+msgid "à exécuter à partir de"
+msgstr "run at"
+
+#: apps/core/models.py
+msgid "tentatives maximales"
+msgstr "maximum attempts"
+
+#: apps/core/models.py
+msgid "réservée le"
+msgstr "locked at"
+
+#: apps/core/models.py
+msgid "réservée par"
+msgstr "locked by"
+
+#: apps/core/models.py
+msgid "terminée le"
+msgstr "finished at"
+
+#: apps/core/models.py
+msgid "tâche"
+msgstr "job"
+
+#: apps/core/models.py
+msgid "tâches"
+msgstr "jobs"
+
+#: apps/core/models.py
+msgid "réussi"
+msgstr "succeeded"
+
+#: apps/core/models.py
+msgid "en erreur"
+msgstr "failed"
+
+#: apps/core/models.py
+msgid "dernier démarrage"
+msgstr "last started at"
+
+#: apps/core/models.py
+msgid "dernière fin"
+msgstr "last finished at"
+
+#: apps/core/models.py
+msgid "dernier succès"
+msgstr "last success at"
+
+#: apps/core/models.py
+msgid "dernier statut"
+msgstr "last status"
+
+#: apps/core/models.py
+msgid "dernière durée (ms)"
+msgstr "last duration (ms)"
+
+#: apps/core/models.py
+msgid "éléments traités"
+msgstr "processed items"
+
+#: apps/core/models.py
+msgid "battement de cœur"
+msgstr "heartbeat"
+
+#: apps/core/models.py
+msgid "battements de cœur"
+msgstr "heartbeats"
 
 #: apps/core/views.py
 msgid "Méthode non autorisée."

@@ -103,6 +103,8 @@ jobs:
           DJANGO_SECRET_KEY: ci-only-${{ github.run_id }}-not-a-real-secret-key-0123456789abcdef
           DJANGO_ALLOWED_HOSTS: conference.exemple.org
           DJANGO_CSRF_TRUSTED_ORIGINS: https://conference.exemple.org
+          GESTCONF_EMAIL_BACKEND: anymail.backends.brevo.EmailBackend
+          DEFAULT_FROM_EMAIL: GEST-CONF <no-reply@conference.exemple.org>
         # Comme deploy.sh : sécurité sans --database (sinon models.W036, plan L1 §3.7), puis
         # contrôles de la base seuls (--tag database : connexion, mysql.W002 mode strict).
         run: |

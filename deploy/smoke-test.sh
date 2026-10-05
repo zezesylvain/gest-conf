@@ -72,6 +72,9 @@ health=$("${CURL[@]}" -D - -w '\n%{http_code}' "$BASE_URL/api/v1/health")
 check "API : /api/v1/health répond 200" "$([[ "${health##*$'\n'}" == "200" ]] && echo 1)"
 check "API : health -> base de données OK" "$(json_has "$health" database '"ok"' && echo 1)"
 check "API : health -> cache OK (table créée par createcachetable)" "$(json_has "$health" cache '"ok"' && echo 1)"
+# File de tâches : le cron run_jobs est passé avec succès récemment (deploy/cron.sh, crontab).
+# « unknown » au tout premier déploiement, tant que la crontab n'a pas tourné une fois.
+check "API : health -> jobs OK (cron run_jobs actif)" "$(json_has "$health" jobs '"ok"' && echo 1)"
 check "API : en-tête X-Robots-Tag noindex sur /api/" "$(has_header "$health" x-robots-tag 'noindex' && echo 1)"
 if [[ "$BASE_URL" == https://* ]]; then
   check "API : Django voit la requête en HTTPS (secure=true)" "$(json_has "$health" secure true && echo 1)"

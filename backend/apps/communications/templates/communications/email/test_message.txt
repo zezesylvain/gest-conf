@@ -1,0 +1,6 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate %}Bonjour,
+
+Ce message de test a été envoyé par la file d'envoi de {{ site_name }}. Sa réception confirme que la tâche planifiée (cron) et le fournisseur d'e-mails fonctionnent.
+
+Aucune action n'est attendue de votre part.{% endblocktranslate %}
+{% endautoescape %}

@@ -1,0 +1,23 @@
+from django.apps import AppConfig
+
+
+class CommunicationsConfig(AppConfig):
+    name = "apps.communications"
+    label = "communications"
+    verbose_name = "Communications"
+
+    def ready(self) -> None:
+        from apps.communications import jobs  # noqa: F401  (enregistre les tâches)
+        from apps.communications.services import (
+            purge_old_bodies,
+            purge_unsent_sensitive_bodies,
+            register_email_template,
+        )
+        from apps.core.retention import register_retention_task
+
+        register_retention_task(
+            "communications.unsent_sensitive_bodies", purge_unsent_sensitive_bodies, security=True
+        )
+        register_retention_task("communications.old_bodies", purge_old_bodies)
+        # E-mail de contrôle de la chaîne d'envoi (manage.py send_test_email, jalon J-tech).
+        register_email_template("communications/email/test")

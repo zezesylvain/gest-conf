@@ -84,6 +84,8 @@ components:
           $ref: '#/components/schemas/ServiceStatus'
         cache:
           $ref: '#/components/schemas/ServiceStatus'
+        jobs:
+          $ref: '#/components/schemas/JobsStatus'
         secure:
           type: boolean
           description: Vrai si Django voit la requête comme HTTPS (contrôle du déploiement).
@@ -92,6 +94,7 @@ components:
       required:
       - cache
       - database
+      - jobs
       - release
       - secure
       - status
@@ -103,6 +106,16 @@ components:
       description: |-
         * `ok` - Ok
         * `degraded` - Degraded
+    JobsStatus:
+      enum:
+      - ok
+      - late
+      - unknown
+      type: string
+      description: |-
+        * `ok` - Ok
+        * `late` - Late
+        * `unknown` - Unknown
     ServiceStatus:
       enum:
       - ok
