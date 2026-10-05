@@ -58,6 +58,9 @@
       </mat-select>
     </mat-form-field>
   </div>
+  <mat-checkbox formControlName="duplicates">{{
+    'gestion.submissions.duplicatesOnly' | translate
+  }}</mat-checkbox>
   <div class="actions">
     <button mat-flat-button type="submit">{{ 'gestion.submissions.apply' | translate }}</button>
     <button mat-button type="button" (click)="reset()">
@@ -103,7 +106,12 @@
                 row.reference || ('gestion.submissions.draft' | translate)
               }}</a>
             </td>
-            <td class="title">{{ row.title || ('gestion.submissions.untitled' | translate) }}</td>
+            <td class="title">
+              {{ row.title || ('gestion.submissions.untitled' | translate) }}
+              @if (row.possible_duplicate) {
+                <span class="badge warning">{{ 'gestion.submissions.duplicate' | translate }}</span>
+              }
+            </td>
             <td>{{ row.authors_label }}</td>
             <td>{{ row.track ?? '—' }}</td>
             <td>{{ row.submission_type ?? '—' }}</td>

@@ -80,6 +80,9 @@ class Submission(TimeStampedModel):
     )
     language = models.CharField(_("langue"), max_length=2, blank=True, default="")
     title = models.CharField(_("titre"), max_length=300, blank=True, default="")
+    # Titre normalisé (casse, accents, ponctuation), tenu à jour par les services : sert à
+    # signaler les doublons d'un même soumissionnaire (F15) sans calcul à la lecture.
+    title_key = models.CharField(_("titre normalisé"), max_length=300, blank=True, default="")
     abstract = models.TextField(_("résumé"), blank=True, default="")
     keywords = models.JSONField(_("mots-clés"), default=list, blank=True)
     status = models.CharField(
@@ -111,7 +114,10 @@ class Submission(TimeStampedModel):
     class Meta:
         verbose_name = _("soumission")
         verbose_name_plural = _("soumissions")
-        indexes = (models.Index(fields=["edition", "status"], name="sub_edition_status"),)
+        indexes = (
+            models.Index(fields=["edition", "status"], name="sub_edition_status"),
+            models.Index(fields=["edition", "submitter", "title_key"], name="sub_title_key"),
+        )
 
     def __str__(self) -> str:
         return self.reference or f"brouillon-{self.pk}"
@@ -313,3 +319,35 @@ class SubmissionExtension(TimeStampedModel):
         constraints = (
             models.CheckConstraint(condition=~Q(reason=""), name="sub_extension_reason"),
         )
+
+
+class ReminderKind(models.TextChoices):
+    """Rappels des brouillons avant la clôture de l'appel (F13, étude A2)."""
+
+    SEVEN_DAYS = "j7", _("sept jours avant la clôture")
+    ONE_DAY = "j1", _("la veille de la clôture")
+
+
+class DraftReminder(models.Model):
+    """Rappel envoyé pour un brouillon : la contrainte d'unicité rend l'envoi idempotent
+    (un cron relancé ou chevauchant n'envoie pas deux fois). Supprimé avec le brouillon
+    (``CASCADE`` : la ligne n'a aucune valeur sans lui, et un brouillon se supprime)."""
+
+    submission = models.ForeignKey(
+        Submission,
+        verbose_name=_("soumission"),
+        on_delete=models.CASCADE,
+        related_name="reminders",
+    )
+    kind = models.CharField(_("rappel"), max_length=4, choices=ReminderKind.choices)
+    sent_at = models.DateTimeField(_("envoyé le"))
+
+    class Meta:
+        verbose_name = _("rappel de brouillon")
+        verbose_name_plural = _("rappels de brouillon")
+        constraints = (
+            models.UniqueConstraint(fields=["submission", "kind"], name="sub_reminder_once"),
+        )
+
+    def __str__(self) -> str:
+        return f"{self.submission_id}:{self.kind}"

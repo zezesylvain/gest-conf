@@ -21,6 +21,7 @@ from apps.submissions.models import Submission, SubmissionFileKind
 from apps.submissions.models import SubmissionStatus as S
 from apps.submissions.serializers import (
     AuthorsWriteSerializer,
+    DuplicateSerializer,
     SubmissionCheckSerializer,
     SubmissionCreateSerializer,
     SubmissionFileUploadSerializer,
@@ -213,9 +214,11 @@ class SubmissionViewSet(GenericViewSet):
 
     @extend_schema(operation_id="submissions_check", responses={200: SubmissionCheckSerializer})
     def check(self, request: Request, submission_id: int) -> Response:
-        """RG-01 : ce qui manque pour soumettre, sans rien écrire."""
-        missing = services.missing_items(self._submission(submission_id))
-        return Response({"complete": not missing, "missing": missing})
+        """RG-01 : ce qui manque pour soumettre, sans rien écrire ; F15 : doublons possibles."""
+        submission = self._submission(submission_id)
+        missing = services.missing_items(submission)
+        duplicates = DuplicateSerializer(services.duplicates_of(submission), many=True).data
+        return Response({"complete": not missing, "missing": missing, "duplicates": duplicates})
 
     @extend_schema(
         operation_id="submissions_submit", request=None, responses={200: SubmissionSerializer}

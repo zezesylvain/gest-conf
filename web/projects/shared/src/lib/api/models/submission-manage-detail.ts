@@ -44,6 +44,11 @@ export interface SubmissionManageDetail {
    * Pages du PDF courant (null : aucun).
    */
   pages: number | null;
+
+  /**
+   * F15 : même soumissionnaire, même titre normalisé, autre soumission active.
+   */
+  possible_duplicate: boolean;
   reference: string | null;
   revisions: Array<RevisionSummary>;
   status: SubmissionStatus;

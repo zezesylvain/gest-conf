@@ -10,6 +10,7 @@ import { RequestBuilder } from '../../request-builder';
 import { PaginatedSubmissionManageList } from '../../models/paginated-submission-manage-list';
 
 export interface ManageSubmissionsList$Params {
+  duplicates?: boolean;
   edition_id: number;
   language?: string;
 
@@ -58,6 +59,7 @@ export interface ManageSubmissionsList$Params {
 export function manageSubmissionsList(http: HttpClient, rootUrl: string, params: ManageSubmissionsList$Params, context?: HttpContext): Observable<StrictHttpResponse<PaginatedSubmissionManageList>> {
   const rb = new RequestBuilder(rootUrl, manageSubmissionsList.PATH, 'get');
   if (params) {
+    rb.query('duplicates', params.duplicates, {});
     rb.path('edition_id', params.edition_id, {});
     rb.query('language', params.language, {});
     rb.query('ordering', params.ordering, {});

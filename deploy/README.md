@@ -122,12 +122,15 @@ dossier de l'application et y écrit le chemin du venv (`VENV_ACTIVATE`) : le cr
 ```text
 */5 * * * *  $HOME/gestconf-app/deploy/cron.sh run_jobs --max-seconds 240
 11 * * * *   $HOME/gestconf-app/deploy/cron.sh close_call
+13 * * * *   $HOME/gestconf-app/deploy/cron.sh remind_drafts
 17 3 * * *   $HOME/gestconf-app/deploy/cron.sh cleanup
 47 3 * * *   $HOME/gestconf-app/deploy/cron.sh check_integrity
 ```
 
 - `close_call` (toutes les heures) : à la clôture de l'appel, fait passer les soumissions en
   recevabilité, sauf dérogation en cours (traitée au premier passage après son échéance).
+- `remind_drafts` (toutes les heures) : rappel des brouillons sept jours puis la veille de la
+  clôture (e-mail et cloche), une fois par brouillon et par échéance.
 - `check_integrity` (quotidienne, lecture seule) : doublons d'adresses vérifiées et de 2FA
   (contraintes que MariaDB ne crée pas), cohérence invitations/rôles, taille du cache, tâches
   en échec. Les anomalies partent par e-mail aux opérateurs (`GESTCONF_OPERATORS`), sans

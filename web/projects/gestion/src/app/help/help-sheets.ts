@@ -104,6 +104,7 @@ export const HELP_SHEETS: readonly HelpSheet[] = [
     text(k('intro')),
     steps(k, 'filter', 'detail', 'export', 'extension'),
     callout('info', k, 'drafts'),
+    callout('info', k, 'duplicates'),
     callout('warning', k, 'closing'),
     callout('info', k, 'who'),
   ]),

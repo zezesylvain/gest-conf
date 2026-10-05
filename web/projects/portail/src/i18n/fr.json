@@ -20,7 +20,9 @@
         "logout": "Se déconnecter",
         "security": "Sécurité",
         "privacy": "Confidentialité",
-        "myData": "Mes données"
+        "myData": "Mes données",
+        "notifications": "Notifications",
+        "notificationsLabel": "Notifications ({{count}} non lue(s))"
       },
       "fields": {
         "email": "Adresse e-mail",
@@ -447,7 +449,8 @@
         "missing": "Avant de soumettre, complétez :",
         "submit": "Soumettre",
         "submitted": "Soumission enregistrée sous la référence {{reference}}. Un accusé de réception vous a été envoyé par e-mail.",
-        "delete": "Supprimer le brouillon"
+        "delete": "Supprimer le brouillon",
+        "duplicates": "Attention : vous avez déjà une soumission au même titre dans cette édition. Vérifiez qu'il ne s'agit pas d'un doublon (la soumission reste possible) :"
       },
       "withdraw": {
         "title": "Retirer la soumission",
@@ -458,6 +461,20 @@
       "timeline": {
         "title": "Historique",
         "revisions": "{{count}} version(s) enregistrée(s) après la soumission."
+      }
+    },
+    "notifications": {
+      "title": "Notifications",
+      "markAll": "Tout marquer comme lu",
+      "unread": "Non lue :",
+      "open": "Ouvrir la soumission",
+      "empty": "Aucune notification.",
+      "kinds": {
+        "submission_received": "Votre soumission {{reference}} « {{title}} » a bien été reçue.",
+        "submission_withdrawn": "Votre soumission {{reference}} « {{title}} » a été retirée.",
+        "coauthor_added": "Vous êtes déclaré co-auteur de la soumission {{reference}} « {{title}} » ({{edition}}).",
+        "extension_granted": "Délai supplémentaire pour votre soumission {{reference}} « {{title}} », jusqu'au {{until}}.",
+        "draft_reminder": "Votre brouillon « {{title}} » n'est pas encore soumis : l'appel ferme le {{closes}}."
       }
     }
   }

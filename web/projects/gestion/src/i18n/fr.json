@@ -602,7 +602,9 @@
           "closingTitle": "Clôture de l'appel",
           "closingText": "À la clôture, les soumissions passent en vérification de recevabilité, automatiquement, dans l'heure. Une soumission en dérogation y passe à l'échéance de sa dérogation. Une soumission en recevabilité ne reçoit plus de dérogation.",
           "whoTitle": "Qui peut le faire",
-          "whoText": "Consultation : administrateur, présidents et comité d'organisation. Dérogations et export : administrateur, président de la conférence et président du comité scientifique."
+          "whoText": "Consultation : administrateur, présidents et comité d'organisation. Dérogations et export : administrateur, président de la conférence et président du comité scientifique.",
+          "duplicatesTitle": "Doublons possibles",
+          "duplicatesText": "Une soumission est signalée quand le même soumissionnaire en a une autre, non retirée, au même titre (casse, accents et ponctuation ignorés). C'est un signal, pas un refus : l'auteur a été averti avant de soumettre."
         }
       }
     },
@@ -896,7 +898,10 @@
         "revoked": "Dérogation révoquée.",
         "revokeTitle": "Révoquer la dérogation",
         "revokeMessage": "La modification de la soumission sera de nouveau refusée (échéance prévue : {{date}})."
-      }
+      },
+      "duplicatesOnly": "Doublons possibles seulement (même auteur, même titre)",
+      "duplicate": "doublon possible",
+      "duplicateHint": "Le même soumissionnaire a une autre soumission au même titre : filtrez « Doublons possibles » pour les comparer."
     }
   }
 }

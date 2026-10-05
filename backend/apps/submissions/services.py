@@ -7,13 +7,14 @@ import csv
 import io
 import logging
 import re
+import unicodedata
 from collections.abc import Iterable, Mapping, Sequence
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any
 from zoneinfo import ZoneInfo
 
 from django.core.exceptions import ValidationError
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.db.models import Count, Exists, Max, OuterRef
 from django.utils import timezone
 from django.utils.text import capfirst
@@ -26,6 +27,8 @@ from apps.core.audit import record
 from apps.core.errors import ErrorCode, Invalid, NotAllowed, RuleViolation, StaleRevision
 from apps.submissions.declarations import DECLARATIONS, missing_declarations
 from apps.submissions.models import (
+    DraftReminder,
+    ReminderKind,
     Submission,
     SubmissionAuthor,
     SubmissionExtension,
@@ -45,6 +48,45 @@ def word_count(text: str) -> int:
     """Mots du résumé : suites de lettres ou chiffres, apostrophes et traits d'union
     internes compris (« l'appel », « bien-être » : un mot chacun)."""
     return len(_WORD.findall(text or ""))
+
+
+def normalized_title(title: str) -> str:
+    """Titre comparé pour les doublons (F15) : sans accents, en minuscules, ponctuation
+    retirée, espaces réduits. Copie figée dans la migration ``0003`` (remplissage)."""
+    text = unicodedata.normalize("NFKD", title or "")
+    text = "".join(char for char in text if not unicodedata.combining(char)).casefold()
+    return " ".join(re.sub(r"[^\w]+", " ", text).split())[:300]
+
+
+def duplicates_of(submission: Submission):
+    """F15 : autres soumissions non retirées du même soumissionnaire, dans la même édition,
+    au titre normalisé identique. Avertissement seulement : rien n'est bloqué."""
+    if not submission.title_key:
+        return Submission.objects.none()
+    return (
+        Submission.objects.filter(
+            edition_id=submission.edition_id,
+            submitter_id=submission.submitter_id,
+            title_key=submission.title_key,
+        )
+        .exclude(pk=submission.pk)
+        .exclude(status=SubmissionStatus.WITHDRAWN)
+        .order_by("created_at", "id")
+    )
+
+
+def duplicate_exists():
+    """Annotation de la liste de gestion (F15) : un doublon non retiré existe."""
+    return Exists(
+        Submission.objects.filter(
+            edition=OuterRef("edition"),
+            submitter=OuterRef("submitter"),
+            title_key=OuterRef("title_key"),
+        )
+        .exclude(pk=OuterRef("pk"))
+        .exclude(title_key="")
+        .exclude(status=SubmissionStatus.WITHDRAWN)
+    )
 
 
 def missing_items(submission: Submission) -> dict[str, list[str]]:
@@ -293,7 +335,8 @@ def update_submission(
     changed: list[str] = []
     if "title" in data:
         submission.title = " ".join(str(data["title"]).split())[:300]
-        changed.append("title")
+        submission.title_key = normalized_title(submission.title)
+        changed += ["title", "title_key"]
     if "abstract" in data:
         abstract = str(data["abstract"]).strip()
         if len(abstract) > ABSTRACT_MAX_CHARS:
@@ -758,3 +801,63 @@ def close_calls(*, now: datetime | None = None, actor: Actor | None = None) -> i
             continue
         moved += 1
     return moved
+
+
+# --- Rappels des brouillons (F13, étude A2) ----------------------------------------------------
+
+# Du plus proche au plus lointain : à moins d'un jour, le rappel « veille » remplace l'autre.
+REMINDER_WINDOWS: tuple[tuple[str, timedelta], ...] = (
+    (ReminderKind.ONE_DAY, timedelta(days=1)),
+    (ReminderKind.SEVEN_DAYS, timedelta(days=7)),
+)
+
+
+def due_reminder(closes_at: datetime, now: datetime) -> str | None:
+    """Rappel dû à ``now`` pour une clôture à ``closes_at`` (aucun après la clôture)."""
+    if now >= closes_at:
+        return None
+    for kind, window in REMINDER_WINDOWS:
+        if closes_at - now <= window:
+            return kind
+    return None
+
+
+def remind_drafts(*, now: datetime | None = None) -> int:
+    """Rappelle aux auteurs leurs brouillons sept jours puis la veille de la clôture
+    (e-mail et cloche). Idempotente : un rappel par brouillon et par échéance, garanti par
+    la contrainte d'unicité de ``DraftReminder`` (un passage manqué n'est pas rattrapé :
+    à la veille, seul le rappel de la veille part). Renvoie le nombre de rappels envoyés."""
+    from apps.submissions.notifications import draft_reminder
+
+    now = now or timezone.now()
+    horizon = now + REMINDER_WINDOWS[-1][1]
+    closings = (
+        KeyDate.objects.filter(
+            code=KeyDateCode.CALL_CLOSE,
+            at__gt=now,
+            at__lte=horizon,
+            edition__status=EditionStatus.PUBLISHED,
+        )
+        .select_related("edition")
+        .order_by("edition_id")
+    )
+    sent = 0
+    for closing in closings:
+        kind = due_reminder(closing.at, now)
+        if kind is None or not is_call_open(closing.edition, now):
+            continue
+        drafts = (
+            Submission.objects.filter(edition=closing.edition, status=SubmissionStatus.DRAFT)
+            .exclude(reminders__kind=kind)
+            .select_related("edition", "submitter", "submitter__profile")
+            .order_by("id")
+        )
+        for draft in drafts:
+            try:
+                with transaction.atomic():
+                    DraftReminder.objects.create(submission=draft, kind=kind, sent_at=now)
+                    draft_reminder(draft, closing.at)
+            except IntegrityError:
+                continue  # déjà envoyé par une exécution concurrente
+            sent += 1
+    return sent

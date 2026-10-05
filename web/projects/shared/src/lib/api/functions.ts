@@ -151,6 +151,10 @@ export type { MeConsentsCreate$Params as MeConsentsCreate$Params } from './fn/me
 export { meConsentsCreate as meConsentsCreate } from './fn/me/me-consents-create';
 export type { MeDataExport$Params as MeDataExport$Params } from './fn/me/me-data-export';
 export { meDataExport as meDataExport } from './fn/me/me-data-export';
+export type { MeNotifications$Params as MeNotifications$Params } from './fn/me/me-notifications';
+export { meNotifications as meNotifications } from './fn/me/me-notifications';
+export type { MeNotificationsRead$Params as MeNotificationsRead$Params } from './fn/me/me-notifications-read';
+export { meNotificationsRead as meNotificationsRead } from './fn/me/me-notifications-read';
 export type { MePhoto$Params as MePhoto$Params } from './fn/me/me-photo';
 export { mePhoto as mePhoto } from './fn/me/me-photo';
 export type { MePhotoUpdate$Params as MePhotoUpdate$Params } from './fn/me/me-photo-update';

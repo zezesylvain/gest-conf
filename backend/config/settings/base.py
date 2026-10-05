@@ -359,6 +359,7 @@ SPECTACULAR_SETTINGS = {
         "MenuLocation": "apps.portal.models.MenuLocation",
         "PublicFileKind": "apps.core.models.PublicFileKind",
         "PortalFileKind": "apps.portal.serializers.PORTAL_FILE_KIND_CHOICES",
+        "NotificationKind": "apps.communications.models.NotificationKind",
         "ErrorCode": "apps.core.errors.ErrorCode",
     },
     "POSTPROCESSING_HOOKS": [

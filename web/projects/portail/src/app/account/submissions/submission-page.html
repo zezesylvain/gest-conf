@@ -288,6 +288,21 @@
           </ul>
         }
       }
+      @if (check()?.duplicates?.length) {
+        <div class="warning" role="note">
+          <p>{{ 'portail.submissions.review.duplicates' | translate }}</p>
+          <ul>
+            @for (duplicate of check()!.duplicates; track duplicate.id) {
+              <li>
+                {{ duplicate.reference || ('portail.submissions.draft' | translate) }} —
+                {{ duplicate.title }} ({{
+                  'portail.submissions.status.' + duplicate.status | translate
+                }})
+              </li>
+            }
+          </ul>
+        </div>
+      }
       <p class="actions">
         @if (current.allowed_actions.includes('submit')) {
           <button

@@ -14,6 +14,7 @@ export function row(overrides: Partial<SubmissionManage> = {}): SubmissionManage
     authors_count: 2,
     pages: 3,
     extension_until: null,
+    possible_duplicate: false,
     submitted_at: '2026-10-01T10:00:00Z',
     updated_at: '2026-10-01T10:00:00Z',
     ...overrides,

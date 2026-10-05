@@ -1,0 +1,7 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate %}Bonjour,
+
+Votre brouillon « {{ title }} » pour {{ edition_title }} n'est pas encore soumis. L'appel à communications ferme le {{ call_close }} : après cette date, il ne pourra plus l'être.
+
+Pour le terminer et le soumettre : {{ link }}{% endblocktranslate %}
+
+{% include "account/email/_signature.txt" %}{% endautoescape %}

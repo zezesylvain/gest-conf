@@ -312,7 +312,11 @@ def test_check_then_submit_queues_receipt_and_coauthor_emails(setup):
         },
         format="json",
     )
-    assert client.get(f"{BASE}/{body['id']}/check").json() == {"complete": True, "missing": {}}
+    assert client.get(f"{BASE}/{body['id']}/check").json() == {
+        "complete": True,
+        "missing": {},
+        "duplicates": [],
+    }
     body = client.post(f"{BASE}/{body['id']}/submit").json()
     emails = {e.template_code: e for e in OutboxEmail.objects.all()}
     assert set(emails) == {"submission/email/received", "submission/email/coauthor"}

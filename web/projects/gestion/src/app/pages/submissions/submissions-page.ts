@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -62,8 +63,8 @@ export const ORDERINGS: readonly Ordering[] = [
 
 /**
  * Soumissions de l'édition (plan L3 §5, F10) : liste filtrée (statuts, thématique, type,
- * langue, recherche), triée, paginée ; export CSV des mêmes filtres (`submissions.export`,
- * journalisé). Identité des auteurs visible : rôles de `submissions.read` seulement (le
+ * langue, recherche, doublons possibles F15), triée, paginée ; export CSV des mêmes filtres
+ * (`submissions.export`, journalisé). Identité des auteurs visible : rôles de `submissions.read` seulement (le
  * serveur en décide ; un relecteur n'aura jamais cette vue, RG-04).
  */
 @Component({
@@ -75,6 +76,7 @@ export const ORDERINGS: readonly Ordering[] = [
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
+    MatCheckboxModule,
     MatButtonModule,
     ErrorSummary,
     PageHeader,
@@ -88,6 +90,10 @@ export const ORDERINGS: readonly Ordering[] = [
     }
     .extension {
       white-space: nowrap;
+    }
+    .badge.warning {
+      border-color: var(--gc-warning, #b26a00);
+      color: var(--gc-warning, #b26a00);
     }
   `,
 })
@@ -122,6 +128,7 @@ export class SubmissionsPage implements OnInit {
     track: [''],
     submission_type: [''],
     language: [''],
+    duplicates: [false],
     ordering: ['reference' as Ordering],
   });
 
@@ -170,6 +177,7 @@ export class SubmissionsPage implements OnInit {
     if (value.track) filters.track = value.track;
     if (value.submission_type) filters.submission_type = value.submission_type;
     if (value.language) filters.language = value.language;
+    if (value.duplicates) filters.duplicates = true;
     return filters;
   }
 

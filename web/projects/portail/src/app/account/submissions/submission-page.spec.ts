@@ -15,9 +15,11 @@ describe('SubmissionPage', () => {
     service = {
       get: vi.fn().mockResolvedValue(testSubmission()),
       currentEdition: vi.fn().mockResolvedValue(testEdition()),
-      check: vi
-        .fn()
-        .mockResolvedValue({ complete: false, missing: { file: ['Fichier PDF obligatoire.'] } }),
+      check: vi.fn().mockResolvedValue({
+        complete: false,
+        missing: { file: ['Fichier PDF obligatoire.'] },
+        duplicates: [],
+      }),
       timeline: vi.fn().mockResolvedValue({ history: [], revisions: [] }),
       update: vi.fn(),
       setAuthors: vi.fn(),
@@ -221,8 +223,24 @@ describe('SubmissionPage', () => {
     expect(submit.disabled).toBe(true);
   });
 
+  it('F15 : doublon possible signalé, soumission toujours possible', async () => {
+    service['check'].mockResolvedValue({
+      complete: true,
+      missing: {},
+      duplicates: [{ id: 3, reference: 'GC27-0002', status: 'submitted', title: 'Réseaux' }],
+    });
+    const { root, step } = await open();
+    await step(4);
+    expect(root.textContent).toContain('vous avez déjà une soumission au même titre');
+    expect(root.textContent).toContain('GC27-0002 — Réseaux (Soumise)');
+    const submit = [...root.querySelectorAll<HTMLButtonElement>('button')].find((button) =>
+      button.textContent?.includes('Soumettre'),
+    )!;
+    expect(submit.disabled).toBe(false);
+  });
+
   it('soumission complète : référence annoncée', async () => {
-    service['check'].mockResolvedValue({ complete: true, missing: {} });
+    service['check'].mockResolvedValue({ complete: true, missing: {}, duplicates: [] });
     service['submit'].mockResolvedValue(
       testSubmission({
         status: 'submitted',

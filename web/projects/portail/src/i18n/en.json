@@ -20,7 +20,9 @@
         "logout": "Sign out",
         "security": "Security",
         "privacy": "Privacy",
-        "myData": "My data"
+        "myData": "My data",
+        "notifications": "Notifications",
+        "notificationsLabel": "Notifications ({{count}} unread)"
       },
       "fields": {
         "email": "Email address",
@@ -447,7 +449,8 @@
         "missing": "Before submitting, complete:",
         "submit": "Submit",
         "submitted": "Submission recorded under reference {{reference}}. An acknowledgement has been sent to you by email.",
-        "delete": "Delete the draft"
+        "delete": "Delete the draft",
+        "duplicates": "Warning: you already have a submission with the same title in this edition. Check that it is not a duplicate (submitting remains possible):"
       },
       "withdraw": {
         "title": "Withdraw the submission",
@@ -458,6 +461,20 @@
       "timeline": {
         "title": "History",
         "revisions": "{{count}} version(s) recorded after submission."
+      }
+    },
+    "notifications": {
+      "title": "Notifications",
+      "markAll": "Mark all as read",
+      "unread": "Unread:",
+      "open": "Open the submission",
+      "empty": "No notifications.",
+      "kinds": {
+        "submission_received": "Your submission {{reference}} “{{title}}” has been received.",
+        "submission_withdrawn": "Your submission {{reference}} “{{title}}” has been withdrawn.",
+        "coauthor_added": "You have been listed as a co-author of submission {{reference}} “{{title}}” ({{edition}}).",
+        "extension_granted": "Extended deadline for your submission {{reference}} “{{title}}”, until {{until}}.",
+        "draft_reminder": "Your draft “{{title}}” has not been submitted yet: the call closes on {{closes}}."
       }
     }
   }

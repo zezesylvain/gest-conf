@@ -53,20 +53,22 @@ ORDERINGS = {
 
 class SubmissionFilter(django_filters.FilterSet):
     """Filtres de la liste et de l'export : statut (plusieurs), thématique et type (codes),
-    langue, recherche (référence, titre, nom d'auteur), tri explicite et déterministe."""
+    langue, recherche (référence, titre, nom d'auteur), doublons possibles (F15), tri
+    explicite et déterministe."""
 
     status = django_filters.MultipleChoiceFilter(choices=SubmissionStatus.choices)
     track = django_filters.CharFilter(field_name="track__code")
     submission_type = django_filters.CharFilter(field_name="submission_type__code")
     language = django_filters.CharFilter(field_name="language")
     q = django_filters.CharFilter(method="search", max_length=100)
+    duplicates = django_filters.BooleanFilter(method="filter_duplicates")
     ordering = django_filters.ChoiceFilter(
         method="order", choices=[(key, key) for key in ORDERINGS], empty_label=None
     )
 
     class Meta:
         model = Submission
-        fields = ("status", "track", "submission_type", "language", "q", "ordering")
+        fields = ("status", "track", "submission_type", "language", "q", "duplicates", "ordering")
 
     def search(self, queryset, name, value):
         value = value.strip()
@@ -78,6 +80,12 @@ class SubmissionFilter(django_filters.FilterSet):
         return queryset.filter(
             Q(reference__icontains=value) | Q(title__icontains=value) | Q(pk__in=by_author)
         )
+
+    def filter_duplicates(self, queryset, name, value):
+        """F15 : doublons possibles (annotation ``has_duplicate``), hors soumissions retirées."""
+        if value:
+            return queryset.filter(has_duplicate=True).exclude(status=SubmissionStatus.WITHDRAWN)
+        return queryset
 
     def order(self, queryset, name, value):
         return queryset.order_by(*ORDERINGS[value])
@@ -112,7 +120,12 @@ class SubmissionManageViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, 
 
     def get_queryset(self):
         # Tri par défaut (référence, brouillons à la fin), remplacé par « ordering ».
-        return super().get_queryset().order_by(*ORDERINGS["reference"])
+        return (
+            super()
+            .get_queryset()
+            .annotate(has_duplicate=services.duplicate_exists())
+            .order_by(*ORDERINGS["reference"])
+        )
 
     def get_serializer_context(self):
         return {**super().get_serializer_context(), "now": timezone.now()}

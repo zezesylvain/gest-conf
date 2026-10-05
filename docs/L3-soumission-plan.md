@@ -583,3 +583,66 @@ matrice a mis le défaut au jour dès qu'une soumission a existé dans son jeu d
 - rappels des brouillons ;
 - doublons (F15 : signalement dans la liste de gestion) ;
 - cloche de notifications (portail).
+
+## 16. Bilan de L3.5 (5 octobre 2026)
+
+**Doublons (F15)** :
+
+- **Titre normalisé** : `Submission.title_key` est tenu à jour par les services (sans
+  accents, en minuscules, ponctuation retirée, espaces réduits). La migration remplit les
+  soumissions existantes avec une copie figée de la normalisation ; un test vérifie que la
+  copie ne diverge pas du service.
+- **Doublon** : autre soumission non retirée du même soumissionnaire, dans la même édition, au
+  même titre normalisé.
+- **Auteur** : `GET …/check` renvoie `duplicates` ; le récapitulatif l'avertit, sans bloquer.
+- **Gestion** :
+  - indicateur `possible_duplicate`, calculé par une sous-requête (aucune requête par ligne) ;
+  - filtre « Doublons possibles seulement » ; badge dans la liste et le détail ;
+  - une soumission retirée n'est jamais signalée.
+
+**Rappels des brouillons (F13, étude A2)** :
+
+- **Commande `remind_drafts`**, ajoutée au cron (toutes les heures) :
+  - rappel sept jours avant la clôture, puis la veille, aux brouillons des éditions publiées
+    dont l'appel est ouvert ;
+  - e-mail (lien vers le brouillon, clôture à l'heure de l'édition) et cloche.
+- **Idempotence** : la table `DraftReminder` a une contrainte d'unicité (brouillon, échéance).
+  Un passage manqué n'est pas rattrapé : à la veille, seul le rappel de la veille part.
+
+**Cloche (F13)** :
+
+- **Modèle** `communications.Notification` (compte, nature, éléments, date de lecture).
+  - Le texte n'est pas stocké : l'interface le compose depuis la nature et les éléments.
+  - Les éléments ne viennent que de la soumission (référence, titre, échéance), jamais d'un
+    tiers.
+- **Natures en L3** : soumission reçue, soumission retirée, co-auteur déclaré, dérogation
+  accordée, rappel de brouillon.
+  - Elles doublent les e-mails existants.
+  - Le co-auteur avec compte est notifié sans lien : il n'a pas accès à la soumission avant
+    P2 (F5).
+- **API** : `GET /v1/me/notifications` (50 dernières et nombre de non lues) et
+  `POST /v1/me/notifications/read` (désignées ou toutes ; celles d'un autre compte ignorées).
+- **Portail** :
+  - cloche dans la navigation de l'espace compte : nombre de non lues, libellé accessible ;
+  - nombre relu à l'ouverture et à chaque navigation (règle n° 9 : pas de temps réel) ;
+  - page `/compte/notifications` : marquer tout comme lu, ouvrir la soumission.
+- **Données personnelles** : export ; suppression à l'anonymisation ; conservation D15 (non
+  validée, en simulation) : 6 mois après lecture, 12 mois au plus.
+
+**Vérifications** :
+
+- **Backend** : 1 524 tests sous SQLite, 1 531 sous MariaDB. 13 sont nouveaux :
+  normalisation, F15 côté auteur et gestion, fenêtres et idempotence des rappels, commande,
+  notifications des transitions, API de la cloche, comptes inactifs, export et
+  anonymisation, purge. Également : `ruff`, migrations,
+  schéma régénéré sur MariaDB, traductions à jour.
+- **Front** : portail 110 tests, gestion 88, shared 76 ; lint, format, build. Bundles initiaux
+  inchangés : portail 367,7 kB, gestion 360,8 kB.
+- **Chromium**, base locale :
+  - migration appliquée : titres normalisés remplis ;
+  - `remind_drafts` : 2 rappels, e-mail rendu en français avec la clôture à l'heure de
+    l'édition ;
+  - cloche à 2, puis 0 après « Tout marquer comme lu » ;
+  - textes composés par l'interface ;
+  - doublons listés au récapitulatif ;
+  - aucune erreur dans la console.

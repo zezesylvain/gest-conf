@@ -253,9 +253,20 @@ class SubmissionWriteSerializer(serializers.Serializer):
         return attrs
 
 
+class DuplicateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Submission
+        fields = ("id", "reference", "status", "title")
+        read_only_fields = fields
+
+
 class SubmissionCheckSerializer(serializers.Serializer):
     complete = serializers.BooleanField()
     missing = serializers.DictField(child=serializers.ListField(child=serializers.CharField()))
+    duplicates = DuplicateSerializer(
+        many=True,
+        help_text="F15 : ses autres soumissions au même titre (avertissement, non bloquant).",
+    )
 
 
 class WithdrawSerializer(serializers.Serializer):
@@ -313,6 +324,9 @@ class SubmissionManageSerializer(serializers.ModelSerializer):
     extension_until = serializers.SerializerMethodField(
         help_text="Échéance de la dérogation en cours (RG-02), sinon null."
     )
+    possible_duplicate = serializers.SerializerMethodField(
+        help_text="F15 : même soumissionnaire, même titre normalisé, autre soumission active."
+    )
 
     class Meta:
         model = Submission
@@ -328,6 +342,7 @@ class SubmissionManageSerializer(serializers.ModelSerializer):
             "authors_count",
             "pages",
             "extension_until",
+            "possible_duplicate",
             "submitted_at",
             "updated_at",
         )
@@ -351,6 +366,13 @@ class SubmissionManageSerializer(serializers.ModelSerializer):
     def get_pages(self, submission: Submission) -> int | None:
         current = _current_file(submission)
         return current.pages if current else None
+
+    def get_possible_duplicate(self, submission: Submission) -> bool:
+        # Annotation ``has_duplicate`` de la vue (pas de requête par ligne) ; une soumission
+        # retirée n'est pas signalée.
+        return bool(getattr(submission, "has_duplicate", False)) and (
+            submission.status != SubmissionStatus.WITHDRAWN
+        )
 
     @extend_schema_field(serializers.DateTimeField(allow_null=True))
     def get_extension_until(self, submission: Submission) -> Any:

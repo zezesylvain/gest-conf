@@ -88,6 +88,31 @@ describe('SubmissionsPage (gestion)', () => {
     );
   });
 
+  it('F15 : doublons possibles signalés et filtrables', async () => {
+    const { fixture, root } = await render();
+    expect(root.textContent).not.toContain('doublon possible');
+    api['list'].mockResolvedValue({
+      count: 1,
+      next: null,
+      previous: null,
+      results: [row({ possible_duplicate: true })],
+    });
+    const page = fixture.componentInstance as unknown as {
+      form: { patchValue(v: object): void };
+      search(): Promise<void>;
+    };
+    page.form.patchValue({ duplicates: true });
+    await page.search();
+    fixture.detectChanges();
+    expect(api['list']).toHaveBeenLastCalledWith(3, {
+      ordering: 'reference',
+      duplicates: true,
+      page: 1,
+      page_size: 25,
+    });
+    expect(root.querySelector('tbody')!.textContent).toContain('doublon possible');
+  });
+
   it('CO : pas de lien d’export (submissions.export)', async () => {
     const { root } = await render(OC);
     expect(root.querySelector('a[download]')).toBeNull();

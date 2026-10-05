@@ -602,7 +602,9 @@
           "closingTitle": "Closing of the call",
           "closingText": "When the call closes, submissions move to the eligibility check automatically, within the hour. A submission under extension moves when its extension ends. A submission under eligibility check can no longer receive an extension.",
           "whoTitle": "Who can do it",
-          "whoText": "Viewing: administrator, chairs and organising committee. Extensions and export: administrator, conference chair and scientific committee chair."
+          "whoText": "Viewing: administrator, chairs and organising committee. Extensions and export: administrator, conference chair and scientific committee chair.",
+          "duplicatesTitle": "Possible duplicates",
+          "duplicatesText": "A submission is flagged when the same submitter has another one, not withdrawn, with the same title (case, accents and punctuation ignored). It is a signal, not a refusal: the author was warned before submitting."
         }
       }
     },
@@ -896,7 +898,10 @@
         "revoked": "Extension revoked.",
         "revokeTitle": "Revoke the extension",
         "revokeMessage": "Changes to the submission will be refused again (planned deadline: {{date}})."
-      }
+      },
+      "duplicatesOnly": "Possible duplicates only (same author, same title)",
+      "duplicate": "possible duplicate",
+      "duplicateHint": "The same submitter has another submission with the same title: filter “Possible duplicates” to compare them."
     }
   }
 }

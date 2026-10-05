@@ -81,6 +81,13 @@ export const accountRoutes: Routes = [
           import('./submissions/submissions.routes').then((m) => m.submissionRoutes),
       },
       {
+        path: 'notifications',
+        title: 'portail.notifications.title',
+        canMatch: [authGuard],
+        loadComponent: () =>
+          import('./notifications/notifications-page').then((m) => m.NotificationsPage),
+      },
+      {
         path: 'profil',
         title: 'portail.account.profile.title',
         canMatch: [authGuard],

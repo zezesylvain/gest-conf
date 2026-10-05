@@ -24,6 +24,10 @@
       <dt>{{ 'gestion.submissions.fields.status' | translate }}</dt>
       <dd>
         <span class="badge">{{ 'gestion.submissions.status.' + current.status | translate }}</span>
+        @if (current.possible_duplicate) {
+          <span class="badge">{{ 'gestion.submissions.duplicate' | translate }}</span>
+          <span class="muted">{{ 'gestion.submissions.duplicateHint' | translate }}</span>
+        }
       </dd>
       <dt>{{ 'gestion.submissions.fields.submitter' | translate }}</dt>
       <dd>{{ current.submitter_name }}</dd>

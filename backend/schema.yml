@@ -1598,6 +1598,10 @@ paths:
     get:
       operationId: manage_submissions_list
       parameters:
+      - in: query
+        name: duplicates
+        schema:
+          type: boolean
       - in: path
         name: edition_id
         schema:
@@ -2088,6 +2092,39 @@ paths:
                 type: object
                 additionalProperties: {}
           description: Export JSON.
+  /v1/me/notifications:
+    get:
+      operationId: me_notifications
+      tags:
+      - me
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationList'
+          description: ''
+  /v1/me/notifications/read:
+    post:
+      operationId: me_notifications_read
+      tags:
+      - me
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationReadRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnreadCount'
+          description: ''
   /v1/me/photo:
     get:
       operationId: me_photo
@@ -2473,7 +2510,8 @@ paths:
   /v1/submissions/{submission_id}/check:
     get:
       operationId: submissions_check
-      description: 'RG-01 : ce qui manque pour soumettre, sans rien écrire.'
+      description: 'RG-01 : ce qui manque pour soumettre, sans rien écrire ; F15 :
+        doublons possibles.'
       parameters:
       - in: path
         name: submission_id
@@ -2967,6 +3005,31 @@ components:
       - accepted
       - code
       - text_version
+    Duplicate:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        reference:
+          type: string
+          readOnly: true
+          nullable: true
+          title: Référence
+        status:
+          allOf:
+          - $ref: '#/components/schemas/SubmissionStatus'
+          readOnly: true
+          title: Statut
+        title:
+          type: string
+          readOnly: true
+          title: Titre
+      required:
+      - id
+      - reference
+      - status
+      - title
     Edition:
       type: object
       description: Informations générales de l'édition (gestion, §6.1).
@@ -3937,6 +4000,75 @@ components:
       required:
       - items
       - location
+    Notification:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        kind:
+          allOf:
+          - $ref: '#/components/schemas/NotificationKind'
+          readOnly: true
+        payload:
+          type: object
+          additionalProperties: {}
+          readOnly: true
+          description: Éléments du texte (référence, titre, échéance), composé par
+            l'interface.
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        read_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Lue le
+      required:
+      - created_at
+      - id
+      - kind
+      - payload
+      - read_at
+    NotificationKind:
+      enum:
+      - submission_received
+      - submission_withdrawn
+      - coauthor_added
+      - extension_granted
+      - draft_reminder
+      type: string
+      description: |-
+        * `submission_received` - soumission reçue
+        * `submission_withdrawn` - soumission retirée
+        * `coauthor_added` - déclaré co-auteur
+        * `extension_granted` - dérogation accordée
+        * `draft_reminder` - brouillon à soumettre
+    NotificationList:
+      type: object
+      properties:
+        unread:
+          type: integer
+          description: Notifications non lues (toutes).
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Notification'
+      required:
+      - results
+      - unread
+    NotificationReadRequest:
+      type: object
+      properties:
+        ids:
+          type: array
+          items:
+            type: integer
+            minimum: 1
+          description: Notifications à marquer comme lues ; toutes si absent.
+          maxItems: 200
     OcFunction:
       enum:
       - finance
@@ -5919,8 +6051,15 @@ components:
             type: array
             items:
               type: string
+        duplicates:
+          type: array
+          items:
+            $ref: '#/components/schemas/Duplicate'
+          description: 'F15 : ses autres soumissions au même titre (avertissement,
+            non bloquant).'
       required:
       - complete
+      - duplicates
       - missing
     SubmissionCreateRequest:
       type: object
@@ -6051,6 +6190,11 @@ components:
           nullable: true
           readOnly: true
           description: Échéance de la dérogation en cours (RG-02), sinon null.
+        possible_duplicate:
+          type: boolean
+          readOnly: true
+          description: 'F15 : même soumissionnaire, même titre normalisé, autre soumission
+            active.'
         submitted_at:
           type: string
           format: date-time
@@ -6068,6 +6212,7 @@ components:
       - id
       - language
       - pages
+      - possible_duplicate
       - reference
       - status
       - submission_type
@@ -6128,6 +6273,11 @@ components:
           nullable: true
           readOnly: true
           description: Échéance de la dérogation en cours (RG-02), sinon null.
+        possible_duplicate:
+          type: boolean
+          readOnly: true
+          description: 'F15 : même soumissionnaire, même titre normalisé, autre soumission
+            active.'
         submitted_at:
           type: string
           format: date-time
@@ -6210,6 +6360,7 @@ components:
       - keywords
       - language
       - pages
+      - possible_duplicate
       - reference
       - revisions
       - status
@@ -6512,6 +6663,13 @@ components:
       required:
       - code
       - name_fr
+    UnreadCount:
+      type: object
+      properties:
+        unread:
+          type: integer
+      required:
+      - unread
     UserRoleStatus:
       enum:
       - active

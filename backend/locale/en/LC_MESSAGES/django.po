@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gestconf-backend\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-05 23:14+0000\n"
+"POT-Creation-Date: 2026-10-05 23:35+0000\n"
 "PO-Revision-Date: 2026-10-05 11:00+0000\n"
 "Last-Translator: GEST-CONF\n"
 "Language-Team: GEST-CONF\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: apps/accounts/models.py:29 apps/submissions/models.py:139
+#: apps/accounts/models.py:29 apps/submissions/models.py:145
 msgid "adresse e-mail"
 msgstr "email address"
 
@@ -67,15 +67,15 @@ msgstr "Ms"
 msgid "titre"
 msgstr "title"
 
-#: apps/accounts/models.py:86 apps/submissions/models.py:137
+#: apps/accounts/models.py:86 apps/submissions/models.py:143
 msgid "prénom"
 msgstr "first name"
 
-#: apps/accounts/models.py:87 apps/submissions/models.py:138
+#: apps/accounts/models.py:87 apps/submissions/models.py:144
 msgid "nom"
 msgstr "last name"
 
-#: apps/accounts/models.py:88 apps/submissions/models.py:140
+#: apps/accounts/models.py:88 apps/submissions/models.py:146
 msgid "institution"
 msgstr "institution"
 
@@ -84,7 +84,7 @@ msgid "département"
 msgstr "department"
 
 #: apps/accounts/models.py:92 apps/conferences/models.py:87
-#: apps/submissions/models.py:141
+#: apps/submissions/models.py:147
 msgid "pays"
 msgstr "country"
 
@@ -211,7 +211,7 @@ msgstr "organising committee function"
 
 #: apps/accounts/models.py:265 apps/accounts/models.py:356
 #: apps/communications/models.py:58 apps/conferences/models.py:106
-#: apps/core/models.py:208 apps/submissions/models.py:86
+#: apps/core/models.py:208 apps/submissions/models.py:89
 msgid "statut"
 msgstr "status"
 
@@ -335,7 +335,7 @@ msgstr "scientific committee chair"
 msgid "membre du comité scientifique"
 msgstr "scientific committee member"
 
-#: apps/accounts/roles.py:25 apps/submissions/models.py:146
+#: apps/accounts/roles.py:25 apps/submissions/models.py:152
 msgid "auteur"
 msgstr "author"
 
@@ -407,7 +407,7 @@ msgstr "Acknowledging the notice cannot be withdrawn."
 #: apps/accounts/services/account.py:169 apps/accounts/services/account.py:191
 #: apps/accounts/services/mfa.py:84 apps/accounts/services/personal_data.py:205
 #: apps/accounts/services/roles.py:196 apps/conferences/services.py:293
-#: apps/submissions/services.py:567 apps/submissions/workflow.py:125
+#: apps/submissions/services.py:611 apps/submissions/workflow.py:125
 msgid "Motif obligatoire."
 msgstr "A reason is required."
 
@@ -981,7 +981,7 @@ msgstr "last error"
 msgid "programmé le"
 msgstr "scheduled at"
 
-#: apps/communications/models.py:63
+#: apps/communications/models.py:63 apps/submissions/models.py:343
 msgid "envoyé le"
 msgstr "sent at"
 
@@ -1004,6 +1004,51 @@ msgstr "sent email"
 #: apps/communications/models.py:75
 msgid "e-mails envoyés"
 msgstr "sent emails"
+
+#: apps/communications/models.py:88
+msgid "soumission reçue"
+msgstr "submission received"
+
+#: apps/communications/models.py:89
+msgid "soumission retirée"
+msgstr "submission withdrawn"
+
+#: apps/communications/models.py:90
+msgid "déclaré co-auteur"
+msgstr "listed as co-author"
+
+#: apps/communications/models.py:91
+msgid "dérogation accordée"
+msgstr "extension granted"
+
+#: apps/communications/models.py:92
+msgid "brouillon à soumettre"
+msgstr "draft to submit"
+
+#: apps/communications/models.py:105 apps/submissions/models.py:137
+msgid "compte"
+msgstr "account"
+
+#: apps/communications/models.py:109 apps/core/models.py:285
+#: apps/submissions/models.py:177
+msgid "nature"
+msgstr "kind"
+
+#: apps/communications/models.py:110 apps/core/models.py:206
+msgid "données"
+msgstr "payload"
+
+#: apps/communications/models.py:111
+msgid "lue le"
+msgstr "read on"
+
+#: apps/communications/models.py:114
+msgid "notification"
+msgstr "notification"
+
+#: apps/communications/models.py:115
+msgid "notifications"
+msgstr "notifications"
 
 #: apps/communications/templates/communications/email/test_message.txt:1
 #, python-format
@@ -1150,7 +1195,7 @@ msgstr "editions"
 
 #: apps/conferences/models.py:179 apps/conferences/models.py:242
 #: apps/conferences/models.py:311 apps/core/models.py:296
-#: apps/portal/models.py:228 apps/submissions/models.py:128
+#: apps/portal/models.py:228 apps/submissions/models.py:134
 msgid "ordre"
 msgstr "order"
 
@@ -1387,13 +1432,13 @@ msgstr "Changed in the meantime (another tab?): reload before saving."
 msgid "Quota atteint."
 msgstr "Quota reached."
 
-#: apps/core/models.py:85 apps/submissions/models.py:211
-#: apps/submissions/models.py:268
+#: apps/core/models.py:85 apps/submissions/models.py:217
+#: apps/submissions/models.py:274
 msgid "date"
 msgstr "date"
 
-#: apps/core/models.py:88 apps/submissions/models.py:214
-#: apps/submissions/models.py:260
+#: apps/core/models.py:88 apps/submissions/models.py:220
+#: apps/submissions/models.py:266
 msgid "acteur"
 msgstr "actor"
 
@@ -1401,7 +1446,7 @@ msgstr "actor"
 msgid "type d'acteur"
 msgstr "actor kind"
 
-#: apps/core/models.py:105 apps/submissions/models.py:266
+#: apps/core/models.py:105 apps/submissions/models.py:272
 msgid "libellé de l'acteur"
 msgstr "actor label"
 
@@ -1425,8 +1470,8 @@ msgstr "before"
 msgid "après"
 msgstr "after"
 
-#: apps/core/models.py:112 apps/submissions/models.py:267
-#: apps/submissions/models.py:297
+#: apps/core/models.py:112 apps/submissions/models.py:273
+#: apps/submissions/models.py:303
 msgid "motif"
 msgstr "reason"
 
@@ -1465,10 +1510,6 @@ msgstr "normal"
 #: apps/core/models.py:195
 msgid "envoi de masse"
 msgstr "bulk sending"
-
-#: apps/core/models.py:206
-msgid "données"
-msgstr "payload"
 
 #: apps/core/models.py:210
 msgid "priorité"
@@ -1558,15 +1599,11 @@ msgstr "profile photo"
 msgid "identifiant public"
 msgstr "public identifier"
 
-#: apps/core/models.py:285 apps/submissions/models.py:171
-msgid "nature"
-msgstr "kind"
-
-#: apps/core/models.py:286 apps/submissions/models.py:173
+#: apps/core/models.py:286 apps/submissions/models.py:179
 msgid "nom de stockage"
 msgstr "storage name"
 
-#: apps/core/models.py:287 apps/submissions/models.py:174
+#: apps/core/models.py:287 apps/submissions/models.py:180
 msgid "nom d'origine"
 msgstr "original name"
 
@@ -1578,11 +1615,11 @@ msgstr "extension"
 msgid "type de contenu"
 msgstr "content type"
 
-#: apps/core/models.py:290 apps/submissions/models.py:175
+#: apps/core/models.py:290 apps/submissions/models.py:181
 msgid "taille (octets)"
 msgstr "size (bytes)"
 
-#: apps/core/models.py:291 apps/submissions/models.py:176
+#: apps/core/models.py:291 apps/submissions/models.py:182
 msgid "empreinte SHA-256"
 msgstr "SHA-256 digest"
 
@@ -1772,7 +1809,7 @@ msgstr "site page"
 msgid "page"
 msgstr "page"
 
-#: apps/portal/models.py:159 apps/submissions/models.py:177
+#: apps/portal/models.py:159 apps/submissions/models.py:183
 msgid "pages"
 msgstr "pages"
 
@@ -1820,7 +1857,7 @@ msgstr "menu items"
 msgid "mis en ligne le"
 msgstr "released on"
 
-#: apps/portal/models.py:271 apps/submissions/models.py:172
+#: apps/portal/models.py:271 apps/submissions/models.py:178
 msgid "version"
 msgstr "version"
 
@@ -2005,143 +2042,168 @@ msgstr "reference"
 msgid "soumissionnaire"
 msgstr "submitter"
 
-#: apps/submissions/models.py:83
+#: apps/submissions/models.py:85
+msgid "titre normalisé"
+msgstr "normalised title"
+
+#: apps/submissions/models.py:86
 msgid "résumé"
 msgstr "abstract"
 
-#: apps/submissions/models.py:84
+#: apps/submissions/models.py:87
 msgid "mots-clés"
 msgstr "keywords"
 
-#: apps/submissions/models.py:91
+#: apps/submissions/models.py:94
 msgid "soumise le"
 msgstr "submitted on"
 
-#: apps/submissions/models.py:92
+#: apps/submissions/models.py:95
 msgid "retirée le"
 msgstr "withdrawn on"
 
-#: apps/submissions/models.py:93
+#: apps/submissions/models.py:96
 msgid "motif du retrait"
 msgstr "withdrawal reason"
 
-#: apps/submissions/models.py:96
+#: apps/submissions/models.py:99
 msgid "révision"
 msgstr "revision"
 
-#: apps/submissions/models.py:98
+#: apps/submissions/models.py:101
 msgid "déclarations"
 msgstr "declarations"
 
-#: apps/submissions/models.py:112 apps/submissions/models.py:126
-#: apps/submissions/models.py:169 apps/submissions/models.py:206
-#: apps/submissions/models.py:248 apps/submissions/models.py:292
+#: apps/submissions/models.py:115 apps/submissions/models.py:132
+#: apps/submissions/models.py:175 apps/submissions/models.py:212
+#: apps/submissions/models.py:254 apps/submissions/models.py:298
+#: apps/submissions/models.py:338
 msgid "soumission"
 msgstr "submission"
 
-#: apps/submissions/models.py:113
+#: apps/submissions/models.py:116
 msgid "soumissions"
 msgstr "submissions"
 
-#: apps/submissions/models.py:131
-msgid "compte"
-msgstr "account"
-
-#: apps/submissions/models.py:142
+#: apps/submissions/models.py:148
 msgid "auteur correspondant"
 msgstr "corresponding author"
 
-#: apps/submissions/models.py:143
+#: apps/submissions/models.py:149
 msgid "auteur présentateur"
 msgstr "presenting author"
 
-#: apps/submissions/models.py:147
+#: apps/submissions/models.py:153
 msgid "auteurs"
 msgstr "authors"
 
-#: apps/submissions/models.py:159
+#: apps/submissions/models.py:165
 msgid "fichier principal"
 msgstr "main file"
 
-#: apps/submissions/models.py:160
+#: apps/submissions/models.py:166
 msgid "version finale"
 msgstr "camera-ready version"
 
-#: apps/submissions/models.py:178
+#: apps/submissions/models.py:184
 msgid "métadonnées retirées"
 msgstr "metadata removed"
 
-#: apps/submissions/models.py:179
+#: apps/submissions/models.py:185
 msgid "courant"
 msgstr "current"
 
-#: apps/submissions/models.py:182
+#: apps/submissions/models.py:188
 msgid "déposé par"
 msgstr "uploaded by"
 
-#: apps/submissions/models.py:188
+#: apps/submissions/models.py:194
 msgid "fichier de soumission"
 msgstr "submission file"
 
-#: apps/submissions/models.py:189
+#: apps/submissions/models.py:195
 msgid "fichiers de soumission"
 msgstr "submission files"
 
-#: apps/submissions/models.py:210
+#: apps/submissions/models.py:216
 msgid "numéro"
 msgstr "number"
 
-#: apps/submissions/models.py:220
+#: apps/submissions/models.py:226
 msgid "cliché"
 msgstr "snapshot"
 
-#: apps/submissions/models.py:235
+#: apps/submissions/models.py:241
 msgid "révision de soumission"
 msgstr "submission revision"
 
-#: apps/submissions/models.py:236
+#: apps/submissions/models.py:242
 msgid "révisions de soumission"
 msgstr "submission revisions"
 
-#: apps/submissions/models.py:253
+#: apps/submissions/models.py:259
 msgid "statut précédent"
 msgstr "previous status"
 
-#: apps/submissions/models.py:256
+#: apps/submissions/models.py:262
 msgid "nouveau statut"
 msgstr "new status"
 
-#: apps/submissions/models.py:282
+#: apps/submissions/models.py:288
 msgid "historique de statut"
 msgstr "status history"
 
-#: apps/submissions/models.py:283
+#: apps/submissions/models.py:289
 msgid "historiques de statut"
 msgstr "status histories"
 
-#: apps/submissions/models.py:296
+#: apps/submissions/models.py:302
 msgid "échéance (UTC)"
 msgstr "deadline (UTC)"
 
-#: apps/submissions/models.py:300
+#: apps/submissions/models.py:306
 msgid "accordée par"
 msgstr "granted by"
 
-#: apps/submissions/models.py:306
+#: apps/submissions/models.py:312
 msgid "accordée le"
 msgstr "granted on"
 
-#: apps/submissions/models.py:307
+#: apps/submissions/models.py:313
 msgid "révoquée le"
 msgstr "revoked on"
 
-#: apps/submissions/models.py:310
+#: apps/submissions/models.py:316
 msgid "dérogation"
 msgstr "extension"
 
-#: apps/submissions/models.py:311
+#: apps/submissions/models.py:317
 msgid "dérogations"
 msgstr "extensions"
+
+#: apps/submissions/models.py:327
+msgid "sept jours avant la clôture"
+msgstr "seven days before the closing"
+
+#: apps/submissions/models.py:328
+msgid "la veille de la clôture"
+msgstr "the day before the closing"
+
+#: apps/submissions/models.py:342
+msgid "rappel"
+msgstr "reminder"
+
+#: apps/submissions/models.py:346
+msgid "rappel de brouillon"
+msgstr "draft reminder"
+
+#: apps/submissions/models.py:347
+msgid "rappels de brouillon"
+msgstr "draft reminders"
+
+#: apps/submissions/notifications.py:65
+msgid "(sans titre)"
+msgstr "(untitled)"
 
 #: apps/submissions/pdf.py:47
 msgid "Le fichier n'est pas un PDF."
@@ -2171,194 +2233,194 @@ msgid ""
 msgstr ""
 "This PDF cannot be anonymised automatically: export it again and retry."
 
-#: apps/submissions/services.py:62
+#: apps/submissions/services.py:105
 msgid "Titre obligatoire."
 msgstr "Title required."
 
-#: apps/submissions/services.py:66
+#: apps/submissions/services.py:109
 msgid "Résumé obligatoire."
 msgstr "Abstract required."
 
-#: apps/submissions/services.py:70
+#: apps/submissions/services.py:113
 #, python-format
 msgid "Résumé trop long : %(words)s mots pour %(max)s au plus."
 msgstr "Abstract too long: %(words)s words for %(max)s at most."
 
-#: apps/submissions/services.py:75 apps/submissions/services.py:273
+#: apps/submissions/services.py:118 apps/submissions/services.py:316
 msgid "De 1 à 6 mots-clés."
 msgstr "From 1 to 6 keywords."
 
-#: apps/submissions/services.py:77
+#: apps/submissions/services.py:120
 msgid "Choisissez une thématique active."
 msgstr "Choose an active track."
 
-#: apps/submissions/services.py:79
+#: apps/submissions/services.py:122
 msgid "Choisissez un type de communication actif."
 msgstr "Choose an active submission type."
 
-#: apps/submissions/services.py:81
+#: apps/submissions/services.py:124
 msgid "Choisissez une langue acceptée par l'édition."
 msgstr "Choose a language accepted by the edition."
 
-#: apps/submissions/services.py:85
+#: apps/submissions/services.py:128
 msgid "Au moins un auteur."
 msgstr "At least one author."
 
-#: apps/submissions/services.py:88
+#: apps/submissions/services.py:131
 msgid "Au moins un auteur correspondant."
 msgstr "At least one corresponding author."
 
-#: apps/submissions/services.py:90
+#: apps/submissions/services.py:133
 msgid "Le soumissionnaire fait partie des auteurs."
 msgstr "The submitter must be one of the authors."
 
-#: apps/submissions/services.py:95
+#: apps/submissions/services.py:138
 msgid "Fichier PDF obligatoire pour ce type de communication."
 msgstr "A PDF file is required for this submission type."
 
-#: apps/submissions/services.py:98
+#: apps/submissions/services.py:141
 msgid "Acceptez toutes les déclarations."
 msgstr "Accept all declarations."
 
-#: apps/submissions/services.py:153
+#: apps/submissions/services.py:196
 msgid "Cette soumission n'est plus modifiable."
 msgstr "This submission can no longer be changed."
 
-#: apps/submissions/services.py:156 apps/submissions/services.py:231
+#: apps/submissions/services.py:199 apps/submissions/services.py:274
 #: apps/submissions/workflow.py:109
 msgid "L'appel à communications est clos."
 msgstr "The call for papers is closed."
 
-#: apps/submissions/services.py:227
+#: apps/submissions/services.py:270
 msgid ""
 "Complétez votre profil (nom, prénom, institution, pays) avant de soumettre."
 msgstr ""
 "Complete your profile (first name, last name, institution, country) before "
 "submitting."
 
-#: apps/submissions/services.py:258
+#: apps/submissions/services.py:301
 msgid "Liste attendue."
 msgstr "A list is expected."
 
-#: apps/submissions/services.py:267
+#: apps/submissions/services.py:310
 #, python-format
 msgid "%(max)s caractères au plus."
 msgstr "%(max)s characters at most."
 
-#: apps/submissions/services.py:299
+#: apps/submissions/services.py:343
 msgid "Résumé trop long."
 msgstr "Abstract too long."
 
-#: apps/submissions/services.py:308
+#: apps/submissions/services.py:352
 msgid "Langue non acceptée par l'édition."
 msgstr "Language not accepted by the edition."
 
-#: apps/submissions/services.py:315
+#: apps/submissions/services.py:359
 msgid "Choix invalide pour cette édition."
 msgstr "Invalid choice for this edition."
 
-#: apps/submissions/services.py:322
+#: apps/submissions/services.py:366
 msgid "Déclaration inconnue."
 msgstr "Unknown declaration."
 
-#: apps/submissions/services.py:371
+#: apps/submissions/services.py:415
 msgid "De 1 à 30 auteurs."
 msgstr "From 1 to 30 authors."
 
-#: apps/submissions/services.py:381
+#: apps/submissions/services.py:425
 msgid "Nom et prénom obligatoires."
 msgstr "First and last names required."
 
-#: apps/submissions/services.py:383
+#: apps/submissions/services.py:427
 msgid "Adresse e-mail obligatoire."
 msgstr "Email address required."
 
-#: apps/submissions/services.py:385
+#: apps/submissions/services.py:429
 msgid "Adresse en double."
 msgstr "Duplicate address."
 
-#: apps/submissions/services.py:390
+#: apps/submissions/services.py:434
 msgid "Pays inconnu."
 msgstr "Unknown country."
 
-#: apps/submissions/services.py:442
+#: apps/submissions/services.py:486
 msgid "Choisissez d'abord le type de communication."
 msgstr "Choose the submission type first."
 
-#: apps/submissions/services.py:444
+#: apps/submissions/services.py:488
 msgid "Ce type de communication ne prend pas de fichier."
 msgstr "This submission type takes no file."
 
-#: apps/submissions/services.py:446
+#: apps/submissions/services.py:490
 msgid "Fichier PDF attendu (.pdf)."
 msgstr "A PDF file (.pdf) is expected."
 
-#: apps/submissions/services.py:452
+#: apps/submissions/services.py:496
 #, python-format
 msgid "Fichier trop volumineux (%(max)s Mo au plus)."
 msgstr "File too large (%(max)s MB at most)."
 
-#: apps/submissions/services.py:532
+#: apps/submissions/services.py:576
 msgid "Une soumission envoyée ne se supprime pas : retirez-la."
 msgstr "A submitted submission cannot be deleted: withdraw it."
 
-#: apps/submissions/services.py:563
+#: apps/submissions/services.py:607
 msgid "Dérogation impossible : la soumission n'est plus modifiable."
 msgstr "Extension impossible: the submission can no longer be changed."
 
-#: apps/submissions/services.py:573
+#: apps/submissions/services.py:617
 msgid "Échéance dans le futur attendue."
 msgstr "A deadline in the future is expected."
 
-#: apps/submissions/services.py:667
+#: apps/submissions/services.py:711
 msgid "Référence"
 msgstr "Reference"
 
-#: apps/submissions/services.py:668
+#: apps/submissions/services.py:712
 msgid "Statut"
 msgstr "Status"
 
-#: apps/submissions/services.py:669
+#: apps/submissions/services.py:713
 msgid "Titre"
 msgstr "Title"
 
-#: apps/submissions/services.py:670
+#: apps/submissions/services.py:714
 msgid "Thématique"
 msgstr "Track"
 
-#: apps/submissions/services.py:671
+#: apps/submissions/services.py:715
 msgid "Type"
 msgstr "Type"
 
-#: apps/submissions/services.py:672
+#: apps/submissions/services.py:716
 msgid "Langue"
 msgstr "Language"
 
-#: apps/submissions/services.py:673
+#: apps/submissions/services.py:717
 msgid "Auteurs"
 msgstr "Authors"
 
-#: apps/submissions/services.py:674
+#: apps/submissions/services.py:718
 msgid "Correspondants"
 msgstr "Corresponding authors"
 
-#: apps/submissions/services.py:675
+#: apps/submissions/services.py:719
 msgid "Mots-clés"
 msgstr "Keywords"
 
-#: apps/submissions/services.py:676
+#: apps/submissions/services.py:720
 msgid "Résumé"
 msgstr "Abstract"
 
-#: apps/submissions/services.py:677
+#: apps/submissions/services.py:721
 msgid "Pages"
 msgstr "Pages"
 
-#: apps/submissions/services.py:678
+#: apps/submissions/services.py:722
 msgid "Soumise le"
 msgstr "Submitted on"
 
-#: apps/submissions/services.py:679
+#: apps/submissions/services.py:723
 msgid "Modifiée le"
 msgstr "Updated on"
 
@@ -2381,6 +2443,26 @@ msgstr ""
 #, python-format
 msgid "[%(site_name)s] Vous êtes déclaré co-auteur d'une soumission"
 msgstr "[%(site_name)s] You have been listed as a co-author of a submission"
+
+#: apps/submissions/templates/submission/email/draft_reminder_message.txt:1
+#, python-format
+msgid ""
+"Bonjour,\n"
+"\n"
+"Votre brouillon « %(title)s » pour %(edition_title)s n'est pas encore soumis. L'appel à communications ferme le %(call_close)s : après cette date, il ne pourra plus l'être.\n"
+"\n"
+"Pour le terminer et le soumettre : %(link)s"
+msgstr ""
+"Hello,\n"
+"\n"
+"Your draft “%(title)s” for %(edition_title)s has not been submitted yet. The call for papers closes on %(call_close)s: after that date, it can no longer be submitted.\n"
+"\n"
+"To finish and submit it: %(link)s"
+
+#: apps/submissions/templates/submission/email/draft_reminder_subject.txt:1
+#, python-format
+msgid "[%(site_name)s] Votre brouillon n'est pas encore soumis"
+msgstr "[%(site_name)s] Your draft has not been submitted yet"
 
 #: apps/submissions/templates/submission/email/extension_message.txt:1
 #, python-format
