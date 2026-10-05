@@ -361,3 +361,64 @@ n'est remise en cause.
   - aucune erreur dans la console.
 - **Bundle initial de la gestion** : 356,6 kB (336,7 avant), budget de 500 kB. Celui du
   portail est inchangé.
+
+## 13. Bilan de L2.2 (5 octobre 2026)
+
+**Livré (backend)** :
+
+- **App `portal`** :
+  - modèles `Section`, `Page` (marquée `is_system` d'après `SITE_ROUTES` à l'enregistrement
+    et par migration de données), `PageSection`, `MenuItem` et `Publication` ;
+  - `site.py` : `SITE_PAGES`, la liste unique des 8 pages du site, chacune avec ses adresses
+    FR/EN (`/fr/appel/`, `/en/call/`…) ; les pages personnalisées sont sous `/<langue>/p/<slug>/`.
+- **Assainisseur** `sanitizer.py` (bibliothèque standard, `html.parser`) :
+  - balises de la liste blanche ; `b` et `i` deviennent `strong` et `em` ;
+  - balises dangereuses supprimées avec leur contenu ;
+  - un seul attribut, `href`, limité à `http(s):`, `mailto:`, `tel:` ou à un chemin interne
+    (`/…`, jamais `//`) ;
+  - sortie stable (réassainir ne change rien) ;
+  - testé contre 18 charges XSS connues.
+- **Services audités** (`portal.*`) :
+  - sections, avec une configuration bornée selon le type ; les sections « données » n'ont
+    pas de corps ;
+  - pages : adresse et publication figées pour les pages du site, qui ne se suppriment pas ;
+    une page présente dans un menu ne se supprime pas non plus ;
+  - composition (poser, retirer, ordonner) : l'ordre s'envoie en liste complète, et chaque
+    écriture renvoie la composition relue depuis la base ;
+  - suppression d'une section encore posée : 400, avec le nom des pages ;
+  - menus : une page **ou** une adresse ; réordonnancement par liste complète ;
+  - édition archivée : lecture seule, aperçu compris.
+- **Seed à la création d'une édition** : pages du site, sections « données » et menu
+  d'en-tête, sans aucune composition. La commande `seed_portal` est idempotente.
+- **État de publication** :
+  - `mark_portal_published <code> --release` ;
+  - `GET …/portal/status` renvoie la dernière mise en ligne et le nombre de modifications
+    non publiées, compté dans le journal : `portal.*`, `edition.updated`,
+    `edition.status_changed`, `track.*`, `submission_type.*`, `key_date.*`.
+- **API** :
+  - gestion `v1/manage/editions/{id}/portal/…` : `sections` (avec `preview`), `pages` (avec
+    `attach`, `detach`, `reorder`), `menu` (avec `reorder`), `status` ;
+  - public `v1/public/portal/…` : `routes` (avec le nombre attendu), `pages/<slug>`,
+    `menu?location=`, `site`.
+- **Capacité `portal.write`** : ADMIN, CHAIR, et OC_MEMBER de fonction `communication`
+  (règle (rôle, fonction) `FUNCTION_CAPABILITIES`, E11).
+
+**Écarts avec le plan, et pourquoi** :
+
+| Plan | Fait | Raison |
+|---|---|---|
+| Champ `Section.key` | `Section.code` | Le journal d'audit refuse toute clé nommée `key` (secrets) ; `code` est cohérent avec les thématiques et les types |
+| `GET …/composition/<chemin\|slug>` | `GET /v1/public/portal/pages/<slug>` | Le slug suffit : les adresses se déduisent de `SITE_PAGES` |
+| — | Adresses e-mail masquées dans le journal des contenus du portail (`c***@conf.org`), pas en base | Le journal refuse les adresses en clair : un corps ou un lien `mailto:` aurait sinon fait échouer l'enregistrement (500), ce que le test de la matrice a révélé |
+| Pages du site publiables ou non | Toujours publiées | Gabarit codé, adresse figée, menu ; une page « à venir » garde son gabarit |
+| Image de section, affiche de l'édition | Reportées à L2.4 | Dépendent du modèle « fichier public » |
+| Données « documents » et « comités » | Listes vides | Fichiers publics en L2.4 ; comités avec consentements en L2.6 |
+
+**Vérifications** :
+
+- Backend : **1 196 tests réussis** sous SQLite et **1 202 sous MariaDB** 10.11 :
+  - matrice des droits étendue aux 23 routes du portail, avec un profil « CO
+    communication » ;
+  - assainisseur, services, API publique et de gestion (pas de requêtes N+1), commandes.
+- Couverture de `apps/portal` : 94 %.
+- Schéma OpenAPI régénéré et validé ; client TypeScript régénéré ; front inchangé, au vert.

@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "apps.accounts",
     "apps.communications",
     "apps.conferences",
+    "apps.portal",
     # Après les applications du projet : leurs gabarits d'e-mails (account/email/*) priment.
     "allauth",
     "allauth.account",
@@ -342,6 +343,8 @@ SPECTACULAR_SETTINGS = {
         "SkippedReason": "apps.accounts.services.invitations.SkippedReason",
         "ActorKind": "apps.core.actor.ActorKind",
         "EditionStatus": "apps.conferences.models.EditionStatus",
+        "SectionType": "apps.portal.models.SectionType",
+        "MenuLocation": "apps.portal.models.MenuLocation",
         "ErrorCode": "apps.core.errors.ErrorCode",
     },
     "POSTPROCESSING_HOOKS": [
