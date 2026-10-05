@@ -2200,7 +2200,7 @@ Ces mises à jour seront livrées par une PR de documentation en L1.8, **après 
 
 ---
 
-## 16. Écarts constatés pendant l'implémentation (L1.0 à L1.3)
+## 16. Écarts constatés pendant l'implémentation (L1.0 à L1.6)
 
 Consignés ici pour ne pas dériver en silence (CLAUDE.md). Les écarts marqués **à valider** attendent
 l'accord du commanditaire ; les autres sont des précisions sans effet sur les décisions D1 à D18.
@@ -2365,3 +2365,133 @@ Ils seront repris dans la PR de documentation de L1.8 (§15).
 32. **§3.8.** `accounts/0002` regroupe `anonymized_at`, `Profile` et `Consent`, comme le prévoit
     le tableau des migrations. `GESTCONF_PUBLIC_URL` est obligatoire en production, en
     `https://` (contrôle au démarrage).
+
+### Étape L1.4 (socle front et pages de compte)
+
+33. **§10.5, budget `initial` du portail (à valider).** Mesure : 356,6 kB bruts, 102,6 kB
+    transférés, contre 307 kB et 84 kB avant L1.4. Le budget passe de 312/327 kB à **365/380 kB**.
+    Cause établie par essais : esbuild découpe par module ; le code d'`@angular/core` qu'utilise
+    l'espace compte, pourtant chargé à la demande, est placé dans un morceau importé par `main`.
+    Coque seule : +12 kB ; composants Material : +33 kB ; infrastructure de session
+    (intercepteurs, `AuthApi`, stores) : environ 15 kB. Ni `afterNextRender` ni la feuille de thème
+    n'y sont pour quelque chose (vérifié). Piste si la valeur gêne : sortir `/compte` dans une
+    application séparée, à décider.
+34. **§10.5, feuille du thème (vérifié).** `inject: false` produit `gc-theme.css` **sans
+    empreinte** (7,1 kB, 1,1 kB transférés), absente de `index.html` et `index.csr.html` (contrôle
+    en CI). Faute d'empreinte, le `.htaccess` la sert en `no-cache` (revalidation). L'absence de
+    clignotement au premier affichage n'a pas été mesurée (aucun constaté sur les captures).
+    L'API de thème de Material 22 (`mat.theme`, palettes M3) est confirmée.
+35. **§10.1, nom `GcApiError`.** Le client généré exporte déjà un modèle `ApiError` (format
+    DRF) : l'erreur normalisée côté Angular s'appelle `GcApiError` (`status`, `code`, `message`,
+    `fields`, `body`).
+36. **§10.1, périmètre des intercepteurs en L1.4.** Gérés : `Accept-Language`, 401 sous
+    `/api/v1/` seulement (expiration : vidage des stores, connexion avec `next`), `csrf_failed`
+    (rechargement du cookie puis une seule nouvelle tentative). Bogue évité et testé : le premier
+    événement `Sent` de l'amorçage déclenchait la nouvelle tentative trop tôt. `mfa_required`,
+    `mfa_enrollment_required` et `reauthentication_required` arrivent avec les codes qui les émettent
+    (L1.5, L1.6), de même que `capabilityGuard` et le contexte actif (L1.5, L1.7).
+37. **Outillage.** Material 22 n'exige pas `@angular/animations`. Le verrou npm doit être modifié
+    avec npm 11.19.0 (`packageManager`) : npm 10 retire les champs `libc`.
+38. **Démo A, vérifiée en local seulement.** Parcours rejoué dans Chromium (Playwright, script hors
+    dépôt), Django en développement et `ng serve` : inscription avec un navigateur en anglais,
+    e-mail en anglais, vérification (clé effacée de l'adresse), connexion avec `next`, notice,
+    profil (ORCID refusé puis accepté), langue enregistrée dans le compte, déconnexion,
+    réinitialisation par le lien envoyé au passage de `run_jobs`, nouvelle connexion ; `noindex`
+    et thème chargé sur `/compte`. **Reste à faire sur o2switch** (critère de L1.4), après J-tech.
+    Le test E2E automatisé reste prévu en L3. Limite constatée : coller un nouveau lien de
+    vérification dans l'onglet déjà ouvert sur `/compte/verifier-email` ne change que le fragment
+    et n'est pas pris en compte ; le clic depuis l'e-mail, qui charge la page, fonctionne.
+
+### Étape L1.5 (éditions, rôles et permissions)
+
+39. **§9.1, catalogue `ErrorCode`.** Quatre codes s'ajoutent à ceux que prévoyait le §9.1 :
+    `invitation_not_pending` (accepter, refuser, renvoyer ou annuler une invitation déjà traitée),
+    `invitation_resend_limit` (trois envois au plus par invitation), `invalid_transition` (statut
+    d'édition) et `edition_incomplete` (publication refusée, détail par champ dans `fields`). Les
+    codes `mfa_required`, `mfa_enrollment_required` et `account_has_active_duties` n'entrent au
+    catalogue qu'avec le code qui les émet (L1.6, L1.8). Traductions FR/EN ajoutées côté Angular.
+40. **§5.7, invitations groupées.** La création renvoie les invitations créées et les adresses
+    ignorées, masquées, avec un motif `SkippedReason` : `already_pending` ou `already_member`.
+    Plafonds : 50 adresses par requête, 100 adresses par heure et par édition (`QuotaExceeded`,
+    429), 3 envois par invitation.
+41. **§6.2, `tzdata` (vérifié).** Version 2026.5, licence **Apache-2.0**, pur Python, sans
+    dépendance système. La conversion `at_local` → `at` refuse une heure inexistante ou ambiguë
+    (testé sur `Europe/Paris` ; `Africa/Abidjan` n'a pas d'heure d'été). Côté DRF, un champ
+    `LocalDateTimeField` empêche DRF de rendre la valeur consciente du fuseau du serveur avant la
+    conversion par le service.
+42. **§5.5, `last_admin`.** Par l'API, le cas n'arrive qu'en concurrence : on ne retire jamais son
+    propre rôle, et révoquer un autre ADMIN suppose d'en être un, donc d'être deux. Deux ADMIN qui
+    se révoquent l'un l'autre en même temps verrouillent chacun une ligne différente : sans autre
+    précaution, chacun compterait deux ADMIN et l'édition n'en aurait plus aucun. `revoke_role`
+    verrouille donc d'abord la ligne de l'édition, puis compte les ADMIN par lecture verrouillante
+    (dernier état validé). Test MariaDB à deux transactions concurrentes ; il échoue sans verrou
+    (vérifié). La protection existait déjà par effet de bord (le `select_related` du
+    `SELECT … FOR UPDATE` verrouille aussi l'édition) : elle est rendue explicite. La commande
+    `revoke_role` peut retirer le dernier ADMIN, avec motif.
+43. **§5.3, `MfaVerified` inactive.** Elle figure dans `ManageViewSet` mais reste sans effet tant
+    qu'`allauth.mfa` n'est pas installé (L1.6). La matrice des droits est donc au vert **sans**
+    la 2FA ; L1.6 ajoutera les cases `mfa_enrollment_required` et `mfa_required`.
+44. **Import circulaire d'allauth.** `allauth.account.authentication` ne peut pas être importé au
+    chargement de `apps.accounts.permissions` (cycle avec les modèles d'allauth) : l'import est fait
+    dans la fonction qui lit les méthodes d'authentification de la session. Le délai de
+    réauthentification est lu dans `allauth.account.app_settings` (il n'existe pas de réglage
+    Django `ACCOUNT_REAUTHENTICATION_TIMEOUT` lisible tel quel).
+45. **§9.3, édition publique courante (hypothèse Q2).** `GET /v1/public/editions/current` prend
+    l'édition courante publiée de la **première** conférence : hypothèse mono-conférence, à revoir
+    si la question ouverte Q2 (mono- ou multi-conférences) est tranchée autrement. Réponse
+    cachable 5 minutes (`Cache-Control: public, max-age=300`), 404 JSON sinon. Le test de fumée
+    accepte 200 ou 404.
+46. **§6.1, suppression des tracks et types.** Possible en L1, faute de référence ; à partir de
+    L3, un élément utilisé renverra 409 `in_use` et devra être désactivé (§6.1 inchangé).
+47. **§5.3, garde-fous automatisés.** Trois méta-tests s'ajoutent : toute route de `v1/manage/`
+    hérite de `ManageViewSet` (seule exception : `ManageEditionListView`) ; liste blanche des vues
+    ouvertes aux anonymes (`health`, `public/editions/current`, `invitations/lookup` et
+    `invitations/decline`, ces deux dernières avec `CsrfEnforced`) ; client allauth `browser`
+    seul et réauthentification exigée.
+48. **§13, critère « test de fumée ».** Vérifié en local seulement (script rejoué contre des
+    réponses simulées 200, 404, HTML et 500). **Reste à faire sur o2switch** avec le déploiement.
+
+### Étape L1.6 (double authentification)
+
+49. **§4.2, `MFA_TOTP_ISSUER` (à valider, Q15).** Le plan le laissait vide : allauth affiche
+    alors l'en-tête `Host` de la requête dans l'application TOTP (lu dans le code). Il vaut
+    `GESTCONF_SITE_NAME` (« GEST-CONF » par défaut) : nom fixe, jamais tiré d'un en-tête.
+50. **§4.10, clés de chiffrement.** `GESTCONF_MFA_ENCRYPTION_KEYS` est obligatoire en
+    production (`prod.py` refuse de démarrer sans elle). En développement, une clé est dérivée
+    de `SECRET_KEY` si aucune n'est fournie ; les tests utilisent une clé fixe. Un secret
+    indéchiffrable (clé retirée trop tôt) lève une erreur de configuration : échec fermé
+    (500 et alerte), jamais un contournement. La rotation (`MultiFernet.rotate`) est
+    **vérifiée** par test : rechiffrement, puis lecture avec la nouvelle clé seule.
+51. **§4.3, refus `unverified_email`.** allauth le renvoie dès la demande du secret
+    (`GET account/authenticators/totp`, 409), et non seulement à l'activation (constaté).
+    L'écran l'affiche avant même le QR code.
+52. **§10.1, réauthentification côté Angular.** La fenêtre est fournie par l'application
+    (portail : coque `/compte`), enregistrée auprès d'un service partagé
+    `ReauthenticationPrompt`. L'intercepteur (403 `reauthentication_required`) et `AuthApi`
+    (401 `reauthenticate` d'allauth) l'ouvrent puis rejouent la requête une seule fois. Sans
+    fenêtre enregistrée (gestion avant L1.7), l'erreur remonte telle quelle. La fenêtre
+    propose le mot de passe ou, pour un compte 2FA, un code.
+53. **§10.1, `mfa_required` et `mfa_enrollment_required`.** L'intercepteur renvoie vers
+    `/compte/double-authentification` ou `/compte/securite`, avec `next` (page entière depuis
+    la gestion). `/v1/me` expose `mfa_enabled` et `mfa_verified` (session validée par la 2FA),
+    pour que les écrans proposent la validation sans attendre un refus.
+54. **§10.2, `/compte/securite`.** Livrée avec trois sections : 2FA (QR code, clé en texte,
+    codes de secours, régénération, désactivation après confirmation), mot de passe (ancien
+    mot de passe exigé) et adresses e-mail (ajout, retrait, adresse principale, renvoi du lien).
+    Le renvoi d'un lien moins de 3 min après le précédent répond 403 (limite d'allauth,
+    constaté) : message dédié. Un compte 2FA reçoit `add_email_blocked` à l'ajout, comme
+    prévu par D6 (a).
+55. **Constats sur allauth 65.19.7.** Le changement de mot de passe conserve les
+    enregistrements d'authentification de la session (la validation 2FA reste acquise,
+    vérifié). Les signaux `authenticator_added` et `authenticator_reset` sont émis après la
+    validation de la transaction : l'audit `mfa.enabled` et `mfa.recovery_codes_regenerated`
+    est donc écrit hors de la transaction d'allauth. La contrainte d'unicité conditionnelle
+    d'`Authenticator` (un TOTP par compte) n'existe pas sous MariaDB (W036) : contrôle prévu
+    par `check_integrity` (L1.8).
+56. **Budget du portail.** Le bundle initial passe de 356,6 à 361,2 kB (intercepteur et
+    service de réauthentification partagés), sous le budget de 365 kB.
+57. **Parcours vérifié en local** (Chromium, Django de développement et `ng serve`) :
+    connexion, activation par QR code, codes de secours, déconnexion, connexion en deux étapes,
+    `mfa_verified` vrai. **Reste à faire sur o2switch** avec le déploiement (roues de
+    `cryptography` et `fido2` : vérification V03 de L1.0).
+

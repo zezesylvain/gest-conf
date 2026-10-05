@@ -1,0 +1,23 @@
+// Thème Angular Material 22 (décision D9, plan L1 §10.5).
+// - Gestion : inclus dans les styles globaux.
+// - Portail : compilé dans une feuille séparée (« styles » avec inject: false), chargée par
+//   la coque de /compte au premier affichage : les pages publiques pré-rendues ne la
+//   paient pas. Polices système en attendant l'identité visuelle (Q15).
+@use '@angular/material' as mat;
+
+html {
+  color-scheme: light;
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$azure-palette,
+        theme-type: light,
+      ),
+      typography: (
+        plain-family: var(--gc-font),
+        brand-family: var(--gc-font),
+      ),
+      density: 0,
+    )
+  );
+}

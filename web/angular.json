@@ -29,7 +29,14 @@
                 "input": "projects/portail/public"
               }
             ],
-            "styles": ["projects/portail/src/styles.scss"],
+            "styles": [
+              "projects/portail/src/styles.scss",
+              {
+                "input": "projects/shared/src/lib/ui-kit/theme.scss",
+                "bundleName": "gc-theme",
+                "inject": false
+              }
+            ],
             "server": "projects/portail/src/main.server.ts",
             "outputMode": "static"
           },
@@ -38,8 +45,8 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "312kB",
-                  "maximumError": "327kB"
+                  "maximumWarning": "365kB",
+                  "maximumError": "380kB"
                 },
                 {
                   "type": "bundle",
@@ -114,7 +121,10 @@
                 "input": "projects/gestion/public"
               }
             ],
-            "styles": ["projects/gestion/src/styles.scss"],
+            "styles": [
+              "projects/shared/src/lib/ui-kit/theme.scss",
+              "projects/gestion/src/styles.scss"
+            ],
             "baseHref": "/gestion/"
           },
           "configurations": {

@@ -85,3 +85,57 @@ def test_authentication_records_structure(client):
     records = client.session[AUTH_RECORDS_SESSION_KEY]
     assert records[-1]["method"] == "password"
     assert before <= records[-1]["at"] <= time.time()
+
+
+# --- 2FA (L1.6) : champs consommés par AuthApi (web/projects/shared/src/lib/auth) -----------
+
+
+def test_mfa_endpoints_contract(django_capture_on_commit_callbacks):
+    from apps.accounts.tests.roles_helpers import client_for
+    from apps.accounts.tests.test_mfa import totp_code
+
+    user = VerifiedUserFactory()
+    client = client_for(user, mfa=False)
+    assert client.get(f"{AUTH}/account/authenticators").json() == {"status": 200, "data": []}
+    pending = client.get(f"{AUTH}/account/authenticators/totp")
+    assert pending.status_code == 404
+    meta = pending.json()["meta"]
+    assert set(meta) == {"secret", "totp_url"}
+    wrong = post(client, "account/authenticators/totp", {"code": "000000"}).json()
+    assert (wrong["status"], wrong["errors"][0]["code"], wrong["errors"][0]["param"]) == (
+        400,
+        "incorrect_code",
+        "code",
+    )
+    with django_capture_on_commit_callbacks(execute=True):
+        active = post(client, "account/authenticators/totp", {"code": totp_code(meta["secret"])})
+    assert active.json()["data"]["type"] == "totp"
+    listed = client.get(f"{AUTH}/account/authenticators").json()["data"]
+    assert [item["type"] for item in listed] == ["totp", "recovery_codes"]
+    assert {"total_code_count", "unused_code_count"} <= set(listed[1])
+    codes = client.get(f"{AUTH}/account/authenticators/recovery-codes").json()["data"]
+    assert len(codes["unused_codes"]) == 10
+    regenerated = post(client, "account/authenticators/recovery-codes").json()["data"]
+    assert regenerated["unused_codes"] != codes["unused_codes"]
+    # Compte 2FA : ajout d'adresse bloqué en mode « lien » (D6, option (a) et RG-20).
+    blocked = post(client, "account/email", {"email": "autre@example.org"}).json()
+    assert blocked["errors"][0]["code"] == "add_email_blocked"
+    assert client.delete(f"{AUTH}/account/authenticators/totp").json() == {"status": 200}
+
+
+def test_stale_mfa_action_asks_for_reauthentication():
+    """Action 2FA sans authentification récente : 401, flux ``reauthenticate`` et
+    ``mfa_reauthenticate`` (sans ``is_pending``), session toujours authentifiée."""
+    from apps.accounts.tests.roles_helpers import client_for, enable_totp
+
+    user = VerifiedUserFactory()
+    enable_totp(user)
+    client = client_for(user, mfa=False, recent_auth=False)
+    body = client.delete(f"{AUTH}/account/authenticators/totp").json()
+    assert body["status"] == 401
+    assert body["meta"]["is_authenticated"] is True
+    assert flow_ids_of(body) == ["reauthenticate", "mfa_reauthenticate"]
+
+
+def flow_ids_of(body: dict) -> list[str]:
+    return [flow["id"] for flow in body["data"]["flows"]]

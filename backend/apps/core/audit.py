@@ -114,6 +114,7 @@ def record(
     action: str,
     *,
     actor: Actor,
+    edition: Model | None = None,
     obj: Model | None = None,
     before: Mapping[str, Any] | None = None,
     after: Mapping[str, Any] | None = None,
@@ -121,9 +122,9 @@ def record(
 ) -> AuditLog:
     """Écrit une entrée du journal d'audit (RG-17).
 
-    ``action`` est un code ``domaine.verbe`` (``role.revoked``). Le paramètre
-    ``edition`` du plan (§7.2) arrive en L1.5 avec la clé étrangère
-    correspondante (plan §3.8).
+    ``action`` est un code ``domaine.verbe`` (``role.revoked``). ``edition`` rattache
+    l'entrée à une édition : seules ces entrées sont visibles par l'API de gestion
+    (``GET …/audit``) ; les autres (connexions, comptes) passent par ``audit_query``.
     """
     if len(action) > ACTION_MAX_LENGTH or not ACTION_PATTERN.match(action):
         raise ValueError(f"Code d'action invalide : {action!r} (forme attendue domaine.verbe).")
@@ -134,6 +135,7 @@ def record(
         actor=actor.user if actor.kind == ActorKind.USER else None,
         actor_kind=actor.kind,
         actor_label=actor.label,
+        edition=edition,
         action=action,
         object_type=obj._meta.label_lower if obj is not None else "",
         object_id=str(obj.pk) if obj is not None else "",

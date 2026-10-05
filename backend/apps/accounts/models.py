@@ -10,6 +10,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from apps.accounts.managers import UserManager
+from apps.accounts.roles import InvitableRole, OcFunction, Role
 from apps.accounts.validators import validate_country, validate_orcid
 from apps.core.models import AppendOnlyModel, TimeStampedModel
 
@@ -187,3 +188,201 @@ class Consent(AppendOnlyModel):
         count = cls.objects.filter(user=user, ip__isnull=False)._unchecked_update(ip=None)
         record("consent.network_redacted", actor=actor, obj=user, after={"count": count})
         return count
+
+
+# --- Rôles par édition et invitations (plan L1 §3.3, D6) --------------------------------
+
+
+class UserRoleStatus(models.TextChoices):
+    ACTIVE = "active", _("actif")
+    REVOKED = "revoked", _("révoqué")
+
+
+class RoleSource(models.TextChoices):
+    INVITATION = "invitation", _("invitation")
+    COMMAND = "command", _("commande")
+    SYSTEM = "system", _("système")
+
+
+# CHECK : fonction CO renseignée si et seulement si le rôle est OC_MEMBER (D8).
+_OC_FUNCTION_CHECK = models.Q(role=Role.OC_MEMBER, oc_function__gt="") | (
+    ~models.Q(role=Role.OC_MEMBER) & models.Q(oc_function="")
+)
+
+
+class UserRole(TimeStampedModel):
+    """Rôle d'un compte dans une édition (règle n° 5). Seul ``active`` donne des droits.
+
+    Une ligne n'existe qu'après attribution ou acceptation : un invité ne détient aucun
+    droit, par construction (D6). Une réattribution après révocation réactive la même
+    ligne ; l'historique est dans le journal d'audit.
+    """
+
+    user = models.ForeignKey(
+        User, verbose_name=_("utilisateur"), on_delete=models.RESTRICT, related_name="roles"
+    )
+    edition = models.ForeignKey(
+        "conferences.Edition",
+        verbose_name=_("édition"),
+        on_delete=models.RESTRICT,
+        related_name="user_roles",
+    )
+    role = models.CharField(_("rôle"), max_length=16, choices=Role.choices)
+    # NOT NULL, "" par défaut : une colonne NULL rendrait l'unicité inopérante (§3.1).
+    oc_function = models.CharField(
+        _("fonction au CO"), max_length=32, choices=OcFunction.choices, blank=True, default=""
+    )
+    status = models.CharField(
+        _("statut"), max_length=8, choices=UserRoleStatus.choices, default=UserRoleStatus.ACTIVE
+    )
+    source = models.CharField(_("origine"), max_length=16, choices=RoleSource.choices)
+    granted_at = models.DateTimeField(_("attribué le"))
+    granted_by = models.ForeignKey(
+        User,
+        verbose_name=_("attribué par"),
+        null=True,
+        blank=True,
+        on_delete=models.RESTRICT,
+        related_name="+",
+    )
+    revoked_at = models.DateTimeField(_("révoqué le"), null=True, blank=True)
+    revoked_by = models.ForeignKey(
+        User,
+        verbose_name=_("révoqué par"),
+        null=True,
+        blank=True,
+        on_delete=models.RESTRICT,
+        related_name="+",
+    )
+    revoke_reason = models.TextField(_("motif de révocation"), blank=True, default="")
+    invitation = models.ForeignKey(
+        "accounts.RoleInvitation",
+        verbose_name=_("invitation"),
+        null=True,
+        blank=True,
+        on_delete=models.RESTRICT,
+        related_name="+",
+    )
+
+    AUDIT_FIELDS: ClassVar[tuple[str, ...]] = (
+        "user",
+        "edition",
+        "role",
+        "oc_function",
+        "status",
+        "source",
+    )
+
+    class Meta:
+        verbose_name = _("rôle")
+        verbose_name_plural = _("rôles")
+        constraints = (
+            models.UniqueConstraint(
+                fields=["user", "edition", "role", "oc_function"], name="accounts_userrole_unique"
+            ),
+            models.CheckConstraint(condition=_OC_FUNCTION_CHECK, name="accounts_userrole_oc_fn"),
+        )
+        indexes = (
+            models.Index(fields=["edition", "role", "status"], name="accounts_userrole_edition"),
+            models.Index(fields=["user", "status"], name="accounts_userrole_user"),
+        )
+
+    def __str__(self) -> str:
+        return f"{self.role}@{self.edition_id}"
+
+
+class InvitationStatus(models.TextChoices):
+    PENDING = "pending", _("en attente")
+    ACCEPTED = "accepted", _("acceptée")
+    DECLINED = "declined", _("refusée")
+    CANCELLED = "cancelled", _("annulée")
+    EXPIRED = "expired", _("expirée")
+
+
+MESSAGE_MAX_LENGTH = 1000
+
+
+class RoleInvitation(TimeStampedModel):
+    """Invitation à un rôle, adressée à un e-mail, avec ou sans compte (D6, §5.7).
+
+    Le jeton n'est jamais stocké en clair (``token_hash``). ``pending_key`` (empreinte
+    SHA-256, longueur fixe) n'est renseignée que tant que l'invitation est en attente :
+    la base garantit ainsi une seule invitation en attente par (édition, adresse, rôle,
+    fonction), sans unicité conditionnelle (§3.1). Statut modifié par le service seulement.
+    """
+
+    edition = models.ForeignKey(
+        "conferences.Edition",
+        verbose_name=_("édition"),
+        on_delete=models.RESTRICT,
+        related_name="invitations",
+    )
+    email = models.EmailField(_("adresse invitée"))
+    role = models.CharField(_("rôle"), max_length=16, choices=InvitableRole.choices)
+    oc_function = models.CharField(
+        _("fonction au CO"), max_length=32, choices=OcFunction.choices, blank=True, default=""
+    )
+    token_hash = models.CharField(_("empreinte du jeton"), max_length=64, unique=True)
+    status = models.CharField(
+        _("statut"),
+        max_length=12,
+        choices=InvitationStatus.choices,
+        default=InvitationStatus.PENDING,
+    )
+    pending_key = models.CharField(
+        _("clé d'unicité en attente"), max_length=64, null=True, blank=True, unique=True
+    )
+    invited_by = models.ForeignKey(
+        User,
+        verbose_name=_("invité par"),
+        null=True,
+        blank=True,
+        on_delete=models.RESTRICT,
+        related_name="+",
+    )
+    expires_at = models.DateTimeField(_("expire le"))
+    locale = models.CharField(_("langue"), max_length=8)
+    message = models.TextField(_("message"), blank=True, default="")
+    send_count = models.PositiveSmallIntegerField(_("envois"), default=1)
+    last_sent_at = models.DateTimeField(_("dernier envoi"))
+    responded_at = models.DateTimeField(_("répondu le"), null=True, blank=True)
+    accepted_by = models.ForeignKey(
+        User,
+        verbose_name=_("acceptée par"),
+        null=True,
+        blank=True,
+        on_delete=models.RESTRICT,
+        related_name="+",
+    )
+
+    # Jamais l'adresse en clair : seulement sa forme masquée (plan §7.2).
+    AUDIT_FIELDS: ClassVar[tuple[str, ...]] = (
+        "edition",
+        "email_masked",
+        "role",
+        "oc_function",
+        "status",
+        "expires_at",
+        "send_count",
+    )
+
+    class Meta:
+        verbose_name = _("invitation")
+        verbose_name_plural = _("invitations")
+        constraints = (
+            models.CheckConstraint(condition=_OC_FUNCTION_CHECK, name="accounts_invitation_oc_fn"),
+        )
+        indexes = (
+            models.Index(fields=["edition", "status"], name="accounts_invitation_edition"),
+            models.Index(fields=["email", "status"], name="accounts_invitation_email"),
+            models.Index(fields=["invited_by", "created_at"], name="accounts_invitation_quota"),
+        )
+
+    def __str__(self) -> str:
+        return f"{self.role}@{self.edition_id} ({self.status})"
+
+    @property
+    def email_masked(self) -> str:
+        from apps.core.audit import mask_email
+
+        return mask_email(self.email)

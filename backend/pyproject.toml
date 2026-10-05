@@ -24,6 +24,9 @@ select = [
 [tool.ruff.lint.per-file-ignores]
 "config/settings/*.py" = ["F403", "F405"]  # import * entre fichiers de configuration
 "**/tests/**/*.py" = ["S101", "S105", "S106"]  # assert et mots de passe factices
+# Vues DRF : attributs de classe déclaratifs (required_capabilities, filterset_fields…),
+# lus par le cadre et jamais modifiés en place.
+"apps/*/{views,manage_views,permissions}.py" = ["RUF012"]
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "config.settings.test"

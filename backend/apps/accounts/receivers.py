@@ -1,4 +1,5 @@
-"""Récepteurs de signaux : horodatage de connexion, audit, notification d'ajout d'adresse.
+"""Récepteurs de signaux : horodatage de connexion, audit (comptes et 2FA), notification
+d'ajout d'adresse.
 
 Branchés dans ``AccountsConfig.ready()`` (plan L1 §4.2, §7.2, §7.3). Signatures lues
 dans le code d'allauth 65.19.7 et de Django 5.2.
@@ -11,6 +12,8 @@ from typing import Any
 
 from allauth.account import signals as allauth_signals
 from allauth.account.models import EmailAddress
+from allauth.mfa import signals as mfa_signals
+from allauth.mfa.models import Authenticator
 from django.contrib.auth import signals as auth_signals
 from django.dispatch import receiver
 from django.http import HttpRequest
@@ -89,3 +92,37 @@ def on_email_added(
         after={"email_masked": mask_email(email_address.email)},
     )
     notify_email_added(user, email_address.email, actor=_actor(request))
+
+
+# --- 2FA (plan L1 §7.3 : mfa.enabled, mfa.disabled, mfa.recovery_codes_regenerated,
+# mfa.failed ; mfa.reset est journalisée par la commande) ----------------------------------
+
+
+def _mfa_record(action: str, request: HttpRequest | None, user: Any, authenticator: Any) -> None:
+    record(action, actor=_actor(request), obj=user, after={"type": authenticator.type})
+
+
+@receiver(mfa_signals.authenticator_added, dispatch_uid="gestconf_mfa_added")
+def on_authenticator_added(request, user, authenticator, **kwargs: Any) -> None:
+    if authenticator.type == Authenticator.Type.TOTP:
+        _mfa_record("mfa.enabled", request, user, authenticator)
+
+
+@receiver(mfa_signals.authenticator_removed, dispatch_uid="gestconf_mfa_removed")
+def on_authenticator_removed(request, user, authenticator, **kwargs: Any) -> None:
+    if authenticator.type == Authenticator.Type.TOTP:
+        _mfa_record("mfa.disabled", request, user, authenticator)
+
+
+@receiver(mfa_signals.authenticator_reset, dispatch_uid="gestconf_mfa_reset")
+def on_authenticator_reset(request, user, authenticator, **kwargs: Any) -> None:
+    if authenticator.type == Authenticator.Type.RECOVERY_CODES:
+        _mfa_record("mfa.recovery_codes_regenerated", request, user, authenticator)
+
+
+@receiver(mfa_signals.authentication_failed, dispatch_uid="gestconf_mfa_failed")
+def on_mfa_failed(request, user, authenticator=None, **kwargs: Any) -> None:
+    after = {"reauthentication": bool(kwargs.get("reauthentication", False))}
+    if authenticator is not None:
+        after["type"] = authenticator.type
+    record("mfa.failed", actor=_actor(request), obj=user, after=after)

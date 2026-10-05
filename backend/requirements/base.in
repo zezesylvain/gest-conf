@@ -9,4 +9,7 @@ django-filter==26.2
 django-environ==0.14.0        # configuration par variables d'environnement
 PyMySQL==1.2.3                # pilote MariaDB pur Python (pas de compilation sur o2switch)
 django-anymail==15.2          # e-mails transactionnels par API (Brevo ou Mailjet, décision D10)
-django-allauth==65.19.7       # comptes, mode headless (décisions D2, D4) ; extra « mfa » ajouté en L1.6
+django-allauth[mfa]==65.19.7  # comptes, mode headless, 2FA TOTP (décisions D2, D4) ; tire qrcode (BSD)
+cryptography==50.0.2          # chiffrement du secret TOTP (MultiFernet) ; version vérifiée par V03
+fido2==2.2.1                  # importé par allauth.mfa même sans WebAuthn ; version vérifiée par V03
+tzdata==2026.5                # fuseaux IANA pour zoneinfo (saisie des échéances, D13), pur Python

@@ -173,3 +173,9 @@ def test_smoke_test_checks_the_allauth_bootstrap():
     code = shell_code(REPO_DIR / "deploy" / "smoke-test.sh")
     assert '"$BASE_URL/api/_allauth/browser/v1/auth/session"' in code
     assert "set-cookie 'csrftoken='" in code
+
+
+def test_smoke_test_checks_the_public_current_edition():
+    """Étape L1.5 (plan §11) : édition publique courante, 200 ou 404 JSON."""
+    code = shell_code(REPO_DIR / "deploy" / "smoke-test.sh")
+    assert '"$BASE_URL/api/v1/public/editions/current"' in code

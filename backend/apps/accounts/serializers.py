@@ -8,7 +8,9 @@ from rest_framework import serializers
 
 from apps.accounts.consents import CURRENT_TEXT_VERSIONS
 from apps.accounts.models import BIO_MAX_LENGTH, ConsentKind, ConsentSource, ProfileTitle
+from apps.accounts.roles import CAPABILITY_CHOICES, InvitableRole, OcFunction, Role
 from apps.accounts.validators import validate_country, validate_orcid
+from apps.conferences.models import EditionStatus
 
 
 class Locale(models.TextChoices):
@@ -26,8 +28,42 @@ class ConsentRequestSource(models.TextChoices):
     ACCOUNT = ConsentSource.ACCOUNT.value, ConsentSource.ACCOUNT.label
 
 
+class EditionRoleSerializer(serializers.Serializer):
+    role = serializers.ChoiceField(choices=Role.choices)
+    oc_function = serializers.ChoiceField(choices=OcFunction.choices)
+
+
+class MeEditionSerializer(serializers.Serializer):
+    """Édition où le compte a au moins un rôle actif, avec ses capacités (§5.1) : Angular
+    masque les actions d'après elles, sans recopier la matrice en TypeScript."""
+
+    id = serializers.IntegerField()
+    code = serializers.CharField()
+    title_fr = serializers.CharField()
+    title_en = serializers.CharField()
+    year = serializers.IntegerField()
+    status = serializers.ChoiceField(choices=EditionStatus.choices)
+    roles = EditionRoleSerializer(many=True)
+    capabilities = serializers.ListField(child=serializers.ChoiceField(choices=CAPABILITY_CHOICES))
+    mfa_required = serializers.BooleanField(
+        help_text="Un rôle de l'édition impose la 2FA pour les routes de gestion (D3)."
+    )
+
+
+class MePendingInvitationSerializer(serializers.Serializer):
+    """Invitation en attente adressée à une adresse vérifiée du compte."""
+
+    edition_code = serializers.CharField(source="edition.code")
+    edition_title_fr = serializers.CharField(source="edition.title_fr")
+    edition_title_en = serializers.CharField(source="edition.title_en")
+    role = serializers.ChoiceField(choices=InvitableRole.choices)
+    oc_function = serializers.ChoiceField(choices=OcFunction.choices)
+    expires_at = serializers.DateTimeField()
+
+
 class MeSerializer(serializers.Serializer):
-    """Compte connecté. Rôles, capacités, invitations (L1.5) et état 2FA (L1.6) s'y ajouteront."""
+    """Compte connecté : identité, langue, éditions (rôles, capacités), invitations en
+    attente, état de la 2FA."""
 
     id = serializers.IntegerField()
     email = serializers.EmailField()
@@ -37,6 +73,18 @@ class MeSerializer(serializers.Serializer):
     )
     privacy_notice_pending = serializers.BooleanField(
         help_text="Vrai tant que la version courante de la notice n'a pas été lue."
+    )
+    editions = MeEditionSerializer(many=True)
+    pending_invitations = MePendingInvitationSerializer(many=True)
+    mfa_enabled = serializers.BooleanField(help_text="2FA (TOTP) activée sur le compte.")
+    mfa_verified = serializers.BooleanField(
+        help_text="Session validée par la 2FA (connexion en deux étapes ou réauthentification)."
+    )
+
+
+class TotpQrSerializer(serializers.Serializer):
+    qr_code = serializers.CharField(
+        help_text="QR code de l'enrôlement, en data:image/svg+xml;base64,…"
     )
 
 

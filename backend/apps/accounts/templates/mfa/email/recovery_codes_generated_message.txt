@@ -1,0 +1,7 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate %}Bonjour,
+
+De nouveaux codes de secours pour la double authentification ont été générés sur votre compte {{ site_name }}. Les anciens codes ne sont plus valables.{% endblocktranslate %}
+
+{% include "account/email/_security_footer.txt" %}
+
+{% include "account/email/_signature.txt" %}{% endautoescape %}

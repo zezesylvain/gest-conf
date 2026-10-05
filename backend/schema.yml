@@ -24,6 +24,919 @@ paths:
               schema:
                 $ref: '#/components/schemas/Health'
           description: ''
+  /v1/invitations/accept:
+    post:
+      operationId: invitation_accept
+      description: |-
+        ``POST /v1/invitations/accept`` : connecté ; ``{link}`` exige une réauthentification
+        récente (plan v3), ``{token}`` non (aucune adresse ajoutée au compte).
+      tags:
+      - invitations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcceptRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AcceptedRole'
+          description: ''
+  /v1/invitations/decline:
+    post:
+      operationId: invitation_decline
+      description: '``POST /v1/invitations/decline`` : refus sans compte (aucun droit
+        donné).'
+      tags:
+      - invitations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /v1/invitations/link-email:
+    post:
+      operationId: invitation_link_email
+      description: |-
+        ``POST /v1/invitations/link-email`` : lien de liaison envoyé à l'adresse invitée
+        (RG-20, option (a) de D6) ; réauthentification récente, limite ``invitation_link``.
+      tags:
+      - invitations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /v1/invitations/lookup:
+    post:
+      operationId: invitation_lookup
+      description: '``POST /v1/invitations/lookup`` : public, CSRF imposé, limité
+        (§5.7).'
+      tags:
+      - invitations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvitationLookup'
+          description: ''
+  /v1/manage/editions:
+    get:
+      operationId: manage_editions_list
+      description: |-
+        ``GET /v1/manage/editions`` : sélecteur d'édition (§5.3, D3).
+
+        Éditions où l'on détient au moins une capacité de gestion ; champs non sensibles ;
+        **sans** 2FA (chaque édition l'exige ensuite). Seule vue de ``v1/manage/`` hors
+        ``ManageViewSet`` (liste blanche du test de plateforme).
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Quel champ utiliser pour classer les résultats.
+        schema:
+          type: string
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EditionSummary'
+          description: ''
+  /v1/manage/editions/{edition_id}:
+    get:
+      operationId: manage_edition_retrieve
+      description: '``/v1/manage/editions/{edition_id}`` : informations générales
+        (§6.1).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Edition'
+          description: ''
+    patch:
+      operationId: manage_edition_update
+      description: '``/v1/manage/editions/{edition_id}`` : informations générales
+        (§6.1).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedEditionRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Edition'
+          description: ''
+  /v1/manage/editions/{edition_id}/audit:
+    get:
+      operationId: manage_audit_list
+      description: |-
+        ``GET …/audit`` : journal de l'édition, sans IP ni navigateur ; lecture seule (§7.4).
+
+        Les entrées sans édition (connexions, comptes) ne sont visibles que par ``audit_query``.
+      parameters:
+      - in: query
+        name: action
+        schema:
+          type: string
+      - in: query
+        name: actor
+        schema:
+          type: number
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: object_type
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: Un numéro de page de l'ensemble des résultats.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Nombre de résultats à retourner par page.
+        schema:
+          type: integer
+      - in: query
+        name: since
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: until
+        schema:
+          type: string
+          format: date-time
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAuditEntryList'
+          description: ''
+  /v1/manage/editions/{edition_id}/confidentiality:
+    get:
+      operationId: manage_confidentiality_retrieve
+      description: |-
+        ``…/confidentiality`` : double aveugle, relecteurs par soumission (§6.1).
+        Écriture : réauthentification récente, audit classé critique.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Confidentiality'
+          description: ''
+    patch:
+      operationId: manage_confidentiality_update
+      description: |-
+        ``…/confidentiality`` : double aveugle, relecteurs par soumission (§6.1).
+        Écriture : réauthentification récente, audit classé critique.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedConfidentialityRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Confidentiality'
+          description: ''
+  /v1/manage/editions/{edition_id}/invitations:
+    get:
+      operationId: manage_invitations_list
+      description: '``…/invitations`` : liste filtrée par rôle, création, renvoi,
+        annulation (§5.7).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: Un numéro de page de l'ensemble des résultats.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Nombre de résultats à retourner par page.
+        schema:
+          type: integer
+      - in: query
+        name: role
+        schema:
+          type: string
+          title: Rôle
+          enum:
+          - ADMIN
+          - CHAIR
+          - OC_MEMBER
+          - SC_CHAIR
+          - SC_MEMBER
+        description: |-
+          * `ADMIN` - administrateur de l'édition
+          * `CHAIR` - président de la conférence
+          * `SC_CHAIR` - président du comité scientifique
+          * `OC_MEMBER` - membre du comité d'organisation
+          * `SC_MEMBER` - membre du comité scientifique
+      - in: query
+        name: status
+        schema:
+          type: string
+          title: Statut
+          enum:
+          - accepted
+          - cancelled
+          - declined
+          - expired
+          - pending
+        description: |-
+          * `pending` - en attente
+          * `accepted` - acceptée
+          * `declined` - refusée
+          * `cancelled` - annulée
+          * `expired` - expirée
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedInvitationWithEmailList'
+          description: ''
+    post:
+      operationId: manage_invitations_create
+      description: '``…/invitations`` : liste filtrée par rôle, création, renvoi,
+        annulation (§5.7).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvitationCreateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvitationBatch'
+          description: ''
+  /v1/manage/editions/{edition_id}/invitations/{invitation_id}/cancel:
+    post:
+      operationId: manage_invitation_cancel
+      description: '``…/invitations`` : liste filtrée par rôle, création, renvoi,
+        annulation (§5.7).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: invitation_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvitationWithEmail'
+          description: ''
+  /v1/manage/editions/{edition_id}/invitations/{invitation_id}/resend:
+    post:
+      operationId: manage_invitation_resend
+      description: '``…/invitations`` : liste filtrée par rôle, création, renvoi,
+        annulation (§5.7).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: invitation_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvitationWithEmail'
+          description: ''
+  /v1/manage/editions/{edition_id}/key-dates:
+    get:
+      operationId: manage_editions_key_dates_list
+      description: 'Dates clés : saisie ``at_local`` à l''heure de l''édition (D13).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - name: ordering
+        required: false
+        in: query
+        description: Quel champ utiliser pour classer les résultats.
+        schema:
+          type: string
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/KeyDate'
+          description: ''
+    post:
+      operationId: manage_editions_key_dates_create
+      description: 'Dates clés : saisie ``at_local`` à l''heure de l''édition (D13).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KeyDateWriteRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyDate'
+          description: ''
+  /v1/manage/editions/{edition_id}/key-dates/{item_id}:
+    get:
+      operationId: manage_editions_key_dates_retrieve
+      description: 'Dates clés : saisie ``at_local`` à l''heure de l''édition (D13).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyDate'
+          description: ''
+    patch:
+      operationId: manage_editions_key_dates_partial_update
+      description: 'Dates clés : saisie ``at_local`` à l''heure de l''édition (D13).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedKeyDateWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyDate'
+          description: ''
+    delete:
+      operationId: manage_editions_key_dates_destroy
+      description: 'Dates clés : saisie ``at_local`` à l''heure de l''édition (D13).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /v1/manage/editions/{edition_id}/roles:
+    get:
+      operationId: manage_members_list
+      description: '``GET …/roles`` et ``POST …/roles/{role_id}/revoke`` (§5.4, §5.5).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - name: ordering
+        required: false
+        in: query
+        description: Quel champ utiliser pour classer les résultats.
+        schema:
+          type: string
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MemberWithEmail'
+          description: ''
+  /v1/manage/editions/{edition_id}/roles/{role_id}/revoke:
+    post:
+      operationId: manage_member_revoke
+      description: '``GET …/roles`` et ``POST …/roles/{role_id}/revoke`` (§5.4, §5.5).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: role_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RevokeRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemberWithEmail'
+          description: ''
+  /v1/manage/editions/{edition_id}/status:
+    post:
+      operationId: manage_edition_status
+      description: |-
+        ``POST …/status`` : publication (ADMIN, CHAIR) ou archivage (ADMIN), avec
+        réauthentification récente (§6.3, D12).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EditionStatusChangeRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Edition'
+          description: ''
+  /v1/manage/editions/{edition_id}/submission-types:
+    get:
+      operationId: manage_editions_submission_types_list
+      description: Liste, détail, création, modification, suppression d'un élément
+        de l'édition.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - name: ordering
+        required: false
+        in: query
+        description: Quel champ utiliser pour classer les résultats.
+        schema:
+          type: string
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SubmissionType'
+          description: ''
+    post:
+      operationId: manage_editions_submission_types_create
+      description: Liste, détail, création, modification, suppression d'un élément
+        de l'édition.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmissionTypeRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmissionType'
+          description: ''
+  /v1/manage/editions/{edition_id}/submission-types/{item_id}:
+    get:
+      operationId: manage_editions_submission_types_retrieve
+      description: Liste, détail, création, modification, suppression d'un élément
+        de l'édition.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmissionType'
+          description: ''
+    patch:
+      operationId: manage_editions_submission_types_partial_update
+      description: Liste, détail, création, modification, suppression d'un élément
+        de l'édition.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSubmissionTypeRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmissionType'
+          description: ''
+    delete:
+      operationId: manage_editions_submission_types_destroy
+      description: Liste, détail, création, modification, suppression d'un élément
+        de l'édition.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /v1/manage/editions/{edition_id}/tracks:
+    get:
+      operationId: manage_editions_tracks_list
+      description: Liste, détail, création, modification, suppression d'un élément
+        de l'édition.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - name: ordering
+        required: false
+        in: query
+        description: Quel champ utiliser pour classer les résultats.
+        schema:
+          type: string
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Track'
+          description: ''
+    post:
+      operationId: manage_editions_tracks_create
+      description: Liste, détail, création, modification, suppression d'un élément
+        de l'édition.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrackRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Track'
+          description: ''
+  /v1/manage/editions/{edition_id}/tracks/{item_id}:
+    get:
+      operationId: manage_editions_tracks_retrieve
+      description: Liste, détail, création, modification, suppression d'un élément
+        de l'édition.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Track'
+          description: ''
+    patch:
+      operationId: manage_editions_tracks_partial_update
+      description: Liste, détail, création, modification, suppression d'un élément
+        de l'édition.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedTrackRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Track'
+          description: ''
+    delete:
+      operationId: manage_editions_tracks_destroy
+      description: Liste, détail, création, modification, suppression d'un élément
+        de l'édition.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
   /v1/me:
     get:
       operationId: me
@@ -122,8 +1035,76 @@ paths:
               schema:
                 $ref: '#/components/schemas/Profile'
           description: ''
+  /v1/me/totp-qr:
+    get:
+      operationId: me_totp_qr
+      description: |-
+        ``GET /v1/me/totp-qr`` : QR code du secret TOTP en attente (plan L1 §10.2).
+
+        Le secret est celui qu'allauth a mis en session au ``GET …/authenticators/totp`` ;
+        404 sans secret en attente. Jamais mis en cache.
+      tags:
+      - me
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TotpQr'
+          description: ''
+  /v1/public/editions/current:
+    get:
+      operationId: public_current_edition
+      description: |-
+        ``GET /v1/public/editions/current`` : édition courante publiée (§9.3), sinon 404.
+
+        Brouillons et dates internes invisibles. Sert au portail (L2) et au test de fumée.
+      tags:
+      - public
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicEdition'
+          description: ''
 components:
   schemas:
+    AcceptRequest:
+      type: object
+      description: Jeton d'invitation (``token``) ou lien de liaison d'adresse (``link``),
+        l'un ou l'autre.
+      properties:
+        token:
+          type: string
+          minLength: 1
+          maxLength: 128
+        link:
+          type: string
+          minLength: 1
+          maxLength: 512
+    AcceptedRole:
+      type: object
+      properties:
+        edition_id:
+          type: integer
+        role:
+          type: string
+      required:
+      - edition_id
+      - role
+    ActorKind:
+      enum:
+      - user
+      - command
+      - system
+      type: string
+      description: |-
+        * `user` - utilisateur
+        * `command` - commande
+        * `system` - système
     ApiError:
       type: object
       description: 'Format de toute réponse d''erreur de l''API : {code, message,
@@ -143,9 +1124,98 @@ components:
       - code
       - fields
       - message
+    AuditEntry:
+      type: object
+      description: Entrée du journal d'une édition, **sans IP ni navigateur** (minimisation,
+        §7.4).
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Date
+        action:
+          type: string
+          readOnly: true
+        actor_kind:
+          allOf:
+          - $ref: '#/components/schemas/ActorKind'
+          readOnly: true
+        actor_id:
+          type: integer
+          nullable: true
+          title: Acteur
+          readOnly: true
+        actor_name:
+          type: string
+          readOnly: true
+        object_type:
+          type: string
+          readOnly: true
+          title: Type d'objet
+        object_id:
+          type: string
+          readOnly: true
+          title: Identifiant d'objet
+        before:
+          readOnly: true
+          nullable: true
+          title: Avant
+        after:
+          readOnly: true
+          nullable: true
+          title: Après
+        reason:
+          type: string
+          readOnly: true
+          title: Motif
+      required:
+      - action
+      - actor_id
+      - actor_kind
+      - actor_name
+      - after
+      - at
+      - before
+      - id
+      - object_id
+      - object_type
+      - reason
     BlankEnum:
       enum:
       - ''
+    Capability:
+      enum:
+      - edition.read
+      - edition.write
+      - edition.publish
+      - edition.archive
+      - members.read
+      - members.manage
+      - audit.read
+      type: string
+      description: |-
+        * `edition.read` - edition.read
+        * `edition.write` - edition.write
+        * `edition.publish` - edition.publish
+        * `edition.archive` - edition.archive
+        * `members.read` - members.read
+        * `members.manage` - members.manage
+        * `audit.read` - audit.read
+    Confidentiality:
+      type: object
+      properties:
+        double_blind:
+          type: boolean
+          title: Double aveugle
+        reviewers_per_submission:
+          type: integer
+          maximum: 10
+          minimum: 1
+          title: Relecteurs par soumission
     ConsentCreateRequest:
       type: object
       properties:
@@ -241,6 +1311,159 @@ components:
       required:
       - history
       - states
+    Edition:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        code:
+          type: string
+          maxLength: 12
+        slug:
+          type: string
+          title: Identifiant
+          maxLength: 64
+          pattern: ^[-a-zA-Z0-9_]+$
+        year:
+          type: integer
+          maximum: 2100
+          minimum: 2000
+          title: Année
+        title_fr:
+          type: string
+          title: Titre (FR)
+          maxLength: 255
+        title_en:
+          type: string
+          title: Titre (EN)
+          maxLength: 255
+        theme_fr:
+          type: string
+          title: Thème (FR)
+          maxLength: 500
+        theme_en:
+          type: string
+          title: Thème (EN)
+          maxLength: 500
+        start_date:
+          type: string
+          format: date
+          nullable: true
+          title: Début
+        end_date:
+          type: string
+          format: date
+          nullable: true
+          title: Fin
+        venue:
+          type: string
+          title: Lieu
+          maxLength: 255
+        city:
+          type: string
+          title: Ville
+          maxLength: 128
+        country:
+          type: string
+          title: Pays
+          maxLength: 2
+        timezone:
+          type: string
+          title: Fuseau horaire
+          maxLength: 64
+        status:
+          allOf:
+          - $ref: '#/components/schemas/EditionStatus'
+          readOnly: true
+          title: Statut
+        published_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Publiée le
+        archived_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Archivée le
+      required:
+      - archived_at
+      - code
+      - id
+      - published_at
+      - slug
+      - status
+      - title_fr
+      - year
+    EditionRole:
+      type: object
+      properties:
+        role:
+          $ref: '#/components/schemas/Role'
+        oc_function:
+          oneOf:
+          - $ref: '#/components/schemas/OcFunction'
+          - $ref: '#/components/schemas/BlankEnum'
+      required:
+      - oc_function
+      - role
+    EditionStatus:
+      enum:
+      - draft
+      - published
+      - archived
+      type: string
+      description: |-
+        * `draft` - brouillon
+        * `published` - publiée
+        * `archived` - archivée
+    EditionStatusChangeRequest:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/EditionStatus'
+        reason:
+          type: string
+          default: ''
+      required:
+      - status
+    EditionSummary:
+      type: object
+      description: 'Sélecteur d''édition : champs non sensibles seulement (D3, §5.3).'
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        code:
+          type: string
+          readOnly: true
+        title_fr:
+          type: string
+          readOnly: true
+          title: Titre (FR)
+        title_en:
+          type: string
+          readOnly: true
+          title: Titre (EN)
+        year:
+          type: integer
+          readOnly: true
+          title: Année
+        status:
+          allOf:
+          - $ref: '#/components/schemas/EditionStatus'
+          readOnly: true
+          title: Statut
+      required:
+      - code
+      - id
+      - status
+      - title_en
+      - title_fr
+      - year
     ErrorCode:
       enum:
       - validation_error
@@ -256,6 +1479,21 @@ components:
       - unsupported_media_type
       - csrf_failed
       - in_use
+      - reauthentication_required
+      - mfa_enrollment_required
+      - mfa_required
+      - last_admin
+      - invitation_expired
+      - invitation_not_pending
+      - invitation_email_mismatch
+      - invitation_email_unverified
+      - invitation_link_invalid
+      - invitation_self_accept
+      - invitation_resend_limit
+      - email_address_limit
+      - edition_archived
+      - invalid_transition
+      - edition_incomplete
       type: string
       description: |-
         * `validation_error` - Validation Error
@@ -271,6 +1509,21 @@ components:
         * `unsupported_media_type` - Unsupported Media Type
         * `csrf_failed` - Csrf Failed
         * `in_use` - In Use
+        * `reauthentication_required` - Reauthentication Required
+        * `mfa_enrollment_required` - Mfa Enrollment Required
+        * `mfa_required` - Mfa Required
+        * `last_admin` - Last Admin
+        * `invitation_expired` - Invitation Expired
+        * `invitation_not_pending` - Invitation Not Pending
+        * `invitation_email_mismatch` - Invitation Email Mismatch
+        * `invitation_email_unverified` - Invitation Email Unverified
+        * `invitation_link_invalid` - Invitation Link Invalid
+        * `invitation_self_accept` - Invitation Self Accept
+        * `invitation_resend_limit` - Invitation Resend Limit
+        * `email_address_limit` - Email Address Limit
+        * `edition_archived` - Edition Archived
+        * `invalid_transition` - Invalid Transition
+        * `edition_incomplete` - Edition Incomplete
     Health:
       type: object
       properties:
@@ -302,6 +1555,181 @@ components:
       description: |-
         * `ok` - Ok
         * `degraded` - Degraded
+    InvitableRole:
+      enum:
+      - ADMIN
+      - CHAIR
+      - SC_CHAIR
+      - OC_MEMBER
+      - SC_MEMBER
+      type: string
+      description: |-
+        * `ADMIN` - administrateur de l'édition
+        * `CHAIR` - président de la conférence
+        * `SC_CHAIR` - président du comité scientifique
+        * `OC_MEMBER` - membre du comité d'organisation
+        * `SC_MEMBER` - membre du comité scientifique
+    InvitationBatch:
+      type: object
+      properties:
+        created:
+          type: array
+          items:
+            $ref: '#/components/schemas/InvitationWithEmail'
+        skipped:
+          type: array
+          items:
+            $ref: '#/components/schemas/SkippedInvitation'
+      required:
+      - created
+      - skipped
+    InvitationCreateRequest:
+      type: object
+      properties:
+        emails:
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 254
+          maxItems: 50
+          minItems: 1
+        role:
+          $ref: '#/components/schemas/InvitableRole'
+        oc_function:
+          default: ''
+          oneOf:
+          - $ref: '#/components/schemas/OcFunction'
+          - $ref: '#/components/schemas/BlankEnum'
+        locale:
+          $ref: '#/components/schemas/Locale'
+        message:
+          type: string
+          default: ''
+          maxLength: 1000
+      required:
+      - emails
+      - role
+    InvitationLookup:
+      type: object
+      properties:
+        edition_code:
+          type: string
+        edition_title_fr:
+          type: string
+        edition_title_en:
+          type: string
+        role:
+          $ref: '#/components/schemas/InvitableRole'
+        oc_function:
+          type: string
+        inviter_name:
+          type: string
+        email_masked:
+          type: string
+        status:
+          $ref: '#/components/schemas/InvitationStatus'
+        expires_at:
+          type: string
+          format: date-time
+        message:
+          type: string
+        controls_address:
+          type: boolean
+          description: Vrai si le compte connecté porte déjà l'adresse invitée, vérifiée.
+      required:
+      - controls_address
+      - edition_code
+      - edition_title_en
+      - edition_title_fr
+      - email_masked
+      - expires_at
+      - inviter_name
+      - message
+      - oc_function
+      - role
+      - status
+    InvitationStatus:
+      enum:
+      - pending
+      - accepted
+      - declined
+      - cancelled
+      - expired
+      type: string
+      description: |-
+        * `pending` - en attente
+        * `accepted` - acceptée
+        * `declined` - refusée
+        * `cancelled` - annulée
+        * `expired` - expirée
+    InvitationWithEmail:
+      type: object
+      description: Invitation, adresse masquée (``members.read`` seul).
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        email:
+          type: string
+          readOnly: true
+        role:
+          allOf:
+          - $ref: '#/components/schemas/InvitableRole'
+          readOnly: true
+        oc_function:
+          readOnly: true
+          oneOf:
+          - $ref: '#/components/schemas/OcFunction'
+          - $ref: '#/components/schemas/BlankEnum'
+        status:
+          allOf:
+          - $ref: '#/components/schemas/InvitationStatus'
+          readOnly: true
+        locale:
+          type: string
+          readOnly: true
+          title: Langue
+        invited_by_name:
+          type: string
+          readOnly: true
+        expires_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Expire le
+        send_count:
+          type: integer
+          readOnly: true
+          title: Envois
+        last_sent_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Dernier envoi
+        responded_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Répondu le
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - email
+      - expires_at
+      - id
+      - invited_by_name
+      - last_sent_at
+      - locale
+      - oc_function
+      - responded_at
+      - role
+      - send_count
+      - status
     JobsStatus:
       enum:
       - ok
@@ -312,6 +1740,79 @@ components:
         * `ok` - Ok
         * `late` - Late
         * `unknown` - Unknown
+    KeyDate:
+      type: object
+      description: 'Lecture : ``at`` (UTC) et ``at_local`` (heure de l''édition, sans
+        fuseau).'
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        code:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Date (UTC)
+        at_local:
+          type: string
+          readOnly: true
+        label_fr:
+          type: string
+          readOnly: true
+          title: Libellé (FR)
+        label_en:
+          type: string
+          readOnly: true
+          title: Libellé (EN)
+        is_public:
+          type: boolean
+          readOnly: true
+          title: Publique
+        position:
+          type: integer
+          readOnly: true
+          title: Ordre
+      required:
+      - at
+      - at_local
+      - code
+      - id
+      - is_public
+      - label_en
+      - label_fr
+      - position
+    KeyDateWriteRequest:
+      type: object
+      description: Saisie à l'heure de l'édition (D13), convertie en UTC par le serveur.
+      properties:
+        code:
+          type: string
+          minLength: 1
+          maxLength: 32
+          pattern: ^[-a-zA-Z0-9_]+$
+        at_local:
+          type: string
+          format: date-time
+          description: Date et heure dans le fuseau de l'édition, sans fuseau (2027-03-31T23:59).
+        label_fr:
+          type: string
+          maxLength: 255
+        label_en:
+          type: string
+          maxLength: 255
+        is_public:
+          type: boolean
+        position:
+          type: integer
+          maximum: 32767
+          minimum: 0
+      required:
+      - at_local
+      - code
     Locale:
       enum:
       - fr
@@ -322,8 +1823,9 @@ components:
         * `en` - English
     Me:
       type: object
-      description: Compte connecté. Rôles, capacités, invitations (L1.5) et état 2FA
-        (L1.6) s'y ajouteront.
+      description: |-
+        Compte connecté : identité, langue, éditions (rôles, capacités), invitations en
+        attente, état de la 2FA.
       properties:
         id:
           type: integer
@@ -339,12 +1841,315 @@ components:
           type: boolean
           description: Vrai tant que la version courante de la notice n'a pas été
             lue.
+        editions:
+          type: array
+          items:
+            $ref: '#/components/schemas/MeEdition'
+        pending_invitations:
+          type: array
+          items:
+            $ref: '#/components/schemas/MePendingInvitation'
+        mfa_enabled:
+          type: boolean
+          description: 2FA (TOTP) activée sur le compte.
+        mfa_verified:
+          type: boolean
+          description: Session validée par la 2FA (connexion en deux étapes ou réauthentification).
       required:
+      - editions
       - email
       - id
       - locale
+      - mfa_enabled
+      - mfa_verified
+      - pending_invitations
       - privacy_notice_pending
       - profile_complete
+    MeEdition:
+      type: object
+      description: |-
+        Édition où le compte a au moins un rôle actif, avec ses capacités (§5.1) : Angular
+        masque les actions d'après elles, sans recopier la matrice en TypeScript.
+      properties:
+        id:
+          type: integer
+        code:
+          type: string
+        title_fr:
+          type: string
+        title_en:
+          type: string
+        year:
+          type: integer
+        status:
+          $ref: '#/components/schemas/EditionStatus'
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/EditionRole'
+        capabilities:
+          type: array
+          items:
+            $ref: '#/components/schemas/Capability'
+        mfa_required:
+          type: boolean
+          description: Un rôle de l'édition impose la 2FA pour les routes de gestion
+            (D3).
+      required:
+      - capabilities
+      - code
+      - id
+      - mfa_required
+      - roles
+      - status
+      - title_en
+      - title_fr
+      - year
+    MePendingInvitation:
+      type: object
+      description: Invitation en attente adressée à une adresse vérifiée du compte.
+      properties:
+        edition_code:
+          type: string
+        edition_title_fr:
+          type: string
+        edition_title_en:
+          type: string
+        role:
+          $ref: '#/components/schemas/InvitableRole'
+        oc_function:
+          oneOf:
+          - $ref: '#/components/schemas/OcFunction'
+          - $ref: '#/components/schemas/BlankEnum'
+        expires_at:
+          type: string
+          format: date-time
+      required:
+      - edition_code
+      - edition_title_en
+      - edition_title_fr
+      - expires_at
+      - oc_function
+      - role
+    MemberWithEmail:
+      type: object
+      description: Membre d'une édition, sans adresse (``members.read`` seul).
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user_id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        role:
+          allOf:
+          - $ref: '#/components/schemas/Role'
+          readOnly: true
+        oc_function:
+          readOnly: true
+          oneOf:
+          - $ref: '#/components/schemas/OcFunction'
+          - $ref: '#/components/schemas/BlankEnum'
+        status:
+          allOf:
+          - $ref: '#/components/schemas/UserRoleStatus'
+          readOnly: true
+        source:
+          allOf:
+          - $ref: '#/components/schemas/RoleSource'
+          readOnly: true
+        granted_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Attribué le
+        revoked_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Révoqué le
+        email:
+          type: string
+          format: email
+          readOnly: true
+      required:
+      - email
+      - granted_at
+      - id
+      - name
+      - oc_function
+      - revoked_at
+      - role
+      - source
+      - status
+      - user_id
+    OcFunction:
+      enum:
+      - finance
+      - program
+      - logistics
+      - communication
+      - external_relations
+      - volunteers
+      - secretariat
+      type: string
+      description: |-
+        * `` - aucune
+        * `finance` - finances
+        * `program` - programme
+        * `logistics` - logistique
+        * `communication` - communication
+        * `external_relations` - relations extérieures
+        * `volunteers` - bénévoles
+        * `secretariat` - secrétariat
+    PaginatedAuditEntryList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuditEntry'
+    PaginatedInvitationWithEmailList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/InvitationWithEmail'
+    PatchedConfidentialityRequest:
+      type: object
+      properties:
+        double_blind:
+          type: boolean
+          title: Double aveugle
+        reviewers_per_submission:
+          type: integer
+          maximum: 10
+          minimum: 1
+          title: Relecteurs par soumission
+    PatchedEditionRequest:
+      type: object
+      properties:
+        code:
+          type: string
+          minLength: 1
+          maxLength: 12
+        slug:
+          type: string
+          minLength: 1
+          title: Identifiant
+          maxLength: 64
+          pattern: ^[-a-zA-Z0-9_]+$
+        year:
+          type: integer
+          maximum: 2100
+          minimum: 2000
+          title: Année
+        title_fr:
+          type: string
+          minLength: 1
+          title: Titre (FR)
+          maxLength: 255
+        title_en:
+          type: string
+          title: Titre (EN)
+          maxLength: 255
+        theme_fr:
+          type: string
+          title: Thème (FR)
+          maxLength: 500
+        theme_en:
+          type: string
+          title: Thème (EN)
+          maxLength: 500
+        start_date:
+          type: string
+          format: date
+          nullable: true
+          title: Début
+        end_date:
+          type: string
+          format: date
+          nullable: true
+          title: Fin
+        venue:
+          type: string
+          title: Lieu
+          maxLength: 255
+        city:
+          type: string
+          title: Ville
+          maxLength: 128
+        country:
+          type: string
+          title: Pays
+          maxLength: 2
+        timezone:
+          type: string
+          minLength: 1
+          title: Fuseau horaire
+          maxLength: 64
+    PatchedKeyDateWriteRequest:
+      type: object
+      description: Saisie à l'heure de l'édition (D13), convertie en UTC par le serveur.
+      properties:
+        code:
+          type: string
+          minLength: 1
+          maxLength: 32
+          pattern: ^[-a-zA-Z0-9_]+$
+        at_local:
+          type: string
+          format: date-time
+          description: Date et heure dans le fuseau de l'édition, sans fuseau (2027-03-31T23:59).
+        label_fr:
+          type: string
+          maxLength: 255
+        label_en:
+          type: string
+          maxLength: 255
+        is_public:
+          type: boolean
+        position:
+          type: integer
+          maximum: 32767
+          minimum: 0
     PatchedPreferencesRequest:
       type: object
       properties:
@@ -382,6 +2187,82 @@ components:
           type: string
           description: Texte brut.
           maxLength: 2000
+    PatchedSubmissionTypeRequest:
+      type: object
+      properties:
+        code:
+          type: string
+          minLength: 1
+          maxLength: 32
+          pattern: ^[-a-zA-Z0-9_]+$
+        label_fr:
+          type: string
+          minLength: 1
+          title: Libellé (FR)
+          maxLength: 255
+        label_en:
+          type: string
+          title: Libellé (EN)
+          maxLength: 255
+        description_fr:
+          type: string
+          title: Description (FR)
+        description_en:
+          type: string
+          title: Description (EN)
+        default_duration_min:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          nullable: true
+          title: Durée par défaut (min)
+        abstract_max_words:
+          type: integer
+          maximum: 2000
+          minimum: 50
+          title: Mots maximum du résumé
+        position:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: Ordre
+        is_active:
+          type: boolean
+          title: Actif
+    PatchedTrackRequest:
+      type: object
+      properties:
+        code:
+          type: string
+          minLength: 1
+          maxLength: 32
+          pattern: ^[-a-zA-Z0-9_]+$
+        name_fr:
+          type: string
+          minLength: 1
+          title: Nom (FR)
+          maxLength: 255
+        name_en:
+          type: string
+          title: Nom (EN)
+          maxLength: 255
+        description_fr:
+          type: string
+          title: Description (FR)
+        description_en:
+          type: string
+          title: Description (EN)
+        position:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: Ordre
+        is_active:
+          type: boolean
+          title: Actif
     Profile:
       type: object
       properties:
@@ -432,6 +2313,147 @@ components:
         * `pr` - Pr
         * `mr` - M.
         * `ms` - Mme
+    PublicEdition:
+      type: object
+      description: 'Édition courante publiée (§9.3) : tracks et types actifs, dates
+        publiques seulement.'
+      properties:
+        code:
+          type: string
+          readOnly: true
+        slug:
+          type: string
+          readOnly: true
+          title: Identifiant
+          pattern: ^[-a-zA-Z0-9_]+$
+        year:
+          type: integer
+          readOnly: true
+          title: Année
+        title_fr:
+          type: string
+          readOnly: true
+          title: Titre (FR)
+        title_en:
+          type: string
+          readOnly: true
+          title: Titre (EN)
+        theme_fr:
+          type: string
+          readOnly: true
+          title: Thème (FR)
+        theme_en:
+          type: string
+          readOnly: true
+          title: Thème (EN)
+        start_date:
+          type: string
+          format: date
+          readOnly: true
+          nullable: true
+          title: Début
+        end_date:
+          type: string
+          format: date
+          readOnly: true
+          nullable: true
+          title: Fin
+        venue:
+          type: string
+          readOnly: true
+          title: Lieu
+        city:
+          type: string
+          readOnly: true
+          title: Ville
+        country:
+          type: string
+          readOnly: true
+          title: Pays
+        timezone:
+          type: string
+          readOnly: true
+          title: Fuseau horaire
+        tracks:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+          readOnly: true
+        submission_types:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+          readOnly: true
+        key_dates:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+          readOnly: true
+      required:
+      - city
+      - code
+      - country
+      - end_date
+      - key_dates
+      - slug
+      - start_date
+      - submission_types
+      - theme_en
+      - theme_fr
+      - timezone
+      - title_en
+      - title_fr
+      - tracks
+      - venue
+      - year
+    RevokeRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 1000
+      required:
+      - reason
+    Role:
+      enum:
+      - ADMIN
+      - CHAIR
+      - OC_MEMBER
+      - SC_CHAIR
+      - SC_MEMBER
+      - AUTHOR
+      - SPEAKER
+      - SESSION_CHAIR
+      - ATTENDEE
+      - SPONSOR
+      - VOLUNTEER
+      type: string
+      description: |-
+        * `ADMIN` - administrateur de l'édition
+        * `CHAIR` - président de la conférence
+        * `OC_MEMBER` - membre du comité d'organisation
+        * `SC_CHAIR` - président du comité scientifique
+        * `SC_MEMBER` - membre du comité scientifique
+        * `AUTHOR` - auteur
+        * `SPEAKER` - intervenant
+        * `SESSION_CHAIR` - président de session
+        * `ATTENDEE` - participant
+        * `SPONSOR` - partenaire
+        * `VOLUNTEER` - bénévole
+    RoleSource:
+      enum:
+      - invitation
+      - command
+      - system
+      type: string
+      description: |-
+        * `invitation` - invitation
+        * `command` - commande
+        * `system` - système
     ServiceStatus:
       enum:
       - ok
@@ -440,6 +2462,218 @@ components:
       description: |-
         * `ok` - Ok
         * `error` - Error
+    SkippedInvitation:
+      type: object
+      properties:
+        email:
+          type: string
+          description: Adresse masquée.
+        reason:
+          $ref: '#/components/schemas/SkippedReason'
+      required:
+      - email
+      - reason
+    SkippedReason:
+      enum:
+      - already_pending
+      - already_member
+      type: string
+      description: |-
+        * `already_pending` - invitation déjà en attente
+        * `already_member` - rôle déjà actif
+    SubmissionType:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        code:
+          type: string
+          maxLength: 32
+          pattern: ^[-a-zA-Z0-9_]+$
+        label_fr:
+          type: string
+          title: Libellé (FR)
+          maxLength: 255
+        label_en:
+          type: string
+          title: Libellé (EN)
+          maxLength: 255
+        description_fr:
+          type: string
+          title: Description (FR)
+        description_en:
+          type: string
+          title: Description (EN)
+        default_duration_min:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          nullable: true
+          title: Durée par défaut (min)
+        abstract_max_words:
+          type: integer
+          maximum: 2000
+          minimum: 50
+          title: Mots maximum du résumé
+        position:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: Ordre
+        is_active:
+          type: boolean
+          title: Actif
+      required:
+      - code
+      - id
+      - label_fr
+    SubmissionTypeRequest:
+      type: object
+      properties:
+        code:
+          type: string
+          minLength: 1
+          maxLength: 32
+          pattern: ^[-a-zA-Z0-9_]+$
+        label_fr:
+          type: string
+          minLength: 1
+          title: Libellé (FR)
+          maxLength: 255
+        label_en:
+          type: string
+          title: Libellé (EN)
+          maxLength: 255
+        description_fr:
+          type: string
+          title: Description (FR)
+        description_en:
+          type: string
+          title: Description (EN)
+        default_duration_min:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          nullable: true
+          title: Durée par défaut (min)
+        abstract_max_words:
+          type: integer
+          maximum: 2000
+          minimum: 50
+          title: Mots maximum du résumé
+        position:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: Ordre
+        is_active:
+          type: boolean
+          title: Actif
+      required:
+      - code
+      - label_fr
+    TokenRequest:
+      type: object
+      properties:
+        token:
+          type: string
+          minLength: 1
+          maxLength: 128
+      required:
+      - token
+    TotpQr:
+      type: object
+      properties:
+        qr_code:
+          type: string
+          description: QR code de l'enrôlement, en data:image/svg+xml;base64,…
+      required:
+      - qr_code
+    Track:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        code:
+          type: string
+          maxLength: 32
+          pattern: ^[-a-zA-Z0-9_]+$
+        name_fr:
+          type: string
+          title: Nom (FR)
+          maxLength: 255
+        name_en:
+          type: string
+          title: Nom (EN)
+          maxLength: 255
+        description_fr:
+          type: string
+          title: Description (FR)
+        description_en:
+          type: string
+          title: Description (EN)
+        position:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: Ordre
+        is_active:
+          type: boolean
+          title: Actif
+      required:
+      - code
+      - id
+      - name_fr
+    TrackRequest:
+      type: object
+      properties:
+        code:
+          type: string
+          minLength: 1
+          maxLength: 32
+          pattern: ^[-a-zA-Z0-9_]+$
+        name_fr:
+          type: string
+          minLength: 1
+          title: Nom (FR)
+          maxLength: 255
+        name_en:
+          type: string
+          title: Nom (EN)
+          maxLength: 255
+        description_fr:
+          type: string
+          title: Description (FR)
+        description_en:
+          type: string
+          title: Description (EN)
+        position:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: Ordre
+        is_active:
+          type: boolean
+          title: Actif
+      required:
+      - code
+      - name_fr
+    UserRoleStatus:
+      enum:
+      - active
+      - revoked
+      type: string
+      description: |-
+        * `active` - actif
+        * `revoked` - révoqué
   securitySchemes:
     cookieAuth:
       type: apiKey

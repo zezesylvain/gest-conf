@@ -1,0 +1,7 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate %}Bonjour,
+
+La double authentification (application TOTP) vient d'être activée sur votre compte {{ site_name }}. Conservez vos codes de secours en lieu sûr.{% endblocktranslate %}
+
+{% include "account/email/_security_footer.txt" %}
+
+{% include "account/email/_signature.txt" %}{% endautoescape %}

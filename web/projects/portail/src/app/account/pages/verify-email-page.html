@@ -1,0 +1,44 @@
+<gc-page-header [heading]="'portail.account.verify.title' | translate" />
+
+<div aria-live="polite">
+  @switch (state()) {
+    @case ('verifying') {
+      <p class="notice" role="status">
+        <mat-progress-spinner mode="indeterminate" diameter="20" aria-hidden="true" />
+        {{ 'portail.account.verify.verifying' | translate }}
+      </p>
+    }
+    @case ('verified') {
+      <div class="notice" role="status">
+        <p>{{ 'portail.account.verify.verified' | translate }}</p>
+      </div>
+      <p>
+        <a mat-flat-button routerLink="/compte/connexion">{{
+          'portail.account.verify.login' | translate
+        }}</a>
+      </p>
+    }
+    @case ('failed') {
+      <div class="notice" role="alert">
+        <p>{{ message() }}</p>
+      </div>
+      <p>{{ 'portail.account.verify.resendHint' | translate }}</p>
+      <p>
+        <a routerLink="/compte/connexion">{{ 'portail.account.verify.resend' | translate }}</a>
+      </p>
+    }
+    @default {
+      <div class="notice" role="status">
+        @if (email()) {
+          <p>{{ 'portail.account.verify.sentTo' | translate: { email: email() } }}</p>
+        } @else {
+          <p>{{ 'portail.account.verify.sent' | translate }}</p>
+        }
+      </div>
+      <p>{{ 'portail.account.verify.resendHint' | translate }}</p>
+      <p>
+        <a routerLink="/compte/connexion">{{ 'portail.account.verify.resend' | translate }}</a>
+      </p>
+    }
+  }
+</div>

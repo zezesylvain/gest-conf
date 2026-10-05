@@ -28,6 +28,17 @@
   color: var(--gc-on-primary);
 }
 
+.header-tools {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.account-link {
+  color: inherit;
+  font-weight: 600;
+}
+
 .brand {
   color: inherit;
   font-weight: 700;

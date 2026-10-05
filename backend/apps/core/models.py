@@ -1,7 +1,7 @@
 """Modèles transverses : horodatage, journal d'audit, file de tâches, battements de cœur.
 
 Plan L1 §3.5. Les clés étrangères vers ``Edition`` (``AuditLog.edition``,
-``Job.edition``) arrivent en L1.5 avec l'application ``conferences``, par une
+``Job.edition``) sont arrivées en L1.5 avec l'application ``conferences``, par une
 migration additive (``core/0002``, plan §3.8).
 """
 
@@ -92,6 +92,15 @@ class AuditLog(AppendOnlyModel):
         related_name="+",
     )
     actor_kind = models.CharField(_("type d'acteur"), max_length=8, choices=ActorKind.choices)
+    # Ajout par rapport à l'étude §8.2 (B8) : limite la lecture d'un président à son édition.
+    edition = models.ForeignKey(
+        "conferences.Edition",
+        verbose_name=_("édition"),
+        null=True,
+        blank=True,
+        on_delete=models.RESTRICT,
+        related_name="+",
+    )
     actor_label = models.CharField(
         _("libellé de l'acteur"), max_length=LABEL_MAX_LENGTH, blank=True, default=""
     )
@@ -114,6 +123,7 @@ class AuditLog(AppendOnlyModel):
         verbose_name_plural = _("journal d'audit")
         ordering = ("-at", "-id")
         indexes = (
+            models.Index(fields=["edition", "at"], name="core_audit_edition_at"),
             models.Index(fields=["actor", "at"], name="core_audit_actor_at"),
             models.Index(fields=["object_type", "object_id"], name="core_audit_object"),
             models.Index(fields=["action", "at"], name="core_audit_action_at"),

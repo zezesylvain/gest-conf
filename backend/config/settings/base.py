@@ -44,10 +44,12 @@ INSTALLED_APPS = [
     "apps.core",
     "apps.accounts",
     "apps.communications",
+    "apps.conferences",
     # Après les applications du projet : leurs gabarits d'e-mails (account/email/*) priment.
     "allauth",
     "allauth.account",
     "allauth.headless",
+    "allauth.mfa",
 ]
 
 MIDDLEWARE = [
@@ -190,6 +192,18 @@ HEADLESS_FRONTEND_URLS = {
     "account_signup": f"{GESTCONF_PUBLIC_URL}/compte/inscription",
 }
 
+# --- 2FA : allauth.mfa (décisions D2, D3 ; plan L1 §4.2, §4.4, §4.10) ---------------------
+# TOTP et codes de secours seulement (ni WebAuthn ni « appareil de confiance »).
+MFA_ADAPTER = "apps.accounts.adapters.MFAAdapter"
+MFA_SUPPORTED_TYPES = ["totp", "recovery_codes"]
+MFA_TRUST_ENABLED = False
+# Garde conservée : pas de 2FA avec une adresse non vérifiée (409 « unverified_email »).
+MFA_ALLOW_UNVERIFIED_EMAIL = False
+# Clés Fernet (base64 urlsafe, 32 octets) chiffrant le secret TOTP et la graine des codes
+# de secours, séparées par des virgules : la première chiffre, toutes déchiffrent
+# (MultiFernet). Obligatoire en production (prod.py) ; rotation : rotate_mfa_keys.
+GESTCONF_MFA_ENCRYPTION_KEYS = env.list("GESTCONF_MFA_ENCRYPTION_KEYS", default=[])
+
 # --- Sessions (D12) -------------------------------------------------------------------
 # 12 h au plus, imposées par AbsoluteSessionTimeoutMiddleware (Django fait glisser
 # l'échéance à chaque enregistrement de la session) ; cookie sans date d'expiration.
@@ -318,6 +332,16 @@ SPECTACULAR_SETTINGS = {
         "ConsentKind": "apps.accounts.models.ConsentKind",
         "ConsentSource": "apps.accounts.models.ConsentSource",
         "ConsentRequestSource": "apps.accounts.serializers.ConsentRequestSource",
+        "Role": "apps.accounts.roles.Role",
+        "Capability": "apps.accounts.roles.CAPABILITY_CHOICES",
+        "InvitableRole": "apps.accounts.roles.InvitableRole",
+        "OcFunction": "apps.accounts.roles.OcFunction",
+        "UserRoleStatus": "apps.accounts.models.UserRoleStatus",
+        "RoleSource": "apps.accounts.models.RoleSource",
+        "InvitationStatus": "apps.accounts.models.InvitationStatus",
+        "SkippedReason": "apps.accounts.services.invitations.SkippedReason",
+        "ActorKind": "apps.core.actor.ActorKind",
+        "EditionStatus": "apps.conferences.models.EditionStatus",
         "ErrorCode": "apps.core.errors.ErrorCode",
     },
     "POSTPROCESSING_HOOKS": [
@@ -330,6 +354,9 @@ SPECTACULAR_SETTINGS = {
 # --- E-mails (plan L1 §8.3, décision D10) ------------------------------------------------
 # Nom affiché dans les gabarits (objet et corps) ; fixe, jamais saisi par un utilisateur.
 GESTCONF_SITE_NAME = env.str("GESTCONF_SITE_NAME", default="GEST-CONF")
+# Émetteur affiché par l'application TOTP : nom fixe, jamais l'en-tête Host (allauth
+# l'utiliserait par défaut, MFA_TOTP_ISSUER vide).
+MFA_TOTP_ISSUER = GESTCONF_SITE_NAME
 # Backend : console en développement, locmem en test (test.py), fournisseur par API en
 # production via django-anymail, par exemple « anymail.backends.brevo.EmailBackend » ou
 # « anymail.backends.mailjet.EmailBackend » (classes vérifiées dans anymail 15.2).

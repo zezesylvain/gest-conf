@@ -5,7 +5,22 @@
 // Client de l'API généré depuis le schéma OpenAPI (npm run api:generate) : ne pas éditer.
 export * from './lib/api';
 
+export * from './lib/http/api-error';
+export * from './lib/http/interceptors';
 export * from './lib/http/provide-api';
+
+export * from './lib/auth/allauth';
+export * from './lib/auth/auth-api';
+export * from './lib/auth/auth.guard';
+export * from './lib/auth/login-navigation';
+export * from './lib/auth/me.store';
+export * from './lib/auth/reauthentication';
+export * from './lib/auth/safe-next';
+export * from './lib/auth/session.store';
+
+export * from './lib/ui-kit/error-summary';
+export * from './lib/ui-kit/page-header';
+export * from './lib/ui-kit/server-errors';
 
 export * from './lib/i18n/languages';
 export * from './lib/i18n/json-import-loader';

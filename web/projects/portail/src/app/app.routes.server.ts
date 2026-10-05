@@ -7,5 +7,7 @@ import { RenderMode, ServerRoute } from '@angular/ssr';
  */
 export const serverRoutes: ServerRoute[] = [
   { path: '', renderMode: RenderMode.Prerender },
+  // Espace compte : jamais pré-rendu (lecture des jetons du fragment, état de session).
+  { path: 'compte/**', renderMode: RenderMode.Client },
   { path: '**', renderMode: RenderMode.Client },
 ];
