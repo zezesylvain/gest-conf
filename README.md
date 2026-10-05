@@ -6,7 +6,7 @@ Plateforme de gestion de conférences scientifiques : portail public, espace de 
 - **Étude fonctionnelle et technique** (source de vérité) : [`Etude_fonctionnelle_et_technique_GEST-CONF.md`](Etude_fonctionnelle_et_technique_GEST-CONF.md)
 - **Règles de développement** : [`CLAUDE.md`](CLAUDE.md)
 - **Avancement** : lot L0 (squelette et prototype de déploiement) — voir [`docs/L0-prototype-deploiement.md`](docs/L0-prototype-deploiement.md)
-- **Lot L1 (socle)** : plan proposé, **en attente de validation** — voir [`docs/L1-socle-plan.md`](docs/L1-socle-plan.md)
+- **Lot L1 (socle)** : plan **validé** (D1–D18), en cours de réalisation — voir [`docs/L1-socle-plan.md`](docs/L1-socle-plan.md)
 
 ## Architecture en bref
 

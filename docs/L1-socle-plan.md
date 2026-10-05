@@ -24,7 +24,9 @@
 >   Charge : **22,75 à 28 j-h** (+0,25 sur L1.3 et +0,25 sur L1.5).
 > - **v4** (5 octobre 2026) : **six corrections mineures après une troisième relecture adverse**, sans effet sur la charge : répartition de la hausse de L1.5 (D6, §13) ; e-mail de liaison d'adresse ajouté à la voie rapide (§8.3, §10.2, §12.1) ; code `invitation_self_accept` (§5.7, §9.1, §12.1) ; durée de conservation des invitations annulées (D15, §3.3, §8.4) ; test d'audit fondé sur les valeurs (§7.5) ; conception du contrôle RG-04 conservée pour L4 (§5.4).
 
-> **Statut.** Ce document est une proposition. `CLAUDE.md` exige un plan validé avant toute modification large : modèle de données, permissions, workflow de statuts. **Aucun code ne sera écrit avant votre accord** : seul ce document a été ajouté au dépôt.
+> **Statut : validé par le commanditaire le 5 octobre 2026 (« OK D1–D18 »).** Les recommandations des décisions D1 à D18 s'appliquent.
+>
+> **Statut initial.** Ce document était une proposition. `CLAUDE.md` exige un plan validé avant toute modification large : modèle de données, permissions, workflow de statuts. **Aucun code ne sera écrit avant votre accord** : seul ce document a été ajouté au dépôt.
 >
 > **Date.** 5 octobre 2026 (version 4).
 >
