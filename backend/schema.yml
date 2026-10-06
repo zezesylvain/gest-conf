@@ -642,12 +642,16 @@ paths:
           - OC_MEMBER
           - SC_CHAIR
           - SC_MEMBER
+          - SESSION_CHAIR
+          - SPEAKER
         description: |-
           * `ADMIN` - administrateur de l'édition
           * `CHAIR` - président de la conférence
           * `SC_CHAIR` - président du comité scientifique
           * `OC_MEMBER` - membre du comité d'organisation
           * `SC_MEMBER` - membre du comité scientifique
+          * `SPEAKER` - intervenant
+          * `SESSION_CHAIR` - président de session
       - in: query
         name: status
         schema:
@@ -1683,12 +1687,427 @@ paths:
               schema:
                 $ref: '#/components/schemas/PublicationStatus'
           description: ''
+  /v1/manage/editions/{edition_id}/program:
+    get:
+      operationId: manage_program_board
+      description: '``…/program`` : brouillon complet pour le planificateur.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProgramBoard'
+          description: ''
+  /v1/manage/editions/{edition_id}/program/people:
+    get:
+      operationId: manage_program_people
+      description: |-
+        ``…/program/people?q=`` : personnes de l'édition (rôle actif), pour les rôles de
+        séance et les intervenants (I10, I11). Nom et institution, jamais d'adresse.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: q
+        schema:
+          type: string
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PersonSearch'
+          description: ''
+  /v1/manage/editions/{edition_id}/program/publications:
+    get:
+      operationId: manage_program_publications
+      description: '``GET …/program/publications`` : historique des publications (I13).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Publication'
+          description: ''
+  /v1/manage/editions/{edition_id}/program/publish:
+    post:
+      operationId: manage_program_publish
+      description: |-
+        ``POST …/program/publish`` : publication par le Chair (``program.publish``, I1),
+        réauthentification récente, journalisée (RG-17) ; refusée tant qu'il reste un conflit
+        (409 ``program_conflicts``) ou sans modification (409 ``program_unchanged``).
+      parameters:
+      - in: header
+        name: If-Match
+        schema:
+          type: integer
+        description: Révision du programme lue ; 412 « stale_revision » si elle a
+          changé (I14).
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProgramBoard'
+          description: ''
+  /v1/manage/editions/{edition_id}/program/rooms:
+    post:
+      operationId: manage_program_rooms_create
+      description: '``…/program/rooms`` : salles (I9).'
+      parameters:
+      - in: header
+        name: If-Match
+        schema:
+          type: integer
+        description: Révision du programme lue ; 412 « stale_revision » si elle a
+          changé (I14).
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoomWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProgramBoard'
+          description: ''
+  /v1/manage/editions/{edition_id}/program/rooms/{item_id}:
+    patch:
+      operationId: manage_program_rooms_update
+      description: '``…/program/rooms`` : salles (I9).'
+      parameters:
+      - in: header
+        name: If-Match
+        schema:
+          type: integer
+        description: Révision du programme lue ; 412 « stale_revision » si elle a
+          changé (I14).
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedRoomWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProgramBoard'
+          description: ''
+    delete:
+      operationId: manage_program_rooms_delete
+      description: '``…/program/rooms`` : salles (I9).'
+      parameters:
+      - in: header
+        name: If-Match
+        schema:
+          type: integer
+        description: Révision du programme lue ; 412 « stale_revision » si elle a
+          changé (I14).
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProgramBoard'
+          description: ''
+  /v1/manage/editions/{edition_id}/program/session-roles/{item_id}:
+    delete:
+      operationId: manage_program_roles_delete
+      description: '``…/program/sessions/{s}/roles`` (ajout) et ``…/program/session-roles/{r}``
+        (retrait).'
+      parameters:
+      - in: header
+        name: If-Match
+        schema:
+          type: integer
+        description: Révision du programme lue ; 412 « stale_revision » si elle a
+          changé (I14).
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProgramBoard'
+          description: ''
+  /v1/manage/editions/{edition_id}/program/sessions:
+    post:
+      operationId: manage_program_sessions_create
+      description: '``…/program/sessions`` : sessions (I2, I12), saisies à l''heure
+        de l''édition (D13).'
+      parameters:
+      - in: header
+        name: If-Match
+        schema:
+          type: integer
+        description: Révision du programme lue ; 412 « stale_revision » si elle a
+          changé (I14).
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SessionWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProgramBoard'
+          description: ''
+  /v1/manage/editions/{edition_id}/program/sessions/{item_id}:
+    patch:
+      operationId: manage_program_sessions_update
+      description: '``…/program/sessions`` : sessions (I2, I12), saisies à l''heure
+        de l''édition (D13).'
+      parameters:
+      - in: header
+        name: If-Match
+        schema:
+          type: integer
+        description: Révision du programme lue ; 412 « stale_revision » si elle a
+          changé (I14).
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSessionWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProgramBoard'
+          description: ''
+    delete:
+      operationId: manage_program_sessions_delete
+      description: '``…/program/sessions`` : sessions (I2, I12), saisies à l''heure
+        de l''édition (D13).'
+      parameters:
+      - in: header
+        name: If-Match
+        schema:
+          type: integer
+        description: Révision du programme lue ; 412 « stale_revision » si elle a
+          changé (I14).
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProgramBoard'
+          description: ''
+  /v1/manage/editions/{edition_id}/program/sessions/{session_id}/roles:
+    post:
+      operationId: manage_program_roles_create
+      description: '``…/program/sessions/{s}/roles`` (ajout) et ``…/program/session-roles/{r}``
+        (retrait).'
+      parameters:
+      - in: header
+        name: If-Match
+        schema:
+          type: integer
+        description: Révision du programme lue ; 412 « stale_revision » si elle a
+          changé (I14).
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: session_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SessionRoleWriteRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProgramBoard'
+          description: ''
+  /v1/manage/editions/{edition_id}/program/sessions/{session_id}/slots:
+    post:
+      operationId: manage_program_slots_create
+      description: |-
+        ``…/program/sessions/{s}/slots`` (création) et ``…/program/slots/{c}`` (durée,
+        déplacement, titres, retrait).
+      parameters:
+      - in: header
+        name: If-Match
+        schema:
+          type: integer
+        description: Révision du programme lue ; 412 « stale_revision » si elle a
+          changé (I14).
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: session_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SlotCreateRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProgramBoard'
+          description: ''
   /v1/manage/editions/{edition_id}/program/settings:
     get:
       operationId: manage_program_settings_retrieve
-      description: |-
-        ``…/program/settings`` : paramètres du programme (I17). Lecture ``program.read``,
-        écriture ``program.write`` (CO « programme », administrateur ; I1).
+      description: '``…/program/settings`` : paramètres du programme (I17).'
       parameters:
       - in: path
         name: edition_id
@@ -1708,9 +2127,7 @@ paths:
           description: ''
     patch:
       operationId: manage_program_settings_update
-      description: |-
-        ``…/program/settings`` : paramètres du programme (I17). Lecture ``program.read``,
-        écriture ``program.write`` (CO « programme », administrateur ; I1).
+      description: '``…/program/settings`` : paramètres du programme (I17).'
       parameters:
       - in: path
         name: edition_id
@@ -1732,6 +2149,78 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProgramSettings'
+          description: ''
+  /v1/manage/editions/{edition_id}/program/slots/{item_id}:
+    patch:
+      operationId: manage_program_slots_update
+      description: |-
+        ``…/program/sessions/{s}/slots`` (création) et ``…/program/slots/{c}`` (durée,
+        déplacement, titres, retrait).
+      parameters:
+      - in: header
+        name: If-Match
+        schema:
+          type: integer
+        description: Révision du programme lue ; 412 « stale_revision » si elle a
+          changé (I14).
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSlotUpdateRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProgramBoard'
+          description: ''
+    delete:
+      operationId: manage_program_slots_delete
+      description: |-
+        ``…/program/sessions/{s}/slots`` (création) et ``…/program/slots/{c}`` (durée,
+        déplacement, titres, retrait).
+      parameters:
+      - in: header
+        name: If-Match
+        schema:
+          type: integer
+        description: Révision du programme lue ; 412 « stale_revision » si elle a
+          changé (I14).
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProgramBoard'
           description: ''
   /v1/manage/editions/{edition_id}/ranking:
     get:
@@ -3123,6 +3612,41 @@ paths:
               schema:
                 $ref: '#/components/schemas/Me'
           description: ''
+  /v1/me/agenda:
+    get:
+      operationId: me_agenda
+      description: |-
+        ``GET /v1/me/agenda`` : passages de la personne connectée, d'après les programmes
+        publiés des éditions ouvertes.
+      tags:
+      - me
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AgendaEntry'
+          description: ''
+  /v1/me/agenda.ics:
+    get:
+      operationId: me_agenda_ics
+      description: '``GET /v1/me/agenda.ics`` : les mêmes passages au format iCalendar
+        (RFC 5545).'
+      tags:
+      - me
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            text/calendar:
+              schema:
+                type: string
+          description: ''
   /v1/me/anonymization:
     post:
       operationId: me_anonymization
@@ -3474,6 +3998,60 @@ paths:
               schema:
                 $ref: '#/components/schemas/PublicSite'
           description: ''
+  /v1/public/program:
+    get:
+      operationId: public_program
+      description: |-
+        ``GET /v1/public/program`` : dernière publication de l'édition courante, résumée
+        (jours et sessions) ; 404 tant que rien n'est publié. Lu au build du portail (I7).
+      tags:
+      - public
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicProgram'
+          description: ''
+  /v1/public/program/days/{day}:
+    get:
+      operationId: public_program_day
+      description: '``GET /v1/public/program/days/{date}`` : sessions d''un jour (heure
+        de l''édition).'
+      parameters:
+      - in: path
+        name: day
+        schema:
+          type: string
+        required: true
+      tags:
+      - public
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicProgramDay'
+          description: ''
+  /v1/public/program/sessions/{session_id}:
+    get:
+      operationId: public_program_session
+      description: '``GET /v1/public/program/sessions/{id}`` : une session publiée.'
+      parameters:
+      - in: path
+        name: session_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - public
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicSession'
+          description: ''
   /v1/submissions:
     get:
       operationId: submissions_list
@@ -3632,6 +4210,35 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SubmissionCheck'
+          description: ''
+  /v1/submissions/{submission_id}/confirm-presentation:
+    post:
+      operationId: submissions_confirm_presentation
+      description: |-
+        I5 (plan L5) : présentateurs désignés parmi les auteurs ; la première fois, la
+        communication passe à « confirmée » et devient programmable.
+      parameters:
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - submissions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmPresentationRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Submission'
           description: ''
   /v1/submissions/{submission_id}/file:
     post:
@@ -3869,6 +4476,108 @@ components:
         * `user` - utilisateur
         * `command` - commande
         * `system` - système
+    AgendaEdition:
+      type: object
+      properties:
+        code:
+          type: string
+        title_fr:
+          type: string
+        title_en:
+          type: string
+        timezone:
+          type: string
+      required:
+      - code
+      - timezone
+      - title_en
+      - title_fr
+    AgendaEntry:
+      type: object
+      description: '« Mon passage » (I8) : les passages de la personne connectée.'
+      properties:
+        edition:
+          $ref: '#/components/schemas/AgendaEdition'
+        version:
+          type: integer
+        role:
+          $ref: '#/components/schemas/PassageRole'
+        session:
+          $ref: '#/components/schemas/AgendaSession'
+        slot:
+          type: integer
+          nullable: true
+        starts_at:
+          type: string
+          format: date-time
+        ends_at:
+          type: string
+          format: date-time
+        duration_min:
+          type: integer
+        room:
+          $ref: '#/components/schemas/AgendaRoom'
+        title:
+          type: string
+        title_en:
+          type: string
+        reference:
+          type: string
+        co_speakers:
+          type: array
+          items:
+            type: string
+        chairs:
+          type: array
+          items:
+            type: string
+        instructions:
+          type: string
+      required:
+      - chairs
+      - co_speakers
+      - duration_min
+      - edition
+      - ends_at
+      - instructions
+      - reference
+      - role
+      - room
+      - session
+      - slot
+      - starts_at
+      - title
+      - title_en
+      - version
+    AgendaRoom:
+      type: object
+      properties:
+        name:
+          type: string
+        access_note:
+          type: string
+        is_accessible:
+          type: boolean
+      required:
+      - access_note
+      - is_accessible
+      - name
+    AgendaSession:
+      type: object
+      properties:
+        id:
+          type: integer
+        kind:
+          $ref: '#/components/schemas/SessionKind'
+        title_fr:
+          type: string
+        title_en:
+          type: string
+      required:
+      - id
+      - kind
+      - title_en
+      - title_fr
     AnonymizationRequest:
       type: object
       description: 'Confirmation explicite : l''adresse du compte, saisie à nouveau
@@ -4305,6 +5014,18 @@ components:
           description: Réglages gelés depuis la première soumission (RG-19).
       required:
       - frozen_fields
+    ConfirmPresentationRequest:
+      type: object
+      properties:
+        presenters:
+          type: array
+          items:
+            type: integer
+            minimum: 1
+          description: Positions des auteurs qui présentent.
+          maxItems: 50
+      required:
+      - presenters
     ConflictCreateRequest:
       type: object
       properties:
@@ -4975,6 +5696,26 @@ components:
       - title_en
       - title_fr
       - year
+    Equipment:
+      enum:
+      - projector
+      - microphone
+      - sound_system
+      - computer
+      - whiteboard
+      - interpretation
+      - recording
+      - wifi
+      type: string
+      description: |-
+        * `projector` - vidéoprojecteur
+        * `microphone` - micro
+        * `sound_system` - sonorisation
+        * `computer` - ordinateur
+        * `whiteboard` - tableau
+        * `interpretation` - interprétation
+        * `recording` - enregistrement
+        * `wifi` - wifi
     ErrorCode:
       enum:
       - validation_error
@@ -5010,6 +5751,8 @@ components:
       - call_closed
       - setting_frozen
       - stale_revision
+      - program_conflicts
+      - program_unchanged
       - submission_locked
       - profile_incomplete
       - grid_locked
@@ -5054,6 +5797,8 @@ components:
         * `call_closed` - Call Closed
         * `setting_frozen` - Setting Frozen
         * `stale_revision` - Stale Revision
+        * `program_conflicts` - Program Conflicts
+        * `program_unchanged` - Program Unchanged
         * `submission_locked` - Submission Locked
         * `profile_incomplete` - Profile Incomplete
         * `grid_locked` - Grid Locked
@@ -5344,6 +6089,8 @@ components:
       - SC_CHAIR
       - OC_MEMBER
       - SC_MEMBER
+      - SPEAKER
+      - SESSION_CHAIR
       type: string
       description: |-
         * `ADMIN` - administrateur de l'édition
@@ -5351,6 +6098,8 @@ components:
         * `SC_CHAIR` - président du comité scientifique
         * `OC_MEMBER` - membre du comité d'organisation
         * `SC_MEMBER` - membre du comité scientifique
+        * `SPEAKER` - intervenant
+        * `SESSION_CHAIR` - président de session
     InvitationBatch:
       type: object
       properties:
@@ -6328,6 +7077,22 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SubmissionManage'
+    PassageRole:
+      enum:
+      - presenter
+      - speaker
+      - chair
+      - discussant
+      - moderator
+      - panelist
+      type: string
+      description: |-
+        * `presenter` - presenter
+        * `speaker` - speaker
+        * `chair` - chair
+        * `discussant` - discussant
+        * `moderator` - moderator
+        * `panelist` - panelist
     PatchedAssignmentUpdateRequest:
       type: object
       properties:
@@ -6629,6 +7394,36 @@ components:
         published:
           type: boolean
           title: Publié
+    PatchedRoomWriteRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        capacity:
+          type: integer
+          maximum: 100000
+          minimum: 0
+          nullable: true
+        equipment:
+          type: array
+          items:
+            $ref: '#/components/schemas/Equipment'
+        note:
+          type: string
+          maxLength: 2000
+        is_accessible:
+          type: boolean
+        access_note:
+          type: string
+          maxLength: 255
+        is_active:
+          type: boolean
+        position:
+          type: integer
+          maximum: 32767
+          minimum: 0
     PatchedSectionWriteRequest:
       type: object
       description: 'Écriture : les contrôles métier (HTML, liens, configuration) sont
@@ -6696,6 +7491,66 @@ components:
         published:
           type: boolean
           title: Publiée
+    PatchedSessionWriteRequest:
+      type: object
+      properties:
+        kind:
+          $ref: '#/components/schemas/SessionKind'
+        title_fr:
+          type: string
+          minLength: 1
+          maxLength: 255
+        title_en:
+          type: string
+          maxLength: 255
+        description_fr:
+          type: string
+          maxLength: 5000
+        description_en:
+          type: string
+          maxLength: 5000
+        track:
+          type: string
+          nullable: true
+          minLength: 1
+          description: Code.
+        room:
+          type: integer
+          nullable: true
+        starts_local:
+          type: string
+          format: date-time
+        ends_local:
+          type: string
+          format: date-time
+        instructions:
+          type: string
+          maxLength: 5000
+    PatchedSlotUpdateRequest:
+      type: object
+      description: |-
+        Durée ; déplacement (``session``, ``position``) ; titres et intervenant d'un élément
+        libre.
+      properties:
+        duration_min:
+          type: integer
+          maximum: 600
+          minimum: 1
+        session:
+          type: integer
+        position:
+          type: integer
+          minimum: 0
+        title_fr:
+          type: string
+          minLength: 1
+          maxLength: 300
+        title_en:
+          type: string
+          maxLength: 300
+        speaker:
+          type: integer
+          nullable: true
     PatchedSubmissionTypeRequest:
       type: object
       properties:
@@ -6891,6 +7746,24 @@ components:
       required:
       - id
       - name
+    PersonSearch:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        institution:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+      required:
+      - id
+      - institution
+      - name
+      - roles
     PhotoUploadRequest:
       type: object
       properties:
@@ -6979,6 +7852,22 @@ components:
           description: Image de l'édition, ou null.
       required:
       - file
+    Presentation:
+      type: object
+      description: 'I5 (plan L5) : présentateurs désignés (positions des auteurs)
+        et date de confirmation.'
+      properties:
+        presenters:
+          type: array
+          items:
+            type: integer
+            minimum: 1
+        confirmed_at:
+          type: string
+          format: date-time
+      required:
+      - confirmed_at
+      - presenters
     Preview:
       type: object
       properties:
@@ -7063,6 +7952,105 @@ components:
         * `pr` - Pr
         * `mr` - M.
         * `ms` - Mme
+    ProgramBoard:
+      type: object
+      description: |-
+        Brouillon complet pour le planificateur (I15) : à chaque écriture, la gestion reçoit
+        la nouvelle révision, les sessions et les conflits (I14).
+      properties:
+        revision:
+          type: integer
+        published_revision:
+          type: integer
+        published_version:
+          type: integer
+        unpublished_changes:
+          type: boolean
+        timezone:
+          type: string
+        days:
+          type: array
+          items:
+            type: string
+            format: date
+        buffer_minutes:
+          type: integer
+        rooms:
+          type: array
+          items:
+            $ref: '#/components/schemas/Room'
+        sessions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Session'
+        to_schedule:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScheduledSubmission'
+        conflicts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProgramConflict'
+      required:
+      - buffer_minutes
+      - conflicts
+      - days
+      - published_revision
+      - published_version
+      - revision
+      - rooms
+      - sessions
+      - timezone
+      - to_schedule
+      - unpublished_changes
+    ProgramConflict:
+      type: object
+      properties:
+        kind:
+          $ref: '#/components/schemas/ProgramConflictKind'
+        sessions:
+          type: array
+          items:
+            type: integer
+        slots:
+          type: array
+          items:
+            type: integer
+        person:
+          type: string
+          description: Nom de la personne (conflit de personne).
+        minutes:
+          type: integer
+          description: Dépassement en minutes (RG-13).
+      required:
+      - kind
+      - minutes
+      - person
+      - sessions
+      - slots
+    ProgramConflictKind:
+      enum:
+      - room
+      - person
+      - overflow
+      type: string
+      description: |-
+        * `room` - room
+        * `person` - person
+        * `overflow` - overflow
+    ProgramPerson:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        institution:
+          type: string
+      required:
+      - id
+      - institution
+      - name
     ProgramSettings:
       type: object
       description: |-
@@ -7077,6 +8065,16 @@ components:
         presenter_registration_required:
           type: boolean
           title: Présentateur inscrit exigé (RG-11)
+    PublicAlternate:
+      type: object
+      description: |-
+        Adresse hors pages du CMS (programme publié) : variantes FR et EN, pour le plan du
+        site.
+      properties:
+        paths:
+          $ref: '#/components/schemas/PagePaths'
+      required:
+      - paths
     PublicCommittee:
       type: object
       properties:
@@ -7510,6 +8508,218 @@ components:
       - slug
       - title_en
       - title_fr
+    PublicProgram:
+      type: object
+      properties:
+        edition:
+          type: string
+        version:
+          type: integer
+        published_at:
+          type: string
+          format: date-time
+        timezone:
+          type: string
+        days:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicProgramDaySummary'
+      required:
+      - days
+      - edition
+      - published_at
+      - timezone
+      - version
+    PublicProgramAuthor:
+      type: object
+      properties:
+        name:
+          type: string
+        institution:
+          type: string
+        presenter:
+          type: boolean
+      required:
+      - institution
+      - name
+      - presenter
+    PublicProgramChair:
+      type: object
+      properties:
+        role:
+          $ref: '#/components/schemas/SessionRoleKind'
+        name:
+          type: string
+        institution:
+          type: string
+      required:
+      - institution
+      - name
+      - role
+    PublicProgramDay:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        timezone:
+          type: string
+        sessions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicSession'
+      required:
+      - date
+      - sessions
+      - timezone
+    PublicProgramDaySummary:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        sessions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicProgramSessionSummary'
+      required:
+      - date
+      - sessions
+    PublicProgramRoom:
+      type: object
+      properties:
+        name:
+          type: string
+        is_accessible:
+          type: boolean
+        access_note:
+          type: string
+      required:
+      - access_note
+      - is_accessible
+      - name
+    PublicProgramSessionSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+        kind:
+          $ref: '#/components/schemas/SessionKind'
+        title_fr:
+          type: string
+        title_en:
+          type: string
+        track:
+          allOf:
+          - $ref: '#/components/schemas/PublicProgramTrack'
+          nullable: true
+        room:
+          type: string
+          nullable: true
+        starts_at:
+          type: string
+          format: date-time
+        ends_at:
+          type: string
+          format: date-time
+        slot_count:
+          type: integer
+      required:
+      - ends_at
+      - id
+      - kind
+      - room
+      - slot_count
+      - starts_at
+      - title_en
+      - title_fr
+      - track
+    PublicProgramSlot:
+      type: object
+      properties:
+        id:
+          type: integer
+        starts_at:
+          type: string
+          format: date-time
+        ends_at:
+          type: string
+          format: date-time
+        duration_min:
+          type: integer
+        reference:
+          type: string
+          nullable: true
+        title:
+          type: string
+        title_en:
+          type: string
+        type:
+          allOf:
+          - $ref: '#/components/schemas/PublicProgramType'
+          nullable: true
+        authors:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicProgramAuthor'
+        speaker:
+          allOf:
+          - $ref: '#/components/schemas/PublicProgramSpeaker'
+          nullable: true
+      required:
+      - authors
+      - duration_min
+      - ends_at
+      - id
+      - reference
+      - speaker
+      - starts_at
+      - title
+      - title_en
+      - type
+    PublicProgramSpeaker:
+      type: object
+      properties:
+        name:
+          type: string
+        institution:
+          type: string
+        bio:
+          type: string
+        photo_url:
+          type: string
+          nullable: true
+      required:
+      - bio
+      - institution
+      - name
+      - photo_url
+    PublicProgramTrack:
+      type: object
+      properties:
+        code:
+          type: string
+        name_fr:
+          type: string
+        name_en:
+          type: string
+      required:
+      - code
+      - name_en
+      - name_fr
+    PublicProgramType:
+      type: object
+      properties:
+        code:
+          type: string
+        label_fr:
+          type: string
+        label_en:
+          type: string
+      required:
+      - code
+      - label_en
+      - label_fr
     PublicRoutes:
       type: object
       properties:
@@ -7524,7 +8734,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PublicPage'
+        alternates:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicAlternate'
       required:
+      - alternates
       - expected
       - pages
       - routes
@@ -7620,6 +8835,56 @@ components:
       - subtitle_fr
       - title_en
       - title_fr
+    PublicSession:
+      type: object
+      properties:
+        id:
+          type: integer
+        kind:
+          $ref: '#/components/schemas/SessionKind'
+        title_fr:
+          type: string
+        title_en:
+          type: string
+        description_fr:
+          type: string
+        description_en:
+          type: string
+        track:
+          allOf:
+          - $ref: '#/components/schemas/PublicProgramTrack'
+          nullable: true
+        room:
+          allOf:
+          - $ref: '#/components/schemas/PublicProgramRoom'
+          nullable: true
+        starts_at:
+          type: string
+          format: date-time
+        ends_at:
+          type: string
+          format: date-time
+        chairs:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicProgramChair'
+        slots:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicProgramSlot'
+      required:
+      - chairs
+      - description_en
+      - description_fr
+      - ends_at
+      - id
+      - kind
+      - room
+      - slots
+      - starts_at
+      - title_en
+      - title_fr
+      - track
     PublicSite:
       type: object
       properties:
@@ -7724,6 +8989,22 @@ components:
       - description_fr
       - name_en
       - name_fr
+    Publication:
+      type: object
+      properties:
+        version:
+          type: integer
+        published_at:
+          type: string
+          format: date-time
+        published_by:
+          type: string
+        summary: {}
+      required:
+      - published_at
+      - published_by
+      - summary
+      - version
     PublicationStatus:
       type: object
       properties:
@@ -7752,6 +9033,37 @@ components:
           description: Décisions publiées.
       required:
       - published
+    PublishedSlot:
+      type: object
+      description: 'Créneau de la communication au programme **publié** (plan L5 §4)
+        : jamais le brouillon.'
+      properties:
+        version:
+          type: integer
+          description: Version du programme publié.
+        session_id:
+          type: integer
+        session_title_fr:
+          type: string
+        session_title_en:
+          type: string
+        room:
+          type: string
+          nullable: true
+        starts_at:
+          type: string
+          format: date-time
+        ends_at:
+          type: string
+          format: date-time
+      required:
+      - ends_at
+      - room
+      - session_id
+      - session_title_en
+      - session_title_fr
+      - starts_at
+      - version
     Ranking:
       type: object
       properties:
@@ -8656,6 +9968,117 @@ components:
         * `invitation` - invitation
         * `command` - commande
         * `system` - système
+    Room:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          title: Nom
+          maxLength: 150
+        capacity:
+          type: integer
+          maximum: 100000
+          minimum: 0
+          nullable: true
+          title: Capacité
+        equipment:
+          type: array
+          items:
+            $ref: '#/components/schemas/Equipment'
+        note:
+          type: string
+          title: Note sur l'équipement
+        is_accessible:
+          type: boolean
+          title: Accessible
+        access_note:
+          type: string
+          title: Indications d'accès
+          maxLength: 255
+        is_active:
+          type: boolean
+          title: Actif
+        position:
+          type: integer
+          maximum: 65535
+          minimum: 0
+          title: Ordre
+      required:
+      - equipment
+      - id
+      - name
+    RoomWriteRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        capacity:
+          type: integer
+          maximum: 100000
+          minimum: 0
+          nullable: true
+        equipment:
+          type: array
+          items:
+            $ref: '#/components/schemas/Equipment'
+        note:
+          type: string
+          maxLength: 2000
+        is_accessible:
+          type: boolean
+        access_note:
+          type: string
+          maxLength: 255
+        is_active:
+          type: boolean
+        position:
+          type: integer
+          maximum: 32767
+          minimum: 0
+    ScheduledSubmission:
+      type: object
+      description: 'Communication placée ou à programmer : présentateurs **nommés**,
+        sans adresse.'
+      properties:
+        id:
+          type: integer
+        reference:
+          type: string
+          nullable: true
+        title:
+          type: string
+        status:
+          type: string
+        submission_type:
+          type: string
+          nullable: true
+        track:
+          type: string
+          nullable: true
+        default_duration_min:
+          type: integer
+        presenters:
+          type: array
+          items:
+            type: string
+        confirmed:
+          type: boolean
+          description: Présentateurs désignés par l'auteur (I5).
+      required:
+      - confirmed
+      - default_duration_min
+      - id
+      - presenters
+      - reference
+      - status
+      - submission_type
+      - title
+      - track
     ScreeningDecision:
       enum:
       - admissible
@@ -8891,6 +10314,164 @@ components:
       description: |-
         * `ok` - Ok
         * `error` - Error
+    Session:
+      type: object
+      properties:
+        id:
+          type: integer
+        kind:
+          $ref: '#/components/schemas/SessionKind'
+        title_fr:
+          type: string
+        title_en:
+          type: string
+        description_fr:
+          type: string
+        description_en:
+          type: string
+        track:
+          type: string
+          nullable: true
+          description: Code de la thématique.
+        room:
+          type: integer
+          nullable: true
+        starts_at:
+          type: string
+          format: date-time
+        ends_at:
+          type: string
+          format: date-time
+        starts_local:
+          type: string
+          description: Début à l'heure de l'édition, sans fuseau.
+        ends_local:
+          type: string
+          description: Fin à l'heure de l'édition, sans fuseau.
+        instructions:
+          type: string
+        slots:
+          type: array
+          items:
+            $ref: '#/components/schemas/Slot'
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/SessionRole'
+      required:
+      - description_en
+      - description_fr
+      - ends_at
+      - ends_local
+      - id
+      - instructions
+      - kind
+      - roles
+      - room
+      - slots
+      - starts_at
+      - starts_local
+      - title_en
+      - title_fr
+      - track
+    SessionKind:
+      enum:
+      - opening
+      - keynote
+      - parallel
+      - poster
+      - workshop
+      - tutorial
+      - round_table
+      - assembly
+      - break
+      - meal
+      - social
+      - closing
+      type: string
+      description: |-
+        * `opening` - ouverture
+        * `keynote` - conférence plénière
+        * `parallel` - session parallèle
+        * `poster` - session posters
+        * `workshop` - atelier
+        * `tutorial` - tutoriel
+        * `round_table` - table ronde
+        * `assembly` - assemblée ou réunion
+        * `break` - pause
+        * `meal` - repas
+        * `social` - activité sociale
+        * `closing` - clôture
+    SessionRole:
+      type: object
+      properties:
+        id:
+          type: integer
+        role:
+          $ref: '#/components/schemas/SessionRoleKind'
+        person:
+          $ref: '#/components/schemas/ProgramPerson'
+      required:
+      - id
+      - person
+      - role
+    SessionRoleKind:
+      enum:
+      - chair
+      - discussant
+      - moderator
+      - panelist
+      type: string
+      description: |-
+        * `chair` - président de séance
+        * `discussant` - discutant
+        * `moderator` - modérateur
+        * `panelist` - panéliste
+    SessionRoleWriteRequest:
+      type: object
+      properties:
+        user:
+          type: integer
+        role:
+          $ref: '#/components/schemas/SessionRoleKind'
+      required:
+      - role
+      - user
+    SessionWriteRequest:
+      type: object
+      properties:
+        kind:
+          $ref: '#/components/schemas/SessionKind'
+        title_fr:
+          type: string
+          minLength: 1
+          maxLength: 255
+        title_en:
+          type: string
+          maxLength: 255
+        description_fr:
+          type: string
+          maxLength: 5000
+        description_en:
+          type: string
+          maxLength: 5000
+        track:
+          type: string
+          nullable: true
+          minLength: 1
+          description: Code.
+        room:
+          type: integer
+          nullable: true
+        starts_local:
+          type: string
+          format: date-time
+        ends_local:
+          type: string
+          format: date-time
+        instructions:
+          type: string
+          maxLength: 5000
     Simulation:
       type: object
       description: 'US-06 : nombre de soumissions au-dessus du seuil, au total, par
@@ -8937,6 +10518,66 @@ components:
       description: |-
         * `already_pending` - invitation déjà en attente
         * `already_member` - rôle déjà actif
+    Slot:
+      type: object
+      properties:
+        id:
+          type: integer
+        position:
+          type: integer
+        duration_min:
+          type: integer
+        starts_at:
+          type: string
+          format: date-time
+        ends_at:
+          type: string
+          format: date-time
+        submission:
+          allOf:
+          - $ref: '#/components/schemas/ScheduledSubmission'
+          nullable: true
+        title_fr:
+          type: string
+        title_en:
+          type: string
+        speaker:
+          allOf:
+          - $ref: '#/components/schemas/ProgramPerson'
+          nullable: true
+      required:
+      - duration_min
+      - ends_at
+      - id
+      - position
+      - speaker
+      - starts_at
+      - submission
+      - title_en
+      - title_fr
+    SlotCreateRequest:
+      type: object
+      description: Une communication (``submission``) **ou** un élément libre (``title_fr``).
+      properties:
+        submission:
+          type: integer
+        title_fr:
+          type: string
+          minLength: 1
+          maxLength: 300
+        title_en:
+          type: string
+          maxLength: 300
+        speaker:
+          type: integer
+          nullable: true
+        duration_min:
+          type: integer
+          maximum: 600
+          minimum: 1
+        position:
+          type: integer
+          minimum: 0
     Submission:
       type: object
       description: Vue de l'auteur sur **sa** soumission.
@@ -9069,6 +10710,19 @@ components:
           nullable: true
           readOnly: true
           description: Date limite de la version finale (date clé camera_ready).
+        presentation:
+          allOf:
+          - $ref: '#/components/schemas/Presentation'
+          nullable: true
+          readOnly: true
+          description: Confirmation de présentation (I5, plan L5).
+        schedule:
+          allOf:
+          - $ref: '#/components/schemas/PublishedSlot'
+          nullable: true
+          readOnly: true
+          description: Créneau au programme publié (plan L5 §4), pour une communication
+            programmée.
       required:
       - abstract
       - allowed_actions
@@ -9087,8 +10741,10 @@ components:
       - id
       - keywords
       - language
+      - presentation
       - reference
       - revision
+      - schedule
       - status
       - submission_type
       - submitted_at
@@ -9102,11 +10758,13 @@ components:
       - submit
       - withdraw
       - final_version
+      - confirm_presentation
       type: string
       description: |-
         * `submit` - submit
         * `withdraw` - withdraw
         * `final_version` - final_version
+        * `confirm_presentation` - confirm_presentation
     SubmissionAuthor:
       type: object
       properties:

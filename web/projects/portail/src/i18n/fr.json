@@ -22,7 +22,8 @@
         "privacy": "Confidentialité",
         "myData": "Mes données",
         "notifications": "Notifications",
-        "notificationsLabel": "Notifications ({{count}} non lue(s))"
+        "notificationsLabel": "Notifications ({{count}} non lue(s))",
+        "agenda": "Mon passage"
       },
       "fields": {
         "email": "Adresse e-mail",
@@ -501,6 +502,20 @@
       "timeline": {
         "title": "Historique",
         "revisions": "{{count}} version(s) enregistrée(s) après la soumission."
+      },
+      "presentation": {
+        "title": "Présentation",
+        "scheduled": "Programmée :",
+        "myAgenda": "Voir mon passage",
+        "confirmed": "Présentation confirmée le {{date}} ; présentateurs : {{names}}.",
+        "lead": "Désignez qui présentera la communication, puis confirmez votre venue : la communication pourra alors être programmée.",
+        "leadUpdate": "Vous pouvez encore changer les présentateurs.",
+        "presenters": "Présentateurs",
+        "confirm": "Confirmer ma présentation",
+        "update": "Mettre à jour les présentateurs",
+        "none": "Désignez au moins un présentateur.",
+        "done": "Présentation confirmée.",
+        "updated": "Présentateurs mis à jour."
       }
     },
     "notifications": {
@@ -519,6 +534,76 @@
         "decision_published": "Décision publiée pour votre soumission {{reference}} « {{title}} ».",
         "final_version_received": "Version finale reçue pour votre soumission {{reference}} « {{title}} »."
       }
+    },
+    "program": {
+      "title": "Programme",
+      "unpublished": "Le programme n'est pas encore publié. Il paraîtra ici dès sa publication.",
+      "timezone": "Horaires à l'heure locale de la conférence ({{zone}}).",
+      "filters": {
+        "day": "Jour",
+        "room": "Salle",
+        "track": "Thématique",
+        "kind": "Type",
+        "search": "Rechercher une session",
+        "searchDay": "Rechercher (titre, auteur, intervenant)",
+        "all": "Tous"
+      },
+      "count": "{{count}} session(s) affichée(s)",
+      "noMatch": "Aucune session ne correspond à ces critères.",
+      "slotCount": "{{count}} intervention(s)",
+      "kinds": {
+        "opening": "Ouverture",
+        "keynote": "Conférence plénière",
+        "parallel": "Session parallèle",
+        "poster": "Session posters",
+        "workshop": "Atelier",
+        "tutorial": "Tutoriel",
+        "round_table": "Table ronde",
+        "assembly": "Assemblée ou réunion",
+        "break": "Pause",
+        "meal": "Repas",
+        "social": "Activité sociale",
+        "closing": "Clôture"
+      },
+      "back": "← Programme",
+      "views": {
+        "label": "Affichage",
+        "list": "Liste",
+        "grid": "Grille par salle"
+      },
+      "accessible": "accessible aux personnes à mobilité réduite",
+      "noRoom": "Hors salle",
+      "roles": {
+        "chair": "Président de séance",
+        "discussant": "Discutant",
+        "moderator": "Modérateur",
+        "panelist": "Panéliste"
+      },
+      "presenter": "présente",
+      "room": "Salle",
+      "contributions": "Interventions"
+    },
+    "agenda": {
+      "title": "Mon passage",
+      "lead": "Vos présentations, interventions et rôles de séance au programme publié.",
+      "ics": "Ajouter à mon agenda (.ics)",
+      "icsHint": "Fichier iCal, lisible par la plupart des agendas.",
+      "roles": {
+        "presenter": "Présentation",
+        "speaker": "Intervention",
+        "chair": "Président de séance",
+        "discussant": "Discutant",
+        "moderator": "Modérateur",
+        "panelist": "Panéliste"
+      },
+      "duration": "{{count}} min",
+      "session": "Session",
+      "room": "Salle",
+      "accessible": "accessible",
+      "coSpeakers": "Avec",
+      "chairs": "Présidence",
+      "instructions": "Consignes",
+      "empty": "Aucun passage au programme publié pour l'instant. Il apparaîtra ici dès la publication du programme."
     }
   }
 }

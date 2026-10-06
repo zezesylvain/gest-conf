@@ -26,10 +26,18 @@ def _writable(edition: Edition, actor: Actor) -> None:
 @transaction.atomic
 def update_program_settings(edition: Edition, data: Mapping[str, Any], *, actor: Actor) -> Edition:
     """Tampon entre créneaux (RG-13, 0 à 30 minutes) et RG-11 (désactivable ; sans effet
-    avant L6). Journalisé avec l'avant et l'après (RG-17)."""
+    avant L6). Journalisé avec l'avant et l'après (RG-17).
+
+    Un changement de tampon déplace les créneaux de toutes les sessions : ils sont recalculés
+    sous le verrou de la planification, et la révision du brouillon change (I14)."""
+    from apps.program.models import Session
+    from apps.program.services import planning
+
     unknown = set(data) - set(SETTINGS_FIELDS)
     if unknown:
         raise Invalid(fields={name: [_("Champ non modifiable.")] for name in sorted(unknown)})
+    # Même ordre de verrouillage que la planification : l'état du programme d'abord.
+    planning.program_state(edition, lock=True)
     edition = Edition.objects.select_for_update().get(pk=edition.pk)
     _writable(edition, actor)
     before = snapshot(edition)
@@ -43,6 +51,10 @@ def update_program_settings(edition: Edition, data: Mapping[str, Any], *, actor:
     except ValidationError as exc:
         raise Invalid(fields=exc.message_dict) from exc
     edition.save(update_fields=[*changed, "updated_at"])
+    if "session_buffer_minutes" in changed:
+        for session in Session.objects.filter(edition=edition).select_related("edition"):
+            planning.reflow(session)
+        planning.mark_changed(edition)
     after = snapshot(edition)
     record(
         "program.settings_changed",

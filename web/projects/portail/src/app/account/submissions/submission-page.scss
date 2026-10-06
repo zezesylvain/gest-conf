@@ -67,22 +67,29 @@ fieldset {
   padding-left: 0.75rem;
 }
 .decision,
-.final {
+.final,
+.presentation {
   max-width: 48rem;
   margin: 1rem 0 1.5rem;
   padding: 0.75rem 1rem;
   border: 1px solid var(--gc-border);
   border-radius: 0.25rem;
 }
-.final {
+.final,
+.presentation {
   display: grid;
   gap: 0.5rem;
 }
-.final h2 {
+.final h2,
+.presentation h2 {
   margin: 0.25rem 0;
 }
-.final > p {
+.final > p,
+.presentation > p {
   margin: 0;
+}
+.presenters {
+  display: grid;
 }
 .outcome {
   color: var(--gc-primary);

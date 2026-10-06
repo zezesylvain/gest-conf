@@ -1,0 +1,9 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate %}Bonjour,
+
+La version finale de votre communication {{ reference }} « {{ title }} » ({{ edition_title }}) a bien été reçue. Pour qu'elle puisse être programmée, désignez qui la présentera et confirmez votre venue dans votre espace auteur.{% endblocktranslate %}
+
+{% blocktranslate %}Sans confirmation, la communication ne pourra pas figurer au programme.{% endblocktranslate %}
+
+{% blocktranslate %}Votre soumission : {{ link }}{% endblocktranslate %}
+
+{% include "account/email/_signature.txt" %}{% endautoescape %}

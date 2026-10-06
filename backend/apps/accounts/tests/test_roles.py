@@ -58,8 +58,23 @@ def test_mfa_required_roles_match_d3_and_h2():
 @pytest.mark.parametrize(
     ("grantor", "expected"),
     [
-        (Role.ADMIN, {Role.ADMIN, Role.CHAIR, Role.SC_CHAIR, Role.OC_MEMBER, Role.SC_MEMBER}),
-        (Role.CHAIR, {Role.SC_CHAIR, Role.OC_MEMBER, Role.SC_MEMBER}),
+        # I10 (plan L5) : intervenants et présidents de séance, invités par ADMIN et CHAIR.
+        (
+            Role.ADMIN,
+            {
+                Role.ADMIN,
+                Role.CHAIR,
+                Role.SC_CHAIR,
+                Role.OC_MEMBER,
+                Role.SC_MEMBER,
+                Role.SPEAKER,
+                Role.SESSION_CHAIR,
+            },
+        ),
+        (
+            Role.CHAIR,
+            {Role.SC_CHAIR, Role.OC_MEMBER, Role.SC_MEMBER, Role.SPEAKER, Role.SESSION_CHAIR},
+        ),
         (Role.SC_CHAIR, {Role.SC_MEMBER}),
         (Role.OC_MEMBER, set()),
         (Role.SC_MEMBER, set()),

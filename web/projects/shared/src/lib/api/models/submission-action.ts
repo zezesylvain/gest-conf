@@ -6,6 +6,7 @@
  * * `submit` - submit
  * * `withdraw` - withdraw
  * * `final_version` - final_version
+ * * `confirm_presentation` - confirm_presentation
  */
-export type SubmissionAction = 'submit' | 'withdraw' | 'final_version';
+export type SubmissionAction = 'submit' | 'withdraw' | 'final_version' | 'confirm_presentation';
 

@@ -8,6 +8,8 @@
  * * `SC_CHAIR` - président du comité scientifique
  * * `OC_MEMBER` - membre du comité d'organisation
  * * `SC_MEMBER` - membre du comité scientifique
+ * * `SPEAKER` - intervenant
+ * * `SESSION_CHAIR` - président de session
  */
-export type InvitableRole = 'ADMIN' | 'CHAIR' | 'SC_CHAIR' | 'OC_MEMBER' | 'SC_MEMBER';
+export type InvitableRole = 'ADMIN' | 'CHAIR' | 'SC_CHAIR' | 'OC_MEMBER' | 'SC_MEMBER' | 'SPEAKER' | 'SESSION_CHAIR';
 

@@ -239,6 +239,9 @@ ANONYMOUS_VIEWS = {
     "apps.portal.views.PublicMenuView": "portail public (menus)",
     "apps.portal.views.PublicSiteView": "portail public (données des gabarits)",
     "apps.portal.views.PublicFileView": "fichiers publics publiés (L2.4, E4)",
+    "apps.program.views.PublicProgramView": "programme public publié (L5, I7)",
+    "apps.program.views.PublicProgramDayView": "programme public publié, par jour (L5, I7)",
+    "apps.program.views.PublicProgramSessionView": "programme public publié, session (L5, I7)",
 }
 
 # Seule vue de ``v1/manage/`` hors ``ManageViewSet`` : sélecteur d'édition.

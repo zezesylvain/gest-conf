@@ -30,6 +30,7 @@ describe('SubmissionPage', () => {
       remove: vi.fn(),
       fileUrl: vi.fn().mockReturnValue('/api/v1/submissions/7/file/content'),
       finalVersion: vi.fn(),
+      confirmPresentation: vi.fn(),
       finalVersionUrl: vi.fn().mockReturnValue('/api/v1/submissions/7/final-version/content'),
     };
     TestBed.configureTestingModule({
@@ -432,6 +433,78 @@ describe('SubmissionPage', () => {
       const file = chooseFile(root, harness);
       button(root, 'Déposer la version finale').click();
       await vi.waitFor(() => expect(service['finalVersion']).toHaveBeenCalledWith(7, file, ''));
+    });
+
+    it('I5 : confirmation de présentation, présentateurs choisis parmi les auteurs', async () => {
+      const coauthor = {
+        position: 2,
+        first_name: 'Mariam',
+        last_name: 'Traoré',
+        email: 'mariam@univ.ci',
+        institution: 'INP-HB',
+        is_presenter: false,
+        has_account: false,
+      };
+      const ready = decided({
+        status: 'camera_ready_received',
+        allowed_actions: ['final_version', 'withdraw', 'confirm_presentation'],
+        authors: [...testSubmission().authors, coauthor],
+      });
+      service['get'].mockResolvedValue(ready);
+      service['confirmPresentation'].mockResolvedValue(
+        decided({
+          status: 'confirmed',
+          allowed_actions: ['withdraw', 'confirm_presentation'],
+          authors: ready.authors,
+          presentation: { presenters: [2], confirmed_at: '2026-12-02T10:00:00Z' },
+        }),
+      );
+      const { harness, root } = await open();
+      const section = root.querySelector<HTMLElement>('.presentation')!;
+      expect(section.textContent).toContain('Désignez qui présentera');
+      const boxes = section.querySelectorAll<HTMLInputElement>('input[type=checkbox]');
+      // L'auteure marquée présentatrice est cochée par défaut ; on choisit la co-autrice.
+      expect([...boxes].map((box) => box.checked)).toEqual([true, false]);
+      boxes[0].click();
+      boxes[1].click();
+      harness.detectChanges();
+      button(section, 'Confirmer ma présentation').click();
+      await vi.waitFor(() => expect(service['confirmPresentation']).toHaveBeenCalledWith(7, [2]));
+      await harness.fixture.whenStable();
+      harness.detectChanges();
+      expect(root.textContent).toContain('Présentation confirmée.');
+      expect(root.querySelector('.presentation')!.textContent).toContain(
+        'présentateurs : Mariam Traoré',
+      );
+      expect(button(root, 'Mettre à jour les présentateurs')).toBeTruthy();
+    });
+
+    it('programmée : créneau publié, lien « Mon passage », retrait avec motif', async () => {
+      service['get'].mockResolvedValue(
+        decided({
+          status: 'scheduled',
+          allowed_actions: ['withdraw', 'confirm_presentation'],
+          presentation: { presenters: [1], confirmed_at: '2026-12-02T10:00:00Z' },
+          schedule: {
+            version: 1,
+            session_id: 10,
+            session_title_fr: 'Santé numérique',
+            session_title_en: 'Digital health',
+            room: 'Amphi A',
+            starts_at: '2027-06-01T09:00:00Z',
+            ends_at: '2027-06-01T09:20:00Z',
+          },
+        }),
+      );
+      const { root } = await open();
+      const section = root.querySelector<HTMLElement>('.presentation')!;
+      expect(section.textContent).toContain('Programmée :');
+      expect(section.textContent).toContain('Santé numérique');
+      expect(section.textContent).toContain('Amphi A');
+      expect(section.textContent).toContain('– 09:20');
+      expect(section.querySelector('a[href="/compte/mon-passage"]')).not.toBeNull();
+      const withdraw = section.querySelector('.withdraw')!;
+      expect(button(withdraw as HTMLElement, 'Retirer définitivement').disabled).toBe(true);
     });
 
     it('liste d’attente : décision affichée, pas de version finale', async () => {

@@ -1,0 +1,99 @@
+@switch (state()) {
+  @case ('loading') {
+    <p role="status" class="muted">{{ 'portail.site.loading' | translate }}</p>
+  }
+  @case ('unpublished') {
+    <p class="soon">{{ 'portail.program.unpublished' | translate }}</p>
+  }
+  @case ('error') {
+    <p>{{ 'portail.site.errorLead' | translate }}</p>
+  }
+  @case ('ready') {
+    @if (program(); as current) {
+      <p class="muted">
+        {{ 'portail.program.timezone' | translate: { zone: current.timezone } }}
+      </p>
+      <form class="filters" role="search" (submit)="$event.preventDefault()">
+        <label>
+          <span>{{ 'portail.program.filters.day' | translate }}</span>
+          <select (change)="setFilter('day', $any($event.target).value)">
+            <option value="">{{ 'portail.program.filters.all' | translate }}</option>
+            @for (item of current.days; track item.date) {
+              <option [value]="item.date">{{ day(item.date) }}</option>
+            }
+          </select>
+        </label>
+        @if (rooms().length > 1) {
+          <label>
+            <span>{{ 'portail.program.filters.room' | translate }}</span>
+            <select (change)="setFilter('room', $any($event.target).value)">
+              <option value="">{{ 'portail.program.filters.all' | translate }}</option>
+              @for (room of rooms(); track room) {
+                <option [value]="room">{{ room }}</option>
+              }
+            </select>
+          </label>
+        }
+        @if (tracks().length) {
+          <label>
+            <span>{{ 'portail.program.filters.track' | translate }}</span>
+            <select (change)="setFilter('track', $any($event.target).value)">
+              <option value="">{{ 'portail.program.filters.all' | translate }}</option>
+              @for (item of tracks(); track item[0]) {
+                <option [value]="item[0]">{{ item[1] }}</option>
+              }
+            </select>
+          </label>
+        }
+        <label>
+          <span>{{ 'portail.program.filters.kind' | translate }}</span>
+          <select (change)="setFilter('kind', $any($event.target).value)">
+            <option value="">{{ 'portail.program.filters.all' | translate }}</option>
+            @for (kind of kinds(); track kind) {
+              <option [value]="kind">{{ 'portail.program.kinds.' + kind | translate }}</option>
+            }
+          </select>
+        </label>
+        <label>
+          <span>{{ 'portail.program.filters.search' | translate }}</span>
+          <input type="search" (input)="setFilter('query', $any($event.target).value)" />
+        </label>
+      </form>
+      <p class="muted" aria-live="polite">
+        {{ 'portail.program.count' | translate: { count: count() } }}
+      </p>
+      @for (item of days(); track item.date) {
+        <section [attr.aria-labelledby]="'day-' + item.date">
+          <h2 [id]="'day-' + item.date">
+            <a [routerLink]="dayLink(item.date)">{{ day(item.date) }}</a>
+          </h2>
+          <ul class="sessions">
+            @for (session of item.sessions; track session.id) {
+              <li [class.pause]="['break', 'meal', 'social'].includes(session.kind)">
+                <span class="time">{{ hours(session.starts_at, session.ends_at) }}</span>
+                <span>
+                  <a [routerLink]="sessionLink(session.id)">{{ title(session) }}</a>
+                  <span class="meta">
+                    {{ 'portail.program.kinds.' + session.kind | translate }}
+                    @if (session.room) {
+                      · {{ session.room }}
+                    }
+                    @if (session.track) {
+                      · {{ trackName(session.track) }}
+                    }
+                    @if (session.slot_count) {
+                      ·
+                      {{ 'portail.program.slotCount' | translate: { count: session.slot_count } }}
+                    }
+                  </span>
+                </span>
+              </li>
+            }
+          </ul>
+        </section>
+      } @empty {
+        <p>{{ 'portail.program.noMatch' | translate }}</p>
+      }
+    }
+  }
+}

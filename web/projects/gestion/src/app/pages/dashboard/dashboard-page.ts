@@ -22,6 +22,7 @@ import {
   LanguageService,
   MeStore,
   PageHeader,
+  ProgramBoard,
   ReviewProgress,
   SubmissionStats,
   SubmissionStatus,
@@ -32,6 +33,7 @@ import { firstValueFrom } from 'rxjs';
 import { EditionApi } from '../../core/edition-api';
 import { editionTitle } from '../../core/managed-editions';
 import { editionCapabilities, errorMessages } from '../../core/page-support';
+import { ProgramApi } from '../../core/program-api';
 import { ReviewsApi } from '../../core/reviews-api';
 import { SubmissionsApi } from '../../core/submissions-api';
 
@@ -45,7 +47,8 @@ interface CheckItem {
  * Tableau de bord de l'édition (squelette US-12, plan L1 §10.3) : statut et publication,
  * paramétrage à compléter, dates clés, invitations en attente, état de la 2FA ; compteurs
  * de soumissions par statut avec `submissions.read` (plan L3) ; avancement de l'évaluation
- * avec `reviews.manage` (plan L4 : divergences, retards). La liste de contrôle est
+ * avec `reviews.manage` (plan L4 : divergences, retards) ; programme avec `program.read`
+ * (plan L5 : à programmer, conflits, modifications non publiées). La liste de contrôle est
  * indicative : le serveur revérifie les préconditions à la publication (`edition_incomplete`).
  */
 @Component({
@@ -61,6 +64,7 @@ export class DashboardPage implements OnInit {
   private readonly api = inject(EditionApi);
   private readonly submissions = inject(SubmissionsApi);
   private readonly reviewsApi = inject(ReviewsApi);
+  private readonly programApi = inject(ProgramApi);
   private readonly meStore = inject(MeStore);
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
@@ -72,6 +76,7 @@ export class DashboardPage implements OnInit {
   protected readonly pendingInvitations = signal<number | null>(null);
   protected readonly submissionStats = signal<SubmissionStats | null>(null);
   protected readonly reviewProgress = signal<ReviewProgress | null>(null);
+  protected readonly program = signal<ProgramBoard | null>(null);
   /** Évaluations en retard, tous relecteurs confondus. */
   protected readonly lateReviews = computed(() =>
     (this.reviewProgress()?.reviewers ?? []).reduce((sum, reviewer) => sum + reviewer.late, 0),
@@ -195,6 +200,9 @@ export class DashboardPage implements OnInit {
       }
       if (this.can('reviews.manage')) {
         this.reviewProgress.set(await this.reviewsApi.progress(id));
+      }
+      if (this.can('program.read')) {
+        this.program.set(await this.programApi.board(id));
       }
     } catch (error) {
       this.errors.set(errorMessages(this.translate, error));

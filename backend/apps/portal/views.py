@@ -447,7 +447,14 @@ class PublicRoutesView(_PublicPortalView):
         routes = services.public_routes(edition)
         return self.respond(
             PublicRoutesSerializer(
-                {"routes": routes, "expected": len(routes), "pages": services.public_pages(edition)}
+                {
+                    "routes": routes,
+                    "expected": len(routes),
+                    "pages": services.public_pages(edition),
+                    "alternates": [
+                        {"paths": paths} for paths in services.extra_route_paths(edition)
+                    ],
+                }
             ).data
         )
 

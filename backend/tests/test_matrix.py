@@ -122,6 +122,109 @@ CASES = [
         "/v1/manage/editions/{e}/program/settings",
         {"session_buffer_minutes": 5},
     ),
+    # Plan L5 (L5.3) : brouillon du programme, lu par les comités, écrit par le CO
+    # « programme » et l'administrateur (I1).
+    Case("manage-program", "GET", PGR, 200, "/v1/manage/editions/{e}/program"),
+    Case(
+        "manage-program-rooms",
+        "POST",
+        PGW,
+        201,
+        "/v1/manage/editions/{e}/program/rooms",
+        {"name": "Salle matrice"},
+    ),
+    Case(
+        "manage-program-room",
+        "PATCH",
+        PGW,
+        200,
+        "/v1/manage/editions/{e}/program/rooms/{room}",
+        {"capacity": 50},
+    ),
+    Case(
+        "manage-program-room",
+        "DELETE",
+        PGW,
+        200,
+        "/v1/manage/editions/{e}/program/rooms/{free_room}",
+    ),
+    Case(
+        "manage-program-sessions",
+        "POST",
+        PGW,
+        201,
+        "/v1/manage/editions/{e}/program/sessions",
+        {
+            "kind": "parallel",
+            "title_fr": "Nouvelle",
+            "starts_local": "2027-06-02T09:00",
+            "ends_local": "2027-06-02T10:00",
+        },
+    ),
+    Case(
+        "manage-program-session",
+        "PATCH",
+        PGW,
+        200,
+        "/v1/manage/editions/{e}/program/sessions/{program_session}",
+        {"title_fr": "Renommée"},
+    ),
+    Case(
+        "manage-program-session",
+        "DELETE",
+        PGW,
+        200,
+        "/v1/manage/editions/{e}/program/sessions/{program_session}",
+    ),
+    Case(
+        "manage-program-slots",
+        "POST",
+        PGW,
+        201,
+        "/v1/manage/editions/{e}/program/sessions/{program_session}/slots",
+        lambda ids: {"submission": ids["confirmed_submission"]},
+    ),
+    Case(
+        "manage-program-slot",
+        "PATCH",
+        PGW,
+        200,
+        "/v1/manage/editions/{e}/program/slots/{slot}",
+        {"duration_min": 25},
+    ),
+    Case("manage-program-slot", "DELETE", PGW, 200, "/v1/manage/editions/{e}/program/slots/{slot}"),
+    Case(
+        "manage-program-roles",
+        "POST",
+        PGW,
+        201,
+        "/v1/manage/editions/{e}/program/sessions/{program_session}/roles",
+        lambda ids: {"user": ids["program_member"], "role": "discussant"},
+    ),
+    Case(
+        "manage-program-role",
+        "DELETE",
+        PGW,
+        200,
+        "/v1/manage/editions/{e}/program/session-roles/{session_role}",
+    ),
+    Case("manage-program-people", "GET", PGW, 200, "/v1/manage/editions/{e}/program/people"),
+    # I6 : publication par le Chair, réauthentification récente ; historique (I13).
+    Case(
+        "manage-program-publish",
+        "POST",
+        PGP,
+        200,
+        "/v1/manage/editions/{e}/program/publish",
+        recent_auth=True,
+    ),
+    Case(
+        "manage-program-publications",
+        "GET",
+        PGR,
+        200,
+        "/v1/manage/editions/{e}/program/publications",
+    ),
     Case("manage-tracks-list", "GET", R, 200, "/v1/manage/editions/{e}/tracks"),
     Case(
         "manage-tracks-list",
@@ -761,6 +864,7 @@ def world():
     reviewing = _reviewer_objects(edition, users)
     ids = {
         **reviewing,
+        **_program_objects(edition, users),
         "track_code": track.code,
         "grid": grid.pk,
         "review_submission": review_submission.pk,
@@ -784,6 +888,48 @@ def world():
         "invitation": invitation.pk,
     }
     return edition, users, ids
+
+
+def _program_objects(edition, users) -> dict:
+    """Plan L5 : salle utilisée et salle libre, session avec un créneau libre et un rôle de
+    séance, communication confirmée à placer, personne de l'édition pour un rôle."""
+    from apps.program.models import Room, Session, SessionRole, Slot
+    from apps.submissions.models import Submission, SubmissionStatus
+    from apps.submissions.tests.factories import author_user, complete_submission
+
+    room = Room.objects.create(edition=edition, name="Amphi matrice")
+    free_room = Room.objects.create(edition=edition, name="Salle libre")
+    start = dt.datetime(2027, 6, 1, 9, tzinfo=dt.UTC)
+    session = Session.objects.create(
+        edition=edition,
+        kind="parallel",
+        title_fr="Session matrice",
+        room=room,
+        starts_at=start,
+        ends_at=start + dt.timedelta(hours=2),
+    )
+    slot = Slot.objects.create(
+        session=session,
+        position=0,
+        duration_min=20,
+        title_fr="Ouverture",
+        starts_at=start,
+        ends_at=start + dt.timedelta(minutes=20),
+    )
+    role = SessionRole.objects.create(session=session, user=users["SC_CHAIR"], role="chair")
+    paper = complete_submission(edition, author_user(first="Kwame", last="Asante"))
+    Submission.objects.filter(pk=paper.pk).update(
+        status=SubmissionStatus.CONFIRMED, reference=f"{edition.code}-0005"
+    )
+    return {
+        "room": room.pk,
+        "free_room": free_room.pk,
+        "program_session": session.pk,
+        "slot": slot.pk,
+        "session_role": role.pk,
+        "confirmed_submission": paper.pk,
+        "program_member": users["SC_MEMBER"].pk,
+    }
 
 
 def _submission_with_extension(edition):

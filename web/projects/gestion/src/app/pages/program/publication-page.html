@@ -1,0 +1,105 @@
+<gc-page-header
+  [heading]="'gestion.program.publication.title' | translate"
+  [lead]="'gestion.program.publication.lead' | translate"
+/>
+<div aria-live="polite">
+  @if (status()) {
+    <p class="notice" role="status">{{ status() }}</p>
+  }
+</div>
+<gc-error-summary [messages]="errors()" />
+
+@if (board(); as current) {
+  <section class="card" aria-labelledby="state-title">
+    <h2 id="state-title">{{ 'gestion.program.publication.state' | translate }}</h2>
+    <ul class="checklist">
+      <li>
+        @if (current.published_version) {
+          {{
+            'gestion.program.publishedVersion' | translate: { version: current.published_version }
+          }}
+        } @else {
+          {{ 'gestion.program.publication.never' | translate }}
+        }
+      </li>
+      <li>
+        <span [class]="current.unpublished_changes ? 'ko' : 'ok'" aria-hidden="true">{{
+          current.unpublished_changes ? '✘' : '✔'
+        }}</span>
+        {{
+          (current.unpublished_changes
+            ? 'gestion.program.unpublished'
+            : 'gestion.program.publication.upToDate'
+          ) | translate
+        }}
+      </li>
+      <li>
+        <span [class]="current.conflicts.length ? 'ko' : 'ok'" aria-hidden="true">{{
+          current.conflicts.length ? '✘' : '✔'
+        }}</span>
+        {{ 'gestion.program.conflicts.count' | translate: { count: current.conflicts.length } }}
+        @if (current.conflicts.length) {
+          <a [routerLink]="['/editions', editionId(), 'programme']" fragment="conflicts">{{
+            'gestion.program.publication.fix' | translate
+          }}</a>
+        }
+      </li>
+      <li>
+        {{
+          'gestion.program.publication.toSchedule'
+            | translate: { count: current.to_schedule.length }
+        }}
+      </li>
+    </ul>
+    @if (canPublish()) {
+      <div class="actions">
+        <button
+          mat-flat-button
+          type="button"
+          (click)="publish()"
+          [disabled]="busy() || !publishable()"
+        >
+          {{ 'gestion.program.publication.publish' | translate }}
+        </button>
+      </div>
+      <p class="muted">{{ 'gestion.program.publication.effects' | translate }}</p>
+    } @else {
+      <p class="muted">{{ 'gestion.program.publication.chairOnly' | translate }}</p>
+    }
+    <p class="notice">{{ 'gestion.program.publication.portal' | translate }}</p>
+  </section>
+
+  <section class="card" aria-labelledby="history-title">
+    <h2 id="history-title">{{ 'gestion.program.publication.history' | translate }}</h2>
+    @if (history(); as list) {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">{{ 'gestion.program.publication.version' | translate }}</th>
+              <th scope="col">{{ 'gestion.program.publication.at' | translate }}</th>
+              <th scope="col">{{ 'gestion.program.publication.by' | translate }}</th>
+              <th scope="col">{{ 'gestion.program.publication.changes' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of list; track item.version) {
+              <tr>
+                <td>{{ item.version }}</td>
+                <td>{{ at(item) }}</td>
+                <td>{{ item.published_by || '—' }}</td>
+                <td>{{ summary(item) }}</td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="4" class="muted">
+                  {{ 'gestion.program.publication.empty' | translate }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+}

@@ -124,6 +124,7 @@ dossier de l'application et y écrit le chemin du venv (`VENV_ACTIVATE`) : le cr
 11 * * * *   $HOME/gestconf-app/deploy/cron.sh close_call
 13 * * * *   $HOME/gestconf-app/deploy/cron.sh remind_drafts
 19 * * * *   $HOME/gestconf-app/deploy/cron.sh remind_reviewers
+23 * * * *   $HOME/gestconf-app/deploy/cron.sh remind_presentations
 17 3 * * *   $HOME/gestconf-app/deploy/cron.sh cleanup
 47 3 * * *   $HOME/gestconf-app/deploy/cron.sh check_integrity
 ```
@@ -134,6 +135,9 @@ dossier de l'application et y écrit le chemin du venv (`VENV_ACTIVATE`) : le cr
   clôture (e-mail et cloche), une fois par brouillon et par échéance.
 - `remind_reviewers` (toutes les heures) : relance des relecteurs sept jours et un jour avant
   l'échéance de leur évaluation, puis après elle, une fois chacune (plan L4, H15).
+- `remind_presentations` (toutes les heures) : rappel aux auteurs de confirmer leur
+  présentation trois jours, puis dix jours après la réception de la version finale, une fois
+  chacun (plan L5, §9).
 - `check_integrity` (quotidienne, lecture seule) : doublons d'adresses vérifiées et de 2FA
   (contraintes que MariaDB ne crée pas), cohérence invitations/rôles, taille du cache, tâches
   en échec. Les anomalies partent par e-mail aux opérateurs (`GESTCONF_OPERATORS`), sans

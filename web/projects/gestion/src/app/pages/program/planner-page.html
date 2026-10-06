@@ -1,0 +1,359 @@
+<gc-page-header
+  [heading]="'gestion.program.planner.title' | translate"
+  [lead]="'gestion.program.planner.lead' | translate: { zone: board()?.timezone ?? '' }"
+/>
+@if (!canWrite()) {
+  <p class="notice">{{ 'gestion.program.readOnly' | translate }}</p>
+}
+<div aria-live="polite" class="live">
+  @if (status()) {
+    <p class="notice" role="status">{{ status() }}</p>
+  }
+</div>
+<gc-error-summary [messages]="errors()" />
+
+@if (board(); as current) {
+  <p class="summary">
+    @if (current.unpublished_changes) {
+      <span class="badge warn">{{ 'gestion.program.unpublished' | translate }}</span>
+    } @else {
+      <span class="badge">{{
+        'gestion.program.publishedVersion' | translate: { version: current.published_version }
+      }}</span>
+    }
+    @if (current.conflicts.length) {
+      <a class="badge danger" href="#conflicts">{{
+        'gestion.program.conflicts.count' | translate: { count: current.conflicts.length }
+      }}</a>
+    }
+    <a [routerLink]="['/editions', editionId(), 'programme', 'publication']">{{
+      'gestion.nav.programPublication' | translate
+    }}</a>
+    @if (canWrite()) {
+      <a [routerLink]="['/editions', editionId(), 'programme', 'sessions']">{{
+        'gestion.nav.programSessions' | translate
+      }}</a>
+    }
+  </p>
+
+  <div class="planner" cdkDropListGroup>
+    <aside class="pool" aria-labelledby="pool-title">
+      <h2 id="pool-title" tabindex="-1">
+        {{ 'gestion.program.planner.pool' | translate: { count: current.to_schedule.length } }}
+      </h2>
+      <div class="filters">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>{{ 'gestion.program.planner.search' | translate }}</mat-label>
+          <input matInput type="search" (input)="setFilter('query', $any($event.target).value)" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>{{ 'gestion.program.planner.track' | translate }}</mat-label>
+          <select matNativeControl (change)="setFilter('track', $any($event.target).value)">
+            <option value="">{{ 'gestion.program.planner.all' | translate }}</option>
+            @for (track of tracks(); track track.code) {
+              <option [value]="track.code">{{ trackName(track.code) }}</option>
+            }
+          </select>
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>{{ 'gestion.program.planner.type' | translate }}</mat-label>
+          <select matNativeControl (change)="setFilter('type', $any($event.target).value)">
+            <option value="">{{ 'gestion.program.planner.all' | translate }}</option>
+            @for (type of types(); track type.code) {
+              <option [value]="type.code">{{ typeName(type.code) }}</option>
+            }
+          </select>
+        </mat-form-field>
+      </div>
+      <ul
+        class="slots"
+        id="pool"
+        cdkDropList
+        [cdkDropListData]="poolTarget"
+        [cdkDropListConnectedTo]="dropListIds()"
+        [cdkDropListEnterPredicate]="poolAccepts"
+        cdkDropListSortingDisabled
+        (cdkDropListDropped)="drop($event)"
+      >
+        @for (item of pool(); track item.id) {
+          <li
+            class="slot"
+            cdkDrag
+            [cdkDragData]="{ kind: 'submission', submission: item }"
+            [cdkDragDisabled]="!canWrite() || busy()"
+          >
+            <strong>{{ item.reference }}</strong> {{ item.title }}
+            <span class="muted">
+              {{ item.presenters.join(', ') }}
+              · {{ 'gestion.program.minutes' | translate: { count: item.default_duration_min } }}
+              @if (item.track) {
+                · {{ trackName(item.track) }}
+              }
+            </span>
+            @if (canWrite()) {
+              <button
+                mat-button
+                type="button"
+                [attr.aria-expanded]="panel() === 'submission:' + item.id"
+                (click)="toggle('submission:' + item.id)"
+              >
+                {{ 'gestion.program.planner.placeIn' | translate
+                }}<span class="visually-hidden"> {{ item.reference }} {{ item.title }}</span>
+              </button>
+              @if (panel() === 'submission:' + item.id) {
+                <div class="panel" [id]="'panel-submission-' + item.id">
+                  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                    <mat-label>{{ 'gestion.program.planner.target' | translate }}</mat-label>
+                    <select matNativeControl #target>
+                      @for (group of targets(); track group.day) {
+                        <optgroup [label]="group.label">
+                          @for (session of group.sessions; track session.id) {
+                            <option [value]="session.id">{{ targetLabel(session) }}</option>
+                          }
+                        </optgroup>
+                      }
+                    </select>
+                  </mat-form-field>
+                  <button
+                    mat-flat-button
+                    type="button"
+                    [disabled]="busy() || !targets().length"
+                    (click)="place(item, +target.value)"
+                  >
+                    {{ 'gestion.program.planner.place' | translate }}
+                  </button>
+                </div>
+              }
+            }
+          </li>
+        } @empty {
+          <li class="muted">{{ 'gestion.program.planner.poolEmpty' | translate }}</li>
+        }
+      </ul>
+    </aside>
+
+    <section class="board" aria-labelledby="grid-title">
+      <h2 id="grid-title" class="visually-hidden">
+        {{ 'gestion.program.planner.grid' | translate }}
+      </h2>
+      <div class="days" role="group" [attr.aria-label]="'gestion.program.planner.days' | translate">
+        @for (item of days(); track item) {
+          <button
+            mat-stroked-button
+            type="button"
+            [attr.aria-pressed]="item === day()"
+            [class.selected]="item === day()"
+            (click)="selectedDay.set(item)"
+          >
+            {{ dayName(item) }}
+          </button>
+        }
+      </div>
+
+      @if (columns().length) {
+        <div class="grid" [style.--columns]="columns().length">
+          @for (column of columns(); track column.room?.id ?? 'none') {
+            <div class="column">
+              <h3>
+                {{ column.room?.name ?? ('gestion.program.noRoom' | translate) }}
+                @if (column.room?.capacity) {
+                  <span class="muted">({{ column.room?.capacity }})</span>
+                }
+              </h3>
+              @for (session of column.sessions; track session.id) {
+                <article
+                  class="session"
+                  [class.conflict]="sessionIssues(session).length"
+                  [id]="'session-card-' + session.id"
+                  tabindex="-1"
+                  [attr.aria-labelledby]="'session-title-' + session.id"
+                >
+                  <h4 [id]="'session-title-' + session.id">
+                    <span class="hours">{{ hours(session) }}</span> {{ title(session) }}
+                  </h4>
+                  <p class="muted">
+                    {{ 'gestion.program.kinds.' + session.kind | translate }} ·
+                    {{ occupancy(session) }}
+                    @for (role of session.roles; track role.id) {
+                      · {{ 'gestion.program.roleKinds.' + role.role | translate }} :
+                      {{ role.person.name }}
+                    }
+                  </p>
+                  @for (issue of sessionIssues(session); track $index) {
+                    <p class="issue">{{ describe(issue) }}</p>
+                  }
+                  <ol
+                    class="slots"
+                    [id]="'session-' + session.id"
+                    cdkDropList
+                    [cdkDropListData]="sessionTargets().get(session.id)!"
+                    [cdkDropListConnectedTo]="dropListIds()"
+                    [cdkDropListEnterPredicate]="sessionAccepts(session)"
+                    (cdkDropListDropped)="drop($event)"
+                    [attr.aria-label]="title(session)"
+                  >
+                    @for (slot of session.slots; track slot.id; let first = $first, last = $last) {
+                      <li
+                        class="slot"
+                        [id]="'slot-' + slot.id"
+                        [class.conflict]="slotIssues(slot).length"
+                        cdkDrag
+                        [cdkDragData]="{ kind: 'slot', slot, session }"
+                        [cdkDragDisabled]="!canWrite() || busy()"
+                      >
+                        <span class="hours">{{ slotHours(slot) }}</span>
+                        {{ slotLabel(slot) }}
+                        <span class="muted">
+                          @if (slot.submission) {
+                            {{ slot.submission.presenters.join(', ') }}
+                          } @else if (slot.speaker) {
+                            {{ slot.speaker.name }}
+                          }
+                          ·
+                          {{ 'gestion.program.minutes' | translate: { count: slot.duration_min } }}
+                        </span>
+                        @if (slotIssues(slot).length) {
+                          <span class="visually-hidden">{{
+                            'gestion.program.conflicts.slot' | translate
+                          }}</span>
+                        }
+                        @if (canWrite()) {
+                          <span class="tools">
+                            <button
+                              mat-button
+                              type="button"
+                              class="up"
+                              [disabled]="busy() || first"
+                              (click)="shift(slot, session, -1)"
+                              [attr.aria-label]="
+                                'gestion.program.planner.up' | translate: { title: slotLabel(slot) }
+                              "
+                            >
+                              ↑
+                            </button>
+                            <button
+                              mat-button
+                              type="button"
+                              class="down"
+                              [disabled]="busy() || last"
+                              (click)="shift(slot, session, 1)"
+                              [attr.aria-label]="
+                                'gestion.program.planner.down'
+                                  | translate: { title: slotLabel(slot) }
+                              "
+                            >
+                              ↓
+                            </button>
+                            <button
+                              mat-button
+                              type="button"
+                              class="more"
+                              [attr.aria-expanded]="panel() === 'slot:' + slot.id"
+                              (click)="toggle('slot:' + slot.id)"
+                            >
+                              {{ 'gestion.program.planner.more' | translate
+                              }}<span class="visually-hidden"> {{ slotLabel(slot) }}</span>
+                            </button>
+                          </span>
+                          @if (panel() === 'slot:' + slot.id) {
+                            <div class="panel" [id]="'panel-slot-' + slot.id">
+                              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                                <mat-label>{{
+                                  'gestion.program.planner.moveTo' | translate
+                                }}</mat-label>
+                                <select matNativeControl #moveTarget>
+                                  @for (group of targets(); track group.day) {
+                                    <optgroup [label]="group.label">
+                                      @for (other of group.sessions; track other.id) {
+                                        <option
+                                          [value]="other.id"
+                                          [selected]="other.id === session.id"
+                                        >
+                                          {{ targetLabel(other) }}
+                                        </option>
+                                      }
+                                    </optgroup>
+                                  }
+                                </select>
+                              </mat-form-field>
+                              <button
+                                mat-stroked-button
+                                type="button"
+                                [disabled]="busy()"
+                                (click)="move(slot, +moveTarget.value)"
+                              >
+                                {{ 'gestion.program.planner.move' | translate }}
+                              </button>
+                              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                                <mat-label>{{ 'gestion.program.duration' | translate }}</mat-label>
+                                <input
+                                  matInput
+                                  #duration
+                                  type="number"
+                                  min="1"
+                                  max="600"
+                                  [value]="slot.duration_min"
+                                />
+                              </mat-form-field>
+                              <button
+                                mat-stroked-button
+                                type="button"
+                                [disabled]="busy()"
+                                (click)="resize(slot, duration.value)"
+                              >
+                                {{ 'gestion.program.planner.resize' | translate }}
+                              </button>
+                              <button
+                                mat-button
+                                type="button"
+                                [disabled]="busy()"
+                                (click)="unplace(slot)"
+                              >
+                                {{
+                                  (slot.submission
+                                    ? 'gestion.program.planner.unplace'
+                                    : 'gestion.settings.delete'
+                                  ) | translate
+                                }}
+                              </button>
+                            </div>
+                          }
+                        }
+                      </li>
+                    } @empty {
+                      <li class="muted empty">
+                        {{ 'gestion.program.planner.dropHere' | translate }}
+                      </li>
+                    }
+                  </ol>
+                </article>
+              }
+            </div>
+          }
+        </div>
+      } @else {
+        <p class="muted">{{ 'gestion.program.planner.noSessions' | translate }}</p>
+      }
+    </section>
+  </div>
+
+  <section id="conflicts" class="card" aria-labelledby="conflicts-title">
+    <h2 id="conflicts-title">
+      {{ 'gestion.program.conflicts.title' | translate: { count: current.conflicts.length } }}
+    </h2>
+    @if (current.conflicts.length) {
+      <ul>
+        @for (conflict of current.conflicts; track $index) {
+          <li>
+            {{ describe(conflict) }}
+            <button mat-button type="button" (click)="show(conflict.sessions[0])">
+              {{ 'gestion.program.conflicts.show' | translate }}
+            </button>
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="muted">{{ 'gestion.program.conflicts.none' | translate }}</p>
+    }
+  </section>
+}

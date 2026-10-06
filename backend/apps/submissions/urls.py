@@ -28,6 +28,11 @@ urlpatterns = [
     path(f"{S}/timeline", V.as_view({"get": "timeline"}), name="timeline"),
     path(f"{S}/final-version", F.as_view({"post": "final_version"}), name="final-version"),
     path(
+        f"{S}/confirm-presentation",
+        V.as_view({"post": "confirm_presentation"}),
+        name="confirm-presentation",
+    ),
+    path(
         f"{S}/final-version/content",
         V.as_view({"get": "final_version_content"}),
         name="final-version-content",

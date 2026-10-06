@@ -1,0 +1,9 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate %}Bonjour,{% endblocktranslate %}
+
+{% if status == "removed" %}{% blocktranslate %}Le programme publié de {{ edition_title }} ne prévoit plus votre passage :{% endblocktranslate %}{% elif status == "added" %}{% blocktranslate %}Le programme publié de {{ edition_title }} prévoit votre passage :{% endblocktranslate %}{% else %}{% blocktranslate %}Votre passage au programme publié de {{ edition_title }} a changé :{% endblocktranslate %}{% endif %}
+
+{{ passages }}
+
+{% if has_account %}{% blocktranslate %}Détail, consignes et ajout à votre agenda : {{ link }}{% endblocktranslate %}{% else %}{% blocktranslate %}Pour retrouver ce détail et l'ajouter à votre agenda, créez un compte avec cette adresse : {{ link }}{% endblocktranslate %}{% endif %}
+
+{% include "account/email/_signature.txt" %}{% endautoescape %}

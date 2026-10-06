@@ -2,7 +2,7 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Route, Routes } from '@angular/router';
 import { LanguageService } from '@gestconf/shared';
 
-import { SITE_LANGUAGES, SITE_PAGES, SiteLanguage } from './site/site-pages';
+import { SITE_LANGUAGES, SITE_PAGES, SITE_PAGES_BY_SLUG, SiteLanguage } from './site/site-pages';
 
 /** La langue du portail public est celle de l'adresse (E2) : appliquée avant le rendu. */
 function useLanguage(lang: SiteLanguage): CanActivateFn {
@@ -26,6 +26,13 @@ function languageRoutes(lang: SiteLanguage): Route {
         loadComponent: portalPage,
         data: { lang, slug: page.slug },
       })),
+      // Programme publié (plan L5, I7) : une page par jour et par session ; l'accueil du
+      // programme reste la page du site (ci-dessus, adresse exacte).
+      {
+        path: SITE_PAGES_BY_SLUG['program'][lang],
+        loadChildren: () =>
+          import('./site/program/program.routes').then((m) => m.programRoutes(lang)),
+      },
       // Déclarée avant « ** » (plan L2 §2.2) ; le slug vient du paramètre.
       { path: 'p/:slug', loadComponent: portalPage, data: { lang, custom: true } },
     ],

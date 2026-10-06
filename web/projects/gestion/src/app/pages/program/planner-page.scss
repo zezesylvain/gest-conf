@@ -1,0 +1,126 @@
+// Planificateur (I15) : liste « à programmer » à gauche, grille du jour à droite ; sous
+// 768 px, tout s'empile et la grille devient une liste de sessions.
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  align-items: center;
+}
+.badge.warn {
+  border-color: #b45309;
+}
+.badge.danger,
+.issue {
+  color: var(--gc-danger);
+}
+.badge.danger {
+  border-color: var(--gc-danger);
+}
+.planner {
+  display: grid;
+  grid-template-columns: minmax(15rem, 20rem) 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+.pool {
+  position: sticky;
+  top: 0.5rem;
+  max-height: calc(100vh - 1rem);
+  overflow-y: auto;
+}
+.filters,
+.panel {
+  display: grid;
+  gap: 0.5rem;
+}
+.days {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.days .selected {
+  background: var(--gc-surface-muted);
+  font-weight: 600;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(var(--columns), minmax(14rem, 1fr));
+  gap: 0.75rem;
+  overflow-x: auto;
+}
+h3,
+h4 {
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
+}
+.session {
+  margin-bottom: 0.75rem;
+  padding: 0.5rem;
+  border: 1px solid var(--gc-border);
+  border-radius: 0.5rem;
+}
+.session.conflict,
+.slot.conflict {
+  border-color: var(--gc-danger);
+  border-left-width: 0.3rem;
+}
+.session p {
+  margin: 0 0 0.25rem;
+  font-size: 0.9rem;
+}
+.slots {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  min-height: 2.5rem;
+  display: grid;
+  gap: 0.35rem;
+}
+.slot {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--gc-border);
+  border-radius: 0.35rem;
+  background: var(--gc-surface, #fff);
+  cursor: grab;
+  overflow-wrap: anywhere;
+}
+.slot .muted {
+  display: block;
+  font-size: 0.85rem;
+}
+.tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+}
+// Flèches : cible tactile de 44 px (WCAG 2.5.5), sans la largeur minimale des boutons.
+.tools .up,
+.tools .down {
+  min-width: 2.75rem;
+  padding: 0;
+}
+.hours {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+.empty {
+  padding: 0.5rem;
+  border: 1px dashed var(--gc-border);
+  cursor: default;
+}
+.cdk-drag-placeholder {
+  opacity: 0.4;
+}
+@media (max-width: 767.98px) {
+  .planner,
+  .grid {
+    display: block;
+  }
+  .pool {
+    position: static;
+    max-height: none;
+    margin-bottom: 1rem;
+  }
+}

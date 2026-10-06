@@ -94,6 +94,8 @@ SUBMISSION_ACTION_CHOICES = [
     ("submit", "submit"),
     ("withdraw", "withdraw"),
     ("final_version", "final_version"),
+    # Plan L5 (I5) : désigner les présentateurs et confirmer la présentation.
+    ("confirm_presentation", "confirm_presentation"),
 ]
 
 
@@ -122,6 +124,34 @@ class FinalVersionSerializer(serializers.Serializer):
     submitted_at = serializers.DateTimeField()
     response_letter = serializers.CharField()
     file = SubmissionFileSerializer()
+
+
+class PresentationSerializer(serializers.Serializer):
+    """I5 (plan L5) : présentateurs désignés (positions des auteurs) et date de confirmation."""
+
+    presenters = serializers.ListField(child=serializers.IntegerField(min_value=1))
+    confirmed_at = serializers.DateTimeField()
+
+
+class PublishedSlotSerializer(serializers.Serializer):
+    """Créneau de la communication au programme **publié** (plan L5 §4) : jamais le brouillon."""
+
+    version = serializers.IntegerField(help_text="Version du programme publié.")
+    session_id = serializers.IntegerField()
+    session_title_fr = serializers.CharField()
+    session_title_en = serializers.CharField()
+    room = serializers.CharField(allow_null=True)
+    starts_at = serializers.DateTimeField()
+    ends_at = serializers.DateTimeField()
+
+
+class ConfirmPresentationSerializer(serializers.Serializer):
+    presenters = serializers.ListField(
+        child=serializers.IntegerField(min_value=1),
+        allow_empty=False,
+        max_length=50,
+        help_text="Positions des auteurs qui présentent.",
+    )
 
 
 class FinalVersionUploadSerializer(serializers.Serializer):
@@ -160,6 +190,12 @@ class SubmissionSerializer(serializers.ModelSerializer):
     final_deadline = serializers.SerializerMethodField(
         help_text="Date limite de la version finale (date clé camera_ready)."
     )
+    presentation = serializers.SerializerMethodField(
+        help_text="Confirmation de présentation (I5, plan L5)."
+    )
+    schedule = serializers.SerializerMethodField(
+        help_text="Créneau au programme publié (plan L5 §4), pour une communication programmée."
+    )
 
     class Meta:
         model = Submission
@@ -191,6 +227,8 @@ class SubmissionSerializer(serializers.ModelSerializer):
             "decision",
             "final_version",
             "final_deadline",
+            "presentation",
+            "schedule",
         )
         read_only_fields = fields
 
@@ -229,6 +267,26 @@ class SubmissionSerializer(serializers.ModelSerializer):
         ):
             return None
         return services.key_date(submission.edition, KeyDateCode.CAMERA_READY)
+
+    @extend_schema_field(PresentationSerializer(allow_null=True))
+    def get_presentation(self, submission: Submission) -> dict | None:
+        from apps.program.models import PresentationConfirmation
+
+        confirmation = PresentationConfirmation.objects.filter(submission=submission).first()
+        return PresentationSerializer(confirmation).data if confirmation is not None else None
+
+    @extend_schema_field(PublishedSlotSerializer(allow_null=True))
+    def get_schedule(self, submission: Submission) -> dict | None:
+        if submission.status != SubmissionStatus.SCHEDULED:
+            return None
+        from apps.program.services.publication import latest_publication, published_slot
+
+        # Une lecture de la dernière publication par édition et par réponse (liste comprise).
+        cache = self.context.setdefault("_publications", {})
+        if submission.edition_id not in cache:
+            cache[submission.edition_id] = latest_publication(submission.edition)
+        found = published_slot(cache[submission.edition_id], submission.pk)
+        return PublishedSlotSerializer(found).data if found is not None else None
 
     @extend_schema_field(SubmissionFileSerializer(allow_null=True))
     def get_file(self, submission: Submission) -> dict | None:
@@ -282,6 +340,12 @@ class SubmissionSerializer(serializers.ModelSerializer):
             submission.status == SubmissionStatus.CAMERA_READY_RECEIVED
         ):
             actions.append("final_version")
+        if submission.status in (
+            SubmissionStatus.CAMERA_READY_RECEIVED,
+            SubmissionStatus.CONFIRMED,
+            SubmissionStatus.SCHEDULED,
+        ):
+            actions.append("confirm_presentation")
         return actions
 
 

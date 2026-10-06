@@ -171,8 +171,8 @@ def test_cron_script_only_runs_scheduled_commands():
     """Liste fermée : le script cron n'est pas un accès générique à manage.py."""
     code = shell_code(CRON_SCRIPT)
     scheduled = (
-        r"^\s*run_jobs \| close_call \| remind_drafts \| remind_reviewers \| cleanup "
-        r"\| check_integrity\)"
+        r"^\s*run_jobs \| close_call \| remind_drafts \| remind_reviewers \| "
+        r"remind_presentations \| cleanup \| \\\n\s*check_integrity\)"
     )
     assert re.search(scheduled, code, re.M)
     assert "config.settings.prod" in code

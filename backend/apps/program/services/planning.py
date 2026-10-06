@@ -99,7 +99,7 @@ def program_state(edition: Edition, *, lock: bool = False) -> ProgramState:
     return state
 
 
-def _begin(edition: Edition, actor: Actor, revision: int | None) -> ProgramState:
+def begin_write(edition: Edition, actor: Actor, revision: int | None) -> ProgramState:
     """Début de toute écriture : édition modifiable, verrou, révision attendue (I14)."""
     _writable(edition, actor)
     state = program_state(edition, lock=True)
@@ -111,6 +111,12 @@ def _begin(edition: Edition, actor: Actor, revision: int | None) -> ProgramState
 def _bump(state: ProgramState) -> None:
     state.revision += 1
     state.save(update_fields=["revision"])
+
+
+def mark_changed(edition: Edition) -> None:
+    """Le brouillon dépend d'une donnée modifiée ailleurs (présentateurs d'une communication
+    placée, RG-12) : nouvelle révision, pour que les planificateurs rechargent (I14)."""
+    _bump(program_state(edition, lock=True))
 
 
 def _audit(action: str, *, actor: Actor, edition: Edition, obj: Any, before=None, after=None):
@@ -153,7 +159,7 @@ def _clean_room(edition: Edition, data: Mapping[str, Any], room: Room | None) ->
 def create_room(
     edition: Edition, data: Mapping[str, Any], *, actor: Actor, revision: int | None = None
 ) -> Room:
-    state = _begin(edition, actor, revision)
+    state = begin_write(edition, actor, revision)
     values = _clean_room(edition, data, None)
     if "name" not in values:
         raise Invalid(fields={"name": [_("Nom obligatoire.")]})
@@ -169,7 +175,7 @@ def create_room(
 def update_room(
     room: Room, data: Mapping[str, Any], *, actor: Actor, revision: int | None = None
 ) -> Room:
-    state = _begin(room.edition, actor, revision)
+    state = begin_write(room.edition, actor, revision)
     room = Room.objects.select_for_update().get(pk=room.pk)
     values = _clean_room(room.edition, data, room)
     before = snapshot(room)
@@ -187,7 +193,7 @@ def update_room(
 @transaction.atomic
 def delete_room(room: Room, *, actor: Actor, revision: int | None = None) -> None:
     """Une salle utilisée ne se supprime pas (409 ``in_use``) : on la désactive (I9)."""
-    state = _begin(room.edition, actor, revision)
+    state = begin_write(room.edition, actor, revision)
     if Session.objects.filter(room=room).exists():
         raise RuleViolation(
             _("Salle utilisée par une session : désactivez-la plutôt."), code=ErrorCode.IN_USE
@@ -261,7 +267,7 @@ def _clean_session(
 def create_session(
     edition: Edition, data: Mapping[str, Any], *, actor: Actor, revision: int | None = None
 ) -> Session:
-    state = _begin(edition, actor, revision)
+    state = begin_write(edition, actor, revision)
     for name in ("kind", "title_fr", "starts_local", "ends_local"):
         if name not in data:
             raise Invalid(fields={name: [_("Champ obligatoire.")]})
@@ -281,7 +287,7 @@ def update_session(
 ) -> Session:
     """Un changement d'horaire recalcule les créneaux (I3) ; la durée réelle compte (I12)."""
     edition = session.edition
-    state = _begin(edition, actor, revision)
+    state = begin_write(edition, actor, revision)
     session = Session.objects.select_for_update().get(pk=session.pk)
     values = _clean_session(edition, data, session)
     before = snapshot(session)
@@ -304,7 +310,7 @@ def delete_session(session: Session, *, actor: Actor, revision: int | None = Non
     """Supprime la session, ses créneaux et ses rôles : les communications retournent dans
     la liste « à programmer » (journalisé)."""
     edition = session.edition
-    state = _begin(edition, actor, revision)
+    state = begin_write(edition, actor, revision)
     slots = list(session.slots.values_list("submission__reference", flat=True))
     _audit(
         "session_deleted",
@@ -374,7 +380,7 @@ def place_submission(
     """Place une communication confirmée (I5) dans une session. Une communication déjà
     placée se déplace par ``move_slot``."""
     edition = session.edition
-    state = _begin(edition, actor, revision)
+    state = begin_write(edition, actor, revision)
     session = _locked_session(session)
     submission = Submission.objects.select_for_update().get(pk=submission.pk)
     if submission.edition_id != edition.pk:
@@ -429,7 +435,7 @@ def add_free_slot(
     """Élément libre (I3) : conférence invitée, discours, remise de prix… avec ou sans
     intervenant invité (I11)."""
     edition = session.edition
-    state = _begin(edition, actor, revision)
+    state = begin_write(edition, actor, revision)
     session = _locked_session(session)
     if not title_fr.strip():
         raise Invalid(fields={"title_fr": [_("Titre français obligatoire.")]})
@@ -464,7 +470,7 @@ def move_slot(
 ) -> Slot:
     """Déplace un créneau dans sa session ou vers une autre session de l'édition."""
     edition = slot.session.edition
-    state = _begin(edition, actor, revision)
+    state = begin_write(edition, actor, revision)
     slot = Slot.objects.select_for_update().select_related("session").get(pk=slot.pk)
     source = _locked_session(slot.session)
     target = source if session is None else _locked_session(session)
@@ -504,7 +510,7 @@ def update_slot(
 ) -> Slot:
     """Durée, et pour un élément libre : titres et intervenant invité."""
     edition = slot.session.edition
-    state = _begin(edition, actor, revision)
+    state = begin_write(edition, actor, revision)
     slot = Slot.objects.select_for_update().select_related("session").get(pk=slot.pk)
     allowed = {"duration_min"} | (
         set() if slot.submission_id else {"title_fr", "title_en", "speaker"}
@@ -537,7 +543,7 @@ def update_slot(
 def remove_slot(slot: Slot, *, actor: Actor, revision: int | None = None) -> None:
     """Retire le créneau ; la communication retourne dans la liste « à programmer »."""
     edition = slot.session.edition
-    state = _begin(edition, actor, revision)
+    state = begin_write(edition, actor, revision)
     slot = Slot.objects.select_for_update().select_related("session").get(pk=slot.pk)
     session = _locked_session(slot.session)
     _audit("slot_removed", actor=actor, edition=edition, obj=slot, before=snapshot(slot))
@@ -560,7 +566,7 @@ def add_session_role(
     revision: int | None = None,
 ) -> SessionRole:
     edition = session.edition
-    state = _begin(edition, actor, revision)
+    state = begin_write(edition, actor, revision)
     if role not in SessionRoleKind.values:
         raise Invalid(fields={"role": [_("Rôle de séance inconnu.")]})
     if user.anonymized_at is not None or not user.is_active:
@@ -576,7 +582,7 @@ def add_session_role(
 @transaction.atomic
 def remove_session_role(item: SessionRole, *, actor: Actor, revision: int | None = None) -> None:
     edition = item.session.edition
-    state = _begin(edition, actor, revision)
+    state = begin_write(edition, actor, revision)
     _audit("role_removed", actor=actor, edition=edition, obj=item, before=snapshot(item))
     item.delete()
     _bump(state)
@@ -612,7 +618,8 @@ class _Presence:
     slot: int | None
 
 
-def _author_key(author: SubmissionAuthor) -> str:
+def author_key(author: SubmissionAuthor) -> str:
+    """Clé de personne d'un auteur : son compte, sinon son adresse (RG-12, I8)."""
     return f"user:{author.user_id}" if author.user_id else f"email:{author.email.strip().lower()}"
 
 
@@ -661,7 +668,7 @@ def _presences(sessions: Iterable[Session]) -> list[_Presence]:
                 for author in presenters(slot.submission):
                     presences.append(
                         _Presence(
-                            _author_key(author),
+                            author_key(author),
                             f"{author.first_name} {author.last_name}".strip(),
                             slot.starts_at,
                             slot.ends_at,

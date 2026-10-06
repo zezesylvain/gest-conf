@@ -30,8 +30,17 @@ export const CHAIR_EDITION: MeEdition = {
     'decisions.decide',
     'decisions.publish',
     'grids.write',
+    'program.read',
+    'program.publish',
   ],
   mfa_required: true,
+};
+
+/** Membre du CO de fonction « programme » (plan L5, I1) : lecture et écriture du programme. */
+export const PROGRAM_EDITION: MeEdition = {
+  ...CHAIR_EDITION,
+  roles: [{ role: 'OC_MEMBER', oc_function: 'program' }],
+  capabilities: ['edition.read', 'submissions.read', 'program.read', 'program.write'],
 };
 
 /** Relecteur (membre du comité scientifique) : ses évaluations seulement (plan L4, H19). */

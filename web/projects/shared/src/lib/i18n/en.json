@@ -74,7 +74,9 @@
       "reviewers_missing": "First assign the required number of reviewers.",
       "review_not_open": "Reviewing is not open for this submission.",
       "discussion_closed": "The discussion opens once your review is submitted and the discussion has started.",
-      "deadline_passed": "The deadline has passed."
+      "deadline_passed": "The deadline has passed.",
+      "program_conflicts": "The programme has conflicts: fix them before publishing.",
+      "program_unchanged": "Nothing has changed since the last publication."
     },
     "form": {
       "errorSummary": "The form contains errors:",

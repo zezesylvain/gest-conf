@@ -9,5 +9,6 @@ import { SubmissionAction } from './submission-action';
 export const SUBMISSION_ACTION: SubmissionAction[] = [
   'submit',
   'withdraw',
-  'final_version'
+  'final_version',
+  'confirm_presentation'
 ];

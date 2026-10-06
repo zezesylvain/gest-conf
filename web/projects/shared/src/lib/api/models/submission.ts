@@ -4,6 +4,8 @@
 import { AuthorDecision } from '../models/author-decision';
 import { DeclarationState } from '../models/declaration-state';
 import { FinalVersion } from '../models/final-version';
+import { Presentation } from '../models/presentation';
+import { PublishedSlot } from '../models/published-slot';
 import { SubmissionAction } from '../models/submission-action';
 import { SubmissionAuthor } from '../models/submission-author';
 import { SubmissionFile } from '../models/submission-file';
@@ -54,8 +56,18 @@ export interface Submission {
   id: number;
   keywords: Array<string>;
   language: string;
+
+  /**
+   * Confirmation de présentation (I5, plan L5).
+   */
+  presentation: Presentation | null;
   reference: string | null;
   revision: number;
+
+  /**
+   * Créneau au programme publié (plan L5 §4), pour une communication programmée.
+   */
+  schedule: PublishedSlot | null;
   status: SubmissionStatus;
   submission_type: string | null;
   submitted_at: string | null;

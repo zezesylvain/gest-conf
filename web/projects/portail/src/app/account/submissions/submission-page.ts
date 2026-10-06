@@ -27,6 +27,7 @@ import {
   PublicEdition,
   Submission,
   SubmissionCheck,
+  SubmissionStatus,
   Timeline,
 } from '@gestconf/shared';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -42,6 +43,21 @@ export const AUTOSAVE_DELAY_MS = 1200;
 
 /** Longueur maximale de la lettre de réponse aux relecteurs (comme le serveur). */
 export const LETTER_MAX = 50000;
+
+/** Statuts dont l'auteur peut se retirer (le serveur revérifie ; motif obligatoire). */
+const WITHDRAWABLE: readonly SubmissionStatus[] = [
+  'submitted',
+  'accepted',
+  'camera_ready_received',
+  'confirmed',
+  'scheduled',
+];
+/** Après la version finale (I5). */
+const LATE_STATUSES: readonly SubmissionStatus[] = [
+  'camera_ready_received',
+  'confirmed',
+  'scheduled',
+];
 
 /**
  * Assistant de soumission (plan L3 §5) : informations → auteurs → fichier → déclarations →
@@ -121,14 +137,33 @@ export class SubmissionPage implements OnInit {
   protected readonly words = signal(0);
 
   protected readonly decision = computed(() => this.submission()?.decision ?? null);
-  /** Retrait encore possible (soumise, ou acceptée : l'auteur renonce à présenter). */
+  /** Retrait encore possible (soumise, acceptée, puis jusqu'au programme publié : I5). */
   protected readonly withdrawable = computed(() => {
     const current = this.submission();
     return (
       !!current &&
-      (current.status === 'submitted' || current.status === 'accepted') &&
+      WITHDRAWABLE.includes(current.status) &&
       current.allowed_actions.includes('withdraw')
     );
+  });
+  /** Retrait après la version finale : il se fait depuis la section « Présentation ». */
+  protected readonly lateWithdrawal = computed(() =>
+    LATE_STATUSES.includes(this.submission()?.status ?? 'draft'),
+  );
+  /** I5 : confirmation de présentation ouverte (version finale reçue, puis jusqu'au programme). */
+  protected readonly canConfirm = computed(
+    () => this.submission()?.allowed_actions.includes('confirm_presentation') ?? false,
+  );
+  /** Positions des auteurs cochés comme présentateurs. */
+  protected readonly presenters = signal<number[]>([]);
+  /** Noms des présentateurs confirmés (positions de la confirmation). */
+  protected readonly confirmedPresenters = computed(() => {
+    const current = this.submission();
+    const chosen = current?.presentation?.presenters ?? [];
+    return (current?.authors ?? [])
+      .filter((author) => chosen.includes(author.position))
+      .map((author) => `${author.first_name} ${author.last_name}`.trim())
+      .join(', ');
   });
   /** Dépôt de la version finale ouvert : action permise et date limite non passée (le
    * serveur revérifie). */
@@ -195,6 +230,10 @@ export class SubmissionPage implements OnInit {
       { emitEvent: false },
     );
     this.words.set(wordCount(submission.abstract));
+    this.presenters.set(
+      submission.presentation?.presenters ??
+        submission.authors.filter((author) => author.is_presenter).map((author) => author.position),
+    );
     if (!this.finalLetter.dirty) {
       this.finalLetter.reset(submission.final_version?.response_letter ?? '', {
         emitEvent: false,
@@ -408,6 +447,57 @@ export class SubmissionPage implements OnInit {
     } finally {
       this.busy.set(false);
     }
+  }
+
+  protected togglePresenter(position: number, checked: boolean): void {
+    this.presenters.update((current) =>
+      checked
+        ? [...current.filter((item) => item !== position), position].sort((a, b) => a - b)
+        : current.filter((item) => item !== position),
+    );
+  }
+
+  /** I5 : désigne les présentateurs et confirme la venue ; la première fois, la
+   * communication devient « confirmée » et peut être programmée. */
+  protected async confirmPresentation(): Promise<void> {
+    const current = this.submission();
+    if (!current) return;
+    if (!this.presenters().length) {
+      this.errors.set([this.translate.instant('portail.submissions.presentation.none')]);
+      return;
+    }
+    const first = !current.presentation;
+    this.errors.set([]);
+    this.busy.set(true);
+    try {
+      this.load(await this.service.confirmPresentation(current.id, this.presenters()));
+      this.notice.set(
+        this.translate.instant(
+          first
+            ? 'portail.submissions.presentation.done'
+            : 'portail.submissions.presentation.updated',
+        ),
+      );
+      await this.refreshSide();
+    } catch (error) {
+      this.errors.set([
+        apiErrorMessage(this.translate, error),
+        ...(error instanceof GcApiError ? Object.values(error.fields).flat() : []),
+      ]);
+    } finally {
+      this.busy.set(false);
+    }
+  }
+
+  /** Créneau publié : début (date et heure) et fin, dans le fuseau de l'édition. */
+  protected slotWhen(startsAt: string, endsAt: string): string {
+    const zone = this.edition()?.timezone;
+    const end = new Intl.DateTimeFormat(this.language.current(), {
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: zone,
+    }).format(new Date(endsAt));
+    return `${formatInZone(startsAt, zone, this.language.current())} – ${end}`;
   }
 
   protected async deleteDraft(): Promise<void> {

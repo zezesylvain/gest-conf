@@ -1,10 +1,10 @@
 # Lot L5 — Programme : plan d'implémentation
 
-> **Statut : validé le 6 octobre 2026** (décisions I1 à I18 telles que proposées, sans
-> correction ; propositions du §10 retenues, dont la lecture seule des autres fonctions du CO
-> et le rappel de la confirmation de présentation). Reste ouverte la question Q14 : la
+> **Statut : validé le 6 octobre 2026, livré** (décisions I1 à I18 telles que proposées,
+> sans correction ; propositions du §10 retenues, dont la lecture seule des autres fonctions
+> du CO et le rappel de la confirmation de présentation). Étapes L5.0 à L5.7 livrées ; bilan
+> du lot : `docs/L5-programme.md` ; étude : §21. Reste ouverte la question Q14 : la
 > déclaration « publication » couvre-t-elle les noms des auteurs au programme public ?
-> L4 est clos (bilan : `docs/L4-evaluation.md`).
 >
 > Sources :
 > - étude §3.3 (matrice), §4 M7 (et M10 pour les salles), §5.1, §5.4, §6 (RG-11, RG-12,
@@ -384,3 +384,307 @@ placements simultanés, mis en série sans perte : créneaux contigus, révision
 quatre fois).
 2 229 tests backend sous SQLite ; les 32 tests du programme passent sous MariaDB. Le service
 n'a pas encore de route : l'API de gestion arrive en L5.3.
+
+## 14. Bilan de L5.3 (6 octobre 2026)
+
+**Workflow (I5)** :
+
+- `CAMERA_READY_RECEIVED → CONFIRMED` devient disponible, déclenchée par le soumissionnaire.
+  L'étude la donnait au système en L6 : **écart validé** avec le plan.
+  - Une garde de l'application `program` exige les présentateurs enregistrés ; L6 y
+    ajoutera RG-11.
+- Trois retraits ajoutés, avec motif obligatoire : depuis `CAMERA_READY_RECEIVED`,
+  `CONFIRMED` et `SCHEDULED`.
+  - L'effet inscrit par `program` libère le créneau (journalisé) et prévient l'équipe du
+    programme : CO « programme » et Chair, sinon administrateurs.
+  - Le motif n'est pas dans l'e-mail, et l'objet ne porte aucune variable autre que le nom du
+    site, règle déjà vérifiée par un test des gabarits.
+- La table compte 22 transitions (19 de l'étude, plus les 3 retraits).
+- **Point ouvert** : `ACCEPTED_MINOR → WITHDRAWN` n'existe toujours pas. Un auteur accepté
+  sous réserve ne peut retirer sa communication qu'après la version finale. À trancher, avec
+  une transition à ajouter si besoin.
+
+**Confirmation de présentation (I5)** : `POST /v1/submissions/{id}/confirm-presentation`.
+
+- Réservée au soumissionnaire, une fois la version finale reçue.
+- Présentateurs choisis parmi les auteurs (positions distinctes).
+- La première fois, la communication passe à « confirmée ». Ensuite, un changement de
+  présentateurs d'une communication placée incrémente la révision du programme : les
+  conflits de personnes en dépendent (RG-12).
+- Journal `program.presentation_confirmed` et `program.presenters_changed`.
+- `/v1/submissions/{id}` expose `presentation` et l'action `confirm_presentation`.
+
+**Rôles de séance (I10)** : `SPEAKER` et `SESSION_CHAIR` sont invitables par `ADMIN` et
+`CHAIR`. La migration ne change que les choix du champ. Un rôle de séance ou un intervenant
+invité doit avoir un rôle actif dans l'édition.
+
+**API de gestion** (`…/program/…`, `program.read` en lecture, `program.write` en écriture,
+table des capacités explicite) :
+
+- `GET program` : brouillon complet pour le planificateur. Il contient les jours, les
+  salles, les sessions avec créneaux et rôles, la liste « à programmer », les conflits, la
+  révision et l'indicateur de modifications non publiées.
+- Salles, sessions, créneaux et rôles : création, modification, suppression. Chaque
+  écriture renvoie le brouillon complet, porte `If-Match` (412 `stale_revision`) et passe
+  par le service de planification.
+  - Un `PATCH` de créneau qui change la durée et la position s'exécute dans une seule
+    transaction.
+- `GET program/people?q=` : personnes de l'édition, avec nom, institution et rôles,
+  jamais d'adresse.
+- Objets d'une autre édition : 404.
+- Composants du schéma nommés : `ProgramPerson`, `ProgramConflict`, énumérations
+  `SessionKind`, `SessionRoleKind`, `Equipment`, `ProgramConflictKind`.
+
+**Tests** :
+
+- 2 422 tests backend sous SQLite ; 1 908 sous MariaDB pour les suites touchées (transverses, programme, soumissions, comptes, communications) ;
+- 56 tests du programme ;
+- matrice : 1 497 tests, une case par profil pour les 13 routes du programme ;
+- table d'attribution des rôles et table du workflow mises à jour.
+
+## 15. Bilan de L5.4 (6 octobre 2026)
+
+**Publication (I6)** : `POST …/program/publish` (`program.publish`, Chair seul,
+réauthentification récente, `If-Match`).
+
+- **Refusée** tant qu'il reste un conflit (409 `program_conflicts`, RG-12 et RG-13), ou sans
+  modification depuis la dernière publication (409 `program_unchanged`). Les deux codes sont
+  nouveaux et traduits dans l'interface.
+- **Instantané numéroté**, en ajout seul, construit par liste blanche :
+  - sessions, salles, thématiques, créneaux ;
+  - auteurs avec nom, institution et indication du présentateur ;
+  - rôles de séance, intervenants invités ;
+  - consignes, pour « Mon passage » seulement ;
+  - une **clé de personne** interne (`user:<id>` ou `email:<adresse>`), que les réponses
+    publiques retirent.
+- **Transitions à ce moment seulement** (règle n° 4) :
+  - `CONFIRMED → SCHEDULED` pour les communications placées ;
+  - `SCHEDULED → CONFIRMED` pour celles retirées du programme publié. Cette transition
+    est ajoutée (écart I6 validé) ; la table en compte 23.
+  - Le workflow revérifie `program.publish` (famille `ORGANIZERS`).
+- **Journal** `program.published` ; historique `GET …/program/publications` (version, date,
+  auteur, résumé des différences).
+
+**Notifications ciblées (I16)** :
+
+- les passages de chaque personne sont comparés entre deux instantanés ;
+- un e-mail part à chaque personne dont le passage est **nouveau, modifié ou supprimé**,
+  une fois par version (clé d'idempotence avec une empreinte, sans adresse en clair) ;
+- l'e-mail donne la date et l'heure de l'édition, la salle, le rôle et le titre ; la ligne
+  est traduite (« : » à la française ou à l'anglaise) ;
+- un présentateur **sans compte** reçoit l'e-mail à son adresse d'auteur, avec l'invitation
+  à créer un compte pour retrouver son passage ;
+- l'objet ne porte que le nom du site.
+
+**Programme public (I7)** : trois routes anonymes, en cache public de 5 minutes, sur la
+dernière publication de l'édition courante (404 tant que rien n'est publié).
+
+- `GET /v1/public/program` : jours et sessions, sans le détail des communications.
+- `GET /v1/public/program/days/{date}` : sessions d'un jour, en heure de l'édition.
+- `GET /v1/public/program/sessions/{id}` : une session.
+- Découpage décidé en L5.0. Les routes sont inscrites dans la liste blanche des vues
+  anonymes (méta-test).
+- **Test à traceurs** : ni adresse, ni clé de personne, ni consignes, ni identifiant de
+  compte. Le brouillon reste invisible jusqu'à la publication suivante.
+- **Intervenants invités (I11)** : biographie et photo seulement avec les consentements de
+  L2, lus à la publication. Un retrait de consentement prend effet à la publication
+  suivante.
+
+**« Mon passage » (I8)** : `GET /v1/me/agenda` et `GET /v1/me/agenda.ics`, connecté, sans
+cache.
+
+- Lu dans la dernière publication de chaque édition non archivée.
+- Une personne s'y reconnaît par son compte ou par une adresse **vérifiée**. Un co-auteur
+  qui crée son compte plus tard retrouve donc son passage.
+- Chaque passage donne la date, l'horaire, la salle (accès), la durée, le rôle, les
+  co-intervenants, les présidents de séance et les consignes.
+- Fichier iCal par le générateur de L5.0 (`apps/program/ical.py`), testé sur l'échappement,
+  le pliage à 75 octets et l'UTC.
+
+**Intégrité** : contrôle `program.publication`. Une communication programmée figure au
+programme publié, et une communication publiée n'est pas restée confirmée.
+
+**Tests** : 13 tests de publication ; matrice avec la publication (réauthentification
+comprise) et l'historique. 2 462 tests backend sous SQLite ; 1 948 sous MariaDB pour les suites
+touchées.
+
+## 16. Bilan de L5.5 (6 octobre 2026)
+
+**Rubrique « Programme » de la gestion**, inscrite dans le rail (catégorie entre Évaluation et
+Paramétrage, `program.read`), dans la recherche et dans l'aide (une fiche par écran). Le rôle
+actif l'affiche pour l'administrateur, le Chair, le président du CS et le CO.
+
+- **Planificateur** (`/editions/{id}/programme`, I15) :
+  - un jour à la fois, une colonne par salle active (plus les salles inactives encore
+    utilisées et une colonne « hors salle ») ;
+  - liste « à programmer » filtrable par thématique, type et texte ;
+  - glisser-déposer du CDK : placer, réordonner, changer de session, rendre à la liste ;
+  - **équivalent au clavier** : « Placer dans… » (choix de la session, groupé par jour),
+    flèches monter et descendre, « Actions… » (déplacer, durée, retirer). Le focus suit le
+    créneau ; chaque résultat est annoncé dans une région `aria-live` ;
+  - heures des créneaux dans le fuseau de l'édition, jamais celui du navigateur ; occupation
+    de chaque session (« 60 / 90 min ») ;
+  - conflits renvoyés par le serveur à chaque écriture, sur la session, sur le créneau et
+    dans une liste avec « Voir ». Une personne est citée par son nom, jamais par son
+    adresse ;
+  - sous 768 px, la grille devient une liste.
+- **Sessions** : formulaire (type, titres, salle, thématique, horaires saisis à l'heure de
+  l'édition, consignes), erreurs de conversion sur le champ concerné. Après la création, la
+  session reste ouverte pour ses **rôles de séance** et ses **éléments libres** (intervenant
+  invité facultatif). Le choix d'une personne cherche dans l'édition par le nom, sans
+  adresse.
+- **Salles** : équipements en liste fermée, accessibilité, désactivation ; une salle utilisée
+  ne se supprime pas (message du serveur).
+- **Publication** : état (version publiée, modifications non publiées, conflits, communications
+  à programmer), publication confirmée réservée au Chair (réauthentification par
+  l'intercepteur), effets annoncés, historique (version, date, auteur, différences). Rappel :
+  le programme public paraît à la prochaine mise en ligne du portail.
+- **Paramétrage › Programme** : tampon (RG-13) et RG-11.
+- **Tableau de bord** : carte « Programme » (sessions, à programmer, conflits, état publié).
+- Toutes les écritures envoient la révision lue (`If-Match`) et remplacent l'état de l'écran
+  par le brouillon renvoyé. Une révision périmée (412) recharge le brouillon et le dit.
+
+**Corrections du serveur, trouvées en construisant les écrans** :
+
+- **Tampon (RG-13)** : le changer ne recalculait pas les créneaux existants et ne changeait
+  pas la révision. Les horaires restaient faux jusqu'à la prochaine écriture de chaque
+  session, et le contrôle d'intégrité les aurait signalés. Désormais, le changement verrouille
+  l'état du programme, recalcule toutes les sessions et incrémente la révision (test dédié).
+- **Schéma OpenAPI** : les listes `program/people` et `program/publications` étaient décrites
+  paginées et triables, alors que les vues renvoient une liste simple. Le client généré
+  lisait `results` et ne trouvait personne. Les vues du programme n'ont plus ni pagination ni
+  tri générique ; schéma et client régénérés ; test de l'historique ajouté.
+- **Portail à republier (I7)** : `program.published` compte désormais parmi les
+  modifications non publiées du portail (bandeau de L2) ; les écritures du brouillon, non.
+- Message de validation d'un créneau traduit.
+
+**Correctif commun de la gestion** : `.table-wrap` est positionné. Les libellés masqués des
+tableaux (position absolue) ne font plus déborder la page sur mobile.
+
+**Vérifications** :
+
+- parcours dans Chromium, sur une base de démonstration (3 salles, 7 sessions sur deux jours,
+  12 communications) : placement au clavier et à la souris, montée avec focus conservé,
+  correction d'un dépassement et d'un président de séance à deux endroits, rôle ajouté par
+  la recherche, refus de suppression d'une salle utilisée, publication par le Chair
+  (version 1, 11 personnes prévenues), tableau de bord, bandeau du portail ; aucun
+  débordement à 375 px sur les six écrans ;
+- front : 330 tests (shared 76, portail 116, gestion 138) ; lint, format, build ;
+- backend : 2 465 tests sous SQLite ; 1 763 sous MariaDB pour le programme, le portail et les
+  tests transverses ; schéma régénéré sur MariaDB.
+
+**Point connu, antérieur à L5** : le bundle initial du portail (367,7 ko) dépasse le seuil
+d'avertissement (365 ko), sans atteindre celui d'erreur (380 ko). Le bilan de L4 le
+signalait déjà. À traiter en L5.6, qui touche le portail.
+
+## 17. Bilan de L5.6 (6 octobre 2026)
+
+**Programme public pré-rendu (I7)**, en FR et en EN, sans Material (budget du portail) :
+
+- **Accueil** `/fr/programme/` (la page du site, qui n'est plus « à venir ») : jours et
+  sessions, sans le détail des communications. Filtres par jour, salle, thématique et type,
+  recherche sans tenir compte des accents ; le nombre de sessions affichées est annoncé.
+  Avant la première publication : « pas encore publié ».
+- **Une page par jour** `/fr/programme/<date>/` : liste détaillée (créneaux, auteurs,
+  présentateurs signalés, présidents de séance, salle et accessibilité) ou **grille par
+  salle** ; recherche dans les titres, les auteurs, les intervenants et les références.
+- **Une page par session** `/fr/programme/session/<id>/` : horaire et fuseau, salle et
+  indications d'accès, description, présidents, communications ; intervenants invités avec
+  photo et biographie selon leurs consentements (I11).
+- Heures dans le fuseau de l'édition, indiqué sur chaque page.
+- Sélecteur de langue, titre, adresses canoniques et `hreflang` comme les pages du site ;
+  marqueur de rendu complet `data-gc-rendered`.
+- Pages du jour et de la session dans un seul morceau chargé à la demande
+  (`program.routes.ts`).
+
+**Pré-rendu** : `getPrerenderParams` lit `/v1/public/program` (aucun paramètre avant
+publication). Le serveur annonce ces pages dans `/v1/public/portal/routes` : le contrôle après
+build les exige (nombre et marqueur), et le plan du site les reprend (`alternates`). Le
+portail ne dépend pas du programme : `program` inscrit un fournisseur d'adresses
+(`register_route_provider`) dans `AppConfig.ready()`.
+
+**Espace auteur** :
+
+- section « Présentation » de la soumission : choix des présentateurs parmi les auteurs,
+  « Confirmer ma présentation » (I5), puis mise à jour possible ;
+- **créneau publié** dans `/v1/submissions/{id}` (`schedule`, plan §4), lu dans la dernière
+  publication, jamais dans le brouillon. Un soumissionnaire qui ne présente pas sait ainsi
+  quand passe sa communication ;
+- retrait étendu à la version finale reçue, confirmée et programmée (motif obligatoire).
+
+**« Mon passage » (I8)** : `/compte/mon-passage`, dans la navigation du compte. Passages
+regroupés par édition et par jour, heures de l'édition, rôle, salle et accès,
+co-intervenants, présidence, consignes ; lien « Ajouter à mon agenda (.ics) ».
+
+**Vérifications** :
+
+- **build pré-rendu** contre une API au programme publié (base de démonstration : 7
+  sessions, 2 jours) : 35 pages pré-rendues, contrôle complet (34 routes), plan du site.
+  Les pages ne contiennent aucune adresse ;
+- **dans Chromium**, build servi avec `/api` relayé comme sous Apache :
+  - au chargement, aucun appel d'API pour le programme (données embarquées) ;
+  - le contenu est lisible sans JavaScript ;
+  - filtres, recherche, grille par salle, passage en anglais ;
+  - aucun débordement à 375 px ;
+  - côté auteur : « Mon passage », fichier `.ics` téléchargé (UTC), créneau publié dans la
+    soumission ;
+- front : 345 tests (shared 76, portail 131, gestion 138) et 11 tests de scripts ; lint,
+  format, build ;
+- backend : 2 467 tests sous SQLite ; 1 860 sous MariaDB (programme, portail, soumissions,
+  transverses), dont les nouveaux tests des routes du programme et du créneau publié ;
+  schéma régénéré sur MariaDB.
+
+**Points à signaler** :
+
+- **Q14 toujours ouverte** : le programme public affiche les noms et institutions des
+  auteurs (I7). À confirmer avant la mise en ligne.
+- Bundle initial du portail : 367,8 ko, inchangé par L5.6 (+0,1 ko, déclaration des
+  routes). Il est fait à 96 % du framework (`@angular/core` 213 ko, routeur 97 ko) ; notre
+  code y pèse une trentaine de ko. Le seuil d'avertissement (365 ko) date d'une version
+  antérieure d'Angular : à relever (370 ko) ou à garder comme simple avertissement. **À
+  trancher par le commanditaire**, le seuil d'erreur (380 ko) restant inchangé.
+- La page « Intervenants » reste « à venir » (fiche M10, P2).
+
+## 18. Bilan de L5.7 (6 octobre 2026)
+
+**Rappel de la confirmation de présentation** (proposition du §9, retenue à la validation et
+restée à faire) : commande `remind_presentations`, horaire, idempotente et verrouillée.
+
+- Tant que l'auteur n'a pas confirmé, le soumissionnaire reçoit un rappel trois jours, puis
+  dix jours après la réception de sa version finale (date lue dans l'historique des
+  statuts), une fois chacun.
+- Un passage manqué n'est pas rattrapé : seul le rappel le plus récent part.
+- Idempotence par la clé de l'e-mail, sans nouvelle table. Rien pour une communication
+  confirmée ni pour une édition archivée.
+- Gabarit FR et EN, objet sans autre variable que le nom du site ; cron et `deploy/README.md`
+  mis à jour (liste fermée de `cron.sh` et son test).
+
+**Bout en bout** : le parcours en série de L4 se prolonge de trois étapes, sur la même base.
+
+1. L'auteure confirme sa présentation.
+2. Dans la gestion :
+   - le CO « programme » (2FA) crée une salle et une session trop courte, puis place la
+     communication au clavier ;
+   - le dépassement de 5 minutes est signalé (RG-13), puis corrigé par la durée du créneau ;
+   - le Chair (2FA) publie : statut « programmée », e-mail de passage, historique.
+3. L'auteure voit « Mon passage », télécharge le fichier iCal (UTC), retrouve le créneau dans
+   sa soumission et la session au programme public, sans son adresse.
+
+Le seed crée deux comptes de plus (CO « programme », Chair). Les 8 tests passent.
+
+**Documentation** :
+
+- bilan du lot `docs/L5-programme.md` ;
+- étude §21 (Markdown et HTML), version 1.5 ;
+- `CLAUDE.md` : structure, cron, état d'avancement, « Décisions du lot L5 ».
+
+**Vérifications finales** :
+
+- backend : 2 471 tests sous SQLite (8 ignorés) ; **2 479 sous MariaDB, suite complète** ;
+  ruff ; traductions ; shellcheck ;
+- front : 345 tests et 11 tests de scripts ; lint, format, build ;
+- E2E : 8 tests.
+
+**À faire hors du code** : passage en CI de L5.3 à L5.7 (nouvelle PR, sur demande) ; démo F
+sur o2switch ; Q14 ; transition `ACCEPTED_MINOR → WITHDRAWN` ; seuil d'avertissement du bundle
+du portail.

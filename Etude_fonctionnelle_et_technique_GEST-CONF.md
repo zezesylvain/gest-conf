@@ -3,7 +3,7 @@
 
 | | |
 |---|---|
-| **Version** | 1.4 – document de cadrage, mis à jour après les lots L1 (§17), L2 (§18), L3 (§19) et L4 (§20) |
+| **Version** | 1.5 – document de cadrage, mis à jour après les lots L1 (§17), L2 (§18), L3 (§19), L4 (§20) et L5 (§21) |
 | **Date** | 6 octobre 2026 |
 | **Auteur** | Étude réalisée pour ZDS |
 | **Statut** | Pour validation |
@@ -1575,6 +1575,67 @@ Les décisions H1 à H19 du plan [`docs/L4-evaluation-plan.md`](docs/L4-evaluati
 - Charge de L4 estimée à 24 – 30,5 j-h (étude : 18 – 24).
 - **Avant la campagne d'évaluation réelle** : démo E sur o2switch avec le cron `remind_reviewers`, grille et pondérations définitives (Q4), niveau de double aveugle (Q3), fournisseur d'e-mails de production (D10). Budget du portail inchangé (367,7 kB pour un avertissement à 365 kB).
 - **Reporté (P2)** : suggestions d'affectation et mots-clés d'expertise, validation des décisions par le Chair, export PDF des évaluations, détection de l'identité dans le texte du PDF.
+
+## 21. Mises à jour issues du lot L5 (version 1.5)
+
+Les décisions I1 à I18 du plan [`docs/L5-programme-plan.md`](docs/L5-programme-plan.md) ont été validées le 6 octobre 2026 et mises en œuvre dans le lot L5. Cette section les reporte dans l'étude ; **en cas de divergence avec les sections précédentes (§17 à §20 compris), elle prévaut**. Le détail (justifications, vérifications, défauts trouvés) est dans le plan, §2 et §11 à §18 ; le bilan du lot dans [`docs/L5-programme.md`](docs/L5-programme.md).
+
+### 21.1 Programme (M7)
+
+- **Structure** (I2, I3) : édition → jours (dates de l'édition) → **sessions** → **créneaux**. Session : type en **catalogue fermé** (ouverture, plénière, parallèle, posters, atelier, tutoriel, table ronde, assemblée, pause, repas, social, clôture), titres et descriptions FR et EN, thématique et salle facultatives, horaires, consignes techniques. Créneau : position et durée ; début et fin **calculés** par le serveur (à la suite depuis le début de la session, séparés par le tampon) ; une communication **ou** un élément libre (titre FR et EN, intervenant invité facultatif). Une communication n'occupe qu'un créneau.
+- **Salles** (I9) : capacité, équipements (liste fermée et note), accessibilité et indications d'accès. Une salle utilisée ne se supprime pas : elle se désactive.
+- **Planificateur dans la gestion** (I15) : grille du jour par salle, liste « à programmer » (communications confirmées non placées) filtrable, glisser-déposer **et équivalent au clavier** (« Placer dans… », monter, descendre, durée, retrait), résultats annoncés aux lecteurs d'écran, vue en liste sous 768 px.
+- **RG-12** (I4) : conflits de salle (deux sessions qui se chevauchent dans la même salle) et de personne (présentateur, intervenant invité, rôle de séance à deux endroits au même moment). Une personne s'identifie par son compte, ou par l'adresse d'un auteur sans compte ; le conflit ne cite que le nom. Deux présences dans la même session ne sont pas un conflit.
+- **RG-13** (I5) : la somme des durées et des tampons ne dépasse pas la durée de la session. Le **tampon** est un paramètre de l'édition (0 à 30 minutes, défaut 0) ; le changer recalcule tous les créneaux. Le brouillon peut contenir des conflits, signalés à chaque écriture ; **la publication est refusée tant qu'il en reste** (I6).
+- **Heures** (I12) : saisie à l'heure de l'édition, stockage en UTC ; heure inexistante ou ambiguë refusée sur le champ concerné ; session commencée pendant les dates de l'édition et de 24 heures au plus ; durées en temps réel.
+- **Concurrence** (I14) : toutes les écritures verrouillent l'état du programme de l'édition (une ligne par édition, hors de la table des éditions) et portent la révision lue en `If-Match` (412 si elle a changé ; l'interface recharge).
+
+### 21.2 Workflow et règles de gestion
+
+- **Confirmation de présentation** (I5, **écart** avec §5.1 : par le soumissionnaire, et non par le système en L6) : `CAMERA_READY_RECEIVED → CONFIRMED`, avec les présentateurs désignés parmi les auteurs. Un changement ultérieur de présentateurs d'une communication placée change la révision du programme (RG-12).
+- **RG-11** devient un paramètre de l'édition, désactivé par défaut et sans effet avant les inscriptions (L6).
+- **Retraits ajoutés** (I5) : depuis `CAMERA_READY_RECEIVED`, `CONFIRMED` et `SCHEDULED`, par le soumissionnaire, motif obligatoire ; le créneau est libéré et l'équipe du programme prévenue (sans le motif).
+- **Publication** (I6) : `CONFIRMED → SCHEDULED` pour les communications placées ; **`SCHEDULED → CONFIRMED` (ajoutée)** pour celles retirées du programme publié. Le workflow compte 23 transitions et revérifie `program.publish`.
+- **Rappel** : sans confirmation, le soumissionnaire reçoit un rappel trois jours, puis dix jours après la réception de sa version finale.
+- **Point ouvert** : `ACCEPTED_MINOR → WITHDRAWN` n'existe pas ; un auteur accepté sous réserve ne se retire qu'après sa version finale.
+
+### 21.3 Publication, programme public et « Mon passage »
+
+- **Publication** (I6, I13 ; RG-17) par le Chair seul, réauthentification récente : **instantané numéroté**, en ajout seul, construit par liste blanche ; journal `program.published` ; historique (version, date, auteur, différences). Refusée sans modification depuis la dernière version.
+- **Notifications ciblées** (I16) : un e-mail à chaque présentateur, intervenant invité ou président de séance dont le passage est nouveau, modifié ou supprimé, une fois par version ; un présentateur sans compte est écrit à son adresse d'auteur. Les inscrits : après L6.
+- **Programme public** (I7) : **pré-rendu au build**, en FR et EN, à partir du dernier instantané publié ; accueil (jours et sessions, filtres par jour, salle, thématique et type, recherche), une page par jour (liste détaillée ou grille par salle), une page par session. Heures dans le fuseau de l'édition, indiqué. **Visible après la remise en ligne du portail** (`deploy.sh --portal-only`) : la publication compte parmi les modifications à mettre en ligne. Les pages des jours et des sessions sont annoncées au contrôle après build et au plan du site. Contenu : titres, horaires, salles, noms et institutions des auteurs (Q14), présidents de séance ; **jamais d'adresse**.
+- **Intervenants invités** (I11) : biographie et photo publiées seulement avec les consentements de L2.
+- **« Mon passage »** (I8) : `/compte/mon-passage`, d'après l'instantané publié ; reconnu par le compte ou par une adresse vérifiée (un co-auteur qui crée son compte plus tard retrouve son passage). Fichier **iCal** (RFC 5545, UTC), générateur écrit à la main et testé.
+- **Soumission** : le créneau publié figure dans la réponse de l'auteur (`schedule`), même s'il ne présente pas.
+
+### 21.4 Droits et gestion
+
+- **Capacités** (I1) : `program.read` (`ADMIN`, `CHAIR`, `SC_CHAIR`, `OC_MEMBER` de toutes fonctions), `program.write` (`ADMIN`, `OC_MEMBER` de fonction « programme » ; **réponse partielle à Q12** : les autres fonctions du CO lisent), `program.publish` (`CHAIR`). L'administrateur ne publie pas.
+- **Rôles de séance** (I10) : comptes de l'édition ; `SESSION_CHAIR` et `SPEAKER` sont invitables par `ADMIN` et `CHAIR` (parcours d'invitation de L1).
+- **Écrans de la gestion** : rubrique « Programme » (planificateur, sessions, salles, publication), « Paramétrage › Programme », carte « Programme » du tableau de bord ; chaque écran est inscrit dans le rail et a sa fiche d'aide.
+
+### 21.5 Modèle de données et API
+
+- Application `program` : `room`, `session`, `slot`, `session_role`, `program_state` (révision du brouillon, révision et version publiées), `program_publication` (ajout seul), `presentation_confirmation`. Édition : `session_buffer_minutes`, `presenter_registration_required`.
+- **Données personnelles** : rôles de séance, créneaux d'intervenant et confirmations à l'export ; anonymisation refusée tant que la personne figure au programme d'une édition non archivée ; ensuite, son nom est retiré des instantanés publiés.
+- **API de gestion** `…/manage/editions/{id}/program/…` : brouillon complet (`program`), `rooms`, `sessions`, `slots`, `session-roles`, `people`, `settings`, `publish`, `publications` ; chaque écriture renvoie le brouillon complet avec ses conflits.
+- **API publique** : `/v1/public/program`, `…/days/{date}`, `…/sessions/{id}` (cache public de 5 minutes, 404 avant publication). **Compte** : `/v1/me/agenda`, `/v1/me/agenda.ics`. **Auteur** : `…/submissions/{id}/confirm-presentation`, champs `presentation` et `schedule`.
+- Codes d'erreur ajoutés : `program_conflicts`, `program_unchanged`.
+
+### 21.6 Exploitation
+
+- Cron : `remind_presentations` toutes les heures, en plus des commandes des lots précédents ; idempotente et verrouillée.
+- Après chaque publication du programme : remise en ligne du portail.
+- `check_integrity` contrôle aussi les créneaux (`program.slots`) et la cohérence entre statuts et programme publié (`program.publication`).
+- À vérifier sur o2switch : compression HTTP des pages statiques.
+
+### 21.7 Tests, planning et points ouverts
+
+- 2 471 tests backend (2 479 sous MariaDB) : programme, publication, programme public par traceurs, iCal, rappels, concurrence sur MariaDB ; matrice des droits (1 524 cas). 345 tests front. **Parcours de bout en bout** (Playwright) en CI, prolongé : confirmation de présentation, salle et session, placement au clavier, dépassement signalé puis corrigé, publication par le Chair, « Mon passage », fichier iCal et programme public.
+- Charge de L5 estimée à 21,5 – 27 j-h (étude : 16 – 22).
+- **Avant la mise en ligne** : démo F sur o2switch avec le cron `remind_presentations`, compression HTTP à vérifier, Q14 (noms des auteurs au programme public).
+- **À trancher** : transition `ACCEPTED_MINOR → WITHDRAWN` ; seuil d'avertissement du bundle initial du portail (367,8 kB pour 365 kB ; le framework en fait 96 %).
+- **Reporté** : indisponibilités, « Mon programme » du participant et notification des inscrits (après L6), PDF du programme, fiche intervenant complète (M10), minuterie du président de séance (P2) ; proposition automatique de planning et sessions hybrides (P3).
 
 ---
 

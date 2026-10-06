@@ -16,7 +16,12 @@ import { freshTotpCode } from '../totp';
  *    relecteurs, recevabilité, évaluations en double aveugle (RG-04), passage automatique en
  *    « évaluée » (RG-07), décision provisoire, publication (RG-09) ;
  * 3. auteur : décision et commentaires sous pseudonymes, sans commentaire confidentiel
- *    (RG-10), dépôt de la version finale avec la lettre de réponse (H18).
+ *    (RG-10), dépôt de la version finale avec la lettre de réponse (H18) ;
+ * 4. auteur : confirmation de présentation (plan L5, I5) ;
+ * 5. programme, dans la gestion (plan L5 §7 ; démo F) : salle et session (CO « programme »),
+ *    placement au clavier, dépassement signalé puis corrigé (RG-13), publication par le Chair
+ *    (I6) et e-mail de passage (I16) ;
+ * 6. auteure : « Mon passage », fichier iCal (I8), programme public (I7).
  */
 test.describe.configure({ mode: 'serial' });
 
@@ -34,6 +39,8 @@ let seed: {
   chair: string;
   reviewer1: string;
   reviewer2: string;
+  program: string;
+  conference_chair: string;
 };
 let reference = '';
 
@@ -315,4 +322,111 @@ test('auteur : décision sous pseudonymes (RG-10), puis version finale (H18)', a
   );
   expect(download.status()).toBe(200);
   expect(download.headers()['content-type']).toBe('application/pdf');
+});
+
+/** Connexion de l'auteure (sans 2FA : aucun rôle de gestion). */
+async function authorLogin(page: Page): Promise<void> {
+  await page.goto('/compte/connexion');
+  await page.getByLabel('Adresse e-mail').fill(EMAIL);
+  await page.getByLabel('Mot de passe').fill(PASSWORD);
+  await page.getByRole('button', { name: 'Se connecter' }).click();
+  await expect(page).toHaveURL(/\/compte$/);
+}
+
+test('auteur : confirmation de présentation (I5)', async ({ page }) => {
+  await authorLogin(page);
+  await page.goto('/compte/soumissions');
+  await page.locator('tbody tr', { hasText: reference }).getByRole('link').click();
+  const section = page.locator('section.presentation');
+  await expect(section).toContainText('Désignez qui présentera la communication');
+  await section.getByRole('checkbox', { name: /Awa Koné/ }).check();
+  await section.getByRole('button', { name: 'Confirmer ma présentation' }).click();
+  await expect(page.getByText('Présentation confirmée.')).toBeVisible();
+  await expect(section).toContainText('présentateurs : Awa Koné');
+  expect(submissionStatus()).toBe('confirmed');
+});
+
+test('programme : salle, session, placement au clavier, dépassement corrigé, publication', async ({
+  browser,
+}) => {
+  test.setTimeout(180_000);
+  const planner = await committeeLogin(browser, seed.program);
+  const chair = await committeeLogin(browser, seed.conference_chair);
+  const base = `${GESTION}/editions/${seed.edition}`;
+
+  // Salle (I9).
+  await planner.goto(`${base}/programme/salles`);
+  await planner.getByRole('button', { name: 'Ajouter une salle' }).click();
+  await planner.getByLabel('Nom').fill('Amphi A');
+  await planner.getByLabel('Capacité').fill('120');
+  await planner.getByRole('checkbox', { name: 'Vidéoprojecteur' }).check();
+  await planner.getByRole('button', { name: 'Enregistrer' }).click();
+  await expect(planner.locator('tbody')).toContainText('Amphi A');
+
+  // Session trop courte pour une communication de 20 minutes (RG-13), à l'heure de l'édition.
+  await planner.goto(`${base}/programme/sessions`);
+  await planner.getByRole('button', { name: 'Ajouter une session' }).click();
+  await planner.getByLabel('Salle').click();
+  await planner.getByRole('option', { name: 'Amphi A' }).click();
+  await planner.getByLabel('Titre (français)').first().fill('Santé et IA');
+  await planner.getByLabel('Début').fill('2027-03-01T09:00');
+  await planner.getByLabel('Fin').fill('2027-03-01T09:15');
+  await planner.getByRole('button', { name: 'Enregistrer' }).first().click();
+  await expect(planner.getByText('Session créée')).toBeVisible();
+
+  // Planificateur, au clavier : « Placer dans… », choix de la session, « Placer ».
+  await planner.goto(`${base}/programme`);
+  const paper = planner.locator('#pool li', { hasText: reference });
+  await paper.getByRole('button', { name: /Placer dans/ }).press('Enter');
+  await planner
+    .getByLabel('Session', { exact: true })
+    .selectOption({ label: '09:00 · Santé et IA · Amphi A' });
+  await paper.getByRole('button', { name: 'Placer', exact: true }).click();
+  await expect(planner.getByRole('status')).toContainText('placée dans « Santé et IA »');
+  await expect(planner.locator('#conflicts')).toContainText('déborde de 5 min (RG-13)');
+
+  // Publication refusée tant que le conflit demeure (I6) : on corrige la durée.
+  const slot = planner.locator('li.slot', { hasText: reference });
+  await slot.getByRole('button', { name: /Actions/ }).click();
+  await slot.getByLabel('Durée (min)').fill('15');
+  await slot.getByRole('button', { name: 'Appliquer la durée' }).click();
+  await expect(planner.locator('#conflicts')).toContainText('Aucun conflit.');
+
+  // Publication par le Chair : la communication est programmée, l'auteure prévenue (I16).
+  await chair.goto(`${base}/programme/publication`);
+  await chair.getByRole('button', { name: 'Publier le programme' }).click();
+  await chair.getByRole('dialog').getByRole('button', { name: 'Publier' }).click();
+  await expect(chair.getByText('Programme publié (version 1).')).toBeVisible();
+  await expect(chair.locator('tbody')).toContainText('Yao Kouassi');
+  expect(submissionStatus()).toBe('scheduled');
+  expect(outbox(EMAIL)).toContain('program/email/passage');
+});
+
+test('auteure : « Mon passage », fichier iCal (I8) et programme public (I7)', async ({ page }) => {
+  await authorLogin(page);
+  await page.getByRole('link', { name: 'Mon passage' }).first().click();
+  const passage = page.locator('.passages li').first();
+  await expect(passage).toContainText('09:00 – 09:15');
+  await expect(passage).toContainText('Présentation');
+  await expect(passage).toContainText('Santé et IA');
+  await expect(passage).toContainText('Amphi A');
+  const ics = await page.request.get('/api/v1/me/agenda.ics');
+  expect(ics.status()).toBe(200);
+  expect(ics.headers()['content-type']).toContain('text/calendar');
+  const calendar = await ics.text();
+  expect(calendar).toContain('DTSTART:20270301T090000Z');
+  expect(calendar).toContain('LOCATION:Amphi A');
+
+  // Créneau publié dans la soumission.
+  await page.goto('/compte/soumissions');
+  await page.locator('tbody tr', { hasText: reference }).getByRole('link').click();
+  await expect(page.locator('section.presentation')).toContainText('Programmée :');
+
+  // Programme public (rendu dans le navigateur en E2E ; pré-rendu au build en production).
+  await page.goto('/fr/programme/');
+  await expect(page.getByRole('link', { name: 'Santé et IA' })).toBeVisible();
+  await page.getByRole('link', { name: 'Santé et IA' }).click();
+  await expect(page.locator('h1')).toHaveText('Santé et IA');
+  await expect(page.locator('main')).toContainText('Awa Koné');
+  await expect(page.locator('main')).not.toContainText(EMAIL);
 });

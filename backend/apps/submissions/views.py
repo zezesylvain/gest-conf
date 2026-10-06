@@ -21,6 +21,7 @@ from apps.submissions.models import Submission, SubmissionFileKind
 from apps.submissions.models import SubmissionStatus as S
 from apps.submissions.serializers import (
     AuthorsWriteSerializer,
+    ConfirmPresentationSerializer,
     DuplicateSerializer,
     FinalVersionUploadSerializer,
     SubmissionCheckSerializer,
@@ -77,6 +78,7 @@ class SubmissionViewSet(GenericViewSet):
             "submit": "submission_submit",
             "withdraw": "submission_submit",
             "final_version": "submission_upload",
+            "confirm_presentation": "submission_submit",
         }
         self.throttle_scope = scopes.get(self.action, "")
         return super().get_throttles() if self.throttle_scope else []
@@ -266,6 +268,26 @@ class SubmissionViewSet(GenericViewSet):
             data=upload.read(),
             name=upload.name,
             response_letter=serializer.validated_data["response_letter"],
+            actor=Actor.from_request(request),
+        )
+        return self._respond(submission)
+
+    @extend_schema(
+        operation_id="submissions_confirm_presentation",
+        request=ConfirmPresentationSerializer,
+        responses={200: SubmissionSerializer},
+    )
+    def confirm_presentation(self, request: Request, submission_id: int) -> Response:
+        """I5 (plan L5) : présentateurs désignés parmi les auteurs ; la première fois, la
+        communication passe à « confirmée » et devient programmable."""
+        from apps.program.services.presentation import confirm_presentation
+
+        submission = self._submission(submission_id)
+        serializer = ConfirmPresentationSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        confirm_presentation(
+            submission,
+            serializer.validated_data["presenters"],
             actor=Actor.from_request(request),
         )
         return self._respond(submission)
