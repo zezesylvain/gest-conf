@@ -208,3 +208,83 @@ gabarits, PAdES et ses tests) : **23,5 à 30 j-h** au total.
 6. **Badges** : format A6 en planche A4 (proposition) ou autre (badge plastifié, cordon,
    imprimante thermique) ? Couleurs par catégorie ?
 7. **Questionnaire de satisfaction** : à reprendre en L8 (proposition) ?
+
+## 11. Bilan de L7.0 (6 octobre 2026)
+
+Essais menés dans des environnements jetables (dossier de travail de la session), sans
+modifier le dépôt.
+
+**Lecture du QR (K6)** : **`jsQR` 1.4.0 retenu** (Apache-2.0, JavaScript pur, environ 58 ko
+compressés), chargé par le seul écran d'accueil.
+
+- **`@zxing/library`** écartée : environ 11,8 Mo non empaquetés, pour un seul format utile.
+- **`BarcodeDetector`** : absente de Chromium sous Linux (essai). Elle existe sur Chrome
+  Android ; on l'emploiera là où elle existe, `jsQR` sinon.
+- **Essai dans Chromium**, sur un QR de jeton d'inscription (192 bits) dégradé : rotation de
+  14°, flou, bruit, contraste réduit, réduction à 113 px, perspective. Quatre images sur
+  quatre décodées, en 7 à 80 ms.
+- **Chaîne complète par une caméra simulée** (`--use-file-for-fake-video-capture`, vidéo
+  Y4M fabriquée à partir du QR dégradé) : `getUserMedia`, vidéo, canevas, `jsQR`. Jeton lu
+  dès la première trame. Ce montage servira à l'E2E de L7.8.
+- **Non vérifiable ici** : caméra d'une PWA installée sur iOS Safari. À la recette, sur un
+  appareil réel ; la saisie manuelle de la référence reste le recours.
+
+**PWA (K5)** : **`@angular/service-worker` 22.2.1** (version d'Angular du dépôt).
+
+- **Manifeste `ngsw.json`** généré par l'outil du paquet sur le build de la gestion : les
+  77 fichiers sont préfixés par `/gestion/`.
+- **Essai dans Chromium**, la gestion servie sous `/gestion/` avec repli SPA :
+  - service worker actif, portée `/gestion/` ;
+  - 80 entrées en cache ;
+  - réseau coupé, `/gestion/editions/1/accueil` répond 200 avec l'application.
+- **Précision de K5 : enregistrement à la demande.** Le service worker est enregistré
+  **depuis l'écran d'accueil seulement**, pas au démarrage de la gestion. Les autres
+  utilisateurs de la gestion n'en reçoivent donc jamais. Une fois installé, il met en
+  cache toute la coquille de la gestion (plus simple que de la découper) ; seul l'accueil
+  fonctionne sans réseau, les autres écrans affichant leur erreur habituelle.
+- **Liste hors ligne** : 163 ko pour 1 000 participants (empreinte, nom, catégorie, statut),
+  42 ko compressés.
+- **Chiffrement au repos de la liste** dans IndexedDB : **non retenu**. La protection serait
+  marginale (la clé vit dans le même navigateur) pour une liste déjà minimale ; restent la
+  minimisation, l'effacement à la déconnexion et la durée de vie de 48 h.
+
+**En-têtes (K6)** : vérifiés avec un **Apache 2.4 réel** (installé pour l'essai) et les
+`.htaccess` du dépôt.
+
+- Un `Header always set Permissions-Policy "camera=(self), …"` dans le `.htaccess` de la
+  gestion **remplace** celui de la racine : `/fr/` garde `camera=()`, alors que `/gestion/`
+  et ses sous-adresses reçoivent `camera=(self)`.
+- `ngsw-worker.js` et `ngsw.json` ne prennent pas le cache long réservé aux fichiers à
+  empreinte.
+- Ce changement entre dans `deploy/apache/gestion.htaccess` en L7.6, avec un contrôle dans
+  `deploy/smoke-test.sh`.
+
+**Badges (K3)** : `fpdf2` 2.8.9 et `segno` 1.6.6, déjà installés en L6.
+
+- **Planche A4** de quatre A6 : bandeau de l'édition, nom (alphabets étendus : Ŋ, ɔ́, Ḱ, Œ,
+  Ł), institution et pays, QR, bandeau de catégorie en couleur. Rendu contrôlé.
+- **QR en SVG** (vectoriel, plus net à l'impression) avec `viewBox`, sinon en PNG.
+- **Durée** : 100 badges en 0,8 s, soit environ 8 s pour 1 000. **Précision de K3** : le
+  lot du CO est découpé en fichiers de 200 badges au plus, pour tenir dans le temps d'une
+  requête Passenger.
+
+**Signature PAdES (K19)** : **`pyHanko` 0.37.0 retenu** (MIT).
+
+- **Essai** : certificat RSA 3072 auto-signé, en PKCS#12 ; signature d'une attestation
+  `fpdf2`, au format `ETSI.CAdES.detached` (PAdES-B-B). La validation donne : intègre,
+  valide et de confiance (racine fournie). Un octet modifié dans la plage signée est
+  détecté.
+- **Coût** : 0,3 s d'import et 0,3 s par signature ; le module ne sera importé qu'au moment
+  de signer.
+- **Dépendances** : une quinzaine de paquets, dont sept roues binaires `manylinux`
+  (`aiohttp`, `lxml`, `yarl`, `multidict`, `frozenlist`, `propcache`, `cffi`). Aucune n'a de
+  dépendance système, et toutes existent pour CPython 3.12 et 3.13.
+  - Le projet installe déjà des roues binaires de ce type (`cryptography`, `pillow`) : pas
+    de risque d'une nature nouvelle pour o2switch (règle n° 10).
+  - L'ajout aux verrous se fera en L7.4, quand le code s'en servira, avec empreintes.
+- **Garde de la clé** : le PKCS#12 déposé est déchiffré à la réception, puis **rechiffré par
+  des clés dédiées** (`GESTCONF_SIGNING_ENCRYPTION_KEYS`, `MultiFernet`, comme les secrets
+  2FA de L1.6). Son mot de passe n'est pas conservé ; la clé n'est jamais servie.
+
+**Écart avec le plan** : aucun ; les précisions ci-dessus (enregistrement du service worker
+à la demande, lots de 200 badges, pas de chiffrement de la liste) affinent K3 et K5.
