@@ -9,6 +9,7 @@ la spécification, pas contre lui-même. 2FA (``mfa_*``) : cases ajoutées en L1
 from __future__ import annotations
 
 import datetime as dt
+import functools
 from collections.abc import Callable
 from dataclasses import dataclass
 
@@ -1178,6 +1179,133 @@ CASES = [
         "/v1/manage/editions/{e}/day/sessions/{day_session}/slots/{day_presented_slot}/unpresented",
         {"reason": "Erreur de saisie"},
     ),
+    # --- Attestations (plan L7, K9 à K11, K18, K19) : certificates.manage ; objets créés au
+    # premier cas qui les vise ({certificate}, ou un paramètre ignoré par la vue).
+    Case(
+        "manage-certificate-settings",
+        "GET",
+        CEM,
+        200,
+        "/v1/manage/editions/{e}/certificates/settings",
+    ),
+    Case(
+        "manage-certificate-settings",
+        "PATCH",
+        CEM,
+        200,
+        "/v1/manage/editions/{e}/certificates/settings",
+        {"layout": "signature_left"},
+        recent_auth=True,
+    ),
+    Case(
+        "manage-certificate-header",
+        "GET",
+        CEM,
+        200,
+        "/v1/manage/editions/{e}/certificates/settings/header?c={certificate}",
+    ),
+    Case(
+        "manage-certificate-header",
+        "PUT",
+        CEM,
+        200,
+        "/v1/manage/editions/{e}/certificates/settings/header",
+        lambda ids: {"file": SimpleUploadedFile("logo.png", _signature_png(), "image/png")},
+        recent_auth=True,
+        format="multipart",
+    ),
+    Case(
+        "manage-certificate-header",
+        "DELETE",
+        CEM,
+        200,
+        "/v1/manage/editions/{e}/certificates/settings/header",
+        recent_auth=True,
+    ),
+    Case(
+        "manage-certificate-signing-key",
+        "PUT",
+        CEM,
+        200,
+        "/v1/manage/editions/{e}/certificates/settings/signing-key",
+        lambda ids: {
+            "file": SimpleUploadedFile("cle.p12", _signing_key()),
+            "password": "secret-de-test",
+        },
+        recent_auth=True,
+        format="multipart",
+    ),
+    Case(
+        "manage-certificate-signing-key",
+        "DELETE",
+        CEM,
+        200,
+        "/v1/manage/editions/{e}/certificates/settings/signing-key",
+        recent_auth=True,
+    ),
+    Case(
+        "manage-certificate-templates",
+        "GET",
+        CEM,
+        200,
+        "/v1/manage/editions/{e}/certificates/templates",
+    ),
+    Case(
+        "manage-certificate-template",
+        "PATCH",
+        CEM,
+        200,
+        "/v1/manage/editions/{e}/certificates/templates/participation",
+        {"footer_fr": "Université de la matrice"},
+        recent_auth=True,
+    ),
+    Case(
+        "manage-certificate-preview",
+        "GET",
+        CEM,
+        200,
+        "/v1/manage/editions/{e}/certificates/templates/participation/preview",
+    ),
+    Case(
+        "manage-certificate-signatories",
+        "GET",
+        CEM,
+        200,
+        "/v1/manage/editions/{e}/certificates/signatories",
+    ),
+    Case(
+        "manage-certificates-overview",
+        "GET",
+        CEM,
+        200,
+        "/v1/manage/editions/{e}/certificates/overview",
+    ),
+    Case(
+        "manage-certificates-issue",
+        "POST",
+        CEM,
+        202,
+        "/v1/manage/editions/{e}/certificates/issue?c={certificate}",
+        {"nature": "participation"},
+        recent_auth=True,
+    ),
+    Case("manage-certificates", "GET", CEM, 200, "/v1/manage/editions/{e}/certificates"),
+    Case(
+        "manage-certificate-pdf",
+        "GET",
+        CEM,
+        200,
+        "/v1/manage/editions/{e}/certificates/{certificate}/pdf",
+    ),
+    Case(
+        "manage-certificate-revoke",
+        "POST",
+        CEM,
+        200,
+        "/v1/manage/editions/{e}/certificates/{certificate}/revoke",
+        {"reason": "Erreur"},
+        recent_auth=True,
+    ),
     Case("manage-portal-poster", "GET", R, 200, "/v1/manage/editions/{e}/portal/poster"),
     Case(
         "manage-portal-poster",
@@ -1326,9 +1454,43 @@ def world():
         # Inscriptions, paiements et pièces (plan L6) : créés au premier cas qui les vise,
         # leurs PDF coûtant cher à produire pour chacun des cas. Programme publié du jour J
         # (plan L7) : à part, pour que les cas de publication du programme restent valables.
-        loaders=(lambda: _registration_objects(edition), lambda: _day_objects(edition)),
+        loaders=(
+            lambda: _registration_objects(edition),
+            lambda: _day_objects(edition),
+            lambda: _certificate_objects(edition, users),
+        ),
     )
     return edition, users, ids
+
+
+@functools.cache
+def _signing_key() -> bytes:
+    """PKCS#12 jetable (créé une fois par session de test : la clé RSA coûte)."""
+    from apps.events.tests.certificate_helpers import pkcs12_file
+
+    data, _certificate = pkcs12_file()
+    return data
+
+
+def _certificate_objects(edition, users) -> dict:
+    """Plan L7 (K9 à K11, K19) : en-tête déposé, signataire désigné, une personne pointée et
+    son attestation émise."""
+    from apps.core.actor import Actor
+    from apps.events.models import Certificate
+    from apps.events.services import certificates
+    from apps.events.services.signatures import signature_of
+    from apps.events.tests.certificate_helpers import present
+
+    command = Actor.command("cli:matrice")
+    certificates.upload_header(edition, data=_signature_png(), actor=command)
+    signature = signature_of(edition, users["SIGNATORY"])
+    certificates.update_template(
+        edition, "participation", {"signatory": signature.pk}, actor=command
+    )
+    present(edition)
+    certificates.issue_batch(edition, "participation")
+    # Deux attestations au moins (la personne pointée par les objets d'inscription aussi).
+    return {"certificate": Certificate.objects.filter(edition=edition).order_by("id")[0].pk}
 
 
 def _day_objects(edition) -> dict:
@@ -1792,7 +1954,8 @@ def test_matrix_stale_reauthentication(world, case):
 def test_matrix_archived_edition_is_read_only(world):
     """§6.3 : une édition archivée est en lecture seule (409 ``edition_archived``)."""
     edition, users, ids = world
-    assert ids["reg_pending"]  # objets d'inscription créés avant l'archivage
+    # Objets paresseux (inscriptions, jour J, attestations) créés avant l'archivage.
+    assert ids["reg_pending"] and ids["day_session"] and ids["certificate"]
     edition.status = EditionStatus.ARCHIVED
     edition.save()
     clients = {}

@@ -583,6 +583,503 @@ paths:
               schema:
                 $ref: '#/components/schemas/BillingProfile'
           description: ''
+  /v1/manage/editions/{edition_id}/certificates:
+    get:
+      operationId: manage_certificates_list
+      description: '``…/certificates`` : suivi par nature, émission (file), liste,
+        PDF, révocation.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: nature
+        schema:
+          type: string
+        description: Nature.
+      - name: ordering
+        required: false
+        in: query
+        description: Quel champ utiliser pour classer les résultats.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: Un numéro de page de l'ensemble des résultats.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Nombre de résultats à retourner par page.
+        schema:
+          type: integer
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Nom ou référence.
+      - in: query
+        name: revoked
+        schema:
+          type: boolean
+        description: Révoquées seulement.
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCertificateList'
+          description: ''
+  /v1/manage/editions/{edition_id}/certificates/{certificate_id}/pdf:
+    get:
+      operationId: manage_certificate_pdf
+      description: '``…/certificates`` : suivi par nature, émission (file), liste,
+        PDF, révocation.'
+      parameters:
+      - in: path
+        name: certificate_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  /v1/manage/editions/{edition_id}/certificates/{certificate_id}/revoke:
+    post:
+      operationId: manage_certificate_revoke
+      description: '``…/certificates`` : suivi par nature, émission (file), liste,
+        PDF, révocation.'
+      parameters:
+      - in: path
+        name: certificate_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReasonRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Certificate'
+          description: ''
+  /v1/manage/editions/{edition_id}/certificates/issue:
+    post:
+      operationId: manage_certificates_issue
+      description: |-
+        Émission (ou émission complémentaire) d'une nature, confiée à la file : les
+        attestations arrivent au passage suivant de ``run_jobs``.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IssueRequestRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IssueResponse'
+          description: ''
+  /v1/manage/editions/{edition_id}/certificates/overview:
+    get:
+      operationId: manage_certificates_overview
+      description: '``…/certificates`` : suivi par nature, émission (file), liste,
+        PDF, révocation.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - name: ordering
+        required: false
+        in: query
+        description: Quel champ utiliser pour classer les résultats.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: Un numéro de page de l'ensemble des résultats.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Nombre de résultats à retourner par page.
+        schema:
+          type: integer
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCertificateOverviewList'
+          description: ''
+  /v1/manage/editions/{edition_id}/certificates/settings:
+    get:
+      operationId: manage_certificate_settings_retrieve
+      description: '``…/certificates/settings`` : mode de signature, attestation d''évaluation,
+        disposition.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CertificateSettings'
+          description: ''
+    patch:
+      operationId: manage_certificate_settings_update
+      description: '``…/certificates/settings`` : mode de signature, attestation d''évaluation,
+        disposition.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCertificateSettingsRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CertificateSettings'
+          description: ''
+  /v1/manage/editions/{edition_id}/certificates/settings/header:
+    get:
+      operationId: manage_certificate_header
+      description: |-
+        ``…/certificates/settings/header`` (en-tête du modèle officiel) et
+        ``…/certificates/settings/signing-key`` (certificat PAdES de l'institution).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+          description: ''
+    put:
+      operationId: manage_certificate_header_upload
+      description: |-
+        ``…/certificates/settings/header`` (en-tête du modèle officiel) et
+        ``…/certificates/settings/signing-key`` (certificat PAdES de l'institution).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ImageUploadRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CertificateSettings'
+          description: ''
+    delete:
+      operationId: manage_certificate_header_delete
+      description: |-
+        ``…/certificates/settings/header`` (en-tête du modèle officiel) et
+        ``…/certificates/settings/signing-key`` (certificat PAdES de l'institution).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CertificateSettings'
+          description: ''
+  /v1/manage/editions/{edition_id}/certificates/settings/signing-key:
+    put:
+      operationId: manage_certificate_signing_key_upload
+      description: |-
+        Certificat PAdES : ouvert avec son mot de passe, puis rechiffré ; le mot de passe
+        n'est pas gardé (K19).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SigningKeyUploadRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CertificateSettings'
+          description: ''
+    delete:
+      operationId: manage_certificate_signing_key_delete
+      description: |-
+        ``…/certificates/settings/header`` (en-tête du modèle officiel) et
+        ``…/certificates/settings/signing-key`` (certificat PAdES de l'institution).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CertificateSettings'
+          description: ''
+  /v1/manage/editions/{edition_id}/certificates/signatories:
+    get:
+      operationId: manage_certificate_signatories
+      description: 'Signatures désignables : complètes, de signataires au rôle actif
+        (K18).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - name: ordering
+        required: false
+        in: query
+        description: Quel champ utiliser pour classer les résultats.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: Un numéro de page de l'ensemble des résultats.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Nombre de résultats à retourner par page.
+        schema:
+          type: integer
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSignatoryList'
+          description: ''
+  /v1/manage/editions/{edition_id}/certificates/templates:
+    get:
+      operationId: manage_certificate_templates
+      description: '``…/certificates/templates`` : gabarits et signataires désignés,
+        par nature.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - name: ordering
+        required: false
+        in: query
+        description: Quel champ utiliser pour classer les résultats.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: Un numéro de page de l'ensemble des résultats.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Nombre de résultats à retourner par page.
+        schema:
+          type: integer
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedDocumentTemplateList'
+          description: ''
+  /v1/manage/editions/{edition_id}/certificates/templates/{nature}:
+    patch:
+      operationId: manage_certificate_template_update
+      description: '``…/certificates/templates`` : gabarits et signataires désignés,
+        par nature.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: nature
+        schema:
+          type: string
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedDocumentTemplateUpdateRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentTemplate'
+          description: ''
+  /v1/manage/editions/{edition_id}/certificates/templates/{nature}/preview:
+    get:
+      operationId: manage_certificate_preview
+      description: 'Aperçu du gabarit sur des données fictives : ni signé, ni stocké.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: nature
+        schema:
+          type: string
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+          description: ''
   /v1/manage/editions/{edition_id}/checkin:
     get:
       operationId: manage_checkin_list
@@ -5357,6 +5854,47 @@ paths:
       responses:
         '204':
           description: No response body
+  /v1/me/certificates:
+    get:
+      operationId: me_certificates
+      description: '``GET /v1/me/certificates`` : attestations de la personne, toutes
+        éditions.'
+      tags:
+      - me
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MyCertificate'
+          description: ''
+  /v1/me/certificates/{certificate_id}/pdf:
+    get:
+      operationId: me_certificate_pdf
+      description: '``GET /v1/me/certificates/{id}/pdf`` : PDF d''une attestation
+        valide de la personne.'
+      parameters:
+      - in: path
+        name: certificate_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - me
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+          description: ''
   /v1/me/consents:
     get:
       operationId: me_consents
@@ -5605,6 +6143,29 @@ paths:
       responses:
         '200':
           description: No response body
+  /v1/public/certificates/{code}:
+    get:
+      operationId: public_certificate_verify
+      description: |-
+        ``GET /v1/public/certificates/{code}`` : vérification publique (K10), limitée en débit ;
+        même réponse 404 pour un code inconnu ou mal formé (pas d'énumération).
+      parameters:
+      - in: path
+        name: code
+        schema:
+          type: string
+        required: true
+      tags:
+      - public
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicVerification'
+          description: ''
   /v1/public/editions/current:
     get:
       operationId: public_current_edition
@@ -7391,6 +7952,132 @@ components:
       - confirmed
       - label_en
       - label_fr
+    Certificate:
+      type: object
+      description: 'Attestation (gestion) : sans nom de stockage ni empreinte.'
+      properties:
+        id:
+          type: integer
+        nature:
+          $ref: '#/components/schemas/DocumentNature'
+        user_id:
+          type: integer
+        name:
+          type: string
+        institution:
+          type: string
+        reference:
+          type: string
+        signing_mode:
+          $ref: '#/components/schemas/SigningMode'
+        signatory_name:
+          type: string
+        issued_at:
+          type: string
+          format: date-time
+        revoked_at:
+          type: string
+          format: date-time
+          nullable: true
+        revoke_reason:
+          type: string
+      required:
+      - id
+      - institution
+      - issued_at
+      - name
+      - nature
+      - reference
+      - revoke_reason
+      - revoked_at
+      - signatory_name
+      - signing_mode
+      - user_id
+    CertificateNature:
+      enum:
+      - participation
+      - presentation
+      - review
+      type: string
+      description: |-
+        * `participation` - attestation de participation
+        * `presentation` - attestation de communication
+        * `review` - attestation d'évaluation
+    CertificateOverview:
+      type: object
+      properties:
+        nature:
+          $ref: '#/components/schemas/DocumentNature'
+        enabled:
+          type: boolean
+        ready:
+          type: boolean
+          description: Conditions de l'émission réunies.
+        problem:
+          type: string
+          description: Code d'erreur sinon.
+        eligible:
+          type: integer
+          description: Personnes remplissant RG-16.
+        issued:
+          type: integer
+        revoked:
+          type: integer
+        unreachable:
+          type: integer
+          description: Présentateurs sans compte.
+        pending:
+          type: boolean
+          description: Émission en cours dans la file.
+      required:
+      - eligible
+      - enabled
+      - issued
+      - nature
+      - pending
+      - problem
+      - ready
+      - revoked
+      - unreachable
+    CertificateSettings:
+      type: object
+      description: 'Paramètres des pièces : jamais le certificat ni l''image eux-mêmes.'
+      properties:
+        signing_mode:
+          $ref: '#/components/schemas/SigningMode'
+        review_enabled:
+          type: boolean
+        layout:
+          $ref: '#/components/schemas/SignatureLayout'
+        has_header:
+          type: boolean
+          readOnly: true
+        header_width:
+          type: integer
+          readOnly: true
+          nullable: true
+        header_height:
+          type: integer
+          readOnly: true
+          nullable: true
+        signing_key:
+          allOf:
+          - $ref: '#/components/schemas/SigningKey'
+          readOnly: true
+          nullable: true
+        signing_available:
+          type: boolean
+          readOnly: true
+          description: Clés de chiffrement du certificat configurées (serveur).
+      required:
+      - has_header
+      - header_height
+      - header_width
+      - layout
+      - review_enabled
+      - signing_available
+      - signing_key
+      - signing_mode
     Checkin:
       type: object
       properties:
@@ -8219,6 +8906,18 @@ components:
         * `invoice` - facture
         * `credit_note` - avoir
         * `proforma` - pro forma
+    DocumentNature:
+      enum:
+      - participation
+      - presentation
+      - review
+      - letter
+      type: string
+      description: |-
+        * `participation` - attestation de participation
+        * `presentation` - attestation de communication
+        * `review` - attestation d'évaluation
+        * `letter` - lettre d'invitation
     DocumentRef:
       type: object
       description: Pièce de facturation de l'inscription (le PDF se télécharge à part).
@@ -8245,6 +8944,46 @@ components:
       - issued_at
       - kind
       - number
+    DocumentTemplate:
+      type: object
+      description: Gabarit effectif d'une nature (textes par défaut là où rien n'est
+        saisi).
+      properties:
+        nature:
+          $ref: '#/components/schemas/DocumentNature'
+        title_fr:
+          type: string
+        title_en:
+          type: string
+        body_fr:
+          type: string
+        body_en:
+          type: string
+        footer_fr:
+          type: string
+        footer_en:
+          type: string
+        customized:
+          $ref: '#/components/schemas/TemplateCustomized'
+        placeholders:
+          type: array
+          items:
+            type: string
+        signatory:
+          allOf:
+          - $ref: '#/components/schemas/Signatory'
+          nullable: true
+      required:
+      - body_en
+      - body_fr
+      - customized
+      - footer_en
+      - footer_fr
+      - nature
+      - placeholders
+      - signatory
+      - title_en
+      - title_fr
     Duplicate:
       type: object
       properties:
@@ -8508,6 +9247,8 @@ components:
       - promo_code_exhausted
       - already_registered
       - payment_unavailable
+      - signing_unavailable
+      - signatory_missing
       type: string
       description: |-
         * `validation_error` - Validation Error
@@ -8559,6 +9300,8 @@ components:
         * `promo_code_exhausted` - Promo Code Exhausted
         * `already_registered` - Already Registered
         * `payment_unavailable` - Payment Unavailable
+        * `signing_unavailable` - Signing Unavailable
+        * `signatory_missing` - Signatory Missing
     Expertise:
       type: object
       description: Expertises du relecteur (H7) et thématiques proposées.
@@ -8957,6 +9700,14 @@ components:
       - from_status
       - reason
       - to_status
+    ImageUploadRequest:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+      required:
+      - file
     InvitableRole:
       enum:
       - ADMIN
@@ -9140,6 +9891,20 @@ components:
       - role
       - send_count
       - status
+    IssueRequestRequest:
+      type: object
+      properties:
+        nature:
+          $ref: '#/components/schemas/CertificateNature'
+      required:
+      - nature
+    IssueResponse:
+      type: object
+      properties:
+        job_id:
+          type: integer
+      required:
+      - job_id
     IssuedCount:
       type: object
       properties:
@@ -9965,6 +10730,40 @@ components:
       required:
       - amount
       - count
+    MyCertificate:
+      type: object
+      description: Attestation de la personne connectée (« Mes documents »).
+      properties:
+        id:
+          type: integer
+        nature:
+          $ref: '#/components/schemas/DocumentNature'
+        edition_code:
+          type: string
+        edition_title_fr:
+          type: string
+        edition_title_en:
+          type: string
+        title:
+          type: string
+          description: Communication (attestation de communication).
+        issued_at:
+          type: string
+          format: date-time
+        revoked:
+          type: boolean
+        verification_url:
+          type: string
+      required:
+      - edition_code
+      - edition_title_en
+      - edition_title_fr
+      - id
+      - issued_at
+      - nature
+      - revoked
+      - title
+      - verification_url
     MyRegistration:
       type: object
       description: |-
@@ -10548,6 +11347,52 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/BillingDocument'
+    PaginatedCertificateList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Certificate'
+    PaginatedCertificateOverviewList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CertificateOverview'
     PaginatedCheckinListItemList:
       type: object
       required:
@@ -10594,6 +11439,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/DaySession'
+    PaginatedDocumentTemplateList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentTemplate'
     PaginatedInvitationWithEmailList:
       type: object
       required:
@@ -10686,6 +11554,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ReviewSubmission'
+    PaginatedSignatoryList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Signatory'
     PaginatedSubmissionManageList:
       type: object
       required:
@@ -10836,6 +11727,16 @@ components:
             maxLength: 7
           - type: string
             maxLength: 0
+    PatchedCertificateSettingsRequest:
+      type: object
+      description: 'Paramètres des pièces : jamais le certificat ni l''image eux-mêmes.'
+      properties:
+        signing_mode:
+          $ref: '#/components/schemas/SigningMode'
+        review_enabled:
+          type: boolean
+        layout:
+          $ref: '#/components/schemas/SignatureLayout'
     PatchedConfidentialityRequest:
       type: object
       description: Paramètres de l'évaluation (gestion, §6.1 ; plan L4 H4, H6, H12).
@@ -10867,6 +11768,31 @@ components:
           default: ''
           description: Motif, obligatoire pour qu'un ADMIN change un réglage gelé
             (RG-19).
+    PatchedDocumentTemplateUpdateRequest:
+      type: object
+      properties:
+        title_fr:
+          type: string
+          maxLength: 200
+        title_en:
+          type: string
+          maxLength: 200
+        body_fr:
+          type: string
+          maxLength: 2000
+        body_en:
+          type: string
+          maxLength: 2000
+        footer_fr:
+          type: string
+          maxLength: 500
+        footer_en:
+          type: string
+          maxLength: 500
+        signatory:
+          type: integer
+          nullable: true
+          description: 'Signature désignée (null : aucune).'
     PatchedEditionRequest:
       type: object
       description: Informations générales de l'édition (gestion, §6.1).
@@ -13320,6 +14246,51 @@ components:
       - description_fr
       - name_en
       - name_fr
+    PublicVerification:
+      type: object
+      description: 'Vérification publique (K10) : ni institution, ni empreinte, ni
+        code d''autres pièces.'
+      properties:
+        kind:
+          $ref: '#/components/schemas/VerificationKind'
+        nature:
+          $ref: '#/components/schemas/DocumentNature'
+        name:
+          type: string
+          nullable: true
+          description: Absent si le compte est anonymisé.
+        edition_title_fr:
+          type: string
+        edition_title_en:
+          type: string
+        edition_start:
+          type: string
+          format: date
+          nullable: true
+        edition_end:
+          type: string
+          format: date
+          nullable: true
+        issued_at:
+          type: string
+          format: date-time
+        status:
+          $ref: '#/components/schemas/VerificationStatus'
+        revoked_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - edition_end
+      - edition_start
+      - edition_title_en
+      - edition_title_fr
+      - issued_at
+      - kind
+      - name
+      - nature
+      - revoked_at
+      - status
     Publication:
       type: object
       properties:
@@ -15083,6 +16054,23 @@ components:
         instructions:
           type: string
           maxLength: 5000
+    Signatory:
+      type: object
+      description: 'Signature désignable (K18) : jamais l''image ni son empreinte.'
+      properties:
+        id:
+          type: integer
+        display_name:
+          type: string
+        title_fr:
+          type: string
+        title_en:
+          type: string
+      required:
+      - display_name
+      - id
+      - title_en
+      - title_fr
     Signature:
       type: object
       description: 'Signature du signataire connecté (K18) : jamais le nom de stockage
@@ -15140,6 +16128,73 @@ components:
           format: binary
       required:
       - file
+    SignatureLayout:
+      enum:
+      - signature_right
+      - signature_left
+      type: string
+      description: |-
+        * `signature_right` - signature à droite, QR à gauche
+        * `signature_left` - signature à gauche, QR à droite
+    SigningKey:
+      type: object
+      properties:
+        subject:
+          type: string
+        not_after:
+          type: string
+          format: date-time
+          nullable: true
+        uploaded_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - not_after
+      - subject
+      - uploaded_at
+    SigningKeyRequest:
+      type: object
+      properties:
+        subject:
+          type: string
+          minLength: 1
+        not_after:
+          type: string
+          format: date-time
+          nullable: true
+        uploaded_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - not_after
+      - subject
+      - uploaded_at
+    SigningKeyUploadRequest:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+          description: Certificat de l'institution (PKCS#12, .p12 ou .pfx).
+        password:
+          type: string
+          writeOnly: true
+          maxLength: 256
+      required:
+      - file
+      - password
+    SigningMode:
+      enum:
+      - image
+      - pades
+      - provider
+      type: string
+      description: |-
+        * `image` - image de la signature
+        * `pades` - signature électronique PAdES
+        * `provider` - prestataire de signature qualifiée
     Simulation:
       type: object
       description: 'US-06 : nombre de soumissions au-dessus du seuil, au total, par
@@ -16064,6 +17119,28 @@ components:
             $ref: '#/components/schemas/CheckinResult'
       required:
       - results
+    TemplateCustomized:
+      type: object
+      properties:
+        title_fr:
+          type: boolean
+        title_en:
+          type: boolean
+        body_fr:
+          type: boolean
+        body_en:
+          type: boolean
+        footer_fr:
+          type: boolean
+        footer_en:
+          type: boolean
+      required:
+      - body_en
+      - body_fr
+      - footer_en
+      - footer_fr
+      - title_en
+      - title_fr
     Timeline:
       type: object
       properties:
@@ -16223,6 +17300,22 @@ components:
       description: |-
         * `active` - actif
         * `revoked` - révoqué
+    VerificationKind:
+      enum:
+      - certificate
+      - letter
+      type: string
+      description: |-
+        * `certificate` - certificate
+        * `letter` - letter
+    VerificationStatus:
+      enum:
+      - valid
+      - revoked
+      type: string
+      description: |-
+        * `valid` - valid
+        * `revoked` - revoked
     WaiverRequest:
       type: object
       properties:

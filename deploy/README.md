@@ -28,8 +28,9 @@ Topologie (étude §11.3) : un seul domaine, Angular en fichiers statiques dans
    `DEFAULT_FROM_EMAIL` et la clé du fournisseur d'e-mails (D10), `GESTCONF_PUBLIC_URL`
    (URL publique en `https://`, base des liens envoyés par e-mail), `GESTCONF_OPERATORS`
    (alertes, D17), `GESTCONF_CRON_INTERVAL_SECONDS`, `GESTCONF_MFA_ENCRYPTION_KEYS` (clé
-   Fernet chiffrant les secrets de la 2FA, voir « Clés de la 2FA » ci-dessous). Ne jamais le
-   committer.
+   Fernet chiffrant les secrets de la 2FA, voir « Clés de la 2FA » ci-dessous) et, si les
+   attestations sont signées en PAdES, `GESTCONF_SIGNING_ENCRYPTION_KEYS` (voir « Clé du
+   certificat de signature »). Ne jamais le committer.
 4. **HTTPS** : vérifier le certificat AutoSSL et activer « Forcer la redirection
    HTTPS » dans cPanel › Domaines. La redirection n'est pas faite dans notre
    `.htaccess` pour éviter toute boucle si Apache est derrière un proxy.
@@ -213,6 +214,21 @@ dossier de l'application et y écrit le chemin du venv (`VENV_ACTIVATE`) : le cr
 - **Perte d'appareil d'un utilisateur** : après vérification de son identité hors bande
   (procédure à valider), `python manage.py reset_mfa --email … --reason …` (audit
   `mfa.reset`, e-mail à l'adresse principale).
+
+### Clé du certificat de signature des attestations (plan L7, K19)
+
+- **Facultative** : `GESTCONF_SIGNING_ENCRYPTION_KEYS` n'est utile que si l'édition signe
+  ses attestations en **PAdES** avec le certificat de son institution. Sans elle, le dépôt du
+  certificat et l'activation de PAdES sont refusés (`signing_unavailable`) ; l'image de la
+  signature reste disponible.
+- **Distincte de la clé de la 2FA**, générée de la même façon, sauvegardée de même hors de
+  l'hébergement et séparément des sauvegardes. Le certificat déposé est ouvert avec son mot
+  de passe, réexporté sans mot de passe puis chiffré par cette clé (`signing-keys/`, hors
+  racine web) ; le mot de passe n'est jamais gardé.
+- **Perte de la clé** : le certificat déposé devient indéchiffrable ; le CO le redépose
+  (ou revient à l'image seule). Les attestations déjà émises, signées, restent valides.
+- **Rotation** : nouvelle clé en tête de la liste, ancienne derrière (virgule) ; le CO
+  redépose le certificat ; retirer ensuite l'ancienne clé.
 
 ## 3. Tests de fumée
 

@@ -9,6 +9,9 @@ RG-18 ; plan L7, K14).
 - **Pointages** (K4) : export des pointages de la personne (lieu, heure) ; rien à effacer : ils
   ne portent pas de donnée propre, l'inscription à laquelle ils renvoient est anonymisée par
   ``apps.registrations``.
+- **Attestations** (K9, K14) : export (nature, édition, émission, révocation, code de
+  vérification) ; **conservées** à l'anonymisation, preuve délivrée à la personne, avec leur
+  nom figé ; la vérification publique n'affiche alors plus le nom.
 """
 
 from __future__ import annotations
@@ -16,7 +19,7 @@ from __future__ import annotations
 from typing import Any
 
 from apps.core.personal_data import AnonymizationContext, register_personal_data
-from apps.events.models import Checkin, Signature
+from apps.events.models import Certificate, Checkin, Signature
 
 
 def _iso(value) -> str | None:
@@ -49,6 +52,20 @@ def _export(user) -> dict[str, Any]:
             .select_related("edition", "session")
             .order_by("scanned_at", "id")
         ],
+        "certificates": [
+            {
+                "edition": row.edition.code,
+                "nature": row.nature,
+                "name": row.name,
+                "institution": row.institution,
+                "issued_at": _iso(row.issued_at),
+                "revoked_at": _iso(row.revoked_at),
+                "verification_code": row.verification_code,
+            }
+            for row in Certificate.objects.filter(user=user)
+            .select_related("edition")
+            .order_by("issued_at", "id")
+        ],
     }
 
 
@@ -73,7 +90,7 @@ def _anonymize(user, context: AnonymizationContext) -> None:
 def register_events_personal_data() -> None:
     register_personal_data(
         "events.events",
-        models=("events.Signature", "events.Checkin"),
+        models=("events.Signature", "events.Checkin", "events.Certificate"),
         export=_export,
         anonymize=_anonymize,
         rank=490,

@@ -55,5 +55,7 @@ export const ERROR_CODE: ErrorCode[] = [
   'option_full',
   'promo_code_exhausted',
   'already_registered',
-  'payment_unavailable'
+  'payment_unavailable',
+  'signing_unavailable',
+  'signatory_missing'
 ];

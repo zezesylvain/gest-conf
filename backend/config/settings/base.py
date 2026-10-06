@@ -210,6 +210,9 @@ MFA_ALLOW_UNVERIFIED_EMAIL = False
 # de secours, séparées par des virgules : la première chiffre, toutes déchiffrent
 # (MultiFernet). Obligatoire en production (prod.py) ; rotation : rotate_mfa_keys.
 GESTCONF_MFA_ENCRYPTION_KEYS = env.list("GESTCONF_MFA_ENCRYPTION_KEYS", default=[])
+# Clés Fernet du certificat de signature PAdES déposé (plan L7, K19) : facultatives ; sans
+# elles, la signature PAdES ne peut pas être activée. Rotation comme les clés de la 2FA.
+GESTCONF_SIGNING_ENCRYPTION_KEYS = env.list("GESTCONF_SIGNING_ENCRYPTION_KEYS", default=[])
 
 # --- Sessions (D12) -------------------------------------------------------------------
 # 12 h au plus, imposées par AbsoluteSessionTimeoutMiddleware (Django fait glisser
@@ -325,6 +328,8 @@ REST_FRAMEWORK = {
         "payment_webhook": "120/min",  # notifications des fournisseurs, par adresse IP
         # Jour J et attestations (plan L7) : images de signature, par compte.
         "signature_upload": "20/hour",
+        # Vérification publique des attestations (K10), par adresse IP.
+        "certificate_verify": "30/min",
     },
     "NUM_PROXIES": GESTCONF_TRUSTED_PROXY_COUNT,
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
@@ -373,6 +378,12 @@ SPECTACULAR_SETTINGS = {
         "CheckinOutcome": "apps.events.services.checkin.OUTCOME_CHOICES",
         "CheckinMethod": "apps.events.models.CheckinMethod",
         "RetiredTokenReason": "apps.registrations.models.RetiredTokenReason",
+        "DocumentNature": "apps.events.models.DocumentNature",
+        "CertificateNature": "apps.events.serializers.CERTIFICATE_NATURE_CHOICES",
+        "SigningMode": "apps.events.models.SigningMode",
+        "SignatureLayout": "apps.events.models.SignatureLayout",
+        "VerificationKind": "apps.events.serializers.VERIFICATION_KIND_CHOICES",
+        "VerificationStatus": "apps.events.serializers.VERIFICATION_STATUS_CHOICES",
         "InvitableRole": "apps.accounts.roles.InvitableRole",
         "OcFunction": "apps.accounts.roles.OcFunction",
         "UserRoleStatus": "apps.accounts.models.UserRoleStatus",

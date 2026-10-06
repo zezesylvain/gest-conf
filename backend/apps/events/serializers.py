@@ -6,7 +6,14 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
 from apps.accounts.services.invitations import display_name
-from apps.events.models import Checkin, CheckinMethod, Signature
+from apps.events.models import (
+    Checkin,
+    CheckinMethod,
+    DocumentNature,
+    Signature,
+    SignatureLayout,
+    SigningMode,
+)
 from apps.events.services import checkin as checkin_services
 from apps.events.services.checkin import OUTCOME_CHOICES
 from apps.registrations.models import Registration, RegistrationStatus, RetiredTokenReason
@@ -269,3 +276,234 @@ class SessionScanRequestSerializer(serializers.Serializer):
     idempotency_key = serializers.CharField(
         max_length=64, required=False, allow_blank=True, default="", help_text=IDEMPOTENCY_HELP
     )
+
+
+# --- Attestations (K9 à K11, K18, K19) -----------------------------------------------------
+
+
+class SigningKeySerializer(serializers.Serializer):
+    subject = serializers.CharField()
+    not_after = serializers.DateTimeField(allow_null=True)
+    uploaded_at = serializers.DateTimeField(allow_null=True)
+
+
+class CertificateSettingsSerializer(serializers.Serializer):
+    """Paramètres des pièces : jamais le certificat ni l'image eux-mêmes."""
+
+    signing_mode = serializers.ChoiceField(choices=SigningMode.choices)
+    review_enabled = serializers.BooleanField()
+    layout = serializers.ChoiceField(choices=SignatureLayout.choices)
+    has_header = serializers.BooleanField(read_only=True)
+    header_width = serializers.IntegerField(read_only=True, allow_null=True)
+    header_height = serializers.IntegerField(read_only=True, allow_null=True)
+    signing_key = SigningKeySerializer(read_only=True, allow_null=True)
+    signing_available = serializers.BooleanField(
+        read_only=True, help_text="Clés de chiffrement du certificat configurées (serveur)."
+    )
+
+
+def certificate_settings_data(current) -> dict:
+    from apps.events.services.certificates import signing_available
+
+    return {
+        "signing_mode": current.signing_mode,
+        "review_enabled": current.review_enabled,
+        "layout": current.layout,
+        "has_header": bool(current.header_storage_name),
+        "header_width": current.header_width,
+        "header_height": current.header_height,
+        "signing_key": {
+            "subject": current.key_subject,
+            "not_after": current.key_not_after,
+            "uploaded_at": current.key_uploaded_at,
+        }
+        if current.key_storage_name
+        else None,
+        "signing_available": signing_available(),
+    }
+
+
+class ImageUploadSerializer(serializers.Serializer):
+    file = serializers.FileField()
+
+
+class SigningKeyUploadSerializer(serializers.Serializer):
+    file = serializers.FileField(help_text="Certificat de l'institution (PKCS#12, .p12 ou .pfx).")
+    password = serializers.CharField(
+        max_length=256, allow_blank=True, trim_whitespace=False, write_only=True
+    )
+
+
+class SignatorySerializer(serializers.Serializer):
+    """Signature désignable (K18) : jamais l'image ni son empreinte."""
+
+    id = serializers.IntegerField()
+    display_name = serializers.CharField()
+    title_fr = serializers.CharField()
+    title_en = serializers.CharField()
+
+
+def signatory_data(signature) -> dict | None:
+    if signature is None:
+        return None
+    return {
+        "id": signature.pk,
+        "display_name": signature.display_name,
+        "title_fr": signature.title_fr,
+        "title_en": signature.title_en,
+    }
+
+
+class TemplateCustomizedSerializer(serializers.Serializer):
+    title_fr = serializers.BooleanField()
+    title_en = serializers.BooleanField()
+    body_fr = serializers.BooleanField()
+    body_en = serializers.BooleanField()
+    footer_fr = serializers.BooleanField()
+    footer_en = serializers.BooleanField()
+
+
+class DocumentTemplateSerializer(serializers.Serializer):
+    """Gabarit effectif d'une nature (textes par défaut là où rien n'est saisi)."""
+
+    nature = serializers.ChoiceField(choices=DocumentNature.choices)
+    title_fr = serializers.CharField()
+    title_en = serializers.CharField()
+    body_fr = serializers.CharField()
+    body_en = serializers.CharField()
+    footer_fr = serializers.CharField(allow_blank=True)
+    footer_en = serializers.CharField(allow_blank=True)
+    customized = TemplateCustomizedSerializer()
+    placeholders = serializers.ListField(child=serializers.CharField())
+    signatory = SignatorySerializer(allow_null=True)
+
+
+def template_data(view) -> dict:
+    from apps.events.texts import PLACEHOLDERS
+
+    return {
+        "nature": view.nature,
+        **view.texts,
+        "customized": view.customized,
+        "placeholders": sorted(PLACEHOLDERS[view.nature]),
+        "signatory": signatory_data(view.signatory),
+    }
+
+
+class DocumentTemplateUpdateSerializer(serializers.Serializer):
+    title_fr = serializers.CharField(max_length=200, allow_blank=True, required=False)
+    title_en = serializers.CharField(max_length=200, allow_blank=True, required=False)
+    body_fr = serializers.CharField(max_length=2000, allow_blank=True, required=False)
+    body_en = serializers.CharField(max_length=2000, allow_blank=True, required=False)
+    footer_fr = serializers.CharField(max_length=500, allow_blank=True, required=False)
+    footer_en = serializers.CharField(max_length=500, allow_blank=True, required=False)
+    signatory = serializers.IntegerField(
+        required=False, allow_null=True, help_text="Signature désignée (null : aucune)."
+    )
+
+
+class CertificateOverviewSerializer(serializers.Serializer):
+    nature = serializers.ChoiceField(choices=DocumentNature.choices)
+    enabled = serializers.BooleanField()
+    ready = serializers.BooleanField(help_text="Conditions de l'émission réunies.")
+    problem = serializers.CharField(allow_blank=True, help_text="Code d'erreur sinon.")
+    eligible = serializers.IntegerField(help_text="Personnes remplissant RG-16.")
+    issued = serializers.IntegerField()
+    revoked = serializers.IntegerField()
+    unreachable = serializers.IntegerField(help_text="Présentateurs sans compte.")
+    pending = serializers.BooleanField(help_text="Émission en cours dans la file.")
+
+
+# Natures d'attestation (sans la lettre d'invitation) ; statut et type de la vérification.
+CERTIFICATE_NATURE_CHOICES = [
+    (value, label) for value, label in DocumentNature.choices if value != DocumentNature.LETTER
+]
+VERIFICATION_KIND_CHOICES = [("certificate", "certificate"), ("letter", "letter")]
+VERIFICATION_STATUS_CHOICES = [("valid", "valid"), ("revoked", "revoked")]
+
+
+class IssueRequestSerializer(serializers.Serializer):
+    nature = serializers.ChoiceField(choices=CERTIFICATE_NATURE_CHOICES)
+
+
+class IssueResponseSerializer(serializers.Serializer):
+    job_id = serializers.IntegerField()
+
+
+class CertificateSerializer(serializers.Serializer):
+    """Attestation (gestion) : sans nom de stockage ni empreinte."""
+
+    id = serializers.IntegerField()
+    nature = serializers.ChoiceField(choices=DocumentNature.choices)
+    user_id = serializers.IntegerField()
+    name = serializers.CharField()
+    institution = serializers.CharField()
+    reference = serializers.CharField(allow_blank=True)
+    signing_mode = serializers.ChoiceField(choices=SigningMode.choices)
+    signatory_name = serializers.CharField()
+    issued_at = serializers.DateTimeField()
+    revoked_at = serializers.DateTimeField(allow_null=True)
+    revoke_reason = serializers.CharField()
+
+
+def certificate_data(row) -> dict:
+    return {
+        "id": row.pk,
+        "nature": row.nature,
+        "user_id": row.user_id,
+        "name": row.name,
+        "institution": row.institution,
+        "reference": row.details.get("reference", ""),
+        "signing_mode": row.signing_mode,
+        "signatory_name": row.signatory_name,
+        "issued_at": row.issued_at,
+        "revoked_at": row.revoked_at,
+        "revoke_reason": row.revoke_reason,
+    }
+
+
+class MyCertificateSerializer(serializers.Serializer):
+    """Attestation de la personne connectée (« Mes documents »)."""
+
+    id = serializers.IntegerField()
+    nature = serializers.ChoiceField(choices=DocumentNature.choices)
+    edition_code = serializers.CharField()
+    edition_title_fr = serializers.CharField()
+    edition_title_en = serializers.CharField()
+    title = serializers.CharField(
+        allow_blank=True, help_text="Communication (attestation de communication)."
+    )
+    issued_at = serializers.DateTimeField()
+    revoked = serializers.BooleanField()
+    verification_url = serializers.CharField()
+
+
+def my_certificate_data(row) -> dict:
+    from apps.events.services.certificates import verification_url
+
+    return {
+        "id": row.pk,
+        "nature": row.nature,
+        "edition_code": row.edition.code,
+        "edition_title_fr": row.edition.title_fr,
+        "edition_title_en": row.edition.title_en or row.edition.title_fr,
+        "title": row.details.get("title", ""),
+        "issued_at": row.issued_at,
+        "revoked": row.revoked_at is not None,
+        "verification_url": verification_url(row.verification_code),
+    }
+
+
+class PublicVerificationSerializer(serializers.Serializer):
+    """Vérification publique (K10) : ni institution, ni empreinte, ni code d'autres pièces."""
+
+    kind = serializers.ChoiceField(choices=VERIFICATION_KIND_CHOICES)
+    nature = serializers.ChoiceField(choices=DocumentNature.choices)
+    name = serializers.CharField(allow_null=True, help_text="Absent si le compte est anonymisé.")
+    edition_title_fr = serializers.CharField()
+    edition_title_en = serializers.CharField()
+    edition_start = serializers.DateField(allow_null=True)
+    edition_end = serializers.DateField(allow_null=True)
+    issued_at = serializers.DateTimeField()
+    status = serializers.ChoiceField(choices=VERIFICATION_STATUS_CHOICES)
+    revoked_at = serializers.DateTimeField(allow_null=True)

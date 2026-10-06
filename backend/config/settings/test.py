@@ -11,6 +11,8 @@ DEBUG = False
 SECRET_KEY = "test-only-secret-key"  # noqa: S105
 # Clé Fernet de test (32 octets nuls encodés), jamais utilisée ailleurs.
 GESTCONF_MFA_ENCRYPTION_KEYS = ["AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="]
+# Clé Fernet de test du certificat de signature (32 octets 0x01), jamais utilisée ailleurs.
+GESTCONF_SIGNING_ENCRYPTION_KEYS = ["AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE="]
 
 ALLOWED_HOSTS = ["testserver"]
 

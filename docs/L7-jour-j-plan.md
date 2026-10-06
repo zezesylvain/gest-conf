@@ -556,3 +556,122 @@ leur clé de lieu).
 - `ruff`, lint, `format:check`, `locale/check.sh`, schéma validé sous MariaDB.
 
 **Critère de fin** (« Tests au vert ») : atteint.
+
+## 15. Bilan de L7.4 (6 octobre 2026)
+
+**Modèle** (migration `events/0002`) :
+
+- `CertificateSettings`, une ligne par édition :
+  - mode de signature : image (défaut), PAdES ou prestataire ;
+  - attestation d'évaluation, **désactivée par défaut** (réponse du commanditaire) ;
+  - disposition : signature à droite et QR à gauche, ou l'inverse ;
+  - en-tête du modèle officiel, certificat PAdES ;
+- `DocumentTemplate`, par nature (participation, communication, évaluation, et lettre
+  d'invitation pour L7.5) : titre, texte et pied de page FR et EN, signataire désigné ;
+- `Certificate` : pièce **figée** en ajout seul, unique tant qu'elle n'est pas révoquée par
+  (édition, personne, nature, communication).
+
+**RG-16, vérifiée à l'émission** (`apps/events/services/certificates.py`) :
+
+- **participation** : inscription confirmée **et** pointage actif, à l'accueil ou en session ;
+- **communication** : présentateurs d'une communication `PRESENTED`, rattachés à un compte (le
+  leur, ou celui qui a vérifié leur adresse) ;
+  - les présentateurs sans compte sont comptés à part (« impossibles à remettre ») ;
+- **évaluation** : relecteurs ayant envoyé au moins une évaluation, avec leur **nombre**
+  seulement, jamais les titres (RG-04).
+
+**Signataire (K18)** :
+
+- rien ne s'émet sans signataire désigné, dont la signature est complète et le rôle actif
+  (`signatory_missing`) ;
+- seule une signature de l'édition, complète et de rôle actif, se désigne ;
+- l'attestation fige le nom, la fonction FR et EN et l'empreinte de l'image.
+
+**Modèle officiel (K19)** :
+
+- textes à **variables fermées** par nature (`{name}`, `{edition}`, `{dates}`, `{venue}`, plus
+  `{title}` et `{reference}`, ou `{count}`) ;
+  - toute autre accolade, tout attribut, indice ou format est refusé à l'enregistrement ;
+  - le remplissage n'est qu'un `format_map` sur des valeurs déjà calculées ;
+- texte vide : texte par défaut ;
+- dates écrites dans chaque langue (« du 1er au 3 juin 2027 », « from June 1 to 3, 2027 ») ;
+- PDF `fpdf2`, A4 paysage :
+  - en-tête de l'institution (image privée réencodée en PNG) ou bandeau du titre ;
+  - titre et texte en français puis en anglais ;
+  - date d'émission ;
+  - bloc de signature et QR de vérification ;
+  - pied de page ;
+- aperçu du gabarit sur données fictives, ni signé ni stocké.
+
+**PAdES (K19)** :
+
+- `pyHanko` 0.37.0 ajouté aux verrous (`requirements/*.txt`, empreintes) ;
+  - quatorze paquets, tous en roues ; `oscrypto` n'intervient pas dans la signature
+    (essai) ;
+- le PKCS#12 déposé est ouvert avec son mot de passe ;
+  - refusé si illisible, s'il n'a ni clé ni certificat, si le certificat est hors période
+    de validité, ou sans usage de signature ;
+  - puis réexporté **sans** mot de passe et chiffré par `GESTCONF_SIGNING_ENCRYPTION_KEYS`
+    (`MultiFernet`, hors racine web) ;
+  - le mot de passe n'est jamais gardé, la clé jamais servie ;
+- la clé est **facultative** et distincte de celle de la 2FA : sans elle, PAdES est refusé
+  (`signing_unavailable`) ; documentée dans `.env.example` et `deploy/README.md` ;
+- signature PAdES-B-B validée par `pyHanko` dans les tests : intègre, valide, de confiance ;
+- mode « prestataire » refusé tant qu'aucun n'est branché (Q17).
+
+**Émission (K11)** :
+
+- par le CO (`certificates.manage`, réauthentification) : les conditions sont vérifiées tout
+  de suite, puis la tâche `events.issue_certificates` part en file (`run_jobs`) ;
+- traitement par **lots de 100** ; la tâche se relance tant qu'il reste des personnes ;
+- idempotente : une demande en attente est réutilisée ; une émission complémentaire n'émet
+  que les manquants ;
+- conditions perdues entre la demande et l'exécution (signataire retiré…) : journal
+  `certificates.issue_failed`, sans nouvelle tentative ;
+- e-mail « Attestation disponible » (annexe A2) : lien vers « Mes documents »
+  (`/compte/mes-documents`, L7.7), sans PDF ni code ;
+- suivi par nature : activée, prête (ou code du problème), éligibles, émises, révoquées,
+  présentateurs sans compte, émission en cours.
+
+**Révocation** : motif obligatoire, journal ; la vérification répond « révoquée » ; une
+nouvelle attestation peut ensuite être émise.
+
+**Vérification publique (K10)** :
+
+- `GET /v1/public/certificates/{code}`, code de 128 bits en base32 (26 caractères ; casse,
+  tirets et espaces tolérés) ;
+- répond : nature, nom, édition et ses dates, émission, statut ;
+- ni institution, ni empreinte ;
+- après anonymisation du titulaire : sans nom (K14) ;
+- même 404 pour un code inconnu ou mal formé ;
+- limitée à 30 requêtes par minute ; `noindex` (toute l'API) et `no-store`.
+
+**Participant** : `GET /v1/me/certificates` et `…/{id}/pdf` (attestation valide seulement).
+
+**Données personnelles, intégrité, conservation** :
+
+- attestations exportées, **conservées** à l'anonymisation (K14) ;
+- contrôle `events.certificate_files` : PDF présent et empreinte intacte ;
+- purge des fichiers orphelins : PDF, en-têtes, certificats.
+
+**Autres** :
+
+- codes d'erreur `signing_unavailable` et `signatory_missing` (traduits dans la bibliothèque
+  partagée) ;
+- énumérations du schéma nommées ;
+- treize routes de gestion ajoutées à la matrice (troisième chargeur paresseux du monde ;
+  le test d'archivage charge tous les objets avant d'archiver).
+
+**Tests** :
+
+- backend : **4 825 réussis**, 10 ignorés (SQLite) ; la seule vue publique nouvelle
+  (vérification) est inscrite dans la liste blanche des vues anonymes ;
+- sous MariaDB : `events`, `registrations`, `submissions`, `program`, le registre, le schéma et
+  les règles de plateforme (411), plus les cas d'attestation de la matrice (332) ;
+- matrice des droits : **3 611 cas** ;
+- `events` : 82 tests, dont 24 pour les attestations ;
+- front : 388 tests ; client régénéré ;
+- `ruff`, lint, `format:check`, `locale/check.sh`, schéma validé sous MariaDB, sans
+  avertissement.
+
+**Critère de fin** (« Tests RG-16 au vert ») : atteint.

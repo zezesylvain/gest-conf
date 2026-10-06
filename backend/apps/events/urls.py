@@ -11,6 +11,7 @@ E = "manage/editions/<int:edition_id>"
 CHECKIN = views.CheckinViewSet
 BADGES = views.BadgeViewSet
 DAY = views.DaySessionViewSet
+CERT = f"{E}/certificates"
 S = f"{E}/day/sessions/<int:session_id>"
 
 urlpatterns = [
@@ -86,5 +87,74 @@ urlpatterns = [
         f"{S}/slots/<int:slot_id>/unpresented",
         DAY.as_view({"post": "unpresented"}),
         name="manage-day-unpresented",
+    ),
+    path(
+        f"{CERT}/settings",
+        views.CertificateSettingsViewSet.as_view({"get": "retrieve", "patch": "partial_update"}),
+        name="manage-certificate-settings",
+    ),
+    path(
+        f"{CERT}/settings/header",
+        views.CertificateFilesViewSet.as_view(
+            {"get": "header", "put": "upload_header", "delete": "delete_header"}
+        ),
+        name="manage-certificate-header",
+    ),
+    path(
+        f"{CERT}/settings/signing-key",
+        views.CertificateFilesViewSet.as_view({"put": "upload_key", "delete": "delete_key"}),
+        name="manage-certificate-signing-key",
+    ),
+    path(
+        f"{CERT}/templates",
+        views.DocumentTemplateViewSet.as_view({"get": "list"}),
+        name="manage-certificate-templates",
+    ),
+    path(
+        f"{CERT}/templates/<str:nature>",
+        views.DocumentTemplateViewSet.as_view({"patch": "partial_update"}),
+        name="manage-certificate-template",
+    ),
+    path(
+        f"{CERT}/templates/<str:nature>/preview",
+        views.DocumentTemplateViewSet.as_view({"get": "preview"}),
+        name="manage-certificate-preview",
+    ),
+    path(
+        f"{CERT}/signatories",
+        views.DocumentTemplateViewSet.as_view({"get": "signatories"}),
+        name="manage-certificate-signatories",
+    ),
+    path(
+        f"{CERT}/overview",
+        views.CertificateViewSet.as_view({"get": "overview"}),
+        name="manage-certificates-overview",
+    ),
+    path(
+        f"{CERT}/issue",
+        views.CertificateViewSet.as_view({"post": "issue"}),
+        name="manage-certificates-issue",
+    ),
+    path(f"{CERT}", views.CertificateViewSet.as_view({"get": "list"}), name="manage-certificates"),
+    path(
+        f"{CERT}/<int:certificate_id>/pdf",
+        views.CertificateViewSet.as_view({"get": "pdf"}),
+        name="manage-certificate-pdf",
+    ),
+    path(
+        f"{CERT}/<int:certificate_id>/revoke",
+        views.CertificateViewSet.as_view({"post": "revoke"}),
+        name="manage-certificate-revoke",
+    ),
+    path("me/certificates", views.MyCertificatesView.as_view(), name="me-certificates"),
+    path(
+        "me/certificates/<int:certificate_id>/pdf",
+        views.MyCertificatePdfView.as_view(),
+        name="me-certificate-pdf",
+    ),
+    path(
+        "public/certificates/<str:code>",
+        views.PublicCertificateView.as_view(),
+        name="public-certificate",
     ),
 ]

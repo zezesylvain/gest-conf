@@ -1,0 +1,9 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate %}Bonjour,
+
+Votre {{ nature }} de {{ edition_title }} est disponible.{% endblocktranslate %}
+
+{% blocktranslate %}Téléchargez-la dans votre espace, rubrique « Mes documents » : {{ link }}{% endblocktranslate %}
+
+{% blocktranslate %}Elle porte un QR code qui permet à quiconque d'en vérifier l'authenticité.{% endblocktranslate %}
+
+{% include "account/email/_signature.txt" %}{% endautoescape %}
