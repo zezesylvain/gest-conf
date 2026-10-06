@@ -12,6 +12,7 @@ import {
   submissionsCreate,
   submissionsDelete,
   submissionsFileRemove,
+  submissionsFinalVersion,
   submissionsFileUpload,
   submissionsList,
   submissionsRetrieve,
@@ -101,6 +102,19 @@ export class SubmissionsService {
   /** Fichier courant (endpoint authentifié, règle n° 8). */
   fileUrl(id: number): string {
     return `/api/v1/submissions/${id}/file/content`;
+  }
+
+  /** Version finale (H18) : PDF nominatif et lettre de réponse ; remplace le dépôt précédent. */
+  finalVersion(id: number, file: File, responseLetter: string): Promise<Submission> {
+    return this.api.invoke(submissionsFinalVersion, {
+      submission_id: id,
+      body: { file, response_letter: responseLetter },
+    });
+  }
+
+  /** Version finale courante (endpoint authentifié, règle n° 8). */
+  finalVersionUrl(id: number): string {
+    return `/api/v1/submissions/${id}/final-version/content`;
   }
 }
 

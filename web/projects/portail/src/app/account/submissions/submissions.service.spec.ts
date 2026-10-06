@@ -67,5 +67,20 @@ describe('SubmissionsService', () => {
 
   it('fichier courant : endpoint authentifié (règle n° 8)', () => {
     expect(service.fileUrl(7)).toBe('/api/v1/submissions/7/file/content');
+    expect(service.finalVersionUrl(7)).toBe('/api/v1/submissions/7/final-version/content');
+  });
+
+  it('version finale (H18) : multipart, PDF et lettre de réponse, sans If-Match', async () => {
+    const file = new File(['%PDF-1.4'], 'final.pdf', { type: 'application/pdf' });
+    const pending = service.finalVersion(7, file, 'Merci aux relecteurs.');
+    await Promise.resolve();
+    const request = http.expectOne((req) => req.url.endsWith('/v1/submissions/7/final-version'));
+    expect(request.request.method).toBe('POST');
+    expect(request.request.headers.has('If-Match')).toBe(false);
+    const body = request.request.body as FormData;
+    expect(body.get('file')).toBeInstanceOf(File);
+    expect(body.get('response_letter')).toBe('Merci aux relecteurs.');
+    request.flush(testSubmission({ status: 'camera_ready_received' }));
+    expect((await pending).status).toBe('camera_ready_received');
   });
 });

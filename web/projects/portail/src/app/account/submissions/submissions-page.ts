@@ -82,7 +82,22 @@ import { callIsOpen, SubmissionsService } from './submissions.service';
                     </a>
                   </td>
                   <td>{{ 'portail.submissions.status.' + item.status | translate }}</td>
-                  <td>{{ item.can_edit && item.deadline ? when(item.deadline) : '—' }}</td>
+                  <td>
+                    @if (item.can_edit && item.deadline) {
+                      {{ when(item.deadline) }}
+                    } @else if (
+                      item.allowed_actions.includes('final_version') &&
+                      !item.final_version &&
+                      item.final_deadline
+                    ) {
+                      {{
+                        'portail.submissions.list.finalDue'
+                          | translate: { date: when(item.final_deadline) }
+                      }}
+                    } @else {
+                      —
+                    }
+                  </td>
                 </tr>
               }
             </tbody>

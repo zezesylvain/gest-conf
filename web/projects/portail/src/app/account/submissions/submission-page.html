@@ -5,7 +5,12 @@
         | translate: { reference: submission()?.reference })
       : ('portail.submissions.edit.title' | translate)
   "
-  [lead]="'portail.submissions.edit.lead' | translate"
+  [lead]="
+    (submission()?.decision
+      ? 'portail.submissions.edit.leadDecided'
+      : 'portail.submissions.edit.lead'
+    ) | translate
+  "
 />
 <p>
   <a routerLink="/compte/soumissions">{{ 'portail.submissions.edit.back' | translate }}</a>
@@ -54,6 +59,125 @@
       }
     </p>
   </section>
+
+  @if (decision(); as result) {
+    <section class="decision" aria-labelledby="decision-title">
+      <h2 id="decision-title">{{ 'portail.submissions.decision.title' | translate }}</h2>
+      <p>
+        <strong class="outcome">{{
+          'portail.submissions.decision.outcomes.' + result.outcome | translate
+        }}</strong>
+        ·
+        {{
+          'portail.submissions.decision.publishedAt'
+            | translate: { date: when(result.published_at) }
+        }}
+      </p>
+      @if (result.assigned_type; as type) {
+        <p>
+          {{
+            'portail.submissions.decision.assignedType'
+              | translate: { type: localized(type, 'label') }
+          }}
+        </p>
+      }
+      <p class="hint">{{ 'portail.submissions.decision.next.' + result.outcome | translate }}</p>
+      @if (result.comment_to_authors) {
+        <h3>{{ 'portail.submissions.decision.committee' | translate }}</h3>
+        <p class="comment">{{ result.comment_to_authors }}</p>
+      }
+      <h3>{{ 'portail.submissions.decision.reviews' | translate }}</h3>
+      @for (review of result.reviews; track review.pseudonym_rank) {
+        <article class="review" [attr.aria-labelledby]="'review-' + review.pseudonym_rank">
+          <h4 [id]="'review-' + review.pseudonym_rank">
+            {{
+              'portail.submissions.decision.reviewer' | translate: { rank: review.pseudonym_rank }
+            }}
+          </h4>
+          <p class="comment">{{ review.comment }}</p>
+        </article>
+      } @empty {
+        <p class="hint">{{ 'portail.submissions.decision.noReviews' | translate }}</p>
+      }
+      @if (current.status === 'accepted' && withdrawable()) {
+        <ng-container *ngTemplateOutlet="withdrawBlock" />
+      }
+    </section>
+  }
+
+  @if (current.allowed_actions.includes('final_version') || current.final_version) {
+    <section class="final" aria-labelledby="final-title">
+      <h2 id="final-title">{{ 'portail.submissions.final.title' | translate }}</h2>
+      @if (current.final_deadline) {
+        <p>
+          {{
+            'portail.submissions.final.deadline' | translate: { date: when(current.final_deadline) }
+          }}
+        </p>
+      }
+      @if (current.final_version; as final) {
+        <p>
+          <a [href]="finalVersionUrl()">{{ final.file.original_name }}</a>
+          ·
+          {{
+            'portail.submissions.final.details'
+              | translate: { version: final.file.version, date: when(final.submitted_at) }
+          }}
+        </p>
+      }
+      @if (finalOpen()) {
+        <p class="hint">{{ 'portail.submissions.final.lead' | translate }}</p>
+        @if (finalErrors().length) {
+          <ul class="missing" role="alert">
+            @for (message of finalErrors(); track $index) {
+              <li>{{ message }}</li>
+            }
+          </ul>
+        }
+        <label class="file">
+          <span>{{
+            (current.final_version
+              ? 'portail.submissions.final.replace'
+              : 'portail.submissions.final.choose'
+            ) | translate
+          }}</span>
+          <input
+            #finalInput
+            type="file"
+            accept=".pdf,application/pdf"
+            (change)="chooseFinalFile($event)"
+          />
+        </label>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'portail.submissions.final.letter' | translate }}</mat-label>
+          <textarea
+            matInput
+            [formControl]="finalLetter"
+            rows="8"
+            [required]="letterRequired()"
+          ></textarea>
+          <mat-hint>{{
+            (letterRequired()
+              ? 'portail.submissions.final.letterHintRequired'
+              : 'portail.submissions.final.letterHint'
+            ) | translate
+          }}</mat-hint>
+        </mat-form-field>
+        <p class="actions">
+          <button
+            mat-flat-button
+            type="button"
+            (click)="sendFinalVersion(finalInput)"
+            [disabled]="busy()"
+          >
+            {{ 'portail.submissions.final.submit' | translate }}
+          </button>
+        </p>
+      } @else if (current.allowed_actions.includes('final_version')) {
+        <p class="warning">{{ 'portail.submissions.final.closed' | translate }}</p>
+      }
+    </section>
+  }
 
   <nav class="steps" [attr.aria-label]="'portail.submissions.steps.label' | translate">
     <ol>
@@ -320,22 +444,8 @@
           </button>
         }
       </p>
-      @if (current.status === 'submitted' && current.allowed_actions.includes('withdraw')) {
-        <section class="withdraw" aria-labelledby="withdraw-title">
-          <h2 id="withdraw-title">{{ 'portail.submissions.withdraw.title' | translate }}</h2>
-          <mat-form-field appearance="outline">
-            <mat-label>{{ 'portail.submissions.withdraw.reason' | translate }}</mat-label>
-            <textarea matInput [formControl]="withdrawReason" rows="3"></textarea>
-          </mat-form-field>
-          <button
-            mat-stroked-button
-            type="button"
-            (click)="withdraw()"
-            [disabled]="busy() || !withdrawReason.value.trim()"
-          >
-            {{ 'portail.submissions.withdraw.confirm' | translate }}
-          </button>
-        </section>
+      @if (current.status === 'submitted' && withdrawable()) {
+        <ng-container *ngTemplateOutlet="withdrawBlock" />
       }
     }
   }
@@ -367,3 +477,21 @@
     }
   }
 }
+
+<ng-template #withdrawBlock>
+  <section class="withdraw" aria-labelledby="withdraw-title">
+    <h2 id="withdraw-title">{{ 'portail.submissions.withdraw.title' | translate }}</h2>
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'portail.submissions.withdraw.reason' | translate }}</mat-label>
+      <textarea matInput [formControl]="withdrawReason" rows="3"></textarea>
+    </mat-form-field>
+    <button
+      mat-stroked-button
+      type="button"
+      (click)="withdraw()"
+      [disabled]="busy() || !withdrawReason.value.trim()"
+    >
+      {{ 'portail.submissions.withdraw.confirm' | translate }}
+    </button>
+  </section>
+</ng-template>

@@ -29,6 +29,8 @@ describe('SubmissionPage', () => {
       withdraw: vi.fn(),
       remove: vi.fn(),
       fileUrl: vi.fn().mockReturnValue('/api/v1/submissions/7/file/content'),
+      finalVersion: vi.fn(),
+      finalVersionUrl: vi.fn().mockReturnValue('/api/v1/submissions/7/final-version/content'),
     };
     TestBed.configureTestingModule({
       providers: [
@@ -289,5 +291,169 @@ describe('SubmissionPage', () => {
     await vi.waitFor(() =>
       expect(service['withdraw']).toHaveBeenCalledWith(7, 'Conflit de calendrier'),
     );
+  });
+
+  describe('après publication des résultats (plan L4, H18)', () => {
+    function decided(overrides: Partial<Submission> = {}): Submission {
+      return testSubmission({
+        status: 'accepted_minor',
+        reference: 'GC27-0001',
+        can_edit: false,
+        allowed_actions: ['final_version'],
+        final_deadline: '2099-01-15T23:59:00Z',
+        decision: {
+          outcome: 'accepted_minor',
+          assigned_type: { code: 'POSTER', label_fr: 'Affiche', label_en: 'Poster' },
+          comment_to_authors: 'Bravo, quelques corrections.',
+          published_at: '2026-10-05T10:00:00Z',
+          reviews: [
+            { pseudonym_rank: 1, comment: 'Clarifier la méthode.' },
+            { pseudonym_rank: 2, comment: 'Ajouter une référence.' },
+          ],
+        },
+        ...overrides,
+      });
+    }
+
+    function button(root: HTMLElement, label: string): HTMLButtonElement {
+      return [...root.querySelectorAll<HTMLButtonElement>('button')].find((item) =>
+        item.textContent?.includes(label),
+      )!;
+    }
+
+    function chooseFile(root: HTMLElement, harness: { detectChanges(): void }): File {
+      const file = new File(['%PDF-1.4'], 'final.pdf', { type: 'application/pdf' });
+      const input = root.querySelector<HTMLInputElement>('.final input[type=file]')!;
+      Object.defineProperty(input, 'files', { value: [file] });
+      input.dispatchEvent(new Event('change'));
+      harness.detectChanges();
+      return file;
+    }
+
+    it('RG-10 : décision, format attribué, message du comité, commentaires sous pseudonymes', async () => {
+      service['get'].mockResolvedValue(decided());
+      const { root } = await open();
+      const section = root.querySelector('.decision')!;
+      expect(section.textContent).toContain('Décision du comité');
+      expect(root.textContent).toContain('Consultez la décision du comité');
+      expect(section.textContent).toContain('Acceptée sous réserve de corrections');
+      expect(section.textContent).toContain('Format attribué : Affiche');
+      expect(section.textContent).toContain('Bravo, quelques corrections.');
+      const reviewers = [...section.querySelectorAll('.review h4')].map((h) =>
+        h.textContent?.trim(),
+      );
+      expect(reviewers).toEqual(['Relecteur 1', 'Relecteur 2']);
+      expect(section.textContent).toContain('Clarifier la méthode.');
+      // Ni note ni recommandation : le serveur ne les sert pas, l'écran n'en prévoit pas.
+      expect(section.textContent).not.toMatch(/\/\s*100|note|recommandation/i);
+    });
+
+    it('H18 : lettre de réponse exigée pour une acceptation sous réserve, puis dépôt', async () => {
+      service['get'].mockResolvedValue(decided());
+      service['finalVersion'].mockResolvedValue(
+        decided({
+          status: 'camera_ready_received',
+          final_version: {
+            file: {
+              id: 31,
+              kind: 'camera_ready',
+              original_name: 'final.pdf',
+              version: 1,
+              size: 8,
+              pages: 1,
+              metadata_removed: false,
+              uploaded_at: '2026-10-06T09:00:00Z',
+            },
+            response_letter: 'Méthode clarifiée.',
+            submitted_at: '2026-10-06T09:00:00Z',
+          },
+        }),
+      );
+      const { harness, root } = await open();
+      expect(root.querySelector('.final')!.textContent).toContain('Obligatoire');
+      chooseFile(root, harness);
+      button(root, 'Déposer la version finale').click();
+      await harness.fixture.whenStable();
+      harness.detectChanges();
+      expect(service['finalVersion']).not.toHaveBeenCalled();
+      const alert = root.querySelector('.final [role=alert]')!.textContent;
+      expect(alert).toContain('La lettre de réponse aux relecteurs est obligatoire.');
+      expect(alert).not.toContain('trop longue');
+      const letter = root.querySelector<HTMLTextAreaElement>('.final textarea')!;
+      letter.value = 'Méthode clarifiée.';
+      letter.dispatchEvent(new Event('input'));
+      harness.detectChanges();
+      button(root, 'Déposer la version finale').click();
+      await vi.waitFor(() => {
+        harness.detectChanges();
+        expect(root.textContent).toContain('Version finale déposée.');
+      });
+      expect(service['finalVersion']).toHaveBeenCalledWith(
+        7,
+        expect.any(File),
+        'Méthode clarifiée.',
+      );
+      const link = root.querySelector<HTMLAnchorElement>('.final a')!;
+      expect(link.getAttribute('href')).toBe('/api/v1/submissions/7/final-version/content');
+      expect(root.textContent).toContain('Version finale reçue');
+      expect(root.textContent).toContain('Remplacer la version finale');
+    });
+
+    it('H18 : date limite passée, plus de formulaire', async () => {
+      service['get'].mockResolvedValue(decided({ final_deadline: '2020-01-01T00:00:00Z' }));
+      const { root } = await open();
+      expect(root.querySelector('.final input[type=file]')).toBeNull();
+      expect(root.querySelector('.final')!.textContent).toContain(
+        'La date limite de dépôt de la version finale est passée.',
+      );
+    });
+
+    it('acceptée : lettre facultative ; retrait possible depuis la décision', async () => {
+      service['get'].mockResolvedValue(
+        decided({
+          status: 'accepted',
+          allowed_actions: ['withdraw', 'final_version'],
+          decision: {
+            outcome: 'accepted',
+            assigned_type: null,
+            comment_to_authors: '',
+            published_at: '2026-10-05T10:00:00Z',
+            reviews: [],
+          },
+        }),
+      );
+      service['finalVersion'].mockResolvedValue(decided({ status: 'camera_ready_received' }));
+      const { harness, root } = await open();
+      expect(root.querySelector('.final')!.textContent).toContain('Facultative');
+      expect(root.querySelector('.decision')!.textContent).toContain(
+        'Aucun commentaire des relecteurs.',
+      );
+      expect(root.querySelector('.decision .withdraw')).not.toBeNull();
+      const file = chooseFile(root, harness);
+      button(root, 'Déposer la version finale').click();
+      await vi.waitFor(() => expect(service['finalVersion']).toHaveBeenCalledWith(7, file, ''));
+    });
+
+    it('liste d’attente : décision affichée, pas de version finale', async () => {
+      service['get'].mockResolvedValue(
+        decided({
+          status: 'waitlist',
+          allowed_actions: [],
+          final_deadline: null,
+          decision: {
+            outcome: 'waitlist',
+            assigned_type: null,
+            comment_to_authors: '',
+            published_at: '2026-10-05T10:00:00Z',
+            reviews: [{ pseudonym_rank: 1, comment: 'Intéressant.' }],
+          },
+        }),
+      );
+      const { root } = await open();
+      expect(root.querySelector('.decision')!.textContent).toContain("Liste d'attente");
+      expect(root.textContent).toContain('un e-mail vous préviendra');
+      expect(root.querySelector('.final')).toBeNull();
+      expect(root.querySelector('.withdraw')).toBeNull();
+    });
   });
 });

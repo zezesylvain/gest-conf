@@ -601,3 +601,41 @@ nettoyées à son anonymisation.
 - **Défaut corrigé** : à 375 px, les libellés longs des critères débordaient de 19 px, et les
   aides des commentaires chevauchaient le champ suivant. Libellés placés au-dessus des champs,
   aides de hauteur variable : aucun débordement sur les sept écrans de L4.
+
+## 17. Bilan de L4.6 (6 octobre 2026)
+
+**Livré** (portail, espace auteur `/compte/soumissions/:id`) :
+
+- **Décision du comité**, affichée au-dessus de l'assistant dès la publication des résultats
+  (RG-09) :
+  - issue, date de publication, format attribué ;
+  - consigne adaptée à l'issue ; message du comité ;
+  - commentaires des relecteurs sous pseudonymes « Relecteur N » (RG-10). L'écran ne prévoit
+    ni note, ni recommandation, ni commentaire au comité ; le serveur ne les sert pas.
+- **Version finale** (H18), pour une soumission acceptée, acceptée sous réserve ou dont la
+  version finale est déjà reçue :
+  - date limite (`camera_ready`) ; PDF nominatif ; lettre de réponse aux relecteurs,
+    obligatoire pour `accepted_minor` ;
+  - un nouveau dépôt remplace le précédent, et la lettre déjà envoyée est reprise ;
+  - version courante téléchargeable par l'endpoint authentifié (règle n° 8) ;
+  - formulaire masqué une fois la date limite passée. Le serveur revérifie la date, la lettre
+    et le type du fichier.
+- **Retrait** d'une communication acceptée, depuis le bloc de décision (`ACCEPTED → WITHDRAWN`,
+  motif exigé).
+- **Liste** « Mes soumissions » : la date limite de la version finale tient lieu d'échéance
+  tant qu'elle n'est pas déposée. Le chapeau de la page change une fois la décision publiée.
+
+**Vérifications** :
+
+- Front : 116 tests du portail. Décision et pseudonymes, lettre exigée, dépôt, date passée,
+  liste d'attente, retrait et appel multipart du service sont couverts. Lint, format et build
+  passent, budgets inchangés.
+- **Chromium**, sur les données de L4.5 :
+  - une décision `accepted_minor` publiée, avec deux évaluations portant un commentaire au
+    comité traceur ;
+  - aucune fuite du traceur ni des noms des relecteurs dans la page ;
+  - lettre exigée, dépôt puis remplacement (version 2) ;
+  - téléchargement `GC27-0004-final-v1.pdf` en `application/pdf` ; rendu anglais ;
+  - aucun débordement à 375 px, aucune erreur dans la console.
+- **Défaut corrigé** : la lettre vide était aussi signalée « trop longue ». Le `required` du
+  gabarit ajoute un validateur ; seule l'erreur `maxlength` est désormais testée.

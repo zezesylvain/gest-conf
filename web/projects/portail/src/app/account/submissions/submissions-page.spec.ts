@@ -40,7 +40,7 @@ describe('SubmissionsPage', () => {
     return fixture.nativeElement as HTMLElement;
   }
 
-  it('liste : référence ou « Brouillon », état traduit, échéance si modifiable', async () => {
+  it('liste : référence ou « Brouillon », état traduit, échéance si modifiable ou version finale attendue', async () => {
     service['list'].mockResolvedValue([
       testSubmission(),
       testSubmission({
@@ -49,6 +49,14 @@ describe('SubmissionsPage', () => {
         status: 'submitted',
         title: '',
         can_edit: false,
+      }),
+      testSubmission({
+        id: 9,
+        reference: 'GC27-0002',
+        status: 'accepted',
+        can_edit: false,
+        allowed_actions: ['final_version'],
+        final_deadline: '2027-01-15T23:59:00Z',
       }),
     ]);
     service['currentEdition'].mockResolvedValue(testEdition());
@@ -61,6 +69,10 @@ describe('SubmissionsPage', () => {
     expect(rows[1]).toContain('(sans titre)');
     expect(rows[1]).toContain('Soumise');
     expect(rows[1]).toContain('—');
+    // Acceptée : la date limite de la version finale tient lieu d'échéance (H18).
+    expect(rows[2]).toContain('Acceptée');
+    expect(rows[2]).toContain('version finale avant le');
+    expect(rows[2]).toContain('2027');
     expect(root.querySelector('a[href="/compte/soumissions/8"]')).not.toBeNull();
   });
 
