@@ -120,7 +120,8 @@ Les URL Django sont déclarées **sans** le préfixe `/api` (`v1/...`) : `config
 |---|---|
 | L0 à L4 (MVP : squelette, socle, portail, soumission, évaluation et décision) | Livrés en code, testés en local et en CI (jusqu'à L5.2 par la PR #8, fusionnée) ; bilans dans `docs/`. **Aucune démo sur o2switch** encore faite |
 | L5 — Programme | **Livré en code et testé en local** (L5.0 à L5.7, E2E compris) ; bilan [`docs/L5-programme.md`](docs/L5-programme.md). L5.3 à L5.7 attendent leur passage en CI (nouvelle PR, sur demande). Ouverts : Q14, `ACCEPTED_MINOR → WITHDRAWN`, seuil d'avertissement du bundle du portail |
-| L6 et suivants | Non commencés : plan L6 (inscriptions) à proposer et à faire valider |
+| L6 — Inscriptions et paiements | **Plan proposé, en attente de validation** : [`docs/L6-inscriptions-plan.md`](docs/L6-inscriptions-plan.md) (décisions J1 à J16) ; dépend de Q7 (agrégateur, tarifs) et Q8 (entité de facturation) |
+| L7 et suivants | Non commencés |
 
 ## Décisions du lot L1
 
