@@ -1,0 +1,182 @@
+<gc-page-header
+  [heading]="'gestion.finance.title' | translate"
+  [lead]="'gestion.finance.lead' | translate"
+/>
+<div aria-live="polite">
+  @if (status()) {
+    <p class="notice" role="status">{{ status() }}</p>
+  }
+</div>
+<gc-error-summary [messages]="errors()" />
+
+@if (loading()) {
+  <p role="status">{{ 'gestion.registrations.loading' | translate }}</p>
+} @else if (dashboard(); as board) {
+  @if (!profileComplete()) {
+    <p class="notice">
+      {{ 'gestion.finance.profileIncomplete' | translate }}
+      <a [routerLink]="['/editions', editionId(), 'parametrage', 'facturation']">{{
+        'gestion.finance.profileLink' | translate
+      }}</a>
+    </p>
+  }
+
+  <section class="card" aria-labelledby="totals-title">
+    <h2 id="totals-title">{{ 'gestion.finance.totals' | translate }}</h2>
+    <dl class="figures">
+      <div>
+        <dt>{{ 'gestion.finance.collected' | translate }}</dt>
+        <dd>{{ amount(board.collected) }}</dd>
+      </div>
+      <div>
+        <dt>{{ 'gestion.finance.refunded' | translate }}</dt>
+        <dd>{{ amount(board.refunded) }}</dd>
+      </div>
+      <div>
+        <dt>{{ 'gestion.finance.net' | translate }}</dt>
+        <dd>{{ amount(board.net) }}</dd>
+      </div>
+      <div>
+        <dt>{{ 'gestion.finance.outstanding' | translate }}</dt>
+        <dd>{{ amount(board.outstanding) }}</dd>
+      </div>
+      <div>
+        <dt>{{ 'gestion.finance.refundsDue' | translate }}</dt>
+        <dd>{{ amount(board.refunds_due) }}</dd>
+      </div>
+    </dl>
+  </section>
+
+  <section class="card" aria-labelledby="registrations-title">
+    <h2 id="registrations-title">{{ 'gestion.finance.registrations' | translate }}</h2>
+    <dl class="figures">
+      <div>
+        <dt>{{ 'gestion.registrations.status.confirmed' | translate }}</dt>
+        <dd>{{ board.registrations.confirmed }}</dd>
+      </div>
+      <div>
+        <dt>{{ 'gestion.registrations.status.pending' | translate }}</dt>
+        <dd>{{ board.registrations.pending }}</dd>
+      </div>
+      <div>
+        <dt>{{ 'gestion.registrations.status.cancelled' | translate }}</dt>
+        <dd>{{ board.registrations.cancelled }}</dd>
+      </div>
+      <div>
+        <dt>{{ 'gestion.registrations.status.expired' | translate }}</dt>
+        <dd>{{ board.registrations.expired }}</dd>
+      </div>
+      <div>
+        <dt>{{ 'gestion.finance.waivers' | translate }}</dt>
+        <dd>{{ board.waivers }}</dd>
+      </div>
+    </dl>
+    <p>
+      <a [routerLink]="['/editions', editionId(), 'inscriptions']">{{
+        'gestion.finance.registrationsLink' | translate
+      }}</a>
+    </p>
+  </section>
+
+  <section class="card" aria-labelledby="todo-title">
+    <h2 id="todo-title">{{ 'gestion.finance.todo' | translate }}</h2>
+    <ul>
+      <li>
+        {{ 'gestion.finance.pendingInvoices' | translate: { count: board.pending_invoices } }}
+        @if (board.pending_invoices > 0 && canManage() && profileComplete()) {
+          <button mat-stroked-button type="button" (click)="issuePending()" [disabled]="busy()">
+            {{ 'gestion.finance.issuePending' | translate }}
+          </button>
+        }
+      </li>
+      <li>
+        {{ 'gestion.finance.orphanPayments' | translate: { count: board.orphan_payments } }}
+        @if (board.orphan_payments > 0) {
+          <a [routerLink]="['/editions', editionId(), 'inscriptions', 'paiements']">{{
+            'gestion.finance.paymentsLink' | translate
+          }}</a>
+        }
+      </li>
+    </ul>
+  </section>
+
+  <section class="card" aria-labelledby="documents-title">
+    <h2 id="documents-title">{{ 'gestion.finance.documents' | translate }}</h2>
+    <ul>
+      <li>
+        {{
+          'gestion.finance.invoices'
+            | translate: { count: board.invoices.count, amount: amount(board.invoices.amount) }
+        }}
+      </li>
+      <li>
+        {{
+          'gestion.finance.creditNotes'
+            | translate
+              : { count: board.credit_notes.count, amount: amount(board.credit_notes.amount) }
+        }}
+      </li>
+    </ul>
+    <p>
+      <a [routerLink]="['/editions', editionId(), 'inscriptions', 'factures']">{{
+        'gestion.finance.documentsLink' | translate
+      }}</a>
+    </p>
+  </section>
+
+  <section class="card" aria-labelledby="by-category-title">
+    <h2 id="by-category-title">{{ 'gestion.finance.byCategory' | translate }}</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">{{ 'gestion.registrations.fields.category' | translate }}</th>
+            <th scope="col">{{ 'gestion.registrations.status.confirmed' | translate }}</th>
+            <th scope="col" class="amount">{{ 'gestion.finance.amount' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of board.by_category; track row.code) {
+            <tr>
+              <td>{{ itemLabel(row) }}</td>
+              <td>{{ row.confirmed }}</td>
+              <td class="amount">{{ amount(row.amount) }}</td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="3" class="muted">{{ 'gestion.finance.none' | translate }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="by-method-title">
+    <h2 id="by-method-title">{{ 'gestion.finance.byMethod' | translate }}</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">{{ 'gestion.registrations.fields.method' | translate }}</th>
+            <th scope="col">{{ 'gestion.finance.count' | translate }}</th>
+            <th scope="col" class="amount">{{ 'gestion.finance.amount' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of board.by_method; track row.method) {
+            <tr>
+              <td>{{ 'gestion.registrations.method.' + row.method | translate }}</td>
+              <td>{{ row.count }}</td>
+              <td class="amount">{{ amount(row.amount) }}</td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="3" class="muted">{{ 'gestion.finance.none' | translate }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+}

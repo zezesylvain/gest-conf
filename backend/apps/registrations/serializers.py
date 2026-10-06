@@ -6,6 +6,8 @@ from __future__ import annotations
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
+from apps.conferences.serializers import LocalDateTimeField
+from apps.conferences.services import utc_to_local
 from apps.core.money import DECIMAL_PLACES, MAX_DIGITS, Currency
 from apps.payments.models import DocumentKind
 from apps.registrations.models import (
@@ -26,13 +28,30 @@ PERIODS = [Period.EARLY, Period.REGULAR, Period.ONSITE]
 # --- Gestion (plan L6 §4) ---------------------------------------------------------------------
 
 
+def local_value(value, timezone: str) -> str | None:
+    return utc_to_local(value, timezone).isoformat() if value else None
+
+
 class RegistrationSettingsSerializer(serializers.ModelSerializer):
     """Paramètres des inscriptions (J2, J5, J9) : lecture ``registrations.read``, écriture
-    ``pricing.write``."""
+    ``pricing.write``. Date limite d'annulation saisie à l'heure de l'édition
+    (``cancellation_deadline_local``, D13), convertie en UTC par le serveur."""
 
     local_countries = serializers.ListField(
         child=serializers.CharField(max_length=2), required=False
     )
+    cancellation_deadline_local = LocalDateTimeField(
+        required=False,
+        allow_null=True,
+        help_text="Date limite d'annulation, à l'heure de l'édition, sans fuseau.",
+    )
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["cancellation_deadline_local"] = local_value(
+            instance.cancellation_deadline, instance.edition.timezone
+        )
+        return data
 
     class Meta:
         model = RegistrationSettings
@@ -45,9 +64,11 @@ class RegistrationSettingsSerializer(serializers.ModelSerializer):
             "online_deadline_hours",
             "transfer_deadline_days",
             "cancellation_deadline",
+            "cancellation_deadline_local",
             "refund_percent_before",
             "refund_percent_after",
         )
+        read_only_fields = ("cancellation_deadline",)
 
 
 class FeeSerializer(serializers.Serializer):
@@ -140,11 +161,21 @@ class OptionSerializer(serializers.ModelSerializer):
 
 class PromoCodeSerializer(serializers.ModelSerializer):
     """Code promo (gestion) : utilisations réservées (commandes en attente) et consommées
-    (inscriptions confirmées)."""
+    (inscriptions confirmées). Date limite saisie à l'heure de l'édition (D13)."""
 
     categories = serializers.SlugRelatedField(
         slug_field="code", many=True, required=False, queryset=RegistrationCategory.objects.all()
     )
+    valid_until_local = LocalDateTimeField(
+        required=False,
+        allow_null=True,
+        help_text="Valable jusqu'au, à l'heure de l'édition, sans fuseau.",
+    )
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["valid_until_local"] = local_value(instance.valid_until, instance.edition.timezone)
+        return data
 
     class Meta:
         model = PromoCode
@@ -159,9 +190,10 @@ class PromoCodeSerializer(serializers.ModelSerializer):
             "reserved_uses",
             "consumed_uses",
             "valid_until",
+            "valid_until_local",
             "is_active",
         )
-        read_only_fields = ("id", "reserved_uses", "consumed_uses")
+        read_only_fields = ("id", "reserved_uses", "consumed_uses", "valid_until")
         # Unicité contrôlée par le service, après normalisation en majuscules.
         validators = ()
 

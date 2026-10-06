@@ -53,6 +53,22 @@ from apps.registrations.services import orders, pricing
 from apps.registrations.services import settings as registration_settings
 
 
+def local_to_utc_field(data: dict, local_name: str, utc_name: str, timezone: str) -> dict:
+    """Échéance saisie à l'heure de l'édition (D13) → instant UTC, erreur sur le champ saisi."""
+    from apps.conferences.services import local_to_utc
+
+    if local_name not in data:
+        return data
+    data = dict(data)
+    value = data.pop(local_name)
+    try:
+        data[utc_name] = None if value is None else local_to_utc(value, timezone)
+    except Invalid as exc:
+        messages = [message for items in exc.fields.values() for message in items]
+        raise Invalid(fields={local_name: messages}) from exc
+    return data
+
+
 class RegistrationSettingsViewSet(ManageViewSet):
     """``…/registrations/settings`` : devise, pays locaux, moyens et échéances, annulation."""
 
@@ -69,8 +85,14 @@ class RegistrationSettingsViewSet(ManageViewSet):
         current = registration_settings.registration_settings(self.edition)
         serializer = RegistrationSettingsSerializer(current, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
+        data = local_to_utc_field(
+            serializer.validated_data,
+            "cancellation_deadline_local",
+            "cancellation_deadline",
+            self.edition.timezone,
+        )
         settings = registration_settings.update_registration_settings(
-            self.edition, serializer.validated_data, actor=Actor.from_request(request)
+            self.edition, data, actor=Actor.from_request(request)
         )
         return Response(RegistrationSettingsSerializer(settings).data)
 
@@ -225,9 +247,10 @@ class PromoCodeViewSet(_CatalogViewSet):
     def create(self, request: Request, edition_id: int) -> Response:
         serializer = PromoCodeSerializer(data=request.data, context=self.context())
         serializer.is_valid(raise_exception=True)
-        promo = pricing.create_promo_code(
-            self.edition, serializer.validated_data, actor=self.actor()
+        data = local_to_utc_field(
+            serializer.validated_data, "valid_until_local", "valid_until", self.edition.timezone
         )
+        promo = pricing.create_promo_code(self.edition, data, actor=self.actor())
         data = PromoCodeSerializer(_promo_codes(self.edition).get(pk=promo.pk)).data
         return Response(data, status=status.HTTP_201_CREATED)
 
@@ -238,7 +261,10 @@ class PromoCodeViewSet(_CatalogViewSet):
             promo, data=request.data, partial=True, context=self.context()
         )
         serializer.is_valid(raise_exception=True)
-        pricing.update_promo_code(promo, serializer.validated_data, actor=self.actor())
+        data = local_to_utc_field(
+            serializer.validated_data, "valid_until_local", "valid_until", self.edition.timezone
+        )
+        pricing.update_promo_code(promo, data, actor=self.actor())
         return Response(PromoCodeSerializer(_promo_codes(self.edition).get(pk=promo.pk)).data)
 
     @extend_schema(operation_id="manage_registration_promo_codes_delete")

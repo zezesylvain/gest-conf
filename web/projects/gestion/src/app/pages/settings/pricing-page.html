@@ -1,0 +1,611 @@
+<gc-page-header
+  [heading]="'gestion.settings.pricing.title' | translate"
+  [lead]="'gestion.settings.pricing.lead' | translate"
+/>
+@if (!canWrite()) {
+  <p class="notice">{{ 'gestion.settings.readOnly' | translate }}</p>
+}
+<div aria-live="polite">
+  @if (status()) {
+    <p class="notice" role="status">{{ status() }}</p>
+  }
+</div>
+<gc-error-summary [messages]="errors()" />
+
+@if (!loading()) {
+  <!-- Paramètres -->
+  <form [formGroup]="settingsForm" (ngSubmit)="saveSettings()" novalidate class="card">
+    <h2>{{ 'gestion.settings.pricing.settings' | translate }}</h2>
+    <div class="grid-2">
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'gestion.settings.pricing.currency' | translate }}</mat-label>
+        <mat-select formControlName="currency">
+          @for (code of currencies; track code) {
+            <mat-option [value]="code">{{ code }}</mat-option>
+          }
+        </mat-select>
+        <mat-hint>{{ 'gestion.settings.pricing.currencyHint' | translate }}</mat-hint>
+        <mat-error>{{ error(settingsForm, 'currency') }}</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'gestion.settings.pricing.localCountries' | translate }}</mat-label>
+        <input matInput formControlName="local_countries" />
+        <mat-hint>{{ 'gestion.settings.pricing.localCountriesHint' | translate }}</mat-hint>
+        <mat-error>{{ error(settingsForm, 'local_countries') }}</mat-error>
+      </mat-form-field>
+    </div>
+    <fieldset>
+      <legend>{{ 'gestion.settings.pricing.methods' | translate }}</legend>
+      <div class="checks">
+        <mat-checkbox formControlName="online_enabled">{{
+          'gestion.registrations.method.online' | translate
+        }}</mat-checkbox>
+        <mat-checkbox formControlName="transfer_enabled">{{
+          'gestion.registrations.method.transfer' | translate
+        }}</mat-checkbox>
+        <mat-checkbox formControlName="onsite_enabled">{{
+          'gestion.registrations.method.onsite' | translate
+        }}</mat-checkbox>
+      </div>
+      <p class="muted">{{ 'gestion.settings.pricing.onlineHint' | translate }}</p>
+    </fieldset>
+    <div class="grid-2">
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'gestion.settings.pricing.onlineDeadline' | translate }}</mat-label>
+        <input matInput type="number" min="1" max="720" formControlName="online_deadline_hours" />
+        <mat-error>{{ error(settingsForm, 'online_deadline_hours') }}</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'gestion.settings.pricing.transferDeadline' | translate }}</mat-label>
+        <input matInput type="number" min="1" max="180" formControlName="transfer_deadline_days" />
+        <mat-error>{{ error(settingsForm, 'transfer_deadline_days') }}</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'gestion.settings.pricing.cancellationDeadline' | translate }}</mat-label>
+        <input matInput type="datetime-local" formControlName="cancellation_deadline_local" />
+        <mat-hint>{{
+          'gestion.settings.pricing.localTimeHint' | translate: { zone: timezone() ?? 'UTC' }
+        }}</mat-hint>
+        <mat-error>{{ error(settingsForm, 'cancellation_deadline_local') }}</mat-error>
+      </mat-form-field>
+      <div></div>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'gestion.settings.pricing.refundBefore' | translate }}</mat-label>
+        <input matInput type="number" min="0" max="100" formControlName="refund_percent_before" />
+        <mat-error>{{ error(settingsForm, 'refund_percent_before') }}</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'gestion.settings.pricing.refundAfter' | translate }}</mat-label>
+        <input matInput type="number" min="0" max="100" formControlName="refund_percent_after" />
+        <mat-error>{{ error(settingsForm, 'refund_percent_after') }}</mat-error>
+      </mat-form-field>
+    </div>
+    @if (canWrite()) {
+      <div class="actions">
+        <button mat-flat-button type="submit" [disabled]="busy()">
+          {{ 'gestion.settings.save' | translate }}
+        </button>
+      </div>
+    }
+  </form>
+
+  <!-- Catégories et grille des tarifs -->
+  <section class="card" aria-labelledby="categories-title">
+    <h2 id="categories-title">{{ 'gestion.settings.pricing.categories' | translate }}</h2>
+    <p class="muted">{{ 'gestion.settings.pricing.categoriesLead' | translate }}</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">{{ 'gestion.settings.pricing.category' | translate }}</th>
+            @for (period of periods; track period) {
+              @for (zone of zones; track zone) {
+                <th scope="col" class="amount">
+                  {{ 'gestion.registrations.period.' + period | translate }}<br />
+                  <span class="muted">{{ 'gestion.registrations.zone.' + zone | translate }}</span>
+                </th>
+              }
+            }
+            @if (canWrite()) {
+              <th scope="col">
+                <span class="visually-hidden">{{ 'gestion.settings.actions' | translate }}</span>
+              </th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (category of categories(); track category.id) {
+            <tr>
+              <td>
+                <strong>{{ category.code }}</strong> — {{ itemLabel(category) }}
+                @if (category.requires_proof) {
+                  <span class="badge">{{ 'gestion.settings.pricing.proof' | translate }}</span>
+                }
+                @if (category.is_active === false) {
+                  <span class="badge">{{ 'gestion.settings.pricing.inactive' | translate }}</span>
+                }
+              </td>
+              @for (period of periods; track period) {
+                @for (zone of zones; track zone) {
+                  <td class="amount">{{ fee(category, period, zone) }}</td>
+                }
+              }
+              @if (canWrite()) {
+                <td class="actions">
+                  <button
+                    mat-button
+                    type="button"
+                    (click)="startFees(category)"
+                    [disabled]="busy()"
+                  >
+                    {{ 'gestion.settings.pricing.editFees' | translate
+                    }}<span class="visually-hidden"> {{ category.code }}</span>
+                  </button>
+                  <button
+                    mat-button
+                    type="button"
+                    (click)="startCategory(category)"
+                    [disabled]="busy()"
+                  >
+                    {{ 'gestion.settings.edit' | translate
+                    }}<span class="visually-hidden"> {{ category.code }}</span>
+                  </button>
+                  @if (!category.in_use) {
+                    <button
+                      mat-button
+                      type="button"
+                      (click)="removeCategory(category)"
+                      [disabled]="busy()"
+                    >
+                      {{ 'gestion.settings.delete' | translate
+                      }}<span class="visually-hidden"> {{ category.code }}</span>
+                    </button>
+                  }
+                </td>
+              }
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="8" class="muted">{{ 'gestion.settings.empty' | translate }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (canWrite() && categoryEditing() === null && feesEditing() === null) {
+      <div class="actions">
+        <button mat-stroked-button type="button" (click)="startCategory()">
+          {{ 'gestion.settings.pricing.addCategory' | translate }}
+        </button>
+      </div>
+    }
+
+    @if (categoryEditing() !== null) {
+      <form [formGroup]="categoryForm" (ngSubmit)="saveCategory()" novalidate>
+        <h3>
+          {{
+            (categoryEditing()
+              ? 'gestion.settings.pricing.editCategory'
+              : 'gestion.settings.pricing.addCategory'
+            ) | translate
+          }}
+        </h3>
+        <div class="grid-2">
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'gestion.fields.code' | translate }}</mat-label>
+            <input matInput formControlName="code" required maxlength="32" />
+            <mat-hint>{{ 'gestion.settings.pricing.codeHint' | translate }}</mat-hint>
+            <mat-error>{{ error(categoryForm, 'code') }}</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'gestion.fields.position' | translate }}</mat-label>
+            <input matInput type="number" min="0" formControlName="position" />
+            <mat-error>{{ error(categoryForm, 'position') }}</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'gestion.fields.labelFr' | translate }}</mat-label>
+            <input matInput formControlName="label_fr" required maxlength="150" />
+            <mat-error>{{ error(categoryForm, 'label_fr') }}</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'gestion.fields.labelEn' | translate }}</mat-label>
+            <input matInput formControlName="label_en" maxlength="150" />
+            <mat-error>{{ error(categoryForm, 'label_en') }}</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'gestion.fields.descriptionFr' | translate }}</mat-label>
+            <textarea matInput rows="2" formControlName="description_fr"></textarea>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'gestion.fields.descriptionEn' | translate }}</mat-label>
+            <textarea matInput rows="2" formControlName="description_en"></textarea>
+          </mat-form-field>
+        </div>
+        <div class="checks">
+          <mat-checkbox formControlName="requires_proof">{{
+            'gestion.settings.pricing.requiresProof' | translate
+          }}</mat-checkbox>
+          <mat-checkbox formControlName="is_active">{{
+            'gestion.settings.pricing.active' | translate
+          }}</mat-checkbox>
+        </div>
+        <div class="actions">
+          <button mat-flat-button type="submit" [disabled]="busy()">
+            {{ 'gestion.settings.save' | translate }}
+          </button>
+          <button mat-button type="button" (click)="closeForms()">
+            {{ 'gestion.registrations.cancelForm' | translate }}
+          </button>
+        </div>
+      </form>
+    }
+
+    @if (feesEditing() !== null) {
+      <form [formGroup]="feesForm" (ngSubmit)="saveFees()" novalidate>
+        <h3>{{ 'gestion.settings.pricing.feesTitle' | translate }}</h3>
+        <p class="muted">
+          {{ 'gestion.settings.pricing.feesLead' | translate: { currency: currency() } }}
+        </p>
+        <div class="grid-2">
+          @for (period of periods; track period) {
+            @for (zone of zones; track zone) {
+              <mat-form-field appearance="outline">
+                <mat-label
+                  >{{ 'gestion.registrations.period.' + period | translate }} —
+                  {{ 'gestion.registrations.zone.' + zone | translate }}</mat-label
+                >
+                <input matInput inputmode="decimal" [formControlName]="feeKey(period, zone)" />
+                <mat-error>{{ error(feesForm, feeKey(period, zone)) }}</mat-error>
+              </mat-form-field>
+            }
+          }
+        </div>
+        <div class="actions">
+          <button mat-flat-button type="submit" [disabled]="busy()">
+            {{ 'gestion.settings.save' | translate }}
+          </button>
+          <button mat-button type="button" (click)="closeForms()">
+            {{ 'gestion.registrations.cancelForm' | translate }}
+          </button>
+        </div>
+      </form>
+    }
+  </section>
+
+  <!-- Options -->
+  <section class="card" aria-labelledby="options-title">
+    <h2 id="options-title">{{ 'gestion.settings.pricing.options' | translate }}</h2>
+    <p class="muted">{{ 'gestion.settings.pricing.optionsLead' | translate }}</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">{{ 'gestion.settings.pricing.option' | translate }}</th>
+            <th scope="col" class="amount">
+              {{ 'gestion.registrations.zone.local' | translate }}
+            </th>
+            <th scope="col" class="amount">
+              {{ 'gestion.registrations.zone.international' | translate }}
+            </th>
+            <th scope="col">{{ 'gestion.settings.pricing.quota' | translate }}</th>
+            <th scope="col">{{ 'gestion.settings.pricing.allowedCategories' | translate }}</th>
+            @if (canWrite()) {
+              <th scope="col">
+                <span class="visually-hidden">{{ 'gestion.settings.actions' | translate }}</span>
+              </th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (option of options(); track option.id) {
+            <tr>
+              <td>
+                <strong>{{ option.code }}</strong> — {{ itemLabel(option) }}
+                @if (option.is_active === false) {
+                  <span class="badge">{{ 'gestion.settings.pricing.inactive' | translate }}</span>
+                }
+              </td>
+              <td class="amount">{{ amount(option.price_local ?? '0') }}</td>
+              <td class="amount">{{ amount(option.price_international ?? '0') }}</td>
+              <td>
+                @if (option.quota === null || option.quota === undefined) {
+                  {{ 'gestion.settings.pricing.unlimited' | translate }}
+                } @else {
+                  {{
+                    'gestion.settings.pricing.reserved'
+                      | translate: { reserved: option.reserved, quota: option.quota }
+                  }}
+                }
+              </td>
+              <td>
+                {{
+                  option.categories?.length
+                    ? option.categories?.join(', ')
+                    : ('gestion.settings.pricing.allCategories' | translate)
+                }}
+              </td>
+              @if (canWrite()) {
+                <td class="actions">
+                  <button
+                    mat-button
+                    type="button"
+                    (click)="startOption(option)"
+                    [disabled]="busy()"
+                  >
+                    {{ 'gestion.settings.edit' | translate
+                    }}<span class="visually-hidden"> {{ option.code }}</span>
+                  </button>
+                  <button
+                    mat-button
+                    type="button"
+                    (click)="removeOption(option)"
+                    [disabled]="busy()"
+                  >
+                    {{ 'gestion.settings.delete' | translate
+                    }}<span class="visually-hidden"> {{ option.code }}</span>
+                  </button>
+                </td>
+              }
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="muted">{{ 'gestion.settings.empty' | translate }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (canWrite()) {
+      @if (optionEditing() === null) {
+        <div class="actions">
+          <button mat-stroked-button type="button" (click)="startOption()">
+            {{ 'gestion.settings.pricing.addOption' | translate }}
+          </button>
+        </div>
+      } @else {
+        <form [formGroup]="optionForm" (ngSubmit)="saveOption()" novalidate>
+          <h3>
+            {{
+              (optionEditing()
+                ? 'gestion.settings.pricing.editOption'
+                : 'gestion.settings.pricing.addOption'
+              ) | translate
+            }}
+          </h3>
+          <div class="grid-2">
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.fields.code' | translate }}</mat-label>
+              <input matInput formControlName="code" required maxlength="32" />
+              <mat-error>{{ error(optionForm, 'code') }}</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.fields.position' | translate }}</mat-label>
+              <input matInput type="number" min="0" formControlName="position" />
+              <mat-error>{{ error(optionForm, 'position') }}</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.fields.labelFr' | translate }}</mat-label>
+              <input matInput formControlName="label_fr" required maxlength="150" />
+              <mat-error>{{ error(optionForm, 'label_fr') }}</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.fields.labelEn' | translate }}</mat-label>
+              <input matInput formControlName="label_en" maxlength="150" />
+              <mat-error>{{ error(optionForm, 'label_en') }}</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.settings.pricing.priceLocal' | translate }}</mat-label>
+              <input matInput inputmode="decimal" formControlName="price_local" required />
+              <mat-error>{{ error(optionForm, 'price_local') }}</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.settings.pricing.priceInternational' | translate }}</mat-label>
+              <input matInput inputmode="decimal" formControlName="price_international" required />
+              <mat-error>{{ error(optionForm, 'price_international') }}</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.settings.pricing.quota' | translate }}</mat-label>
+              <input matInput type="number" min="0" formControlName="quota" />
+              <mat-hint>{{ 'gestion.settings.pricing.quotaHint' | translate }}</mat-hint>
+              <mat-error>{{ error(optionForm, 'quota') }}</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.settings.pricing.allowedCategories' | translate }}</mat-label>
+              <mat-select formControlName="categories" multiple>
+                @for (category of categories(); track category.id) {
+                  <mat-option [value]="category.code">{{ category.code }}</mat-option>
+                }
+              </mat-select>
+              <mat-hint>{{ 'gestion.settings.pricing.allCategoriesHint' | translate }}</mat-hint>
+              <mat-error>{{ error(optionForm, 'categories') }}</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.fields.descriptionFr' | translate }}</mat-label>
+              <textarea matInput rows="2" formControlName="description_fr"></textarea>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.fields.descriptionEn' | translate }}</mat-label>
+              <textarea matInput rows="2" formControlName="description_en"></textarea>
+            </mat-form-field>
+          </div>
+          <mat-checkbox formControlName="is_active">{{
+            'gestion.settings.pricing.active' | translate
+          }}</mat-checkbox>
+          <div class="actions">
+            <button mat-flat-button type="submit" [disabled]="busy()">
+              {{ 'gestion.settings.save' | translate }}
+            </button>
+            <button mat-button type="button" (click)="closeForms()">
+              {{ 'gestion.registrations.cancelForm' | translate }}
+            </button>
+          </div>
+        </form>
+      }
+    }
+  </section>
+
+  <!-- Codes promo -->
+  <section class="card" aria-labelledby="promo-title">
+    <h2 id="promo-title">{{ 'gestion.settings.pricing.promoCodes' | translate }}</h2>
+    <p class="muted">{{ 'gestion.settings.pricing.promoLead' | translate }}</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">{{ 'gestion.fields.code' | translate }}</th>
+            <th scope="col">{{ 'gestion.settings.pricing.discount' | translate }}</th>
+            <th scope="col">{{ 'gestion.settings.pricing.uses' | translate }}</th>
+            <th scope="col">{{ 'gestion.settings.pricing.validUntil' | translate }}</th>
+            @if (canWrite()) {
+              <th scope="col">
+                <span class="visually-hidden">{{ 'gestion.settings.actions' | translate }}</span>
+              </th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (promo of promoCodes(); track promo.id) {
+            <tr>
+              <td>
+                <strong>{{ promo.code }}</strong>
+                @if (promo.is_active === false) {
+                  <span class="badge">{{ 'gestion.settings.pricing.inactive' | translate }}</span>
+                }
+              </td>
+              <td>
+                {{ promoValue(promo) }} ·
+                {{
+                  'gestion.settings.pricing.scope.' + (promo.scope ?? 'registration') | translate
+                }}
+                @if (promo.categories?.length) {
+                  <br /><span class="muted">{{ promo.categories?.join(', ') }}</span>
+                }
+              </td>
+              <td>
+                {{
+                  'gestion.settings.pricing.usesValue'
+                    | translate
+                      : {
+                          consumed: promo.consumed_uses,
+                          reserved: promo.reserved_uses,
+                          max: promo.max_uses ?? '∞',
+                        }
+                }}
+              </td>
+              <td>{{ date(promo.valid_until) }}</td>
+              @if (canWrite()) {
+                <td class="actions">
+                  <button mat-button type="button" (click)="startPromo(promo)" [disabled]="busy()">
+                    {{ 'gestion.settings.edit' | translate
+                    }}<span class="visually-hidden"> {{ promo.code }}</span>
+                  </button>
+                  <button mat-button type="button" (click)="removePromo(promo)" [disabled]="busy()">
+                    {{ 'gestion.settings.delete' | translate
+                    }}<span class="visually-hidden"> {{ promo.code }}</span>
+                  </button>
+                </td>
+              }
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="5" class="muted">{{ 'gestion.settings.empty' | translate }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (canWrite()) {
+      @if (promoEditing() === null) {
+        <div class="actions">
+          <button mat-stroked-button type="button" (click)="startPromo()">
+            {{ 'gestion.settings.pricing.addPromo' | translate }}
+          </button>
+        </div>
+      } @else {
+        <form [formGroup]="promoForm" (ngSubmit)="savePromo()" novalidate>
+          <h3>
+            {{
+              (promoEditing()
+                ? 'gestion.settings.pricing.editPromo'
+                : 'gestion.settings.pricing.addPromo'
+              ) | translate
+            }}
+          </h3>
+          <div class="grid-2">
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.fields.code' | translate }}</mat-label>
+              <input matInput formControlName="code" required maxlength="32" />
+              <mat-hint>{{ 'gestion.settings.pricing.promoCodeHint' | translate }}</mat-hint>
+              <mat-error>{{ error(promoForm, 'code') }}</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.settings.pricing.kind' | translate }}</mat-label>
+              <mat-select formControlName="kind">
+                <mat-option value="percent">{{
+                  'gestion.settings.pricing.kinds.percent' | translate
+                }}</mat-option>
+                <mat-option value="amount">{{
+                  'gestion.settings.pricing.kinds.amount' | translate
+                }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.settings.pricing.value' | translate }}</mat-label>
+              <input matInput inputmode="decimal" formControlName="value" required />
+              <mat-error>{{ error(promoForm, 'value') }}</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.settings.pricing.scopeLabel' | translate }}</mat-label>
+              <mat-select formControlName="scope">
+                <mat-option value="registration">{{
+                  'gestion.settings.pricing.scope.registration' | translate
+                }}</mat-option>
+                <mat-option value="all">{{
+                  'gestion.settings.pricing.scope.all' | translate
+                }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.settings.pricing.allowedCategories' | translate }}</mat-label>
+              <mat-select formControlName="categories" multiple>
+                @for (category of categories(); track category.id) {
+                  <mat-option [value]="category.code">{{ category.code }}</mat-option>
+                }
+              </mat-select>
+              <mat-hint>{{ 'gestion.settings.pricing.allCategoriesHint' | translate }}</mat-hint>
+              <mat-error>{{ error(promoForm, 'categories') }}</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.settings.pricing.maxUses' | translate }}</mat-label>
+              <input matInput type="number" min="1" formControlName="max_uses" />
+              <mat-hint>{{ 'gestion.settings.pricing.maxUsesHint' | translate }}</mat-hint>
+              <mat-error>{{ error(promoForm, 'max_uses') }}</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.settings.pricing.validUntil' | translate }}</mat-label>
+              <input matInput type="datetime-local" formControlName="valid_until_local" />
+              <mat-hint>{{
+                'gestion.settings.pricing.localTimeHint' | translate: { zone: timezone() ?? 'UTC' }
+              }}</mat-hint>
+              <mat-error>{{ error(promoForm, 'valid_until_local') }}</mat-error>
+            </mat-form-field>
+          </div>
+          <mat-checkbox formControlName="is_active">{{
+            'gestion.settings.pricing.active' | translate
+          }}</mat-checkbox>
+          <div class="actions">
+            <button mat-flat-button type="submit" [disabled]="busy()">
+              {{ 'gestion.settings.save' | translate }}
+            </button>
+            <button mat-button type="button" (click)="closeForms()">
+              {{ 'gestion.registrations.cancelForm' | translate }}
+            </button>
+          </div>
+        </form>
+      }
+    }
+  </section>
+}

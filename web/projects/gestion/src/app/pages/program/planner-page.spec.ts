@@ -12,7 +12,7 @@ import {
 import { EditionApi } from '../../core/edition-api';
 import { ProgramApi } from '../../core/program-api';
 import { DragItem, DropTarget, PlannerPage } from './planner-page';
-import { board } from './testing';
+import { board, paper, session, slot } from './testing';
 
 interface Page {
   drop(event: unknown): Promise<void>;
@@ -21,9 +21,9 @@ interface Page {
 describe('PlannerPage (plan L5, I15 ; RG-12, RG-13)', () => {
   let api: Record<string, ReturnType<typeof vi.fn>>;
 
-  async function render(edition = PROGRAM_EDITION) {
+  async function render(edition = PROGRAM_EDITION, value = board()) {
     api = {
-      board: vi.fn().mockResolvedValue(board()),
+      board: vi.fn().mockResolvedValue(value),
       createSlot: vi.fn().mockResolvedValue(board({ revision: 8 })),
       updateSlot: vi.fn().mockResolvedValue(board({ revision: 8 })),
       deleteSlot: vi.fn().mockResolvedValue(board({ revision: 8 })),
@@ -188,5 +188,27 @@ describe('PlannerPage (plan L5, I15 ; RG-12, RG-13)', () => {
     expect(root.textContent).toContain('Lecture seule');
     expect(root.textContent).not.toContain('Placer dans…');
     expect(root.querySelector('button.down')).toBeNull();
+  });
+
+  it('RG-11 : présentateur non inscrit signalé (liste et créneau) ; inconnu sans badge', async () => {
+    const { root } = await render(
+      PROGRAM_EDITION,
+      board({
+        sessions: [
+          session(10, {
+            slots: [
+              slot(1, 0, { submission: paper(101, { presenter_registered: false }) }),
+              slot(2, 1, { submission: paper(102, { presenter_registered: true }) }),
+            ],
+          }),
+        ],
+        to_schedule: [paper(1, { presenter_registered: false }), paper(2)],
+        conflicts: [],
+      }),
+    );
+    const badges = Array.from(root.querySelectorAll('.badge.warn')).filter((badge) =>
+      badge.textContent!.includes('Présentateur non inscrit'),
+    );
+    expect(badges).toHaveLength(2);
   });
 });

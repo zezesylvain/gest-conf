@@ -184,6 +184,28 @@ def test_j3_reserved_option_cannot_be_deleted(edition, finance):
 # --- Codes promo (J4) -------------------------------------------------------------------------
 
 
+def test_d13_promo_code_deadline_entered_in_edition_local_time():
+    """D13 : « valable jusqu'au » saisi à l'heure de l'édition, stocké en UTC."""
+    edition = EditionFactory(timezone="Europe/Paris")
+    client = client_for(make_member(edition, Role.OC_MEMBER, oc_function="finance"))
+    response = client.post(
+        f"{base(edition)}/promo-codes",
+        {"code": "ete", "kind": "percent", "value": "10", "valid_until_local": "2027-07-01T23:59"},
+        format="json",
+    )
+    assert response.status_code == 201, response.content
+    assert response.json()["valid_until"] == "2027-07-01T21:59:00Z"
+    assert response.json()["valid_until_local"] == "2027-07-01T23:59:00"
+    promo = PromoCode.objects.get(edition=edition)
+    response = client.patch(
+        f"{base(edition)}/promo-codes/{promo.pk}",
+        {"valid_until_local": "2027-10-31T02:30"},
+        format="json",
+    )
+    assert response.status_code == 400, "heure ambiguë (retour à l'heure d'hiver)"
+    assert list(response.json()["fields"]) == ["valid_until_local"]
+
+
 def test_j4_promo_code_normalized_and_unique_ignoring_case(edition, finance):
     url = f"{base(edition)}/promo-codes"
     response = finance.post(url, {"code": " etu10 ", "kind": "percent", "value": "10"})

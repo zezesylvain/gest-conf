@@ -14,6 +14,7 @@ export type NavGroupKey =
   | 'submissions'
   | 'reviewing'
   | 'program'
+  | 'registrations'
   | 'settings'
   | 'committees'
   | 'portal'
@@ -57,6 +58,7 @@ export const GROUP_ORDER: readonly NavGroupKey[] = [
   'submissions',
   'reviewing',
   'program',
+  'registrations',
   'settings',
   'committees',
   'portal',
@@ -147,6 +149,39 @@ export const SCREENS: readonly ScreenDef[] = [
     group: 'program',
     capability: 'program.read',
   },
+  // Inscriptions (plan L6, J12) : lecture registrations.read ; finances finance.read.
+  {
+    key: 'registrations',
+    path: 'inscriptions',
+    label: 'gestion.nav.registrations',
+    help: 'registrations',
+    group: 'registrations',
+    capability: 'registrations.read',
+  },
+  {
+    key: 'payments',
+    path: 'inscriptions/paiements',
+    label: 'gestion.nav.payments',
+    help: 'payments',
+    group: 'registrations',
+    capability: 'finance.read',
+  },
+  {
+    key: 'billingDocuments',
+    path: 'inscriptions/factures',
+    label: 'gestion.nav.billingDocuments',
+    help: 'billing-documents',
+    group: 'registrations',
+    capability: 'finance.read',
+  },
+  {
+    key: 'finance',
+    path: 'inscriptions/finances',
+    label: 'gestion.nav.finance',
+    help: 'finance-dashboard',
+    group: 'registrations',
+    capability: 'finance.read',
+  },
   {
     key: 'general',
     path: 'parametrage/general',
@@ -194,6 +229,22 @@ export const SCREENS: readonly ScreenDef[] = [
     help: 'settings-program',
     group: 'settings',
     capability: 'program.read',
+  },
+  {
+    key: 'pricing',
+    path: 'parametrage/tarifs',
+    label: 'gestion.nav.pricing',
+    help: 'settings-pricing',
+    group: 'settings',
+    capability: 'registrations.read',
+  },
+  {
+    key: 'billingProfile',
+    path: 'parametrage/facturation',
+    label: 'gestion.nav.billingProfile',
+    help: 'settings-billing',
+    group: 'settings',
+    capability: 'finance.read',
   },
   {
     key: 'grids',
@@ -288,6 +339,7 @@ export const ROLE_GROUPS: Partial<Record<Role, readonly NavGroupKey[]>> = {
     'submissions',
     'reviewing',
     'program',
+    'registrations',
     'settings',
     'committees',
     'portal',
@@ -298,6 +350,7 @@ export const ROLE_GROUPS: Partial<Record<Role, readonly NavGroupKey[]>> = {
     'submissions',
     'reviewing',
     'program',
+    'registrations',
     'settings',
     'committees',
     'portal',
@@ -305,7 +358,7 @@ export const ROLE_GROUPS: Partial<Record<Role, readonly NavGroupKey[]>> = {
   ],
   // Paramétrage pour les grilles d'évaluation (plan L4, H3) ; programme en lecture (L5, I1).
   SC_CHAIR: ['steering', 'submissions', 'reviewing', 'program', 'settings', 'committees'],
-  OC_MEMBER: ['steering', 'submissions', 'program', 'settings', 'portal'],
+  OC_MEMBER: ['steering', 'submissions', 'program', 'registrations', 'settings', 'portal'],
   // Relecteur (plan L4, H1) : ses évaluations seulement.
   SC_MEMBER: ['reviewing'],
 };

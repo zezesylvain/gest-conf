@@ -43,12 +43,18 @@ describe('EditionLayout', () => {
       'Sessions',
       'Salles',
       'Publication du programme',
+      'Inscriptions',
+      'Paiements',
+      'Factures et avoirs',
+      'Finances',
       'Informations générales',
       'Thématiques',
       'Types de communication',
       'Calendrier',
       'Confidentialité',
       'Programme',
+      'Tarifs',
+      'Facturation',
       "Grilles d'évaluation",
       'Membres',
       'Invitations',
@@ -65,7 +71,7 @@ describe('EditionLayout', () => {
     const root = await render([CHAIR_EDITION]);
     expect(openGroups(root)).toEqual(['Pilotage']);
     expect(links(root, '.rail ul:not([hidden]) a')).toEqual(['Tableau de bord']);
-    expect(root.querySelectorAll('.rail ul[hidden]').length).toBe(8);
+    expect(root.querySelectorAll('.rail ul[hidden]').length).toBe(9);
   });
 
   it('un clic ouvre une autre catégorie et referme la précédente', async () => {

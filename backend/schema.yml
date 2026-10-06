@@ -10016,7 +10016,7 @@ components:
       type: object
       description: |-
         Code promo (gestion) : utilisations réservées (commandes en attente) et consommées
-        (inscriptions confirmées).
+        (inscriptions confirmées). Date limite saisie à l'heure de l'édition (D13).
       properties:
         code:
           type: string
@@ -10047,11 +10047,11 @@ components:
           format: int64
           nullable: true
           title: Utilisations maximales
-        valid_until:
+        valid_until_local:
           type: string
           format: date-time
           nullable: true
-          title: Valable jusqu'au (UTC)
+          description: Valable jusqu'au, à l'heure de l'édition, sans fuseau.
         is_active:
           type: boolean
           title: Actif
@@ -10079,7 +10079,8 @@ components:
       type: object
       description: |-
         Paramètres des inscriptions (J2, J5, J9) : lecture ``registrations.read``, écriture
-        ``pricing.write``.
+        ``pricing.write``. Date limite d'annulation saisie à l'heure de l'édition
+        (``cancellation_deadline_local``, D13), convertie en UTC par le serveur.
       properties:
         currency:
           allOf:
@@ -10110,11 +10111,11 @@ components:
           maximum: 180
           minimum: 1
           title: Délai de paiement par virement (jours)
-        cancellation_deadline:
+        cancellation_deadline_local:
           type: string
           format: date-time
           nullable: true
-          title: Annulation par le participant jusqu'au (UTC)
+          description: Date limite d'annulation, à l'heure de l'édition, sans fuseau.
         refund_percent_before:
           type: integer
           maximum: 100
@@ -10964,7 +10965,7 @@ components:
       type: object
       description: |-
         Code promo (gestion) : utilisations réservées (commandes en attente) et consommées
-        (inscriptions confirmées).
+        (inscriptions confirmées). Date limite saisie à l'heure de l'édition (D13).
       properties:
         id:
           type: integer
@@ -11007,8 +11008,14 @@ components:
         valid_until:
           type: string
           format: date-time
+          readOnly: true
           nullable: true
           title: Valable jusqu'au (UTC)
+        valid_until_local:
+          type: string
+          format: date-time
+          nullable: true
+          description: Valable jusqu'au, à l'heure de l'édition, sans fuseau.
         is_active:
           type: boolean
           title: Actif
@@ -11018,12 +11025,13 @@ components:
       - id
       - kind
       - reserved_uses
+      - valid_until
       - value
     PromoCodeRequest:
       type: object
       description: |-
         Code promo (gestion) : utilisations réservées (commandes en attente) et consommées
-        (inscriptions confirmées).
+        (inscriptions confirmées). Date limite saisie à l'heure de l'édition (D13).
       properties:
         code:
           type: string
@@ -11054,11 +11062,11 @@ components:
           format: int64
           nullable: true
           title: Utilisations maximales
-        valid_until:
+        valid_until_local:
           type: string
           format: date-time
           nullable: true
-          title: Valable jusqu'au (UTC)
+          description: Valable jusqu'au, à l'heure de l'édition, sans fuseau.
         is_active:
           type: boolean
           title: Actif
@@ -12447,7 +12455,8 @@ components:
       type: object
       description: |-
         Paramètres des inscriptions (J2, J5, J9) : lecture ``registrations.read``, écriture
-        ``pricing.write``.
+        ``pricing.write``. Date limite d'annulation saisie à l'heure de l'édition
+        (``cancellation_deadline_local``, D13), convertie en UTC par le serveur.
       properties:
         currency:
           allOf:
@@ -12480,8 +12489,14 @@ components:
         cancellation_deadline:
           type: string
           format: date-time
+          readOnly: true
           nullable: true
           title: Annulation par le participant jusqu'au (UTC)
+        cancellation_deadline_local:
+          type: string
+          format: date-time
+          nullable: true
+          description: Date limite d'annulation, à l'heure de l'édition, sans fuseau.
         refund_percent_before:
           type: integer
           maximum: 100
@@ -12492,6 +12507,8 @@ components:
           maximum: 100
           minimum: 0
           title: Part remboursée après la date limite (%)
+      required:
+      - cancellation_deadline
     RegistrationStatus:
       enum:
       - pending

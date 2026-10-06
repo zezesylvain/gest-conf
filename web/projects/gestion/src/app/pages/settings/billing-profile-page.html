@@ -1,0 +1,101 @@
+<gc-page-header
+  [heading]="'gestion.settings.billing.title' | translate"
+  [lead]="'gestion.settings.billing.lead' | translate"
+/>
+@if (!canWrite()) {
+  <p class="notice">{{ 'gestion.settings.readOnly' | translate }}</p>
+}
+<div aria-live="polite">
+  @if (status()) {
+    <p class="notice" role="status">{{ status() }}</p>
+  }
+</div>
+<gc-error-summary [messages]="errors()" />
+
+@if (!loading()) {
+  @if (profile(); as current) {
+    <p class="notice">
+      {{
+        (current.is_complete
+          ? 'gestion.settings.billing.complete'
+          : 'gestion.settings.billing.incomplete'
+        ) | translate
+      }}
+    </p>
+  }
+  <form [formGroup]="form" (ngSubmit)="save()" novalidate class="card">
+    <h2>{{ 'gestion.settings.billing.issuer' | translate }}</h2>
+    <div class="grid-2">
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'gestion.settings.billing.legalName' | translate }}</mat-label>
+        <input matInput formControlName="legal_name" maxlength="255" />
+        <mat-error>{{ error('legal_name') }}</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'gestion.settings.billing.address' | translate }}</mat-label>
+        <textarea matInput rows="3" formControlName="address"></textarea>
+        <mat-error>{{ error('address') }}</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'gestion.settings.billing.taxIdentifiers' | translate }}</mat-label>
+        <textarea matInput rows="2" formControlName="tax_identifiers"></textarea>
+        <mat-hint>{{ 'gestion.settings.billing.taxIdentifiersHint' | translate }}</mat-hint>
+        <mat-error>{{ error('tax_identifiers') }}</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'gestion.settings.billing.bankDetails' | translate }}</mat-label>
+        <textarea matInput rows="3" formControlName="bank_details"></textarea>
+        <mat-hint>{{ 'gestion.settings.billing.bankDetailsHint' | translate }}</mat-hint>
+        <mat-error>{{ error('bank_details') }}</mat-error>
+      </mat-form-field>
+    </div>
+
+    <h2>{{ 'gestion.settings.billing.vat' | translate }}</h2>
+    <div class="grid-2">
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'gestion.settings.billing.vatRate' | translate }}</mat-label>
+        <input matInput inputmode="decimal" formControlName="vat_rate" />
+        <mat-hint>{{ 'gestion.settings.billing.vatRateHint' | translate }}</mat-hint>
+        <mat-error>{{ error('vat_rate') }}</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'gestion.settings.billing.vatNote' | translate }}</mat-label>
+        <input matInput formControlName="vat_note" maxlength="255" />
+        <mat-hint>{{ 'gestion.settings.billing.vatNoteHint' | translate }}</mat-hint>
+        <mat-error>{{ error('vat_note') }}</mat-error>
+      </mat-form-field>
+    </div>
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'gestion.settings.billing.footer' | translate }}</mat-label>
+      <textarea matInput rows="2" formControlName="footer"></textarea>
+      <mat-error>{{ error('footer') }}</mat-error>
+    </mat-form-field>
+
+    <h2>{{ 'gestion.settings.billing.numbering' | translate }}</h2>
+    <p class="muted">{{ 'gestion.settings.billing.numberingLead' | translate }}</p>
+    <div class="grid-2">
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'gestion.settings.billing.invoicePrefix' | translate }}</mat-label>
+        <input matInput formControlName="invoice_prefix" required maxlength="8" />
+        <mat-error>{{ error('invoice_prefix') }}</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'gestion.settings.billing.creditNotePrefix' | translate }}</mat-label>
+        <input matInput formControlName="credit_note_prefix" required maxlength="8" />
+        <mat-error>{{ error('credit_note_prefix') }}</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'gestion.settings.billing.proformaPrefix' | translate }}</mat-label>
+        <input matInput formControlName="proforma_prefix" required maxlength="8" />
+        <mat-error>{{ error('proforma_prefix') }}</mat-error>
+      </mat-form-field>
+    </div>
+    @if (canWrite()) {
+      <div class="actions">
+        <button mat-flat-button type="submit" [disabled]="busy()">
+          {{ 'gestion.settings.save' | translate }}
+        </button>
+      </div>
+    }
+  </form>
+}

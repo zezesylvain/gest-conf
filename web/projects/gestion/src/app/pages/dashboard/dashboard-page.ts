@@ -17,6 +17,7 @@ import {
   Edition,
   EditionStatus,
   ErrorSummary,
+  FinanceDashboard,
   formatInZone,
   KeyDate,
   LanguageService,
@@ -34,6 +35,7 @@ import { EditionApi } from '../../core/edition-api';
 import { editionTitle } from '../../core/managed-editions';
 import { editionCapabilities, errorMessages } from '../../core/page-support';
 import { ProgramApi } from '../../core/program-api';
+import { money, RegistrationsApi } from '../../core/registrations-api';
 import { ReviewsApi } from '../../core/reviews-api';
 import { SubmissionsApi } from '../../core/submissions-api';
 
@@ -48,7 +50,8 @@ interface CheckItem {
  * paramétrage à compléter, dates clés, invitations en attente, état de la 2FA ; compteurs
  * de soumissions par statut avec `submissions.read` (plan L3) ; avancement de l'évaluation
  * avec `reviews.manage` (plan L4 : divergences, retards) ; programme avec `program.read`
- * (plan L5 : à programmer, conflits, modifications non publiées). La liste de contrôle est
+ * (plan L5 : à programmer, conflits, modifications non publiées) ; inscriptions avec
+ * `registrations.read` et finances avec `finance.read` (plan L6, J12). La liste de contrôle est
  * indicative : le serveur revérifie les préconditions à la publication (`edition_incomplete`).
  */
 @Component({
@@ -65,6 +68,7 @@ export class DashboardPage implements OnInit {
   private readonly submissions = inject(SubmissionsApi);
   private readonly reviewsApi = inject(ReviewsApi);
   private readonly programApi = inject(ProgramApi);
+  private readonly registrationsApi = inject(RegistrationsApi);
   private readonly meStore = inject(MeStore);
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
@@ -77,6 +81,9 @@ export class DashboardPage implements OnInit {
   protected readonly submissionStats = signal<SubmissionStats | null>(null);
   protected readonly reviewProgress = signal<ReviewProgress | null>(null);
   protected readonly program = signal<ProgramBoard | null>(null);
+  /** Inscriptions confirmées et en attente (`registrations.read`). */
+  protected readonly registrations = signal<{ confirmed: number; pending: number } | null>(null);
+  protected readonly finance = signal<FinanceDashboard | null>(null);
   /** Évaluations en retard, tous relecteurs confondus. */
   protected readonly lateReviews = computed(() =>
     (this.reviewProgress()?.reviewers ?? []).reduce((sum, reviewer) => sum + reviewer.late, 0),
@@ -114,6 +121,10 @@ export class DashboardPage implements OnInit {
 
   protected at(keyDate: KeyDate, edition: Edition): string {
     return formatInZone(keyDate.at, edition.timezone, this.language.current());
+  }
+
+  protected amount(value: string, currency: string): string {
+    return money(value, currency, this.language.current());
   }
 
   protected can(capability: string): boolean {
@@ -203,6 +214,18 @@ export class DashboardPage implements OnInit {
       }
       if (this.can('program.read')) {
         this.program.set(await this.programApi.board(id));
+      }
+      if (this.can('finance.read')) {
+        const finance = await this.registrationsApi.dashboard(id);
+        this.finance.set(finance);
+        this.registrations.set(finance.registrations);
+      } else if (this.can('registrations.read')) {
+        const [confirmed, pending] = await Promise.all(
+          (['confirmed', 'pending'] as const).map((status) =>
+            this.registrationsApi.list(id, { status, page_size: 1 }),
+          ),
+        );
+        this.registrations.set({ confirmed: confirmed.count, pending: pending.count });
       }
     } catch (error) {
       this.errors.set(errorMessages(this.translate, error));

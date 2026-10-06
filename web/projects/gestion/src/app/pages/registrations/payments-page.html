@@ -1,0 +1,127 @@
+<gc-page-header
+  [heading]="'gestion.payments.title' | translate"
+  [lead]="'gestion.payments.lead' | translate"
+/>
+<gc-error-summary [messages]="errors()" />
+
+<form [formGroup]="form" (ngSubmit)="search()" novalidate class="card">
+  <div class="grid-2">
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'gestion.payments.fields.status' | translate }}</mat-label>
+      <mat-select formControlName="status">
+        <mat-option value="">{{ 'gestion.registrations.all' | translate }}</mat-option>
+        @for (status of statuses; track status) {
+          <mat-option [value]="status">{{
+            'gestion.payments.status.' + status | translate
+          }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'gestion.payments.fields.provider' | translate }}</mat-label>
+      <mat-select formControlName="provider">
+        <mat-option value="">{{ 'gestion.registrations.all' | translate }}</mat-option>
+        @for (provider of providers; track provider) {
+          <mat-option [value]="provider">{{
+            'gestion.payments.provider.' + provider | translate
+          }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'gestion.registrations.fields.method' | translate }}</mat-label>
+      <mat-select formControlName="method">
+        <mat-option value="">{{ 'gestion.registrations.all' | translate }}</mat-option>
+        @for (method of methods; track method) {
+          <mat-option [value]="method">{{
+            'gestion.registrations.method.' + method | translate
+          }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+  <div class="actions">
+    <button mat-flat-button type="submit">{{ 'gestion.registrations.apply' | translate }}</button>
+    <button mat-button type="button" (click)="reset()">
+      {{ 'gestion.registrations.reset' | translate }}
+    </button>
+  </div>
+</form>
+
+@if (!loading()) {
+  <div class="actions">
+    <p class="muted" role="status">
+      {{ 'gestion.payments.count' | translate: { count: count() } }}
+    </p>
+    <button mat-stroked-button type="button" (click)="exportCsv()" [disabled]="busy()">
+      {{ 'gestion.payments.export' | translate }}
+    </button>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <caption class="visually-hidden">
+        {{
+          'gestion.payments.title' | translate
+        }}
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">{{ 'gestion.payments.fields.reference' | translate }}</th>
+          <th scope="col">{{ 'gestion.payments.fields.registration' | translate }}</th>
+          <th scope="col">{{ 'gestion.payments.fields.provider' | translate }}</th>
+          <th scope="col">{{ 'gestion.payments.fields.status' | translate }}</th>
+          <th scope="col" class="amount">{{ 'gestion.payments.fields.amount' | translate }}</th>
+          <th scope="col">{{ 'gestion.payments.fields.completedAt' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows(); track row.id) {
+          <tr>
+            <td>
+              {{ row.reference }}
+              @if (row.provider_reference) {
+                <br /><span class="muted">{{ row.provider_reference }}</span>
+              }
+            </td>
+            <td>
+              <a [routerLink]="['/editions', editionId(), 'inscriptions', row.registration_id]">{{
+                row.registration_reference
+              }}</a>
+              <br /><span class="muted">{{ row.customer }}</span>
+            </td>
+            <td>
+              {{ 'gestion.payments.provider.' + row.provider | translate }} ·
+              {{ 'gestion.registrations.method.' + row.method | translate }}
+            </td>
+            <td>
+              <span class="badge">{{ 'gestion.payments.status.' + row.status | translate }}</span>
+              @if (row.provider_status) {
+                <br /><span class="muted">{{ row.provider_status }}</span>
+              }
+              @if (row.note) {
+                <br /><span class="muted">{{ row.note }}</span>
+              }
+            </td>
+            <td class="amount">{{ amount(row) }}</td>
+            <td>{{ row.received_on ?? date(row.completed_at ?? row.created_at) }}</td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="6" class="muted">{{ 'gestion.payments.empty' | translate }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  @if (pages() > 1) {
+    <nav class="actions" [attr.aria-label]="'gestion.pagination.label' | translate">
+      <button mat-button type="button" [disabled]="page() <= 1" (click)="goTo(page() - 1)">
+        {{ 'gestion.pagination.previous' | translate }}
+      </button>
+      <span>{{ 'gestion.pagination.status' | translate: { page: page(), pages: pages() } }}</span>
+      <button mat-button type="button" [disabled]="page() >= pages()" (click)="goTo(page() + 1)">
+        {{ 'gestion.pagination.next' | translate }}
+      </button>
+    </nav>
+  }
+}

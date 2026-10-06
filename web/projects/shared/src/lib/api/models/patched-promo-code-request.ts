@@ -6,7 +6,7 @@ import { DiscountScope } from '../models/discount-scope';
 
 /**
  * Code promo (gestion) : utilisations réservées (commandes en attente) et consommées
- * (inscriptions confirmées).
+ * (inscriptions confirmées). Date limite saisie à l'heure de l'édition (D13).
  */
 export interface PatchedPromoCodeRequest {
   categories?: Array<string>;
@@ -15,6 +15,10 @@ export interface PatchedPromoCodeRequest {
   kind?: DiscountKind;
   max_uses?: number | null;
   scope?: DiscountScope;
-  valid_until?: string | null;
+
+  /**
+   * Valable jusqu'au, à l'heure de l'édition, sans fuseau.
+   */
+  valid_until_local?: string | null;
   value?: string;
 }

@@ -740,3 +740,66 @@ HTTP simulé, sans appel réel.
 - Sous MariaDB aussi.
 
 **Écart avec le plan** : aucun.
+
+## 16. Bilan de L6.5 (6 octobre 2026)
+
+**Rubrique « Inscriptions » de la gestion** (J12), après « Programme » dans le rail. Chaque
+écran est inscrit dans `core/navigation.ts` (rail, recherche) et a sa fiche d'aide.
+
+| Écran | Adresse | Capacité | Contenu |
+|---|---|---|---|
+| Inscriptions | `inscriptions` | `registrations.read` | Liste filtrée (statut, catégorie, moyen, recherche par nom, adresse ou référence), paginée ; export CSV ; saisie par le CO pour un compte existant (`registrations.manage`) |
+| Fiche | `inscriptions/:id` | `registrations.read` | Commande figée, justificatif, mentions de facturation, pièces (PDF), paiements, remboursements, historique ; actions du CO |
+| Paiements | `inscriptions/paiements` | `finance.read` | Rapprochement : fournisseur, statut, référence du fournisseur, saisie manuelle ; export CSV |
+| Factures et avoirs | `inscriptions/factures` | `finance.read` | Pièces par nature, PDF, facture d'origine des avoirs ; export CSV |
+| Finances | `inscriptions/finances` | `finance.read` | Encaissé, remboursé, net, impayés, remboursements dus ; répartitions ; points à traiter ; émission des factures en attente (`registrations.manage`) |
+| Tarifs | `parametrage/tarifs` | `registrations.read` (écriture `pricing.write`) | Paramètres, catégories et grille période × zone, options à quota, codes promo |
+| Facturation | `parametrage/facturation` | `finance.read` (écriture `pricing.write`) | Émetteur, TVA, coordonnées bancaires, préfixes |
+
+**Actions de la fiche** (CO « finances » ou « secrétariat », administrateur), proposées selon
+le statut et revérifiées par le serveur (règle n° 2) :
+
+- paiement reçu hors ligne (J7) : virement ou sur place, montant total proposé, date du jour ;
+- pro forma et gratuité motivée (J4), en attente de paiement seulement ;
+- annulation motivée, confirmée par un dialogue ; part remboursée vide : règle de l'édition (J9) ;
+- remboursement fait hors plateforme, après annulation d'une inscription facturée ; le reste
+  dû est proposé ; l'avoir est émis par le serveur.
+
+Paiement manuel, remboursement, exports et mentions de facturation demandent une
+réauthentification récente : l'intercepteur ouvre la fenêtre et rejoue. Les exports passent
+donc par l'API (fichier reçu puis enregistré), pas par un lien direct. Les PDF et les
+justificatifs restent des liens vers les endpoints authentifiés (règle n° 8).
+
+**D13 (reporté de L6.2)** : la date limite d'annulation et la date de validité d'un code
+promo se saisissent désormais **à l'heure de l'édition** (`cancellation_deadline_local`,
+`valid_until_local`). Le serveur les convertit en UTC, refuse une heure inexistante ou ambiguë
+au changement d'heure (erreur sur le champ saisi) et renvoie les deux formes. Les champs UTC
+passent en lecture seule.
+
+**Autres écrans** :
+
+- **Tableau de bord** : carte « Inscriptions » (confirmées, en attente) ; avec `finance.read`,
+  encaissé, impayés et points à traiter.
+- **Planificateur** : badge « Présentateur non inscrit » sur la communication, placée ou à
+  programmer, dont aucun présentateur n'est inscrit (RG-11, indicateur de L6.4) ; rien quand
+  l'information est inconnue (RG-11 désactivée).
+- **Aide** : fiches `registrations`, `payments`, `billing-documents`, `finance-dashboard`,
+  `settings-pricing`, `settings-billing` ; la fiche `settings-program` décrit maintenant l'effet
+  réel de RG-11.
+
+**Tests** :
+
+- Vitest : liste, filtres et export ; saisie par le CO ; fiche (paiement, gratuité sans
+  motif refusée, annulation, remboursement du reste dû) ; paiements, pièces, finances ; tarifs
+  (lecture seule, D13, pays invalides, grille, erreur du serveur) ; mentions de facturation ;
+  badge RG-11 du planificateur ; navigation et rail mis à jour.
+- pytest : conversion D13 des deux dates (heure d'été, heure inexistante, heure ambiguë).
+- Totaux : gestion 163 tests, portail 131, shared 76 ; lint et format au vert.
+
+**Écarts avec le plan** :
+
+- La rubrique « Inscriptions » a quatre écrans (liste, paiements, pièces, finances) au lieu
+  d'un écran à onglets : chacun a son adresse, sa fiche d'aide et sa capacité (`finance.read`
+  pour les trois derniers).
+- La carte du tableau de bord se contente des compteurs, faute de `finance.read`, pour le CO
+  sans fonction.

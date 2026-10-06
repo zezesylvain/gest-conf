@@ -90,6 +90,9 @@
                 · {{ trackName(item.track) }}
               }
             </span>
+            @if (item.presenter_registered === false) {
+              <span class="badge warn">{{ 'gestion.program.notRegistered' | translate }}</span>
+            }
             @if (canWrite()) {
               <button
                 mat-button
@@ -212,6 +215,11 @@
                           ·
                           {{ 'gestion.program.minutes' | translate: { count: slot.duration_min } }}
                         </span>
+                        @if (slot.submission?.presenter_registered === false) {
+                          <span class="badge warn">{{
+                            'gestion.program.notRegistered' | translate
+                          }}</span>
+                        }
                         @if (slotIssues(slot).length) {
                           <span class="visually-hidden">{{
                             'gestion.program.conflicts.slot' | translate
