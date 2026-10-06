@@ -216,3 +216,54 @@ Chaque écran est inscrit dans le rail et a sa fiche d'aide (règle de L2).
    au programme public ?
 5. Rappel automatique de la confirmation de présentation (§9) : oui ou non ?
 6. Charge de 21,5 à 27 j-h, contre 16 à 22 dans l'étude.
+
+## 11. Bilan de L5.0 (6 octobre 2026)
+
+**iCal (I8)** : générateur **écrit à la main**, sans dépendance.
+
+- La bibliothèque `icalendar` 7.3.0 est pur Python, mais elle apporte quatre paquets
+  (`python-dateutil`, `six`, `typing_extensions`, `tzdata`) pour un besoin d'une centaine de
+  lignes.
+- Prototype du sous-ensemble utile de RFC 5545 :
+  - `VCALENDAR` (`VERSION`, `PRODID`, `CALSCALE`, `METHOD:PUBLISH`) ;
+  - `VEVENT` (`UID`, `DTSTAMP`, `DTSTART` et `DTEND` en UTC, `SUMMARY`, `LOCATION`,
+    `DESCRIPTION`) ;
+  - échappement de `\`, `;`, `,` et des sauts de ligne ;
+  - lignes de 75 octets au plus, pliées sans couper un caractère UTF-8 ; fins de ligne CRLF.
+- Relu par `icalendar`, hors du dépôt : textes restitués à l'identique, échappements et
+  accents compris ; heures UTC exactes.
+- Les tests de L5.4 vérifieront ces règles directement.
+
+**Glisser-déposer (I15)** : le CDK d'Angular 22.2.1 n'a ni gestion du clavier ni attributs
+ARIA dans son module de glisser-déposer (code installé vérifié). L'**équivalent au clavier**
+est donc indispensable :
+
+- menu « Placer dans… » ;
+- boutons « monter » et « descendre » ;
+- annonce du résultat dans une région `aria-live`.
+
+**Pré-rendu d'un programme volumineux (I7)** : le portail pré-rend en interrogeant l'API au
+build (`getPrerenderParams`), et chaque page embarque les réponses qu'elle a lues.
+
+- **Mesure** sur un programme synthétique : 300 sessions et 1 200 communications donnent
+  763 Ko de JSON ; une journée de 100 sessions, 254 Ko ; une session, 2,5 Ko. Le taux de
+  compression mesuré (×20) est trompeur, le texte synthétique étant répétitif.
+- **Compression** : aucune n'est configurée dans nos `.htaccess`, et celle d'o2switch n'est
+  pas vérifiée. Il faut raisonner en taille brute.
+- **Découpage retenu** :
+  - une page d'accueil du programme (jours, sessions, sans le détail des communications) ;
+  - **une page par jour** ;
+  - une page par session, chacune lisant sa propre réponse d'API (`/v1/public/program`
+    résumé, `/v1/public/program/days/{date}`, `/v1/public/program/sessions/{id}`).
+- **À vérifier sur o2switch** : compression HTTP des pages statiques (`mod_deflate`). Elle
+  s'ajoutera, si besoin, au `.htaccess` du portail.
+
+**Heures et changement d'heure (I12)** : `local_to_utc` refuse les heures inexistantes et
+ambiguës (essai : 02:30 le 28 mars et le 31 octobre 2027, à Paris).
+
+- Les débuts et fins de session sont saisis à l'heure locale, puis convertis.
+- Les durées et les créneaux sont calculés en **temps réel**, en UTC. Une session qui
+  traverse un changement d'heure affiche donc des heures locales cohérentes avec le temps
+  écoulé : à Paris, 01:30 plus 150 minutes affiche 05:00.
+- Les erreurs de saisie sont renvoyées sur le champ concerné de la session (`starts_local`,
+  `ends_local`).
