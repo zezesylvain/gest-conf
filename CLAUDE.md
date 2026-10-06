@@ -121,7 +121,7 @@ Les URL Django sont déclarées **sans** le préfixe `/api` (`v1/...`) : `config
 | L0 à L4 (MVP : squelette, socle, portail, soumission, évaluation et décision) | Livrés en code, testés en local et en CI ; bilans dans `docs/`. **Aucune démo sur o2switch** encore faite |
 | L5 — Programme | **Livré en code, testé en local et en CI** (L5.0 à L5.7, E2E compris ; PR #8 et #9, fusionnées) ; bilan [`docs/L5-programme.md`](docs/L5-programme.md). Ouverts : Q14, `ACCEPTED_MINOR → WITHDRAWN`, seuil d'avertissement du bundle du portail |
 | L6 — Inscriptions et paiements | **Livré en code et testé en local** (L6.0 à L6.7, E2E compris) ; bilan [`docs/L6-inscriptions.md`](docs/L6-inscriptions.md). Passage en CI : nouvelle PR, sur demande. Ouverts : Q7 (tarifs ; carte bancaire absente de l'API v1 de CinetPay), Q8 (entité de facturation, conservation, format du numéro), J15 reportée |
-| L7 — Jour J et attestations | **Plan proposé, en attente de validation** : [`docs/L7-jour-j-plan.md`](docs/L7-jour-j-plan.md) (décisions K1 à K17) ; dépend de Q11 (signataire des lettres) et Q14 (exigences institutionnelles) |
+| L7 — Jour J et attestations | **En cours** : plan [`docs/L7-jour-j-plan.md`](docs/L7-jour-j-plan.md) validé le 6 octobre 2026 (K1 à K17, plus K18 rôle signataire et K19 modèle officiel et signature électronique, issues des réponses à Q11 et Q14). Nouvelle question Q17 : prestataire de signature qualifiée |
 | L8 et suivants | Non commencés |
 
 ## Décisions du lot L1

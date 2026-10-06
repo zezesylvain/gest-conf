@@ -1,9 +1,8 @@
 # Lot L7 — Jour J et attestations : plan d'implémentation
 
-> **Statut : proposition, en attente de validation** (décisions K1 à K17, §2). Questions au
-> commanditaire au §10, dont **Q11** (signataire des lettres d'invitation) et **Q14**
-> (exigences institutionnelles pour les attestations). L6 est clos (bilan :
-> `docs/L6-inscriptions.md`).
+> **Statut : validé le 6 octobre 2026, en cours** (décisions K1 à K17 telles que proposées,
+> précisées par les réponses du commanditaire, qui ajoutent K18 et K19 : §2.1). L6 est clos
+> (bilan : `docs/L6-inscriptions.md`).
 >
 > Sources :
 > - étude §4 M14 (jour J) et M10 (lettres d'invitation), §6 (RG-16, RG-17, RG-18), §8.2
@@ -68,6 +67,26 @@
 | K15 | Écrans | **Gestion** : « Jour J » (accueil et scan PWA, émargement de session, présences, badges, comptoir), « Attestations » (paramétrage : signataire, modèles FR et EN, couleurs de catégories ; émission, liste, révocation), « Lettres d'invitation » (demandes, instruction) ; carte « Jour J » du tableau de bord ; fiches d'aide. **Portail** : « Mes documents » dans le compte (badge, attestations, lettre : demande et suivi) ; page publique `/verification/<code>` |
 | K16 | Reporté | Questionnaire de satisfaction et annonces de dernière minute : **L8** (avec le reporting). « Mon programme » (J15) : non demandé. Signature qualifiée : P3 |
 | K17 | Ordre | L7.0 vérifications ; L7.1 modèle, droits, bénévoles ; L7.2 pointage (API, hors ligne côté serveur), badges ; L7.3 `PRESENTED`, émargement ; L7.4 attestations et vérification ; L7.5 lettres, comptoir ; L7.6 écrans de la gestion et PWA ; L7.7 portail ; L7.8 E2E, recette, documentation |
+
+### 2.1 Réponses du commanditaire (6 octobre 2026) et décisions ajoutées
+
+| Question (§10) | Réponse | Effet sur le plan |
+|---|---|---|
+| Q11 : signataire | « Un utilisateur avec un rôle spécial, à créer » | **K18** (rôle signataire) |
+| Q14 : modèle officiel ou signature qualifiée | « Les deux possibles » | **K19** (modèle officiel et signature électronique) |
+| Bénévoles et 2FA | Oui | K1 tel quel |
+| Inscription non payée à l'accueil | Refusée | K4 : refus « en attente de paiement », renvoi au comptoir |
+| Attestation d'évaluation | Possible | K9 : nature **activable par édition**, désactivée par défaut |
+| Badges | A6 en planche A4, couleur par catégorie | K3 tel quel |
+| Questionnaire de satisfaction | Sans réponse | Hypothèse K16 maintenue : L8 |
+
+| # | Sujet | Décision |
+|---|---|---|
+| K18 | Rôle signataire (Q11) | Nouveau rôle d'édition **`SIGNATORY`** (« signataire »), le 12ᵉ : attribué ou invité par `ADMIN` et `CHAIR`, **2FA imposée**, sans autre droit de gestion. Capacité **`signature.manage`** : le signataire **seul** renseigne sa signature, pour son propre compte : nom affiché, fonction FR et EN, image de signature (PNG ou JPEG, type vérifié par contenu, fichier privé, règle n° 8). Le CO ne peut ni déposer ni remplacer l'image d'un autre : il ne peut pas signer à sa place. Le paramétrage des attestations et des lettres **désigne** le signataire de chaque nature parmi les comptes qui ont le rôle et une signature complète ; sans signataire désigné, rien ne s'émet. Une pièce émise fige le nom, la fonction et l'empreinte de l'image. Retrait du rôle : les pièces émises restent valides ; les suivantes exigent un autre signataire |
+| K19 | Modèle officiel et signature électronique (Q14) | **Modèle officiel** : gabarit paramétrable par édition et par nature : en-tête (logo ou bandeau, fichier privé), titre, textes FR et EN à variables fermées, pied de page, position de la signature et du QR. Le gabarit par défaut reste celui de K9. **Signature électronique** : interface de signataire électronique, sur le modèle des fournisseurs de paiement de L6 :<br>— **PAdES** (signature PDF) par une bibliothèque Python pure (`pyHanko`, à vérifier en L7.0), avec le **certificat de l'institution** (PKCS#12), déposé chiffré, son mot de passe dans l'environnement (règle n° 11) ;<br>— **qualifiée** : un certificat dans un fichier n'est pas un dispositif qualifié (QSCD). Une signature *qualifiée* au sens eIDAS exige un **prestataire de confiance qualifié** (signature à distance par API), à choisir (**nouvelle question Q17** : prestataire, contrat, coût). L'interface le prévoit ; aucun prestataire n'est branché en L7.<br>Activation par édition : image seule (défaut), PAdES, ou prestataire (quand il existera). La vérification publique (K10) reste disponible dans tous les cas |
+
+**Charge** : K18 et K19 ajoutent **3 à 4 j-h** (rôle et droits, dépôt de la signature,
+gabarits, PAdES et ses tests) : **23,5 à 30 j-h** au total.
 
 ## 3. Modèle de données (nouvelle application `events`, additif)
 
@@ -147,16 +166,16 @@
 
 | Étape | Contenu | Critère de fin | Charge |
 |---|---|---|---|
-| L7.0 | Vérifications : décodage QR (`BarcodeDetector`, `jsQR`, `zxing-js`), caméra sur iOS Safari et Android, service worker Angular servi par o2switch (`.htaccess`, `ngsw.json`), `Permissions-Policy` par chemin, chiffrement IndexedDB (Web Crypto), images dans `fpdf2` | Choix consignés | 1,5 – 2 |
-| L7.1 | Application `events`, capacités, rôle `VOLUNTEER` invitable et 2FA, matrice, registre | Matrice au vert | 2 – 2,5 |
+| L7.0 | Vérifications : décodage QR (`BarcodeDetector`, `jsQR`, `zxing-js`), caméra sur iOS Safari et Android, service worker Angular servi par o2switch (`.htaccess`, `ngsw.json`), `Permissions-Policy` par chemin, chiffrement IndexedDB (Web Crypto), images dans `fpdf2`, **PAdES par `pyHanko`** (licence, dépendances, signature et vérification) | Choix consignés | 2 – 2,5 |
+| L7.1 | Application `events`, capacités, rôles `VOLUNTEER` (invitable) et `SIGNATORY` (K18), 2FA, signature du signataire, matrice, registre | Matrice au vert | 3 – 3,5 |
 | L7.2 | Pointage : scan, liste hors ligne, synchronisation, annulation, export ; badges PDF ; régénération du jeton | Tests au vert | 3 – 4 |
 | L7.3 | `PRESENTED`, émargement de session, président de séance | Tests au vert | 1,5 – 2 |
-| L7.4 | Attestations : paramétrage, émission en tâche, PDF, vérification publique, e-mail, révocation | Tests RG-16 au vert | 3 – 4 |
+| L7.4 | Attestations : paramétrage (signataire, gabarit officiel), émission en tâche, PDF, signature PAdES (K19), vérification publique, e-mail, révocation | Tests RG-16 au vert | 4,5 – 5,5 |
 | L7.5 | Lettres d'invitation ; comptoir sans compte | Tests au vert | 2 – 2,5 |
-| L7.6 | Gestion : Jour J (PWA, scan, hors ligne), attestations, lettres, tableau de bord, aide | Démo H côté gestion | 4 – 5 |
+| L7.6 | Gestion : Jour J (PWA, scan, hors ligne), attestations, lettres, signature du signataire, tableau de bord, aide | Démo H côté gestion | 4,5 – 5,5 |
 | L7.7 | Portail : « Mes documents », vérification publique | Démo H côté portail | 1,5 – 2 |
 | L7.8 | E2E, recette (téléphone réel si possible), documentation, étude (§23) | Démo H sur o2switch | 1,5 – 2 |
-| **Total L7** | | | **20,5 – 26** |
+| **Total L7** | | | **23,5 – 30** |
 
 ## 9. Risques et hypothèses non vérifiées
 
