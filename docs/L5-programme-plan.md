@@ -441,3 +441,69 @@ table des capacités explicite) :
 - 56 tests du programme ;
 - matrice : 1 497 tests, une case par profil pour les 13 routes du programme ;
 - table d'attribution des rôles et table du workflow mises à jour.
+
+## 15. Bilan de L5.4 (6 octobre 2026)
+
+**Publication (I6)** : `POST …/program/publish` (`program.publish`, Chair seul,
+réauthentification récente, `If-Match`).
+
+- **Refusée** tant qu'il reste un conflit (409 `program_conflicts`, RG-12 et RG-13), ou sans
+  modification depuis la dernière publication (409 `program_unchanged`). Les deux codes sont
+  nouveaux et traduits dans l'interface.
+- **Instantané numéroté**, en ajout seul, construit par liste blanche :
+  - sessions, salles, thématiques, créneaux ;
+  - auteurs avec nom, institution et indication du présentateur ;
+  - rôles de séance, intervenants invités ;
+  - consignes, pour « Mon passage » seulement ;
+  - une **clé de personne** interne (`user:<id>` ou `email:<adresse>`), que les réponses
+    publiques retirent.
+- **Transitions à ce moment seulement** (règle n° 4) :
+  - `CONFIRMED → SCHEDULED` pour les communications placées ;
+  - `SCHEDULED → CONFIRMED` pour celles retirées du programme publié. Cette transition
+    est ajoutée (écart I6 validé) ; la table en compte 23.
+  - Le workflow revérifie `program.publish` (famille `ORGANIZERS`).
+- **Journal** `program.published` ; historique `GET …/program/publications` (version, date,
+  auteur, résumé des différences).
+
+**Notifications ciblées (I16)** :
+
+- les passages de chaque personne sont comparés entre deux instantanés ;
+- un e-mail part à chaque personne dont le passage est **nouveau, modifié ou supprimé**,
+  une fois par version (clé d'idempotence avec une empreinte, sans adresse en clair) ;
+- l'e-mail donne la date et l'heure de l'édition, la salle, le rôle et le titre ; la ligne
+  est traduite (« : » à la française ou à l'anglaise) ;
+- un présentateur **sans compte** reçoit l'e-mail à son adresse d'auteur, avec l'invitation
+  à créer un compte pour retrouver son passage ;
+- l'objet ne porte que le nom du site.
+
+**Programme public (I7)** : trois routes anonymes, en cache public de 5 minutes, sur la
+dernière publication de l'édition courante (404 tant que rien n'est publié).
+
+- `GET /v1/public/program` : jours et sessions, sans le détail des communications.
+- `GET /v1/public/program/days/{date}` : sessions d'un jour, en heure de l'édition.
+- `GET /v1/public/program/sessions/{id}` : une session.
+- Découpage décidé en L5.0. Les routes sont inscrites dans la liste blanche des vues
+  anonymes (méta-test).
+- **Test à traceurs** : ni adresse, ni clé de personne, ni consignes, ni identifiant de
+  compte. Le brouillon reste invisible jusqu'à la publication suivante.
+- **Intervenants invités (I11)** : biographie et photo seulement avec les consentements de
+  L2, lus à la publication. Un retrait de consentement prend effet à la publication
+  suivante.
+
+**« Mon passage » (I8)** : `GET /v1/me/agenda` et `GET /v1/me/agenda.ics`, connecté, sans
+cache.
+
+- Lu dans la dernière publication de chaque édition non archivée.
+- Une personne s'y reconnaît par son compte ou par une adresse **vérifiée**. Un co-auteur
+  qui crée son compte plus tard retrouve donc son passage.
+- Chaque passage donne la date, l'horaire, la salle (accès), la durée, le rôle, les
+  co-intervenants, les présidents de séance et les consignes.
+- Fichier iCal par le générateur de L5.0 (`apps/program/ical.py`), testé sur l'échappement,
+  le pliage à 75 octets et l'UTC.
+
+**Intégrité** : contrôle `program.publication`. Une communication programmée figure au
+programme publié, et une communication publiée n'est pas restée confirmée.
+
+**Tests** : 13 tests de publication ; matrice avec la publication (réauthentification
+comprise) et l'historique. 2 462 tests backend sous SQLite ; 1 948 sous MariaDB pour les suites
+touchées.

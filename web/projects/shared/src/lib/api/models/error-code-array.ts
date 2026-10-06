@@ -40,6 +40,8 @@ export const ERROR_CODE: ErrorCode[] = [
   'call_closed',
   'setting_frozen',
   'stale_revision',
+  'program_conflicts',
+  'program_unchanged',
   'submission_locked',
   'profile_incomplete',
   'grid_locked',

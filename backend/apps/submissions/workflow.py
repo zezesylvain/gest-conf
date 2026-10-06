@@ -42,7 +42,8 @@ class Who(StrEnum):
     SUBMITTER = "submitter"
     SYSTEM = "system"  # commande ou tâche planifiée
     SC = "sc"  # détenteur de la capacité de la règle dans l'édition (président du CS, L4)
-    ORGANIZERS = "organizers"  # CO, présence, inscription (L5 à L7)
+    # Détenteur de la capacité de la règle : publication du programme (L5), présence (L7).
+    ORGANIZERS = "organizers"
 
 
 @dataclass(frozen=True, slots=True)
@@ -92,7 +93,14 @@ TRANSITIONS: dict[tuple[str, str], Rule] = {
     (S.CAMERA_READY_RECEIVED, S.WITHDRAWN): Rule(Who.SUBMITTER, "L5", available=True),
     (S.CONFIRMED, S.WITHDRAWN): Rule(Who.SUBMITTER, "L5", available=True),
     (S.SCHEDULED, S.WITHDRAWN): Rule(Who.SUBMITTER, "L5", available=True),
-    (S.CONFIRMED, S.SCHEDULED): Rule(Who.ORGANIZERS, "L5"),
+    # I6 (plan L5) : à la publication du programme par le Chair (« program.publish ») ;
+    # retour à « confirmée » d'une communication retirée du programme publié (écart I6).
+    (S.CONFIRMED, S.SCHEDULED): Rule(
+        Who.ORGANIZERS, "L5", available=True, capability=Capability.PROGRAM_PUBLISH
+    ),
+    (S.SCHEDULED, S.CONFIRMED): Rule(
+        Who.ORGANIZERS, "L5", available=True, capability=Capability.PROGRAM_PUBLISH
+    ),
     (S.SCHEDULED, S.PRESENTED): Rule(Who.ORGANIZERS, "L7"),
     (S.PRESENTED, S.PUBLISHED): Rule(Who.ORGANIZERS, "L10"),
 }
@@ -134,7 +142,7 @@ def _check_actor(rule: Rule, submission: Submission, actor: Actor) -> None:
     elif rule.who == Who.SYSTEM:
         if actor.kind not in (ActorKind.SYSTEM, ActorKind.COMMAND):
             raise NotAllowed()
-    elif rule.who == Who.SC and rule.capability is not None:
+    elif rule.who in (Who.SC, Who.ORGANIZERS) and rule.capability is not None:
         if actor.kind != ActorKind.USER or actor.user is None:
             raise NotAllowed()
         try:
@@ -143,7 +151,7 @@ def _check_actor(rule: Rule, submission: Submission, actor: Actor) -> None:
             raise NotAllowed() from error
         if not access.has(rule.capability):
             raise NotAllowed()
-    else:  # pragma: no cover - aucune transition disponible de cette famille avant L5
+    else:  # pragma: no cover - règle sans capacité : aucune n'est disponible
         raise NotAllowed()
 
 

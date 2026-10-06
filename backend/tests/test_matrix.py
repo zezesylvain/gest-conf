@@ -209,6 +209,22 @@ CASES = [
         "/v1/manage/editions/{e}/program/session-roles/{session_role}",
     ),
     Case("manage-program-people", "GET", PGW, 200, "/v1/manage/editions/{e}/program/people"),
+    # I6 : publication par le Chair, réauthentification récente ; historique (I13).
+    Case(
+        "manage-program-publish",
+        "POST",
+        PGP,
+        200,
+        "/v1/manage/editions/{e}/program/publish",
+        recent_auth=True,
+    ),
+    Case(
+        "manage-program-publications",
+        "GET",
+        PGR,
+        200,
+        "/v1/manage/editions/{e}/program/publications",
+    ),
     Case("manage-tracks-list", "GET", R, 200, "/v1/manage/editions/{e}/tracks"),
     Case(
         "manage-tracks-list",

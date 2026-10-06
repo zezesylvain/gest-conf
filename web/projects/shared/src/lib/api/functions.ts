@@ -129,6 +129,10 @@ export type { ManageProgramBoard$Params as ManageProgramBoard$Params } from './f
 export { manageProgramBoard as manageProgramBoard } from './fn/manage/manage-program-board';
 export type { ManageProgramPeople$Params as ManageProgramPeople$Params } from './fn/manage/manage-program-people';
 export { manageProgramPeople as manageProgramPeople } from './fn/manage/manage-program-people';
+export type { ManageProgramPublications$Params as ManageProgramPublications$Params } from './fn/manage/manage-program-publications';
+export { manageProgramPublications as manageProgramPublications } from './fn/manage/manage-program-publications';
+export type { ManageProgramPublish$Params as ManageProgramPublish$Params } from './fn/manage/manage-program-publish';
+export { manageProgramPublish as manageProgramPublish } from './fn/manage/manage-program-publish';
 export type { ManageProgramRoomsCreate$Params as ManageProgramRoomsCreate$Params } from './fn/manage/manage-program-rooms-create';
 export { manageProgramRoomsCreate as manageProgramRoomsCreate } from './fn/manage/manage-program-rooms-create';
 export type { ManageProgramRoomsDelete$Params as ManageProgramRoomsDelete$Params } from './fn/manage/manage-program-rooms-delete';
@@ -245,6 +249,10 @@ export type { ManageEditionsTracksPartialUpdate$Params as ManageEditionsTracksPa
 export { manageEditionsTracksPartialUpdate as manageEditionsTracksPartialUpdate } from './fn/manage/manage-editions-tracks-partial-update';
 export type { Me$Params as Me$Params } from './fn/me/me';
 export { me as me } from './fn/me/me';
+export type { MeAgenda$Params as MeAgenda$Params } from './fn/me/me-agenda';
+export { meAgenda as meAgenda } from './fn/me/me-agenda';
+export type { MeAgendaIcs$Params as MeAgendaIcs$Params } from './fn/me/me-agenda-ics';
+export { meAgendaIcs as meAgendaIcs } from './fn/me/me-agenda-ics';
 export type { MeAnonymization$Params as MeAnonymization$Params } from './fn/me/me-anonymization';
 export { meAnonymization as meAnonymization } from './fn/me/me-anonymization';
 export type { MeConsents$Params as MeConsents$Params } from './fn/me/me-consents';
@@ -283,6 +291,12 @@ export type { PublicPortalRoutes$Params as PublicPortalRoutes$Params } from './f
 export { publicPortalRoutes as publicPortalRoutes } from './fn/public/public-portal-routes';
 export type { PublicPortalSite$Params as PublicPortalSite$Params } from './fn/public/public-portal-site';
 export { publicPortalSite as publicPortalSite } from './fn/public/public-portal-site';
+export type { PublicProgram$Params as PublicProgram$Params } from './fn/public/public-program';
+export { publicProgram as publicProgram } from './fn/public/public-program';
+export type { PublicProgramDay$Params as PublicProgramDay$Params } from './fn/public/public-program-day';
+export { publicProgramDay as publicProgramDay } from './fn/public/public-program-day';
+export type { PublicProgramSession$Params as PublicProgramSession$Params } from './fn/public/public-program-session';
+export { publicProgramSession as publicProgramSession } from './fn/public/public-program-session';
 export type { SubmissionsList$Params as SubmissionsList$Params } from './fn/submissions/submissions-list';
 export { submissionsList as submissionsList } from './fn/submissions/submissions-list';
 export type { SubmissionsCreate$Params as SubmissionsCreate$Params } from './fn/submissions/submissions-create';

@@ -11,33 +11,45 @@ from __future__ import annotations
 
 from django.db import transaction
 from django.db.models import Q
-from django.http import Http404
+from django.http import Http404, HttpResponse
+from django.utils import timezone
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import status
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from apps.accounts.models import User, UserRole, UserRoleStatus
-from apps.accounts.permissions import ManageViewSet
+from apps.accounts.permissions import ManageViewSet, RecentAuthRequired
 from apps.accounts.roles import Capability as C
+from apps.accounts.services.invitations import display_name
 from apps.conferences.models import Track
 from apps.core.actor import Actor
 from apps.core.errors import Invalid
-from apps.program.models import Room, Session, SessionRole, Slot
+from apps.program.models import ProgramPublication, Room, Session, SessionRole, Slot
 from apps.program.serializers import (
+    AgendaEntrySerializer,
     PersonSearchSerializer,
     ProgramBoardSerializer,
     ProgramSettingsSerializer,
+    PublicationSerializer,
+    PublicProgramDaySerializer,
+    PublicProgramSerializer,
+    PublicSessionSerializer,
     RoomWriteSerializer,
     SessionRoleWriteSerializer,
     SessionWriteSerializer,
     SlotCreateSerializer,
     SlotUpdateSerializer,
     board_data,
+    local_day,
     person,
+    public_session,
+    public_summary,
 )
-from apps.program.services import planning
+from apps.program.services import agenda, planning, publication
 from apps.program.services import settings as program_settings
 from apps.submissions.models import Submission
 
@@ -437,3 +449,173 @@ class ProgramPeopleViewSet(_ProgramViewSet):
             if row.role not in entry["roles"]:
                 entry["roles"].append(row.role)
         return Response(PersonSearchSerializer(list(people.values())[:20], many=True).data)
+
+
+# --- Publication (I6) ----------------------------------------------------------------------
+
+
+class ProgramPublishViewSet(_ProgramViewSet):
+    """``POST …/program/publish`` : publication par le Chair (``program.publish``, I1),
+    réauthentification récente, journalisée (RG-17) ; refusée tant qu'il reste un conflit
+    (409 ``program_conflicts``) ou sans modification (409 ``program_unchanged``)."""
+
+    serializer_class = ProgramBoardSerializer
+    required_capabilities = {"create": C.PROGRAM_PUBLISH}
+
+    def get_permissions(self):
+        return [*super().get_permissions(), RecentAuthRequired()]
+
+    @extend_schema(
+        operation_id="manage_program_publish",
+        parameters=[IF_MATCH],
+        request=None,
+        responses={200: ProgramBoardSerializer},
+    )
+    def create(self, request: Request, edition_id: int) -> Response:
+        publication.publish_program(
+            self.edition, actor=self.actor(), revision=expected_revision(request)
+        )
+        return self.board()
+
+
+class ProgramPublicationsViewSet(_ProgramViewSet):
+    """``GET …/program/publications`` : historique des publications (I13)."""
+
+    serializer_class = PublicationSerializer
+    queryset = ProgramPublication.objects.none()
+    required_capabilities = {"list": C.PROGRAM_READ}
+
+    @extend_schema(
+        operation_id="manage_program_publications",
+        responses={200: PublicationSerializer(many=True)},
+    )
+    def list(self, request: Request, edition_id: int) -> Response:
+        rows = (
+            ProgramPublication.objects.filter(edition=self.edition)
+            .select_related("published_by__profile")
+            .order_by("-version")
+        )
+        return Response(
+            PublicationSerializer(
+                [
+                    {
+                        "version": row.version,
+                        "published_at": row.published_at,
+                        "published_by": display_name(row.published_by),
+                        "summary": row.summary,
+                    }
+                    for row in rows
+                ],
+                many=True,
+            ).data
+        )
+
+
+# --- Programme public (I7) -----------------------------------------------------------------
+
+
+def _current_publication():
+    from apps.conferences.services import current_public_edition
+
+    edition = current_public_edition()
+    found = publication.latest_publication(edition) if edition is not None else None
+    if found is None:
+        raise Http404
+    return found
+
+
+def _public(data) -> Response:
+    response = Response(data)
+    response["Cache-Control"] = "public, max-age=300"
+    return response
+
+
+class PublicProgramView(APIView):
+    """``GET /v1/public/program`` : dernière publication de l'édition courante, résumée
+    (jours et sessions) ; 404 tant que rien n'est publié. Lu au build du portail (I7)."""
+
+    authentication_classes = ()
+    permission_classes = (AllowAny,)
+
+    @extend_schema(operation_id="public_program", responses={200: PublicProgramSerializer}, auth=[])
+    def get(self, request: Request) -> Response:
+        return _public(PublicProgramSerializer(public_summary(_current_publication())).data)
+
+
+class PublicProgramDayView(APIView):
+    """``GET /v1/public/program/days/{date}`` : sessions d'un jour (heure de l'édition)."""
+
+    authentication_classes = ()
+    permission_classes = (AllowAny,)
+
+    @extend_schema(
+        operation_id="public_program_day", responses={200: PublicProgramDaySerializer}, auth=[]
+    )
+    def get(self, request: Request, day: str) -> Response:
+        found = _current_publication()
+        zone = found.snapshot["edition"]["timezone"]
+        sessions = [
+            public_session(item)
+            for item in found.snapshot["sessions"]
+            if local_day(item["starts_at"], zone) == day
+        ]
+        if not sessions:
+            raise Http404
+        return _public(
+            PublicProgramDaySerializer({"date": day, "timezone": zone, "sessions": sessions}).data
+        )
+
+
+class PublicProgramSessionView(APIView):
+    """``GET /v1/public/program/sessions/{id}`` : une session publiée."""
+
+    authentication_classes = ()
+    permission_classes = (AllowAny,)
+
+    @extend_schema(
+        operation_id="public_program_session",
+        responses={200: PublicSessionSerializer},
+        auth=[],
+    )
+    def get(self, request: Request, session_id: int) -> Response:
+        found = _current_publication()
+        session = next(
+            (item for item in found.snapshot["sessions"] if item["id"] == session_id), None
+        )
+        if session is None:
+            raise Http404
+        return _public(PublicSessionSerializer(public_session(session)).data)
+
+
+# --- « Mon passage » (I8) ------------------------------------------------------------------
+
+
+class MyAgendaView(APIView):
+    """``GET /v1/me/agenda`` : passages de la personne connectée, d'après les programmes
+    publiés des éditions ouvertes."""
+
+    permission_classes = (IsAuthenticated,)
+
+    @extend_schema(operation_id="me_agenda", responses={200: AgendaEntrySerializer(many=True)})
+    def get(self, request: Request) -> Response:
+        response = Response(AgendaEntrySerializer(agenda.my_agenda(request.user), many=True).data)
+        response["Cache-Control"] = "private, no-store"
+        return response
+
+
+class MyAgendaCalendarView(APIView):
+    """``GET /v1/me/agenda.ics`` : les mêmes passages au format iCalendar (RFC 5545)."""
+
+    permission_classes = (IsAuthenticated,)
+
+    @extend_schema(
+        operation_id="me_agenda_ics",
+        responses={(200, "text/calendar"): OpenApiTypes.STR},
+    )
+    def get(self, request: Request) -> HttpResponse:
+        body = agenda.agenda_calendar(request.user, now=timezone.now())
+        response = HttpResponse(body, content_type="text/calendar; charset=utf-8")
+        response["Content-Disposition"] = 'attachment; filename="gest-conf.ics"'
+        response["Cache-Control"] = "private, no-store"
+        response["X-Content-Type-Options"] = "nosniff"
+        return response

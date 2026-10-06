@@ -77,6 +77,10 @@ class ErrorCode(models.TextChoices):
     SETTING_FROZEN = "setting_frozen"
     # Écriture concurrente (If-Match périmé, plan L3 §4) : relire avant de réécrire.
     STALE_REVISION = "stale_revision"
+    # Plan L5 (I6) : publication du programme refusée tant qu'il reste un conflit (RG-12,
+    # RG-13), ou sans modification depuis la dernière publication.
+    PROGRAM_CONFLICTS = "program_conflicts"
+    PROGRAM_UNCHANGED = "program_unchanged"
     # Soumission dans un état qui n'admet plus de modification par l'auteur ; profil
     # incomplet (prérequis de la soumission, plan L1 §3.3).
     SUBMISSION_LOCKED = "submission_locked"

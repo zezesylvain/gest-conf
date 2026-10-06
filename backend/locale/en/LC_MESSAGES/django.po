@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gestconf-backend\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-06 06:04+0000\n"
+"POT-Creation-Date: 2026-10-06 06:18+0000\n"
 "PO-Revision-Date: 2026-10-05 11:00+0000\n"
 "Last-Translator: GEST-CONF\n"
 "Language-Team: GEST-CONF\n"
@@ -421,8 +421,8 @@ msgstr "Acknowledging the notice cannot be withdrawn."
 #: apps/accounts/services/roles.py:196 apps/conferences/services.py:301
 #: apps/reviews/services/assignments.py:287
 #: apps/reviews/services/conflicts.py:178 apps/reviews/services/reviews.py:430
-#: apps/submissions/services.py:611 apps/submissions/workflow.py:170
-#: apps/submissions/workflow.py:173
+#: apps/submissions/services.py:611 apps/submissions/workflow.py:178
+#: apps/submissions/workflow.py:181
 msgid "Motif obligatoire."
 msgstr "A reason is required."
 
@@ -1468,27 +1468,27 @@ msgstr "Unknown time zone."
 msgid "Échec de la vérification CSRF : rechargez la page puis réessayez."
 msgstr "CSRF verification failed: reload the page and try again."
 
-#: apps/core/errors.py:107
+#: apps/core/errors.py:111
 msgid "Opération refusée."
 msgstr "Operation refused."
 
-#: apps/core/errors.py:136
+#: apps/core/errors.py:140
 msgid "Opération impossible dans l'état actuel."
 msgstr "This operation is not possible in the current state."
 
-#: apps/core/errors.py:143
+#: apps/core/errors.py:147
 msgid "Action non autorisée."
 msgstr "Action not allowed."
 
-#: apps/core/errors.py:150 apps/core/exceptions.py:110
+#: apps/core/errors.py:154 apps/core/exceptions.py:110
 msgid "Données invalides."
 msgstr "Invalid data."
 
-#: apps/core/errors.py:157
+#: apps/core/errors.py:161
 msgid "Modifié entre-temps (autre onglet ?) : rechargez avant d'enregistrer."
 msgstr "Changed in the meantime (another tab?): reload before saving."
 
-#: apps/core/errors.py:168
+#: apps/core/errors.py:172
 msgid "Quota atteint."
 msgstr "Quota reached."
 
@@ -2124,7 +2124,7 @@ msgstr "workshop"
 msgid "tutoriel"
 msgstr "tutorial"
 
-#: apps/program/models.py:94
+#: apps/program/models.py:94 apps/program/notifications.py:104
 msgid "table ronde"
 msgstr "round table"
 
@@ -2273,10 +2273,36 @@ msgstr "presentation confirmation"
 msgid "confirmations de présentation"
 msgstr "presentation confirmations"
 
-#: apps/program/notifications.py:53 apps/reviews/notifications.py:50
+#: apps/program/notifications.py:60 apps/reviews/notifications.py:50
 #: apps/reviews/notifications.py:93 apps/submissions/notifications.py:71
 msgid "(sans titre)"
 msgstr "(untitled)"
+
+#: apps/program/notifications.py:99
+msgid "présentation"
+msgstr "presentation"
+
+#: apps/program/notifications.py:100
+msgid "intervention"
+msgstr "talk"
+
+#: apps/program/notifications.py:101
+msgid "présidence de séance"
+msgstr "session chairing"
+
+#: apps/program/notifications.py:102 apps/reviews/models.py:423
+#: apps/reviews/models.py:435
+msgid "discussion"
+msgstr "discussion"
+
+#: apps/program/notifications.py:103
+msgid "modération"
+msgstr "moderation"
+
+#: apps/program/notifications.py:108
+#, python-brace-format
+msgid "- {start} · {room} · {role} : {title}"
+msgstr "- {start} · {room} · {role}: {title}"
 
 #: apps/program/services/planning.py:142 apps/program/services/planning.py:165
 #: apps/reviews/services/grids.py:179 apps/reviews/services/grids.py:226
@@ -2389,6 +2415,58 @@ msgstr ""
 #: apps/program/services/presentation.py:108
 msgid "Désignez d'abord les présentateurs."
 msgstr "Designate the presenters first."
+
+#: apps/program/services/publication.py:301
+msgid "Le programme contient des conflits : corrigez-les avant de publier."
+msgstr "The programme has conflicts: fix them before publishing."
+
+#: apps/program/services/publication.py:307
+msgid "Aucune modification depuis la dernière publication."
+msgstr "Nothing has changed since the last publication."
+
+#: apps/program/templates/program/email/passage_message.txt:1
+#: apps/reviews/templates/review/email/reminder_message.txt:1
+#: apps/submissions/templates/submission/email/decision_message.txt:1
+msgid "Bonjour,"
+msgstr "Hello,"
+
+#: apps/program/templates/program/email/passage_message.txt:3
+#, python-format
+msgid ""
+"Le programme publié de %(edition_title)s ne prévoit plus votre passage :"
+msgstr ""
+"The published programme of %(edition_title)s no longer includes your "
+"appearance:"
+
+#: apps/program/templates/program/email/passage_message.txt:3
+#, python-format
+msgid "Le programme publié de %(edition_title)s prévoit votre passage :"
+msgstr "The published programme of %(edition_title)s includes your appearance:"
+
+#: apps/program/templates/program/email/passage_message.txt:3
+#, python-format
+msgid "Votre passage au programme publié de %(edition_title)s a changé :"
+msgstr ""
+"Your appearance in the published programme of %(edition_title)s has changed:"
+
+#: apps/program/templates/program/email/passage_message.txt:7
+#, python-format
+msgid "Détail, consignes et ajout à votre agenda : %(link)s"
+msgstr "Details, instructions and adding it to your calendar: %(link)s"
+
+#: apps/program/templates/program/email/passage_message.txt:7
+#, python-format
+msgid ""
+"Pour retrouver ce détail et l'ajouter à votre agenda, créez un compte avec "
+"cette adresse : %(link)s"
+msgstr ""
+"To see these details and add them to your calendar, create an account with "
+"this address: %(link)s"
+
+#: apps/program/templates/program/email/passage_subject.txt:1
+#, python-format
+msgid "[%(site_name)s] Votre passage au programme"
+msgstr "[%(site_name)s] Your appearance in the programme"
 
 #: apps/program/templates/program/email/withdrawn_message.txt:1
 #, python-format
@@ -2677,10 +2755,6 @@ msgstr "opened on"
 #: apps/reviews/models.py:415
 msgid "ouverte par"
 msgstr "opened by"
-
-#: apps/reviews/models.py:423 apps/reviews/models.py:435
-msgid "discussion"
-msgstr "discussion"
 
 #: apps/reviews/models.py:424
 msgid "discussions"
@@ -3156,11 +3230,6 @@ msgstr ""
 msgid "[%(site_name)s] Évaluations divergentes"
 msgstr "[%(site_name)s] Diverging reviews"
 
-#: apps/reviews/templates/review/email/reminder_message.txt:1
-#: apps/submissions/templates/submission/email/decision_message.txt:1
-msgid "Bonjour,"
-msgstr "Hello,"
-
 #: apps/reviews/templates/review/email/reminder_message.txt:3
 #, python-format
 msgid ""
@@ -3479,7 +3548,7 @@ msgid "Cette soumission n'est plus modifiable."
 msgstr "This submission can no longer be changed."
 
 #: apps/submissions/services.py:199 apps/submissions/services.py:274
-#: apps/submissions/workflow.py:154
+#: apps/submissions/workflow.py:162
 msgid "L'appel à communications est clos."
 msgstr "The call for papers is closed."
 
@@ -3796,14 +3865,14 @@ msgstr ""
 msgid "[%(site_name)s] Soumission retirée"
 msgstr "[%(site_name)s] Submission withdrawn"
 
-#: apps/submissions/workflow.py:158
+#: apps/submissions/workflow.py:166
 msgid "La soumission est incomplète."
 msgstr "The submission is incomplete."
 
-#: apps/submissions/workflow.py:166
+#: apps/submissions/workflow.py:174
 msgid "La recevabilité commence à la clôture de l'appel (et des dérogations)."
 msgstr "Screening starts when the call (and any extensions) closes."
 
-#: apps/submissions/workflow.py:200
+#: apps/submissions/workflow.py:208
 msgid "Changement de statut non autorisé."
 msgstr "Status change not allowed."

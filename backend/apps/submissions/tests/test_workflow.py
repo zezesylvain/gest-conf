@@ -40,9 +40,10 @@ def submit(submission, user=None, **kwargs):
 
 
 def test_table_covers_the_study_diagram():
-    """Les 19 transitions de l'étude (§5.1), plus les 3 retraits ajoutés par le plan L5 (I5) ;
-    celles des lots L3, L4 et L5 déjà livrées sont disponibles, pas les suivantes."""
-    assert len(workflow.TRANSITIONS) == 22
+    """Les 19 transitions de l'étude (§5.1), plus les 3 retraits (I5) et le retour à
+    « confirmée » (I6) ajoutés par le plan L5 ; celles des lots L3 à L5 sont disponibles, pas
+    les suivantes."""
+    assert len(workflow.TRANSITIONS) == 23
     available = {pair for pair, rule in workflow.TRANSITIONS.items() if rule.available}
     assert available == {
         (S.DRAFT, S.SUBMITTED),
@@ -65,6 +66,9 @@ def test_table_covers_the_study_diagram():
         (S.CAMERA_READY_RECEIVED, S.WITHDRAWN),
         (S.CONFIRMED, S.WITHDRAWN),
         (S.SCHEDULED, S.WITHDRAWN),
+        # Plan L5 (I6) : à la publication du programme.
+        (S.CONFIRMED, S.SCHEDULED),
+        (S.SCHEDULED, S.CONFIRMED),
     }
     L5_SOURCES = (S.CAMERA_READY_RECEIVED, S.CONFIRMED, S.SCHEDULED)
     assert all(

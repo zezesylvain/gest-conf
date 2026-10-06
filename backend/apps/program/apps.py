@@ -16,5 +16,6 @@ class ProgramConfig(AppConfig):
         register_program_personal_data()
         register_program_templates()
         register_integrity_check("program.slots", integrity.check_slots)
+        register_integrity_check("program.publication", integrity.check_publication)
         workflow.register_guard(presentation.guard_confirmation)
         workflow.register_effect(presentation.on_transition)

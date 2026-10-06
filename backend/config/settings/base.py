@@ -362,6 +362,7 @@ SPECTACULAR_SETTINGS = {
         "SessionRoleKind": "apps.program.models.SessionRoleKind",
         "Equipment": "apps.program.models.Equipment",
         "ProgramConflictKind": "apps.program.serializers.PROGRAM_CONFLICT_CHOICES",
+        "PassageRole": "apps.program.serializers.PASSAGE_ROLE_CHOICES",
         "SectionType": "apps.portal.models.SectionType",
         "MenuLocation": "apps.portal.models.MenuLocation",
         "PublicFileKind": "apps.core.models.PublicFileKind",

@@ -1753,6 +1753,75 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedPersonSearchList'
           description: ''
+  /v1/manage/editions/{edition_id}/program/publications:
+    get:
+      operationId: manage_program_publications
+      description: '``GET …/program/publications`` : historique des publications (I13).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - name: ordering
+        required: false
+        in: query
+        description: Quel champ utiliser pour classer les résultats.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: Un numéro de page de l'ensemble des résultats.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Nombre de résultats à retourner par page.
+        schema:
+          type: integer
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPublicationList'
+          description: ''
+  /v1/manage/editions/{edition_id}/program/publish:
+    post:
+      operationId: manage_program_publish
+      description: |-
+        ``POST …/program/publish`` : publication par le Chair (``program.publish``, I1),
+        réauthentification récente, journalisée (RG-17) ; refusée tant qu'il reste un conflit
+        (409 ``program_conflicts``) ou sans modification (409 ``program_unchanged``).
+      parameters:
+      - in: header
+        name: If-Match
+        schema:
+          type: integer
+        description: Révision du programme lue ; 412 « stale_revision » si elle a
+          changé (I14).
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProgramBoard'
+          description: ''
   /v1/manage/editions/{edition_id}/program/rooms:
     post:
       operationId: manage_program_rooms_create
@@ -3575,6 +3644,41 @@ paths:
               schema:
                 $ref: '#/components/schemas/Me'
           description: ''
+  /v1/me/agenda:
+    get:
+      operationId: me_agenda
+      description: |-
+        ``GET /v1/me/agenda`` : passages de la personne connectée, d'après les programmes
+        publiés des éditions ouvertes.
+      tags:
+      - me
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AgendaEntry'
+          description: ''
+  /v1/me/agenda.ics:
+    get:
+      operationId: me_agenda_ics
+      description: '``GET /v1/me/agenda.ics`` : les mêmes passages au format iCalendar
+        (RFC 5545).'
+      tags:
+      - me
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            text/calendar:
+              schema:
+                type: string
+          description: ''
   /v1/me/anonymization:
     post:
       operationId: me_anonymization
@@ -3925,6 +4029,60 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PublicSite'
+          description: ''
+  /v1/public/program:
+    get:
+      operationId: public_program
+      description: |-
+        ``GET /v1/public/program`` : dernière publication de l'édition courante, résumée
+        (jours et sessions) ; 404 tant que rien n'est publié. Lu au build du portail (I7).
+      tags:
+      - public
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicProgram'
+          description: ''
+  /v1/public/program/days/{day}:
+    get:
+      operationId: public_program_day
+      description: '``GET /v1/public/program/days/{date}`` : sessions d''un jour (heure
+        de l''édition).'
+      parameters:
+      - in: path
+        name: day
+        schema:
+          type: string
+        required: true
+      tags:
+      - public
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicProgramDay'
+          description: ''
+  /v1/public/program/sessions/{session_id}:
+    get:
+      operationId: public_program_session
+      description: '``GET /v1/public/program/sessions/{id}`` : une session publiée.'
+      parameters:
+      - in: path
+        name: session_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - public
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicSession'
           description: ''
   /v1/submissions:
     get:
@@ -4350,6 +4508,108 @@ components:
         * `user` - utilisateur
         * `command` - commande
         * `system` - système
+    AgendaEdition:
+      type: object
+      properties:
+        code:
+          type: string
+        title_fr:
+          type: string
+        title_en:
+          type: string
+        timezone:
+          type: string
+      required:
+      - code
+      - timezone
+      - title_en
+      - title_fr
+    AgendaEntry:
+      type: object
+      description: '« Mon passage » (I8) : les passages de la personne connectée.'
+      properties:
+        edition:
+          $ref: '#/components/schemas/AgendaEdition'
+        version:
+          type: integer
+        role:
+          $ref: '#/components/schemas/PassageRole'
+        session:
+          $ref: '#/components/schemas/AgendaSession'
+        slot:
+          type: integer
+          nullable: true
+        starts_at:
+          type: string
+          format: date-time
+        ends_at:
+          type: string
+          format: date-time
+        duration_min:
+          type: integer
+        room:
+          $ref: '#/components/schemas/AgendaRoom'
+        title:
+          type: string
+        title_en:
+          type: string
+        reference:
+          type: string
+        co_speakers:
+          type: array
+          items:
+            type: string
+        chairs:
+          type: array
+          items:
+            type: string
+        instructions:
+          type: string
+      required:
+      - chairs
+      - co_speakers
+      - duration_min
+      - edition
+      - ends_at
+      - instructions
+      - reference
+      - role
+      - room
+      - session
+      - slot
+      - starts_at
+      - title
+      - title_en
+      - version
+    AgendaRoom:
+      type: object
+      properties:
+        name:
+          type: string
+        access_note:
+          type: string
+        is_accessible:
+          type: boolean
+      required:
+      - access_note
+      - is_accessible
+      - name
+    AgendaSession:
+      type: object
+      properties:
+        id:
+          type: integer
+        kind:
+          $ref: '#/components/schemas/SessionKind'
+        title_fr:
+          type: string
+        title_en:
+          type: string
+      required:
+      - id
+      - kind
+      - title_en
+      - title_fr
     AnonymizationRequest:
       type: object
       description: 'Confirmation explicite : l''adresse du compte, saisie à nouveau
@@ -5523,6 +5783,8 @@ components:
       - call_closed
       - setting_frozen
       - stale_revision
+      - program_conflicts
+      - program_unchanged
       - submission_locked
       - profile_incomplete
       - grid_locked
@@ -5567,6 +5829,8 @@ components:
         * `call_closed` - Call Closed
         * `setting_frozen` - Setting Frozen
         * `stale_revision` - Stale Revision
+        * `program_conflicts` - Program Conflicts
+        * `program_unchanged` - Program Unchanged
         * `submission_locked` - Submission Locked
         * `profile_incomplete` - Profile Incomplete
         * `grid_locked` - Grid Locked
@@ -6822,6 +7086,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PersonSearch'
+    PaginatedPublicationList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Publication'
     PaginatedReviewSubmissionList:
       type: object
       required:
@@ -6868,6 +7155,22 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SubmissionManage'
+    PassageRole:
+      enum:
+      - presenter
+      - speaker
+      - chair
+      - discussant
+      - moderator
+      - panelist
+      type: string
+      description: |-
+        * `presenter` - presenter
+        * `speaker` - speaker
+        * `chair` - chair
+        * `discussant` - discussant
+        * `moderator` - moderator
+        * `panelist` - panelist
     PatchedAssignmentUpdateRequest:
       type: object
       properties:
@@ -8273,6 +8576,218 @@ components:
       - slug
       - title_en
       - title_fr
+    PublicProgram:
+      type: object
+      properties:
+        edition:
+          type: string
+        version:
+          type: integer
+        published_at:
+          type: string
+          format: date-time
+        timezone:
+          type: string
+        days:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicProgramDaySummary'
+      required:
+      - days
+      - edition
+      - published_at
+      - timezone
+      - version
+    PublicProgramAuthor:
+      type: object
+      properties:
+        name:
+          type: string
+        institution:
+          type: string
+        presenter:
+          type: boolean
+      required:
+      - institution
+      - name
+      - presenter
+    PublicProgramChair:
+      type: object
+      properties:
+        role:
+          $ref: '#/components/schemas/SessionRoleKind'
+        name:
+          type: string
+        institution:
+          type: string
+      required:
+      - institution
+      - name
+      - role
+    PublicProgramDay:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        timezone:
+          type: string
+        sessions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicSession'
+      required:
+      - date
+      - sessions
+      - timezone
+    PublicProgramDaySummary:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        sessions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicProgramSessionSummary'
+      required:
+      - date
+      - sessions
+    PublicProgramRoom:
+      type: object
+      properties:
+        name:
+          type: string
+        is_accessible:
+          type: boolean
+        access_note:
+          type: string
+      required:
+      - access_note
+      - is_accessible
+      - name
+    PublicProgramSessionSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+        kind:
+          $ref: '#/components/schemas/SessionKind'
+        title_fr:
+          type: string
+        title_en:
+          type: string
+        track:
+          allOf:
+          - $ref: '#/components/schemas/PublicProgramTrack'
+          nullable: true
+        room:
+          type: string
+          nullable: true
+        starts_at:
+          type: string
+          format: date-time
+        ends_at:
+          type: string
+          format: date-time
+        slot_count:
+          type: integer
+      required:
+      - ends_at
+      - id
+      - kind
+      - room
+      - slot_count
+      - starts_at
+      - title_en
+      - title_fr
+      - track
+    PublicProgramSlot:
+      type: object
+      properties:
+        id:
+          type: integer
+        starts_at:
+          type: string
+          format: date-time
+        ends_at:
+          type: string
+          format: date-time
+        duration_min:
+          type: integer
+        reference:
+          type: string
+          nullable: true
+        title:
+          type: string
+        title_en:
+          type: string
+        type:
+          allOf:
+          - $ref: '#/components/schemas/PublicProgramType'
+          nullable: true
+        authors:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicProgramAuthor'
+        speaker:
+          allOf:
+          - $ref: '#/components/schemas/PublicProgramSpeaker'
+          nullable: true
+      required:
+      - authors
+      - duration_min
+      - ends_at
+      - id
+      - reference
+      - speaker
+      - starts_at
+      - title
+      - title_en
+      - type
+    PublicProgramSpeaker:
+      type: object
+      properties:
+        name:
+          type: string
+        institution:
+          type: string
+        bio:
+          type: string
+        photo_url:
+          type: string
+          nullable: true
+      required:
+      - bio
+      - institution
+      - name
+      - photo_url
+    PublicProgramTrack:
+      type: object
+      properties:
+        code:
+          type: string
+        name_fr:
+          type: string
+        name_en:
+          type: string
+      required:
+      - code
+      - name_en
+      - name_fr
+    PublicProgramType:
+      type: object
+      properties:
+        code:
+          type: string
+        label_fr:
+          type: string
+        label_en:
+          type: string
+      required:
+      - code
+      - label_en
+      - label_fr
     PublicRoutes:
       type: object
       properties:
@@ -8383,6 +8898,56 @@ components:
       - subtitle_fr
       - title_en
       - title_fr
+    PublicSession:
+      type: object
+      properties:
+        id:
+          type: integer
+        kind:
+          $ref: '#/components/schemas/SessionKind'
+        title_fr:
+          type: string
+        title_en:
+          type: string
+        description_fr:
+          type: string
+        description_en:
+          type: string
+        track:
+          allOf:
+          - $ref: '#/components/schemas/PublicProgramTrack'
+          nullable: true
+        room:
+          allOf:
+          - $ref: '#/components/schemas/PublicProgramRoom'
+          nullable: true
+        starts_at:
+          type: string
+          format: date-time
+        ends_at:
+          type: string
+          format: date-time
+        chairs:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicProgramChair'
+        slots:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicProgramSlot'
+      required:
+      - chairs
+      - description_en
+      - description_fr
+      - ends_at
+      - id
+      - kind
+      - room
+      - slots
+      - starts_at
+      - title_en
+      - title_fr
+      - track
     PublicSite:
       type: object
       properties:
@@ -8487,6 +9052,22 @@ components:
       - description_fr
       - name_en
       - name_fr
+    Publication:
+      type: object
+      properties:
+        version:
+          type: integer
+        published_at:
+          type: string
+          format: date-time
+        published_by:
+          type: string
+        summary: {}
+      required:
+      - published_at
+      - published_by
+      - summary
+      - version
     PublicationStatus:
       type: object
       properties:

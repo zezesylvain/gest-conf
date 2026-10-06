@@ -15,10 +15,17 @@ from apps.conferences.models import Edition
 from apps.submissions.models import Submission
 
 WITHDRAWN = "program/email/withdrawn"
+PASSAGE = "program/email/passage"
 
 
 def register_program_templates() -> None:
     register_email_template(WITHDRAWN)
+    register_email_template(PASSAGE)
+
+
+def agenda_link() -> str:
+    """« Mon passage » dans l'espace compte du portail (I8)."""
+    return f"{settings.GESTCONF_PUBLIC_URL}/compte/mon-passage"
 
 
 def planner_link(edition: Edition) -> str:
@@ -65,3 +72,67 @@ def withdrawn_from_programme(submission: Submission, *, was_placed: bool) -> Non
             },
             idempotency_key=f"program-withdrawn:{submission.pk}:{member.pk}",
         )
+
+
+def _recipient(key: str) -> tuple[str, User | None]:
+    """Destinataire d'une clé de personne : le compte, sinon l'adresse de l'auteur."""
+    kind, _sep, value = key.partition(":")
+    if kind == "user":
+        user = User.objects.filter(
+            pk=int(value), is_active=True, anonymized_at__isnull=True
+        ).first()
+        return (user.email, user) if user is not None else ("", None)
+    return value, User.objects.filter(email__iexact=value, anonymized_at__isnull=True).first()
+
+
+def passage_changed(edition: Edition, publication, key: str, status: str, items) -> None:
+    """I16 : passage nouveau, modifié ou supprimé, une fois par version publiée. L'e-mail
+    ne porte que les passages de la personne (date, heure de l'édition, salle, rôle)."""
+    from apps.program.services.publication import person_hash
+
+    to_email, user = _recipient(key)
+    if not to_email:
+        return
+    locale = resolve_locale(None, user) if user is not None else "fr"
+    with translation.override(locale):
+        roles = {
+            "presenter": _("présentation"),
+            "speaker": _("intervention"),
+            "chair": _("présidence de séance"),
+            "discussant": _("discussion"),
+            "moderator": _("modération"),
+            "panelist": _("table ronde"),
+        }
+        lines = "\n".join(
+            # Gabarit traduit : « : » précédé d'une espace en français, pas en anglais.
+            _("- {start} · {room} · {role} : {title}").format(
+                start=local_datetime_from_iso(item.starts_at, edition.timezone, locale),
+                room=item.room or "—",
+                role=roles.get(item.role, item.role),
+                title=item.title,
+            )
+            for item in items
+        )
+    queue_email(
+        template_code=PASSAGE,
+        to_email=to_email,
+        to_user=user,
+        locale=locale,
+        context={
+            "edition_title": edition_title(edition, locale),
+            "status": status,
+            "passages": lines,
+            "link": agenda_link(),
+            "has_account": "1" if user is not None else "",
+        },
+        idempotency_key=f"program-passage:{edition.pk}:{publication.version}:{person_hash(key)}",
+    )
+
+
+def local_datetime_from_iso(value: str, tz_name: str, locale: str) -> str:
+    """Date et heure de l'édition, au format des e-mails (fuseau indiqué)."""
+    import datetime as dt
+
+    from apps.submissions.notifications import local_datetime
+
+    return local_datetime(dt.datetime.fromisoformat(value), tz_name, locale)

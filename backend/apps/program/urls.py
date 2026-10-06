@@ -57,6 +57,29 @@ urlpatterns = [
         name="manage-program-role",
     ),
     path(
+        f"{P}/publish",
+        views.ProgramPublishViewSet.as_view({"post": "create"}),
+        name="manage-program-publish",
+    ),
+    path(
+        f"{P}/publications",
+        views.ProgramPublicationsViewSet.as_view({"get": "list"}),
+        name="manage-program-publications",
+    ),
+    path("public/program", views.PublicProgramView.as_view(), name="public-program"),
+    path(
+        "public/program/days/<str:day>",
+        views.PublicProgramDayView.as_view(),
+        name="public-program-day",
+    ),
+    path(
+        "public/program/sessions/<int:session_id>",
+        views.PublicProgramSessionView.as_view(),
+        name="public-program-session",
+    ),
+    path("me/agenda", views.MyAgendaView.as_view(), name="me-agenda"),
+    path("me/agenda.ics", views.MyAgendaCalendarView.as_view(), name="me-agenda-ics"),
+    path(
         f"{P}/people",
         views.ProgramPeopleViewSet.as_view({"get": "list"}),
         name="manage-program-people",

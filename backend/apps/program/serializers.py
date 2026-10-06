@@ -313,3 +313,249 @@ def board_data(edition: Edition) -> dict:
             for item in conflicts
         ],
     }
+
+
+# --- Programme public (I7) et « Mon passage » (I8) ------------------------------------------
+# Construits par liste blanche depuis l'instantané publié : ni clé de personne, ni identifiant
+# de communication, ni consignes internes, ni adresse.
+
+
+def public_session(session: dict) -> dict:
+    return {
+        "id": session["id"],
+        "kind": session["kind"],
+        "title_fr": session["title_fr"],
+        "title_en": session["title_en"],
+        "description_fr": session["description_fr"],
+        "description_en": session["description_en"],
+        "track": session["track"],
+        "room": {
+            "name": session["room"]["name"],
+            "is_accessible": session["room"]["is_accessible"],
+            "access_note": session["room"]["access_note"],
+        }
+        if session["room"]
+        else None,
+        "starts_at": session["starts_at"],
+        "ends_at": session["ends_at"],
+        "chairs": [
+            {"role": role["role"], "name": role["name"], "institution": role["institution"]}
+            for role in session["roles"]
+        ],
+        "slots": [
+            {
+                "id": slot["id"],
+                "starts_at": slot["starts_at"],
+                "ends_at": slot["ends_at"],
+                "duration_min": slot["duration_min"],
+                "reference": (slot["submission"] or {}).get("reference"),
+                "title": slot["submission"]["title"] if slot["submission"] else slot["title_fr"],
+                "title_en": "" if slot["submission"] else slot["title_en"],
+                "type": (slot["submission"] or {}).get("type"),
+                "authors": [
+                    {
+                        "name": author["name"],
+                        "institution": author["institution"],
+                        "presenter": author["presenter"],
+                    }
+                    for author in (slot["submission"] or {}).get("authors", [])
+                ],
+                "speaker": {
+                    "name": slot["speaker"]["name"],
+                    "institution": slot["speaker"]["institution"],
+                    "bio": slot["speaker"].get("bio", ""),
+                    "photo_url": slot["speaker"].get("photo_url"),
+                }
+                if slot["speaker"]
+                else None,
+            }
+            for slot in session["slots"]
+        ],
+    }
+
+
+def local_day(value: str, tz_name: str) -> str:
+    import datetime as dt
+    from zoneinfo import ZoneInfo
+
+    return dt.datetime.fromisoformat(value).astimezone(ZoneInfo(tz_name)).date().isoformat()
+
+
+def public_summary(publication) -> dict:
+    """Accueil du programme : jours et sessions, sans le détail des communications (bilan
+    de L5.0 : une page par jour et par session)."""
+    snapshot = publication.snapshot
+    zone = snapshot["edition"]["timezone"]
+    days: dict[str, list] = {}
+    for session in snapshot["sessions"]:
+        days.setdefault(local_day(session["starts_at"], zone), []).append(
+            {
+                "id": session["id"],
+                "kind": session["kind"],
+                "title_fr": session["title_fr"],
+                "title_en": session["title_en"],
+                "track": session["track"],
+                "room": session["room"]["name"] if session["room"] else None,
+                "starts_at": session["starts_at"],
+                "ends_at": session["ends_at"],
+                "slot_count": len(session["slots"]),
+            }
+        )
+    return {
+        "edition": snapshot["edition"]["code"],
+        "version": publication.version,
+        "published_at": publication.published_at,
+        "timezone": zone,
+        "days": [{"date": day, "sessions": days[day]} for day in sorted(days)],
+    }
+
+
+class PublicProgramTrackSerializer(serializers.Serializer):
+    code = serializers.CharField()
+    name_fr = serializers.CharField()
+    name_en = serializers.CharField()
+
+
+class PublicProgramTypeSerializer(serializers.Serializer):
+    code = serializers.CharField()
+    label_fr = serializers.CharField()
+    label_en = serializers.CharField()
+
+
+class PublicProgramRoomSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    is_accessible = serializers.BooleanField()
+    access_note = serializers.CharField()
+
+
+class PublicProgramAuthorSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    institution = serializers.CharField()
+    presenter = serializers.BooleanField()
+
+
+class PublicProgramSpeakerSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    institution = serializers.CharField()
+    bio = serializers.CharField()
+    photo_url = serializers.CharField(allow_null=True)
+
+
+class PublicProgramChairSerializer(serializers.Serializer):
+    role = serializers.ChoiceField(choices=SessionRoleKind.choices)
+    name = serializers.CharField()
+    institution = serializers.CharField()
+
+
+class PublicProgramSlotSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    starts_at = serializers.DateTimeField()
+    ends_at = serializers.DateTimeField()
+    duration_min = serializers.IntegerField()
+    reference = serializers.CharField(allow_null=True)
+    title = serializers.CharField()
+    title_en = serializers.CharField()
+    type = PublicProgramTypeSerializer(allow_null=True)
+    authors = PublicProgramAuthorSerializer(many=True)
+    speaker = PublicProgramSpeakerSerializer(allow_null=True)
+
+
+class PublicSessionSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    kind = serializers.ChoiceField(choices=SessionKind.choices)
+    title_fr = serializers.CharField()
+    title_en = serializers.CharField()
+    description_fr = serializers.CharField()
+    description_en = serializers.CharField()
+    track = PublicProgramTrackSerializer(allow_null=True)
+    room = PublicProgramRoomSerializer(allow_null=True)
+    starts_at = serializers.DateTimeField()
+    ends_at = serializers.DateTimeField()
+    chairs = PublicProgramChairSerializer(many=True)
+    slots = PublicProgramSlotSerializer(many=True)
+
+
+class PublicProgramSessionSummarySerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    kind = serializers.ChoiceField(choices=SessionKind.choices)
+    title_fr = serializers.CharField()
+    title_en = serializers.CharField()
+    track = PublicProgramTrackSerializer(allow_null=True)
+    room = serializers.CharField(allow_null=True)
+    starts_at = serializers.DateTimeField()
+    ends_at = serializers.DateTimeField()
+    slot_count = serializers.IntegerField()
+
+
+class PublicProgramDaySummarySerializer(serializers.Serializer):
+    date = serializers.DateField()
+    sessions = PublicProgramSessionSummarySerializer(many=True)
+
+
+class PublicProgramSerializer(serializers.Serializer):
+    edition = serializers.CharField()
+    version = serializers.IntegerField()
+    published_at = serializers.DateTimeField()
+    timezone = serializers.CharField()
+    days = PublicProgramDaySummarySerializer(many=True)
+
+
+class PublicProgramDaySerializer(serializers.Serializer):
+    date = serializers.DateField()
+    timezone = serializers.CharField()
+    sessions = PublicSessionSerializer(many=True)
+
+
+class AgendaEditionSerializer(serializers.Serializer):
+    code = serializers.CharField()
+    title_fr = serializers.CharField()
+    title_en = serializers.CharField()
+    timezone = serializers.CharField()
+
+
+class AgendaSessionSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    kind = serializers.ChoiceField(choices=SessionKind.choices)
+    title_fr = serializers.CharField()
+    title_en = serializers.CharField()
+
+
+class AgendaRoomSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    access_note = serializers.CharField()
+    is_accessible = serializers.BooleanField()
+
+
+# Rôles d'un passage : présentateur, intervenant invité, rôles de séance.
+PASSAGE_ROLE_CHOICES = [
+    ("presenter", "presenter"),
+    ("speaker", "speaker"),
+    *[(value, value) for value in SessionRoleKind.values],
+]
+
+
+class AgendaEntrySerializer(serializers.Serializer):
+    """« Mon passage » (I8) : les passages de la personne connectée."""
+
+    edition = AgendaEditionSerializer()
+    version = serializers.IntegerField()
+    role = serializers.ChoiceField(choices=PASSAGE_ROLE_CHOICES)
+    session = AgendaSessionSerializer()
+    slot = serializers.IntegerField(allow_null=True)
+    starts_at = serializers.DateTimeField()
+    ends_at = serializers.DateTimeField()
+    duration_min = serializers.IntegerField()
+    room = AgendaRoomSerializer()
+    title = serializers.CharField()
+    title_en = serializers.CharField()
+    reference = serializers.CharField()
+    co_speakers = serializers.ListField(child=serializers.CharField())
+    chairs = serializers.ListField(child=serializers.CharField())
+    instructions = serializers.CharField()
+
+
+class PublicationSerializer(serializers.Serializer):
+    version = serializers.IntegerField()
+    published_at = serializers.DateTimeField()
+    published_by = serializers.CharField()
+    summary = serializers.JSONField()
