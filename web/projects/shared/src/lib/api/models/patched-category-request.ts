@@ -6,6 +6,7 @@
  * Catégorie et sa grille de tarifs (gestion). ``code`` : fixé à la création.
  */
 export interface PatchedCategoryRequest {
+  badge_color?: (string | string);
   code?: string;
   description_en?: string;
   description_fr?: string;

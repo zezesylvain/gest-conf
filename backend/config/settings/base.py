@@ -369,6 +369,10 @@ SPECTACULAR_SETTINGS = {
         "DocumentKind": "apps.payments.models.DocumentKind",
         "PaymentStatus": "apps.payments.models.PaymentStatus",
         "PaymentProvider": "apps.payments.models.Provider",
+        # Plan L7 : jour J.
+        "CheckinOutcome": "apps.events.services.checkin.OUTCOME_CHOICES",
+        "CheckinMethod": "apps.events.models.CheckinMethod",
+        "RetiredTokenReason": "apps.registrations.models.RetiredTokenReason",
         "InvitableRole": "apps.accounts.roles.InvitableRole",
         "OcFunction": "apps.accounts.roles.OcFunction",
         "UserRoleStatus": "apps.accounts.models.UserRoleStatus",

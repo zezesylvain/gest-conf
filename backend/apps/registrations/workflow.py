@@ -9,12 +9,11 @@ la ligne, applique les effets du statut (clé active, jeton QR, quotas et codes 
 |---|---|---|
 | en attente | confirmée | jeton QR, utilisation du code promo consommée |
 | en attente | annulée, expirée | places et utilisation du code rendues |
-| confirmée | annulée | places rendues, jeton QR retiré, remboursement dû (J9) |
+| confirmée | annulée | places rendues, jeton QR retiré (empreinte gardée), remboursement dû (J9) |
 """
 
 from __future__ import annotations
 
-import secrets
 from decimal import Decimal
 
 from django.db import transaction
@@ -28,8 +27,11 @@ from apps.registrations.models import (
     Registration,
     RegistrationStatus,
     RegistrationStatusHistory,
+    RetiredQrToken,
+    RetiredTokenReason,
 )
 from apps.registrations.models import RegistrationStatus as S
+from apps.registrations.tokens import new_token, token_hash
 
 TRANSITIONS: frozenset[tuple[str, str]] = frozenset(
     {
@@ -86,13 +88,21 @@ def transition(
     fields = ["status", "updated_at"]
     registration.status = to_status
     if to_status == S.CONFIRMED:
-        registration.qr_token = secrets.token_urlsafe(24)
+        registration.qr_token = new_token()
         registration.confirmed_at = now
         registration.due_at = None
         fields += ["qr_token", "confirmed_at", "due_at"]
         if registration.promo_code is not None:
             pricing.consume_promo(registration.promo_code)
     else:
+        if registration.qr_token:
+            # Badge annulé (plan L7, K4) : l'accueil le reconnaît à son empreinte.
+            RetiredQrToken.objects.create(
+                registration=registration,
+                token_hash=token_hash(registration.qr_token),
+                reason=RetiredTokenReason.CANCELLED,
+                retired_at=now,
+            )
         registration.active_key = None
         registration.qr_token = None
         registration.closed_at = now

@@ -11,16 +11,13 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime
 from decimal import Decimal
-from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from fpdf import FPDF
 from fpdf.fonts import FontFace
 
 from apps.core.money import format_amount, quantize
-
-FONTS = Path(__file__).resolve().parent / "fonts"
-FONT = "DejaVu"
+from apps.core.pdf import FONT, add_fonts
 
 TITLES = {
     "invoice": ("Facture", "Invoice"),
@@ -68,8 +65,7 @@ def render(data: DocumentData) -> bytes:
     pdf.set_title(f"{title_fr} {data.number}")
     pdf.set_author(data.issuer.get("legal_name", ""))
     pdf.set_creator("GEST-CONF")
-    pdf.add_font(FONT, "", str(FONTS / "DejaVuSans.ttf"))
-    pdf.add_font(FONT, "B", str(FONTS / "DejaVuSans-Bold.ttf"))
+    add_fonts(pdf)
     pdf.set_auto_page_break(auto=True, margin=20)
     pdf.add_page()
 

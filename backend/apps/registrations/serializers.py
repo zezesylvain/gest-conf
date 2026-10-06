@@ -101,6 +101,7 @@ class CategorySerializer(serializers.ModelSerializer):
             "requires_proof",
             "is_active",
             "position",
+            "badge_color",
             "fees",
             "in_use",
         )

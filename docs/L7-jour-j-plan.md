@@ -376,3 +376,110 @@ compressés), chargé par le seul écran d'accueil.
   client régénéré.
 
 **Critère de fin** (« Matrice au vert ») : atteint.
+
+## 13. Bilan de L7.2 (6 octobre 2026)
+
+**Pointage à l'accueil** (`apps/events/services/checkin.py`, K4, K5) :
+
+- par le QR du badge (`checkin.scan`) ou par la référence de l'inscription (saisie manuelle,
+  `checkin.manage`, car une référence se devine) ;
+- un pointage vaut présence (RG-16) ; le second passage d'un badge rend « déjà pointé », sans
+  nouvelle ligne ;
+- refus distincts :
+  - badge inconnu ;
+  - badge d'une autre édition ;
+  - inscription annulée, inscription expirée ;
+  - badge remplacé ;
+  - en attente de paiement (réponse du commanditaire) ;
+- verrou de l'inscription : deux appareils qui lisent le même badge en même temps produisent
+  un pointage et un « déjà pointé » ;
+- heure de l'appareil ramenée entre la réception moins 24 heures et la réception ; heure de
+  réception gardée à part ;
+- annulation d'un pointage : motif obligatoire, journal ; la personne peut être repointée ;
+- journal `checkin.recorded` et `checkin.cancelled`, sans jeton.
+
+**Précision de K2 et K5 : la preuve d'un pointage est le jeton lui-même.**
+
+- Le serveur n'accepte jamais une empreinte comme preuve. La liste hors ligne, qui ne contient
+  que des empreintes, ne permet donc pas de pointer qui que ce soit sans son badge, même entre
+  les mains d'un bénévole indélicat.
+- Conséquence côté appareil : la file des pointages hors ligne garde les jetons lus jusqu'à
+  la synchronisation. Elle est effacée avec la liste (déconnexion, 48 heures) ; à traiter en
+  L7.6.
+
+**Badges retirés** (`registrations.RetiredQrToken`, migration `registrations/0003`) :
+
+- à l'annulation d'une inscription confirmée (workflow) et au remplacement d'un badge perdu,
+  l'empreinte de l'ancien jeton est gardée, jamais le jeton ;
+- l'accueil répond ainsi « inscription annulée » ou « badge remplacé », en ligne comme hors
+  ligne, plutôt que « inconnu » (démo H : « un badge annulé »).
+
+**Badge perdu** (K2) : `orders.regenerate_qr_token`.
+
+- Inscription confirmée seulement ; motif obligatoire ; journal sans jeton.
+- Capacité `checkin.manage` : l'accueil le fait sur place.
+
+**Liste hors ligne** (K5, `GET …/checkin/bundle`) :
+
+- contenu : empreinte SHA-256 du jeton, référence, nom, code de catégorie, « déjà pointé » ;
+  catégories et badges retirés (empreinte, référence, motif) ;
+- ni jeton, ni adresse, ni institution (test à traceurs) ;
+- échéance à 48 heures ; téléchargement journalisé avec le nombre d'entrées ;
+- servie en `no-store`.
+
+**Synchronisation** (`POST …/checkin/sync`) :
+
+- lots de 200 au plus ; chaque élément est revérifié par le serveur ;
+- même clé d'idempotence, même résultat : le lot est rejouable ;
+- une saisie manuelle reçue d'un appareil sans `checkin.manage` est rendue « non permise » ;
+- un élément mal formé fait refuser tout le lot (400), sans écriture.
+
+**Suivi** :
+
+- compteurs (`…/checkin/summary`, `checkin.scan`) ;
+- liste filtrable avec les pointages annulés en option, annulation, export CSV
+  (`checkin.manage`, réauthentification, journal) ;
+- contrôle d'intégrité `events.checkins` : pointage actif d'une inscription qui n'est plus
+  confirmée, ou d'une autre édition.
+
+**Badges** (K3, `apps/events/badges.py`) :
+
+- format A6 pour le participant (`GET /v1/registrations/{id}/badge`, dès la confirmation) et
+  pour un badge seul côté CO ;
+- planches A4 de quatre badges avec traits de coupe, par lots de 200
+  (`…/registrations/badges?category=&batch=`, nombre de lots par `…/badges/batches`) ;
+- droits : `registrations.read` ; journal sans jeton ; jamais stockés, servis en `no-store` ;
+- contenu :
+  - titre de l'édition ;
+  - nom en grand, sur deux lignes au plus, sans couper de mot ;
+  - institution et pays ;
+  - QR vectoriel ;
+  - référence sous le QR, secours de la saisie manuelle (K6) ;
+  - bandeau de catégorie dans sa couleur (`RegistrationCategory.badge_color`, `#RRGGBB`,
+    palette par défaut selon l'ordre), texte noir ou blanc selon la luminance.
+- **Écarts** :
+  - la couleur est portée par la catégorie, éditée avec elle (`pricing.write`), et non par le
+    paramétrage des attestations (§3) ;
+  - **le pays s'imprime en code ISO** (« SN ») : le serveur n'a pas de table des noms de pays
+    (Angular les affiche par `Intl.DisplayNames`). Une table FR et EN versionnée serait à
+    ajouter si le commanditaire veut le nom complet.
+- La police DejaVu Sans passe de `apps/payments/fonts/` à `apps/core/fonts/`, avec
+  `apps/core/pdf.py`, pour servir à toutes les applications.
+
+**Reporté en L7.3** : le pointage en session (le modèle et le service le prévoient déjà par
+leur clé de lieu).
+
+**Tests** :
+
+- backend : **4 363 réussis**, 9 ignorés (SQLite) ;
+- sous MariaDB : `events`, `registrations`, `payments`, `accounts`, le registre, le schéma et
+  les règles de plateforme (421), plus les cases nouvelles de la matrice (326) ;
+  - dont deux appareils qui lisent le même badge en même temps : un pointage, un « déjà
+    pointé » ;
+- matrice des droits : **3 184 cas** (douze routes ajoutées) ;
+- `events` : 47 tests (pointage, refus, idempotence, bornes, synchronisation, liste hors
+  ligne à traceurs, badges A6 et planches, couleur, remplacement du badge) ;
+- front : 388 tests ; client régénéré (aucun écran nouveau : L7.6) ;
+- `ruff`, lint, `format:check`, `locale/check.sh`, schéma validé sous MariaDB.
+
+**Critère de fin** (« Tests au vert ») : atteint.

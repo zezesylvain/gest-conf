@@ -33,9 +33,12 @@ from apps.registrations.models import (
     Registration,
     RegistrationSettings,
     RegistrationStatus,
+    RetiredQrToken,
+    RetiredTokenReason,
 )
 from apps.registrations.services import pricing
 from apps.registrations.services.settings import offered_methods, registration_settings
+from apps.registrations.tokens import new_token, token_hash
 
 PROOFS = PrivateStore("registration-proofs")
 
@@ -333,6 +336,42 @@ def grant_waiver(registration: Registration, *, reason: str, actor: Actor) -> Re
     return workflow.transition(
         registration, RegistrationStatus.CONFIRMED, actor=actor, reason=reason
     )
+
+
+# --- Badge perdu (plan L7, K2) -------------------------------------------------------------------
+
+
+@transaction.atomic
+def regenerate_qr_token(registration: Registration, *, reason: str, actor: Actor) -> Registration:
+    """Nouveau jeton QR pour une inscription confirmée (badge perdu) : l'ancien badge devient
+    invalide, son empreinte est gardée (« badge remplacé » à l'accueil). Motif obligatoire,
+    journal sans jeton."""
+    ensure_editable(registration.edition)
+    if not reason.strip():
+        raise Invalid(fields={"reason": [_("Motif obligatoire.")]})
+    registration = (
+        Registration.objects.select_for_update().select_related("edition").get(pk=registration.pk)
+    )
+    if registration.status != RegistrationStatus.CONFIRMED or not registration.qr_token:
+        raise RuleViolation(
+            _("Seule une inscription confirmée a un badge."), code=ErrorCode.INVALID_TRANSITION
+        )
+    RetiredQrToken.objects.create(
+        registration=registration,
+        token_hash=token_hash(registration.qr_token),
+        reason=RetiredTokenReason.REPLACED,
+        retired_at=timezone.now(),
+    )
+    registration.qr_token = new_token()
+    registration.save(update_fields=["qr_token", "updated_at"])
+    record(
+        "registration.qr_regenerated",
+        actor=actor,
+        edition=registration.edition,
+        obj=registration,
+        reason=reason,
+    )
+    return registration
 
 
 # --- Identité de facturation et justificatif ------------------------------------------------------

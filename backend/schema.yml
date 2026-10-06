@@ -583,6 +583,235 @@ paths:
               schema:
                 $ref: '#/components/schemas/BillingProfile'
           description: ''
+  /v1/manage/editions/{edition_id}/checkin:
+    get:
+      operationId: manage_checkin_list
+      description: '``…/checkin/…`` : pointage à l''accueil.'
+      parameters:
+      - in: query
+        name: cancelled
+        schema:
+          type: boolean
+        description: Inclure les pointages annulés.
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - name: ordering
+        required: false
+        in: query
+        description: Quel champ utiliser pour classer les résultats.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: Un numéro de page de l'ensemble des résultats.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Nombre de résultats à retourner par page.
+        schema:
+          type: integer
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Nom ou référence.
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCheckinListItemList'
+          description: ''
+  /v1/manage/editions/{edition_id}/checkin/{checkin_id}/cancel:
+    post:
+      operationId: manage_checkin_cancel
+      description: '``…/checkin/…`` : pointage à l''accueil.'
+      parameters:
+      - in: path
+        name: checkin_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReasonRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Checkin'
+          description: ''
+  /v1/manage/editions/{edition_id}/checkin/bundle:
+    get:
+      operationId: manage_checkin_bundle
+      description: 'Liste hors ligne (K5) : empreintes, références, noms, catégories
+        ; journalisée.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bundle'
+          description: ''
+  /v1/manage/editions/{edition_id}/checkin/export:
+    get:
+      operationId: manage_checkin_export
+      description: Présences à l'accueil en CSV (pointages non annulés), journalisé.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  /v1/manage/editions/{edition_id}/checkin/manual:
+    post:
+      operationId: manage_checkin_manual
+      description: 'Saisie de la référence (caméra en panne, badge oublié) : ``checkin.manage``.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ManualRequestRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckinResult'
+          description: ''
+  /v1/manage/editions/{edition_id}/checkin/scan:
+    post:
+      operationId: manage_checkin_scan
+      description: 'Lecture du QR d''un badge : pointé, déjà pointé, ou refus explicite
+        (K4).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScanRequestRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckinResult'
+          description: ''
+  /v1/manage/editions/{edition_id}/checkin/summary:
+    get:
+      operationId: manage_checkin_summary
+      description: '``…/checkin/…`` : pointage à l''accueil.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckinSummary'
+          description: ''
+  /v1/manage/editions/{edition_id}/checkin/sync:
+    post:
+      operationId: manage_checkin_sync
+      description: 'File hors ligne (K5) : chaque pointage est revérifié ; rejouable
+        sans doublon.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SyncRequestRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyncResponse'
+          description: ''
   /v1/manage/editions/{edition_id}/confidentiality:
     get:
       operationId: manage_confidentiality_retrieve
@@ -2843,6 +3072,126 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ManageRegistration'
+          description: ''
+  /v1/manage/editions/{edition_id}/registrations/{registration_id}/badge:
+    get:
+      operationId: manage_badge_single
+      description: |-
+        ``…/registrations/badges`` (lots), ``…/registrations/{id}/badge`` (un badge) et
+        ``…/registrations/{id}/regenerate-token`` (badge perdu).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: registration_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  /v1/manage/editions/{edition_id}/registrations/{registration_id}/regenerate-token:
+    post:
+      operationId: manage_badge_regenerate
+      description: 'Badge perdu : nouveau jeton, l''ancien badge est refusé (« badge
+        remplacé »).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: registration_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReasonRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /v1/manage/editions/{edition_id}/registrations/badges:
+    get:
+      operationId: manage_badges_sheets
+      description: |-
+        ``…/registrations/badges`` (lots), ``…/registrations/{id}/badge`` (un badge) et
+        ``…/registrations/{id}/regenerate-token`` (badge perdu).
+      parameters:
+      - in: query
+        name: batch
+        schema:
+          type: integer
+        description: Lot de 200 badges, à partir de 1.
+      - in: query
+        name: category
+        schema:
+          type: string
+        description: Code de catégorie.
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  /v1/manage/editions/{edition_id}/registrations/badges/batches:
+    get:
+      operationId: manage_badges_batches
+      description: |-
+        ``…/registrations/badges`` (lots), ``…/registrations/{id}/badge`` (un badge) et
+        ``…/registrations/{id}/regenerate-token`` (badge perdu).
+      parameters:
+      - in: query
+        name: category
+        schema:
+          type: string
+        description: Code de catégorie.
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadgeBatches'
           description: ''
   /v1/manage/editions/{edition_id}/registrations/categories:
     get:
@@ -5313,6 +5662,30 @@ paths:
               schema:
                 $ref: '#/components/schemas/MyRegistration'
           description: ''
+  /v1/registrations/{registration_id}/badge:
+    get:
+      operationId: registrations_badge
+      description: |-
+        ``GET /v1/registrations/{id}/badge`` : le badge du participant (A6), dès la
+        confirmation ; 404 sinon.
+      parameters:
+      - in: path
+        name: registration_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - registrations
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+          description: ''
   /v1/registrations/{registration_id}/cancel:
     post:
       operationId: registrations_cancel
@@ -6324,6 +6697,19 @@ components:
             $ref: '#/components/schemas/AuthorWriteRequest'
       required:
       - authors
+    BadgeBatches:
+      type: object
+      properties:
+        count:
+          type: integer
+        batch_size:
+          type: integer
+        batches:
+          type: integer
+      required:
+      - batch_size
+      - batches
+      - count
     BillingDocument:
       type: object
       description: Pièce de facturation (gestion, ``finance.read``).
@@ -6416,6 +6802,84 @@ components:
     BlankEnum:
       enum:
       - ''
+    Bundle:
+      type: object
+      description: 'Liste de pointage hors ligne (K5) : minimale, sans jeton, à effacer
+        après 48 h.'
+      properties:
+        edition_id:
+          type: integer
+        generated_at:
+          type: string
+          format: date-time
+        expires_at:
+          type: string
+          format: date-time
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/BundleCategory'
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/BundleEntry'
+        retired:
+          type: array
+          items:
+            $ref: '#/components/schemas/BundleRetired'
+      required:
+      - categories
+      - edition_id
+      - entries
+      - expires_at
+      - generated_at
+      - retired
+    BundleCategory:
+      type: object
+      properties:
+        code:
+          type: string
+        label_fr:
+          type: string
+        label_en:
+          type: string
+      required:
+      - code
+      - label_en
+      - label_fr
+    BundleEntry:
+      type: object
+      properties:
+        token_hash:
+          type: string
+          description: SHA-256 (hexadécimal) du texte du QR.
+        reference:
+          type: string
+        name:
+          type: string
+        category:
+          type: string
+        checked_in:
+          type: boolean
+      required:
+      - category
+      - checked_in
+      - name
+      - reference
+      - token_hash
+    BundleRetired:
+      type: object
+      properties:
+        token_hash:
+          type: string
+        reference:
+          type: string
+        reason:
+          $ref: '#/components/schemas/RetiredTokenReason'
+      required:
+      - reason
+      - reference
+      - token_hash
     CancelRequest:
       type: object
       properties:
@@ -6597,6 +7061,14 @@ components:
           maximum: 65535
           minimum: 0
           title: Ordre
+        badge_color:
+          title: Couleur du badge
+          oneOf:
+          - type: string
+            pattern: ^#[0-9A-Fa-f]{6}$
+            maxLength: 7
+          - type: string
+            maxLength: 0
         fees:
           type: array
           items:
@@ -6663,6 +7135,14 @@ components:
           maximum: 65535
           minimum: 0
           title: Ordre
+        badge_color:
+          title: Couleur du badge
+          oneOf:
+          - type: string
+            pattern: ^#[0-9A-Fa-f]{6}$
+            maxLength: 7
+          - type: string
+            maxLength: 0
       required:
       - code
       - label_fr
@@ -6687,6 +7167,169 @@ components:
       - confirmed
       - label_en
       - label_fr
+    Checkin:
+      type: object
+      properties:
+        id:
+          type: integer
+        scanned_at:
+          type: string
+          format: date-time
+        received_at:
+          type: string
+          format: date-time
+        method:
+          $ref: '#/components/schemas/CheckinMethod'
+        recorded_by:
+          type: string
+        device:
+          type: string
+        cancelled_at:
+          type: string
+          format: date-time
+          nullable: true
+        cancelled_by:
+          type: string
+        cancel_reason:
+          type: string
+      required:
+      - cancel_reason
+      - cancelled_at
+      - cancelled_by
+      - device
+      - id
+      - method
+      - received_at
+      - recorded_by
+      - scanned_at
+    CheckinListItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        scanned_at:
+          type: string
+          format: date-time
+        received_at:
+          type: string
+          format: date-time
+        method:
+          $ref: '#/components/schemas/CheckinMethod'
+        recorded_by:
+          type: string
+        device:
+          type: string
+        cancelled_at:
+          type: string
+          format: date-time
+          nullable: true
+        cancelled_by:
+          type: string
+        cancel_reason:
+          type: string
+        registration:
+          $ref: '#/components/schemas/CheckinPerson'
+      required:
+      - cancel_reason
+      - cancelled_at
+      - cancelled_by
+      - device
+      - id
+      - method
+      - received_at
+      - recorded_by
+      - registration
+      - scanned_at
+    CheckinMethod:
+      enum:
+      - scan
+      - manual
+      type: string
+      description: |-
+        * `scan` - lecture du QR
+        * `manual` - saisie manuelle
+    CheckinOutcome:
+      enum:
+      - checked_in
+      - already_checked_in
+      - unknown
+      - other_edition
+      - cancelled
+      - expired
+      - replaced
+      - pending_payment
+      - not_allowed
+      type: string
+      description: |-
+        * `checked_in` - pointé
+        * `already_checked_in` - déjà pointé
+        * `unknown` - badge inconnu
+        * `other_edition` - badge d'une autre édition
+        * `cancelled` - inscription annulée
+        * `expired` - inscription expirée
+        * `replaced` - badge remplacé
+        * `pending_payment` - en attente de paiement
+        * `not_allowed` - saisie manuelle non permise
+    CheckinPerson:
+      type: object
+      description: 'Personne pointée : référence, nom, catégorie, statut ; ni adresse
+        ni institution.'
+      properties:
+        id:
+          type: integer
+        reference:
+          type: string
+        name:
+          type: string
+        category:
+          type: string
+        category_label_fr:
+          type: string
+        category_label_en:
+          type: string
+        status:
+          $ref: '#/components/schemas/RegistrationStatus'
+      required:
+      - category
+      - category_label_en
+      - category_label_fr
+      - id
+      - name
+      - reference
+      - status
+    CheckinResult:
+      type: object
+      properties:
+        outcome:
+          $ref: '#/components/schemas/CheckinOutcome'
+        idempotency_key:
+          type: string
+        registration:
+          allOf:
+          - $ref: '#/components/schemas/CheckinPerson'
+          nullable: true
+        checkin:
+          allOf:
+          - $ref: '#/components/schemas/Checkin'
+          nullable: true
+      required:
+      - checkin
+      - idempotency_key
+      - outcome
+      - registration
+    CheckinSummary:
+      type: object
+      properties:
+        confirmed:
+          type: integer
+        checked_in:
+          type: integer
+        pending:
+          type: integer
+      required:
+      - checked_in
+      - confirmed
+      - pending
     Confidentiality:
       type: object
       description: Paramètres de l'évaluation (gestion, §6.1 ; plan L4 H4, H6, H12).
@@ -8658,6 +9301,25 @@ components:
       - amount
       - method
       - received_on
+    ManualRequestRequest:
+      type: object
+      properties:
+        reference:
+          type: string
+          minLength: 1
+          description: Référence « GC27-I00042 ».
+          maxLength: 32
+        device:
+          type: string
+          default: ''
+          maxLength: 64
+        idempotency_key:
+          type: string
+          default: ''
+          description: Clé de l'appareil (8 à 64 caractères [A-Za-z0-9_-]) ; rejouable.
+          maxLength: 64
+      required:
+      - reference
     Me:
       type: object
       description: |-
@@ -9562,6 +10224,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/BillingDocument'
+    PaginatedCheckinListItemList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CheckinListItem'
     PaginatedInvitationWithEmailList:
       type: object
       required:
@@ -9796,6 +10481,14 @@ components:
           maximum: 65535
           minimum: 0
           title: Ordre
+        badge_color:
+          title: Couleur du badge
+          oneOf:
+          - type: string
+            pattern: ^#[0-9A-Fa-f]{6}$
+            maxLength: 7
+          - type: string
+            maxLength: 0
     PatchedConfidentialityRequest:
       type: object
       description: Paramètres de l'évaluation (gestion, §6.1 ; plan L4 H4, H6, H12).
@@ -12468,6 +13161,15 @@ components:
       - spread
       - status
       - title
+    ReasonRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 500
+      required:
+      - reason
     Recommendation:
       enum:
       - accept
@@ -12649,6 +13351,14 @@ components:
         * `confirmed` - confirmée
         * `cancelled` - annulée
         * `expired` - expirée
+    RetiredTokenReason:
+      enum:
+      - cancelled
+      - replaced
+      type: string
+      description: |-
+        * `cancelled` - inscription annulée
+        * `replaced` - badge remplacé
     ReviewManage:
       type: object
       description: 'Évaluation envoyée, avec le nom du relecteur (H11 : visible du
@@ -13550,6 +14260,25 @@ components:
           type: integer
           maximum: 32767
           minimum: 0
+    ScanRequestRequest:
+      type: object
+      properties:
+        token:
+          type: string
+          minLength: 1
+          description: Texte lu dans le QR du badge.
+          maxLength: 128
+        device:
+          type: string
+          default: ''
+          maxLength: 64
+        idempotency_key:
+          type: string
+          default: ''
+          description: Clé de l'appareil (8 à 64 caractères [A-Za-z0-9_-]) ; rejouable.
+          maxLength: 64
+      required:
+      - token
     ScheduledSubmission:
       type: object
       description: 'Communication placée ou à programmer : présentateurs **nommés**,
@@ -14916,6 +15645,55 @@ components:
       required:
       - code
       - label_fr
+    SyncItemRequest:
+      type: object
+      properties:
+        idempotency_key:
+          type: string
+          minLength: 1
+          description: Clé de l'appareil (8 à 64 caractères [A-Za-z0-9_-]) ; rejouable.
+          pattern: ^[A-Za-z0-9_-]{8,64}$
+        method:
+          allOf:
+          - $ref: '#/components/schemas/CheckinMethod'
+          default: scan
+        token:
+          type: string
+          default: ''
+          maxLength: 128
+        reference:
+          type: string
+          default: ''
+          maxLength: 32
+        scanned_at:
+          type: string
+          format: date-time
+          description: Heure de l'appareil au pointage.
+      required:
+      - idempotency_key
+      - scanned_at
+    SyncRequestRequest:
+      type: object
+      properties:
+        device:
+          type: string
+          default: ''
+          maxLength: 64
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/SyncItemRequest'
+      required:
+      - items
+    SyncResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CheckinResult'
+      required:
+      - results
     Timeline:
       type: object
       properties:

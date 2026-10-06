@@ -12,7 +12,7 @@ from __future__ import annotations
 from typing import ClassVar
 
 from django.conf import settings
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 from django.db import models
 from django.db.models import F, Q
 from django.utils.translation import gettext_lazy as _
@@ -169,6 +169,14 @@ class RegistrationCategory(TimeStampedModel):
     requires_proof = models.BooleanField(_("justificatif demandé"), default=False)
     is_active = models.BooleanField(_("active"), default=True)
     position = models.PositiveSmallIntegerField(_("ordre"), default=0)
+    # Bandeau du badge (plan L7, K3) : « #RRGGBB » ; vide, couleur par défaut selon l'ordre.
+    badge_color = models.CharField(
+        _("couleur du badge"),
+        max_length=7,
+        blank=True,
+        default="",
+        validators=[RegexValidator(r"^#[0-9A-Fa-f]{6}$", _("Couleur « #RRGGBB » attendue."))],
+    )
 
     AUDIT_FIELDS: ClassVar[tuple[str, ...]] = (
         "code",
@@ -177,6 +185,7 @@ class RegistrationCategory(TimeStampedModel):
         "requires_proof",
         "is_active",
         "position",
+        "badge_color",
     )
 
     class Meta:
@@ -495,6 +504,35 @@ class Registration(TimeStampedModel):
     def reference(self) -> str:
         """Référence affichée (« GC27-I00042 ») : édition et rang de l'inscription."""
         return f"{self.edition.code}-I{self.pk:05d}"
+
+
+class RetiredTokenReason(models.TextChoices):
+    CANCELLED = "cancelled", _("inscription annulée")
+    REPLACED = "replaced", _("badge remplacé")
+
+
+class RetiredQrToken(AppendOnlyModel):
+    """Empreinte SHA-256 d'un jeton QR retiré (plan L7, K2, K4) : à l'annulation de
+    l'inscription ou au remplacement d'un badge perdu. Le jeton lui-même n'est jamais gardé ;
+    l'empreinte permet à l'accueil de dire « badge annulé » ou « badge remplacé » plutôt que
+    « inconnu », en ligne comme hors ligne."""
+
+    registration = models.ForeignKey(
+        Registration,
+        verbose_name=_("inscription"),
+        on_delete=models.RESTRICT,
+        related_name="retired_tokens",
+    )
+    token_hash = models.CharField(_("empreinte du jeton"), max_length=64, unique=True)
+    reason = models.CharField(_("motif"), max_length=10, choices=RetiredTokenReason.choices)
+    retired_at = models.DateTimeField(_("retiré le"))
+
+    class Meta:
+        verbose_name = _("jeton QR retiré")
+        verbose_name_plural = _("jetons QR retirés")
+
+    def __str__(self) -> str:
+        return f"{self.registration_id}:{self.reason}"
 
 
 class RegistrationStatusHistory(AppendOnlyModel):

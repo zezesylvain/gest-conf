@@ -53,6 +53,7 @@ CATEGORY_FIELDS = (
     "requires_proof",
     "is_active",
     "position",
+    "badge_color",
 )
 OPTION_FIELDS = (
     "code",

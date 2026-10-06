@@ -1,10 +1,13 @@
-# Polices des pièces de facturation (plan L6, J8)
+# Polices des PDF (plan L6, J8 ; plan L7, K3 et K9)
 
 Les polices de base du PDF ne couvrent que le latin-1 ; les noms des participants n'y
-tiennent pas tous (vietnamien, polonais, turc…). Les factures, avoirs et pro forma
-embarquent donc un sous-ensemble de **DejaVu Sans** 2.37 (normal et gras), généré par
-`fpdf2` à chaque PDF (quelques dizaines de ko). Rien n'est supposé sur les polices
-installées chez o2switch.
+tiennent pas tous (vietnamien, polonais, turc…). Les factures, avoirs et pro forma (L6),
+puis les badges, attestations et lettres d'invitation (L7), embarquent donc un sous-ensemble
+de **DejaVu Sans** 2.37 (normal et gras), généré par `fpdf2` à chaque PDF (quelques dizaines
+de ko). Rien n'est supposé sur les polices installées chez o2switch.
+
+Dossier déplacé de `apps/payments/fonts/` en L7.2, pour servir à toutes les applications
+(`apps/core/pdf.py`).
 
 | Fichier | Provenance | SHA-256 |
 |---|---|---|

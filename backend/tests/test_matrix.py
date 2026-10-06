@@ -1048,6 +1048,88 @@ CASES = [
         recent_auth=True,
         format="multipart",
     ),
+    # --- Pointage à l'accueil et badges (plan L7, K2 à K5) -----------------------------------
+    Case("manage-checkin-summary", "GET", CKS, 200, "/v1/manage/editions/{e}/checkin/summary"),
+    Case("manage-checkin-bundle", "GET", CKS, 200, "/v1/manage/editions/{e}/checkin/bundle"),
+    Case(
+        "manage-checkin-scan",
+        "POST",
+        CKS,
+        200,
+        "/v1/manage/editions/{e}/checkin/scan",
+        lambda ids: {"token": ids["reg_token"]},
+    ),
+    Case(
+        "manage-checkin-sync",
+        "POST",
+        CKS,
+        200,
+        "/v1/manage/editions/{e}/checkin/sync",
+        lambda ids: {
+            "items": [
+                {
+                    "idempotency_key": "matrice-0001",
+                    "token": ids["reg_token"],
+                    "scanned_at": "2027-06-01T08:00:00Z",
+                }
+            ]
+        },
+    ),
+    Case(
+        "manage-checkin-manual",
+        "POST",
+        CKM,
+        200,
+        "/v1/manage/editions/{e}/checkin/manual",
+        lambda ids: {"reference": ids["reg_reference"]},
+    ),
+    Case("manage-checkin", "GET", CKM, 200, "/v1/manage/editions/{e}/checkin"),
+    Case(
+        "manage-checkin-cancel",
+        "POST",
+        CKM,
+        200,
+        "/v1/manage/editions/{e}/checkin/{checkin}/cancel",
+        {"reason": "Erreur d'accueil"},
+    ),
+    Case(
+        "manage-checkin-export",
+        "GET",
+        CKM,
+        200,
+        "/v1/manage/editions/{e}/checkin/export",
+        recent_auth=True,
+    ),
+    Case(
+        "manage-badges-batches",
+        "GET",
+        RGR,
+        200,
+        "/v1/manage/editions/{e}/registrations/badges/batches",
+    ),
+    # Paramètre lu dans les objets d'inscription : leur création (paresseuse) précède l'appel.
+    Case(
+        "manage-badges",
+        "GET",
+        RGR,
+        200,
+        "/v1/manage/editions/{e}/registrations/badges?category={reg_category_code}",
+    ),
+    Case(
+        "manage-badge",
+        "GET",
+        RGR,
+        200,
+        "/v1/manage/editions/{e}/registrations/{reg_paid}/badge",
+    ),
+    Case(
+        "manage-badge-regenerate",
+        "POST",
+        CKM,
+        204,
+        "/v1/manage/editions/{e}/registrations/{reg_paid}/regenerate-token",
+        {"reason": "Badge perdu"},
+    ),
     Case("manage-portal-poster", "GET", R, 200, "/v1/manage/editions/{e}/portal/poster"),
     Case(
         "manage-portal-poster",
@@ -1309,6 +1391,17 @@ def _registration_objects(edition) -> dict:
     pay(cancelled)
     orders.cancel_by_committee(cancelled, reason="Matrice", percent=100, actor=command)
     invoice = BillingDocument.objects.get(registration=paid, kind="invoice")
+    # Plan L7 : jeton du badge de l'inscription payée, et un pointage à annuler (celui d'une
+    # autre inscription confirmée, pour que le badge payé reste à pointer).
+    from apps.events.services import checkin as checkin_services
+    from apps.registrations.models import Registration
+
+    token = Registration.objects.get(pk=paid.pk).qr_token
+    checked = order()
+    pay(checked)
+    checkin = checkin_services.check_in(
+        edition, token=Registration.objects.get(pk=checked.pk).qr_token, actor=command
+    ).checkin
     return {
         "reg_category": category.pk,
         "reg_free_category": free.pk,
@@ -1318,6 +1411,10 @@ def _registration_objects(edition) -> dict:
         "reg_paid": paid.pk,
         "reg_cancelled": cancelled.pk,
         "reg_invoice": invoice.pk,
+        "reg_token": token,
+        "reg_category_code": category.code,
+        "reg_reference": paid.reference,
+        "checkin": checkin.pk,
         "reg_newcomer": person().email,
         "today": timezone.localdate().isoformat(),
     }
@@ -1756,18 +1853,17 @@ def test_k1_volunteers_committee_sees_and_manages_volunteers_only(world):
     assert response.status_code == 404
 
 
-@pytest.mark.parametrize("profile", ["VOLUNTEER", "SIGNATORY"])
-def test_k1_k18_volunteer_and_signatory_require_two_factor_authentication(world, profile):
-    """K1 et K18 (plan L7) : 2FA imposée aux bénévoles et aux signataires (annoncée par
-    ``/v1/me`` ; exigée sur la route de la signature, la seule du signataire en L7.1)."""
+@pytest.mark.parametrize(
+    ("profile", "route"), [("VOLUNTEER", "checkin/summary"), ("SIGNATORY", "signature")]
+)
+def test_k1_k18_volunteer_and_signatory_require_two_factor_authentication(world, profile, route):
+    """K1 et K18 (plan L7) : 2FA imposée aux bénévoles et aux signataires, annoncée par
+    ``/v1/me`` et exigée sur leurs routes."""
     edition, users, ids = world
-    body = client_for(users[profile], mfa=False).get("/v1/me").json()
-    mine = next(item for item in body["editions"] if item["id"] == edition.pk)
+    client = client_for(users[profile], mfa=False)
+    mine = next(
+        item for item in client.get("/v1/me").json()["editions"] if item["id"] == edition.pk
+    )
     assert mine["mfa_required"] is True
-    if profile == "SIGNATORY":
-        path = f"/v1/manage/editions/{ids['e']}/signature"
-        response = client_for(users[profile], mfa=False).get(path)
-        assert (response.status_code, response.json()["code"]) == (
-            403,
-            "mfa_enrollment_required",
-        )
+    response = client.get(f"/v1/manage/editions/{ids['e']}/{route}")
+    assert (response.status_code, response.json()["code"]) == (403, "mfa_enrollment_required")
