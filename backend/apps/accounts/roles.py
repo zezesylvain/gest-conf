@@ -44,13 +44,16 @@ class OcFunction(models.TextChoices):
 
 
 class InvitableRole(models.TextChoices):
-    """Rôles qu'une invitation peut attribuer en L1 (§3.3) ; les autres dans leur lot."""
+    """Rôles qu'une invitation peut attribuer (§3.3) : ceux de L1, puis intervenants et
+    présidents de séance en L5 (I10) ; les autres dans leur lot."""
 
     ADMIN = Role.ADMIN.value, Role.ADMIN.label
     CHAIR = Role.CHAIR.value, Role.CHAIR.label
     SC_CHAIR = Role.SC_CHAIR.value, Role.SC_CHAIR.label
     OC_MEMBER = Role.OC_MEMBER.value, Role.OC_MEMBER.label
     SC_MEMBER = Role.SC_MEMBER.value, Role.SC_MEMBER.label
+    SPEAKER = Role.SPEAKER.value, Role.SPEAKER.label
+    SESSION_CHAIR = Role.SESSION_CHAIR.value, Role.SESSION_CHAIR.label
 
 
 class Capability(StrEnum):
@@ -162,9 +165,10 @@ GRANTORS: Mapping[str, frozenset[str]] = {
     Role.SC_CHAIR: frozenset({Role.ADMIN, Role.CHAIR}),
     Role.OC_MEMBER: frozenset({Role.ADMIN, Role.CHAIR}),
     Role.SC_MEMBER: frozenset({Role.ADMIN, Role.CHAIR, Role.SC_CHAIR}),
-    # Activés dans leur lot (L5, L8).
-    Role.SPEAKER: frozenset(),
-    Role.SESSION_CHAIR: frozenset(),
+    # I10 (plan L5) : intervenants invités et présidents de séance, invités par les
+    # détenteurs de ``members.manage`` de l'édition. Sponsors et bénévoles : lot L8.
+    Role.SPEAKER: frozenset({Role.ADMIN, Role.CHAIR}),
+    Role.SESSION_CHAIR: frozenset({Role.ADMIN, Role.CHAIR}),
     Role.SPONSOR: frozenset(),
     Role.VOLUNTEER: frozenset(),
     Role.AUTHOR: frozenset(),

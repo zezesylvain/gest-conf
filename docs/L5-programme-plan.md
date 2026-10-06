@@ -384,3 +384,60 @@ placements simultanés, mis en série sans perte : créneaux contigus, révision
 quatre fois).
 2 229 tests backend sous SQLite ; les 32 tests du programme passent sous MariaDB. Le service
 n'a pas encore de route : l'API de gestion arrive en L5.3.
+
+## 14. Bilan de L5.3 (6 octobre 2026)
+
+**Workflow (I5)** :
+
+- `CAMERA_READY_RECEIVED → CONFIRMED` devient disponible, déclenchée par le soumissionnaire.
+  L'étude la donnait au système en L6 : **écart validé** avec le plan.
+  - Une garde de l'application `program` exige les présentateurs enregistrés ; L6 y
+    ajoutera RG-11.
+- Trois retraits ajoutés, avec motif obligatoire : depuis `CAMERA_READY_RECEIVED`,
+  `CONFIRMED` et `SCHEDULED`.
+  - L'effet inscrit par `program` libère le créneau (journalisé) et prévient l'équipe du
+    programme : CO « programme » et Chair, sinon administrateurs.
+  - Le motif n'est pas dans l'e-mail, et l'objet ne porte aucune variable autre que le nom du
+    site, règle déjà vérifiée par un test des gabarits.
+- La table compte 22 transitions (19 de l'étude, plus les 3 retraits).
+- **Point ouvert** : `ACCEPTED_MINOR → WITHDRAWN` n'existe toujours pas. Un auteur accepté
+  sous réserve ne peut retirer sa communication qu'après la version finale. À trancher, avec
+  une transition à ajouter si besoin.
+
+**Confirmation de présentation (I5)** : `POST /v1/submissions/{id}/confirm-presentation`.
+
+- Réservée au soumissionnaire, une fois la version finale reçue.
+- Présentateurs choisis parmi les auteurs (positions distinctes).
+- La première fois, la communication passe à « confirmée ». Ensuite, un changement de
+  présentateurs d'une communication placée incrémente la révision du programme : les
+  conflits de personnes en dépendent (RG-12).
+- Journal `program.presentation_confirmed` et `program.presenters_changed`.
+- `/v1/submissions/{id}` expose `presentation` et l'action `confirm_presentation`.
+
+**Rôles de séance (I10)** : `SPEAKER` et `SESSION_CHAIR` sont invitables par `ADMIN` et
+`CHAIR`. La migration ne change que les choix du champ. Un rôle de séance ou un intervenant
+invité doit avoir un rôle actif dans l'édition.
+
+**API de gestion** (`…/program/…`, `program.read` en lecture, `program.write` en écriture,
+table des capacités explicite) :
+
+- `GET program` : brouillon complet pour le planificateur. Il contient les jours, les
+  salles, les sessions avec créneaux et rôles, la liste « à programmer », les conflits, la
+  révision et l'indicateur de modifications non publiées.
+- Salles, sessions, créneaux et rôles : création, modification, suppression. Chaque
+  écriture renvoie le brouillon complet, porte `If-Match` (412 `stale_revision`) et passe
+  par le service de planification.
+  - Un `PATCH` de créneau qui change la durée et la position s'exécute dans une seule
+    transaction.
+- `GET program/people?q=` : personnes de l'édition, avec nom, institution et rôles,
+  jamais d'adresse.
+- Objets d'une autre édition : 404.
+- Composants du schéma nommés : `ProgramPerson`, `ProgramConflict`, énumérations
+  `SessionKind`, `SessionRoleKind`, `Equipment`, `ProgramConflictKind`.
+
+**Tests** :
+
+- 2 422 tests backend sous SQLite ; 1 908 sous MariaDB pour les suites touchées (transverses, programme, soumissions, comptes, communications) ;
+- 56 tests du programme ;
+- matrice : 1 497 tests, une case par profil pour les 13 routes du programme ;
+- table d'attribution des rôles et table du workflow mises à jour.

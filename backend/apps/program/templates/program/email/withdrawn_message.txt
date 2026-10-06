@@ -1,0 +1,9 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate %}Bonjour,
+
+Les auteurs ont retiré la communication {{ reference }} « {{ title }} » ({{ edition_title }}).{% endblocktranslate %}{% if placed %}
+
+{% blocktranslate %}Son créneau a été libéré dans le programme brouillon : vérifiez la session concernée avant la prochaine publication.{% endblocktranslate %}{% endif %}
+
+{% blocktranslate %}Programme : {{ link }}{% endblocktranslate %}
+
+{% include "account/email/_signature.txt" %}{% endautoescape %}

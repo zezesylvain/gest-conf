@@ -84,7 +84,14 @@ TRANSITIONS: dict[tuple[str, str], Rule] = {
     (S.ACCEPTED, S.CAMERA_READY_RECEIVED): Rule(Who.SUBMITTER, "L4", available=True),
     (S.ACCEPTED_MINOR, S.CAMERA_READY_RECEIVED): Rule(Who.SUBMITTER, "L4", available=True),
     (S.ACCEPTED, S.WITHDRAWN): Rule(Who.SUBMITTER, "L4", available=True),
-    (S.CAMERA_READY_RECEIVED, S.CONFIRMED): Rule(Who.SYSTEM, "L6"),
+    # I5 (plan L5, écart avec l'étude qui la donnait au système en L6) : confirmation de
+    # présentation par le soumissionnaire ; la garde de l'application program exige la
+    # confirmation enregistrée, et L6 y ajoutera RG-11 (présentateur inscrit).
+    (S.CAMERA_READY_RECEIVED, S.CONFIRMED): Rule(Who.SUBMITTER, "L5", available=True),
+    # I5 : retraits après la version finale, motif obligatoire ; le créneau est libéré.
+    (S.CAMERA_READY_RECEIVED, S.WITHDRAWN): Rule(Who.SUBMITTER, "L5", available=True),
+    (S.CONFIRMED, S.WITHDRAWN): Rule(Who.SUBMITTER, "L5", available=True),
+    (S.SCHEDULED, S.WITHDRAWN): Rule(Who.SUBMITTER, "L5", available=True),
     (S.CONFIRMED, S.SCHEDULED): Rule(Who.ORGANIZERS, "L5"),
     (S.SCHEDULED, S.PRESENTED): Rule(Who.ORGANIZERS, "L7"),
     (S.PRESENTED, S.PUBLISHED): Rule(Who.ORGANIZERS, "L10"),

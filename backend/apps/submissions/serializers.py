@@ -94,6 +94,8 @@ SUBMISSION_ACTION_CHOICES = [
     ("submit", "submit"),
     ("withdraw", "withdraw"),
     ("final_version", "final_version"),
+    # Plan L5 (I5) : désigner les présentateurs et confirmer la présentation.
+    ("confirm_presentation", "confirm_presentation"),
 ]
 
 
@@ -122,6 +124,22 @@ class FinalVersionSerializer(serializers.Serializer):
     submitted_at = serializers.DateTimeField()
     response_letter = serializers.CharField()
     file = SubmissionFileSerializer()
+
+
+class PresentationSerializer(serializers.Serializer):
+    """I5 (plan L5) : présentateurs désignés (positions des auteurs) et date de confirmation."""
+
+    presenters = serializers.ListField(child=serializers.IntegerField(min_value=1))
+    confirmed_at = serializers.DateTimeField()
+
+
+class ConfirmPresentationSerializer(serializers.Serializer):
+    presenters = serializers.ListField(
+        child=serializers.IntegerField(min_value=1),
+        allow_empty=False,
+        max_length=50,
+        help_text="Positions des auteurs qui présentent.",
+    )
 
 
 class FinalVersionUploadSerializer(serializers.Serializer):
@@ -160,6 +178,9 @@ class SubmissionSerializer(serializers.ModelSerializer):
     final_deadline = serializers.SerializerMethodField(
         help_text="Date limite de la version finale (date clé camera_ready)."
     )
+    presentation = serializers.SerializerMethodField(
+        help_text="Confirmation de présentation (I5, plan L5)."
+    )
 
     class Meta:
         model = Submission
@@ -191,6 +212,7 @@ class SubmissionSerializer(serializers.ModelSerializer):
             "decision",
             "final_version",
             "final_deadline",
+            "presentation",
         )
         read_only_fields = fields
 
@@ -229,6 +251,13 @@ class SubmissionSerializer(serializers.ModelSerializer):
         ):
             return None
         return services.key_date(submission.edition, KeyDateCode.CAMERA_READY)
+
+    @extend_schema_field(PresentationSerializer(allow_null=True))
+    def get_presentation(self, submission: Submission) -> dict | None:
+        from apps.program.models import PresentationConfirmation
+
+        confirmation = PresentationConfirmation.objects.filter(submission=submission).first()
+        return PresentationSerializer(confirmation).data if confirmation is not None else None
 
     @extend_schema_field(SubmissionFileSerializer(allow_null=True))
     def get_file(self, submission: Submission) -> dict | None:
@@ -282,6 +311,12 @@ class SubmissionSerializer(serializers.ModelSerializer):
             submission.status == SubmissionStatus.CAMERA_READY_RECEIVED
         ):
             actions.append("final_version")
+        if submission.status in (
+            SubmissionStatus.CAMERA_READY_RECEIVED,
+            SubmissionStatus.CONFIRMED,
+            SubmissionStatus.SCHEDULED,
+        ):
+            actions.append("confirm_presentation")
         return actions
 
 

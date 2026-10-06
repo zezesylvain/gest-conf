@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gestconf-backend\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-06 05:48+0000\n"
+"POT-Creation-Date: 2026-10-06 06:04+0000\n"
 "PO-Revision-Date: 2026-10-05 11:00+0000\n"
 "Last-Translator: GEST-CONF\n"
 "Language-Team: GEST-CONF\n"
@@ -402,8 +402,8 @@ msgid "secrétariat"
 msgstr "secretariat"
 
 #: apps/accounts/services/account.py:66 apps/conferences/services.py:111
-#: apps/conferences/services.py:495 apps/program/services/planning.py:131
-#: apps/program/services/planning.py:233 apps/program/services/planning.py:514
+#: apps/conferences/services.py:495 apps/program/services/planning.py:137
+#: apps/program/services/planning.py:239 apps/program/services/planning.py:520
 #: apps/program/services/settings.py:32
 msgid "Champ non modifiable."
 msgstr "This field cannot be changed."
@@ -421,8 +421,8 @@ msgstr "Acknowledging the notice cannot be withdrawn."
 #: apps/accounts/services/roles.py:196 apps/conferences/services.py:301
 #: apps/reviews/services/assignments.py:287
 #: apps/reviews/services/conflicts.py:178 apps/reviews/services/reviews.py:430
-#: apps/submissions/services.py:611 apps/submissions/workflow.py:163
-#: apps/submissions/workflow.py:166
+#: apps/submissions/services.py:611 apps/submissions/workflow.py:170
+#: apps/submissions/workflow.py:173
 msgid "Motif obligatoire."
 msgstr "A reason is required."
 
@@ -2273,100 +2273,151 @@ msgstr "presentation confirmation"
 msgid "confirmations de présentation"
 msgstr "presentation confirmations"
 
-#: apps/program/services/planning.py:136 apps/program/services/planning.py:159
+#: apps/program/notifications.py:53 apps/reviews/notifications.py:50
+#: apps/reviews/notifications.py:93 apps/submissions/notifications.py:71
+msgid "(sans titre)"
+msgstr "(untitled)"
+
+#: apps/program/services/planning.py:142 apps/program/services/planning.py:165
 #: apps/reviews/services/grids.py:179 apps/reviews/services/grids.py:226
 msgid "Nom obligatoire."
 msgstr "Name required."
 
-#: apps/program/services/planning.py:141
+#: apps/program/services/planning.py:147
 msgid "Une salle porte déjà ce nom."
 msgstr "A room already has this name."
 
-#: apps/program/services/planning.py:147
+#: apps/program/services/planning.py:153
 msgid "Équipement inconnu."
 msgstr "Unknown equipment."
 
-#: apps/program/services/planning.py:193
+#: apps/program/services/planning.py:199
 msgid "Salle utilisée par une session : désactivez-la plutôt."
 msgstr "Room used by a session: deactivate it instead."
 
-#: apps/program/services/planning.py:206
+#: apps/program/services/planning.py:212
 msgid "Date et heure locales attendues."
 msgstr "A local date and time is expected."
 
-#: apps/program/services/planning.py:216
+#: apps/program/services/planning.py:222
 msgid "La fin doit suivre le début."
 msgstr "The end must come after the start."
 
-#: apps/program/services/planning.py:218
+#: apps/program/services/planning.py:224
 msgid "Une session dure au plus 24 heures."
 msgstr "A session lasts at most 24 hours."
 
-#: apps/program/services/planning.py:224
+#: apps/program/services/planning.py:230
 msgid "La session doit se tenir pendant l'édition."
 msgstr "The session must take place during the edition."
 
-#: apps/program/services/planning.py:238
+#: apps/program/services/planning.py:244
 msgid "Type de session inconnu."
 msgstr "Unknown session type."
 
-#: apps/program/services/planning.py:240 apps/program/services/planning.py:435
-#: apps/program/services/planning.py:520
+#: apps/program/services/planning.py:246 apps/program/services/planning.py:441
+#: apps/program/services/planning.py:526
 msgid "Titre français obligatoire."
 msgstr "French title required."
 
-#: apps/program/services/planning.py:243 apps/program/services/planning.py:246
+#: apps/program/services/planning.py:249 apps/program/services/planning.py:252
 msgid "Salle d'une autre édition."
 msgstr "Room from another edition."
 
-#: apps/program/services/planning.py:248
+#: apps/program/services/planning.py:254
 msgid "Salle désactivée."
 msgstr "Room deactivated."
 
-#: apps/program/services/planning.py:252
+#: apps/program/services/planning.py:258
 #: apps/reviews/services/assignments.py:482
 msgid "Thématique d'une autre édition."
 msgstr "Track from another edition."
 
-#: apps/program/services/planning.py:267
+#: apps/program/services/planning.py:273
 msgid "Champ obligatoire."
 msgstr "Required field."
 
-#: apps/program/services/planning.py:356
+#: apps/program/services/planning.py:362
 msgid "Durée de 1 à 600 minutes."
 msgstr "Duration from 1 to 600 minutes."
 
-#: apps/program/services/planning.py:381
+#: apps/program/services/planning.py:387
 msgid "Communication d'une autre édition."
 msgstr "Paper from another edition."
 
-#: apps/program/services/planning.py:384
+#: apps/program/services/planning.py:390
 msgid "Seule une communication confirmée se programme."
 msgstr "Only a confirmed paper can be scheduled."
 
-#: apps/program/services/planning.py:388
+#: apps/program/services/planning.py:394
 msgid "Communication déjà programmée : déplacez-la."
 msgstr "Paper already scheduled: move it instead."
 
-#: apps/program/services/planning.py:413
+#: apps/program/services/planning.py:419
 msgid "Intervenant inconnu."
 msgstr "Unknown speaker."
 
-#: apps/program/services/planning.py:472
+#: apps/program/services/planning.py:478
 msgid "Session d'une autre édition."
 msgstr "Session from another edition."
 
-#: apps/program/services/planning.py:565
+#: apps/program/services/planning.py:571
 msgid "Rôle de séance inconnu."
 msgstr "Unknown session role."
 
-#: apps/program/services/planning.py:567
+#: apps/program/services/planning.py:573
 msgid "Personne inconnue."
 msgstr "Unknown person."
 
-#: apps/program/services/planning.py:569
+#: apps/program/services/planning.py:575
 msgid "Cette personne a déjà ce rôle dans la session."
 msgstr "This person already has this role in the session."
+
+#: apps/program/services/presentation.py:40
+msgid "Désignez au moins un présentateur."
+msgstr "Designate at least one presenter."
+
+#: apps/program/services/presentation.py:42
+msgid "Présentateurs à choisir parmi les auteurs."
+msgstr "Presenters must be chosen among the authors."
+
+#: apps/program/services/presentation.py:61
+msgid "La présentation se confirme une fois la version finale reçue."
+msgstr ""
+"The presentation is confirmed once the final version has been received."
+
+#: apps/program/services/presentation.py:108
+msgid "Désignez d'abord les présentateurs."
+msgstr "Designate the presenters first."
+
+#: apps/program/templates/program/email/withdrawn_message.txt:1
+#, python-format
+msgid ""
+"Bonjour,\n"
+"\n"
+"Les auteurs ont retiré la communication %(reference)s « %(title)s » (%(edition_title)s)."
+msgstr ""
+"Hello,\n"
+"\n"
+"The authors have withdrawn paper %(reference)s “%(title)s” (%(edition_title)s)."
+
+#: apps/program/templates/program/email/withdrawn_message.txt:5
+msgid ""
+"Son créneau a été libéré dans le programme brouillon : vérifiez la session "
+"concernée avant la prochaine publication."
+msgstr ""
+"Its slot has been freed in the draft programme: check the session concerned "
+"before the next publication."
+
+#: apps/program/templates/program/email/withdrawn_message.txt:7
+#, python-format
+msgid "Programme : %(link)s"
+msgstr "Programme: %(link)s"
+
+#: apps/program/templates/program/email/withdrawn_subject.txt:1
+#, python-format
+msgid "[%(site_name)s] Une communication a été retirée du programme"
+msgstr "[%(site_name)s] A paper has been withdrawn from the programme"
 
 #: apps/reviews/models.py:46
 msgid "note minimale"
@@ -2702,11 +2753,6 @@ msgstr "camera-ready version"
 #: apps/reviews/models.py:527
 msgid "versions finales"
 msgstr "final versions"
-
-#: apps/reviews/notifications.py:50 apps/reviews/notifications.py:93
-#: apps/submissions/notifications.py:71
-msgid "(sans titre)"
-msgstr "(untitled)"
 
 #: apps/reviews/services/assignments.py:80
 msgid "Le relecteur est auteur de la soumission."
@@ -3433,7 +3479,7 @@ msgid "Cette soumission n'est plus modifiable."
 msgstr "This submission can no longer be changed."
 
 #: apps/submissions/services.py:199 apps/submissions/services.py:274
-#: apps/submissions/workflow.py:147
+#: apps/submissions/workflow.py:154
 msgid "L'appel à communications est clos."
 msgstr "The call for papers is closed."
 
@@ -3750,14 +3796,14 @@ msgstr ""
 msgid "[%(site_name)s] Soumission retirée"
 msgstr "[%(site_name)s] Submission withdrawn"
 
-#: apps/submissions/workflow.py:151
+#: apps/submissions/workflow.py:158
 msgid "La soumission est incomplète."
 msgstr "The submission is incomplete."
 
-#: apps/submissions/workflow.py:159
+#: apps/submissions/workflow.py:166
 msgid "La recevabilité commence à la clôture de l'appel (et des dérogations)."
 msgstr "Screening starts when the call (and any extensions) closes."
 
-#: apps/submissions/workflow.py:193
+#: apps/submissions/workflow.py:200
 msgid "Changement de statut non autorisé."
 msgstr "Status change not allowed."

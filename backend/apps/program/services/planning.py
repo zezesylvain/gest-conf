@@ -113,6 +113,12 @@ def _bump(state: ProgramState) -> None:
     state.save(update_fields=["revision"])
 
 
+def mark_changed(edition: Edition) -> None:
+    """Le brouillon dépend d'une donnée modifiée ailleurs (présentateurs d'une communication
+    placée, RG-12) : nouvelle révision, pour que les planificateurs rechargent (I14)."""
+    _bump(program_state(edition, lock=True))
+
+
 def _audit(action: str, *, actor: Actor, edition: Edition, obj: Any, before=None, after=None):
     record(f"program.{action}", actor=actor, edition=edition, obj=obj, before=before, after=after)
 

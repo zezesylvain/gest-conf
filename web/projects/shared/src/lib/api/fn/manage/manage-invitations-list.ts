@@ -28,8 +28,10 @@ export interface ManageInvitationsList$Params {
  * * `SC_CHAIR` - président du comité scientifique
  * * `OC_MEMBER` - membre du comité d'organisation
  * * `SC_MEMBER` - membre du comité scientifique
+ * * `SPEAKER` - intervenant
+ * * `SESSION_CHAIR` - président de session
  */
-  role?: 'ADMIN' | 'CHAIR' | 'OC_MEMBER' | 'SC_CHAIR' | 'SC_MEMBER';
+  role?: 'ADMIN' | 'CHAIR' | 'OC_MEMBER' | 'SC_CHAIR' | 'SC_MEMBER' | 'SESSION_CHAIR' | 'SPEAKER';
 
 /**
  * * `pending` - en attente
