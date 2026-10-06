@@ -305,12 +305,26 @@ def update_session(
     return session
 
 
+# Refus de suppression d'une session déclarés par les autres applications (présences
+# enregistrées, plan L7) : f(session) lève une ``DomainError``. ``program`` n'en dépend pas.
+type SessionGuard = Callable[[Session], None]
+_SESSION_GUARDS: list[SessionGuard] = []
+
+
+def register_session_guard(guard: SessionGuard) -> None:
+    if guard not in _SESSION_GUARDS:
+        _SESSION_GUARDS.append(guard)
+
+
 @transaction.atomic
 def delete_session(session: Session, *, actor: Actor, revision: int | None = None) -> None:
     """Supprime la session, ses créneaux et ses rôles : les communications retournent dans
-    la liste « à programmer » (journalisé)."""
+    la liste « à programmer » (journalisé). Refusée si une autre application l'interdit
+    (présences enregistrées)."""
     edition = session.edition
     state = begin_write(edition, actor, revision)
+    for guard in list(_SESSION_GUARDS):
+        guard(session)
     slots = list(session.slots.values_list("submission__reference", flat=True))
     _audit(
         "session_deleted",

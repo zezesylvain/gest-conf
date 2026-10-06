@@ -15,5 +15,10 @@ export interface SyncItemRequest {
    * Heure de l'appareil au pointage.
    */
   scanned_at: string;
+
+  /**
+   * Session ; vide : accueil.
+   */
+  session?: number | null;
   token?: string;
 }

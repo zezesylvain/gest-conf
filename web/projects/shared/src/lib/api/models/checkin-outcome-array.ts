@@ -15,5 +15,6 @@ export const CHECKIN_OUTCOME: CheckinOutcome[] = [
   'expired',
   'replaced',
   'pending_payment',
-  'not_allowed'
+  'not_allowed',
+  'unknown_session'
 ];

@@ -10,6 +10,7 @@ from apps.events.models import Checkin, CheckinMethod, Signature
 from apps.events.services import checkin as checkin_services
 from apps.events.services.checkin import OUTCOME_CHOICES
 from apps.registrations.models import Registration, RegistrationStatus, RetiredTokenReason
+from apps.submissions.models import SubmissionStatus
 
 
 class SignatureSerializer(serializers.Serializer):
@@ -162,6 +163,9 @@ class SyncItemSerializer(serializers.Serializer):
     token = serializers.CharField(max_length=128, required=False, allow_blank=True, default="")
     reference = serializers.CharField(max_length=32, required=False, allow_blank=True, default="")
     scanned_at = serializers.DateTimeField(help_text="Heure de l'appareil au pointage.")
+    session = serializers.IntegerField(
+        required=False, allow_null=True, default=None, help_text="Session ; vide : accueil."
+    )
 
     def validate(self, attrs):
         field = "token" if attrs["method"] == CheckinMethod.SCAN else "reference"
@@ -224,3 +228,44 @@ class BadgeBatchesSerializer(serializers.Serializer):
     count = serializers.IntegerField()
     batch_size = serializers.IntegerField()
     batches = serializers.IntegerField()
+
+
+# --- Émargement des sessions et communications présentées (K7, K8) ---------------------------
+
+
+class DaySlotSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    starts_at = serializers.DateTimeField()
+    ends_at = serializers.DateTimeField()
+    title = serializers.CharField()
+    reference = serializers.CharField()
+    submission_id = serializers.IntegerField(allow_null=True)
+    presenters = serializers.ListField(child=serializers.CharField())
+    status = serializers.ChoiceField(
+        choices=SubmissionStatus.choices,
+        allow_blank=True,
+        help_text="Statut courant de la communication (vide : élément libre).",
+    )
+
+
+class DaySessionSerializer(serializers.Serializer):
+    """Session du programme publié, pour l'émargement (K7) et « présentée » (K8)."""
+
+    id = serializers.IntegerField()
+    title_fr = serializers.CharField()
+    title_en = serializers.CharField()
+    starts_at = serializers.DateTimeField()
+    ends_at = serializers.DateTimeField()
+    room = serializers.CharField()
+    chairs = serializers.ListField(child=serializers.CharField())
+    chaired = serializers.BooleanField(help_text="Le compte connecté préside la session.")
+    attendance = serializers.IntegerField(help_text="Présents pointés à l'entrée.")
+    slots = DaySlotSerializer(many=True)
+
+
+class SessionScanRequestSerializer(serializers.Serializer):
+    token = serializers.CharField(max_length=128, help_text="Texte lu dans le QR du badge.")
+    device = serializers.CharField(max_length=64, required=False, allow_blank=True, default="")
+    idempotency_key = serializers.CharField(
+        max_length=64, required=False, allow_blank=True, default="", help_text=IDEMPOTENCY_HELP
+    )

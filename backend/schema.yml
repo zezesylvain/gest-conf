@@ -890,6 +890,230 @@ paths:
               schema:
                 $ref: '#/components/schemas/ConflictManage'
           description: ''
+  /v1/manage/editions/{edition_id}/day/sessions:
+    get:
+      operationId: manage_day_sessions
+      description: |-
+        Sessions publiées (toutes, ou celles que préside le compte s'il n'a pas
+        ``checkin.scan``).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - name: ordering
+        required: false
+        in: query
+        description: Quel champ utiliser pour classer les résultats.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: Un numéro de page de l'ensemble des résultats.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Nombre de résultats à retourner par page.
+        schema:
+          type: integer
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedDaySessionList'
+          description: ''
+  /v1/manage/editions/{edition_id}/day/sessions/{session_id}/attendance:
+    get:
+      operationId: manage_day_attendance
+      description: Présents pointés à l'entrée de la session (K7).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - name: ordering
+        required: false
+        in: query
+        description: Quel champ utiliser pour classer les résultats.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: Un numéro de page de l'ensemble des résultats.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Nombre de résultats à retourner par page.
+        schema:
+          type: integer
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Nom ou référence.
+      - in: path
+        name: session_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCheckinListItemList'
+          description: ''
+  /v1/manage/editions/{edition_id}/day/sessions/{session_id}/attendance/export:
+    get:
+      operationId: manage_day_attendance_export
+      description: |-
+        ``…/day/sessions/…`` : sessions du programme publié, émargement, « présentée ».
+
+        Capacité de l'action, **ou** présidence de la session au programme publié pour les
+        actions de ``chair_actions`` (``CapabilityOrSessionChair``).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: session_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  /v1/manage/editions/{edition_id}/day/sessions/{session_id}/attendance/scan:
+    post:
+      operationId: manage_day_attendance_scan
+      description: 'Badge lu à l''entrée de la session : vaut présence, même sans
+        pointage d''accueil.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: session_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SessionScanRequestRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckinResult'
+          description: ''
+  /v1/manage/editions/{edition_id}/day/sessions/{session_id}/slots/{slot_id}/presented:
+    post:
+      operationId: manage_day_presented
+      description: 'Communication présentée (K8) : ``SCHEDULED → PRESENTED`` par le
+        workflow.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: session_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: slot_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DaySession'
+          description: ''
+  /v1/manage/editions/{edition_id}/day/sessions/{session_id}/slots/{slot_id}/unpresented:
+    post:
+      operationId: manage_day_unpresented
+      description: 'Correction (``PRESENTED → SCHEDULED``) : ``program.write``, motif
+        obligatoire.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: session_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: slot_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReasonRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DaySession'
+          description: ''
   /v1/manage/editions/{edition_id}/decisions/batch:
     post:
       operationId: manage_decisions_batch
@@ -7259,6 +7483,7 @@ components:
       - replaced
       - pending_payment
       - not_allowed
+      - unknown_session
       type: string
       description: |-
         * `checked_in` - pointé
@@ -7270,6 +7495,7 @@ components:
         * `replaced` - badge remplacé
         * `pending_payment` - en attente de paiement
         * `not_allowed` - saisie manuelle non permise
+        * `unknown_session` - session absente du programme publié
     CheckinPerson:
       type: object
       description: 'Personne pointée : référence, nom, catégorie, statut ; ni adresse
@@ -7650,6 +7876,104 @@ components:
         * `USD` - dollar des États-Unis
         * `GNF` - franc guinéen
         * `CDF` - franc congolais
+    DaySession:
+      type: object
+      description: Session du programme publié, pour l'émargement (K7) et « présentée
+        » (K8).
+      properties:
+        id:
+          type: integer
+        title_fr:
+          type: string
+        title_en:
+          type: string
+        starts_at:
+          type: string
+          format: date-time
+        ends_at:
+          type: string
+          format: date-time
+        room:
+          type: string
+        chairs:
+          type: array
+          items:
+            type: string
+        chaired:
+          type: boolean
+          description: Le compte connecté préside la session.
+        attendance:
+          type: integer
+          description: Présents pointés à l'entrée.
+        slots:
+          type: array
+          items:
+            $ref: '#/components/schemas/DaySlot'
+      required:
+      - attendance
+      - chaired
+      - chairs
+      - ends_at
+      - id
+      - room
+      - slots
+      - starts_at
+      - title_en
+      - title_fr
+    DaySlot:
+      type: object
+      properties:
+        id:
+          type: integer
+        starts_at:
+          type: string
+          format: date-time
+        ends_at:
+          type: string
+          format: date-time
+        title:
+          type: string
+        reference:
+          type: string
+        submission_id:
+          type: integer
+          nullable: true
+        presenters:
+          type: array
+          items:
+            type: string
+        status:
+          description: |-
+            Statut courant de la communication (vide : élément libre).
+
+            * `draft` - brouillon
+            * `submitted` - soumise
+            * `screening` - vérification de recevabilité
+            * `under_review` - en cours d'évaluation
+            * `reviewed` - évaluée
+            * `accepted` - acceptée
+            * `accepted_minor` - acceptée sous réserve de corrections
+            * `waitlist` - liste d'attente
+            * `rejected` - rejetée
+            * `revision_requested` - corrections demandées
+            * `camera_ready_received` - version finale reçue
+            * `confirmed` - présentation confirmée
+            * `scheduled` - programmée
+            * `presented` - présentée
+            * `published` - publiée dans les actes
+            * `withdrawn` - retirée
+          oneOf:
+          - $ref: '#/components/schemas/SubmissionStatus'
+          - $ref: '#/components/schemas/BlankEnum'
+      required:
+      - ends_at
+      - id
+      - presenters
+      - reference
+      - starts_at
+      - status
+      - submission_id
+      - title
     DecisionBatchItemRequest:
       type: object
       properties:
@@ -10247,6 +10571,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CheckinListItem'
+    PaginatedDaySessionList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/DaySession'
     PaginatedInvitationWithEmailList:
       type: object
       required:
@@ -14682,6 +15029,25 @@ components:
       required:
       - role
       - user
+    SessionScanRequestRequest:
+      type: object
+      properties:
+        token:
+          type: string
+          minLength: 1
+          description: Texte lu dans le QR du badge.
+          maxLength: 128
+        device:
+          type: string
+          default: ''
+          maxLength: 64
+        idempotency_key:
+          type: string
+          default: ''
+          description: Clé de l'appareil (8 à 64 caractères [A-Za-z0-9_-]) ; rejouable.
+          maxLength: 64
+      required:
+      - token
     SessionWriteRequest:
       type: object
       properties:
@@ -15669,6 +16035,10 @@ components:
           type: string
           format: date-time
           description: Heure de l'appareil au pointage.
+        session:
+          type: integer
+          nullable: true
+          description: 'Session ; vide : accueil.'
       required:
       - idempotency_key
       - scanned_at

@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gestconf-backend\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-06 20:40+0000\n"
+"POT-Creation-Date: 2026-10-06 20:59+0000\n"
 "PO-Revision-Date: 2026-10-05 11:00+0000\n"
 "Last-Translator: GEST-CONF\n"
 "Language-Team: GEST-CONF\n"
@@ -413,7 +413,7 @@ msgstr "secretariat"
 #: apps/accounts/services/account.py:66 apps/conferences/services.py:111
 #: apps/conferences/services.py:495 apps/payments/services/billing.py:77
 #: apps/program/services/planning.py:137 apps/program/services/planning.py:239
-#: apps/program/services/planning.py:520 apps/program/services/settings.py:38
+#: apps/program/services/planning.py:534 apps/program/services/settings.py:38
 #: apps/registrations/services/pricing.py:389
 #: apps/registrations/services/settings.py:120
 msgid "Champ non modifiable."
@@ -430,14 +430,14 @@ msgstr "Acknowledging the notice cannot be withdrawn."
 #: apps/accounts/services/account.py:169 apps/accounts/services/account.py:191
 #: apps/accounts/services/mfa.py:84 apps/accounts/services/personal_data.py:205
 #: apps/accounts/services/roles.py:196 apps/conferences/services.py:301
-#: apps/events/services/checkin.py:314
+#: apps/events/services/checkin.py:331
 #: apps/registrations/services/orders.py:284
 #: apps/registrations/services/orders.py:308
 #: apps/registrations/services/orders.py:351
 #: apps/reviews/services/assignments.py:287
 #: apps/reviews/services/conflicts.py:178 apps/reviews/services/reviews.py:430
-#: apps/submissions/services.py:611 apps/submissions/workflow.py:178
-#: apps/submissions/workflow.py:181
+#: apps/submissions/services.py:611 apps/submissions/workflow.py:207
+#: apps/submissions/workflow.py:210 apps/submissions/workflow.py:213
 msgid "Motif obligatoire."
 msgstr "A reason is required."
 
@@ -1984,96 +1984,106 @@ msgstr "cancellation reason"
 msgid "pointage"
 msgstr "check-in"
 
-#: apps/events/serializers.py:169 apps/program/services/planning.py:273
+#: apps/events/serializers.py:173 apps/program/services/planning.py:273
 msgid "Champ obligatoire."
 msgstr "Required field."
 
-#: apps/events/services/checkin.py:75
+#: apps/events/services/attendance.py:128
+msgid ""
+"Des présences sont enregistrées pour cette session : elle ne se supprime "
+"plus."
+msgstr "Attendance has been recorded for this session: it can no longer be deleted."
+
+#: apps/events/services/checkin.py:76
 msgid "pointé"
 msgstr "checked in"
 
-#: apps/events/services/checkin.py:76
+#: apps/events/services/checkin.py:77
 msgid "déjà pointé"
 msgstr "already checked in"
 
-#: apps/events/services/checkin.py:77
+#: apps/events/services/checkin.py:78
 msgid "badge inconnu"
 msgstr "unknown badge"
 
-#: apps/events/services/checkin.py:78
+#: apps/events/services/checkin.py:79
 msgid "badge d'une autre édition"
 msgstr "badge from another edition"
 
-#: apps/events/services/checkin.py:79 apps/registrations/models.py:510
+#: apps/events/services/checkin.py:80 apps/registrations/models.py:510
 msgid "inscription annulée"
 msgstr "registration cancelled"
 
-#: apps/events/services/checkin.py:80
+#: apps/events/services/checkin.py:81
 msgid "inscription expirée"
 msgstr "registration expired"
 
-#: apps/events/services/checkin.py:81 apps/registrations/models.py:511
+#: apps/events/services/checkin.py:82 apps/registrations/models.py:511
 msgid "badge remplacé"
 msgstr "badge replaced"
 
-#: apps/events/services/checkin.py:82 apps/registrations/models.py:370
+#: apps/events/services/checkin.py:83 apps/registrations/models.py:370
 msgid "en attente de paiement"
 msgstr "awaiting payment"
 
-#: apps/events/services/checkin.py:83
+#: apps/events/services/checkin.py:84
 msgid "saisie manuelle non permise"
 msgstr "manual entry not allowed"
 
-#: apps/events/services/checkin.py:186
+#: apps/events/services/checkin.py:85
+msgid "session absente du programme publié"
+msgstr "session not in the published programme"
+
+#: apps/events/services/checkin.py:188
 msgid "Clé déjà utilisée."
 msgstr "Key already used."
 
-#: apps/events/services/checkin.py:247
+#: apps/events/services/checkin.py:254
 msgid "Clé mal formée."
 msgstr "Malformed key."
 
-#: apps/events/services/checkin.py:286
+#: apps/events/services/checkin.py:297
 msgid "200 pointages au plus par envoi."
 msgstr "200 check-ins at most per batch."
 
-#: apps/events/services/checkin.py:317
+#: apps/events/services/checkin.py:334
 msgid "Pointage déjà annulé."
 msgstr "Check-in already cancelled."
 
-#: apps/events/services/checkin.py:445 apps/payments/services/finance.py:118
+#: apps/events/services/checkin.py:469 apps/payments/services/finance.py:118
 #: apps/registrations/services/exports.py:25
 #: apps/reviews/services/decisions.py:499 apps/submissions/services.py:711
 msgid "Référence"
 msgstr "Reference"
 
-#: apps/events/services/checkin.py:446
+#: apps/events/services/checkin.py:470
 #: apps/registrations/services/exports.py:26
 msgid "Nom"
 msgstr "Name"
 
-#: apps/events/services/checkin.py:447
+#: apps/events/services/checkin.py:471
 #: apps/registrations/services/exports.py:29
 msgid "Catégorie"
 msgstr "Category"
 
-#: apps/events/services/checkin.py:448
+#: apps/events/services/checkin.py:472
 msgid "Pointé le (UTC)"
 msgstr "Checked in at (UTC)"
 
-#: apps/events/services/checkin.py:449
+#: apps/events/services/checkin.py:473
 msgid "Reçu le (UTC)"
 msgstr "Received at (UTC)"
 
-#: apps/events/services/checkin.py:450 apps/payments/services/finance.py:122
+#: apps/events/services/checkin.py:474 apps/payments/services/finance.py:122
 #: apps/registrations/services/exports.py:33
 msgid "Moyen"
 msgstr "Method"
 
-#: apps/events/services/checkin.py:451
+#: apps/events/services/checkin.py:475
 msgid "Pointé par"
 msgstr "Checked in by"
 
-#: apps/events/services/checkin.py:452
+#: apps/events/services/checkin.py:476
 msgid "Appareil"
 msgstr "Device"
 
@@ -2093,7 +2103,7 @@ msgstr "PNG or JPEG expected."
 msgid "Image trop petite pour une signature lisible."
 msgstr "Image too small for a legible signature."
 
-#: apps/events/views.py:326
+#: apps/events/views.py:331
 msgid "Numéro de lot attendu (1, 2…)."
 msgstr "Batch number expected (1, 2…)."
 
@@ -3019,8 +3029,8 @@ msgstr "The session must take place during the edition."
 msgid "Type de session inconnu."
 msgstr "Unknown session type."
 
-#: apps/program/services/planning.py:246 apps/program/services/planning.py:441
-#: apps/program/services/planning.py:526
+#: apps/program/services/planning.py:246 apps/program/services/planning.py:455
+#: apps/program/services/planning.py:540
 msgid "Titre français obligatoire."
 msgstr "French title required."
 
@@ -3037,39 +3047,39 @@ msgstr "Room deactivated."
 msgid "Thématique d'une autre édition."
 msgstr "Track from another edition."
 
-#: apps/program/services/planning.py:362
+#: apps/program/services/planning.py:376
 msgid "Durée de 1 à 600 minutes."
 msgstr "Duration from 1 to 600 minutes."
 
-#: apps/program/services/planning.py:387
+#: apps/program/services/planning.py:401
 msgid "Communication d'une autre édition."
 msgstr "Paper from another edition."
 
-#: apps/program/services/planning.py:390
+#: apps/program/services/planning.py:404
 msgid "Seule une communication confirmée se programme."
 msgstr "Only a confirmed paper can be scheduled."
 
-#: apps/program/services/planning.py:394
+#: apps/program/services/planning.py:408
 msgid "Communication déjà programmée : déplacez-la."
 msgstr "Paper already scheduled: move it instead."
 
-#: apps/program/services/planning.py:419
+#: apps/program/services/planning.py:433
 msgid "Intervenant inconnu."
 msgstr "Unknown speaker."
 
-#: apps/program/services/planning.py:478
+#: apps/program/services/planning.py:492
 msgid "Session d'une autre édition."
 msgstr "Session from another edition."
 
-#: apps/program/services/planning.py:571
+#: apps/program/services/planning.py:585
 msgid "Rôle de séance inconnu."
 msgstr "Unknown session role."
 
-#: apps/program/services/planning.py:573
+#: apps/program/services/planning.py:587
 msgid "Personne inconnue."
 msgstr "Unknown person."
 
-#: apps/program/services/planning.py:575
+#: apps/program/services/planning.py:589
 msgid "Cette personne a déjà ce rôle dans la session."
 msgstr "This person already has this role in the session."
 
@@ -4896,7 +4906,7 @@ msgid "Cette soumission n'est plus modifiable."
 msgstr "This submission can no longer be changed."
 
 #: apps/submissions/services.py:199 apps/submissions/services.py:274
-#: apps/submissions/workflow.py:162
+#: apps/submissions/workflow.py:191
 msgid "L'appel à communications est clos."
 msgstr "The call for papers is closed."
 
@@ -5231,14 +5241,14 @@ msgstr ""
 msgid "[%(site_name)s] Soumission retirée"
 msgstr "[%(site_name)s] Submission withdrawn"
 
-#: apps/submissions/workflow.py:166
+#: apps/submissions/workflow.py:195
 msgid "La soumission est incomplète."
 msgstr "The submission is incomplete."
 
-#: apps/submissions/workflow.py:174
+#: apps/submissions/workflow.py:203
 msgid "La recevabilité commence à la clôture de l'appel (et des dérogations)."
 msgstr "Screening starts when the call (and any extensions) closes."
 
-#: apps/submissions/workflow.py:208
+#: apps/submissions/workflow.py:240
 msgid "Changement de statut non autorisé."
 msgstr "Status change not allowed."

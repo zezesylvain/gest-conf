@@ -10,6 +10,8 @@ E = "manage/editions/<int:edition_id>"
 
 CHECKIN = views.CheckinViewSet
 BADGES = views.BadgeViewSet
+DAY = views.DaySessionViewSet
+S = f"{E}/day/sessions/<int:session_id>"
 
 urlpatterns = [
     path(
@@ -62,5 +64,27 @@ urlpatterns = [
         "registrations/<int:registration_id>/badge",
         views.MyBadgeView.as_view(),
         name="registrations-badge",
+    ),
+    path(f"{E}/day/sessions", DAY.as_view({"get": "sessions"}), name="manage-day-sessions"),
+    path(f"{S}/attendance", DAY.as_view({"get": "attendance"}), name="manage-day-attendance"),
+    path(
+        f"{S}/attendance/scan",
+        DAY.as_view({"post": "attendance_scan"}),
+        name="manage-day-attendance-scan",
+    ),
+    path(
+        f"{S}/attendance/export",
+        DAY.as_view({"get": "attendance_export"}),
+        name="manage-day-attendance-export",
+    ),
+    path(
+        f"{S}/slots/<int:slot_id>/presented",
+        DAY.as_view({"post": "presented"}),
+        name="manage-day-presented",
+    ),
+    path(
+        f"{S}/slots/<int:slot_id>/unpresented",
+        DAY.as_view({"post": "unpresented"}),
+        name="manage-day-unpresented",
     ),
 ]

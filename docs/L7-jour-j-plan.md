@@ -483,3 +483,76 @@ leur clé de lieu).
 - `ruff`, lint, `format:check`, `locale/check.sh`, schéma validé sous MariaDB.
 
 **Critère de fin** (« Tests au vert ») : atteint.
+
+## 14. Bilan de L7.3 (6 octobre 2026)
+
+**Communication présentée** (K8) : transition `SCHEDULED → PRESENTED` ouverte dans
+`apps/submissions/workflow.py`.
+
+- Qui : `program.write` (administrateur, CO « programme »), et le **président de séance** de
+  la session où la communication est placée.
+- Le président de séance passe par une **délégation** que l'application `events` inscrit
+  dans le workflow (`register_actor_grant`, par transition). `submissions` ne dépend pas
+  d'`events`, et une délégation n'étend jamais une transition à d'autres statuts.
+- **Correction** `PRESENTED → SCHEDULED` : `program.write` seulement, motif obligatoire,
+  historique et journal.
+  - **Précision de K8** : le plan disait « par l'administrateur » ; la capacité retenue
+    inclut le CO « programme », qui tient le programme.
+  - Le président de séance ne corrige pas.
+
+**Émargement des sessions** (K7) :
+
+- tout se lit dans le **programme publié** (dernier instantané), jamais dans le brouillon :
+  seules ses sessions s'émargent, et le président de séance est celui qu'il désigne ;
+- un président désigné au brouillon seulement n'a aucun droit ;
+- un pointage de session vaut présence, même sans pointage d'accueil ; un lieu, un pointage
+  actif (accueil, chaque session) ;
+- la synchronisation hors ligne accepte un champ `session`, refusé (« session absente du
+  programme publié ») hors du programme publié ;
+- une session émargée ne se supprime plus du brouillon : garde inscrite dans
+  `planning.delete_session` (`register_session_guard`), qui renvoie `in_use` au lieu d'une
+  erreur de contrainte.
+
+**API** (`…/day/sessions/…`, au lieu du `…/program/…` esquissé au §4) :
+
+- liste des sessions publiées avec leurs créneaux, le **statut courant** de chaque
+  communication, ses présentateurs et le nombre de présents ;
+- présents d'une session, lecture du badge à l'entrée, export CSV (réauthentification,
+  journal) ;
+- « présentée » et sa correction.
+
+**Droits** (`CapabilityOrSessionChair`) :
+
+- la capacité de l'action, **ou** la présidence de la session du chemin au programme publié,
+  pour les seules actions ouvertes au président :
+  - liste des sessions (les siennes seulement) ;
+  - présents, lecture du badge, « présentée » ;
+- pas l'export, ni la correction, ni l'accueil ;
+- le président de séance reste **sans 2FA** (K1 ne l'imposait pas) : il ne voit que les
+  présents de sa session.
+
+**Matrice** :
+
+- six routes ajoutées, sur une session publiée créée à part (instantané posé directement),
+  pour que les cas de publication du programme restent valables ;
+- les objets paresseux du monde acceptent désormais plusieurs chargeurs ;
+- la présidence de séance est testée hors de la matrice (`test_attendance.py`) : sa session,
+  pas l'autre, ni l'export, ni la correction, ni la liste hors ligne.
+
+**Non retenu** :
+
+- saisie manuelle de la référence à l'entrée d'une session : l'accueil la couvre ;
+- garde horaire sur « présentée » (pas avant le début de la session) : non demandée ; elle
+  gênerait la recette.
+
+**Tests** :
+
+- backend : **4 489 réussis**, 10 ignorés (SQLite) ;
+- sous MariaDB : `events`, `submissions`, `program`, le schéma et les règles de plateforme
+  (258), plus les cases nouvelles de la matrice ;
+- matrice des droits : **3 299 cas** ;
+- `events` : 58 tests, dont 11 pour l'émargement et « présentée » ;
+- front : 388 tests ; client régénéré ;
+- `ruff`, lint, `format:check`, `locale/check.sh`, schéma validé sous MariaDB.
+
+**Critère de fin** (« Tests au vert ») : atteint.

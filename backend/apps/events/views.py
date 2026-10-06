@@ -25,13 +25,14 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.accounts.permissions import ManageViewSet, RecentAuthRequired
+from apps.accounts.permissions import ManageViewSet, MfaVerified, RecentAuthRequired
 from apps.accounts.roles import Capability as C
 from apps.core.actor import Actor
 from apps.core.audit import record
 from apps.core.errors import Invalid
 from apps.core.spreadsheet import csv_response, csv_text
 from apps.events.models import Checkin, CheckinMethod
+from apps.events.permissions import CapabilityOrSessionChair
 from apps.events.serializers import (
     BadgeBatchesSerializer,
     BundleSerializer,
@@ -39,9 +40,11 @@ from apps.events.serializers import (
     CheckinResultSerializer,
     CheckinSerializer,
     CheckinSummarySerializer,
+    DaySessionSerializer,
     ManualRequestSerializer,
     ReasonSerializer,
     ScanRequestSerializer,
+    SessionScanRequestSerializer,
     SignatureImageUploadSerializer,
     SignatureSerializer,
     SyncRequestSerializer,
@@ -51,9 +54,9 @@ from apps.events.serializers import (
     result_data,
     signature_data,
 )
+from apps.events.services import attendance, signatures
 from apps.events.services import badges as badge_services
 from apps.events.services import checkin as checkin_services
-from apps.events.services import signatures
 from apps.registrations.models import Registration
 from apps.registrations.services import orders
 
@@ -432,3 +435,147 @@ class MyBadgeView(APIView):
         return pdf_response(
             badge_services.single_badge(registration), f"badge-{registration.reference}.pdf"
         )
+
+
+# --- Émargement des sessions et communications présentées (K7, K8) -----------------------
+
+
+class DaySessionViewSet(ManageViewSet):
+    """``…/day/sessions/…`` : sessions du programme publié, émargement, « présentée ».
+
+    Capacité de l'action, **ou** présidence de la session au programme publié pour les
+    actions de ``chair_actions`` (``CapabilityOrSessionChair``)."""
+
+    queryset = Checkin.objects.none()
+    serializer_class = DaySessionSerializer
+    permission_classes = (IsAuthenticated, CapabilityOrSessionChair, MfaVerified)
+    required_capabilities = {
+        "sessions": C.CHECKIN_SCAN,
+        "attendance": C.CHECKIN_MANAGE,
+        "attendance_scan": C.CHECKIN_SCAN,
+        "attendance_export": C.CHECKIN_MANAGE,
+        "presented": C.PROGRAM_WRITE,
+        "unpresented": C.PROGRAM_WRITE,
+    }
+    chair_actions = ("sessions", "attendance", "attendance_scan", "presented")
+
+    def get_permissions(self):
+        permissions = super().get_permissions()
+        if self.action == "attendance_export":
+            permissions.append(RecentAuthRequired())
+        return permissions
+
+    def actor(self) -> Actor:
+        return Actor.from_request(self.request)
+
+    def session(self, session_id: int) -> dict:
+        return attendance.published_session(self.edition, session_id)
+
+    @extend_schema(
+        operation_id="manage_day_sessions", responses={200: DaySessionSerializer(many=True)}
+    )
+    def sessions(self, request: Request, edition_id: int) -> Response:
+        """Sessions publiées (toutes, ou celles que préside le compte s'il n'a pas
+        ``checkin.scan``)."""
+        chaired = attendance.chaired_session_ids(self.edition, request.user)
+        only = None if self.access.has(C.CHECKIN_SCAN) else chaired
+        rows = [
+            {**item, "chaired": item["id"] in chaired}
+            for item in attendance.day_sessions(self.edition, only=only)
+        ]
+        return Response(DaySessionSerializer(rows, many=True).data)
+
+    @extend_schema(
+        operation_id="manage_day_attendance",
+        parameters=[OpenApiParameter("q", str, description="Nom ou référence.")],
+        responses={200: CheckinListItemSerializer(many=True)},
+    )
+    def attendance(self, request: Request, edition_id: int, session_id: int) -> Response:
+        """Présents pointés à l'entrée de la session (K7)."""
+        self.session(session_id)
+        rows = checkin_services.checkins(
+            self.edition, query=request.query_params.get("q", ""), session_id=session_id
+        )
+        page = self.paginate_queryset(rows)
+        data = [
+            {**checkin_data(row), "registration": person_data(row.registration)} for row in page
+        ]
+        return self.get_paginated_response(CheckinListItemSerializer(data, many=True).data)
+
+    @extend_schema(
+        operation_id="manage_day_attendance_scan",
+        request=SessionScanRequestSerializer,
+        responses={200: CheckinResultSerializer},
+    )
+    def attendance_scan(self, request: Request, edition_id: int, session_id: int) -> Response:
+        """Badge lu à l'entrée de la session : vaut présence, même sans pointage d'accueil."""
+        self.session(session_id)
+        serializer = SessionScanRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        result = checkin_services.check_in(
+            self.edition,
+            token=data["token"],
+            method=CheckinMethod.SCAN,
+            device=data["device"],
+            idempotency_key=data["idempotency_key"],
+            session_id=session_id,
+            actor=self.actor(),
+        )
+        return _no_store(Response(CheckinResultSerializer(result_data(result)).data))
+
+    @extend_schema(
+        operation_id="manage_day_attendance_export",
+        responses={(200, "text/csv"): OpenApiTypes.BINARY},
+    )
+    def attendance_export(self, request: Request, edition_id: int, session_id: int) -> HttpResponse:
+        self.session(session_id)
+        rows = list(checkin_services.checkins(self.edition, session_id=session_id))
+        content = csv_text(
+            [str(item) for item in checkin_services.EXPORT_HEADER],
+            checkin_services.export_rows(rows),
+        )
+        record(
+            "checkin.session_exported",
+            actor=self.actor(),
+            edition=self.edition,
+            after={"session": session_id, "count": len(rows)},
+        )
+        return csv_response(content, f"presences-{self.edition.code}-session-{session_id}.csv")
+
+    @extend_schema(
+        operation_id="manage_day_presented",
+        request=None,
+        responses={200: DaySessionSerializer},
+    )
+    def presented(
+        self, request: Request, edition_id: int, session_id: int, slot_id: int
+    ) -> Response:
+        """Communication présentée (K8) : ``SCHEDULED → PRESENTED`` par le workflow."""
+        attendance.mark_presented(self.edition, session_id, slot_id, actor=self.actor())
+        return self.session_response(request, session_id)
+
+    @extend_schema(
+        operation_id="manage_day_unpresented",
+        request=ReasonSerializer,
+        responses={200: DaySessionSerializer},
+    )
+    def unpresented(
+        self, request: Request, edition_id: int, session_id: int, slot_id: int
+    ) -> Response:
+        """Correction (``PRESENTED → SCHEDULED``) : ``program.write``, motif obligatoire."""
+        serializer = ReasonSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        attendance.unmark_presented(
+            self.edition,
+            session_id,
+            slot_id,
+            reason=serializer.validated_data["reason"],
+            actor=self.actor(),
+        )
+        return self.session_response(request, session_id)
+
+    def session_response(self, request: Request, session_id: int) -> Response:
+        chaired = attendance.chaired_session_ids(self.edition, request.user)
+        row = attendance.day_sessions(self.edition, only={session_id})[0]
+        return Response(DaySessionSerializer({**row, "chaired": session_id in chaired}).data)

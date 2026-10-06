@@ -1130,6 +1130,54 @@ CASES = [
         "/v1/manage/editions/{e}/registrations/{reg_paid}/regenerate-token",
         {"reason": "Badge perdu"},
     ),
+    # --- Émargement et « présentée » (plan L7, K7, K8) : capacité, ou présidence de séance
+    # (testée à part, le président de la session du jour J n'étant pas un profil de la matrice).
+    # Paramètre ignoré par la vue : il fait créer le programme publié avant l'appel.
+    Case(
+        "manage-day-sessions",
+        "GET",
+        CKS,
+        200,
+        "/v1/manage/editions/{e}/day/sessions?session={day_session}",
+    ),
+    Case(
+        "manage-day-attendance",
+        "GET",
+        CKM,
+        200,
+        "/v1/manage/editions/{e}/day/sessions/{day_session}/attendance",
+    ),
+    Case(
+        "manage-day-attendance-scan",
+        "POST",
+        CKS,
+        200,
+        "/v1/manage/editions/{e}/day/sessions/{day_session}/attendance/scan",
+        lambda ids: {"token": ids["day_token"]},
+    ),
+    Case(
+        "manage-day-attendance-export",
+        "GET",
+        CKM,
+        200,
+        "/v1/manage/editions/{e}/day/sessions/{day_session}/attendance/export",
+        recent_auth=True,
+    ),
+    Case(
+        "manage-day-presented",
+        "POST",
+        PGW,
+        200,
+        "/v1/manage/editions/{e}/day/sessions/{day_session}/slots/{day_scheduled_slot}/presented",
+    ),
+    Case(
+        "manage-day-unpresented",
+        "POST",
+        PGW,
+        200,
+        "/v1/manage/editions/{e}/day/sessions/{day_session}/slots/{day_presented_slot}/unpresented",
+        {"reason": "Erreur de saisie"},
+    ),
     Case("manage-portal-poster", "GET", R, 200, "/v1/manage/editions/{e}/portal/poster"),
     Case(
         "manage-portal-poster",
@@ -1276,10 +1324,70 @@ def world():
             "invite_role": "SC_MEMBER",
         },
         # Inscriptions, paiements et pièces (plan L6) : créés au premier cas qui les vise,
-        # leurs PDF coûtant cher à produire pour chacun des cas.
-        loader=lambda: _registration_objects(edition),
+        # leurs PDF coûtant cher à produire pour chacun des cas. Programme publié du jour J
+        # (plan L7) : à part, pour que les cas de publication du programme restent valables.
+        loaders=(lambda: _registration_objects(edition), lambda: _day_objects(edition)),
     )
     return edition, users, ids
+
+
+def _day_objects(edition) -> dict:
+    """Plan L7 (K7, K8) : session publiée (instantané posé directement, sans toucher à l'état
+    du programme), présidée par une personne hors des profils de la matrice, avec une
+    communication programmée et une présentée ; une inscription confirmée à pointer."""
+    from apps.program.models import ProgramPublication, Room, Session, SessionRole, Slot
+    from apps.program.services.publication import build_snapshot
+    from apps.registrations.models import RegistrationStatus
+    from apps.registrations.tests.factories import make_registration
+    from apps.submissions.models import Submission, SubmissionStatus
+    from apps.submissions.tests.factories import author_user, complete_submission
+
+    room = Room.objects.create(edition=edition, name="Salle du jour J")
+    start = dt.datetime(2027, 6, 2, 9, tzinfo=dt.UTC)
+    day = Session.objects.create(
+        edition=edition,
+        kind="parallel",
+        title_fr="Session du jour J",
+        room=room,
+        starts_at=start,
+        ends_at=start + dt.timedelta(hours=2),
+    )
+    SessionRole.objects.create(
+        session=day, user=make_member(edition, Role.SESSION_CHAIR), role="chair"
+    )
+    slots = {}
+    for position, (status, number, last) in enumerate(
+        ((SubmissionStatus.SCHEDULED, 6, "Boateng"), (SubmissionStatus.PRESENTED, 7, "Ofori"))
+    ):
+        paper = complete_submission(edition, author_user(first="Yaw", last=last))
+        Submission.objects.filter(pk=paper.pk).update(
+            status=status, reference=f"{edition.code}-{number:04d}"
+        )
+        begins = start + dt.timedelta(minutes=30 * position)
+        slots[status] = Slot.objects.create(
+            session=day,
+            position=position,
+            duration_min=20,
+            submission_id=paper.pk,
+            starts_at=begins,
+            ends_at=begins + dt.timedelta(minutes=20),
+        )
+    ProgramPublication.objects.create(
+        edition=edition,
+        version=1000,
+        revision=0,
+        published_at=timezone.now(),
+        snapshot=build_snapshot(edition, [day]),
+    )
+    registration = make_registration(
+        edition, VerifiedUserFactory(), status=RegistrationStatus.CONFIRMED
+    )
+    return {
+        "day_session": day.pk,
+        "day_scheduled_slot": slots[SubmissionStatus.SCHEDULED].pk,
+        "day_presented_slot": slots[SubmissionStatus.PRESENTED].pk,
+        "day_token": registration.qr_token,
+    }
 
 
 def _program_objects(edition, users) -> dict:
@@ -1641,20 +1749,21 @@ def test_matrix(world, case, profile, expected):
 
 class LazyIds(dict):
     """Identifiants du monde, dont une partie est créée à la première lecture d'une clé
-    absente (``loader``) ; une vue par profil délègue à son parent les clés qu'elle n'a pas."""
+    absente (``loaders``, dans l'ordre, chacun une fois) ; une vue par profil délègue à son
+    parent les clés qu'elle n'a pas."""
 
-    def __init__(self, data, *, loader=None, parent=None):
+    def __init__(self, data, *, loaders=(), parent=None):
         super().__init__(data)
-        self._loader = loader
+        self._loaders = list(loaders)
         self._parent = parent
 
     def __missing__(self, key):
         if self._parent is not None:
             return self._parent[key]
-        if self._loader is not None:
-            loader, self._loader = self._loader, None
-            self.update(loader())
-            return self[key]
+        while self._loaders:
+            self.update(self._loaders.pop(0)())
+            if dict.__contains__(self, key):
+                return self[key]
         raise KeyError(key)
 
 

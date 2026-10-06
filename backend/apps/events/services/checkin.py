@@ -69,6 +69,7 @@ class Outcome:
     REPLACED = "replaced"
     PENDING_PAYMENT = "pending_payment"
     NOT_ALLOWED = "not_allowed"
+    UNKNOWN_SESSION = "unknown_session"
 
 
 OUTCOME_CHOICES = [
@@ -81,6 +82,7 @@ OUTCOME_CHOICES = [
     (Outcome.REPLACED, _("badge remplacé")),
     (Outcome.PENDING_PAYMENT, _("en attente de paiement")),
     (Outcome.NOT_ALLOWED, _("saisie manuelle non permise")),
+    (Outcome.UNKNOWN_SESSION, _("session absente du programme publié")),
 ]
 # Résultats où la personne est (ou était déjà) pointée.
 ADMITTED = frozenset({Outcome.CHECKED_IN, Outcome.ALREADY_CHECKED_IN})
@@ -198,6 +200,7 @@ def _check_in(
     scanned_at: dt.datetime | None,
     device: str,
     key: str,
+    session_id: int | None,
     actor: Actor,
 ) -> CheckinResult:
     # Verrou de l'inscription : deux appareils qui lisent le même badge en même temps
@@ -205,21 +208,21 @@ def _check_in(
     registration = _registrations().select_for_update().get(pk=registration.pk)
     if registration.status != RegistrationStatus.CONFIRMED:
         return CheckinResult(_STATUS_OUTCOMES[registration.status], key, registration)
-    existing = active_checkin(registration)
+    existing = active_checkin(registration, session_id)
     if existing is not None:
         return CheckinResult(Outcome.ALREADY_CHECKED_IN, key, registration, existing)
     now = timezone.now()
     checkin = Checkin.objects.create(
         edition=edition,
         registration=registration,
-        session=None,
+        session_id=session_id,
         scanned_at=bounded_scan_time(scanned_at, now),
         received_at=now,
         recorded_by=actor.user,
         method=method,
         device=device[:64],
         idempotency_key=key,
-        active_key=Checkin.place_key(registration.pk, None),
+        active_key=Checkin.place_key(registration.pk, session_id),
     )
     record("checkin.recorded", actor=actor, edition=edition, obj=checkin, after=snapshot(checkin))
     return CheckinResult(Outcome.CHECKED_IN, key, registration, checkin)
@@ -234,12 +237,16 @@ def check_in(
     scanned_at: dt.datetime | None = None,
     device: str = "",
     idempotency_key: str = "",
+    session_id: int | None = None,
     actor: Actor,
 ) -> CheckinResult:
-    """Pointe à l'accueil par le jeton du badge (``scan``) ou la référence (``manual``).
+    """Pointe à l'accueil (``session_id`` nul) ou à l'entrée d'une session (K7), par le jeton
+    du badge (``scan``) ou la référence (``manual``). Un pointage de session sans pointage
+    d'accueil est accepté : il vaut aussi présence.
 
-    Les droits (``checkin.scan`` ou ``checkin.manage``) sont vérifiés par la vue ; la
-    synchronisation les revérifie élément par élément (``synchronize``).
+    Les droits (``checkin.scan``, ``checkin.manage``, président de la séance) et la
+    publication de la session sont vérifiés par l'appelant ; la synchronisation les
+    revérifie élément par élément (``synchronize``).
     """
     ensure_editable(edition)
     key = idempotency_key or uuid.uuid4().hex
@@ -262,6 +269,7 @@ def check_in(
             scanned_at=scanned_at,
             device=device,
             key=key,
+            session_id=session_id,
             actor=actor,
         )
     except IntegrityError:
@@ -281,14 +289,22 @@ def synchronize(
     actor: Actor,
 ) -> list[CheckinResult]:
     """File de pointages hors ligne (K5) : chaque élément est revérifié par le serveur
-    (règle n° 2) ; une saisie manuelle exige ``checkin.manage``. Rejouable sans doublon."""
+    (règle n° 2) ; une saisie manuelle exige ``checkin.manage`` ; une session doit figurer
+    au programme publié (K7). Rejouable sans doublon."""
+    from apps.events.services.attendance import published_session_ids
+
     if len(items) > SYNC_MAX_ITEMS:
         raise Invalid(fields={"items": [_("200 pointages au plus par envoi.")]})
+    sessions = published_session_ids(edition)
     results = []
     for item in items:
         method = item.get("method", CheckinMethod.SCAN)
+        session_id = item.get("session")
         if method == CheckinMethod.MANUAL and not may_enter_manually:
             results.append(CheckinResult(Outcome.NOT_ALLOWED, item["idempotency_key"]))
+            continue
+        if session_id is not None and session_id not in sessions:
+            results.append(CheckinResult(Outcome.UNKNOWN_SESSION, item["idempotency_key"]))
             continue
         results.append(
             check_in(
@@ -299,6 +315,7 @@ def synchronize(
                 scanned_at=item.get("scanned_at"),
                 device=device,
                 idempotency_key=item["idempotency_key"],
+                session_id=session_id,
                 actor=actor,
             )
         )
@@ -415,9 +432,16 @@ def summary(edition: Edition) -> dict[str, int]:
     return counts
 
 
-def checkins(edition: Edition, *, query: str = "", include_cancelled: bool = False):
+def checkins(
+    edition: Edition,
+    *,
+    query: str = "",
+    include_cancelled: bool = False,
+    session_id: int | None = None,
+):
+    """Pointages de l'accueil (``session_id`` nul) ou d'une session."""
     rows = (
-        Checkin.objects.filter(edition=edition, session__isnull=True)
+        Checkin.objects.filter(edition=edition, session_id=session_id)
         .select_related(
             "registration__edition",
             "registration__category",

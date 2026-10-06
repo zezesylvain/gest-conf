@@ -63,6 +63,18 @@ export type { ManageConfidentialityUpdate$Params as ManageConfidentialityUpdate$
 export { manageConfidentialityUpdate as manageConfidentialityUpdate } from './fn/manage/manage-confidentiality-update';
 export type { ManageConflictCreate$Params as ManageConflictCreate$Params } from './fn/manage/manage-conflict-create';
 export { manageConflictCreate as manageConflictCreate } from './fn/manage/manage-conflict-create';
+export type { ManageDaySessions$Params as ManageDaySessions$Params } from './fn/manage/manage-day-sessions';
+export { manageDaySessions as manageDaySessions } from './fn/manage/manage-day-sessions';
+export type { ManageDayAttendance$Params as ManageDayAttendance$Params } from './fn/manage/manage-day-attendance';
+export { manageDayAttendance as manageDayAttendance } from './fn/manage/manage-day-attendance';
+export type { ManageDayAttendanceExport$Params as ManageDayAttendanceExport$Params } from './fn/manage/manage-day-attendance-export';
+export { manageDayAttendanceExport as manageDayAttendanceExport } from './fn/manage/manage-day-attendance-export';
+export type { ManageDayAttendanceScan$Params as ManageDayAttendanceScan$Params } from './fn/manage/manage-day-attendance-scan';
+export { manageDayAttendanceScan as manageDayAttendanceScan } from './fn/manage/manage-day-attendance-scan';
+export type { ManageDayPresented$Params as ManageDayPresented$Params } from './fn/manage/manage-day-presented';
+export { manageDayPresented as manageDayPresented } from './fn/manage/manage-day-presented';
+export type { ManageDayUnpresented$Params as ManageDayUnpresented$Params } from './fn/manage/manage-day-unpresented';
+export { manageDayUnpresented as manageDayUnpresented } from './fn/manage/manage-day-unpresented';
 export type { ManageDecisionsBatch$Params as ManageDecisionsBatch$Params } from './fn/manage/manage-decisions-batch';
 export { manageDecisionsBatch as manageDecisionsBatch } from './fn/manage/manage-decisions-batch';
 export type { ManageDecisionsPublish$Params as ManageDecisionsPublish$Params } from './fn/manage/manage-decisions-publish';

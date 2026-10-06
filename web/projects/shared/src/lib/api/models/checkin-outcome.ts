@@ -12,6 +12,7 @@
  * * `replaced` - badge remplacé
  * * `pending_payment` - en attente de paiement
  * * `not_allowed` - saisie manuelle non permise
+ * * `unknown_session` - session absente du programme publié
  */
-export type CheckinOutcome = 'checked_in' | 'already_checked_in' | 'unknown' | 'other_edition' | 'cancelled' | 'expired' | 'replaced' | 'pending_payment' | 'not_allowed';
+export type CheckinOutcome = 'checked_in' | 'already_checked_in' | 'unknown' | 'other_edition' | 'cancelled' | 'expired' | 'replaced' | 'pending_payment' | 'not_allowed' | 'unknown_session';
 
