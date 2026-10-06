@@ -26,6 +26,12 @@ urlpatterns = [
     path(f"{S}/submit", V.as_view({"post": "submit"}), name="submit"),
     path(f"{S}/withdraw", V.as_view({"post": "withdraw"}), name="withdraw"),
     path(f"{S}/timeline", V.as_view({"get": "timeline"}), name="timeline"),
+    path(f"{S}/final-version", F.as_view({"post": "final_version"}), name="final-version"),
+    path(
+        f"{S}/final-version/content",
+        V.as_view({"get": "final_version_content"}),
+        name="final-version-content",
+    ),
     # Gestion : routes d'action avant le détail (« stats », « export » ne sont pas des id).
     path(E, M.as_view({"get": "list"}), name="manage-submissions-list"),
     path(f"{E}/stats", M.as_view({"get": "stats"}), name="manage-submissions-stats"),

@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gestconf-backend\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-06 00:53+0000\n"
+"POT-Creation-Date: 2026-10-06 01:12+0000\n"
 "PO-Revision-Date: 2026-10-05 11:00+0000\n"
 "Last-Translator: GEST-CONF\n"
 "Language-Team: GEST-CONF\n"
@@ -414,9 +414,9 @@ msgstr "Acknowledging the notice cannot be withdrawn."
 #: apps/accounts/services/mfa.py:84 apps/accounts/services/personal_data.py:205
 #: apps/accounts/services/roles.py:196 apps/conferences/services.py:301
 #: apps/reviews/services/assignments.py:287
-#: apps/reviews/services/conflicts.py:178 apps/reviews/services/reviews.py:420
-#: apps/submissions/services.py:611 apps/submissions/workflow.py:158
-#: apps/submissions/workflow.py:161
+#: apps/reviews/services/conflicts.py:178 apps/reviews/services/reviews.py:430
+#: apps/submissions/services.py:611 apps/submissions/workflow.py:163
+#: apps/submissions/workflow.py:166
 msgid "Motif obligatoire."
 msgstr "A reason is required."
 
@@ -1038,28 +1038,36 @@ msgstr "draft to submit"
 msgid "soumission non recevable"
 msgstr "inadmissible submission"
 
-#: apps/communications/models.py:107 apps/submissions/models.py:137
+#: apps/communications/models.py:95
+msgid "décision publiée"
+msgstr "decision published"
+
+#: apps/communications/models.py:96 apps/submissions/models.py:34
+msgid "version finale reçue"
+msgstr "camera-ready version received"
+
+#: apps/communications/models.py:109 apps/submissions/models.py:137
 msgid "compte"
 msgstr "account"
 
-#: apps/communications/models.py:111 apps/core/models.py:285
+#: apps/communications/models.py:113 apps/core/models.py:285
 #: apps/reviews/models.py:235 apps/submissions/models.py:177
 msgid "nature"
 msgstr "kind"
 
-#: apps/communications/models.py:112 apps/core/models.py:206
+#: apps/communications/models.py:114 apps/core/models.py:206
 msgid "données"
 msgstr "payload"
 
-#: apps/communications/models.py:113
+#: apps/communications/models.py:115
 msgid "lue le"
 msgstr "read on"
 
-#: apps/communications/models.py:116
+#: apps/communications/models.py:118
 msgid "notification"
 msgstr "notification"
 
-#: apps/communications/models.py:117
+#: apps/communications/models.py:119
 msgid "notifications"
 msgstr "notifications"
 
@@ -1437,27 +1445,27 @@ msgstr "Unknown time zone."
 msgid "Échec de la vérification CSRF : rechargez la page puis réessayez."
 msgstr "CSRF verification failed: reload the page and try again."
 
-#: apps/core/errors.py:105
+#: apps/core/errors.py:107
 msgid "Opération refusée."
 msgstr "Operation refused."
 
-#: apps/core/errors.py:134
+#: apps/core/errors.py:136
 msgid "Opération impossible dans l'état actuel."
 msgstr "This operation is not possible in the current state."
 
-#: apps/core/errors.py:141
+#: apps/core/errors.py:143
 msgid "Action non autorisée."
 msgstr "Action not allowed."
 
-#: apps/core/errors.py:148 apps/core/exceptions.py:110
+#: apps/core/errors.py:150 apps/core/exceptions.py:110
 msgid "Données invalides."
 msgstr "Invalid data."
 
-#: apps/core/errors.py:155
+#: apps/core/errors.py:157
 msgid "Modifié entre-temps (autre onglet ?) : rechargez avant d'enregistrer."
 msgstr "Changed in the meantime (another tab?): reload before saving."
 
-#: apps/core/errors.py:166
+#: apps/core/errors.py:168
 msgid "Quota atteint."
 msgstr "Quota reached."
 
@@ -2345,7 +2353,7 @@ msgid "versions finales"
 msgstr "final versions"
 
 #: apps/reviews/notifications.py:50 apps/reviews/notifications.py:93
-#: apps/submissions/notifications.py:67
+#: apps/submissions/notifications.py:71
 msgid "(sans titre)"
 msgstr "(untitled)"
 
@@ -2416,6 +2424,140 @@ msgstr "Inadmissible submission."
 msgid "Thématique d'une autre édition."
 msgstr "Track from another edition."
 
+#: apps/reviews/services/decisions.py:77 apps/reviews/services/reviews.py:250
+msgid "Type de communication inconnu."
+msgstr "Unknown presentation type."
+
+#: apps/reviews/services/decisions.py:98
+msgid "Issue inconnue."
+msgstr "Unknown outcome."
+
+#: apps/reviews/services/decisions.py:101
+#: apps/reviews/services/decisions.py:181
+msgid "Décision déjà publiée."
+msgstr "Decision already published."
+
+#: apps/reviews/services/decisions.py:104
+msgid "Décision possible une fois la soumission évaluée (RG-07)."
+msgstr "A decision is possible once the submission is reviewed (RG-07)."
+
+#: apps/reviews/services/decisions.py:109
+#: apps/reviews/services/decisions.py:421
+msgid "Texte trop long."
+msgstr "Text too long."
+
+#: apps/reviews/services/decisions.py:168
+msgid "Décisions refusées : rien n'a été enregistré."
+msgstr "Decisions refused: nothing was recorded."
+
+#: apps/reviews/services/decisions.py:241
+msgid "Seule une soumission en liste d'attente publiée peut être acceptée."
+msgstr "Only a published waitlisted submission can be accepted."
+
+#: apps/reviews/services/decisions.py:268
+msgid "Aucune décision correspondante."
+msgstr "No matching decision."
+
+#: apps/reviews/services/decisions.py:274
+msgid "Version finale absente."
+msgstr "Final version missing."
+
+#: apps/reviews/services/decisions.py:410
+msgid "Version finale attendue pour une soumission acceptée."
+msgstr "A final version is expected for an accepted submission."
+
+#: apps/reviews/services/decisions.py:416
+msgid "La date limite de la version finale est passée."
+msgstr "The final version deadline has passed."
+
+#: apps/reviews/services/decisions.py:424
+msgid "Lettre de réponse aux relecteurs obligatoire."
+msgstr "Response letter to the reviewers required."
+
+#: apps/reviews/services/decisions.py:427 apps/submissions/services.py:490
+msgid "Fichier PDF attendu (.pdf)."
+msgstr "A PDF file (.pdf) is expected."
+
+#: apps/reviews/services/decisions.py:431
+msgid "Fichier trop volumineux."
+msgstr "File too large."
+
+#: apps/reviews/services/decisions.py:499 apps/submissions/services.py:711
+msgid "Référence"
+msgstr "Reference"
+
+#: apps/reviews/services/decisions.py:500 apps/submissions/services.py:713
+msgid "Titre"
+msgstr "Title"
+
+#: apps/reviews/services/decisions.py:501 apps/submissions/services.py:714
+msgid "Thématique"
+msgstr "Track"
+
+#: apps/reviews/services/decisions.py:502 apps/submissions/services.py:715
+msgid "Type"
+msgstr "Type"
+
+#: apps/reviews/services/decisions.py:503 apps/submissions/services.py:712
+msgid "Statut"
+msgstr "Status"
+
+#: apps/reviews/services/decisions.py:504
+msgid "Note finale"
+msgstr "Final score"
+
+#: apps/reviews/services/decisions.py:505
+msgid "Décision"
+msgstr "Decision"
+
+#: apps/reviews/services/decisions.py:506
+msgid "Relecteur"
+msgstr "Reviewer"
+
+#: apps/reviews/services/decisions.py:507
+msgid "Pseudonyme"
+msgstr "Pseudonym"
+
+#: apps/reviews/services/decisions.py:508
+msgid "Note pondérée"
+msgstr "Weighted score"
+
+#: apps/reviews/services/decisions.py:509
+msgid "Recommandation"
+msgstr "Recommendation"
+
+#: apps/reviews/services/decisions.py:510
+msgid "Confiance"
+msgstr "Confidence"
+
+#: apps/reviews/services/decisions.py:511
+msgid "Éthique"
+msgstr "Ethics"
+
+#: apps/reviews/services/decisions.py:512
+msgid "Plagiat"
+msgstr "Plagiarism"
+
+#: apps/reviews/services/decisions.py:513
+msgid "Format suggéré"
+msgstr "Suggested format"
+
+#: apps/reviews/services/decisions.py:514
+msgid "Commentaire aux auteurs"
+msgstr "Comment to the authors"
+
+#: apps/reviews/services/decisions.py:515
+msgid "Commentaire au comité"
+msgstr "Comment to the committee"
+
+#: apps/reviews/services/decisions.py:516
+msgid "Envoyée le"
+msgstr "Submitted on"
+
+#: apps/reviews/services/decisions.py:517
+msgid "Version"
+msgstr "Version"
+
 #: apps/reviews/services/grids.py:87
 msgid ""
 "Grille déjà utilisée par une évaluation : dupliquez-la en nouvelle version."
@@ -2462,85 +2604,81 @@ msgstr "Type from another edition."
 msgid "Nom obligatoire."
 msgstr "Name required."
 
-#: apps/reviews/services/reviews.py:168
+#: apps/reviews/services/reviews.py:178
 msgid "Cette évaluation n'est plus modifiable."
 msgstr "This review can no longer be changed."
 
-#: apps/reviews/services/reviews.py:189
+#: apps/reviews/services/reviews.py:199
 msgid "Notes attendues par code de critère."
 msgstr "Scores expected by criterion code."
 
-#: apps/reviews/services/reviews.py:193
+#: apps/reviews/services/reviews.py:203
 #, python-format
 msgid "Critère inconnu : %(code)s."
 msgstr "Unknown criterion: %(code)s."
 
-#: apps/reviews/services/reviews.py:201
+#: apps/reviews/services/reviews.py:211
 #, python-format
 msgid "Note invalide : %(code)s."
 msgstr "Invalid score: %(code)s."
 
-#: apps/reviews/services/reviews.py:208
+#: apps/reviews/services/reviews.py:218
 #, python-format
 msgid "Note de %(code)s entre %(min)s et %(max)s, une décimale au plus."
 msgstr "Score for %(code)s between %(min)s and %(max)s, at most one decimal."
 
-#: apps/reviews/services/reviews.py:216
+#: apps/reviews/services/reviews.py:226
 msgid "Recommandation inconnue."
 msgstr "Unknown recommendation."
 
-#: apps/reviews/services/reviews.py:224
+#: apps/reviews/services/reviews.py:234
 msgid "Confiance de 1 à 5."
 msgstr "Confidence from 1 to 5."
 
-#: apps/reviews/services/reviews.py:230
+#: apps/reviews/services/reviews.py:240
 #, python-format
 msgid "Texte de %(max)s caractères au plus."
 msgstr "Text of at most %(max)s characters."
 
-#: apps/reviews/services/reviews.py:240
-msgid "Type de communication inconnu."
-msgstr "Unknown presentation type."
-
-#: apps/reviews/services/reviews.py:252
+#: apps/reviews/services/reviews.py:262
 #, python-format
 msgid "Critères à noter : %(codes)s."
 msgstr "Criteria to score: %(codes)s."
 
-#: apps/reviews/services/reviews.py:254
+#: apps/reviews/services/reviews.py:264
 msgid "Recommandation obligatoire."
 msgstr "Recommendation required."
 
-#: apps/reviews/services/reviews.py:256
+#: apps/reviews/services/reviews.py:266
 msgid "Confiance obligatoire."
 msgstr "Confidence required."
 
-#: apps/reviews/services/reviews.py:258
+#: apps/reviews/services/reviews.py:268
 msgid "Commentaire aux auteurs obligatoire."
 msgstr "Comment to the authors required."
 
-#: apps/reviews/services/reviews.py:269
+#: apps/reviews/services/reviews.py:279
 msgid ""
 "Aucune grille d'évaluation : prévenez le président du comité scientifique."
 msgstr "No evaluation grid: notify the scientific committee chair."
 
-#: apps/reviews/services/reviews.py:310
+#: apps/reviews/services/reviews.py:320
 msgid "Évaluation envoyée : renvoyez-la pour la modifier."
 msgstr "Review submitted: submit it again to change it."
 
-#: apps/reviews/services/reviews.py:345
+#: apps/reviews/services/reviews.py:355
 msgid "Évaluation vide."
 msgstr "Empty review."
 
-#: apps/reviews/services/reviews.py:349
+#: apps/reviews/services/reviews.py:359
 msgid "Évaluation incomplète."
 msgstr "Incomplete review."
 
-#: apps/reviews/services/reviews.py:424
+#: apps/reviews/services/reviews.py:434
 msgid "Évaluation déjà envoyée : demandez au président de l'écarter."
 msgstr "Review already submitted: ask the chair to set it aside."
 
-#: apps/reviews/services/reviews.py:501
+#: apps/reviews/services/reviews.py:511
 #, python-format
 msgid "Message de 1 à %(max)s caractères."
 msgstr "Message of 1 to %(max)s characters."
@@ -2630,6 +2768,7 @@ msgid "[%(site_name)s] Évaluations divergentes"
 msgstr "[%(site_name)s] Diverging reviews"
 
 #: apps/reviews/templates/review/email/reminder_message.txt:1
+#: apps/submissions/templates/submission/email/decision_message.txt:1
 msgid "Bonjour,"
 msgstr "Hello,"
 
@@ -2691,10 +2830,6 @@ msgstr "reviewed"
 #: apps/submissions/models.py:33
 msgid "corrections demandées"
 msgstr "revisions requested"
-
-#: apps/submissions/models.py:34
-msgid "version finale reçue"
-msgstr "camera-ready version received"
 
 #: apps/submissions/models.py:35
 msgid "présentation confirmée"
@@ -2868,6 +3003,11 @@ msgstr "draft reminder"
 msgid "rappels de brouillon"
 msgstr "draft reminders"
 
+#: apps/submissions/notifications.py:193
+#, python-format
+msgid "Relecteur %(rank)s :"
+msgstr "Reviewer %(rank)s:"
+
 #: apps/submissions/pdf.py:47
 msgid "Le fichier n'est pas un PDF."
 msgstr "The file is not a PDF."
@@ -2950,7 +3090,7 @@ msgid "Cette soumission n'est plus modifiable."
 msgstr "This submission can no longer be changed."
 
 #: apps/submissions/services.py:199 apps/submissions/services.py:274
-#: apps/submissions/workflow.py:142
+#: apps/submissions/workflow.py:147
 msgid "L'appel à communications est clos."
 msgstr "The call for papers is closed."
 
@@ -3014,10 +3154,6 @@ msgstr "Choose the submission type first."
 msgid "Ce type de communication ne prend pas de fichier."
 msgstr "This submission type takes no file."
 
-#: apps/submissions/services.py:490
-msgid "Fichier PDF attendu (.pdf)."
-msgstr "A PDF file (.pdf) is expected."
-
 #: apps/submissions/services.py:496
 #, python-format
 msgid "Fichier trop volumineux (%(max)s Mo au plus)."
@@ -3030,26 +3166,6 @@ msgstr "A submitted submission cannot be deleted: withdraw it."
 #: apps/submissions/services.py:607
 msgid "Dérogation impossible : la soumission n'est plus modifiable."
 msgstr "Extension impossible: the submission can no longer be changed."
-
-#: apps/submissions/services.py:711
-msgid "Référence"
-msgstr "Reference"
-
-#: apps/submissions/services.py:712
-msgid "Statut"
-msgstr "Status"
-
-#: apps/submissions/services.py:713
-msgid "Titre"
-msgstr "Title"
-
-#: apps/submissions/services.py:714
-msgid "Thématique"
-msgstr "Track"
-
-#: apps/submissions/services.py:715
-msgid "Type"
-msgstr "Type"
 
 #: apps/submissions/services.py:716
 msgid "Langue"
@@ -3103,6 +3219,74 @@ msgstr ""
 msgid "[%(site_name)s] Vous êtes déclaré co-auteur d'une soumission"
 msgstr "[%(site_name)s] You have been listed as a co-author of a submission"
 
+#: apps/submissions/templates/submission/email/decision_message.txt:3
+#, python-format
+msgid ""
+"Le comité scientifique de %(edition_title)s a le plaisir de vous annoncer que"
+" la soumission %(reference)s « %(title)s » est acceptée."
+msgstr ""
+"The scientific committee of %(edition_title)s is pleased to announce that "
+"submission %(reference)s “%(title)s” is accepted."
+
+#: apps/submissions/templates/submission/email/decision_message.txt:3
+#, python-format
+msgid ""
+"Le comité scientifique de %(edition_title)s accepte la soumission "
+"%(reference)s « %(title)s », sous réserve des corrections demandées ci-"
+"dessous. Joignez une lettre de réponse aux relecteurs à la version finale."
+msgstr ""
+"The scientific committee of %(edition_title)s accepts submission "
+"%(reference)s “%(title)s”, subject to the corrections requested below. Attach"
+" a response letter to the reviewers to the final version."
+
+#: apps/submissions/templates/submission/email/decision_message.txt:3
+#, python-format
+msgid ""
+"Le comité scientifique de %(edition_title)s a placé la soumission "
+"%(reference)s « %(title)s » sur liste d'attente. Vous serez prévenu si une "
+"place se libère."
+msgstr ""
+"The scientific committee of %(edition_title)s has placed submission "
+"%(reference)s “%(title)s” on the waiting list. You will be notified if a "
+"place becomes available."
+
+#: apps/submissions/templates/submission/email/decision_message.txt:3
+#, python-format
+msgid ""
+"Le comité scientifique de %(edition_title)s regrette de vous annoncer que la "
+"soumission %(reference)s « %(title)s » n'est pas retenue."
+msgstr ""
+"The scientific committee of %(edition_title)s regrets to announce that "
+"submission %(reference)s “%(title)s” has not been accepted."
+
+#: apps/submissions/templates/submission/email/decision_message.txt:5
+#, python-format
+msgid "Format attribué : %(assigned_type)s"
+msgstr "Assigned format: %(assigned_type)s"
+
+#: apps/submissions/templates/submission/email/decision_message.txt:6
+#, python-format
+msgid "Version finale attendue au plus tard le %(camera_ready)s."
+msgstr "Final version expected by %(camera_ready)s at the latest."
+
+#: apps/submissions/templates/submission/email/decision_message.txt:8
+msgid "Message du comité :"
+msgstr "Message from the committee:"
+
+#: apps/submissions/templates/submission/email/decision_message.txt:11
+msgid "Commentaires des relecteurs :"
+msgstr "Reviewers' comments:"
+
+#: apps/submissions/templates/submission/email/decision_message.txt:15
+#, python-format
+msgid "Votre soumission : %(link)s"
+msgstr "Your submission: %(link)s"
+
+#: apps/submissions/templates/submission/email/decision_subject.txt:1
+#, python-format
+msgid "[%(site_name)s] Décision sur votre soumission"
+msgstr "[%(site_name)s] Decision on your submission"
+
 #: apps/submissions/templates/submission/email/draft_reminder_message.txt:1
 #, python-format
 msgid ""
@@ -3142,6 +3326,26 @@ msgstr ""
 #, python-format
 msgid "[%(site_name)s] Délai supplémentaire pour votre soumission"
 msgstr "[%(site_name)s] Extended deadline for your submission"
+
+#: apps/submissions/templates/submission/email/final_received_message.txt:1
+#, python-format
+msgid ""
+"Bonjour,\n"
+"\n"
+"La version finale de votre soumission « %(title)s » (%(reference)s) à %(edition_title)s a bien été reçue. Vous pouvez la remplacer jusqu'à la date limite.\n"
+"\n"
+"Votre soumission : %(link)s"
+msgstr ""
+"Hello,\n"
+"\n"
+"The final version of your submission “%(title)s” (%(reference)s) to %(edition_title)s has been received. You can replace it until the deadline.\n"
+"\n"
+"Your submission: %(link)s"
+
+#: apps/submissions/templates/submission/email/final_received_subject.txt:1
+#, python-format
+msgid "[%(site_name)s] Version finale reçue"
+msgstr "[%(site_name)s] Final version received"
 
 #: apps/submissions/templates/submission/email/received_message.txt:1
 #, python-format
@@ -3203,14 +3407,14 @@ msgstr ""
 msgid "[%(site_name)s] Soumission retirée"
 msgstr "[%(site_name)s] Submission withdrawn"
 
-#: apps/submissions/workflow.py:146
+#: apps/submissions/workflow.py:151
 msgid "La soumission est incomplète."
 msgstr "The submission is incomplete."
 
-#: apps/submissions/workflow.py:154
+#: apps/submissions/workflow.py:159
 msgid "La recevabilité commence à la clôture de l'appel (et des dérogations)."
 msgstr "Screening starts when the call (and any extensions) closes."
 
-#: apps/submissions/workflow.py:188
+#: apps/submissions/workflow.py:193
 msgid "Changement de statut non autorisé."
 msgstr "Status change not allowed."

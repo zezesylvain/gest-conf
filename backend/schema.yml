@@ -410,6 +410,56 @@ paths:
               schema:
                 $ref: '#/components/schemas/ConflictManage'
           description: ''
+  /v1/manage/editions/{edition_id}/decisions/batch:
+    post:
+      operationId: manage_decisions_batch
+      description: 'Décisions provisoires en lot : tout ou rien (refus rendus par
+        ligne).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DecisionBatchRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DecisionBatchResult'
+          description: ''
+  /v1/manage/editions/{edition_id}/decisions/publish:
+    post:
+      operationId: manage_decisions_publish
+      description: 'RG-09 : publie les décisions provisoires (réauthentification récente,
+        journal).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublishResult'
+          description: ''
   /v1/manage/editions/{edition_id}/grids:
     get:
       operationId: manage_grids_list
@@ -1633,6 +1683,41 @@ paths:
               schema:
                 $ref: '#/components/schemas/PublicationStatus'
           description: ''
+  /v1/manage/editions/{edition_id}/ranking:
+    get:
+      operationId: manage_ranking
+      description: Classement par note finale ; avec ``threshold``, simulation du
+        seuil (US-06).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: submission_type
+        schema:
+          type: string
+      - in: query
+        name: threshold
+        schema:
+          type: number
+          format: double
+      - in: query
+        name: track
+        schema:
+          type: string
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ranking'
+          description: ''
   /v1/manage/editions/{edition_id}/review-progress:
     get:
       operationId: manage_review_progress
@@ -1800,6 +1885,64 @@ paths:
               schema:
                 $ref: '#/components/schemas/CandidateList'
           description: ''
+  /v1/manage/editions/{edition_id}/review-submissions/{submission_id}/decision:
+    put:
+      operationId: manage_review_submission_decision
+      description: 'Décision provisoire (H16) : issue, format attribué, message aux
+        auteurs.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DecisionWriteRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewSubmissionDetail'
+          description: ''
+    delete:
+      operationId: manage_review_submission_decision_delete
+      description: Annule une décision **provisoire**.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewSubmissionDetail'
+          description: ''
   /v1/manage/editions/{edition_id}/review-submissions/{submission_id}/discussion/messages:
     post:
       operationId: manage_review_submission_discussion_message
@@ -1858,6 +2001,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SubmissionReviews'
+          description: ''
+  /v1/manage/editions/{edition_id}/review-submissions/{submission_id}/promote:
+    post:
+      operationId: manage_review_submission_promote
+      description: Liste d'attente → acceptée, après publication (H16) ; auteurs prévenus.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewSubmissionDetail'
           description: ''
   /v1/manage/editions/{edition_id}/review-submissions/{submission_id}/reviews:
     get:
@@ -1918,6 +2087,29 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ReviewSubmissionDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/reviews-export:
+    get:
+      operationId: manage_reviews_export
+      description: 'Évaluations nominatives en CSV (réauthentification récente, journal
+        : RG-17).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
           description: ''
   /v1/manage/editions/{edition_id}/reviews/assignments:
     get:
@@ -2655,8 +2847,9 @@ paths:
   /v1/manage/editions/{edition_id}/submissions/{submission_id}/files/{file_id}/content:
     get:
       operationId: manage_submission_file_content
-      description: 'Une version du PDF (règle n° 8 : endpoint authentifié, jamais
-        servi par Apache).'
+      description: |-
+        Une version du PDF, principal ou final (règle n° 8 : endpoint authentifié, jamais
+        servi par Apache).
       parameters:
       - in: path
         name: edition_id
@@ -3475,6 +3668,57 @@ paths:
                 type: string
                 format: binary
           description: ''
+  /v1/submissions/{submission_id}/final-version:
+    post:
+      operationId: submissions_final_version
+      description: |-
+        H18 : version finale (PDF nominatif) et lettre de réponse aux relecteurs, jusqu'à
+        la date clé camera_ready ; un nouveau dépôt remplace le précédent.
+      parameters:
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - submissions
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FinalVersionUploadRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Submission'
+          description: ''
+  /v1/submissions/{submission_id}/final-version/content:
+    get:
+      operationId: submissions_final_version_content
+      description: Version finale courante, pour son auteur (règle n° 8).
+      parameters:
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - submissions
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+          description: ''
   /v1/submissions/{submission_id}/submit:
     post:
       operationId: submissions_submit
@@ -3772,6 +4016,57 @@ components:
       - object_id
       - object_type
       - reason
+    AuthorDecision:
+      type: object
+      properties:
+        outcome:
+          type: string
+          description: accepted, accepted_minor, waitlist, rejected.
+        assigned_type:
+          allOf:
+          - $ref: '#/components/schemas/AuthorDecisionType'
+          nullable: true
+        comment_to_authors:
+          type: string
+          description: Message du comité.
+        published_at:
+          type: string
+          format: date-time
+        reviews:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuthorReviewComment'
+      required:
+      - assigned_type
+      - comment_to_authors
+      - outcome
+      - published_at
+      - reviews
+    AuthorDecisionType:
+      type: object
+      properties:
+        code:
+          type: string
+        label_fr:
+          type: string
+        label_en:
+          type: string
+      required:
+      - code
+      - label_en
+      - label_fr
+    AuthorReviewComment:
+      type: object
+      description: 'RG-10 : commentaire d''un relecteur, sous pseudonyme ; ni nom,
+        ni note.'
+      properties:
+        pseudonym_rank:
+          type: integer
+        comment:
+          type: string
+      required:
+      - comment
+      - pseudonym_rank
     AuthorWriteRequest:
       type: object
       properties:
@@ -4213,6 +4508,115 @@ components:
       - code
       - label_fr
       - weight
+    DecisionBatchItemRequest:
+      type: object
+      properties:
+        outcome:
+          $ref: '#/components/schemas/DecisionOutcome'
+        assigned_type:
+          type: string
+          nullable: true
+          minLength: 1
+          description: Code du format attribué ; par défaut, le type de la soumission
+            (acceptée).
+          pattern: ^[-a-zA-Z0-9_]+$
+        comment_to_authors:
+          type: string
+          default: ''
+          maxLength: 20000
+        submission:
+          type: integer
+      required:
+      - outcome
+      - submission
+    DecisionBatchRequest:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/DecisionBatchItemRequest'
+      required:
+      - items
+    DecisionBatchResult:
+      type: object
+      properties:
+        recorded:
+          type: integer
+          description: Décisions provisoires enregistrées.
+      required:
+      - recorded
+    DecisionManage:
+      type: object
+      description: 'Décision : provisoire tant que ``published_at`` est nul (H16,
+        RG-09).'
+      properties:
+        outcome:
+          allOf:
+          - $ref: '#/components/schemas/DecisionOutcome'
+          readOnly: true
+          title: Issue
+        assigned_type:
+          type: string
+          readOnly: true
+          nullable: true
+        comment_to_authors:
+          type: string
+          readOnly: true
+          title: Commentaire aux auteurs
+        decided_by:
+          allOf:
+          - $ref: '#/components/schemas/Person'
+          nullable: true
+          readOnly: true
+        decided_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Décidée le
+        published_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Publiée le
+      required:
+      - assigned_type
+      - comment_to_authors
+      - decided_at
+      - decided_by
+      - outcome
+      - published_at
+    DecisionOutcome:
+      enum:
+      - accepted
+      - accepted_minor
+      - waitlist
+      - rejected
+      type: string
+      description: |-
+        * `accepted` - acceptée
+        * `accepted_minor` - acceptée sous réserve de corrections
+        * `waitlist` - liste d'attente
+        * `rejected` - rejetée
+    DecisionWriteRequest:
+      type: object
+      properties:
+        outcome:
+          $ref: '#/components/schemas/DecisionOutcome'
+        assigned_type:
+          type: string
+          nullable: true
+          minLength: 1
+          description: Code du format attribué ; par défaut, le type de la soumission
+            (acceptée).
+          pattern: ^[-a-zA-Z0-9_]+$
+        comment_to_authors:
+          type: string
+          default: ''
+          maxLength: 20000
+      required:
+      - outcome
     DeclarationState:
       type: object
       properties:
@@ -4558,6 +4962,7 @@ components:
       - reviewers_missing
       - review_not_open
       - discussion_closed
+      - deadline_passed
       type: string
       description: |-
         * `validation_error` - Validation Error
@@ -4601,6 +5006,7 @@ components:
         * `reviewers_missing` - Reviewers Missing
         * `review_not_open` - Review Not Open
         * `discussion_closed` - Discussion Closed
+        * `deadline_passed` - Deadline Passed
     Expertise:
       type: object
       description: Expertises du relecteur (H7) et thématiques proposées.
@@ -4723,6 +5129,31 @@ components:
       required:
       - file
       - kind
+    FinalVersion:
+      type: object
+      properties:
+        submitted_at:
+          type: string
+          format: date-time
+        response_letter:
+          type: string
+        file:
+          $ref: '#/components/schemas/SubmissionFile'
+      required:
+      - file
+      - response_letter
+      - submitted_at
+    FinalVersionUploadRequest:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+        response_letter:
+          type: string
+          default: ''
+      required:
+      - file
     Grid:
       type: object
       properties:
@@ -4804,6 +5235,21 @@ components:
           description: 'Liste complète ; absente : grille par défaut de l''étude (25/30/15/15/15).'
       required:
       - name
+    GroupCount:
+      type: object
+      properties:
+        code:
+          type: string
+          nullable: true
+        total:
+          type: integer
+        accepted:
+          type: integer
+          description: Au-dessus du seuil.
+      required:
+      - accepted
+      - code
+      - total
     Health:
       type: object
       properties:
@@ -5511,6 +5957,8 @@ components:
       - extension_granted
       - draft_reminder
       - screening_rejected
+      - decision_published
+      - final_version_received
       type: string
       description: |-
         * `submission_received` - soumission reçue
@@ -5519,6 +5967,8 @@ components:
         * `extension_granted` - dérogation accordée
         * `draft_reminder` - brouillon à soumettre
         * `screening_rejected` - soumission non recevable
+        * `decision_published` - décision publiée
+        * `final_version_received` - version finale reçue
     NotificationList:
       type: object
       properties:
@@ -7210,6 +7660,79 @@ components:
       - pending_changes
       - pending_since
       - release
+    PublishResult:
+      type: object
+      properties:
+        published:
+          type: integer
+          description: Décisions publiées.
+      required:
+      - published
+    Ranking:
+      type: object
+      properties:
+        rows:
+          type: array
+          items:
+            $ref: '#/components/schemas/RankingRow'
+        simulation:
+          allOf:
+          - $ref: '#/components/schemas/Simulation'
+          nullable: true
+      required:
+      - rows
+      - simulation
+    RankingRow:
+      type: object
+      properties:
+        id:
+          type: integer
+        reference:
+          type: string
+          nullable: true
+        title:
+          type: string
+        status:
+          $ref: '#/components/schemas/SubmissionStatus'
+        track:
+          type: string
+          nullable: true
+        submission_type:
+          type: string
+          nullable: true
+        final_score:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+        spread:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+        divergent:
+          type: boolean
+        review_count:
+          type: integer
+        recommendations:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Recommandation → nombre.
+        decision:
+          allOf:
+          - $ref: '#/components/schemas/DecisionManage'
+          nullable: true
+      required:
+      - decision
+      - divergent
+      - final_score
+      - id
+      - recommendations
+      - reference
+      - review_count
+      - spread
+      - status
+      - title
     Recommendation:
       enum:
       - accept
@@ -7474,11 +7997,17 @@ components:
           items:
             $ref: '#/components/schemas/ConflictManage'
           readOnly: true
+        decision:
+          allOf:
+          - $ref: '#/components/schemas/DecisionManage'
+          nullable: true
+          readOnly: true
       required:
       - abstract
       - assignment_count
       - assignments
       - conflicts
+      - decision
       - id
       - keywords
       - language
@@ -8278,6 +8807,33 @@ components:
       description: |-
         * `ok` - Ok
         * `error` - Error
+    Simulation:
+      type: object
+      description: 'US-06 : nombre de soumissions au-dessus du seuil, au total, par
+        type et thématique.'
+      properties:
+        threshold:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+        accepted:
+          type: integer
+        total:
+          type: integer
+        by_type:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupCount'
+        by_track:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupCount'
+      required:
+      - accepted
+      - by_track
+      - by_type
+      - threshold
+      - total
     SkippedInvitation:
       type: object
       properties:
@@ -8410,6 +8966,25 @@ components:
           items:
             $ref: '#/components/schemas/SubmissionAction'
           readOnly: true
+        decision:
+          allOf:
+          - $ref: '#/components/schemas/AuthorDecision'
+          nullable: true
+          readOnly: true
+          description: 'RG-09 : décision publiée seulement ; RG-10 : commentaires
+            sous pseudonyme.'
+        final_version:
+          allOf:
+          - $ref: '#/components/schemas/FinalVersion'
+          nullable: true
+          readOnly: true
+          description: Version finale déposée (H18).
+        final_deadline:
+          type: string
+          format: date-time
+          nullable: true
+          readOnly: true
+          description: Date limite de la version finale (date clé camera_ready).
       required:
       - abstract
       - allowed_actions
@@ -8417,11 +8992,14 @@ components:
       - can_edit
       - created_at
       - deadline
+      - decision
       - declarations
       - double_blind
       - edition
       - edition_code
       - file
+      - final_deadline
+      - final_version
       - id
       - keywords
       - language
@@ -8439,10 +9017,12 @@ components:
       enum:
       - submit
       - withdraw
+      - final_version
       type: string
       description: |-
         * `submit` - submit
         * `withdraw` - withdraw
+        * `final_version` - final_version
     SubmissionAuthor:
       type: object
       properties:

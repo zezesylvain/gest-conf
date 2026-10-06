@@ -3,7 +3,7 @@ plan L4 §3). Le relecteur est une personne : ses affectations, évaluations, me
 conflits et expertises le concernent.
 
 - **Export** : expertises, affectations, évaluations (notes et commentaires), messages de
-  discussion, conflits le concernant.
+  discussion, conflits le concernant ; comme auteur, lettres de réponse des versions finales.
 - **Anonymisation** : refusée tant qu'une affectation active porte sur une soumission en cours
   d'évaluation d'une édition non archivée (``reviewer_duties``, comme F16). Sinon : expertises
   supprimées ; évaluations conservées **sans nom** (le compte est anonymisé), son nom et ses
@@ -25,6 +25,7 @@ from apps.reviews.models import (
     AssignmentStatus,
     ConflictOfInterest,
     DiscussionMessage,
+    FinalVersion,
     Review,
     ReviewAssignment,
     ReviewerTrack,
@@ -108,6 +109,17 @@ def _export(user) -> dict[str, Any]:
             {"reference": row.submission.reference, "kind": row.kind, "source": row.source}
             for row in ConflictOfInterest.objects.filter(reviewer=user).select_related("submission")
         ],
+        # En tant qu'auteur : lettres de réponse aux relecteurs de ses versions finales (H18).
+        "final_versions": [
+            {
+                "reference": row.submission.reference,
+                "response_letter": row.response_letter,
+                "submitted_at": _iso(row.submitted_at),
+            }
+            for row in FinalVersion.objects.filter(submission__submitter=user).select_related(
+                "submission"
+            )
+        ],
     }
 
 
@@ -130,6 +142,11 @@ def _anonymize(user, context: AnonymizationContext) -> None:
         if cleaned != message.body:
             message.body = cleaned
             message.save(update_fields=["body"])
+    for final in FinalVersion.objects.filter(submission__submitter=user):
+        cleaned = scrub(final.response_letter)
+        if cleaned != final.response_letter:
+            final.response_letter = cleaned
+            final.save(update_fields=["response_letter", "updated_at"])
     for model, fields in (
         (ReviewAssignment, ("reason", "conflict_override_reason")),
         (ConflictOfInterest, ("reason", "overridden_reason")),

@@ -366,6 +366,7 @@ SPECTACULAR_SETTINGS = {
         "ConflictSource": "apps.reviews.models.ConflictSource",
         "ReviewStatus": "apps.reviews.models.ReviewStatus",
         "Recommendation": "apps.reviews.models.Recommendation",
+        "DecisionOutcome": "apps.reviews.models.DecisionOutcome",
         "ScreeningDecision": "apps.reviews.serializers.SCREENING_DECISION_CHOICES",
         "ErrorCode": "apps.core.errors.ErrorCode",
     },

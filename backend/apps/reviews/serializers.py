@@ -14,13 +14,15 @@ from apps.reviews.models import (
     ConflictKind,
     ConflictOfInterest,
     Criterion,
+    Decision,
+    DecisionOutcome,
     DiscussionMessage,
     EvaluationGrid,
     Review,
     ReviewAssignment,
     ReviewStatus,
 )
-from apps.submissions.models import Submission
+from apps.submissions.models import Submission, SubmissionStatus
 
 
 class CriterionSerializer(serializers.ModelSerializer):
@@ -193,6 +195,29 @@ class ConflictManageSerializer(serializers.ModelSerializer):
         return person(conflict.overridden_by)
 
 
+class DecisionManageSerializer(serializers.ModelSerializer):
+    """Décision : provisoire tant que ``published_at`` est nul (H16, RG-09)."""
+
+    assigned_type = serializers.SlugRelatedField(slug_field="code", read_only=True, allow_null=True)
+    decided_by = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Decision
+        fields = (
+            "outcome",
+            "assigned_type",
+            "comment_to_authors",
+            "decided_by",
+            "decided_at",
+            "published_at",
+        )
+        read_only_fields = fields
+
+    @extend_schema_field(PersonSerializer(allow_null=True))
+    def get_decided_by(self, decision: Decision):
+        return person(decision.decided_by)
+
+
 class ReviewSubmissionSerializer(serializers.ModelSerializer):
     """Ligne du suivi de l'évaluation : compteurs annotés par la vue."""
 
@@ -230,6 +255,7 @@ class ReviewSubmissionSerializer(serializers.ModelSerializer):
 class ReviewSubmissionDetailSerializer(ReviewSubmissionSerializer):
     assignments = AssignmentManageSerializer(many=True, read_only=True)
     conflicts = ConflictManageSerializer(many=True, read_only=True)
+    decision = serializers.SerializerMethodField()
 
     class Meta(ReviewSubmissionSerializer.Meta):
         fields = (
@@ -238,8 +264,14 @@ class ReviewSubmissionDetailSerializer(ReviewSubmissionSerializer):
             "keywords",
             "assignments",
             "conflicts",
+            "decision",
         )
         read_only_fields = fields
+
+    @extend_schema_field(DecisionManageSerializer(allow_null=True))
+    def get_decision(self, submission: Submission):
+        decision = Decision.objects.filter(submission=submission).first()
+        return DecisionManageSerializer(decision).data if decision is not None else None
 
 
 SCREENING_DECISION_CHOICES = [("admissible", "admissible"), ("reject", "reject")]
@@ -429,3 +461,77 @@ class ReviewProgressSerializer(serializers.Serializer):
     reviewers = ReviewerProgressSerializer(many=True)
     tracks = TrackProgressSerializer(many=True)
     divergent = DivergentSubmissionSerializer(many=True)
+
+
+# --- Décisions, classement, publication (L4.4) -----------------------------------------------
+
+
+class DecisionWriteSerializer(serializers.Serializer):
+    outcome = serializers.ChoiceField(choices=DecisionOutcome.choices)
+    assigned_type = serializers.SlugField(
+        required=False,
+        allow_null=True,
+        default=None,
+        help_text="Code du format attribué ; par défaut, le type de la soumission (acceptée).",
+    )
+    comment_to_authors = serializers.CharField(
+        required=False, allow_blank=True, default="", max_length=20000
+    )
+
+
+class DecisionBatchItemSerializer(DecisionWriteSerializer):
+    submission = serializers.IntegerField()
+
+
+class DecisionBatchSerializer(serializers.Serializer):
+    items = DecisionBatchItemSerializer(many=True, allow_empty=False, max_length=500)
+
+
+class DecisionBatchResultSerializer(serializers.Serializer):
+    recorded = serializers.IntegerField(help_text="Décisions provisoires enregistrées.")
+
+
+class PublishResultSerializer(serializers.Serializer):
+    published = serializers.IntegerField(help_text="Décisions publiées.")
+
+
+class RankingRowSerializer(serializers.Serializer):
+    id = serializers.IntegerField(source="submission.pk")
+    reference = serializers.CharField(source="submission.reference", allow_null=True)
+    title = serializers.CharField(source="submission.title")
+    status = serializers.ChoiceField(source="submission.status", choices=SubmissionStatus.choices)
+    track = serializers.CharField(source="submission.track.code", allow_null=True, default=None)
+    submission_type = serializers.CharField(
+        source="submission.submission_type.code", allow_null=True, default=None
+    )
+    final_score = serializers.DecimalField(
+        source="final", max_digits=5, decimal_places=2, allow_null=True
+    )
+    spread = serializers.DecimalField(max_digits=5, decimal_places=2)
+    divergent = serializers.BooleanField()
+    review_count = serializers.IntegerField()
+    recommendations = serializers.DictField(
+        child=serializers.IntegerField(), help_text="Recommandation → nombre."
+    )
+    decision = DecisionManageSerializer(allow_null=True)
+
+
+class GroupCountSerializer(serializers.Serializer):
+    code = serializers.CharField(allow_null=True)
+    total = serializers.IntegerField()
+    accepted = serializers.IntegerField(help_text="Au-dessus du seuil.")
+
+
+class SimulationSerializer(serializers.Serializer):
+    """US-06 : nombre de soumissions au-dessus du seuil, au total, par type et thématique."""
+
+    threshold = serializers.DecimalField(max_digits=5, decimal_places=2)
+    accepted = serializers.IntegerField()
+    total = serializers.IntegerField()
+    by_type = GroupCountSerializer(many=True)
+    by_track = GroupCountSerializer(many=True)
+
+
+class RankingSerializer(serializers.Serializer):
+    rows = RankingRowSerializer(many=True)
+    simulation = SimulationSerializer(allow_null=True)

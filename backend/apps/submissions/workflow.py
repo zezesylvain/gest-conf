@@ -55,6 +55,8 @@ class Rule:
     capability: Capability | None = None
 
 
+PUBLISH = Capability.DECISIONS_PUBLISH
+
 # Étude §5.1, transition par transition. REVISION_REQUESTED (statut de M6) n'a aucune
 # transition dans le diagramme de l'étude : écart signalé, à préciser en L4.
 TRANSITIONS: dict[tuple[str, str], Rule] = {
@@ -71,14 +73,17 @@ TRANSITIONS: dict[tuple[str, str], Rule] = {
     ),
     # RG-07 : automatique, au dernier envoi requis (garde inscrite par l'application reviews).
     (S.UNDER_REVIEW, S.REVIEWED): Rule(Who.SYSTEM, "L4", available=True),
-    (S.REVIEWED, S.ACCEPTED): Rule(Who.SC, "L4"),
-    (S.REVIEWED, S.ACCEPTED_MINOR): Rule(Who.SC, "L4"),
-    (S.REVIEWED, S.WAITLIST): Rule(Who.SC, "L4"),
-    (S.REVIEWED, S.REJECTED): Rule(Who.SC, "L4"),
-    (S.WAITLIST, S.ACCEPTED): Rule(Who.SC, "L4"),
-    (S.ACCEPTED, S.CAMERA_READY_RECEIVED): Rule(Who.SUBMITTER, "L4"),
-    (S.ACCEPTED_MINOR, S.CAMERA_READY_RECEIVED): Rule(Who.SUBMITTER, "L4"),
-    (S.ACCEPTED, S.WITHDRAWN): Rule(Who.SUBMITTER, "L4"),
+    # RG-09, H16 : publication des décisions par le président (« decisions.publish ») ; la
+    # garde de l'application reviews exige la décision correspondante.
+    (S.REVIEWED, S.ACCEPTED): Rule(Who.SC, "L4", available=True, capability=PUBLISH),
+    (S.REVIEWED, S.ACCEPTED_MINOR): Rule(Who.SC, "L4", available=True, capability=PUBLISH),
+    (S.REVIEWED, S.WAITLIST): Rule(Who.SC, "L4", available=True, capability=PUBLISH),
+    (S.REVIEWED, S.REJECTED): Rule(Who.SC, "L4", available=True, capability=PUBLISH),
+    (S.WAITLIST, S.ACCEPTED): Rule(Who.SC, "L4", available=True, capability=PUBLISH),
+    # H18 : version finale déposée par le soumissionnaire ; retrait après acceptation.
+    (S.ACCEPTED, S.CAMERA_READY_RECEIVED): Rule(Who.SUBMITTER, "L4", available=True),
+    (S.ACCEPTED_MINOR, S.CAMERA_READY_RECEIVED): Rule(Who.SUBMITTER, "L4", available=True),
+    (S.ACCEPTED, S.WITHDRAWN): Rule(Who.SUBMITTER, "L4", available=True),
     (S.CAMERA_READY_RECEIVED, S.CONFIRMED): Rule(Who.SYSTEM, "L6"),
     (S.CONFIRMED, S.SCHEDULED): Rule(Who.ORGANIZERS, "L5"),
     (S.SCHEDULED, S.PRESENTED): Rule(Who.ORGANIZERS, "L7"),

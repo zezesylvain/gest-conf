@@ -47,5 +47,6 @@ export const ERROR_CODE: ErrorCode[] = [
   'reviewer_overloaded',
   'reviewers_missing',
   'review_not_open',
-  'discussion_closed'
+  'discussion_closed',
+  'deadline_passed'
 ];

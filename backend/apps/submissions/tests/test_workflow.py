@@ -40,8 +40,8 @@ def submit(submission, user=None, **kwargs):
 
 
 def test_table_covers_the_study_diagram():
-    """Les 19 transitions de l'étude (§5.1) ; seules celles de L3, de la recevabilité (L4.2,
-    H10) et de RG-07 (L4.3) sont disponibles."""
+    """Les 19 transitions de l'étude (§5.1) ; celles des lots L3 et L4 sont disponibles, pas
+    celles des lots suivants (L5 et au-delà)."""
     assert len(workflow.TRANSITIONS) == 19
     available = {pair for pair, rule in workflow.TRANSITIONS.items() if rule.available}
     assert available == {
@@ -52,7 +52,27 @@ def test_table_covers_the_study_diagram():
         (S.SCREENING, S.UNDER_REVIEW),
         (S.SCREENING, S.REJECTED),
         (S.UNDER_REVIEW, S.REVIEWED),
+        (S.REVIEWED, S.ACCEPTED),
+        (S.REVIEWED, S.ACCEPTED_MINOR),
+        (S.REVIEWED, S.WAITLIST),
+        (S.REVIEWED, S.REJECTED),
+        (S.WAITLIST, S.ACCEPTED),
+        (S.ACCEPTED, S.CAMERA_READY_RECEIVED),
+        (S.ACCEPTED_MINOR, S.CAMERA_READY_RECEIVED),
+        (S.ACCEPTED, S.WITHDRAWN),
     }
+    assert all(
+        rule.lot == "L4"
+        for pair, rule in workflow.TRANSITIONS.items()
+        if rule.available
+        and pair
+        not in {
+            (S.DRAFT, S.SUBMITTED),
+            (S.SUBMITTED, S.SCREENING),
+            (S.DRAFT, S.WITHDRAWN),
+            (S.SUBMITTED, S.WITHDRAWN),
+        }
+    )
     used = {status for pair in workflow.TRANSITIONS for status in pair}
     # REVISION_REQUESTED : aucun arc dans le diagramme de l'étude (écart signalé, L4).
     assert set(S.values) - used == {S.REVISION_REQUESTED}

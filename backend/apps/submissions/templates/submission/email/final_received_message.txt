@@ -1,0 +1,7 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate %}Bonjour,
+
+La version finale de votre soumission « {{ title }} » ({{ reference }}) à {{ edition_title }} a bien été reçue. Vous pouvez la remplacer jusqu'à la date limite.
+
+Votre soumission : {{ link }}{% endblocktranslate %}
+
+{% include "account/email/_signature.txt" %}{% endautoescape %}

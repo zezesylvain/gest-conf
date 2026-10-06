@@ -91,6 +91,8 @@ class ErrorCode(models.TextChoices):
     REVIEW_NOT_OPEN = "review_not_open"
     # Discussion (RG-08) : non ouverte, ou évaluation du relecteur pas encore envoyée.
     DISCUSSION_CLOSED = "discussion_closed"
+    # Échéance passée (version finale après la date clé « camera_ready », H18).
+    DEADLINE_PASSED = "deadline_passed"
 
 
 class DomainError(Exception):

@@ -461,3 +461,75 @@ double aveugle.
 
 - 1 971 tests backend sous SQLite, 1 978 sous MariaDB ; la matrice compte 1 104 cas.
 - Schéma régénéré sur MariaDB ; client régénéré ; traductions à jour ; front 274 tests.
+
+## 15. Bilan de L4.4 (6 octobre 2026)
+
+**Décisions provisoires (H16)** : `services/decisions.py`.
+
+- **Contenu** : issue (`accepted`, `accepted_minor`, `waitlist`, `rejected`), format attribué
+  (par défaut le type de la soumission si elle est acceptée), message aux auteurs.
+- **Conditions** : soumission évaluée (RG-07) ; décision individuelle (`PUT` / `DELETE
+  …/review-submissions/{id}/decision`) ou en lot (`POST …/decisions/batch`).
+- **Lot** : tout ou rien ; les refus sont rendus ligne par ligne.
+- **Journal** : chaque décision enregistrée est journalisée (`decision.recorded`, avec l'avant
+  et l'après).
+- **RG-06 précisée** : une décision enregistrée, même provisoire, fige les évaluations (« modifiable
+  jusqu'à la décision ») ; l'annuler les rend de nouveau modifiables.
+
+**Publication (RG-09)** : `POST …/decisions/publish` (`decisions.publish`, réauthentification
+récente).
+
+- Les transitions `REVIEWED → ACCEPTED`, `ACCEPTED_MINOR`, `WAITLIST`, `REJECTED` deviennent
+  disponibles. Le workflow revérifie la capacité, et une garde exige la décision
+  correspondante.
+- **Auteurs prévenus à ce moment seulement** : e-mail au soumissionnaire et aux co-auteurs
+  (une fois par adresse ; le lien vers la soumission ne va qu'au soumissionnaire, F5) et
+  notification `decision_published`.
+- **Journal** : nombre de décisions et répartition des issues (`decision.published`).
+- **Liste d'attente** : `POST …/promote` fait passer `WAITLIST → ACCEPTED` après publication ;
+  les auteurs sont prévenus.
+
+**RG-10** : l'auteur ne voit la décision qu'une fois publiée (`decision` dans
+`/v1/submissions/{id}`).
+
+- Il reçoit l'issue, le format, le message du comité et les commentaires aux auteurs sous
+  pseudonyme.
+- Il ne reçoit jamais le nom des relecteurs, leurs notes ni les commentaires au comité.
+- Deux tests le vérifient avec des traceurs, sur l'API et sur les e-mails.
+
+**Version finale (H18)** : `POST /v1/submissions/{id}/final-version` (multipart), réservée au
+soumissionnaire.
+
+- PDF **nominatif**, jamais nettoyé ; lettre de réponse aux relecteurs, obligatoire pour
+  `accepted_minor`.
+- Refusée après la date clé `camera_ready` (409 `deadline_passed`, nouveau code traduit).
+- Un nouveau dépôt remplace le précédent (nouvelle version du fichier).
+- `ACCEPTED` ou `ACCEPTED_MINOR` → `CAMERA_READY_RECEIVED`, avec accusé de réception par
+  e-mail et notification.
+- La gestion télécharge le fichier comme le PDF principal.
+- `ACCEPTED → WITHDRAWN` (motif obligatoire) est aussi ouvert à l'auteur.
+
+**Classement et simulation (US-06)** : `GET …/ranking?threshold=&track=&submission_type=`
+(`reviews.read_all`).
+
+- Soumissions évaluées ou décidées, classées par note finale, avec divergence,
+  recommandations et décision ; les rejets de recevabilité en sont exclus.
+- Avec un seuil (0 à 100), le nombre de soumissions retenues au total, par type et par
+  thématique.
+
+**Export** : `GET …/reviews-export` (`reviews.read_all`, réauthentification récente).
+
+- Une ligne par évaluation, avec le nom du relecteur, une colonne par critère, la note finale
+  et la décision.
+- Cellules neutralisées contre l'injection de formules ; journal `review.exported`.
+
+**Données personnelles** : les lettres de réponse sont ajoutées à l'export de l'auteur et
+nettoyées à son anonymisation.
+
+**Vérifications** :
+
+- 2 073 tests backend sous SQLite, 2 080 sous MariaDB. La matrice compte 1 188 cas, dont les
+  7 routes de L4.4 ;
+  le contrôle de réauthentification emploie un profil qui détient la capacité.
+- Schéma régénéré sur MariaDB ; client régénéré ; traductions du backend et du portail à
+  jour ; front 274 tests.

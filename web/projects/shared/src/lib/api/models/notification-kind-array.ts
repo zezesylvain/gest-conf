@@ -12,5 +12,7 @@ export const NOTIFICATION_KIND: NotificationKind[] = [
   'coauthor_added',
   'extension_granted',
   'draft_reminder',
-  'screening_rejected'
+  'screening_rejected',
+  'decision_published',
+  'final_version_received'
 ];

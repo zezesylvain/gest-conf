@@ -507,6 +507,54 @@ CASES = [
         {"body": "Pouvez-vous préciser la méthode ?"},
     ),
     Case("manage-review-progress", "GET", RM, 200, "/v1/manage/editions/{e}/review-progress"),
+    # --- Décisions, publication, classement, export (L4.4) ------------------------------------
+    Case(
+        "manage-review-submissions-decision",
+        "PUT",
+        DD,
+        200,
+        "/v1/manage/editions/{e}/review-submissions/{discussed_submission}/decision",
+        {"outcome": "accepted"},
+    ),
+    Case(
+        "manage-review-submissions-decision",
+        "DELETE",
+        DD,
+        200,
+        "/v1/manage/editions/{e}/review-submissions/{discussed_submission}/decision",
+    ),
+    Case(
+        "manage-review-submissions-promote",
+        "POST",
+        DP,
+        200,
+        "/v1/manage/editions/{e}/review-submissions/{waitlisted_submission}/promote",
+    ),
+    Case(
+        "manage-decisions-batch",
+        "POST",
+        DD,
+        200,
+        "/v1/manage/editions/{e}/decisions/batch",
+        lambda ids: {"items": [{"submission": ids["discussed_submission"], "outcome": "rejected"}]},
+    ),
+    Case(
+        "manage-decisions-publish",
+        "POST",
+        DP,
+        200,
+        "/v1/manage/editions/{e}/decisions/publish",
+        recent_auth=True,
+    ),
+    Case("manage-ranking", "GET", RA, 200, "/v1/manage/editions/{e}/ranking?threshold=50"),
+    Case(
+        "manage-reviews-export",
+        "GET",
+        RA,
+        200,
+        "/v1/manage/editions/{e}/reviews-export",
+        recent_auth=True,
+    ),
     # --- Espace relecteur (L4.3) : ses affectations seulement ({my_*} : celle du profil) -----
     Case(
         "reviewer-assignments-list", "GET", RW, 200, "/v1/manage/editions/{e}/reviews/assignments"
@@ -780,7 +828,7 @@ def _reviewer_objects(edition, users):
     from decimal import Decimal
 
     from apps.core.actor import Actor
-    from apps.reviews.models import Discussion, Review, ReviewAssignment, ReviewStatus
+    from apps.reviews.models import Decision, Discussion, Review, ReviewAssignment, ReviewStatus
     from apps.reviews.services.grids import create_grid
     from apps.submissions import storage
     from apps.submissions.models import Submission, SubmissionFile, SubmissionStatus
@@ -818,6 +866,17 @@ def _reviewer_objects(edition, users):
         uploaded_by=open_submission.submitter,
     )
     Discussion.objects.create(submission=discussed, opened_at=timezone.now())
+    waitlisted = complete_submission(edition, author_user(first="Efua", last="Mensah"))
+    Submission.objects.filter(pk=waitlisted.pk).update(
+        status=SubmissionStatus.WAITLIST, reference=f"{edition.code}-0004"
+    )
+    Decision.objects.create(
+        submission=waitlisted,
+        outcome="waitlist",
+        decided_by=users["CHAIR"],
+        decided_at=timezone.now(),
+        published_at=timezone.now(),
+    )
     per_profile = {}
     now = timezone.now()
     for rank, profile in enumerate(("SC_MEMBER", "SC_CHAIR"), start=1):
@@ -851,6 +910,7 @@ def _reviewer_objects(edition, users):
     return {
         "open_submission": open_submission.pk,
         "discussed_submission": discussed.pk,
+        "waitlisted_submission": waitlisted.pk,
         "per_profile": per_profile,
         "my_assignment": per_profile["SC_MEMBER"]["my_assignment"],
         "my_discussed": per_profile["SC_MEMBER"]["my_discussed"],
@@ -901,7 +961,8 @@ def holder(capability: str) -> str:
 def test_matrix_stale_reauthentication(world, case):
     """D12 : sans réauthentification de moins de 5 min → 403 ``reauthentication_required``."""
     _edition, users, ids = world
-    response = call(client_for(users["ADMIN"], recent_auth=False), case, ids)
+    profile = holder(case.capability)
+    response = call(client_for(users[profile], recent_auth=False), case, for_profile(ids, profile))
     assert response.status_code == 403
     assert response.json()["code"] == "reauthentication_required"
 

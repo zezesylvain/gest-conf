@@ -73,7 +73,8 @@
       "reviewer_overloaded": "This reviewer has reached their maximum number of reviews.",
       "reviewers_missing": "First assign the required number of reviewers.",
       "review_not_open": "Reviewing is not open for this submission.",
-      "discussion_closed": "The discussion opens once your review is submitted and the discussion has started."
+      "discussion_closed": "The discussion opens once your review is submitted and the discussion has started.",
+      "deadline_passed": "The deadline has passed."
     },
     "form": {
       "errorSummary": "The form contains errors:",

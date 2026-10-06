@@ -39,6 +39,7 @@ from apps.reviews.models import (
     ConflictKind,
     ConflictOfInterest,
     ConflictSource,
+    Decision,
     Discussion,
     DiscussionMessage,
     EvaluationGrid,
@@ -91,10 +92,18 @@ def scores_of(review: Review) -> dict[str, Decimal]:
     return {score.criterion.code: score.value for score in review.scores.all()}
 
 
+def decided(submission: Submission) -> bool:
+    """Décision enregistrée (provisoire ou publiée) : RG-06, les évaluations sont figées."""
+    return getattr(submission, "decision", None) is not None
+
+
 def can_edit(assignment: ReviewAssignment) -> bool:
-    """Évaluation modifiable : affectation active, soumission en évaluation (H13)."""
+    """Évaluation modifiable (RG-06, H13) : affectation active, soumission en évaluation,
+    aucune décision enregistrée."""
     return (
-        assignment.status == AssignmentStatus.ACTIVE and assignment.submission.status in REVIEWABLE
+        assignment.status == AssignmentStatus.ACTIVE
+        and assignment.submission.status in REVIEWABLE
+        and not decided(assignment.submission)
     )
 
 
@@ -156,14 +165,15 @@ def _lock(assignment: ReviewAssignment) -> ReviewAssignment:
 
 
 def _check_writable(assignment: ReviewAssignment, actor: Actor) -> None:
-    """RG-03 et H13, revérifiés sous verrou : l'affectation du relecteur, active, sans conflit,
-    soumission en évaluation."""
+    """RG-03, RG-06 et H13, revérifiés sous verrou : l'affectation du relecteur, active, sans
+    conflit, soumission en évaluation, aucune décision enregistrée."""
     ensure_editable(assignment.submission.edition)
     user = actor.user if actor.kind == ActorKind.USER else None
     if user is None or user.pk != assignment.reviewer_id:
         raise RuleViolation(code=ErrorCode.REVIEW_NOT_OPEN)
-    allowed = reviewable_assignments(actor.user, assignment.submission.edition)
-    if not allowed.filter(pk=assignment.pk).exists():
+    allowed = reviewable_assignments(user, assignment.submission.edition)
+    frozen = Decision.objects.filter(submission_id=assignment.submission_id).exists()
+    if frozen or not allowed.filter(pk=assignment.pk).exists():
         raise RuleViolation(
             _("Cette évaluation n'est plus modifiable."), code=ErrorCode.REVIEW_NOT_OPEN
         )

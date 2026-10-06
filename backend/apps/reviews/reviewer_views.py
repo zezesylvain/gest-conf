@@ -78,6 +78,7 @@ class ReviewerAssignmentViewSet(ManageViewSet):
                 "submission__edition",
                 "submission__track",
                 "submission__submission_type",
+                "submission__decision",
                 "review__grid",
                 "review__suggested_type",
             )

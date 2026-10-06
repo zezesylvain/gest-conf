@@ -3,6 +3,7 @@
 
 import { AssignmentManage } from '../models/assignment-manage';
 import { ConflictManage } from '../models/conflict-manage';
+import { DecisionManage } from '../models/decision-manage';
 import { SubmissionStatus } from '../models/submission-status';
 
 /**
@@ -17,6 +18,7 @@ export interface ReviewSubmissionDetail {
   assignment_count: number;
   assignments: Array<AssignmentManage>;
   conflicts: Array<ConflictManage>;
+  decision: DecisionManage | null;
   id: number;
   keywords: any;
   language: string;

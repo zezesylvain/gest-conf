@@ -73,7 +73,8 @@
       "reviewer_overloaded": "Ce relecteur a atteint sa charge maximale d'évaluations.",
       "reviewers_missing": "Affectez d'abord le nombre de relecteurs requis.",
       "review_not_open": "L'évaluation de cette soumission n'est pas ouverte.",
-      "discussion_closed": "La discussion s'ouvre une fois votre évaluation envoyée et la discussion lancée."
+      "discussion_closed": "La discussion s'ouvre une fois votre évaluation envoyée et la discussion lancée.",
+      "deadline_passed": "L'échéance est passée."
     },
     "form": {
       "errorSummary": "Le formulaire contient des erreurs :",

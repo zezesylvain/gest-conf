@@ -122,3 +122,20 @@ def divergence_detected(submission: Submission, chair, spread) -> None:
         spread=str(spread),
         threshold=str(submission.edition.divergence_threshold),
     )
+
+
+def decision_published(decision) -> None:
+    """RG-09 : e-mails et notifications des auteurs à la publication (ou à l'acceptation
+    depuis la liste d'attente)."""
+    from apps.conferences.models import KeyDateCode
+    from apps.conferences.services import key_date
+    from apps.reviews.services.decisions import ACCEPTED_OUTCOMES, comments_for_authors
+    from apps.submissions import notifications
+
+    submission = decision.submission
+    camera_ready = (
+        key_date(submission.edition, KeyDateCode.CAMERA_READY)
+        if decision.outcome in ACCEPTED_OUTCOMES
+        else None
+    )
+    notifications.decision_published(decision, comments_for_authors(submission), camera_ready)

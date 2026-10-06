@@ -10,7 +10,7 @@ class ReviewsConfig(AppConfig):
         from apps.reviews import integrity
         from apps.reviews.notifications import register_review_templates
         from apps.reviews.personal_data import register_reviews_personal_data
-        from apps.reviews.services import assignments
+        from apps.reviews.services import assignments, decisions
         from apps.submissions import workflow
 
         register_reviews_personal_data()
@@ -19,4 +19,5 @@ class ReviewsConfig(AppConfig):
         register_integrity_check("reviews.review_scores", integrity.check_review_scores)
         register_integrity_check("reviews.assignments", integrity.check_assignments)
         workflow.register_guard(assignments.guard_review_steps)
+        workflow.register_guard(decisions.guard_decisions)
         workflow.register_effect(assignments.on_transition)

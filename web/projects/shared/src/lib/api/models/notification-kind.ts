@@ -9,6 +9,8 @@
  * * `extension_granted` - dérogation accordée
  * * `draft_reminder` - brouillon à soumettre
  * * `screening_rejected` - soumission non recevable
+ * * `decision_published` - décision publiée
+ * * `final_version_received` - version finale reçue
  */
-export type NotificationKind = 'submission_received' | 'submission_withdrawn' | 'coauthor_added' | 'extension_granted' | 'draft_reminder' | 'screening_rejected';
+export type NotificationKind = 'submission_received' | 'submission_withdrawn' | 'coauthor_added' | 'extension_granted' | 'draft_reminder' | 'screening_rejected' | 'decision_published' | 'final_version_received';
 

@@ -475,7 +475,9 @@
         "coauthor_added": "Vous êtes déclaré co-auteur de la soumission {{reference}} « {{title}} » ({{edition}}).",
         "extension_granted": "Délai supplémentaire pour votre soumission {{reference}} « {{title}} », jusqu'au {{until}}.",
         "draft_reminder": "Votre brouillon « {{title}} » n'est pas encore soumis : l'appel ferme le {{closes}}.",
-        "screening_rejected": "Votre soumission {{reference}} « {{title}} » n'a pas été jugée recevable : elle ne sera pas évaluée."
+        "screening_rejected": "Votre soumission {{reference}} « {{title}} » n'a pas été jugée recevable : elle ne sera pas évaluée.",
+        "decision_published": "Décision publiée pour votre soumission {{reference}} « {{title}} ».",
+        "final_version_received": "Version finale reçue pour votre soumission {{reference}} « {{title}} »."
       }
     }
   }

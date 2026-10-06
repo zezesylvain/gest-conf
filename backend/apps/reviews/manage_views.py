@@ -9,12 +9,16 @@ réauthentification récente (plan L4 §6). Évaluations de tous les relecteurs,
 
 from __future__ import annotations
 
+from decimal import Decimal, InvalidOperation
+
 import django_filters
 from django.db.models import Count, F, Prefetch, Q
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import exceptions, mixins, status
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -46,17 +50,22 @@ from apps.reviews.serializers import (
     CandidateListSerializer,
     ConflictCreateSerializer,
     ConflictManageSerializer,
+    DecisionBatchResultSerializer,
+    DecisionBatchSerializer,
+    DecisionWriteSerializer,
     GridCreateSerializer,
     GridSerializer,
     GridUpdateSerializer,
     MessageCreateSerializer,
+    PublishResultSerializer,
+    RankingSerializer,
     ReviewProgressSerializer,
     ReviewSubmissionDetailSerializer,
     ReviewSubmissionSerializer,
     ScreeningSerializer,
     SubmissionReviewsSerializer,
 )
-from apps.reviews.services import assignments, conflicts, grids
+from apps.reviews.services import assignments, conflicts, decisions, grids
 from apps.reviews.services import reviews as review_services
 from apps.submissions.models import Submission, SubmissionStatus
 
@@ -208,6 +217,9 @@ class ReviewSubmissionViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, 
         "reviews": C.REVIEWS_READ_ALL,
         "open_discussion": C.REVIEWS_MANAGE,
         "post_message": C.REVIEWS_MANAGE,
+        "set_decision": C.DECISIONS_DECIDE,
+        "delete_decision": C.DECISIONS_DECIDE,
+        "promote": C.DECISIONS_PUBLISH,
     }
 
     def get_queryset(self):
@@ -358,6 +370,141 @@ class ReviewSubmissionViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, 
         )
         response = self._reviews_payload(submission)
         response.status_code = status.HTTP_201_CREATED
+        return response
+
+    @extend_schema(
+        operation_id="manage_review_submission_decision",
+        request=DecisionWriteSerializer,
+        responses={200: ReviewSubmissionDetailSerializer},
+    )
+    def set_decision(self, request: Request, edition_id: int, submission_id: int) -> Response:
+        """Décision provisoire (H16) : issue, format attribué, message aux auteurs."""
+        submission = self._in_review(submission_id)
+        serializer = DecisionWriteSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        decisions.record_decision(
+            submission,
+            outcome=data["outcome"],
+            assigned_type=data["assigned_type"],
+            comment_to_authors=data["comment_to_authors"],
+            actor=Actor.from_request(request),
+        )
+        return Response(ReviewSubmissionDetailSerializer(self._detail(submission_id)).data)
+
+    @extend_schema(
+        operation_id="manage_review_submission_decision_delete",
+        responses={200: ReviewSubmissionDetailSerializer},
+    )
+    def delete_decision(self, request: Request, edition_id: int, submission_id: int) -> Response:
+        """Annule une décision **provisoire**."""
+        decisions.cancel_decision(self._in_review(submission_id), actor=Actor.from_request(request))
+        return Response(ReviewSubmissionDetailSerializer(self._detail(submission_id)).data)
+
+    @extend_schema(
+        operation_id="manage_review_submission_promote",
+        request=None,
+        responses={200: ReviewSubmissionDetailSerializer},
+    )
+    def promote(self, request: Request, edition_id: int, submission_id: int) -> Response:
+        """Liste d'attente → acceptée, après publication (H16) ; auteurs prévenus."""
+        decisions.promote(self._in_review(submission_id), actor=Actor.from_request(request))
+        return Response(ReviewSubmissionDetailSerializer(self._detail(submission_id)).data)
+
+
+class DecisionViewSet(ManageViewSet):
+    """Décisions en lot, publication (RG-09), classement et simulation (US-06), export."""
+
+    queryset = Submission.objects.all()
+    pagination_class = None
+    filter_backends = ()
+    required_capabilities = {
+        "batch": C.DECISIONS_DECIDE,
+        "publish": C.DECISIONS_PUBLISH,
+        "ranking": C.REVIEWS_READ_ALL,
+        "export": C.REVIEWS_READ_ALL,
+    }
+
+    @extend_schema(
+        operation_id="manage_decisions_batch",
+        request=DecisionBatchSerializer,
+        responses={200: DecisionBatchResultSerializer},
+    )
+    def batch(self, request: Request, edition_id: int) -> Response:
+        """Décisions provisoires en lot : tout ou rien (refus rendus par ligne)."""
+        serializer = DecisionBatchSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        items = serializer.validated_data["items"]
+        found = {
+            row.pk: row
+            for row in Submission.objects.filter(
+                edition=self.edition, pk__in=[item["submission"] for item in items]
+            )
+        }
+        missing = [str(i) for i, item in enumerate(items) if item["submission"] not in found]
+        if missing:
+            raise Invalid(fields={index: [Invalid.default_message] for index in missing})
+        recorded = decisions.record_decisions(
+            self.edition,
+            [{**item, "submission": found[item["submission"]]} for item in items],
+            actor=Actor.from_request(request),
+        )
+        return Response({"recorded": len(recorded)})
+
+    @extend_schema(
+        operation_id="manage_decisions_publish",
+        request=None,
+        responses={200: PublishResultSerializer},
+    )
+    def publish(self, request: Request, edition_id: int) -> Response:
+        """RG-09 : publie les décisions provisoires (réauthentification récente, journal)."""
+        if not has_recent_authentication(request):
+            raise _reauthentication_required()
+        count = decisions.publish_decisions(self.edition, actor=Actor.from_request(request))
+        return Response({"published": count})
+
+    @extend_schema(
+        operation_id="manage_ranking",
+        parameters=[
+            OpenApiParameter("threshold", OpenApiTypes.DECIMAL, required=False),
+            OpenApiParameter("track", str, required=False),
+            OpenApiParameter("submission_type", str, required=False),
+        ],
+        responses={200: RankingSerializer},
+    )
+    def ranking(self, request: Request, edition_id: int) -> Response:
+        """Classement par note finale ; avec ``threshold``, simulation du seuil (US-06)."""
+        params = request.query_params
+        rows = decisions.ranking(
+            self.edition,
+            track=params.get("track") or None,
+            submission_type=params.get("submission_type") or None,
+        )
+        simulation = None
+        if params.get("threshold"):
+            try:
+                threshold = Decimal(params["threshold"])
+            except InvalidOperation as error:
+                raise Invalid(fields={"threshold": [Invalid.default_message]}) from error
+            if not threshold.is_finite() or not Decimal(0) <= threshold <= Decimal(100):
+                raise Invalid(fields={"threshold": [Invalid.default_message]})
+            simulation = decisions.simulate(rows, threshold)
+        return Response(RankingSerializer({"rows": rows, "simulation": simulation}).data)
+
+    @extend_schema(
+        operation_id="manage_reviews_export",
+        responses={(200, "text/csv"): OpenApiTypes.BINARY},
+    )
+    def export(self, request: Request, edition_id: int) -> HttpResponse:
+        """Évaluations nominatives en CSV (réauthentification récente, journal : RG-17)."""
+        if not has_recent_authentication(request):
+            raise _reauthentication_required()
+        content = decisions.export_reviews_csv(self.edition, actor=Actor.from_request(request))
+        response = HttpResponse(content, content_type="text/csv; charset=utf-8")
+        name = f"evaluations-{self.edition.code}-{timezone.now():%Y%m%d}.csv"
+        response["Content-Disposition"] = f'attachment; filename="{name}"'
+        response["X-Content-Type-Options"] = "nosniff"
+        response["Cache-Control"] = "private, no-store"
         return response
 
 

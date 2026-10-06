@@ -5,6 +5,7 @@ from django.urls import path
 
 from apps.reviews.manage_views import AssignmentViewSet as A
 from apps.reviews.manage_views import ConflictViewSet as K
+from apps.reviews.manage_views import DecisionViewSet as D
 from apps.reviews.manage_views import GridViewSet as G
 from apps.reviews.manage_views import ReviewProgressViewSet as P
 from apps.reviews.manage_views import ReviewSubmissionViewSet as RS
@@ -64,6 +65,21 @@ urlpatterns = [
         name="manage-review-submissions-discussion-messages",
     ),
     path(f"{E}/review-progress", P.as_view({"get": "progress"}), name="manage-review-progress"),
+    # Décisions, publication, classement, export (L4.4).
+    path(
+        f"{E}/review-submissions/<int:submission_id>/decision",
+        RS.as_view({"put": "set_decision", "delete": "delete_decision"}),
+        name="manage-review-submissions-decision",
+    ),
+    path(
+        f"{E}/review-submissions/<int:submission_id>/promote",
+        RS.as_view({"post": "promote"}),
+        name="manage-review-submissions-promote",
+    ),
+    path(f"{E}/decisions/batch", D.as_view({"post": "batch"}), name="manage-decisions-batch"),
+    path(f"{E}/decisions/publish", D.as_view({"post": "publish"}), name="manage-decisions-publish"),
+    path(f"{E}/ranking", D.as_view({"get": "ranking"}), name="manage-ranking"),
+    path(f"{E}/reviews-export", D.as_view({"get": "export"}), name="manage-reviews-export"),
     path(f"{E}/assignments", A.as_view({"post": "create"}), name="manage-assignments-list"),
     path(
         f"{E}/assignments/<int:assignment_id>",
