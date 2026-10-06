@@ -368,12 +368,20 @@ class PublicCompositionSerializer(serializers.Serializer):
     sections = PublicSectionSerializer(many=True)
 
 
+class PublicAlternateSerializer(serializers.Serializer):
+    """Adresse hors pages du CMS (programme publié) : variantes FR et EN, pour le plan du
+    site."""
+
+    paths = PagePathsSerializer()
+
+
 class PublicRoutesSerializer(serializers.Serializer):
     routes = serializers.ListField(child=serializers.CharField())
     expected = serializers.IntegerField(
         help_text="Nombre de routes à pré-rendre, vérifié au build."
     )
     pages = PublicPageSerializer(many=True)
+    alternates = PublicAlternateSerializer(many=True)
 
 
 class PublicMenuItemSerializer(serializers.Serializer):

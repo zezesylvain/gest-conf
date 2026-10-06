@@ -18,6 +18,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { Countdown } from './countdown';
 import { PortalData } from './portal-data';
+import { ProgramOverview } from './program/program-overview';
 import { PageContext } from './public-portal';
 import { SectionsView } from './sections';
 import { applySeo, clearSeo } from './seo';
@@ -59,6 +60,7 @@ const CALL_DATES = ['call_open', 'call_close', 'review_deadline', 'notification'
     SubmissionTypesList,
     DocumentsList,
     CommitteeList,
+    ProgramOverview,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './portal-page.html',

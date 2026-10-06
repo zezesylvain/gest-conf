@@ -73,6 +73,10 @@
                 [language]="lang()"
               />
             }
+            @case ('program') {
+              <h1>{{ heading() }}</h1>
+              <portail-program-overview [language]="lang()" />
+            }
             @default {
               <h1>{{ heading() }}</h1>
               @if (page.coming_soon) {

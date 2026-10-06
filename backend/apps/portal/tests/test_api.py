@@ -47,6 +47,7 @@ def test_routes_with_expected_count(public_edition):
     assert body["expected"] == len(body["routes"]) == 2 * (len(SITE_PAGES) + 1)
     assert {"/fr/", "/en/", "/fr/p/infos/", "/en/p/infos/"} <= set(body["routes"])
     assert {page["slug"] for page in body["pages"]} >= {"home", "infos"}
+    assert body["alternates"] == []  # programme non publié : aucune page du programme
 
 
 def test_composition_lists_only_published_sections_in_order(public_edition):

@@ -179,6 +179,77 @@
     </section>
   }
 
+  @if (canConfirm() || current.presentation || current.schedule || lateWithdrawal()) {
+    <section class="presentation" aria-labelledby="presentation-title">
+      <h2 id="presentation-title">{{ 'portail.submissions.presentation.title' | translate }}</h2>
+      @if (current.schedule; as slot) {
+        <p>
+          <strong>{{ 'portail.submissions.presentation.scheduled' | translate }}</strong>
+          {{ slotWhen(slot.starts_at, slot.ends_at) }} ·
+          {{ localized(slot, 'session_title') }}
+          @if (slot.room) {
+            · {{ slot.room }}
+          }
+        </p>
+        <p>
+          <a routerLink="/compte/mon-passage">{{
+            'portail.submissions.presentation.myAgenda' | translate
+          }}</a>
+        </p>
+      }
+      @if (current.presentation; as presentation) {
+        <p>
+          {{
+            'portail.submissions.presentation.confirmed'
+              | translate: { date: when(presentation.confirmed_at), names: confirmedPresenters() }
+          }}
+        </p>
+      }
+      @if (canConfirm()) {
+        <p class="hint">
+          {{
+            (current.presentation
+              ? 'portail.submissions.presentation.leadUpdate'
+              : 'portail.submissions.presentation.lead'
+            ) | translate
+          }}
+        </p>
+        <fieldset class="presenters">
+          <legend>{{ 'portail.submissions.presentation.presenters' | translate }}</legend>
+          @for (author of current.authors; track author.position) {
+            <mat-checkbox
+              [checked]="presenters().includes(author.position)"
+              (change)="togglePresenter(author.position, $event.checked)"
+            >
+              {{ author.first_name }} {{ author.last_name }}
+              @if (author.institution) {
+                <span class="hint">— {{ author.institution }}</span>
+              }
+            </mat-checkbox>
+          }
+        </fieldset>
+        <p class="actions">
+          <button
+            mat-flat-button
+            type="button"
+            (click)="confirmPresentation()"
+            [disabled]="busy() || !presenters().length"
+          >
+            {{
+              (current.presentation
+                ? 'portail.submissions.presentation.update'
+                : 'portail.submissions.presentation.confirm'
+              ) | translate
+            }}
+          </button>
+        </p>
+      }
+      @if (lateWithdrawal() && withdrawable()) {
+        <ng-container *ngTemplateOutlet="withdrawBlock" />
+      }
+    </section>
+  }
+
   <nav class="steps" [attr.aria-label]="'portail.submissions.steps.label' | translate">
     <ol>
       @for (name of steps; track name; let index = $index) {

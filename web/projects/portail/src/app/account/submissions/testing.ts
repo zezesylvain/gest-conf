@@ -93,6 +93,7 @@ export function testSubmission(overrides: Partial<Submission> = {}): Submission 
     final_version: null,
     final_deadline: null,
     presentation: null,
+    schedule: null,
     ...overrides,
   };
 }

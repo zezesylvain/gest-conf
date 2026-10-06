@@ -1,0 +1,161 @@
+/* Programme public (plan L5, I7) : sans Material, comme le reste du portail. */
+:host {
+  display: block;
+}
+h1 {
+  margin: 0 0 0.5rem;
+  font-size: clamp(1.6rem, 4vw, 2.25rem);
+  line-height: 1.2;
+}
+h2 {
+  margin: 1.75rem 0 0.5rem;
+  font-size: 1.25rem;
+}
+p {
+  margin: 0.25rem 0;
+}
+.muted,
+.meta {
+  color: var(--gc-muted);
+}
+.meta {
+  font-size: 0.95rem;
+}
+.soon,
+.when {
+  font-weight: 600;
+}
+.crumbs {
+  margin-bottom: 0.75rem;
+}
+.toolbar,
+.filters,
+.views {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: end;
+}
+.toolbar {
+  justify-content: space-between;
+  margin: 1rem 0 0.5rem;
+}
+.filters label {
+  display: grid;
+  gap: 0.2rem;
+  font-size: 0.9rem;
+}
+select,
+input,
+.views button {
+  min-height: 2.75rem;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--gc-border);
+  border-radius: 0.3rem;
+  background: var(--gc-surface, #fff);
+  font: inherit;
+}
+.views button[aria-pressed='true'] {
+  border-color: var(--gc-primary);
+  color: var(--gc-primary);
+  font-weight: 700;
+}
+.sessions,
+.slots {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+.sessions > li,
+.slots > li {
+  display: grid;
+  grid-template-columns: 7.5rem 1fr;
+  gap: 0.75rem;
+}
+.slots > li {
+  grid-template-columns: 3.5rem 1fr;
+  padding: 0.4rem 0;
+  border-top: 1px solid var(--gc-border);
+}
+.time {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+.sessions .meta,
+.card .meta {
+  display: block;
+}
+.pause {
+  opacity: 0.85;
+  font-style: italic;
+}
+.session {
+  padding: 0.75rem 0;
+  border-top: 2px solid var(--gc-border);
+}
+.session h2 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.75rem;
+  margin: 0 0 0.25rem;
+}
+.slot-title {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.authors {
+  list-style: none;
+  margin: 0.2rem 0;
+  padding: 0;
+}
+.authors li {
+  display: inline;
+}
+.authors li:not(:last-child)::after {
+  content: ', ';
+}
+.presenter {
+  font-weight: 700;
+}
+.speaker img {
+  float: left;
+  margin: 0 0.75rem 0.25rem 0;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.bio,
+.description {
+  white-space: pre-wrap;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(var(--columns), minmax(12rem, 1fr));
+  gap: 1rem;
+  overflow-x: auto;
+}
+.card {
+  display: grid;
+  margin: 0 0 0.5rem;
+  padding: 0.5rem;
+  border: 1px solid var(--gc-border);
+  border-radius: 0.3rem;
+}
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+@media (max-width: 767.98px) {
+  .grid {
+    display: block;
+  }
+  .sessions > li {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}

@@ -22,7 +22,8 @@
         "privacy": "Privacy",
         "myData": "My data",
         "notifications": "Notifications",
-        "notificationsLabel": "Notifications ({{count}} unread)"
+        "notificationsLabel": "Notifications ({{count}} unread)",
+        "agenda": "My schedule"
       },
       "fields": {
         "email": "Email address",
@@ -501,6 +502,20 @@
       "timeline": {
         "title": "History",
         "revisions": "{{count}} version(s) recorded after submission."
+      },
+      "presentation": {
+        "title": "Presentation",
+        "scheduled": "Scheduled:",
+        "myAgenda": "See my schedule",
+        "confirmed": "Presentation confirmed on {{date}}; presenters: {{names}}.",
+        "lead": "Choose who will present the paper, then confirm your attendance: the paper can then be scheduled.",
+        "leadUpdate": "You can still change the presenters.",
+        "presenters": "Presenters",
+        "confirm": "Confirm my presentation",
+        "update": "Update the presenters",
+        "none": "Choose at least one presenter.",
+        "done": "Presentation confirmed.",
+        "updated": "Presenters updated."
       }
     },
     "notifications": {
@@ -519,6 +534,76 @@
         "decision_published": "Decision published for your submission {{reference}} “{{title}}”.",
         "final_version_received": "Final version received for your submission {{reference}} “{{title}}”."
       }
+    },
+    "program": {
+      "title": "Programme",
+      "unpublished": "The programme is not published yet. It will appear here once published.",
+      "timezone": "Times in the conference's local time ({{zone}}).",
+      "filters": {
+        "day": "Day",
+        "room": "Room",
+        "track": "Track",
+        "kind": "Type",
+        "search": "Search for a session",
+        "searchDay": "Search (title, author, speaker)",
+        "all": "All"
+      },
+      "count": "{{count}} session(s) shown",
+      "noMatch": "No session matches these criteria.",
+      "slotCount": "{{count}} talk(s)",
+      "kinds": {
+        "opening": "Opening",
+        "keynote": "Keynote",
+        "parallel": "Parallel session",
+        "poster": "Poster session",
+        "workshop": "Workshop",
+        "tutorial": "Tutorial",
+        "round_table": "Round table",
+        "assembly": "Assembly or meeting",
+        "break": "Break",
+        "meal": "Meal",
+        "social": "Social event",
+        "closing": "Closing"
+      },
+      "back": "← Programme",
+      "views": {
+        "label": "Display",
+        "list": "List",
+        "grid": "Grid by room"
+      },
+      "accessible": "accessible to people with reduced mobility",
+      "noRoom": "No room",
+      "roles": {
+        "chair": "Session chair",
+        "discussant": "Discussant",
+        "moderator": "Moderator",
+        "panelist": "Panellist"
+      },
+      "presenter": "presenting",
+      "room": "Room",
+      "contributions": "Talks"
+    },
+    "agenda": {
+      "title": "My schedule",
+      "lead": "Your presentations, talks and session roles in the published programme.",
+      "ics": "Add to my calendar (.ics)",
+      "icsHint": "iCal file, readable by most calendars.",
+      "roles": {
+        "presenter": "Presentation",
+        "speaker": "Talk",
+        "chair": "Session chair",
+        "discussant": "Discussant",
+        "moderator": "Moderator",
+        "panelist": "Panellist"
+      },
+      "duration": "{{count}} min",
+      "session": "Session",
+      "room": "Room",
+      "accessible": "accessible",
+      "coSpeakers": "With",
+      "chairs": "Chaired by",
+      "instructions": "Instructions",
+      "empty": "Nothing in the published programme yet. Your schedule will appear here once the programme is published."
     }
   }
 }

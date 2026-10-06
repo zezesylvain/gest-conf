@@ -1,0 +1,145 @@
+<article class="program-page" [attr.data-gc-rendered]="marker()" [attr.lang]="lang()">
+  @switch (state()) {
+    @case ('loading') {
+      <p role="status" class="muted">{{ 'portail.site.loading' | translate }}</p>
+    }
+    @case ('missing') {
+      <h1>{{ 'portail.notFound.heading' | translate }}</h1>
+      <p>
+        <a [routerLink]="programLink()">{{ 'portail.program.back' | translate }}</a>
+      </p>
+    }
+    @case ('error') {
+      <h1>{{ 'portail.site.errorTitle' | translate }}</h1>
+      <p>{{ 'portail.site.errorLead' | translate }}</p>
+    }
+    @case ('ready') {
+      @if (program(); as current) {
+        <p class="crumbs">
+          <a [routerLink]="programLink()">{{ 'portail.program.back' | translate }}</a>
+        </p>
+        <h1>{{ day(current.date) }}</h1>
+        <p class="muted">
+          {{ 'portail.program.timezone' | translate: { zone: current.timezone } }}
+        </p>
+
+        <div class="toolbar">
+          <div
+            class="views"
+            role="group"
+            [attr.aria-label]="'portail.program.views.label' | translate"
+          >
+            <button
+              type="button"
+              [attr.aria-pressed]="view() === 'list'"
+              (click)="view.set('list')"
+            >
+              {{ 'portail.program.views.list' | translate }}
+            </button>
+            <button
+              type="button"
+              [attr.aria-pressed]="view() === 'grid'"
+              (click)="view.set('grid')"
+            >
+              {{ 'portail.program.views.grid' | translate }}
+            </button>
+          </div>
+          <form class="filters" role="search" (submit)="$event.preventDefault()">
+            @if (rooms().length > 1) {
+              <label>
+                <span>{{ 'portail.program.filters.room' | translate }}</span>
+                <select (change)="setFilter('room', $any($event.target).value)">
+                  <option value="">{{ 'portail.program.filters.all' | translate }}</option>
+                  @for (room of rooms(); track room) {
+                    <option [value]="room">{{ room }}</option>
+                  }
+                </select>
+              </label>
+            }
+            @if (tracks().length) {
+              <label>
+                <span>{{ 'portail.program.filters.track' | translate }}</span>
+                <select (change)="setFilter('track', $any($event.target).value)">
+                  <option value="">{{ 'portail.program.filters.all' | translate }}</option>
+                  @for (item of tracks(); track item[0]) {
+                    <option [value]="item[0]">{{ item[1] }}</option>
+                  }
+                </select>
+              </label>
+            }
+            <label>
+              <span>{{ 'portail.program.filters.searchDay' | translate }}</span>
+              <input type="search" (input)="setFilter('query', $any($event.target).value)" />
+            </label>
+          </form>
+        </div>
+        <p class="muted" aria-live="polite">
+          {{ 'portail.program.count' | translate: { count: sessions().length } }}
+        </p>
+
+        @if (view() === 'list') {
+          @for (session of sessions(); track session.id) {
+            <section class="session" [class.pause]="pause(session)">
+              <h2>
+                <span class="time">{{ hours(session) }}</span>
+                <a [routerLink]="sessionLink(session.id)">{{ title(session) }}</a>
+              </h2>
+              <p class="meta">
+                {{ 'portail.program.kinds.' + session.kind | translate }}
+                @if (session.room; as room) {
+                  · {{ room.name }}
+                  @if (room.is_accessible) {
+                    ({{ 'portail.program.accessible' | translate }})
+                  }
+                }
+                @if (session.track; as track) {
+                  · {{ text(track, 'name') }}
+                }
+              </p>
+              @for (chair of session.chairs; track $index) {
+                <p class="meta">
+                  {{ 'portail.program.roles.' + chair.role | translate }} : {{ chair.name }}
+                  @if (chair.institution) {
+                    ({{ chair.institution }})
+                  }
+                </p>
+              }
+              <portail-program-slot-list
+                [slots]="session.slots"
+                [timezone]="current.timezone"
+                [language]="lang()"
+              />
+            </section>
+          } @empty {
+            <p>{{ 'portail.program.noMatch' | translate }}</p>
+          }
+        } @else {
+          <div class="grid" [style.--columns]="columns().length">
+            @for (column of columns(); track column.room ?? '') {
+              <div class="column">
+                <h2>{{ column.room ?? ('portail.program.noRoom' | translate) }}</h2>
+                @for (session of column.sessions; track session.id) {
+                  <p class="card" [class.pause]="pause(session)">
+                    <span class="time">{{ hours(session) }}</span>
+                    <a [routerLink]="sessionLink(session.id)">{{ title(session) }}</a>
+                    <span class="meta">
+                      {{ 'portail.program.kinds.' + session.kind | translate }}
+                      @if (session.slots.length) {
+                        ·
+                        {{
+                          'portail.program.slotCount' | translate: { count: session.slots.length }
+                        }}
+                      }
+                    </span>
+                  </p>
+                }
+              </div>
+            } @empty {
+              <p>{{ 'portail.program.noMatch' | translate }}</p>
+            }
+          </div>
+        }
+      }
+    }
+  }
+</article>

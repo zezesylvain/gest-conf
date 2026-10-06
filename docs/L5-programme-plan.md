@@ -576,3 +576,71 @@ tableaux (position absolue) ne font plus déborder la page sur mobile.
 **Point connu, antérieur à L5** : le bundle initial du portail (367,7 ko) dépasse le seuil
 d'avertissement (365 ko), sans atteindre celui d'erreur (380 ko). Le bilan de L4 le
 signalait déjà. À traiter en L5.6, qui touche le portail.
+
+## 17. Bilan de L5.6 (6 octobre 2026)
+
+**Programme public pré-rendu (I7)**, en FR et en EN, sans Material (budget du portail) :
+
+- **Accueil** `/fr/programme/` (la page du site, qui n'est plus « à venir ») : jours et
+  sessions, sans le détail des communications. Filtres par jour, salle, thématique et type,
+  recherche sans tenir compte des accents ; le nombre de sessions affichées est annoncé.
+  Avant la première publication : « pas encore publié ».
+- **Une page par jour** `/fr/programme/<date>/` : liste détaillée (créneaux, auteurs,
+  présentateurs signalés, présidents de séance, salle et accessibilité) ou **grille par
+  salle** ; recherche dans les titres, les auteurs, les intervenants et les références.
+- **Une page par session** `/fr/programme/session/<id>/` : horaire et fuseau, salle et
+  indications d'accès, description, présidents, communications ; intervenants invités avec
+  photo et biographie selon leurs consentements (I11).
+- Heures dans le fuseau de l'édition, indiqué sur chaque page.
+- Sélecteur de langue, titre, adresses canoniques et `hreflang` comme les pages du site ;
+  marqueur de rendu complet `data-gc-rendered`.
+- Pages du jour et de la session dans un seul morceau chargé à la demande
+  (`program.routes.ts`).
+
+**Pré-rendu** : `getPrerenderParams` lit `/v1/public/program` (aucun paramètre avant
+publication). Le serveur annonce ces pages dans `/v1/public/portal/routes` : le contrôle après
+build les exige (nombre et marqueur), et le plan du site les reprend (`alternates`). Le
+portail ne dépend pas du programme : `program` inscrit un fournisseur d'adresses
+(`register_route_provider`) dans `AppConfig.ready()`.
+
+**Espace auteur** :
+
+- section « Présentation » de la soumission : choix des présentateurs parmi les auteurs,
+  « Confirmer ma présentation » (I5), puis mise à jour possible ;
+- **créneau publié** dans `/v1/submissions/{id}` (`schedule`, plan §4), lu dans la dernière
+  publication, jamais dans le brouillon. Un soumissionnaire qui ne présente pas sait ainsi
+  quand passe sa communication ;
+- retrait étendu à la version finale reçue, confirmée et programmée (motif obligatoire).
+
+**« Mon passage » (I8)** : `/compte/mon-passage`, dans la navigation du compte. Passages
+regroupés par édition et par jour, heures de l'édition, rôle, salle et accès,
+co-intervenants, présidence, consignes ; lien « Ajouter à mon agenda (.ics) ».
+
+**Vérifications** :
+
+- **build pré-rendu** contre une API au programme publié (base de démonstration : 7
+  sessions, 2 jours) : 35 pages pré-rendues, contrôle complet (34 routes), plan du site.
+  Les pages ne contiennent aucune adresse ;
+- **dans Chromium**, build servi avec `/api` relayé comme sous Apache :
+  - au chargement, aucun appel d'API pour le programme (données embarquées) ;
+  - le contenu est lisible sans JavaScript ;
+  - filtres, recherche, grille par salle, passage en anglais ;
+  - aucun débordement à 375 px ;
+  - côté auteur : « Mon passage », fichier `.ics` téléchargé (UTC), créneau publié dans la
+    soumission ;
+- front : 345 tests (shared 76, portail 131, gestion 138) et 11 tests de scripts ; lint,
+  format, build ;
+- backend : 2 467 tests sous SQLite ; 1 860 sous MariaDB (programme, portail, soumissions,
+  transverses), dont les nouveaux tests des routes du programme et du créneau publié ;
+  schéma régénéré sur MariaDB.
+
+**Points à signaler** :
+
+- **Q14 toujours ouverte** : le programme public affiche les noms et institutions des
+  auteurs (I7). À confirmer avant la mise en ligne.
+- Bundle initial du portail : 367,8 ko, inchangé par L5.6 (+0,1 ko, déclaration des
+  routes). Il est fait à 96 % du framework (`@angular/core` 213 ko, routeur 97 ko) ; notre
+  code y pèse une trentaine de ko. Le seuil d'avertissement (365 ko) date d'une version
+  antérieure d'Angular : à relever (370 ko) ou à garder comme simple avertissement. **À
+  trancher par le commanditaire**, le seuil d'erreur (380 ko) restant inchangé.
+- La page « Intervenants » reste « à venir » (fiche M10, P2).

@@ -9,6 +9,7 @@ import {
   SubmissionCheck,
   submissionsAuthors,
   submissionsCheck,
+  submissionsConfirmPresentation,
   submissionsCreate,
   submissionsDelete,
   submissionsFileRemove,
@@ -109,6 +110,14 @@ export class SubmissionsService {
     return this.api.invoke(submissionsFinalVersion, {
       submission_id: id,
       body: { file, response_letter: responseLetter },
+    });
+  }
+
+  /** I5 (plan L5) : présentateurs désignés (positions des auteurs) et venue confirmée. */
+  confirmPresentation(id: number, presenters: number[]): Promise<Submission> {
+    return this.api.invoke(submissionsConfirmPresentation, {
+      submission_id: id,
+      body: { presenters },
     });
   }
 

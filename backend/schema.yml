@@ -8065,6 +8065,16 @@ components:
         presenter_registration_required:
           type: boolean
           title: Présentateur inscrit exigé (RG-11)
+    PublicAlternate:
+      type: object
+      description: |-
+        Adresse hors pages du CMS (programme publié) : variantes FR et EN, pour le plan du
+        site.
+      properties:
+        paths:
+          $ref: '#/components/schemas/PagePaths'
+      required:
+      - paths
     PublicCommittee:
       type: object
       properties:
@@ -8724,7 +8734,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PublicPage'
+        alternates:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicAlternate'
       required:
+      - alternates
       - expected
       - pages
       - routes
@@ -9018,6 +9033,37 @@ components:
           description: Décisions publiées.
       required:
       - published
+    PublishedSlot:
+      type: object
+      description: 'Créneau de la communication au programme **publié** (plan L5 §4)
+        : jamais le brouillon.'
+      properties:
+        version:
+          type: integer
+          description: Version du programme publié.
+        session_id:
+          type: integer
+        session_title_fr:
+          type: string
+        session_title_en:
+          type: string
+        room:
+          type: string
+          nullable: true
+        starts_at:
+          type: string
+          format: date-time
+        ends_at:
+          type: string
+          format: date-time
+      required:
+      - ends_at
+      - room
+      - session_id
+      - session_title_en
+      - session_title_fr
+      - starts_at
+      - version
     Ranking:
       type: object
       properties:
@@ -10670,6 +10716,13 @@ components:
           nullable: true
           readOnly: true
           description: Confirmation de présentation (I5, plan L5).
+        schedule:
+          allOf:
+          - $ref: '#/components/schemas/PublishedSlot'
+          nullable: true
+          readOnly: true
+          description: Créneau au programme publié (plan L5 §4), pour une communication
+            programmée.
       required:
       - abstract
       - allowed_actions
@@ -10691,6 +10744,7 @@ components:
       - presentation
       - reference
       - revision
+      - schedule
       - status
       - submission_type
       - submitted_at

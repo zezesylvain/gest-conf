@@ -81,6 +81,12 @@ export const accountRoutes: Routes = [
           import('./submissions/submissions.routes').then((m) => m.submissionRoutes),
       },
       {
+        path: 'mon-passage',
+        title: 'portail.agenda.title',
+        canMatch: [authGuard],
+        loadComponent: () => import('./agenda/agenda-page').then((m) => m.AgendaPage),
+      },
+      {
         path: 'notifications',
         title: 'portail.notifications.title',
         canMatch: [authGuard],

@@ -95,6 +95,28 @@ def test_i6_only_the_chair_publishes(world):
     assert response.status_code == 403
 
 
+def test_author_sees_the_published_slot_never_the_draft(world):
+    """Plan L5 §4 : la soumission donne son créneau publié à l'auteur (même s'il ne présente
+    pas) ; un déplacement non publié ne change rien."""
+    current, chair, morning, first, *_rest = world
+    client = client_for(first.submitter, mfa=False)
+    assert client.get(f"/v1/submissions/{first.pk}").json()["schedule"] is None
+    publish(current, chair)
+    schedule = client.get(f"/v1/submissions/{first.pk}").json()["schedule"]
+    assert schedule == {
+        "version": 1,
+        "session_id": morning.pk,
+        "session_title_fr": "Santé",
+        "session_title_en": "",
+        "room": "Amphi A",
+        "starts_at": "2027-06-01T09:00:00Z",
+        "ends_at": "2027-06-01T09:20:00Z",
+    }
+    planning.move_slot(first.program_slot, session=morning, position=1, actor=COMMAND)
+    listed = client.get("/v1/submissions").json()
+    assert listed[0]["schedule"]["starts_at"] == "2027-06-01T09:00:00Z"
+
+
 def test_i6_paper_removed_from_published_programme_returns_to_confirmed(world):
     current, chair, _morning, first, *_rest = world
     publish(current, chair)
@@ -192,6 +214,23 @@ def test_i7_public_programme_404_until_published_then_whitelisted(world):
         for leak in (TRACER, first.submitter.email, "user:", "email:", "Clé USB"):
             assert leak not in text
     assert anonymous.get("/v1/public/program/days/2027-06-02").status_code == 404
+
+
+def test_i7_published_programme_pages_announced_for_prerender(world):
+    """I7 : une page par jour et par session du programme publié, en FR et EN, annoncées par
+    les routes du portail (contrôle au build, plan du site) ; aucune avant publication."""
+    current, chair, morning, *_rest = world
+    before = APIClient().get("/v1/public/portal/routes").json()
+    assert not [route for route in before["routes"] if "/programme/2" in route]
+    publish(current, chair)
+    body = APIClient().get("/v1/public/portal/routes").json()
+    pairs = [
+        {"fr": "/fr/programme/2027-06-01/", "en": "/en/program/2027-06-01/"},
+        {"fr": f"/fr/programme/session/{morning.pk}/", "en": f"/en/program/session/{morning.pk}/"},
+    ]
+    assert [item["paths"] for item in body["alternates"]] == pairs
+    assert {path for pair in pairs for path in pair.values()} <= set(body["routes"])
+    assert body["expected"] == len(body["routes"]) == len(before["routes"]) + 4
 
 
 def test_i7_draft_changes_invisible_until_republished(world):

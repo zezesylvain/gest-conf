@@ -108,7 +108,9 @@ async function main() {
   }
   console.log(`Pré-rendu du portail : complet (${body.routes.length} routes).`);
   const { site_url: siteUrl } = await readJson(`${origin}/api/v1/public/portal/site`);
-  await writeFile(join(directory, 'sitemap.xml'), sitemap(siteUrl, body.pages));
+  // Pages du CMS, puis adresses des autres fournisseurs (programme publié, plan L5, I7).
+  const entries = [...body.pages, ...(body.alternates ?? [])];
+  await writeFile(join(directory, 'sitemap.xml'), sitemap(siteUrl, entries));
   await appendFile(join(directory, 'robots.txt'), `\nSitemap: ${siteUrl}/sitemap.xml\n`);
   console.log(`Plan du site écrit (${siteUrl}/sitemap.xml).`);
 }

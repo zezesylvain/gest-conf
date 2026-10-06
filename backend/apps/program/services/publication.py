@@ -16,6 +16,7 @@ ni adresse ailleurs que dans ces clés.
 
 from __future__ import annotations
 
+import datetime as dt
 import hashlib
 from collections import defaultdict
 from dataclasses import dataclass
@@ -353,6 +354,45 @@ def publish_program(
     for key, (status, items) in sorted(changes.items()):
         passage_changed(edition, publication, key, status, items)
     return publication
+
+
+def published_slot(found: ProgramPublication | None, submission_id: int) -> dict[str, Any] | None:
+    """Créneau d'une communication dans une publication (plan L5 §4), ou ``None``."""
+    if found is None:
+        return None
+    for item in found.snapshot["sessions"]:
+        for slot in item["slots"]:
+            if (slot.get("submission") or {}).get("id") == submission_id:
+                return {
+                    "version": found.version,
+                    "session_id": item["id"],
+                    "session_title_fr": item["title_fr"],
+                    "session_title_en": item["title_en"],
+                    "room": item["room"]["name"] if item["room"] else None,
+                    # Instants de l'instantané relus en dates : format de l'API (« Z »).
+                    "starts_at": dt.datetime.fromisoformat(slot["starts_at"]),
+                    "ends_at": dt.datetime.fromisoformat(slot["ends_at"]),
+                }
+    return None
+
+
+def public_paths(edition: Edition) -> list[dict[str, str]]:
+    """Adresses du programme public (I7), d'après la dernière publication : une page par jour
+    (heure de l'édition) et une par session, en FR et en EN. Aucune avant publication."""
+    from apps.portal.site import SITE_ROUTES, site_page_path
+    from apps.program.serializers import local_day
+
+    found = latest_publication(edition)
+    if found is None:
+        return []
+    base = {lang: site_page_path(SITE_ROUTES["program"], lang) for lang in ("fr", "en")}
+    zone = found.snapshot["edition"]["timezone"]
+    sessions = found.snapshot["sessions"]
+    days = sorted({local_day(item["starts_at"], zone) for item in sessions})
+    return [{lang: f"{base[lang]}{day}/" for lang in base} for day in days] + [
+        {lang: f"{base[lang]}session/{item['id']}/" for lang in base}
+        for item in sorted(sessions, key=lambda row: row["id"])
+    ]
 
 
 def person_hash(key: str) -> str:

@@ -9,7 +9,7 @@ Les trois écritures de composition (poser, retirer, ordonner) renvoient la comp
 from __future__ import annotations
 
 import re
-from collections.abc import Iterable, Mapping, Sequence
+from collections.abc import Callable, Iterable, Mapping, Sequence
 from datetime import datetime
 from typing import Any
 
@@ -945,12 +945,29 @@ def public_pages(edition: Edition) -> QuerySet[Page]:
     )
 
 
+# Fournisseurs d'adresses publiques hors pages du CMS (programme publié, plan L5, I7) :
+# inscrits par les applications concernées dans ``AppConfig.ready()``, pour que le portail
+# ne dépende pas d'elles. Chacun rend des paires ``{"fr": …, "en": …}``.
+RouteProvider = Callable[[Edition], list[dict[str, str]]]
+_ROUTE_PROVIDERS: list[RouteProvider] = []
+
+
+def register_route_provider(provider: RouteProvider) -> None:
+    if provider not in _ROUTE_PROVIDERS:
+        _ROUTE_PROVIDERS.append(provider)
+
+
+def extra_route_paths(edition: Edition) -> list[dict[str, str]]:
+    """Adresses des fournisseurs inscrits (pages du programme…), FR et EN."""
+    return [paths for provider in _ROUTE_PROVIDERS for paths in provider(edition)]
+
+
 def public_routes(edition: Edition) -> list[str]:
     """Adresses à pré-rendre (FR puis EN), sans doublon : une page du site n'est jamais
-    pré-rendue aussi sous ``/p/<slug>/``."""
+    pré-rendue aussi sous ``/p/<slug>/``. Les adresses des fournisseurs suivent."""
     routes: list[str] = []
-    for page in public_pages(edition):
-        for path in page.paths.values():
+    for paths in [page.paths for page in public_pages(edition)] + extra_route_paths(edition):
+        for path in paths.values():
             if path not in routes:
                 routes.append(path)
     return routes
