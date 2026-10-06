@@ -39,9 +39,9 @@ GEST-CONF/
 ├── deploy/                  # deploy.sh, smoke-test.sh, cron.sh, check-o2switch.sh, README.md
 ├── backend/                 # Django
 │   ├── config/settings/ (base, dev, prod, test) ; urls.py (API uniquement) ; mount.py ; passenger_wsgi.py
-│   ├── apps/ core, accounts, conferences, portal, communications, submissions, reviews
-│   │         (à venir, lot par lot : program, registrations, payments, events,
-│   │          sponsors, logistics, reports)
+│   ├── apps/ core, accounts, conferences, portal, communications, submissions, reviews,
+│   │         program (à venir, lot par lot : registrations, payments, events,
+│   │         sponsors, logistics, reports)
 │   ├── tests/               # tests transverses : matrice des droits, schéma, règles de plateforme
 │   ├── locale/              # traductions du backend (FR/EN)
 │   ├── schema.yml           # schéma OpenAPI versionné
@@ -54,7 +54,7 @@ GEST-CONF/
 
 Les comités n'ont pas d'application propre : rôles par édition dans `accounts`, pages publiques dans `portal` (L2).
 
-Chaque app Django : `models.py`, `services.py` (logique métier ; paquet `services/` quand il grossit, comme `accounts` et `reviews`), `serializers.py` (par rôle si champs sensibles), `permissions.py`, `views.py`, `urls.py`, `tests/`. **La logique métier va dans les services**, pas dans les vues ni les modèles.
+Chaque app Django : `models.py`, `services.py` (logique métier ; paquet `services/` quand il grossit, comme `accounts`, `reviews` et `program`), `serializers.py` (par rôle si champs sensibles), `permissions.py`, `views.py`, `urls.py`, `tests/`. **La logique métier va dans les services**, pas dans les vues ni les modèles.
 
 ## Conventions de code
 
@@ -85,7 +85,7 @@ npm run api:generate        # régénérer le client TypeScript après chaque é
 GESTCONF_E2E_PYTHON=../backend/.venv/bin/python npm run e2e   # Playwright lance Django, le portail et la gestion (ports 8000, 4200, 4201 libres) ; GESTCONF_E2E_CHROMIUM=<chemin> pour un Chromium déjà installé
 
 # Déploiement : deploy/deploy.sh puis deploy/smoke-test.sh (voir deploy/README.md)
-# Cron (deploy/cron.sh) : run_jobs (toutes les 5 min), close_call, remind_drafts et remind_reviewers (horaires), cleanup et check_integrity (quotidiennes)
+# Cron (deploy/cron.sh) : run_jobs (toutes les 5 min), close_call, remind_drafts, remind_reviewers et remind_presentations (horaires), cleanup et check_integrity (quotidiennes)
 ```
 
 Les URL Django sont déclarées **sans** le préfixe `/api` (`v1/...`) : `config/mount.py` gère le montage.
@@ -118,9 +118,9 @@ Les URL Django sont déclarées **sans** le préfixe `/api` (`v1/...`) : `config
 
 | Lot | État |
 |---|---|
-| L0 à L4 (MVP : squelette, socle, portail, soumission, évaluation et décision) | Livrés en code, testés en local et en CI (L4.2 à L4.7 : CI par une nouvelle PR après la fusion de la PR #7) ; bilans dans `docs/`. **Aucune démo sur o2switch** encore faite |
-| L5 — Programme | **En cours** : plan [`docs/L5-programme-plan.md`](docs/L5-programme-plan.md) validé le 6 octobre 2026 (décisions I1 à I18) ; Q14 (noms des auteurs au programme public) reste ouverte |
-| L6 et suivants | Non commencés |
+| L0 à L4 (MVP : squelette, socle, portail, soumission, évaluation et décision) | Livrés en code, testés en local et en CI (jusqu'à L5.2 par la PR #8, fusionnée) ; bilans dans `docs/`. **Aucune démo sur o2switch** encore faite |
+| L5 — Programme | **Livré en code et testé en local** (L5.0 à L5.7, E2E compris) ; bilan [`docs/L5-programme.md`](docs/L5-programme.md). L5.3 à L5.7 attendent leur passage en CI (nouvelle PR, sur demande). Ouverts : Q14, `ACCEPTED_MINOR → WITHDRAWN`, seuil d'avertissement du bundle du portail |
+| L6 et suivants | Non commencés : plan L6 (inscriptions) à proposer et à faire valider |
 
 ## Décisions du lot L1
 
@@ -165,6 +165,20 @@ Les décisions H1 à H19 du plan [`docs/L4-evaluation-plan.md`](docs/L4-evaluati
 
 Bilan du lot : [`docs/L4-evaluation.md`](docs/L4-evaluation.md).
 
+## Décisions du lot L5
+
+Les décisions I1 à I18 du plan [`docs/L5-programme-plan.md`](docs/L5-programme-plan.md) ont été validées le 6 octobre 2026, avec les propositions de son §10 (lecture seule des autres fonctions du CO, rappel de la confirmation de présentation). Elles sont reportées dans l'étude, **§21 « Mises à jour issues du lot L5 »**, qui prévaut sur les sections antérieures (§17 à §20 compris). Points à retenir :
+
+- application `program` : salles, sessions, créneaux **calculés** par le service ; capacités `program.read`, `program.write` (administrateur, CO « programme »), `program.publish` (Chair seul) ;
+- le brouillon s'écrit par `apps/program/services/planning.py` seul : verrou de l'état du programme (`ProgramState`), révision en `If-Match` (412), journal `program.*` ; conflits RG-12 et RG-13 signalés à chaque écriture, publication refusée tant qu'il en reste ;
+- **publication** : instantané numéroté en ajout seul, construit par liste blanche ; transitions `CONFIRMED ↔ SCHEDULED` à ce moment seulement ; e-mails aux seules personnes dont le passage change ; le programme public, « Mon passage », l'iCal et le créneau de la soumission lisent l'instantané, **jamais le brouillon** ;
+- confirmation de présentation par l'auteur (`CAMERA_READY_RECEIVED → CONFIRMED`, écart validé) ; retraits jusqu'au programme publié ; rappel `remind_presentations` (cron horaire) ;
+- programme public **pré-rendu** (une page par jour et par session), visible après `deploy.sh --portal-only` ; ses pages sont annoncées par un fournisseur d'adresses (`register_route_provider` du portail) ;
+- gestion : planificateur accessible au clavier (« Placer dans… », flèches, `aria-live`), le CDK n'ayant ni clavier ni ARIA ;
+- E2E : le parcours en série se prolonge jusqu'à la publication du programme, « Mon passage » et l'iCal ; le seed crée un CO « programme » et un Chair (2FA).
+
+Bilan du lot : [`docs/L5-programme.md`](docs/L5-programme.md).
+
 ## Questions ouvertes (étude §15, à ne pas trancher seul)
 
-Date de la conférence, mono- ou multi-conférences, niveau de double aveugle, grille et pondérations définitives, résumé seul ou article complet, tarifs et agrégateur de paiement, entité de facturation, actes (DOI/ISBN), sessions hybrides, lettres d'invitation. (L'emplacement de l'espace évaluateur est tranché : application `gestion`, décision H1.)
+Date de la conférence, mono- ou multi-conférences, niveau de double aveugle, grille et pondérations définitives, résumé seul ou article complet, tarifs et agrégateur de paiement, entité de facturation, actes (DOI/ISBN), sessions hybrides, lettres d'invitation, noms des auteurs au programme public (Q14). (L'emplacement de l'espace évaluateur est tranché : application `gestion`, décision H1.)

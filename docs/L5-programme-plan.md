@@ -1,10 +1,10 @@
 # Lot L5 — Programme : plan d'implémentation
 
-> **Statut : validé le 6 octobre 2026** (décisions I1 à I18 telles que proposées, sans
-> correction ; propositions du §10 retenues, dont la lecture seule des autres fonctions du CO
-> et le rappel de la confirmation de présentation). Reste ouverte la question Q14 : la
+> **Statut : validé le 6 octobre 2026, livré** (décisions I1 à I18 telles que proposées,
+> sans correction ; propositions du §10 retenues, dont la lecture seule des autres fonctions
+> du CO et le rappel de la confirmation de présentation). Étapes L5.0 à L5.7 livrées ; bilan
+> du lot : `docs/L5-programme.md` ; étude : §21. Reste ouverte la question Q14 : la
 > déclaration « publication » couvre-t-elle les noms des auteurs au programme public ?
-> L4 est clos (bilan : `docs/L4-evaluation.md`).
 >
 > Sources :
 > - étude §3.3 (matrice), §4 M7 (et M10 pour les salles), §5.1, §5.4, §6 (RG-11, RG-12,
@@ -644,3 +644,47 @@ co-intervenants, présidence, consignes ; lien « Ajouter à mon agenda (.ics) �
   antérieure d'Angular : à relever (370 ko) ou à garder comme simple avertissement. **À
   trancher par le commanditaire**, le seuil d'erreur (380 ko) restant inchangé.
 - La page « Intervenants » reste « à venir » (fiche M10, P2).
+
+## 18. Bilan de L5.7 (6 octobre 2026)
+
+**Rappel de la confirmation de présentation** (proposition du §9, retenue à la validation et
+restée à faire) : commande `remind_presentations`, horaire, idempotente et verrouillée.
+
+- Tant que l'auteur n'a pas confirmé, le soumissionnaire reçoit un rappel trois jours, puis
+  dix jours après la réception de sa version finale (date lue dans l'historique des
+  statuts), une fois chacun.
+- Un passage manqué n'est pas rattrapé : seul le rappel le plus récent part.
+- Idempotence par la clé de l'e-mail, sans nouvelle table. Rien pour une communication
+  confirmée ni pour une édition archivée.
+- Gabarit FR et EN, objet sans autre variable que le nom du site ; cron et `deploy/README.md`
+  mis à jour (liste fermée de `cron.sh` et son test).
+
+**Bout en bout** : le parcours en série de L4 se prolonge de trois étapes, sur la même base.
+
+1. L'auteure confirme sa présentation.
+2. Dans la gestion :
+   - le CO « programme » (2FA) crée une salle et une session trop courte, puis place la
+     communication au clavier ;
+   - le dépassement de 5 minutes est signalé (RG-13), puis corrigé par la durée du créneau ;
+   - le Chair (2FA) publie : statut « programmée », e-mail de passage, historique.
+3. L'auteure voit « Mon passage », télécharge le fichier iCal (UTC), retrouve le créneau dans
+   sa soumission et la session au programme public, sans son adresse.
+
+Le seed crée deux comptes de plus (CO « programme », Chair). Les 8 tests passent.
+
+**Documentation** :
+
+- bilan du lot `docs/L5-programme.md` ;
+- étude §21 (Markdown et HTML), version 1.5 ;
+- `CLAUDE.md` : structure, cron, état d'avancement, « Décisions du lot L5 ».
+
+**Vérifications finales** :
+
+- backend : 2 471 tests sous SQLite (8 ignorés) ; **2 479 sous MariaDB, suite complète** ;
+  ruff ; traductions ; shellcheck ;
+- front : 345 tests et 11 tests de scripts ; lint, format, build ;
+- E2E : 8 tests.
+
+**À faire hors du code** : passage en CI de L5.3 à L5.7 (nouvelle PR, sur demande) ; démo F
+sur o2switch ; Q14 ; transition `ACCEPTED_MINOR → WITHDRAWN` ; seuil d'avertissement du bundle
+du portail.

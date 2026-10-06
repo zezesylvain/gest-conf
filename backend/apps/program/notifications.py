@@ -16,11 +16,13 @@ from apps.submissions.models import Submission
 
 WITHDRAWN = "program/email/withdrawn"
 PASSAGE = "program/email/passage"
+PRESENTATION_REMINDER = "program/email/presentation_reminder"
 
 
 def register_program_templates() -> None:
     register_email_template(WITHDRAWN)
     register_email_template(PASSAGE)
+    register_email_template(PRESENTATION_REMINDER)
 
 
 def agenda_link() -> str:
@@ -72,6 +74,30 @@ def withdrawn_from_programme(submission: Submission, *, was_placed: bool) -> Non
             },
             idempotency_key=f"program-withdrawn:{submission.pk}:{member.pk}",
         )
+
+
+def presentation_reminder(submission: Submission, idempotency_key: str) -> None:
+    """Rappel au soumissionnaire : désigner les présentateurs et confirmer sa venue (I5)."""
+    from apps.submissions.notifications import submission_link
+
+    submitter = submission.submitter
+    edition = submission.edition
+    locale = resolve_locale(None, submitter)
+    with translation.override(locale):
+        untitled = _("(sans titre)")
+    queue_email(
+        template_code=PRESENTATION_REMINDER,
+        to_email=submitter.email,
+        to_user=submitter,
+        locale=locale,
+        context={
+            "reference": submission.reference or "",
+            "title": submission.title or untitled,
+            "edition_title": edition_title(edition, locale),
+            "link": submission_link(submission),
+        },
+        idempotency_key=idempotency_key,
+    )
 
 
 def _recipient(key: str) -> tuple[str, User | None]:

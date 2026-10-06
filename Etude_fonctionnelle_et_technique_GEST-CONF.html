@@ -188,6 +188,16 @@ hr{border:0;border-top:1px solid var(--line);margin:2em 0}
 <li><a href="#20-8-tests-planning-et-points-ouverts">20.8 Tests, planning et points ouverts</a></li>
 </ul>
 </li>
+<li><a href="#21-mises-a-jour-issues-du-lot-l5">21. Mises à jour issues du lot L5 (version 1.5)</a><ul>
+<li><a href="#21-1-programme-m7">21.1 Programme (M7)</a></li>
+<li><a href="#21-2-workflow-et-regles-de-gestion">21.2 Workflow et règles de gestion</a></li>
+<li><a href="#21-3-publication-programme-public-et-mon-passage">21.3 Publication, programme public et « Mon passage »</a></li>
+<li><a href="#21-4-droits-et-gestion">21.4 Droits et gestion</a></li>
+<li><a href="#21-5-modele-de-donnees-et-api">21.5 Modèle de données et API</a></li>
+<li><a href="#21-6-exploitation">21.6 Exploitation</a></li>
+<li><a href="#21-7-tests-planning-et-points-ouverts">21.7 Tests, planning et points ouverts</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </nav><main><h1 id="etude-fonctionnelle-et-technique">Étude fonctionnelle et technique</h1>
@@ -202,7 +212,7 @@ hr{border:0;border-top:1px solid var(--line);margin:2em 0}
 <tbody>
 <tr>
 <td><strong>Version</strong></td>
-<td>1.4 – document de cadrage, mis à jour après les lots L1 (§17), L2 (§18), L3 (§19) et L4 (§20)</td>
+<td>1.5 – document de cadrage, mis à jour après les lots L1 (§17), L2 (§18), L3 (§19), L4 (§20) et L5 (§21)</td>
 </tr>
 <tr>
 <td><strong>Date</strong></td>
@@ -3370,6 +3380,65 @@ def weighted_score(scores, criteria, scale_min, scale_max):
 <li>Charge de L4 estimée à 24 – 30,5 j-h (étude : 18 – 24).</li>
 <li><strong>Avant la campagne d'évaluation réelle</strong> : démo E sur o2switch avec le cron <code>remind_reviewers</code>, grille et pondérations définitives (Q4), niveau de double aveugle (Q3), fournisseur d'e-mails de production (D10). Budget du portail inchangé (367,7 kB pour un avertissement à 365 kB).</li>
 <li><strong>Reporté (P2)</strong> : suggestions d'affectation et mots-clés d'expertise, validation des décisions par le Chair, export PDF des évaluations, détection de l'identité dans le texte du PDF.</li>
+</ul>
+<h2 id="21-mises-a-jour-issues-du-lot-l5">21. Mises à jour issues du lot L5 (version 1.5)</h2>
+<p>Les décisions I1 à I18 du plan <a href="docs/L5-programme-plan.md"><code>docs/L5-programme-plan.md</code></a> ont été validées le 6 octobre 2026 et mises en œuvre dans le lot L5. Cette section les reporte dans l'étude ; <strong>en cas de divergence avec les sections précédentes (§17 à §20 compris), elle prévaut</strong>. Le détail (justifications, vérifications, défauts trouvés) est dans le plan, §2 et §11 à §18 ; le bilan du lot dans <a href="docs/L5-programme.md"><code>docs/L5-programme.md</code></a>.</p>
+<h3 id="21-1-programme-m7">21.1 Programme (M7)</h3>
+<ul>
+<li><strong>Structure</strong> (I2, I3) : édition → jours (dates de l'édition) → <strong>sessions</strong> → <strong>créneaux</strong>. Session : type en <strong>catalogue fermé</strong> (ouverture, plénière, parallèle, posters, atelier, tutoriel, table ronde, assemblée, pause, repas, social, clôture), titres et descriptions FR et EN, thématique et salle facultatives, horaires, consignes techniques. Créneau : position et durée ; début et fin <strong>calculés</strong> par le serveur (à la suite depuis le début de la session, séparés par le tampon) ; une communication <strong>ou</strong> un élément libre (titre FR et EN, intervenant invité facultatif). Une communication n'occupe qu'un créneau.</li>
+<li><strong>Salles</strong> (I9) : capacité, équipements (liste fermée et note), accessibilité et indications d'accès. Une salle utilisée ne se supprime pas : elle se désactive.</li>
+<li><strong>Planificateur dans la gestion</strong> (I15) : grille du jour par salle, liste « à programmer » (communications confirmées non placées) filtrable, glisser-déposer <strong>et équivalent au clavier</strong> (« Placer dans… », monter, descendre, durée, retrait), résultats annoncés aux lecteurs d'écran, vue en liste sous 768 px.</li>
+<li><strong>RG-12</strong> (I4) : conflits de salle (deux sessions qui se chevauchent dans la même salle) et de personne (présentateur, intervenant invité, rôle de séance à deux endroits au même moment). Une personne s'identifie par son compte, ou par l'adresse d'un auteur sans compte ; le conflit ne cite que le nom. Deux présences dans la même session ne sont pas un conflit.</li>
+<li><strong>RG-13</strong> (I5) : la somme des durées et des tampons ne dépasse pas la durée de la session. Le <strong>tampon</strong> est un paramètre de l'édition (0 à 30 minutes, défaut 0) ; le changer recalcule tous les créneaux. Le brouillon peut contenir des conflits, signalés à chaque écriture ; <strong>la publication est refusée tant qu'il en reste</strong> (I6).</li>
+<li><strong>Heures</strong> (I12) : saisie à l'heure de l'édition, stockage en UTC ; heure inexistante ou ambiguë refusée sur le champ concerné ; session commencée pendant les dates de l'édition et de 24 heures au plus ; durées en temps réel.</li>
+<li><strong>Concurrence</strong> (I14) : toutes les écritures verrouillent l'état du programme de l'édition (une ligne par édition, hors de la table des éditions) et portent la révision lue en <code>If-Match</code> (412 si elle a changé ; l'interface recharge).</li>
+</ul>
+<h3 id="21-2-workflow-et-regles-de-gestion">21.2 Workflow et règles de gestion</h3>
+<ul>
+<li><strong>Confirmation de présentation</strong> (I5, <strong>écart</strong> avec §5.1 : par le soumissionnaire, et non par le système en L6) : <code>CAMERA_READY_RECEIVED → CONFIRMED</code>, avec les présentateurs désignés parmi les auteurs. Un changement ultérieur de présentateurs d'une communication placée change la révision du programme (RG-12).</li>
+<li><strong>RG-11</strong> devient un paramètre de l'édition, désactivé par défaut et sans effet avant les inscriptions (L6).</li>
+<li><strong>Retraits ajoutés</strong> (I5) : depuis <code>CAMERA_READY_RECEIVED</code>, <code>CONFIRMED</code> et <code>SCHEDULED</code>, par le soumissionnaire, motif obligatoire ; le créneau est libéré et l'équipe du programme prévenue (sans le motif).</li>
+<li><strong>Publication</strong> (I6) : <code>CONFIRMED → SCHEDULED</code> pour les communications placées ; <strong><code>SCHEDULED → CONFIRMED</code> (ajoutée)</strong> pour celles retirées du programme publié. Le workflow compte 23 transitions et revérifie <code>program.publish</code>.</li>
+<li><strong>Rappel</strong> : sans confirmation, le soumissionnaire reçoit un rappel trois jours, puis dix jours après la réception de sa version finale.</li>
+<li><strong>Point ouvert</strong> : <code>ACCEPTED_MINOR → WITHDRAWN</code> n'existe pas ; un auteur accepté sous réserve ne se retire qu'après sa version finale.</li>
+</ul>
+<h3 id="21-3-publication-programme-public-et-mon-passage">21.3 Publication, programme public et « Mon passage »</h3>
+<ul>
+<li><strong>Publication</strong> (I6, I13 ; RG-17) par le Chair seul, réauthentification récente : <strong>instantané numéroté</strong>, en ajout seul, construit par liste blanche ; journal <code>program.published</code> ; historique (version, date, auteur, différences). Refusée sans modification depuis la dernière version.</li>
+<li><strong>Notifications ciblées</strong> (I16) : un e-mail à chaque présentateur, intervenant invité ou président de séance dont le passage est nouveau, modifié ou supprimé, une fois par version ; un présentateur sans compte est écrit à son adresse d'auteur. Les inscrits : après L6.</li>
+<li><strong>Programme public</strong> (I7) : <strong>pré-rendu au build</strong>, en FR et EN, à partir du dernier instantané publié ; accueil (jours et sessions, filtres par jour, salle, thématique et type, recherche), une page par jour (liste détaillée ou grille par salle), une page par session. Heures dans le fuseau de l'édition, indiqué. <strong>Visible après la remise en ligne du portail</strong> (<code>deploy.sh --portal-only</code>) : la publication compte parmi les modifications à mettre en ligne. Les pages des jours et des sessions sont annoncées au contrôle après build et au plan du site. Contenu : titres, horaires, salles, noms et institutions des auteurs (Q14), présidents de séance ; <strong>jamais d'adresse</strong>.</li>
+<li><strong>Intervenants invités</strong> (I11) : biographie et photo publiées seulement avec les consentements de L2.</li>
+<li><strong>« Mon passage »</strong> (I8) : <code>/compte/mon-passage</code>, d'après l'instantané publié ; reconnu par le compte ou par une adresse vérifiée (un co-auteur qui crée son compte plus tard retrouve son passage). Fichier <strong>iCal</strong> (RFC 5545, UTC), générateur écrit à la main et testé.</li>
+<li><strong>Soumission</strong> : le créneau publié figure dans la réponse de l'auteur (<code>schedule</code>), même s'il ne présente pas.</li>
+</ul>
+<h3 id="21-4-droits-et-gestion">21.4 Droits et gestion</h3>
+<ul>
+<li><strong>Capacités</strong> (I1) : <code>program.read</code> (<code>ADMIN</code>, <code>CHAIR</code>, <code>SC_CHAIR</code>, <code>OC_MEMBER</code> de toutes fonctions), <code>program.write</code> (<code>ADMIN</code>, <code>OC_MEMBER</code> de fonction « programme » ; <strong>réponse partielle à Q12</strong> : les autres fonctions du CO lisent), <code>program.publish</code> (<code>CHAIR</code>). L'administrateur ne publie pas.</li>
+<li><strong>Rôles de séance</strong> (I10) : comptes de l'édition ; <code>SESSION_CHAIR</code> et <code>SPEAKER</code> sont invitables par <code>ADMIN</code> et <code>CHAIR</code> (parcours d'invitation de L1).</li>
+<li><strong>Écrans de la gestion</strong> : rubrique « Programme » (planificateur, sessions, salles, publication), « Paramétrage › Programme », carte « Programme » du tableau de bord ; chaque écran est inscrit dans le rail et a sa fiche d'aide.</li>
+</ul>
+<h3 id="21-5-modele-de-donnees-et-api">21.5 Modèle de données et API</h3>
+<ul>
+<li>Application <code>program</code> : <code>room</code>, <code>session</code>, <code>slot</code>, <code>session_role</code>, <code>program_state</code> (révision du brouillon, révision et version publiées), <code>program_publication</code> (ajout seul), <code>presentation_confirmation</code>. Édition : <code>session_buffer_minutes</code>, <code>presenter_registration_required</code>.</li>
+<li><strong>Données personnelles</strong> : rôles de séance, créneaux d'intervenant et confirmations à l'export ; anonymisation refusée tant que la personne figure au programme d'une édition non archivée ; ensuite, son nom est retiré des instantanés publiés.</li>
+<li><strong>API de gestion</strong> <code>…/manage/editions/{id}/program/…</code> : brouillon complet (<code>program</code>), <code>rooms</code>, <code>sessions</code>, <code>slots</code>, <code>session-roles</code>, <code>people</code>, <code>settings</code>, <code>publish</code>, <code>publications</code> ; chaque écriture renvoie le brouillon complet avec ses conflits.</li>
+<li><strong>API publique</strong> : <code>/v1/public/program</code>, <code>…/days/{date}</code>, <code>…/sessions/{id}</code> (cache public de 5 minutes, 404 avant publication). <strong>Compte</strong> : <code>/v1/me/agenda</code>, <code>/v1/me/agenda.ics</code>. <strong>Auteur</strong> : <code>…/submissions/{id}/confirm-presentation</code>, champs <code>presentation</code> et <code>schedule</code>.</li>
+<li>Codes d'erreur ajoutés : <code>program_conflicts</code>, <code>program_unchanged</code>.</li>
+</ul>
+<h3 id="21-6-exploitation">21.6 Exploitation</h3>
+<ul>
+<li>Cron : <code>remind_presentations</code> toutes les heures, en plus des commandes des lots précédents ; idempotente et verrouillée.</li>
+<li>Après chaque publication du programme : remise en ligne du portail.</li>
+<li><code>check_integrity</code> contrôle aussi les créneaux (<code>program.slots</code>) et la cohérence entre statuts et programme publié (<code>program.publication</code>).</li>
+<li>À vérifier sur o2switch : compression HTTP des pages statiques.</li>
+</ul>
+<h3 id="21-7-tests-planning-et-points-ouverts">21.7 Tests, planning et points ouverts</h3>
+<ul>
+<li>2 471 tests backend (2 479 sous MariaDB) : programme, publication, programme public par traceurs, iCal, rappels, concurrence sur MariaDB ; matrice des droits (1 524 cas). 345 tests front. <strong>Parcours de bout en bout</strong> (Playwright) en CI, prolongé : confirmation de présentation, salle et session, placement au clavier, dépassement signalé puis corrigé, publication par le Chair, « Mon passage », fichier iCal et programme public.</li>
+<li>Charge de L5 estimée à 21,5 – 27 j-h (étude : 16 – 22).</li>
+<li><strong>Avant la mise en ligne</strong> : démo F sur o2switch avec le cron <code>remind_presentations</code>, compression HTTP à vérifier, Q14 (noms des auteurs au programme public).</li>
+<li><strong>À trancher</strong> : transition <code>ACCEPTED_MINOR → WITHDRAWN</code> ; seuil d'avertissement du bundle initial du portail (367,8 kB pour 365 kB ; le framework en fait 96 %).</li>
+<li><strong>Reporté</strong> : indisponibilités, « Mon programme » du participant et notification des inscrits (après L6), PDF du programme, fiche intervenant complète (M10), minuterie du président de séance (P2) ; proposition automatique de planning et sessions hybrides (P3).</li>
 </ul>
 <hr />
 <p><em>Fin du document.</em></p></main></div>

@@ -91,8 +91,23 @@ with tempfile.NamedTemporaryFile(prefix="gestconf-e2e-", suffix=".pdf", delete=F
 # Identifiants de test, connus du navigateur de test, sur une base jetable : pas des secrets.
 PASSWORD = "Une-phrase-assez-longue-2026"  # noqa: S105
 TOTP_SECRET = "JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP"  # noqa: S105
+# Programme (plan L5) : CO de fonction « programme » (écriture) et Chair (publication, I1).
 committee = {
     "chair": ("president.cs@e2e.example.org", "Koffi", "Yao", "Institut Pasteur", Role.SC_CHAIR),
+    "program": (
+        "programme@e2e.example.org",
+        "Mariam",
+        "Bamba",
+        "INP-HB",
+        Role.OC_MEMBER,
+    ),
+    "conference_chair": (
+        "president@e2e.example.org",
+        "Yao",
+        "Kouassi",
+        "Université FHB",
+        Role.CHAIR,
+    ),
     "reviewer1": (
         "relecteur.un@e2e.example.org",
         "Aminata",
@@ -123,7 +138,14 @@ for email, first_name, last_name, institution, role in committee.values():
     Authenticator.objects.create(
         user=user, type=Authenticator.Type.TOTP, data={"secret": encrypt(TOTP_SECRET)}
     )
-    grant_role(user=user, edition=edition, role=role, actor=actor, source=RoleSource.COMMAND)
+    grant_role(
+        user=user,
+        edition=edition,
+        role=role,
+        actor=actor,
+        source=RoleSource.COMMAND,
+        oc_function="program" if role == Role.OC_MEMBER else "",
+    )
 
 print(
     json.dumps(
