@@ -97,10 +97,18 @@ class ScheduledSubmissionSerializer(serializers.Serializer):
     default_duration_min = serializers.IntegerField()
     presenters = serializers.ListField(child=serializers.CharField())
     confirmed = serializers.BooleanField(help_text="Présentateurs désignés par l'auteur (I5).")
+    presenter_registered = serializers.BooleanField(
+        allow_null=True,
+        help_text="Un présentateur au moins est inscrit (RG-11) ; nul sans les inscriptions.",
+    )
 
 
-def scheduled_submission(submission) -> dict:
-    from apps.program.services.planning import DEFAULT_SLOT_MINUTES, presenters
+def scheduled_submission(submission, registered: frozenset[str] | None = None) -> dict:
+    from apps.program.services.planning import (
+        DEFAULT_SLOT_MINUTES,
+        presenter_registered,
+        presenters,
+    )
 
     kind = submission.submission_type
     return {
@@ -116,6 +124,9 @@ def scheduled_submission(submission) -> dict:
             f"{author.first_name} {author.last_name}".strip() for author in presenters(submission)
         ],
         "confirmed": getattr(submission, "presentation_confirmation", None) is not None,
+        "presenter_registered": None
+        if registered is None
+        else presenter_registered(submission, registered),
     }
 
 
@@ -155,7 +166,7 @@ class SessionSerializer(serializers.Serializer):
     roles = SessionRoleSerializer(many=True)
 
 
-def session_data(session: Session) -> dict:
+def session_data(session: Session, registered: frozenset[str] | None = None) -> dict:
     zone = session.edition.timezone
     return {
         "id": session.pk,
@@ -178,7 +189,9 @@ def session_data(session: Session) -> dict:
                 "duration_min": slot.duration_min,
                 "starts_at": slot.starts_at,
                 "ends_at": slot.ends_at,
-                "submission": scheduled_submission(slot.submission) if slot.submission else None,
+                "submission": scheduled_submission(slot.submission, registered)
+                if slot.submission
+                else None,
                 "title_fr": slot.title_fr,
                 "title_en": slot.title_en,
                 "speaker": person(slot.speaker),
@@ -193,14 +206,21 @@ def session_data(session: Session) -> dict:
 
 
 # Types de conflits (RG-12, RG-13) : énumération « ProgramConflictKind » du schéma.
-PROGRAM_CONFLICT_CHOICES = [("room", "room"), ("person", "person"), ("overflow", "overflow")]
+PROGRAM_CONFLICT_CHOICES = [
+    ("room", "room"),
+    ("person", "person"),
+    ("overflow", "overflow"),
+    ("registration", "registration"),
+]
 
 
 class ProgramConflictSerializer(serializers.Serializer):
     kind = serializers.ChoiceField(choices=PROGRAM_CONFLICT_CHOICES)
     sessions = serializers.ListField(child=serializers.IntegerField())
     slots = serializers.ListField(child=serializers.IntegerField())
-    person = serializers.CharField(help_text="Nom de la personne (conflit de personne).")
+    person = serializers.CharField(
+        help_text="Nom de la personne (conflit de personne) ou des présentateurs (RG-11)."
+    )
     minutes = serializers.IntegerField(help_text="Dépassement en minutes (RG-13).")
 
 
@@ -286,6 +306,7 @@ def board_data(edition: Edition) -> dict:
     state = planning.program_state(edition)
     sessions = list(planning.program_sessions(edition))
     conflicts = planning.detect_conflicts(edition, sessions)
+    registered = planning.registered_people(edition)
     if edition.start_date and edition.end_date:
         count = (edition.end_date - edition.start_date).days + 1
         days = [edition.start_date + dt.timedelta(days=offset) for offset in range(count)]
@@ -301,8 +322,10 @@ def board_data(edition: Edition) -> dict:
         "days": days,
         "buffer_minutes": edition.session_buffer_minutes,
         "rooms": RoomSerializer(Room.objects.filter(edition=edition), many=True).data,
-        "sessions": [session_data(item) for item in sessions],
-        "to_schedule": [scheduled_submission(item) for item in planning.to_schedule(edition)],
+        "sessions": [session_data(item, registered) for item in sessions],
+        "to_schedule": [
+            scheduled_submission(item, registered) for item in planning.to_schedule(edition)
+        ],
         "conflicts": [
             {
                 "kind": item.kind,

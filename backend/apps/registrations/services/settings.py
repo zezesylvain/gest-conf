@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
 
+from django.conf import settings as django_settings
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.utils.translation import gettext_lazy as _
@@ -62,7 +63,7 @@ def zone_for(edition: Edition, settings: RegistrationSettings, country: str) -> 
 def offered_methods(settings: RegistrationSettings) -> list[str]:
     """Moyens de paiement proposés aux participants (J6, J7), dans un ordre fixe."""
     methods = []
-    if settings.online_enabled:
+    if settings.online_enabled and django_settings.GESTCONF_PAYMENT_PROVIDER:
         methods.append(PaymentMethod.ONLINE)
     if settings.transfer_enabled:
         methods.append(PaymentMethod.TRANSFER)
@@ -129,6 +130,10 @@ def update_registration_settings(
         return settings
     if "currency" in changed:
         _check_currency_change(edition, values["currency"])
+    if values.get("online_enabled") and not django_settings.GESTCONF_PAYMENT_PROVIDER:
+        raise Invalid(
+            fields={"online_enabled": [_("Aucun fournisseur de paiement en ligne configuré.")]}
+        )
     before = snapshot(settings)
     for name in changed:
         setattr(settings, name, values[name])

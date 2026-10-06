@@ -79,6 +79,7 @@
       "option_full": "No place left for this option.",
       "promo_code_exhausted": "This promo code has reached its number of uses.",
       "already_registered": "You are already registered for this edition.",
+      "payment_unavailable": "Online payment is unavailable: try again later or choose another method.",
       "program_conflicts": "The programme has conflicts: fix them before publishing.",
       "program_unchanged": "Nothing has changed since the last publication."
     },

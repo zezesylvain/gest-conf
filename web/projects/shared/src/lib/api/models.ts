@@ -166,8 +166,10 @@ export type { PatchedSlotUpdateRequest } from './models/patched-slot-update-requ
 export type { PatchedSubmissionTypeRequest } from './models/patched-submission-type-request';
 export type { PatchedSubmissionWriteRequest } from './models/patched-submission-write-request';
 export type { PatchedTrackRequest } from './models/patched-track-request';
+export type { PaymentCheck } from './models/payment-check';
 export type { PaymentMethod } from './models/payment-method';
 export type { PaymentRef } from './models/payment-ref';
+export type { PaymentStart } from './models/payment-start';
 export type { PeerReview } from './models/peer-review';
 export type { Period } from './models/period';
 export type { Person } from './models/person';

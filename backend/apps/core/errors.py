@@ -103,6 +103,8 @@ class ErrorCode(models.TextChoices):
     OPTION_FULL = "option_full"
     PROMO_CODE_EXHAUSTED = "promo_code_exhausted"
     ALREADY_REGISTERED = "already_registered"
+    # Paiement en ligne non proposé, impossible (devise, montant) ou fournisseur injoignable.
+    PAYMENT_UNAVAILABLE = "payment_unavailable"
 
 
 class DomainError(Exception):

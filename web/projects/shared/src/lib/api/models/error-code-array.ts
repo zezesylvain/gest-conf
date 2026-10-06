@@ -54,5 +54,6 @@ export const ERROR_CODE: ErrorCode[] = [
   'registration_closed',
   'option_full',
   'promo_code_exhausted',
-  'already_registered'
+  'already_registered',
+  'payment_unavailable'
 ];

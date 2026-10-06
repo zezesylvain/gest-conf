@@ -8,11 +8,15 @@ from __future__ import annotations
 
 import hashlib
 
-from django.http import Http404, HttpResponse
+from django.conf import settings
+from django.http import Http404, HttpResponse, HttpResponseRedirect
+from django.middleware.csrf import get_token
+from django.utils.html import escape
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
-from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import serializers, status
+from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -21,7 +25,9 @@ from apps.accounts.permissions import ManageViewSet, RecentAuthRequired
 from apps.accounts.roles import Capability as C
 from apps.accounts.services.roles import ensure_editable
 from apps.core.actor import Actor
+from apps.core.permissions import CsrfEnforced
 from apps.payments.models import BillingDocument
+from apps.payments.providers import fake
 from apps.payments.serializers import (
     BillingDocumentSerializer,
     BillingProfileSerializer,
@@ -29,7 +35,7 @@ from apps.payments.serializers import (
     ManualPaymentSerializer,
     RefundSerializer,
 )
-from apps.payments.services import billing, documents, manual
+from apps.payments.services import billing, documents, manual, online
 from apps.registrations.manage_views import detailed, manage_data
 from apps.registrations.models import Registration
 from apps.registrations.serializers import DocumentRefSerializer, ManageRegistrationSerializer
@@ -310,3 +316,147 @@ class MyProformaView(_MyDocumentsView):
             ).data,
             status=status.HTTP_201_CREATED,
         )
+
+
+# --- Paiement en ligne (J6, RG-15) ----------------------------------------------------------------
+
+
+class PaymentStartSerializer(serializers.Serializer):
+    payment_url = serializers.URLField()
+    reference = serializers.CharField()
+
+
+class PaymentCheckSerializer(serializers.Serializer):
+    outcome = serializers.CharField()
+    status = serializers.CharField()
+
+
+class MyPaymentView(_MyDocumentsView):
+    """``POST /v1/registrations/{id}/pay`` : nouvelle tentative de paiement en ligne ;
+    le navigateur est ensuite **dirigé** vers la page hébergée du fournisseur (jamais un
+    formulaire : la CSP du portail l'interdirait, bilan de L6.0)."""
+
+    throttle_scope = "registration_write"
+
+    @extend_schema(
+        operation_id="registrations_pay", request=None, responses={201: PaymentStartSerializer}
+    )
+    def post(self, request: Request, registration_id: int) -> Response:
+        registration = self.registration(request, registration_id)
+        language = "en" if getattr(request, "LANGUAGE_CODE", "fr").startswith("en") else "fr"
+        payment, url = online.start_online_payment(
+            registration, actor=Actor.from_request(request), language=language
+        )
+        return Response(
+            {"payment_url": url, "reference": payment.reference}, status=status.HTTP_201_CREATED
+        )
+
+
+class MyPaymentCheckView(_MyDocumentsView):
+    """``POST /v1/registrations/{id}/payment-check`` : au retour de la page de paiement,
+    interroge le fournisseur sur la dernière tentative (le retour lui-même ne prouve rien,
+    RG-15)."""
+
+    throttle_scope = "payment_check"
+
+    @extend_schema(
+        operation_id="registrations_payment_check",
+        request=None,
+        responses={200: PaymentCheckSerializer},
+    )
+    def post(self, request: Request, registration_id: int) -> Response:
+        registration = self.registration(request, registration_id)
+        outcome = online.check_latest(registration)
+        registration.refresh_from_db(fields=["status"])
+        return Response({"outcome": outcome, "status": registration.status})
+
+
+class PaymentWebhookView(APIView):
+    """``POST /v1/payments/webhook/{provider}`` : notification du fournisseur (J6).
+
+    Publique, sans session donc sans CSRF, limitée en débit. Le jeton de la notification est
+    vérifié, puis le statut **interrogé** : rien n'est cru du corps reçu (RG-15). Réponse
+    rapide et sans détail ; ``GET`` répond 200 (contrôle de l'adresse par l'agrégateur)."""
+
+    authentication_classes = ()
+    permission_classes = (AllowAny,)
+    throttle_scope = "payment_webhook"
+    parser_classes = (JSONParser, FormParser, MultiPartParser)
+
+    def _provider(self, provider: str) -> str:
+        if provider != settings.GESTCONF_PAYMENT_PROVIDER or provider == "":
+            raise Http404
+        return provider
+
+    @extend_schema(operation_id="payments_webhook_ping", auth=[], responses={200: None})
+    def get(self, request: Request, provider: str) -> Response:
+        self._provider(provider)
+        return Response({"ok": True})
+
+    @extend_schema(operation_id="payments_webhook", auth=[], request=None, responses={200: None})
+    def post(self, request: Request, provider: str) -> Response:
+        name = self._provider(provider)
+        data = request.data.dict() if hasattr(request.data, "dict") else dict(request.data)
+        outcome = online.receive_notification(name, data)
+        if outcome == "unreadable":
+            return Response({"ok": False}, status=status.HTTP_400_BAD_REQUEST)
+        if outcome in ("invalid_token", "unknown_payment"):
+            return Response({"ok": False}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response({"ok": True})
+
+
+FAKE_PAGE = """<!doctype html>
+<html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Paiement de démonstration</title>
+<style>body{{font-family:sans-serif;max-width:32rem;margin:3rem auto;padding:0 1rem}}
+button{{font-size:1rem;padding:.6rem 1.2rem;margin:.4rem .4rem 0 0}}</style></head>
+<body><h1>Paiement de démonstration</h1>
+<p>Fournisseur factice : aucune somme n'est prélevée.</p>
+<p>Référence : <strong>{reference}</strong><br>Montant : <strong>{amount} {currency}</strong></p>
+<form method="post"><input type="hidden" name="csrfmiddlewaretoken" value="{csrf}">
+<button name="action" value="pay">Payer</button>
+<button name="action" value="fail">Refuser le paiement</button></form></body></html>"""
+
+
+class FakeCheckoutView(APIView):
+    """``/v1/payments/fake/{référence}`` : « page hébergée » du fournisseur factice
+    (démonstration, E2E). Absente si le fournisseur configuré n'est pas « fake »."""
+
+    authentication_classes = ()
+    permission_classes = (CsrfEnforced,)
+    parser_classes = (FormParser, MultiPartParser)
+
+    def _state(self, reference: str) -> dict:
+        if settings.GESTCONF_PAYMENT_PROVIDER != "fake":
+            raise Http404
+        state = fake.get_state(reference)
+        if not state:
+            raise Http404
+        return state
+
+    @extend_schema(exclude=True)
+    def get(self, request: Request, reference: str) -> HttpResponse:
+        state = self._state(reference)
+        page = FAKE_PAGE.format(
+            reference=escape(reference),
+            amount=escape(state["amount"]),
+            currency=escape(state["currency"]),
+            csrf=escape(get_token(request._request)),
+        )
+        return HttpResponse(page, content_type="text/html; charset=utf-8")
+
+    @extend_schema(exclude=True)
+    def post(self, request: Request, reference: str) -> HttpResponse:
+        state = self._state(reference)
+        paid = request.data.get("action") == "pay"
+        fake.set_state(reference, status="SUCCESS" if paid else "FAILED")
+        online.receive_notification(
+            "fake",
+            {
+                "merchant_transaction_id": reference,
+                "transaction_id": state["transaction_id"],
+                "notify_token": state["token"],
+            },
+        )
+        return HttpResponseRedirect(state["success_url"] if paid else state["failed_url"])

@@ -54,4 +54,20 @@ urlpatterns = [
         views.MyProformaView.as_view(),
         name="registration-proforma",
     ),
+    path(
+        "registrations/<int:registration_id>/pay",
+        views.MyPaymentView.as_view(),
+        name="registration-pay",
+    ),
+    path(
+        "registrations/<int:registration_id>/payment-check",
+        views.MyPaymentCheckView.as_view(),
+        name="registration-payment-check",
+    ),
+    path(
+        "payments/webhook/<str:provider>",
+        views.PaymentWebhookView.as_view(),
+        name="payments-webhook",
+    ),
+    path("payments/fake/<str:reference>", views.FakeCheckoutView.as_view(), name="payments-fake"),
 ]

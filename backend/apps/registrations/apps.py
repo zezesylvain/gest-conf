@@ -8,6 +8,7 @@ class RegistrationsConfig(AppConfig):
     def ready(self) -> None:
         from apps.core.integrity import register_integrity_check
         from apps.core.retention import register_retention_task
+        from apps.program.services.planning import register_registered_people
         from apps.registrations import integrity
         from apps.registrations.notifications import register_registration_templates
         from apps.registrations.personal_data import register_registrations_personal_data
@@ -22,3 +23,5 @@ class RegistrationsConfig(AppConfig):
         )
         register_integrity_check("registrations.totals", integrity.check_totals)
         register_integrity_check("registrations.reservations", integrity.check_reservations)
+        # RG-11 (J10) : le planificateur reconnaît les présentateurs inscrits.
+        register_registered_people(orders.registered_people)

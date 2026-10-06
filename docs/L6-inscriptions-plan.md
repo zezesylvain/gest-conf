@@ -637,3 +637,106 @@ gardes du workflow des soumissions en L4.
   et RG-11 ;
 - vers L7 : inscription sur place au comptoir pour une personne **sans compte**. Le CO
   n'inscrit ici que des comptes existants.
+
+## 15. Bilan de L6.4 (6 octobre 2026)
+
+**Interface de fournisseur** (`apps/payments/providers/`) : `supports` (devise et montant),
+`initiate` (page hébergée), `parse_notification`, `check` (statut interrogé). Configuration
+par l'environnement seulement (règle n° 11) : `GESTCONF_PAYMENT_PROVIDER` (vide, `fake` ou
+`cinetpay`), `CINETPAY_API_KEY`, `CINETPAY_API_PASSWORD`, `CINETPAY_SANDBOX`,
+`CINETPAY_TIMEOUT_SECONDS` (documentés dans `backend/.env.example`).
+
+Garde-fous de `config/settings/prod.py` :
+
+- fournisseur inconnu refusé ;
+- fournisseur factice refusé, sauf recette déclarée (`GESTCONF_ALLOW_FAKE_PAYMENTS`) ;
+- CinetPay sans identifiants refusé.
+
+**Fournisseur factice** : sa « page hébergée » est `/v1/payments/fake/{référence}`, absente
+si le fournisseur configuré n'est pas `fake`. « Payer » ou « Refuser » y fixe le statut côté
+fournisseur, envoie la notification et renvoie le navigateur au portail. Il sert à la
+démonstration, à l'E2E et aux tests.
+
+**CinetPay (API v1)** : client écrit sur `requests` d'après le SDK officiel, testé avec un
+HTTP simulé, sans appel réel.
+
+- **Jeton** : mis en cache 23 h dans le cache de la base, renouvelé une fois s'il a expiré,
+  jamais journalisé.
+- **Initiation** : montant entier, canal `PUSH`, adresses de 120 caractères au plus,
+  nom et prénom complétés à 2 caractères.
+- **Statut** : `SUCCESS` → réussi ; `FAILED`, `EXPIRED`… → échoué ; `INITIATED`, `PENDING`,
+  `NOT_FOUND` → en cours. Un succès annoncé pour une autre référence est refusé.
+- **Notification** : liste blanche. Ni le jeton ni l'identité du payeur (`user`) ne sont
+  gardés.
+- **Montant** : l'interrogation v1 ne renvoie ni montant ni devise. Le montant est lié à la
+  référence à l'initiation (une référence par tentative). Le contrôle du montant et de la
+  devise s'applique aux fournisseurs qui les renvoient (fournisseur factice).
+
+**Service `services/online.py` (RG-15)** :
+
+- **Initiation** : la ligne de paiement est créée et validée **avant** l'appel réseau, pour
+  ne tenir aucun verrou pendant l'appel. On garde l'empreinte SHA-256 du jeton de
+  notification, jamais le jeton.
+  - Fournisseur injoignable : tentative « échouée » et 409 `payment_unavailable`.
+  - Une commande passée par virement peut être réglée en ligne (le moyen devient
+    « en ligne »).
+- **Notification** (`POST /v1/payments/webhook/{fournisseur}`) :
+  - publique, sans session donc sans CSRF (vérifié par un client qui exige le CSRF),
+    limitée à 120 par minute et par adresse ;
+  - JSON, formulaire ou multipart ; `GET` répond 200 (contrôle de l'adresse par
+    l'agrégateur).
+  - Jeton comparé **à temps constant**, puis statut **interrogé** : seule cette
+    interrogation confirme.
+  - Chaque notification est enregistrée (en ajout seul) avec son issue : `confirmed`,
+    `failed`, `pending`, `mismatch`, `deferred`, `invalid_token`, `unknown_payment` ou
+    `unreadable`. Jeton faux : 401, sans effet.
+- **Idempotence** : un paiement final n'est plus interrogé. Une notification rejouée ne
+  produit ni seconde confirmation ni seconde facture.
+- **Fournisseur injoignable** à la notification : une tâche `payments.reconcile` reprend
+  l'interrogation (file `Job`, `run_jobs`).
+- **Retour du navigateur** : sans effet. « Mon inscription » demande une interrogation
+  (`POST /v1/registrations/{id}/payment-check`, 60 par heure).
+- **Paiement reçu hors attente** (inscription expirée, annulée ou déjà réglée) : marqué et
+  journalisé (`payment.orphan`) pour remboursement ou rattachement par le CO, sans
+  reconfirmation automatique.
+- **Réconciliation** : commande `sync_payments` (cron horaire, à 41 minutes).
+  - Elle interroge les tentatives en cours depuis plus de 10 minutes et abandonne celles de
+    plus de 7 jours.
+  - Elle crée aussi les compteurs de facturation de l'année (déplacé depuis
+    `expire_registrations` : `registrations` ne dépend pas de `payments`).
+- **Expiration** (J5) : avant d'expirer une commande, ses paiements en cours sont
+  interrogés. L'expiration est reportée si le fournisseur ne répond pas, ou si une
+  tentative de moins de deux heures est en cours (`register_expiry_check`).
+- **Paramètres** : « paiement en ligne proposé » est refusé sans fournisseur configuré
+  (reporté de L6.1). Le moyen « en ligne » n'est proposé qu'avec un fournisseur.
+- **Participant** : `POST /v1/registrations/{id}/pay` renvoie l'adresse de la page
+  hébergée. Le portail y **dirige** le navigateur, jamais par formulaire (CSP).
+
+**RG-11 (J10)** :
+
+- **Conflit `registration`** dans le planificateur quand l'édition exige un présentateur
+  inscrit : aucun présentateur de la communication placée n'a d'inscription **confirmée**.
+  - Le présentateur est reconnu par son compte, ou par son adresse : celle du compte ou
+    une adresse vérifiée.
+  - Le conflit bloque la publication, comme RG-12 et RG-13.
+- **Indicateur** : `presenter_registered` sur chaque communication du brouillon, placée ou
+  à programmer.
+- **Découplage** : `program` ne dépend pas de `registrations`. Celle-ci déclare la liste
+  des personnes inscrites (`register_registered_people`).
+- **Gestion** : traduction du nouveau conflit ; affichage complet de l'indicateur en L6.5.
+
+**Tests** :
+
+- RG-15 avec le fournisseur factice :
+  - notification valide, jeton faux, rejeu ;
+  - échec annoncé à l'interrogation, montant différent ;
+  - fournisseur injoignable puis tâche ;
+  - paiement après expiration, report de l'expiration ;
+  - réconciliation, abandon ;
+  - webhook en formulaire, page factice.
+- Client CinetPay sur HTTP simulé.
+- RG-11 : conflit, résolution par compte ou par adresse vérifiée, désactivée par défaut,
+  publication refusée.
+- Sous MariaDB aussi.
+
+**Écart avec le plan** : aucun.

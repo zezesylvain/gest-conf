@@ -1514,7 +1514,8 @@
         "slot": "(en conflit)",
         "room": "{{room}} : {{sessions}} se chevauchent (RG-12).",
         "person": "{{person}} est attendu(e) à deux endroits en même temps : {{sessions}} (RG-12).",
-        "overflow": "{{sessions}} déborde de {{minutes}} min (RG-13)."
+        "overflow": "{{sessions}} déborde de {{minutes}} min (RG-13).",
+        "registration": "{{sessions}} : aucun présentateur inscrit ({{person}}) (RG-11)."
       },
       "people": {
         "search": "Rechercher une personne de l'édition",

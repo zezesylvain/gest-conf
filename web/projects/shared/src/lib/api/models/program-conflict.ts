@@ -11,7 +11,7 @@ export interface ProgramConflict {
   minutes: number;
 
   /**
-   * Nom de la personne (conflit de personne).
+   * Nom de la personne (conflit de personne) ou des présentateurs (RG-11).
    */
   person: string;
   sessions: Array<number>;

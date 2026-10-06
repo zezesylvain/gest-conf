@@ -337,6 +337,10 @@ export type { MeProfileUpdate$Params as MeProfileUpdate$Params } from './fn/me/m
 export { meProfileUpdate as meProfileUpdate } from './fn/me/me-profile-update';
 export type { MeTotpQr$Params as MeTotpQr$Params } from './fn/me/me-totp-qr';
 export { meTotpQr as meTotpQr } from './fn/me/me-totp-qr';
+export type { PaymentsWebhookPing$Params as PaymentsWebhookPing$Params } from './fn/payments/payments-webhook-ping';
+export { paymentsWebhookPing as paymentsWebhookPing } from './fn/payments/payments-webhook-ping';
+export type { PaymentsWebhook$Params as PaymentsWebhook$Params } from './fn/payments/payments-webhook';
+export { paymentsWebhook as paymentsWebhook } from './fn/payments/payments-webhook';
 export type { PublicCurrentEdition$Params as PublicCurrentEdition$Params } from './fn/public/public-current-edition';
 export { publicCurrentEdition as publicCurrentEdition } from './fn/public/public-current-edition';
 export type { PublicFile$Params as PublicFile$Params } from './fn/public/public-file';
@@ -369,6 +373,10 @@ export type { RegistrationsCancel$Params as RegistrationsCancel$Params } from '.
 export { registrationsCancel as registrationsCancel } from './fn/registrations/registrations-cancel';
 export type { RegistrationsDocument$Params as RegistrationsDocument$Params } from './fn/registrations/registrations-document';
 export { registrationsDocument as registrationsDocument } from './fn/registrations/registrations-document';
+export type { RegistrationsPay$Params as RegistrationsPay$Params } from './fn/registrations/registrations-pay';
+export { registrationsPay as registrationsPay } from './fn/registrations/registrations-pay';
+export type { RegistrationsPaymentCheck$Params as RegistrationsPaymentCheck$Params } from './fn/registrations/registrations-payment-check';
+export { registrationsPaymentCheck as registrationsPaymentCheck } from './fn/registrations/registrations-payment-check';
 export type { RegistrationsProforma$Params as RegistrationsProforma$Params } from './fn/registrations/registrations-proforma';
 export { registrationsProforma as registrationsProforma } from './fn/registrations/registrations-proforma';
 export type { RegistrationsProof$Params as RegistrationsProof$Params } from './fn/registrations/registrations-proof';

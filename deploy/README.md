@@ -126,6 +126,7 @@ dossier de l'application et y écrit le chemin du venv (`VENV_ACTIVATE`) : le cr
 19 * * * *   $HOME/gestconf-app/deploy/cron.sh remind_reviewers
 23 * * * *   $HOME/gestconf-app/deploy/cron.sh remind_presentations
 37 * * * *   $HOME/gestconf-app/deploy/cron.sh expire_registrations
+41 * * * *   $HOME/gestconf-app/deploy/cron.sh sync_payments
 17 3 * * *   $HOME/gestconf-app/deploy/cron.sh cleanup
 47 3 * * *   $HOME/gestconf-app/deploy/cron.sh check_integrity
 ```
@@ -140,8 +141,12 @@ dossier de l'application et y écrit le chemin du venv (`VENV_ACTIVATE`) : le cr
   présentation trois jours, puis dix jours après la réception de la version finale, une fois
   chacun (plan L5, §9).
 - `expire_registrations` (toutes les heures) : fait expirer les inscriptions impayées à
-  l'échéance (places d'options et codes promo rendus, e-mail au participant) et crée les
-  compteurs de facturation de l'année (plan L6, J5, J8).
+  l'échéance (places d'options et codes promo rendus, e-mail au participant), après avoir
+  interrogé un paiement en ligne en cours (plan L6, J5).
+- `sync_payments` (toutes les heures) : interroge le fournisseur de paiement en ligne sur
+  les tentatives en cours (notification perdue ou en retard), abandonne celles de plus de sept
+  jours et crée les compteurs de facturation de l'année (plan L6, J6, RG-15). Sans
+  fournisseur configuré, elle ne fait que les compteurs.
 - `check_integrity` (quotidienne, lecture seule) : doublons d'adresses vérifiées et de 2FA
   (contraintes que MariaDB ne crée pas), cohérence invitations/rôles, taille du cache, tâches
   en échec. Les anomalies partent par e-mail aux opérateurs (`GESTCONF_OPERATORS`), sans

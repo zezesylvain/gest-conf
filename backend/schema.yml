@@ -4709,6 +4709,45 @@ paths:
               schema:
                 $ref: '#/components/schemas/TotpQr'
           description: ''
+  /v1/payments/webhook/{provider}:
+    get:
+      operationId: payments_webhook_ping
+      description: |-
+        ``POST /v1/payments/webhook/{provider}`` : notification du fournisseur (J6).
+
+        Publique, sans session donc sans CSRF, limitée en débit. Le jeton de la notification est
+        vérifié, puis le statut **interrogé** : rien n'est cru du corps reçu (RG-15). Réponse
+        rapide et sans détail ; ``GET`` répond 200 (contrôle de l'adresse par l'agrégateur).
+      parameters:
+      - in: path
+        name: provider
+        schema:
+          type: string
+        required: true
+      tags:
+      - payments
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: payments_webhook
+      description: |-
+        ``POST /v1/payments/webhook/{provider}`` : notification du fournisseur (J6).
+
+        Publique, sans session donc sans CSRF, limitée en débit. Le jeton de la notification est
+        vérifié, puis le statut **interrogé** : rien n'est cru du corps reçu (RG-15). Réponse
+        rapide et sans détail ; ``GET`` répond 200 (contrôle de l'adresse par l'agrégateur).
+      parameters:
+      - in: path
+        name: provider
+        schema:
+          type: string
+        required: true
+      tags:
+      - payments
+      responses:
+        '200':
+          description: No response body
   /v1/public/editions/current:
     get:
       operationId: public_current_edition
@@ -5039,6 +5078,54 @@ paths:
               schema:
                 type: string
                 format: binary
+          description: ''
+  /v1/registrations/{registration_id}/pay:
+    post:
+      operationId: registrations_pay
+      description: |-
+        ``POST /v1/registrations/{id}/pay`` : nouvelle tentative de paiement en ligne ;
+        le navigateur est ensuite **dirigé** vers la page hébergée du fournisseur (jamais un
+        formulaire : la CSP du portail l'interdirait, bilan de L6.0).
+      parameters:
+      - in: path
+        name: registration_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - registrations
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentStart'
+          description: ''
+  /v1/registrations/{registration_id}/payment-check:
+    post:
+      operationId: registrations_payment_check
+      description: |-
+        ``POST /v1/registrations/{id}/payment-check`` : au retour de la page de paiement,
+        interroge le fournisseur sur la dernière tentative (le retour lui-même ne prouve rien,
+        RG-15).
+      parameters:
+      - in: path
+        name: registration_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - registrations
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentCheck'
           description: ''
   /v1/registrations/{registration_id}/proforma:
     post:
@@ -7138,6 +7225,7 @@ components:
       - option_full
       - promo_code_exhausted
       - already_registered
+      - payment_unavailable
       type: string
       description: |-
         * `validation_error` - Validation Error
@@ -7188,6 +7276,7 @@ components:
         * `option_full` - Option Full
         * `promo_code_exhausted` - Promo Code Exhausted
         * `already_registered` - Already Registered
+        * `payment_unavailable` - Payment Unavailable
     Expertise:
       type: object
       description: Expertises du relecteur (H7) et thématiques proposées.
@@ -9993,6 +10082,16 @@ components:
         is_active:
           type: boolean
           title: Actif
+    PaymentCheck:
+      type: object
+      properties:
+        outcome:
+          type: string
+        status:
+          type: string
+      required:
+      - outcome
+      - status
     PaymentMethod:
       enum:
       - online
@@ -10039,6 +10138,17 @@ components:
       - provider
       - reference
       - status
+    PaymentStart:
+      type: object
+      properties:
+        payment_url:
+          type: string
+          format: uri
+        reference:
+          type: string
+      required:
+      - payment_url
+      - reference
     PeerReview:
       type: object
       description: Évaluation d'un autre relecteur, sous pseudonyme (RG-08, H11).
@@ -10398,7 +10508,8 @@ components:
             type: integer
         person:
           type: string
-          description: Nom de la personne (conflit de personne).
+          description: Nom de la personne (conflit de personne) ou des présentateurs
+            (RG-11).
         minutes:
           type: integer
           description: Dépassement en minutes (RG-13).
@@ -10413,11 +10524,13 @@ components:
       - room
       - person
       - overflow
+      - registration
       type: string
       description: |-
         * `room` - room
         * `person` - person
         * `overflow` - overflow
+        * `registration` - registration
     ProgramPerson:
       type: object
       properties:
@@ -12901,10 +13014,16 @@ components:
         confirmed:
           type: boolean
           description: Présentateurs désignés par l'auteur (I5).
+        presenter_registered:
+          type: boolean
+          nullable: true
+          description: Un présentateur au moins est inscrit (RG-11) ; nul sans les
+            inscriptions.
       required:
       - confirmed
       - default_duration_min
       - id
+      - presenter_registered
       - presenters
       - reference
       - status

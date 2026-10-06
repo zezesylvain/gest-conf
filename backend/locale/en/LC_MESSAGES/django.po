@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gestconf-backend\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-06 17:46+0000\n"
+"POT-Creation-Date: 2026-10-06 18:02+0000\n"
 "PO-Revision-Date: 2026-10-05 11:00+0000\n"
 "Last-Translator: GEST-CONF\n"
 "Language-Team: GEST-CONF\n"
@@ -411,7 +411,7 @@ msgstr "secretariat"
 #: apps/program/services/planning.py:137 apps/program/services/planning.py:239
 #: apps/program/services/planning.py:520 apps/program/services/settings.py:38
 #: apps/registrations/services/pricing.py:388
-#: apps/registrations/services/settings.py:119
+#: apps/registrations/services/settings.py:120
 msgid "Champ non modifiable."
 msgstr "This field cannot be changed."
 
@@ -426,8 +426,8 @@ msgstr "Acknowledging the notice cannot be withdrawn."
 #: apps/accounts/services/account.py:169 apps/accounts/services/account.py:191
 #: apps/accounts/services/mfa.py:84 apps/accounts/services/personal_data.py:205
 #: apps/accounts/services/roles.py:196 apps/conferences/services.py:301
-#: apps/registrations/services/orders.py:270
-#: apps/registrations/services/orders.py:294
+#: apps/registrations/services/orders.py:281
+#: apps/registrations/services/orders.py:305
 #: apps/reviews/services/assignments.py:287
 #: apps/reviews/services/conflicts.py:178 apps/reviews/services/reviews.py:430
 #: apps/submissions/services.py:611 apps/submissions/workflow.py:178
@@ -1486,27 +1486,27 @@ msgstr "Unknown time zone."
 msgid "Échec de la vérification CSRF : rechargez la page puis réessayez."
 msgstr "CSRF verification failed: reload the page and try again."
 
-#: apps/core/errors.py:117
+#: apps/core/errors.py:119
 msgid "Opération refusée."
 msgstr "Operation refused."
 
-#: apps/core/errors.py:146
+#: apps/core/errors.py:148
 msgid "Opération impossible dans l'état actuel."
 msgstr "This operation is not possible in the current state."
 
-#: apps/core/errors.py:153
+#: apps/core/errors.py:155
 msgid "Action non autorisée."
 msgstr "Action not allowed."
 
-#: apps/core/errors.py:160 apps/core/exceptions.py:110
+#: apps/core/errors.py:162 apps/core/exceptions.py:110
 msgid "Données invalides."
 msgstr "Invalid data."
 
-#: apps/core/errors.py:167
+#: apps/core/errors.py:169
 msgid "Modifié entre-temps (autre onglet ?) : rechargez avant d'enregistrer."
 msgstr "Changed in the meantime (another tab?): reload before saving."
 
-#: apps/core/errors.py:178
+#: apps/core/errors.py:180
 msgid "Quota atteint."
 msgstr "Quota reached."
 
@@ -2098,7 +2098,7 @@ msgstr "A pro forma is only for a registration awaiting payment."
 msgid "Montant de 0 à %(max)s."
 msgstr "Amount from 0 to %(max)s."
 
-#: apps/payments/services/manual.py:64
+#: apps/payments/services/manual.py:64 apps/payments/services/online.py:84
 msgid "Seule une inscription en attente de paiement peut être réglée."
 msgstr "Only a registration awaiting payment can be paid."
 
@@ -2126,6 +2126,19 @@ msgstr "Issue this registration's invoice first."
 #: apps/payments/services/manual.py:152
 msgid "Moyen obligatoire."
 msgstr "Method required."
+
+#: apps/payments/services/online.py:74
+msgid "Le paiement en ligne n'est pas proposé."
+msgstr "Online payment is not offered."
+
+#: apps/payments/services/online.py:89
+#, python-format
+msgid "Paiement en ligne impossible : %(reason)s."
+msgstr "Online payment impossible: %(reason)s."
+
+#: apps/payments/services/online.py:126
+msgid "Le service de paiement ne répond pas : réessayez plus tard."
+msgstr "The payment service is not responding: try again later."
 
 #: apps/portal/models.py:27
 msgid "texte riche"
@@ -2644,7 +2657,7 @@ msgstr "moderation"
 msgid "- {start} · {room} · {role} : {title}"
 msgstr "- {start} · {room} · {role}: {title}"
 
-#: apps/program/serializers.py:250
+#: apps/program/serializers.py:270
 msgid "Une communication ou un titre libre, l'un ou l'autre."
 msgstr "Either a paper or a free title, not both."
 
@@ -3167,62 +3180,62 @@ msgstr "registration history"
 msgid "historiques des inscriptions"
 msgstr "registration histories"
 
-#: apps/registrations/services/orders.py:85
+#: apps/registrations/services/orders.py:96
 msgid "Moyen de paiement impossible si près de la conférence."
 msgstr "This payment method is not possible so close to the conference."
 
-#: apps/registrations/services/orders.py:97 apps/registrations/views.py:360
+#: apps/registrations/services/orders.py:108 apps/registrations/views.py:360
 msgid "Indiquez votre pays dans votre profil : il détermine le tarif."
 msgstr "Enter your country in your profile: it determines the fee."
 
-#: apps/registrations/services/orders.py:99 apps/registrations/views.py:362
+#: apps/registrations/services/orders.py:110 apps/registrations/views.py:362
 msgid "Pays obligatoire."
 msgstr "Country required."
 
-#: apps/registrations/services/orders.py:116
+#: apps/registrations/services/orders.py:127
 msgid "Vous avez déjà une inscription à cette édition."
 msgstr "You already have a registration for this edition."
 
-#: apps/registrations/services/orders.py:145 apps/registrations/views.py:366
+#: apps/registrations/services/orders.py:156 apps/registrations/views.py:366
 msgid "Les inscriptions en ligne sont fermées."
 msgstr "Online registration is closed."
 
-#: apps/registrations/services/orders.py:165
+#: apps/registrations/services/orders.py:176
 msgid "Moyen de paiement non proposé."
 msgstr "Payment method not offered."
 
-#: apps/registrations/services/orders.py:251
+#: apps/registrations/services/orders.py:262
 msgid ""
 "La date limite d'annulation est passée : contactez le comité d'organisation."
 msgstr ""
 "The cancellation deadline has passed: contact the organising committee."
 
-#: apps/registrations/services/orders.py:274
+#: apps/registrations/services/orders.py:285
 msgid "Pourcentage de 0 à 100."
 msgstr "Percentage from 0 to 100."
 
-#: apps/registrations/services/orders.py:298
+#: apps/registrations/services/orders.py:309
 msgid "Seule une inscription en attente de paiement peut être offerte."
 msgstr "Only a registration awaiting payment can be waived."
 
-#: apps/registrations/services/orders.py:340
-#: apps/registrations/services/orders.py:384
+#: apps/registrations/services/orders.py:351
+#: apps/registrations/services/orders.py:395
 msgid "Inscription annulée ou expirée."
 msgstr "Registration cancelled or expired."
 
-#: apps/registrations/services/orders.py:345
+#: apps/registrations/services/orders.py:356
 msgid "Facture émise : l'identité de facturation ne change plus."
 msgstr "Invoice issued: the billing identity can no longer change."
 
-#: apps/registrations/services/orders.py:382
+#: apps/registrations/services/orders.py:393
 msgid "Aucun justificatif demandé pour cette catégorie."
 msgstr "No proof is required for this category."
 
-#: apps/registrations/services/orders.py:386 apps/registrations/views.py:524
+#: apps/registrations/services/orders.py:397 apps/registrations/views.py:524
 msgid "Fichier de 5 Mo au plus."
 msgstr "File of 5 MB at most."
 
-#: apps/registrations/services/orders.py:389
+#: apps/registrations/services/orders.py:400
 msgid "PDF, JPEG ou PNG attendu."
 msgstr "PDF, JPEG or PNG expected."
 
@@ -3327,20 +3340,24 @@ msgstr "At least %(count)s, already used."
 msgid "Code promo déjà utilisé : désactivez-le."
 msgstr "Promo code already used: deactivate it."
 
-#: apps/registrations/services/settings.py:76
+#: apps/registrations/services/settings.py:77
 msgid "Liste de codes pays attendue."
 msgstr "A list of country codes is expected."
 
-#: apps/registrations/services/settings.py:91
-#: apps/registrations/services/settings.py:93
+#: apps/registrations/services/settings.py:92
+#: apps/registrations/services/settings.py:94
 msgid "Devise figée : des inscriptions existent déjà."
 msgstr "Currency frozen: registrations already exist."
 
-#: apps/registrations/services/settings.py:106
+#: apps/registrations/services/settings.py:107
 msgid ""
 "Des tarifs ont plus de décimales que cette devise : corrigez-les d'abord."
 msgstr ""
 "Some fees have more decimals than this currency allows: correct them first."
+
+#: apps/registrations/services/settings.py:135
+msgid "Aucun fournisseur de paiement en ligne configuré."
+msgstr "No online payment provider is configured."
 
 #: apps/registrations/templates/registrations/email/cancelled_message.txt:1
 #, python-format

@@ -9,5 +9,6 @@ import { ProgramConflictKind } from './program-conflict-kind';
 export const PROGRAM_CONFLICT_KIND: ProgramConflictKind[] = [
   'room',
   'person',
-  'overflow'
+  'overflow',
+  'registration'
 ];

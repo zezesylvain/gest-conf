@@ -1514,7 +1514,8 @@
         "slot": "(in conflict)",
         "room": "{{room}}: {{sessions}} overlap (RG-12).",
         "person": "{{person}} is expected in two places at the same time: {{sessions}} (RG-12).",
-        "overflow": "{{sessions}} overruns by {{minutes}} min (RG-13)."
+        "overflow": "{{sessions}} overruns by {{minutes}} min (RG-13).",
+        "registration": "{{sessions}}: no registered presenter ({{person}}) (RG-11)."
       },
       "people": {
         "search": "Search for a person in the edition",

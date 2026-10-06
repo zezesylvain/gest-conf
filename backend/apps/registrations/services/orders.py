@@ -50,6 +50,17 @@ def register_order_effect(effect: OrderEffect) -> None:
         _ORDER_EFFECTS.append(effect)
 
 
+# Avant d'expirer une commande, les autres applications peuvent demander un report (paiement
+# en ligne en cours, fournisseur injoignable) : f(inscription) -> True pour reporter.
+type ExpiryCheck = Callable[[Registration], bool]
+_EXPIRY_CHECKS: list[ExpiryCheck] = []
+
+
+def register_expiry_check(check: ExpiryCheck) -> None:
+    if check not in _EXPIRY_CHECKS:
+        _EXPIRY_CHECKS.append(check)
+
+
 PROOF_MAX_BYTES = 5 * 1024 * 1024
 BILLING_FIELDS = ("billing_name", "billing_organization", "billing_address")
 PAID_METHODS = (PaymentMethod.ONLINE, PaymentMethod.TRANSFER, PaymentMethod.ONSITE)
@@ -438,9 +449,32 @@ def expire_overdue(now: dt.datetime | None = None) -> int:
     ).values_list("pk", flat=True)
     for pk in list(overdue):
         registration = Registration.objects.get(pk=pk)
+        if any(check(registration) for check in _EXPIRY_CHECKS):
+            continue  # paiement peut-être en cours : prochain passage
         try:
             workflow.transition(registration, RegistrationStatus.EXPIRED, actor=actor)
         except RuleViolation:
             continue  # confirmée entre-temps (paiement reçu)
         count += 1
     return count
+
+
+# --- RG-11 (J10) : personnes inscrites, pour le planificateur --------------------------------
+
+
+def registered_people(edition: Edition) -> frozenset[str]:
+    """Clés des personnes dont l'inscription est confirmée : ``user:<id>`` et
+    ``email:<adresse>`` (adresse du compte et adresses vérifiées), pour reconnaître un
+    présentateur par son compte ou par son adresse."""
+    from allauth.account.models import EmailAddress
+
+    rows = Registration.objects.filter(
+        edition=edition, status=RegistrationStatus.CONFIRMED
+    ).values_list("user_id", "user__email")
+    keys = {f"user:{user_id}" for user_id, _email in rows}
+    keys |= {f"email:{email.lower()}" for _user_id, email in rows if email}
+    verified = EmailAddress.objects.filter(
+        user_id__in=[user_id for user_id, _email in rows], verified=True
+    ).values_list("email", flat=True)
+    keys |= {f"email:{email.lower()}" for email in verified}
+    return frozenset(keys)
