@@ -53,30 +53,46 @@ PGR, PGW, PGP = "program.read", "program.write", "program.publish"
 # secrétariat ; tarifs par les finances ; paiements et factures lus par les finances et le Chair.
 RGR, RGM = "registrations.read", "registrations.manage"
 PRW, FIR = "pricing.write", "finance.read"
+# Plan L7 (K1, K18) : pointer (bénévoles, tout le CO, administrateur) ; gérer les pointages
+# (secrétariat, logistique, bénévoles) ; attestations (Chair, secrétariat) ; lettres
+# d'invitation (secrétariat, relations extérieures) ; signature (le signataire seul).
+CKS, CKM = "checkin.scan", "checkin.manage"
+CEM, LEM, SGM = "certificates.manage", "letters.manage", "signature.manage"
 
 SPEC: dict[str, set[str]] = {
     # H19 : l'administrateur n'évalue pas et ne décide pas ; I1 : il ne publie pas le
     # programme. J1 : toutes les capacités des inscriptions et des finances.
+    # K18 : il ne renseigne pas la signature d'un signataire.
     "ADMIN": {R, W, PUB, ARC, MR, MM, AR, PW, SR, SE, SX, RM, RA, GW, PGR, PGW, RGR, RGM}
-    | {PRW, FIR},
+    | {PRW, FIR, CKS, CKM, CEM, LEM},
     # I1 : le Chair lit et publie le programme, sans l'écrire. J1 : il lit les inscriptions
-    # et les finances, sans les gérer.
-    "CHAIR": {R, W, PUB, MR, MM, AR, PW, SR, SE, SX, RM, RA, DD, DP, GW, PGR, PGP, RGR, FIR},
+    # et les finances, sans les gérer. K1 : il émet les attestations, ne pointe pas.
+    "CHAIR": {R, W, PUB, MR, MM, AR, PW, SR, SE, SX, RM, RA, DD, DP, GW, PGR, PGP, RGR, FIR}
+    | {CEM},
     # D8 validée : lecture du paramétrage ; membres du CS seulement. F10, F8 (plan L3) :
     # soumissions (lecture, dérogations, export). H19 : évalue, pilote, décide, publie.
     # I1 : lit le programme. J1 : aucun accès aux inscriptions.
     "SC_CHAIR": {R, MR, MM, SR, SE, SX, RW, RM, RA, DD, DP, GW, PGR},
     # D8 : lecture seule (fonction « logistique ») ; F10 : soumissions ; I1 : programme lu ;
-    # J1 : inscriptions lues.
-    "OC_MEMBER": {R, SR, PGR, RGR},
+    # J1 : inscriptions lues. K1 (plan L7) : tout le CO pointe ; la logistique gère les
+    # pointages.
+    "OC_MEMBER": {R, SR, PGR, RGR, CKS, CKM},
     # E11 (plan L2) : le CO « communication » écrit le portail.
-    "OC_COMMUNICATION": {R, PW, SR, PGR, RGR},
-    "OC_PROGRAM": {R, SR, PGR, PGW, RGR},  # I1 (plan L5) : le CO « programme » écrit le programme
+    "OC_COMMUNICATION": {R, PW, SR, PGR, RGR, CKS},
+    # I1 (plan L5) : le CO « programme » écrit le programme.
+    "OC_PROGRAM": {R, SR, PGR, PGW, RGR, CKS},
     # J1 (plan L6) : le CO « finances » gère inscriptions, tarifs et finances ; le
-    # « secrétariat » gère les inscriptions.
-    "OC_FINANCE": {R, SR, PGR, RGR, RGM, PRW, FIR},
-    "OC_SECRETARIAT": {R, SR, PGR, RGR, RGM},
+    # « secrétariat » gère les inscriptions, et en L7 (K1) le jour J, les attestations et les
+    # lettres d'invitation.
+    "OC_FINANCE": {R, SR, PGR, RGR, RGM, PRW, FIR, CKS},
+    "OC_SECRETARIAT": {R, SR, PGR, RGR, RGM, CKS, CKM, CEM, LEM},
+    # K1 (plan L7) : le CO « bénévoles » gère les pointages et les bénévoles (eux seuls) ; les
+    # « relations extérieures » instruisent les lettres d'invitation.
+    "OC_VOLUNTEERS": {R, SR, PGR, RGR, CKS, CKM, MR, MM},
+    "OC_EXTERNAL_RELATIONS": {R, SR, PGR, RGR, CKS, LEM},
     "SC_MEMBER": {RW},  # F10 : pas les soumissions ; H19 : ses affectations seulement
+    "VOLUNTEER": {CKS},  # K1 (plan L7) : pointer, rien d'autre
+    "SIGNATORY": {SGM},  # K18 (plan L7) : sa signature, rien d'autre
     "AUTHOR": set(),
 }
 # Profils qui ne sont pas un rôle seul : (rôle, fonction au CO).
@@ -86,6 +102,8 @@ PROFILE_ROLES = {
     "OC_PROGRAM": (Role.OC_MEMBER, "program"),
     "OC_FINANCE": (Role.OC_MEMBER, "finance"),
     "OC_SECRETARIAT": (Role.OC_MEMBER, "secretariat"),
+    "OC_VOLUNTEERS": (Role.OC_MEMBER, "volunteers"),
+    "OC_EXTERNAL_RELATIONS": (Role.OC_MEMBER, "external_relations"),
 }
 # Profils sans rôle actif dans l'édition visée : 404 (D5).
 NON_MEMBERS = ("no_role", "other_edition_chair", "revoked_chair", "invited")
@@ -560,7 +578,8 @@ CASES = [
         MM,
         201,
         "/v1/manage/editions/{e}/invitations",
-        {"emails": ["nouveau.relecteur@example.org"], "role": "SC_MEMBER"},
+        # Rôle que le profil gère : comité scientifique, bénévoles pour le CO « bénévoles ».
+        lambda ids: {"emails": ["nouveau.membre@example.org"], "role": ids["invite_role"]},
     ),
     Case(
         "manage-invitation-resend",
@@ -1007,6 +1026,28 @@ CASES = [
         "/v1/manage/editions/{e}/reviews/expertise",
         lambda ids: {"tracks": [ids["track_code"]]},
     ),
+    # --- Signature du signataire (plan L7, K18) : la sienne, lue et écrite par lui seul ------
+    Case("manage-signature", "GET", SGM, 200, "/v1/manage/editions/{e}/signature"),
+    Case(
+        "manage-signature",
+        "PATCH",
+        SGM,
+        200,
+        "/v1/manage/editions/{e}/signature",
+        {"title_en": "Conference chair"},
+        recent_auth=True,
+    ),
+    Case("manage-signature-image", "GET", SGM, 200, "/v1/manage/editions/{e}/signature/image"),
+    Case(
+        "manage-signature-image",
+        "PUT",
+        SGM,
+        200,
+        "/v1/manage/editions/{e}/signature/image",
+        lambda ids: {"file": SimpleUploadedFile("signature.png", _signature_png(), "image/png")},
+        recent_auth=True,
+        format="multipart",
+    ),
     Case("manage-portal-poster", "GET", R, 200, "/v1/manage/editions/{e}/portal/poster"),
     Case(
         "manage-portal-poster",
@@ -1124,6 +1165,7 @@ def world():
     profile = billing_profile(edition)
     profile.legal_name, profile.address = "Association matrice", "Abidjan"
     profile.save()
+    reviewing["per_profile"]["OC_VOLUNTEERS"] = _member_objects(edition, users, now)
     ids = LazyIds(
         {
             **reviewing,
@@ -1149,6 +1191,7 @@ def world():
             "date": key_date.pk,
             "role": target_role.pk,
             "invitation": invitation.pk,
+            "invite_role": "SC_MEMBER",
         },
         # Inscriptions, paiements et pièces (plan L6) : créés au premier cas qui les vise,
         # leurs PDF coûtant cher à produire pour chacun des cas.
@@ -1432,14 +1475,53 @@ def _reviewer_objects(edition, users):
     }
 
 
-def _png() -> bytes:
+def _png(size=(20, 10)) -> bytes:
     import io
 
     from PIL import Image
 
     output = io.BytesIO()
-    Image.new("RGB", (20, 10), "navy").save(output, "PNG")
+    Image.new("RGB", size, "navy").save(output, "PNG")
     return output.getvalue()
+
+
+def _signature_png() -> bytes:
+    return _png((240, 80))
+
+
+def _member_objects(edition, users, now) -> dict:
+    """Plan L7 (K1, K18) : un bénévole et une invitation de bénévole, cibles du CO
+    « bénévoles », qui ne voit qu'eux ; la signature complète du signataire."""
+    from apps.core.actor import Actor
+    from apps.events.services import signatures
+
+    volunteer = make_member(edition, Role.VOLUNTEER)
+    invitation = RoleInvitation.objects.create(
+        edition=edition,
+        email="benevole.invite@example.org",
+        role=Role.VOLUNTEER,
+        token_hash=token_hash("jeton-benevole"),
+        pending_key=pending_key(edition.pk, "benevole.invite@example.org", Role.VOLUNTEER, ""),
+        expires_at=now + dt.timedelta(days=14),
+        locale="fr",
+        last_sent_at=now,
+    )
+    signatory = users["SIGNATORY"]
+    command = Actor.command("cli:matrice")
+    signatures.update_details(
+        edition,
+        signatory,
+        display_name="Pr Awa Diallo",
+        title_fr="Présidente du comité d'organisation",
+        title_en="",
+        actor=command,
+    )
+    signatures.upload_image(edition, signatory, data=_signature_png(), actor=command)
+    return {
+        "role": UserRole.objects.get(user=volunteer, edition=edition).pk,
+        "invitation": invitation.pk,
+        "invite_role": "VOLUNTEER",
+    }
 
 
 def call(client: APIClient, case: Case, ids: dict):
@@ -1485,8 +1567,8 @@ def for_profile(ids: dict, profile: str) -> dict:
 
 
 def holder(capability: str) -> str:
-    """Premier profil de gestion qui détient ``capability``."""
-    return next(p for p in ("ADMIN", "CHAIR", "SC_CHAIR", "SC_MEMBER") if capability in SPEC[p])
+    """Premier profil de gestion qui détient ``capability`` (ordre de ``SPEC``)."""
+    return next(profile for profile in SPEC if capability in SPEC[profile])
 
 
 @pytest.mark.parametrize(
@@ -1640,3 +1722,52 @@ def test_h2_reviewer_routes_require_two_factor_authentication(world):
     response = client_for(users["SC_MEMBER"], mfa=False).get(path)
     assert (response.status_code, response.json()["code"]) == (403, "mfa_enrollment_required")
     assert client_for(users["SC_MEMBER"]).get(path).status_code == 200
+
+
+def test_profile_capabilities_match_spec(world):
+    """Les capacités de chaque profil, lues par ``/v1/me``, sont celles de la spécification,
+    y compris celles qui n'ont pas encore de route (plan L7 : pointage, attestations,
+    lettres)."""
+    edition, users, _ids = world
+    for profile in SPEC:
+        body = client_for(users[profile]).get("/v1/me").json()
+        mine = next(item for item in body["editions"] if item["id"] == edition.pk)
+        assert set(mine["capabilities"]) == SPEC[profile], profile
+
+
+def test_k1_volunteers_committee_sees_and_manages_volunteers_only(world):
+    """K1 (plan L7) : le CO « bénévoles » ne voit que les bénévoles parmi les membres et les
+    invitations ; il invite des bénévoles, pas d'autres rôles ; un autre membre lui est
+    introuvable."""
+    _edition, users, ids = world
+    client = client_for(users["OC_VOLUNTEERS"])
+    base = f"/v1/manage/editions/{ids['e']}"
+    roles = {member["role"] for member in client.get(f"{base}/roles").json()}
+    assert roles == {"VOLUNTEER"}
+    invitations = client.get(f"{base}/invitations").json()["results"]
+    assert {item["role"] for item in invitations} == {"VOLUNTEER"}
+    response = client.post(
+        f"{base}/invitations", {"emails": ["x@example.org"], "role": "SC_MEMBER"}, format="json"
+    )
+    assert response.status_code == 403
+    response = client.post(
+        f"{base}/roles/{ids['role']}/revoke", {"reason": "Hors périmètre"}, format="json"
+    )
+    assert response.status_code == 404
+
+
+@pytest.mark.parametrize("profile", ["VOLUNTEER", "SIGNATORY"])
+def test_k1_k18_volunteer_and_signatory_require_two_factor_authentication(world, profile):
+    """K1 et K18 (plan L7) : 2FA imposée aux bénévoles et aux signataires (annoncée par
+    ``/v1/me`` ; exigée sur la route de la signature, la seule du signataire en L7.1)."""
+    edition, users, ids = world
+    body = client_for(users[profile], mfa=False).get("/v1/me").json()
+    mine = next(item for item in body["editions"] if item["id"] == edition.pk)
+    assert mine["mfa_required"] is True
+    if profile == "SIGNATORY":
+        path = f"/v1/manage/editions/{ids['e']}/signature"
+        response = client_for(users[profile], mfa=False).get(path)
+        assert (response.status_code, response.json()["code"]) == (
+            403,
+            "mfa_enrollment_required",
+        )

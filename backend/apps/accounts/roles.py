@@ -15,7 +15,8 @@ from django.utils.translation import gettext_lazy as _
 
 
 class Role(models.TextChoices):
-    """Les 11 rôles de l'étude (§3.2), toujours rattachés à une édition."""
+    """Les 11 rôles de l'étude (§3.2), plus le signataire (K18, plan L7), toujours rattachés à
+    une édition."""
 
     ADMIN = "ADMIN", _("administrateur de l'édition")
     CHAIR = "CHAIR", _("président de la conférence")
@@ -28,6 +29,8 @@ class Role(models.TextChoices):
     ATTENDEE = "ATTENDEE", _("participant")
     SPONSOR = "SPONSOR", _("partenaire")
     VOLUNTEER = "VOLUNTEER", _("bénévole")
+    # K18 (plan L7) : signe les attestations et les lettres d'invitation (Q11).
+    SIGNATORY = "SIGNATORY", _("signataire")
 
 
 class OcFunction(models.TextChoices):
@@ -45,7 +48,8 @@ class OcFunction(models.TextChoices):
 
 class InvitableRole(models.TextChoices):
     """Rôles qu'une invitation peut attribuer (§3.3) : ceux de L1, puis intervenants et
-    présidents de séance en L5 (I10) ; les autres dans leur lot."""
+    présidents de séance en L5 (I10), bénévoles et signataires en L7 (K1, K18) ; les autres
+    dans leur lot."""
 
     ADMIN = Role.ADMIN.value, Role.ADMIN.label
     CHAIR = Role.CHAIR.value, Role.CHAIR.label
@@ -54,6 +58,8 @@ class InvitableRole(models.TextChoices):
     SC_MEMBER = Role.SC_MEMBER.value, Role.SC_MEMBER.label
     SPEAKER = Role.SPEAKER.value, Role.SPEAKER.label
     SESSION_CHAIR = Role.SESSION_CHAIR.value, Role.SESSION_CHAIR.label
+    VOLUNTEER = Role.VOLUNTEER.value, Role.VOLUNTEER.label
+    SIGNATORY = Role.SIGNATORY.value, Role.SIGNATORY.label
 
 
 class Capability(StrEnum):
@@ -88,6 +94,13 @@ class Capability(StrEnum):
     REGISTRATIONS_MANAGE = "registrations.manage"
     PRICING_WRITE = "pricing.write"
     FINANCE_READ = "finance.read"
+    # Lot L7 (K1, K18) : jour J (pointer ; annuler, saisir, lister), attestations, lettres
+    # d'invitation, signature du signataire (la sienne seulement).
+    CHECKIN_SCAN = "checkin.scan"
+    CHECKIN_MANAGE = "checkin.manage"
+    CERTIFICATES_MANAGE = "certificates.manage"
+    LETTERS_MANAGE = "letters.manage"
+    SIGNATURE_MANAGE = "signature.manage"
 
 
 C = Capability
@@ -99,9 +112,16 @@ CAPABILITY_CHOICES: list[tuple[str, str]] = [(item.value, item.value) for item i
 # gestion des membres limitée au comité scientifique (voir MANAGEABLE_ROLES).
 CAPABILITIES: Mapping[str, frozenset[Capability]] = {
     # ADMIN administre l'édition ; il n'évalue pas et ne décide pas (H19) ; il ne publie pas
-    # le programme, que le Chair valide (I1, étude §5.4).
+    # le programme, que le Chair valide (I1, étude §5.4) ; il ne signe pas à la place du
+    # signataire (K18, plan L7).
     Role.ADMIN: frozenset(C)
-    - {C.REVIEWS_WRITE, C.DECISIONS_DECIDE, C.DECISIONS_PUBLISH, C.PROGRAM_PUBLISH},
+    - {
+        C.REVIEWS_WRITE,
+        C.DECISIONS_DECIDE,
+        C.DECISIONS_PUBLISH,
+        C.PROGRAM_PUBLISH,
+        C.SIGNATURE_MANAGE,
+    },
     Role.CHAIR: frozenset(
         {
             C.EDITION_READ,
@@ -125,6 +145,8 @@ CAPABILITIES: Mapping[str, frozenset[Capability]] = {
             # J1 (plan L6) : il suit les inscriptions et les finances, sans les gérer.
             C.REGISTRATIONS_READ,
             C.FINANCE_READ,
+            # K1 (plan L7) : il émet et révoque les attestations ; il ne pointe pas.
+            C.CERTIFICATES_MANAGE,
         }
     ),
     # Président du CS : il peut aussi évaluer (H19).
@@ -148,9 +170,16 @@ CAPABILITIES: Mapping[str, frozenset[Capability]] = {
     # CO en lecture seule en L1, quelle que soit sa fonction (D8) ; écritures partielles
     # attribuées fonction par fonction dans leur lot (FUNCTION_CAPABILITIES). Lecture des
     # soumissions, identité des auteurs comprise (F10, matrice §3.3 de l'étude), du
-    # programme brouillon (I1) et des inscriptions (J1, plan L6).
+    # programme brouillon (I1) et des inscriptions (J1, plan L6). Toutes les fonctions
+    # pointent à l'accueil (K1, plan L7).
     Role.OC_MEMBER: frozenset(
-        {C.EDITION_READ, C.SUBMISSIONS_READ, C.PROGRAM_READ, C.REGISTRATIONS_READ}
+        {
+            C.EDITION_READ,
+            C.SUBMISSIONS_READ,
+            C.PROGRAM_READ,
+            C.REGISTRATIONS_READ,
+            C.CHECKIN_SCAN,
+        }
     ),
     # Relecteur : ses affectations seulement, sans identité des auteurs (RG-04, H9).
     Role.SC_MEMBER: frozenset({C.REVIEWS_WRITE}),
@@ -159,13 +188,25 @@ CAPABILITIES: Mapping[str, frozenset[Capability]] = {
     Role.SESSION_CHAIR: frozenset(),
     Role.ATTENDEE: frozenset(),
     Role.SPONSOR: frozenset(),
-    Role.VOLUNTEER: frozenset(),
+    # K1 (plan L7) : le bénévole pointe à l'accueil et en session, sans autre droit.
+    Role.VOLUNTEER: frozenset({C.CHECKIN_SCAN}),
+    # K18 (plan L7) : le signataire renseigne sa propre signature, sans autre droit.
+    Role.SIGNATORY: frozenset({C.SIGNATURE_MANAGE}),
 }
 
 # 2FA imposée côté serveur à l'accès aux routes de gestion d'une édition (D3). SC_MEMBER
-# depuis L4 (H2) : un relecteur lit des travaux inédits.
+# depuis L4 (H2) : un relecteur lit des travaux inédits. VOLUNTEER et SIGNATORY depuis L7
+# (K1, K18) : le bénévole lit la liste des participants, le signataire signe pour l'édition.
 MFA_REQUIRED_ROLES: frozenset[str] = frozenset(
-    {Role.ADMIN, Role.CHAIR, Role.SC_CHAIR, Role.OC_MEMBER, Role.SC_MEMBER}
+    {
+        Role.ADMIN,
+        Role.CHAIR,
+        Role.SC_CHAIR,
+        Role.OC_MEMBER,
+        Role.SC_MEMBER,
+        Role.VOLUNTEER,
+        Role.SIGNATORY,
+    }
 )
 
 # Matrice d'attribution (§5.5) : rôle visé → rôles qui peuvent l'attribuer (et révoquer).
@@ -177,17 +218,27 @@ GRANTORS: Mapping[str, frozenset[str]] = {
     Role.OC_MEMBER: frozenset({Role.ADMIN, Role.CHAIR}),
     Role.SC_MEMBER: frozenset({Role.ADMIN, Role.CHAIR, Role.SC_CHAIR}),
     # I10 (plan L5) : intervenants invités et présidents de séance, invités par les
-    # détenteurs de ``members.manage`` de l'édition. Sponsors et bénévoles : lot L8.
+    # détenteurs de ``members.manage`` de l'édition. Sponsors : lot L8.
     Role.SPEAKER: frozenset({Role.ADMIN, Role.CHAIR}),
     Role.SESSION_CHAIR: frozenset({Role.ADMIN, Role.CHAIR}),
     Role.SPONSOR: frozenset(),
-    Role.VOLUNTEER: frozenset(),
+    # K1 (plan L7) : bénévoles, aussi par le CO « bénévoles » (FUNCTION_GRANTORS) ; K18 :
+    # signataires, par ADMIN et CHAIR seulement.
+    Role.VOLUNTEER: frozenset({Role.ADMIN, Role.CHAIR}),
+    Role.SIGNATORY: frozenset({Role.ADMIN, Role.CHAIR}),
     Role.AUTHOR: frozenset(),
     Role.ATTENDEE: frozenset(),
 }
 
-# Attribution d'ADMIN ou de CHAIR : réauthentification récente exigée (§5.5).
-REAUTH_REQUIRED_FOR_GRANT: frozenset[str] = frozenset({Role.ADMIN, Role.CHAIR})
+# Attributions par fonction au CO (rôle, fonction) → rôles attribuables (et révocables) :
+# le CO « bénévoles » recrute les bénévoles (K1, plan L7).
+FUNCTION_GRANTORS: Mapping[tuple[str, str], frozenset[str]] = {
+    (Role.OC_MEMBER, "volunteers"): frozenset({Role.VOLUNTEER}),
+}
+
+# Attribution d'ADMIN ou de CHAIR (§5.5), ou de SIGNATORY (K18, plan L7 : signer au nom de
+# l'édition) : réauthentification récente exigée.
+REAUTH_REQUIRED_FOR_GRANT: frozenset[str] = frozenset({Role.ADMIN, Role.CHAIR, Role.SIGNATORY})
 
 # Rôles du comité scientifique, seuls visibles du SC_CHAIR dans les membres (§5.4).
 SCIENTIFIC_COMMITTEE: frozenset[str] = frozenset({Role.SC_CHAIR, Role.SC_MEMBER})
@@ -196,8 +247,11 @@ SCIENTIFIC_COMMITTEE: frozenset[str] = frozenset({Role.SC_CHAIR, Role.SC_MEMBER}
 # Capacités ajoutées par la fonction au comité d'organisation (rôle, fonction) → capacités.
 # E11 (plan L2) : le CO « communication » rédige les contenus du portail ; I1 (plan L5) : le CO
 # « programme » écrit le programme ; J1 (plan L6) : le CO « finances » gère inscriptions,
-# tarifs et finances, le « secrétariat » les inscriptions. Les autres fonctions reçoivent leurs
-# écritures dans leur lot.
+# tarifs et finances, le « secrétariat » les inscriptions. K1 (plan L7) : le jour J (secrétariat,
+# logistique, bénévoles), les attestations (secrétariat), les lettres d'invitation
+# (secrétariat, relations extérieures) ; le CO « bénévoles » gère les bénévoles, et eux seuls
+# (VISIBLE_MEMBER_ROLES, FUNCTION_GRANTORS). Les autres fonctions reçoivent leurs écritures
+# dans leur lot.
 FUNCTION_CAPABILITIES: Mapping[tuple[str, str], frozenset[Capability]] = {
     (Role.OC_MEMBER, "communication"): frozenset({C.PORTAL_WRITE}),
     # I1 (plan L5) : le CO « programme » écrit le programme ; les autres fonctions le lisent.
@@ -205,7 +259,19 @@ FUNCTION_CAPABILITIES: Mapping[tuple[str, str], frozenset[Capability]] = {
     (Role.OC_MEMBER, "finance"): frozenset(
         {C.REGISTRATIONS_MANAGE, C.PRICING_WRITE, C.FINANCE_READ}
     ),
-    (Role.OC_MEMBER, "secretariat"): frozenset({C.REGISTRATIONS_MANAGE}),
+    (Role.OC_MEMBER, "secretariat"): frozenset(
+        {C.REGISTRATIONS_MANAGE, C.CHECKIN_MANAGE, C.CERTIFICATES_MANAGE, C.LETTERS_MANAGE}
+    ),
+    (Role.OC_MEMBER, "logistics"): frozenset({C.CHECKIN_MANAGE}),
+    (Role.OC_MEMBER, "volunteers"): frozenset({C.CHECKIN_MANAGE, C.MEMBERS_READ, C.MEMBERS_MANAGE}),
+    (Role.OC_MEMBER, "external_relations"): frozenset({C.LETTERS_MANAGE}),
+}
+
+# Rôles visibles dans les listes de membres et d'invitations, hors ADMIN et CHAIR qui voient
+# tout (§5.4) : le SC_CHAIR, le comité scientifique ; le CO « bénévoles », les bénévoles (K1).
+VISIBLE_MEMBER_ROLES: Mapping[tuple[str, str], frozenset[str]] = {
+    (Role.SC_CHAIR, ""): SCIENTIFIC_COMMITTEE,
+    (Role.OC_MEMBER, "volunteers"): frozenset({Role.VOLUNTEER}),
 }
 
 
@@ -232,15 +298,26 @@ def manageable_roles(roles: Iterable[str]) -> frozenset[str]:
     return frozenset(target for target, grantors in GRANTORS.items() if grantors & held)
 
 
-def visible_member_roles(roles: Iterable[str]) -> frozenset[str] | None:
+def manageable_roles_for_assignments(assignments: Iterable[tuple[str, str]]) -> frozenset[str]:
+    """Rôles attribuables par des couples (rôle, fonction au CO) : rôles, puis fonctions."""
+    assignments = list(assignments)
+    result = set(manageable_roles(role for role, _function in assignments))
+    for assignment in assignments:
+        result |= FUNCTION_GRANTORS.get(assignment, frozenset())
+    return frozenset(result)
+
+
+def visible_member_roles(assignments: Iterable[tuple[str, str]]) -> frozenset[str] | None:
     """Rôles visibles dans les listes de membres et d'invitations ; ``None`` = tous.
 
-    ADMIN et CHAIR voient tout ; le SC_CHAIR seul ne voit que le comité scientifique,
-    sinon il verrait les adresses invitées aux rôles ADMIN, CHAIR et CO (§5.4).
+    ADMIN et CHAIR voient tout ; le SC_CHAIR ne voit que le comité scientifique, sinon il
+    verrait les adresses invitées aux rôles ADMIN, CHAIR et CO (§5.4) ; le CO « bénévoles »,
+    que les bénévoles (K1, plan L7). Un compte qui cumule voit l'union.
     """
-    held = set(roles)
-    if held & {Role.ADMIN, Role.CHAIR}:
+    assignments = list(assignments)
+    if {role for role, _function in assignments} & {Role.ADMIN, Role.CHAIR}:
         return None
-    if Role.SC_CHAIR in held:
-        return SCIENTIFIC_COMMITTEE
-    return frozenset()
+    result: set[str] = set()
+    for assignment in assignments:
+        result |= VISIBLE_MEMBER_ROLES.get(assignment, frozenset())
+    return frozenset(result)

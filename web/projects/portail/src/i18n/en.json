@@ -235,7 +235,8 @@
           "SESSION_CHAIR": "session chair",
           "ATTENDEE": "attendee",
           "SPONSOR": "sponsor",
-          "VOLUNTEER": "volunteer"
+          "VOLUNTEER": "volunteer",
+          "SIGNATORY": "signatory"
         }
       },
       "privacy": {

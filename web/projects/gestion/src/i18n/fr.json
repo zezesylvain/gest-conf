@@ -103,7 +103,8 @@
       "SESSION_CHAIR": "Président de session",
       "ATTENDEE": "Participant",
       "SPONSOR": "Partenaire",
-      "VOLUNTEER": "Bénévole"
+      "VOLUNTEER": "Bénévole",
+      "SIGNATORY": "Signataire"
     },
     "ocFunctions": {
       "finance": "finances",

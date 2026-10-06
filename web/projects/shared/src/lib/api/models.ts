@@ -167,6 +167,7 @@ export type { PatchedRegistrationSettingsRequest } from './models/patched-regist
 export type { PatchedRoomWriteRequest } from './models/patched-room-write-request';
 export type { PatchedSectionWriteRequest } from './models/patched-section-write-request';
 export type { PatchedSessionWriteRequest } from './models/patched-session-write-request';
+export type { PatchedSignatureRequest } from './models/patched-signature-request';
 export type { PatchedSlotUpdateRequest } from './models/patched-slot-update-request';
 export type { PatchedSubmissionTypeRequest } from './models/patched-submission-type-request';
 export type { PatchedSubmissionWriteRequest } from './models/patched-submission-write-request';
@@ -289,6 +290,8 @@ export type { SessionRole } from './models/session-role';
 export type { SessionRoleKind } from './models/session-role-kind';
 export type { SessionRoleWriteRequest } from './models/session-role-write-request';
 export type { SessionWriteRequest } from './models/session-write-request';
+export type { Signature } from './models/signature';
+export type { SignatureImageUploadRequest } from './models/signature-image-upload-request';
 export type { Simulation } from './models/simulation';
 export type { SkippedInvitation } from './models/skipped-invitation';
 export type { SkippedReason } from './models/skipped-reason';

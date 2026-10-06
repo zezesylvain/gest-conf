@@ -894,7 +894,9 @@ paths:
           - SC_CHAIR
           - SC_MEMBER
           - SESSION_CHAIR
+          - SIGNATORY
           - SPEAKER
+          - VOLUNTEER
         description: |-
           * `ADMIN` - administrateur de l'édition
           * `CHAIR` - président de la conférence
@@ -903,6 +905,8 @@ paths:
           * `SC_MEMBER` - membre du comité scientifique
           * `SPEAKER` - intervenant
           * `SESSION_CHAIR` - président de session
+          * `VOLUNTEER` - bénévole
+          * `SIGNATORY` - signataire
       - in: query
         name: status
         schema:
@@ -4035,6 +4039,102 @@ paths:
               schema:
                 $ref: '#/components/schemas/MemberWithEmail'
           description: ''
+  /v1/manage/editions/{edition_id}/signature:
+    get:
+      operationId: manage_signature_retrieve
+      description: '``…/signature`` : nom affiché et fonction (FR, EN).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Signature'
+          description: ''
+    patch:
+      operationId: manage_signature_update
+      description: '``…/signature`` : nom affiché et fonction (FR, EN).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSignatureRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Signature'
+          description: ''
+  /v1/manage/editions/{edition_id}/signature/image:
+    get:
+      operationId: manage_signature_image
+      description: 'Image déposée, pour l''aperçu du signataire (règle n° 8 : endpoint
+        authentifié).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+          description: ''
+    put:
+      operationId: manage_signature_image_upload
+      description: '``…/signature/image`` : dépôt (PNG ou JPEG, réencodé en PNG) et
+        aperçu.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SignatureImageUploadRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Signature'
+          description: ''
   /v1/manage/editions/{edition_id}/status:
     post:
       operationId: manage_edition_status
@@ -6424,6 +6524,11 @@ components:
       - registrations.manage
       - pricing.write
       - finance.read
+      - checkin.scan
+      - checkin.manage
+      - certificates.manage
+      - letters.manage
+      - signature.manage
       type: string
       description: |-
         * `edition.read` - edition.read
@@ -6450,6 +6555,11 @@ components:
         * `registrations.manage` - registrations.manage
         * `pricing.write` - pricing.write
         * `finance.read` - finance.read
+        * `checkin.scan` - checkin.scan
+        * `checkin.manage` - checkin.manage
+        * `certificates.manage` - certificates.manage
+        * `letters.manage` - letters.manage
+        * `signature.manage` - signature.manage
     Category:
       type: object
       description: 'Catégorie et sa grille de tarifs (gestion). ``code`` : fixé à
@@ -7889,6 +7999,8 @@ components:
       - SC_MEMBER
       - SPEAKER
       - SESSION_CHAIR
+      - VOLUNTEER
+      - SIGNATORY
       type: string
       description: |-
         * `ADMIN` - administrateur de l'édition
@@ -7898,6 +8010,8 @@ components:
         * `SC_MEMBER` - membre du comité scientifique
         * `SPEAKER` - intervenant
         * `SESSION_CHAIR` - président de session
+        * `VOLUNTEER` - bénévole
+        * `SIGNATORY` - signataire
     InvitationBatch:
       type: object
       properties:
@@ -10258,6 +10372,20 @@ components:
         instructions:
           type: string
           maxLength: 5000
+    PatchedSignatureRequest:
+      type: object
+      description: 'Signature du signataire connecté (K18) : jamais le nom de stockage
+        de l''image.'
+      properties:
+        display_name:
+          type: string
+          maxLength: 150
+        title_fr:
+          type: string
+          maxLength: 200
+        title_en:
+          type: string
+          maxLength: 200
     PatchedSlotUpdateRequest:
       type: object
       description: |-
@@ -13325,6 +13453,7 @@ components:
       - ATTENDEE
       - SPONSOR
       - VOLUNTEER
+      - SIGNATORY
       type: string
       description: |-
         * `ADMIN` - administrateur de l'édition
@@ -13338,6 +13467,7 @@ components:
         * `ATTENDEE` - participant
         * `SPONSOR` - partenaire
         * `VOLUNTEER` - bénévole
+        * `SIGNATORY` - signataire
     RoleSource:
       enum:
       - invitation
@@ -13858,6 +13988,63 @@ components:
         instructions:
           type: string
           maxLength: 5000
+    Signature:
+      type: object
+      description: 'Signature du signataire connecté (K18) : jamais le nom de stockage
+        de l''image.'
+      properties:
+        display_name:
+          type: string
+          maxLength: 150
+        title_fr:
+          type: string
+          maxLength: 200
+        title_en:
+          type: string
+          maxLength: 200
+        has_image:
+          type: boolean
+          readOnly: true
+        image_width:
+          type: integer
+          readOnly: true
+          nullable: true
+        image_height:
+          type: integer
+          readOnly: true
+          nullable: true
+        image_uploaded_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        complete:
+          type: boolean
+          readOnly: true
+          description: 'Nom, fonction en français et image : désignable.'
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - complete
+      - display_name
+      - has_image
+      - image_height
+      - image_uploaded_at
+      - image_width
+      - title_en
+      - title_fr
+      - updated_at
+    SignatureImageUploadRequest:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+      required:
+      - file
     Simulation:
       type: object
       description: 'US-06 : nombre de soumissions au-dessus du seuil, au total, par

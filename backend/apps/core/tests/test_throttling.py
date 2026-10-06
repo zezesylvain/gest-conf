@@ -45,6 +45,7 @@ def test_throttle_settings_are_scoped_only():
         "registration_upload": "30/hour",
         "payment_check": "60/hour",
         "payment_webhook": "120/min",
+        "signature_upload": "20/hour",
     }
 
 

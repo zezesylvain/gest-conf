@@ -288,3 +288,91 @@ compressés), chargé par le seul écran d'accueil.
 
 **Écart avec le plan** : aucun ; les précisions ci-dessus (enregistrement du service worker
 à la demande, lots de 200 badges, pas de chiffrement de la liste) affinent K3 et K5.
+
+## 12. Bilan de L7.1 (6 octobre 2026)
+
+**Rôles** (`apps/accounts/roles.py`, migration `accounts/0006`) :
+
+- **`SIGNATORY`** (« signataire »), 12ᵉ rôle d'édition (K18) ;
+- `VOLUNTEER` et `SIGNATORY` **invitables** par `ADMIN` et `CHAIR` ;
+- 2FA imposée aux deux (`MFA_REQUIRED_ROLES`) ;
+- inviter un signataire exige une réauthentification récente, comme `ADMIN` et `CHAIR`
+  (**précision de K18** : il signe au nom de l'édition).
+
+**Capacités** (K1, K18) :
+
+- **`checkin.scan`** : administrateur, bénévoles, tout le CO ;
+- **`checkin.manage`** : administrateur, CO « secrétariat », « logistique » et « bénévoles » ;
+- **`certificates.manage`** : administrateur, Chair, CO « secrétariat » ;
+- **`letters.manage`** : administrateur, CO « secrétariat » et « relations extérieures » ;
+- **`signature.manage`** : le signataire **seul**, l'administrateur compris exclu (un test le
+  vérifie).
+
+**CO « bénévoles »** (K1) :
+
+- attributions **par fonction** au CO : `FUNCTION_GRANTORS` et `VISIBLE_MEMBER_ROLES`
+  s'ajoutent à `GRANTORS` ;
+- le CO « bénévoles » reçoit `members.read` et `members.manage`, mais ne voit, n'invite et ne
+  retire **que des bénévoles**, sur le modèle du président du CS limité au comité
+  scientifique ;
+- la gestion recopie cette table pour l'interface (`core/grantors.ts`, tenant compte de la
+  fonction).
+
+**Application `events`** :
+
+- **`Signature`** (une par compte et par édition) : nom affiché, fonction FR et EN, image.
+  - **Précision de K18** : la signature est rattachée à l'édition, comme le rôle (règle n° 5) ;
+    la fonction peut changer d'une édition à l'autre.
+- **`Checkin`** (pointage, K4) : clé d'idempotence unique ; « clé active »
+  `<inscription>:<session ou 0>`, nulle une fois le pointage annulé, faute d'index unique
+  partiel sur MariaDB. Il est servi en L7.2.
+- **Écart avec le §3 du plan** : les modèles des attestations et des lettres arriveront avec
+  leurs services (L7.4, L7.5), par migrations additives, plutôt que vides dès L7.1.
+
+**Signature du signataire** (`apps/events/services/signatures.py`) :
+
+- le service revérifie le rôle actif : ni l'administrateur ni le CO ne peuvent écrire la
+  signature d'autrui, même par un appel direct ;
+- image PNG ou JPEG d'au plus 1 Mo, type vérifié par le contenu ;
+  - garde contre les bombes de décompression ;
+  - réencodée en PNG sans métadonnées, réduite à 1 200 px, refusée sous 60 × 20 px ;
+- stockage privé (`signatures/`, règle n° 8), ancienne image effacée après validation,
+  orphelins purgés par `cleanup` ;
+- journal `signature.updated` et `signature.image_uploaded` (empreinte seulement).
+
+**API** (gestion, 2FA) :
+
+- `GET` et `PATCH …/signature` ;
+- `GET` et `PUT …/signature/image` (aperçu en `no-store`, dépôt limité à 20 par heure) ;
+- écritures sous réauthentification récente.
+
+**Registre des données personnelles** (`events.events`) :
+
+- export de la signature et des pointages de la personne ;
+- anonymisation : signature vidée et image effacée. Un signataire actif ne peut pas être
+  anonymisé (responsabilité à transmettre) ;
+- les pointages restent, rattachés à une inscription anonymisée (K14).
+
+**Matrice des droits** :
+
+- quatre profils ajoutés (CO « bénévoles », CO « relations extérieures », bénévole,
+  signataire) et les quatre cases de la signature ;
+- un test compare désormais les capacités de chaque profil, lues par `/v1/me`, à la
+  spécification, y compris les capacités encore sans route ;
+- le CO « bénévoles » est testé sur son périmètre (bénévoles seuls) ;
+- la 2FA des bénévoles et des signataires est testée.
+
+**Hors périmètre, corrigé en passant** : quelques en-têtes de colonnes des exports de L6
+étaient restés sans traduction anglaise ; `locale/check.sh` les signalait. Ils sont traduits.
+
+**Tests** :
+
+- backend : **4 112 réussis**, 9 ignorés (SQLite) ; sous MariaDB, `events`, `accounts`, le
+  registre, le schéma et les règles de plateforme réussissent (234) ;
+- matrice des droits : **2 955 cas** (2 273 à la fin de L6) ;
+- `events` : 24 tests (signature : service, image, API, réauthentification ; registre) ;
+- front : 388 tests, dont la table d'attribution de la gestion selon la fonction au CO ;
+- `ruff`, `npm run lint`, `format:check`, `locale/check.sh`, schéma validé sous MariaDB,
+  client régénéré.
+
+**Critère de fin** (« Matrice au vert ») : atteint.

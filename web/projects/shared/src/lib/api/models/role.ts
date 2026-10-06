@@ -14,6 +14,7 @@
  * * `ATTENDEE` - participant
  * * `SPONSOR` - partenaire
  * * `VOLUNTEER` - bénévole
+ * * `SIGNATORY` - signataire
  */
-export type Role = 'ADMIN' | 'CHAIR' | 'OC_MEMBER' | 'SC_CHAIR' | 'SC_MEMBER' | 'AUTHOR' | 'SPEAKER' | 'SESSION_CHAIR' | 'ATTENDEE' | 'SPONSOR' | 'VOLUNTEER';
+export type Role = 'ADMIN' | 'CHAIR' | 'OC_MEMBER' | 'SC_CHAIR' | 'SC_MEMBER' | 'AUTHOR' | 'SPEAKER' | 'SESSION_CHAIR' | 'ATTENDEE' | 'SPONSOR' | 'VOLUNTEER' | 'SIGNATORY';
 

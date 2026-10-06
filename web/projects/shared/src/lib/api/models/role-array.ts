@@ -17,5 +17,6 @@ export const ROLE: Role[] = [
   'SESSION_CHAIR',
   'ATTENDEE',
   'SPONSOR',
-  'VOLUNTEER'
+  'VOLUNTEER',
+  'SIGNATORY'
 ];

@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     "apps.program",
     "apps.registrations",
     "apps.payments",
+    "apps.events",
     # Après les applications du projet : leurs gabarits d'e-mails (account/email/*) priment.
     "allauth",
     "allauth.account",
@@ -322,6 +323,8 @@ REST_FRAMEWORK = {
         "registration_upload": "30/hour",  # justificatifs
         "payment_check": "60/hour",  # interrogation au retour de la page de paiement
         "payment_webhook": "120/min",  # notifications des fournisseurs, par adresse IP
+        # Jour J et attestations (plan L7) : images de signature, par compte.
+        "signature_upload": "20/hour",
     },
     "NUM_PROXIES": GESTCONF_TRUSTED_PROXY_COUNT,
     "TEST_REQUEST_DEFAULT_FORMAT": "json",

@@ -279,6 +279,14 @@ export type { ManageMembersList$Params as ManageMembersList$Params } from './fn/
 export { manageMembersList as manageMembersList } from './fn/manage/manage-members-list';
 export type { ManageMemberRevoke$Params as ManageMemberRevoke$Params } from './fn/manage/manage-member-revoke';
 export { manageMemberRevoke as manageMemberRevoke } from './fn/manage/manage-member-revoke';
+export type { ManageSignatureRetrieve$Params as ManageSignatureRetrieve$Params } from './fn/manage/manage-signature-retrieve';
+export { manageSignatureRetrieve as manageSignatureRetrieve } from './fn/manage/manage-signature-retrieve';
+export type { ManageSignatureUpdate$Params as ManageSignatureUpdate$Params } from './fn/manage/manage-signature-update';
+export { manageSignatureUpdate as manageSignatureUpdate } from './fn/manage/manage-signature-update';
+export type { ManageSignatureImage$Params as ManageSignatureImage$Params } from './fn/manage/manage-signature-image';
+export { manageSignatureImage as manageSignatureImage } from './fn/manage/manage-signature-image';
+export type { ManageSignatureImageUpload$Params as ManageSignatureImageUpload$Params } from './fn/manage/manage-signature-image-upload';
+export { manageSignatureImageUpload as manageSignatureImageUpload } from './fn/manage/manage-signature-image-upload';
 export type { ManageEditionStatus$Params as ManageEditionStatus$Params } from './fn/manage/manage-edition-status';
 export { manageEditionStatus as manageEditionStatus } from './fn/manage/manage-edition-status';
 export type { ManageEditionsSubmissionTypesList$Params as ManageEditionsSubmissionTypesList$Params } from './fn/manage/manage-editions-submission-types-list';

@@ -9,12 +9,15 @@ from django.utils import timezone
 from apps.accounts.models import RoleSource, UserRole, UserRoleStatus
 from apps.accounts.roles import (
     CAPABILITIES,
+    FUNCTION_CAPABILITIES,
     GRANTORS,
     MFA_REQUIRED_ROLES,
+    REAUTH_REQUIRED_FOR_GRANT,
     Capability,
     OcFunction,
     Role,
-    manageable_roles,
+    manageable_roles_for_assignments,
+    visible_member_roles,
 )
 from apps.accounts.services.access import edition_access
 from apps.accounts.services.roles import grant_role, revoke_role
@@ -32,6 +35,9 @@ COMMAND = Actor.command("cli:operateur")
 SYSTEM = Actor.system("job:test")
 
 
+C = Capability
+
+
 def user_actor(user):
     return Actor(kind=ActorKind.USER, user=user)
 
@@ -44,23 +50,27 @@ def test_capabilities_table_covers_every_role():
     assert set(GRANTORS) == set(Role.values)
 
 
-def test_mfa_required_roles_match_d3_and_h2():
-    """D3, et H2 (plan L4) : la 2FA s'impose aussi aux relecteurs (SC_MEMBER)."""
+def test_mfa_required_roles_match_d3_h2_and_k1_k18():
+    """D3, et H2 (plan L4) : la 2FA s'impose aussi aux relecteurs (SC_MEMBER) ; K1 et K18
+    (plan L7) : aux bénévoles, qui lisent la liste des participants, et aux signataires."""
     assert {
         Role.ADMIN,
         Role.CHAIR,
         Role.SC_CHAIR,
         Role.OC_MEMBER,
         Role.SC_MEMBER,
+        Role.VOLUNTEER,
+        Role.SIGNATORY,
     } == MFA_REQUIRED_ROLES
 
 
 @pytest.mark.parametrize(
     ("grantor", "expected"),
     [
-        # I10 (plan L5) : intervenants et présidents de séance, invités par ADMIN et CHAIR.
+        # I10 (plan L5) : intervenants et présidents de séance, invités par ADMIN et CHAIR ;
+        # K1 et K18 (plan L7) : bénévoles et signataires aussi.
         (
-            Role.ADMIN,
+            (Role.ADMIN, ""),
             {
                 Role.ADMIN,
                 Role.CHAIR,
@@ -69,21 +79,65 @@ def test_mfa_required_roles_match_d3_and_h2():
                 Role.SC_MEMBER,
                 Role.SPEAKER,
                 Role.SESSION_CHAIR,
+                Role.VOLUNTEER,
+                Role.SIGNATORY,
             },
         ),
         (
-            Role.CHAIR,
-            {Role.SC_CHAIR, Role.OC_MEMBER, Role.SC_MEMBER, Role.SPEAKER, Role.SESSION_CHAIR},
+            (Role.CHAIR, ""),
+            {
+                Role.SC_CHAIR,
+                Role.OC_MEMBER,
+                Role.SC_MEMBER,
+                Role.SPEAKER,
+                Role.SESSION_CHAIR,
+                Role.VOLUNTEER,
+                Role.SIGNATORY,
+            },
         ),
-        (Role.SC_CHAIR, {Role.SC_MEMBER}),
-        (Role.OC_MEMBER, set()),
-        (Role.SC_MEMBER, set()),
-        (Role.AUTHOR, set()),
+        ((Role.SC_CHAIR, ""), {Role.SC_MEMBER}),
+        ((Role.OC_MEMBER, OcFunction.FINANCE), set()),
+        # K1 (plan L7) : le CO « bénévoles » recrute les bénévoles, et eux seuls.
+        ((Role.OC_MEMBER, OcFunction.VOLUNTEERS), {Role.VOLUNTEER}),
+        ((Role.SC_MEMBER, ""), set()),
+        ((Role.AUTHOR, ""), set()),
+        ((Role.VOLUNTEER, ""), set()),
+        ((Role.SIGNATORY, ""), set()),
     ],
 )
 def test_grantors_table(grantor, expected):
     """§5.5 : AUTHOR et ATTENDEE ne sont jamais attribués à la main."""
-    assert manageable_roles([grantor]) == expected
+    assert manageable_roles_for_assignments([grantor]) == expected
+
+
+@pytest.mark.parametrize(
+    ("assignments", "expected"),
+    [
+        ([(Role.ADMIN, "")], None),
+        ([(Role.CHAIR, ""), (Role.SC_MEMBER, "")], None),
+        ([(Role.SC_CHAIR, "")], {Role.SC_CHAIR, Role.SC_MEMBER}),
+        ([(Role.OC_MEMBER, OcFunction.VOLUNTEERS)], {Role.VOLUNTEER}),
+        (
+            [(Role.SC_CHAIR, ""), (Role.OC_MEMBER, OcFunction.VOLUNTEERS)],
+            {Role.SC_CHAIR, Role.SC_MEMBER, Role.VOLUNTEER},
+        ),
+        ([(Role.OC_MEMBER, OcFunction.SECRETARIAT)], set()),
+        ([(Role.SIGNATORY, "")], set()),
+    ],
+)
+def test_visible_member_roles(assignments, expected):
+    """§5.4 et K1 (plan L7) : chacun ne voit, parmi les membres, que ceux qu'il gère."""
+    assert visible_member_roles(assignments) == expected
+
+
+def test_k18_signature_capability_belongs_to_the_signatory_alone():
+    """K18 (plan L7) : ni l'administrateur ni le CO ne renseignent la signature d'autrui."""
+    holders = {
+        role for role, capabilities in CAPABILITIES.items() if C.SIGNATURE_MANAGE in capabilities
+    }
+    assert holders == {Role.SIGNATORY}
+    assert not any(C.SIGNATURE_MANAGE in caps for caps in FUNCTION_CAPABILITIES.values())
+    assert Role.SIGNATORY in REAUTH_REQUIRED_FOR_GRANT
 
 
 def test_edition_access_in_one_query():

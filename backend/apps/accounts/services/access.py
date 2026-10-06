@@ -12,7 +12,7 @@ from apps.accounts.roles import (
     MFA_REQUIRED_ROLES,
     Capability,
     capabilities_for_assignments,
-    manageable_roles,
+    manageable_roles_for_assignments,
     visible_member_roles,
 )
 
@@ -45,12 +45,12 @@ class EditionAccess:
 
     @property
     def manageable_roles(self) -> frozenset[str]:
-        return manageable_roles(self.role_names)
+        return manageable_roles_for_assignments(self.roles)
 
     @property
     def visible_roles(self) -> frozenset[str] | None:
         """Rôles visibles dans les membres et invitations (``None`` = tous)."""
-        return visible_member_roles(self.role_names)
+        return visible_member_roles(self.roles)
 
 
 def active_roles(user: User, edition_id: int):

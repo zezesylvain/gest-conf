@@ -103,7 +103,8 @@
       "SESSION_CHAIR": "Session chair",
       "ATTENDEE": "Attendee",
       "SPONSOR": "Sponsor",
-      "VOLUNTEER": "Volunteer"
+      "VOLUNTEER": "Volunteer",
+      "SIGNATORY": "Signatory"
     },
     "ocFunctions": {
       "finance": "finance",

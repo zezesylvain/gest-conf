@@ -13,5 +13,7 @@ export const INVITABLE_ROLE: InvitableRole[] = [
   'OC_MEMBER',
   'SC_MEMBER',
   'SPEAKER',
-  'SESSION_CHAIR'
+  'SESSION_CHAIR',
+  'VOLUNTEER',
+  'SIGNATORY'
 ];

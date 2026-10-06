@@ -235,7 +235,8 @@
           "SESSION_CHAIR": "président de session",
           "ATTENDEE": "participant",
           "SPONSOR": "partenaire",
-          "VOLUNTEER": "bénévole"
+          "VOLUNTEER": "bénévole",
+          "SIGNATORY": "signataire"
         }
       },
       "privacy": {
