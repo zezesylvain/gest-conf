@@ -685,6 +685,5 @@ Le seed crée deux comptes de plus (CO « programme », Chair). Les 8 tests pass
 - front : 345 tests et 11 tests de scripts ; lint, format, build ;
 - E2E : 8 tests.
 
-**À faire hors du code** : passage en CI de L5.3 à L5.7 (nouvelle PR, sur demande) ; démo F
-sur o2switch ; Q14 ; transition `ACCEPTED_MINOR → WITHDRAWN` ; seuil d'avertissement du bundle
-du portail.
+**À faire hors du code** : démo F sur o2switch ; Q14 ; transition `ACCEPTED_MINOR → WITHDRAWN` ; seuil d'avertissement du bundle
+du portail. (L5.3 à L5.7 sont passées en CI par la PR #9, fusionnée le 6 octobre 2026.)

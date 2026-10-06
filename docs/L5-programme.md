@@ -16,7 +16,10 @@ aux §11 à §18). L'étude est mise à jour en conséquence (§21 « Mises à j
 | L5.4 | Publication, programme public (API), « Mon passage », iCal | `439c460` |
 | L5.5 | Écrans de la gestion : planificateur, sessions, salles, publication, paramétrage, tableau de bord, aide | `af1e540` |
 | L5.6 | Portail : programme public pré-rendu, confirmation de présentation, « Mon passage » | `a29011a` |
-| L5.7 | Parcours de bout en bout, rappel de confirmation, recette, bilan, étude (§21), `CLAUDE.md` | ce lot |
+| L5.7 | Parcours de bout en bout, rappel de confirmation, recette, bilan, étude (§21), `CLAUDE.md` | `51095a3` |
+
+Intégration continue : L5.0 à L5.2 par la PR #8, L5.3 à L5.7 par la PR #9 (fusionnées, CI au
+vert : backend 3.12 et 3.13 sur MariaDB, front, E2E, scripts de déploiement).
 
 ## 2. Parcours couverts (démo F)
 
@@ -163,4 +166,4 @@ aux §11 à §18). L'étude est mise à jour en conséquence (§21 « Mises à j
 - RG-11 effective (présentateur inscrit) : branchée en L6.
 
 **Pour L6 (inscriptions)** : RG-11, tarifs et agrégateur de paiement (Q7), entité de
-facturation (Q8). Un plan L6 est à proposer et à faire valider.
+facturation (Q8). Plan L6 validé le 6 octobre 2026 : `docs/L6-inscriptions-plan.md`.

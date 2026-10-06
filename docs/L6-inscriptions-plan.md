@@ -1,7 +1,11 @@
 # Lot L6 — Inscriptions et paiements : plan d'implémentation
 
-> **Statut : proposition, à valider** (décisions J1 à J16 au §2, questions au §10). Rien n'est
-> implémenté avant validation. L5 est clos (bilan : `docs/L5-programme.md`).
+> **Statut : validé le 6 octobre 2026, en cours** (décisions J1 à J16 telles que proposées,
+> au §2). J15 (« Mon programme » et notification des inscrits) n'a pas été demandée : elle est
+> **reportée**. Restent ouvertes, avec les hypothèses du plan : **Q7** (tarifs, agrégateur :
+> interface de fournisseur et fournisseur factice, CinetPay candidat), **Q8** (entité de
+> facturation : aucune facture émise sans mentions de facturation), règles d'annulation et
+> inscriptions de groupe (§10, questions 4 et 5). L5 est clos (bilan : `docs/L5-programme.md`).
 >
 > Sources :
 > - étude §4 M9, §5.3 (parcours d'inscription et de paiement), §6 (RG-11, RG-14, RG-15,
@@ -49,7 +53,7 @@
 - facture émise au paiement seulement ; le bon de commande est une pro forma non numérotée
   dans la série des factures (J7, J8).
 
-## 2. Décisions à valider
+## 2. Décisions (validées)
 
 | # | Sujet | Proposition |
 |---|---|---|

@@ -118,9 +118,9 @@ Les URL Django sont déclarées **sans** le préfixe `/api` (`v1/...`) : `config
 
 | Lot | État |
 |---|---|
-| L0 à L4 (MVP : squelette, socle, portail, soumission, évaluation et décision) | Livrés en code, testés en local et en CI (jusqu'à L5.2 par la PR #8, fusionnée) ; bilans dans `docs/`. **Aucune démo sur o2switch** encore faite |
-| L5 — Programme | **Livré en code et testé en local** (L5.0 à L5.7, E2E compris) ; bilan [`docs/L5-programme.md`](docs/L5-programme.md). L5.3 à L5.7 attendent leur passage en CI (nouvelle PR, sur demande). Ouverts : Q14, `ACCEPTED_MINOR → WITHDRAWN`, seuil d'avertissement du bundle du portail |
-| L6 — Inscriptions et paiements | **Plan proposé, en attente de validation** : [`docs/L6-inscriptions-plan.md`](docs/L6-inscriptions-plan.md) (décisions J1 à J16) ; dépend de Q7 (agrégateur, tarifs) et Q8 (entité de facturation) |
+| L0 à L4 (MVP : squelette, socle, portail, soumission, évaluation et décision) | Livrés en code, testés en local et en CI ; bilans dans `docs/`. **Aucune démo sur o2switch** encore faite |
+| L5 — Programme | **Livré en code, testé en local et en CI** (L5.0 à L5.7, E2E compris ; PR #8 et #9, fusionnées) ; bilan [`docs/L5-programme.md`](docs/L5-programme.md). Ouverts : Q14, `ACCEPTED_MINOR → WITHDRAWN`, seuil d'avertissement du bundle du portail |
+| L6 — Inscriptions et paiements | **En cours** : plan [`docs/L6-inscriptions-plan.md`](docs/L6-inscriptions-plan.md) validé le 6 octobre 2026 (décisions J1 à J16 ; J15 reportée). Q7 (agrégateur, tarifs) et Q8 (entité de facturation) toujours ouvertes : fournisseur factice et aucune facture sans mentions de facturation en attendant |
 | L7 et suivants | Non commencés |
 
 ## Décisions du lot L1
