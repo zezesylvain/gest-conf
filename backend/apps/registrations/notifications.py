@@ -24,9 +24,13 @@ def register_registration_templates() -> None:
         register_email_template(code)
 
 
+# « Mon inscription » dans l'espace compte du portail (J13). Pas `/compte/inscription`, qui
+# est la création de compte depuis L1 (allauth : `account_signup`).
+MY_REGISTRATION_PATH = "/compte/mon-inscription"
+
+
 def registration_link() -> str:
-    """« Mon inscription » dans l'espace compte du portail (J13)."""
-    return f"{settings.GESTCONF_PUBLIC_URL}/compte/inscription"
+    return f"{settings.GESTCONF_PUBLIC_URL}{MY_REGISTRATION_PATH}"
 
 
 def _context(registration: Registration, locale: str) -> dict[str, str]:

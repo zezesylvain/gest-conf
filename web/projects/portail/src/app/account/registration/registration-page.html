@@ -1,0 +1,386 @@
+<gc-page-header
+  [heading]="'portail.registration.account.title' | translate"
+  [lead]="'portail.registration.account.lead' | translate"
+/>
+<div aria-live="polite">
+  @if (notice()) {
+    <p class="notice" role="status">{{ notice() }}</p>
+  }
+</div>
+<gc-error-summary [messages]="errors()" />
+
+@if (loading()) {
+  <p role="status">{{ 'portail.account.home.loading' | translate }}</p>
+} @else {
+  @if (active(); as current) {
+    <!-- Suivi de l'inscription en cours (une par édition). -->
+    <section class="card" aria-labelledby="current-title">
+      <h2 id="current-title">
+        {{ title(current) }} · <span class="reference">{{ current.reference }}</span>
+      </h2>
+      <p>
+        <span class="badge" [class.ok]="current.status === 'confirmed'">{{
+          'portail.registration.status.' + current.status | translate
+        }}</span>
+        {{ text(current.category) }} ·
+        {{ 'portail.registration.period.' + current.period | translate }} ·
+        {{ 'portail.registration.zone.' + current.zone | translate }}
+      </p>
+      @if (current.status === 'pending') {
+        <p class="warning">
+          {{
+            'portail.registration.account.pendingLead'
+              | translate
+                : {
+                    total: amount(current.total, current.currency),
+                    date: date(current.due_at, current.edition.timezone),
+                  }
+          }}
+        </p>
+      }
+
+      <table class="lines">
+        <caption class="visually-hidden">
+          {{
+            'portail.registration.account.order' | translate
+          }}
+        </caption>
+        <tbody>
+          @for (line of current.lines; track $index) {
+            <tr>
+              <td>{{ text(line) }}</td>
+              <td class="amount">{{ amount(line.amount, current.currency) }}</td>
+            </tr>
+          }
+        </tbody>
+        <tfoot>
+          <tr>
+            <th scope="row">{{ 'portail.registration.account.total' | translate }}</th>
+            <td class="amount">
+              <strong>{{ amount(current.total, current.currency) }}</strong>
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <p class="actions">
+        @if (canPayOnline(current)) {
+          <button mat-flat-button type="button" (click)="pay(current)" [disabled]="busy()">
+            {{ 'portail.registration.account.payOnline' | translate }}
+          </button>
+        }
+        @if (current.status === 'pending' && owes(current)) {
+          <button
+            mat-stroked-button
+            type="button"
+            (click)="requestProforma(current)"
+            [disabled]="busy()"
+          >
+            {{ 'portail.registration.account.proforma' | translate }}
+          </button>
+        }
+        @if (current.can_cancel) {
+          <button mat-button type="button" (click)="cancel(current)" [disabled]="busy()">
+            {{ 'portail.registration.account.cancel' | translate }}
+          </button>
+        }
+      </p>
+      @if (current.status === 'pending' && current.method === 'transfer') {
+        <p class="hint">{{ 'portail.registration.account.transferHint' | translate }}</p>
+      }
+      @if (current.status === 'pending' && current.method === 'onsite') {
+        <p class="hint">{{ 'portail.registration.account.onsiteHint' | translate }}</p>
+      }
+      @if (current.status === 'confirmed' && current.cancellation_deadline) {
+        <p class="hint">
+          {{
+            (current.can_cancel
+              ? 'portail.registration.account.cancelUntil'
+              : 'portail.registration.account.cancelClosed'
+            )
+              | translate
+                : {
+                    date: date(current.cancellation_deadline, current.edition.timezone),
+                    percent: current.refund_percent ?? 0,
+                  }
+          }}
+        </p>
+      }
+
+      @if (current.category.requires_proof) {
+        <h3>{{ 'portail.registration.account.proof' | translate }}</h3>
+        @if (current.proof; as proof) {
+          <p>
+            {{
+              'portail.registration.account.proofReceived'
+                | translate
+                  : { name: proof.name, date: date(proof.uploaded_at, current.edition.timezone) }
+            }}
+          </p>
+        } @else {
+          <p class="warning">{{ 'portail.registration.account.proofMissing' | translate }}</p>
+        }
+        <label class="file">
+          <span>{{
+            (current.proof
+              ? 'portail.registration.account.proofReplace'
+              : 'portail.registration.account.proofUpload'
+            ) | translate
+          }}</span>
+          <input
+            type="file"
+            accept="application/pdf,image/jpeg,image/png"
+            (change)="uploadProof(current, $event)"
+            [disabled]="busy()"
+          />
+        </label>
+        <p class="hint">{{ 'portail.registration.account.proofHint' | translate }}</p>
+      }
+
+      <h3>{{ 'portail.registration.account.billing' | translate }}</h3>
+      @if (editingBilling()) {
+        <form [formGroup]="billingForm" (ngSubmit)="saveBilling(current)" novalidate>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'portail.registration.fields.billingName' | translate }}</mat-label>
+            <input matInput formControlName="billing_name" maxlength="255" />
+            <mat-error>{{ error(billingForm, 'billing_name') }}</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>{{
+              'portail.registration.fields.billingOrganization' | translate
+            }}</mat-label>
+            <input matInput formControlName="billing_organization" maxlength="255" />
+            <mat-error>{{ error(billingForm, 'billing_organization') }}</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'portail.registration.fields.billingAddress' | translate }}</mat-label>
+            <textarea
+              matInput
+              rows="3"
+              formControlName="billing_address"
+              maxlength="2000"
+            ></textarea>
+            <mat-error>{{ error(billingForm, 'billing_address') }}</mat-error>
+          </mat-form-field>
+          <p class="actions">
+            <button mat-flat-button type="submit" [disabled]="busy()">
+              {{ 'portail.registration.account.save' | translate }}
+            </button>
+            <button mat-button type="button" (click)="editingBilling.set(false)">
+              {{ 'portail.registration.account.cancelEdit' | translate }}
+            </button>
+          </p>
+        </form>
+      } @else {
+        <p class="address">
+          {{ current.billing_name }}
+          @if (current.billing_organization) {
+            <br />{{ current.billing_organization }}
+          }
+          @if (current.billing_address) {
+            <br />{{ current.billing_address }}
+          }
+        </p>
+        @if (canEditBilling(current)) {
+          <p>
+            <button mat-button type="button" (click)="startBilling(current)" [disabled]="busy()">
+              {{ 'portail.registration.account.editBilling' | translate }}
+            </button>
+          </p>
+        }
+      }
+
+      @if (current.documents.length) {
+        <h3>{{ 'portail.registration.account.documents' | translate }}</h3>
+        <ul>
+          @for (document of current.documents; track document.id) {
+            <li>
+              <a [href]="documentHref(current, document.id)" download>
+                {{ 'portail.registration.document.' + document.kind | translate }}
+                {{ document.number }}</a
+              >
+              · {{ amount(document.amount, document.currency) }}
+            </li>
+          }
+        </ul>
+      }
+
+      @if (current.has_qr) {
+        <h3>{{ 'portail.registration.account.qr' | translate }}</h3>
+        <p class="hint">{{ 'portail.registration.account.qrHint' | translate }}</p>
+        <img
+          class="qr"
+          [src]="qrSrc(current)"
+          width="240"
+          height="240"
+          [alt]="'portail.registration.account.qrAlt' | translate: { reference: current.reference }"
+        />
+      }
+    </section>
+  } @else if (catalog(); as offer) {
+    <!-- Commande : prix calculé par le serveur avant engagement. -->
+    @if (meStore.me()?.profile_complete === false) {
+      <p class="notice">
+        {{ 'portail.registration.account.profileIncomplete' | translate }}
+        <a routerLink="/compte/profil">{{ 'portail.account.home.completeProfile' | translate }}</a>
+      </p>
+    }
+    @if (offer.categories.length) {
+      <form [formGroup]="orderForm" (ngSubmit)="placeOrder()" novalidate class="card">
+        <h2>{{ 'portail.registration.account.newTitle' | translate }}</h2>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'portail.registration.fields.category' | translate }}</mat-label>
+          <mat-select formControlName="category" required (selectionChange)="categoryChanged()">
+            @for (category of offer.categories; track category.code) {
+              <mat-option [value]="category.code">{{ text(category) }}</mat-option>
+            }
+          </mat-select>
+          <mat-error>{{ error(orderForm, 'category') }}</mat-error>
+        </mat-form-field>
+        @if (selectedCategory(); as category) {
+          @if (description(category)) {
+            <p class="hint">{{ description(category) }}</p>
+          }
+          @if (category.requires_proof) {
+            <p class="warning">{{ 'portail.registration.account.proofRequired' | translate }}</p>
+          }
+        }
+
+        @if (options().length) {
+          <fieldset>
+            <legend>{{ 'portail.registration.fields.options' | translate }}</legend>
+            @for (option of options(); track option.code) {
+              <mat-checkbox
+                [checked]="orderForm.controls.options.value.includes(option.code)"
+                (change)="toggleOption(option.code, $event.checked)"
+              >
+                {{ text(option) }}
+                <span class="hint">({{ optionPrice(option) }})</span>
+              </mat-checkbox>
+            }
+            <p class="hint">{{ 'portail.registration.account.optionsHint' | translate }}</p>
+          </fieldset>
+        }
+
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'portail.registration.fields.promoCode' | translate }}</mat-label>
+          <input matInput formControlName="promo_code" maxlength="32" autocomplete="off" />
+          <mat-error>{{ error(orderForm, 'promo_code') }}</mat-error>
+        </mat-form-field>
+
+        <p class="actions">
+          <button mat-stroked-button type="button" (click)="computeQuote()" [disabled]="busy()">
+            {{ 'portail.registration.account.quote' | translate }}
+          </button>
+        </p>
+        @if (quote(); as price) {
+          <table class="lines" aria-live="polite">
+            <caption>
+              {{
+                quoteCaption(price)
+              }}
+            </caption>
+            <tbody>
+              @for (line of price.lines; track $index) {
+                <tr>
+                  <td>{{ text(line) }}</td>
+                  <td class="amount">{{ amount(line.amount, price.currency) }}</td>
+                </tr>
+              }
+            </tbody>
+            <tfoot>
+              <tr>
+                <th scope="row">{{ 'portail.registration.account.total' | translate }}</th>
+                <td class="amount">
+                  <strong>{{ amount(price.total, price.currency) }}</strong>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        }
+
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'portail.registration.fields.method' | translate }}</mat-label>
+          <mat-select formControlName="method" required>
+            @for (method of methods(); track method) {
+              <mat-option [value]="method">{{
+                'portail.registration.method.' + method | translate
+              }}</mat-option>
+            }
+          </mat-select>
+          <mat-error>{{ error(orderForm, 'method') }}</mat-error>
+        </mat-form-field>
+
+        <fieldset>
+          <legend>{{ 'portail.registration.account.billing' | translate }}</legend>
+          <p class="hint">{{ 'portail.registration.account.billingHint' | translate }}</p>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'portail.registration.fields.billingName' | translate }}</mat-label>
+            <input matInput formControlName="billing_name" maxlength="255" />
+            <mat-error>{{ error(orderForm, 'billing_name') }}</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>{{
+              'portail.registration.fields.billingOrganization' | translate
+            }}</mat-label>
+            <input matInput formControlName="billing_organization" maxlength="255" />
+            <mat-error>{{ error(orderForm, 'billing_organization') }}</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'portail.registration.fields.billingAddress' | translate }}</mat-label>
+            <textarea
+              matInput
+              rows="3"
+              formControlName="billing_address"
+              maxlength="2000"
+            ></textarea>
+            <mat-error>{{ error(orderForm, 'billing_address') }}</mat-error>
+          </mat-form-field>
+        </fieldset>
+
+        <p class="actions">
+          <button
+            mat-flat-button
+            type="submit"
+            [disabled]="busy() || meStore.me()?.profile_complete === false"
+          >
+            {{ 'portail.registration.account.placeOrder' | translate }}
+          </button>
+        </p>
+        <p class="hint">{{ 'portail.registration.account.orderHint' | translate }}</p>
+      </form>
+    } @else {
+      <p>{{ 'portail.registration.unavailable' | translate }}</p>
+    }
+  } @else {
+    <p>{{ 'portail.registration.unavailable' | translate }}</p>
+  }
+
+  @if (past().length) {
+    <section aria-labelledby="past-title">
+      <h2 id="past-title">{{ 'portail.registration.account.past' | translate }}</h2>
+      <ul>
+        @for (item of past(); track item.id) {
+          <li>
+            {{ title(item) }} · {{ item.reference }} ·
+            {{ 'portail.registration.status.' + item.status | translate }}
+            @if (item.refund_due) {
+              ·
+              {{
+                'portail.registration.account.refundDue'
+                  | translate: { amount: amount(item.refund_due, item.currency) }
+              }}
+            }
+            @for (document of item.documents; track document.id) {
+              ·
+              <a [href]="documentHref(item, document.id)" download
+                >{{ 'portail.registration.document.' + document.kind | translate }}
+                {{ document.number }}</a
+              >
+            }
+          </li>
+        }
+      </ul>
+    </section>
+  }
+}

@@ -55,8 +55,8 @@ def initiate(provider, item=None, **urls):
         customer=Customer(first_name="A", last_name="Zadi", email="awa@example.org"),
         designation="GC27 GC27-I00012",
         language="fr",
-        success_url=urls.get("success", "https://c.test/compte/inscription?paiement=GC27-12-1"),
-        failed_url="https://c.test/compte/inscription?paiement=GC27-12-1&echec=1",
+        success_url=urls.get("success", "https://c.test/compte/mon-inscription?paiement=GC27-12-1"),
+        failed_url="https://c.test/compte/mon-inscription?paiement=GC27-12-1&echec=1",
         notify_url="https://c.test/api/v1/payments/webhook/cinetpay",
     )
 

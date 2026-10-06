@@ -803,3 +803,86 @@ passent en lecture seule.
   pour les trois derniers).
 - La carte du tableau de bord se contente des compteurs, faute de `finance.read`, pour le CO
   sans fonction.
+
+## 17. Bilan de L6.6 (6 octobre 2026)
+
+**Écart d'adresse avec J13 : `/compte/mon-inscription`, pas `/compte/inscription`.**
+`/compte/inscription` est la **création de compte** depuis L1 : adresse `account_signup`
+d'allauth, liens de la connexion et des invitations, parcours E2E de l'auteur. Les e-mails de
+commande (L6.3) et le retour de la page de paiement (L6.4) y menaient donc à tort. Ils
+mènent maintenant à `/compte/mon-inscription`, sur le modèle de « Mon passage »
+(`/compte/mon-passage`).
+
+- L'adresse est écrite une seule fois côté serveur (`MY_REGISTRATION_PATH`,
+  `apps/registrations/notifications.py`), et le retour de paiement la réutilise.
+- Un test le vérifie : l'e-mail de commande mène à « Mon inscription », jamais à la création
+  de compte.
+- **Proposition** : reporter cette adresse dans l'étude (§22) et dans J13.
+
+**Page publique « Inscription »** (fin du « à venir », `site-pages.json` et
+`apps/portal/site.py`) :
+
+- **Pré-rendu** depuis `/v1/public/registration`. Le gabarit `registration` de la page du
+  site affiche, avant les sections du CMS :
+  - les dates d'ouverture, de fin du tarif préférentiel et de clôture, à l'heure de
+    l'édition ;
+  - la grille catégories × (période, zone), limitée aux couples proposés ;
+  - la mention de justificatif ;
+  - les pays « locaux », nommés par `Intl.DisplayNames` ;
+  - les options (prix local et international, places limitées, catégories autorisées) ;
+  - les moyens de paiement, avec une mention : aucune donnée de carte sur le site.
+- **Bouton** « S'inscrire » vers « Mon inscription ».
+- **Sans édition ouverte** (404) : la page annonce l'ouverture prochaine, sans erreur.
+- **Présentation** : sans Material ; le tableau défile dans un cadre focalisable
+  (375 px).
+- **Mise en ligne** : la page n'est à jour qu'à la publication du portail
+  (`deploy.sh --portal-only`), comme le programme.
+
+**« Mon inscription »** (`/compte/mon-inscription`, connexion exigée, lien dans la navigation
+et sur l'accueil du compte) :
+
+- **Commande** :
+  - catégorie ; les options affichées sont celles de la catégorie, vidées quand elle change ;
+  - code promo ;
+  - « Calculer le prix » : devis du serveur, avec la période et la zone ;
+  - moyen de paiement parmi ceux de l'édition, choisi d'office s'il n'y en a qu'un ;
+  - identité de facturation.
+  - Un profil sans pays est signalé, avec un lien vers le profil. Les refus du serveur
+    (quota, code épuisé, période close) sont affichés avec leur message.
+- **Paiement en ligne** : le navigateur est **dirigé** vers la page hébergée
+  (`location.assign`, service `PaymentRedirect`), jamais par un formulaire (CSP
+  `form-action 'self'`).
+  - Au retour (`?paiement=`, `&echec=1`), le prestataire est interrogé (`payment-check`).
+  - Le message suit le statut réel : confirmée, vérification en cours ou échec. Puis
+    l'adresse est nettoyée.
+  - Le retour seul ne confirme jamais rien (RG-15).
+- **Suivi** :
+  - statut, période, zone, lignes et total ;
+  - échéance et consignes du virement ou du règlement sur place ;
+  - pro forma ;
+  - justificatif : PDF, JPEG ou PNG, remplaçable ;
+  - identité de facturation, modifiable jusqu'à la facture ;
+  - pièces (PDF) et code QR d'accès, servis par des endpoints authentifiés (règle n° 8 ;
+    CSP `img-src 'self'`) ;
+  - annulation confirmée par un dialogue, avec la part remboursée et la date limite ;
+  - inscriptions précédentes, avec le remboursement dû.
+
+**Partagé** : `formatMoney` (`shared/ui-kit`) remplace le formateur propre à la gestion.
+
+**Tests** :
+
+- Vitest :
+  - outils de la grille ;
+  - page publique (grille, dates, pays, options, moyens, lien) et cas 404 ;
+  - « Mon inscription » : devis puis commande par virement, options par catégorie,
+    commande en ligne redirigée, refus 409 affiché ;
+  - paiement, pro forma et annulation d'une commande en attente ;
+  - retour de paiement confirmé, en vérification ou échoué ;
+  - inscription confirmée : facture, QR, annulation close, facturation figée ;
+  - cas 404 ;
+  - `formatMoney`.
+- pytest : lien de l'e-mail de commande ; adresses de retour du paiement mises à jour.
+- Totaux : shared 78, portail 144, gestion 163 ; lint et format au vert.
+
+**Budget** : bundle initial du portail à 368,6 ko pour un avertissement à 365 ko, contre
+367,8 ko avant L6 (point ouvert depuis L5) ; seuil d'erreur à 380 ko.

@@ -24,7 +24,8 @@ class SitePage:
     title_fr: str
     title_en: str
     # Page « à venir » (E6) : données en L5 et L6, sections éditables dès L2. Le programme
-    # est servi depuis L5 (I7) ; intervenants (M10) et inscription (L6) restent à venir.
+    # est servi depuis L5 (I7), l'inscription depuis L6 (J13) ; les intervenants (M10)
+    # restent à venir.
     coming_soon: bool = False
 
 
@@ -36,14 +37,7 @@ SITE_PAGES: tuple[SitePage, ...] = (
     SitePage("committees", "comites", "committees", "Comités", "Committees"),
     SitePage("program", "programme", "program", "Programme", "Programme"),
     SitePage("speakers", "intervenants", "speakers", "Intervenants", "Speakers", coming_soon=True),
-    SitePage(
-        "registration",
-        "inscription",
-        "registration",
-        "Inscription",
-        "Registration",
-        coming_soon=True,
-    ),
+    SitePage("registration", "inscription", "registration", "Inscription", "Registration"),
 )
 SITE_ROUTES: dict[str, SitePage] = {page.slug: page for page in SITE_PAGES}
 

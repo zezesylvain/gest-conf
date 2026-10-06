@@ -24,6 +24,7 @@ export * from './lib/ui-kit/confirm-dialog';
 export * from './lib/ui-kit/countries';
 export * from './lib/ui-kit/date-format';
 export * from './lib/ui-kit/error-summary';
+export * from './lib/ui-kit/money-format';
 export * from './lib/ui-kit/page-header';
 export * from './lib/ui-kit/reauthentication-dialog';
 export * from './lib/ui-kit/server-errors';

@@ -1,0 +1,136 @@
+@switch (state()) {
+  @case ('loading') {
+    <p role="status" class="muted">{{ 'portail.site.loading' | translate }}</p>
+  }
+  @case ('unavailable') {
+    <p class="soon">{{ 'portail.registration.unavailable' | translate }}</p>
+  }
+  @case ('error') {
+    <p>{{ 'portail.site.errorLead' | translate }}</p>
+  }
+  @case ('ready') {
+    @if (catalog(); as current) {
+      <p class="muted">
+        {{
+          'portail.registration.currency'
+            | translate: { currency: current.currency, zone: current.timezone }
+        }}
+      </p>
+      @if (dates().length) {
+        <ul class="dates">
+          @for (item of dates(); track item.code) {
+            <li>
+              <time [attr.datetime]="item.at">{{ when(item.at) }}</time>
+              <span>{{ 'portail.site.keyDates.' + item.code | translate }}</span>
+            </li>
+          }
+        </ul>
+      }
+      @if (current.categories.length) {
+        <p class="buttons">
+          <a class="button primary" [routerLink]="myRegistration">{{
+            'portail.registration.register' | translate
+          }}</a>
+        </p>
+        <p class="muted">{{ 'portail.registration.accountHint' | translate }}</p>
+
+        <h2>{{ 'portail.registration.categories' | translate }}</h2>
+        <!-- Défilement horizontal dans le cadre, jamais de la page (375 px). -->
+        <div
+          class="table-wrap"
+          role="region"
+          tabindex="0"
+          [attr.aria-label]="'portail.registration.categories' | translate"
+        >
+          <table>
+            <caption class="visually-hidden">
+              {{
+                'portail.registration.categories' | translate
+              }}
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">{{ 'portail.registration.category' | translate }}</th>
+                @for (column of columns(); track column.period + column.zone) {
+                  <th scope="col" class="amount">
+                    {{ 'portail.registration.period.' + column.period | translate }}<br />
+                    <span class="muted">{{
+                      'portail.registration.zone.' + column.zone | translate
+                    }}</span>
+                  </th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (category of current.categories; track category.code) {
+                <tr>
+                  <th scope="row">
+                    {{ text(category) }}
+                    @if (category.requires_proof) {
+                      <span class="tag">{{ 'portail.registration.proof' | translate }}</span>
+                    }
+                    @if (description(category)) {
+                      <br /><span class="muted">{{ description(category) }}</span>
+                    }
+                  </th>
+                  @for (column of columns(); track column.period + column.zone) {
+                    <td class="amount">{{ fee(category, column.period, column.zone) }}</td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <p class="muted">
+          @if (localCountries()) {
+            {{ 'portail.registration.localCountries' | translate: { countries: localCountries() } }}
+          } @else {
+            {{ 'portail.registration.localEdition' | translate }}
+          }
+          {{ 'portail.registration.periodHint' | translate }}
+        </p>
+
+        @if (current.options.length) {
+          <h2>{{ 'portail.registration.options' | translate }}</h2>
+          <ul class="cards">
+            @for (option of current.options; track option.code) {
+              <li>
+                <h3>{{ text(option) }}</h3>
+                @if (description(option)) {
+                  <p>{{ description(option) }}</p>
+                }
+                <p>
+                  {{ 'portail.registration.zone.local' | translate }} :
+                  {{ amount(option.price_local) }} ·
+                  {{ 'portail.registration.zone.international' | translate }} :
+                  {{ amount(option.price_international) }}
+                </p>
+                @if (option.limited) {
+                  <p class="muted">{{ 'portail.registration.limited' | translate }}</p>
+                }
+                @if (optionCategories(option)) {
+                  <p class="muted">
+                    {{
+                      'portail.registration.reservedTo'
+                        | translate: { categories: optionCategories(option) }
+                    }}
+                  </p>
+                }
+              </li>
+            }
+          </ul>
+        }
+
+        <h2>{{ 'portail.registration.methods' | translate }}</h2>
+        <ul>
+          @for (method of current.methods; track method) {
+            <li>{{ 'portail.registration.method.' + method | translate }}</li>
+          }
+        </ul>
+        <p class="muted">{{ 'portail.registration.paymentHint' | translate }}</p>
+      } @else {
+        <p class="soon">{{ 'portail.registration.unavailable' | translate }}</p>
+      }
+    }
+  }
+}

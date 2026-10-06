@@ -81,6 +81,14 @@ export const accountRoutes: Routes = [
           import('./submissions/submissions.routes').then((m) => m.submissionRoutes),
       },
       {
+        // « Mon inscription » (plan L6, J13) : `/compte/inscription` est la création de compte.
+        path: 'mon-inscription',
+        title: 'portail.registration.account.title',
+        canMatch: [authGuard],
+        loadComponent: () =>
+          import('./registration/registration-page').then((m) => m.RegistrationPage),
+      },
+      {
         path: 'mon-passage',
         title: 'portail.agenda.title',
         canMatch: [authGuard],

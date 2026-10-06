@@ -7,6 +7,7 @@ import {
   CategoryRequest,
   FeeRequest,
   FinanceDashboard,
+  formatMoney,
   ManageOrderRequest,
   ManageRegistration,
   ManualPaymentRequest,
@@ -292,13 +293,5 @@ export function saveBlob(blob: Blob, name: string): void {
   URL.revokeObjectURL(url);
 }
 
-/** Montant décimal (« 25000.00 ») au format de la langue et de la devise (Intl). */
-export function money(amount: string | number | null | undefined, currency: string, lang: string) {
-  if (amount === null || amount === undefined || amount === '') {
-    return '—';
-  }
-  return new Intl.NumberFormat(lang === 'en' ? 'en-GB' : 'fr-FR', {
-    style: 'currency',
-    currency,
-  }).format(Number(amount));
-}
+/** Montant décimal (« 25000.00 ») au format de la langue et de la devise (`shared`). */
+export const money = formatMoney;

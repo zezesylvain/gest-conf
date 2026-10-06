@@ -238,7 +238,7 @@ def test_fake_checkout_page_pays_and_redirects(registration, settings):
         url, {"action": "pay", "csrfmiddlewaretoken": token.decode()}, format="multipart"
     )
     assert response.status_code == 302
-    assert response["Location"].endswith(f"/compte/inscription?paiement={payment.reference}")
+    assert response["Location"].endswith(f"/compte/mon-inscription?paiement={payment.reference}")
     registration.refresh_from_db()
     assert registration.status == "confirmed"
     settings.GESTCONF_PAYMENT_PROVIDER = "cinetpay"

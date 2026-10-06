@@ -36,6 +36,7 @@ from apps.payments.services import documents
 from apps.payments.services.manual import next_reference
 from apps.registrations import workflow
 from apps.registrations.models import PaymentMethod, Registration, RegistrationStatus
+from apps.registrations.notifications import registration_link
 from apps.registrations.services.settings import registration_settings
 
 IN_PROGRESS = (PaymentStatus.INITIATED, PaymentStatus.PENDING)
@@ -53,7 +54,7 @@ def _unavailable(reason) -> RuleViolation:
 
 def return_urls(payment: Payment) -> tuple[str, str]:
     """Retour du navigateur vers « Mon inscription » : simple affichage, aucun effet."""
-    base = f"{settings.GESTCONF_PUBLIC_URL}/compte/inscription?paiement={payment.reference}"
+    base = f"{registration_link()}?paiement={payment.reference}"
     return base, f"{base}&echec=1"
 
 

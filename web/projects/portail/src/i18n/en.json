@@ -23,7 +23,8 @@
         "myData": "My data",
         "notifications": "Notifications",
         "notificationsLabel": "Notifications ({{count}} unread)",
-        "agenda": "My schedule"
+        "agenda": "My schedule",
+        "registration": "My registration"
       },
       "fields": {
         "email": "Email address",
@@ -604,6 +605,118 @@
       "chairs": "Chaired by",
       "instructions": "Instructions",
       "empty": "Nothing in the published programme yet. Your schedule will appear here once the programme is published."
+    },
+    "registration": {
+      "unavailable": "Registration is not open yet: please come back soon.",
+      "currency": "Fees in {{currency}}; dates and times in the edition's time zone ({{zone}}).",
+      "register": "Register",
+      "accountHint": "Registration is done from your account: the exact price (period, zone of your country, promo code) is calculated there before any order.",
+      "categories": "Categories and fees",
+      "category": "Category",
+      "period": {
+        "early": "Early bird",
+        "regular": "Regular",
+        "onsite": "On site"
+      },
+      "zone": {
+        "local": "local",
+        "international": "international"
+      },
+      "proof": "proof required",
+      "localCountries": "Local fee: your profile's country among {{countries}}; international otherwise.",
+      "localEdition": "Local fee: the edition's country; international otherwise.",
+      "periodHint": "The period depends on the order date.",
+      "options": "Options",
+      "limited": "Limited places.",
+      "reservedTo": "Reserved for: {{categories}}.",
+      "methods": "Payment methods",
+      "method": {
+        "online": "Online payment",
+        "transfer": "Bank transfer (purchase order, pro forma invoice)",
+        "onsite": "On site",
+        "free": "No payment",
+        "waiver": "Fee waiver"
+      },
+      "paymentHint": "No card data is entered on this site: online payment takes place on the provider's secure page. Registration is confirmed when the payment is received.",
+      "status": {
+        "pending": "Awaiting payment",
+        "confirmed": "Confirmed",
+        "cancelled": "Cancelled",
+        "expired": "Expired"
+      },
+      "document": {
+        "invoice": "Invoice",
+        "credit_note": "Credit note",
+        "proforma": "Pro forma invoice"
+      },
+      "fields": {
+        "category": "Category",
+        "options": "Options",
+        "promoCode": "Promo code",
+        "method": "Payment method",
+        "billingName": "Bill to",
+        "billingOrganization": "Organisation",
+        "billingAddress": "Billing address"
+      },
+      "account": {
+        "title": "My registration",
+        "lead": "Registration for the current edition: order, payment, invoices and badge.",
+        "newTitle": "Register",
+        "profileIncomplete": "Give your country in your profile: it sets the fee (local or international).",
+        "proofRequired": "This category requires a proof (student card…), to be uploaded after ordering.",
+        "optionsHint": "Local / international price. Places are reserved when ordering.",
+        "quote": "Calculate the price",
+        "quoteTitle": "Price ({{period}}, {{zone}} fee)",
+        "billingHint": "Empty: your name. Give the paying organisation, if any.",
+        "placeOrder": "Confirm the order",
+        "orderHint": "The price is recalculated by the server when ordering. Online payment: you will be taken to the provider's secure page.",
+        "ordered": "Order saved.",
+        "order": "Order",
+        "total": "Total",
+        "pendingLead": "To pay: {{total}}, before {{date}}. After that, the order expires and the places are released.",
+        "payOnline": "Pay online",
+        "proforma": "Get a pro forma invoice",
+        "proformaIssued": "Pro forma invoice issued.",
+        "cancel": "Cancel my registration",
+        "cancelled": "Registration cancelled.",
+        "cancelPending": {
+          "title": "Cancel this order?",
+          "message": "The order is cancelled and the places released.",
+          "confirm": "Cancel the order"
+        },
+        "cancelConfirmed": {
+          "title": "Cancel your registration?",
+          "message": "Cancellation is final. Refunded share: {{percent}}% of the amount paid.",
+          "confirm": "Cancel my registration"
+        },
+        "cancelUntil": "Cancellation possible until {{date}} ({{percent}}% refund).",
+        "cancelClosed": "The cancellation deadline ({{date}}) has passed: contact the organising committee.",
+        "transferHint": "Bank transfer: quote the registration reference. The committee confirms the registration on receipt.",
+        "onsiteHint": "Payment on site, at the conference desk.",
+        "proof": "Proof",
+        "proofReceived": "Received: {{name}} ({{date}}).",
+        "proofMissing": "Proof expected.",
+        "proofUpload": "Upload the proof",
+        "proofReplace": "Replace the proof",
+        "proofHint": "PDF, JPEG or PNG, 5 MB at most.",
+        "proofSaved": "Proof saved.",
+        "billing": "Billing",
+        "editBilling": "Edit",
+        "save": "Save",
+        "cancelEdit": "Cancel",
+        "billingSaved": "Billing details updated.",
+        "documents": "Documents",
+        "qr": "Access code",
+        "qrHint": "Show this code at the conference desk.",
+        "qrAlt": "Access QR code for registration {{reference}}",
+        "payment": {
+          "confirmed": "Payment received: your registration is confirmed.",
+          "pending": "Payment being checked with the provider: the confirmation will arrive by email.",
+          "failed": "The payment did not go through. You can try again."
+        },
+        "past": "Previous registrations",
+        "refundDue": "refund of {{amount}}"
+      }
     }
   }
 }

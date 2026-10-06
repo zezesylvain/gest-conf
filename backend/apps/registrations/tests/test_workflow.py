@@ -74,6 +74,15 @@ def test_j5_order_freezes_price_reserves_and_sets_due_date(edition):
     assert OutboxEmail.objects.filter(template_code="registrations/email/ordered").count() == 1
 
 
+def test_j13_emails_link_to_my_registration_not_to_account_signup(edition):
+    """J13 : le lien mène à « Mon inscription » (`/compte/mon-inscription`) ; `/compte/inscription`
+    est la création de compte (L1)."""
+    order(edition)
+    email = OutboxEmail.objects.get(template_code="registrations/email/ordered")
+    assert "/compte/mon-inscription" in email.body_text
+    assert "/compte/inscription" not in email.body_text
+
+
 def test_j5_one_active_registration_per_person(edition):
     user = participant_user()
     order(edition, user)
