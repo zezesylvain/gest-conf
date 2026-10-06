@@ -317,6 +317,33 @@ CASES = [
         "/v1/manage/editions/{e}/registrations/{reg_paid}/documents/{reg_invoice}",
     ),
     Case("manage-billing-documents", "GET", FIR, 200, "/v1/manage/editions/{e}/billing/documents"),
+    # Plan L6 (L6.5) : suivi financier et exports journalisés (réauthentification, J1).
+    Case(
+        "manage-registrations-export",
+        "GET",
+        RGR,
+        200,
+        "/v1/manage/editions/{e}/registrations/export",
+        recent_auth=True,
+    ),
+    Case("manage-billing-payments", "GET", FIR, 200, "/v1/manage/editions/{e}/billing/payments"),
+    Case(
+        "manage-billing-payments-export",
+        "GET",
+        FIR,
+        200,
+        "/v1/manage/editions/{e}/billing/payments/export",
+        recent_auth=True,
+    ),
+    Case(
+        "manage-billing-documents-export",
+        "GET",
+        FIR,
+        200,
+        "/v1/manage/editions/{e}/billing/documents/export",
+        recent_auth=True,
+    ),
+    Case("manage-billing-dashboard", "GET", FIR, 200, "/v1/manage/editions/{e}/billing/dashboard"),
     Case(
         "manage-billing-issue-pending",
         "POST",

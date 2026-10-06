@@ -55,6 +55,11 @@ urlpatterns = [
         name="manage-registrations",
     ),
     path(
+        f"{E}/registrations/export",
+        manage_views.RegistrationListViewSet.as_view({"get": "export"}),
+        name="manage-registrations-export",
+    ),
+    path(
         f"{E}/registrations/<int:item_id>",
         manage_views.RegistrationDetailViewSet.as_view({"get": "retrieve"}),
         name="manage-registration",

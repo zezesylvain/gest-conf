@@ -364,6 +364,8 @@ SPECTACULAR_SETTINGS = {
         "OrderMethod": "apps.registrations.models.ORDER_METHOD_CHOICES",
         "ManualPaymentMethod": "apps.payments.models.MANUAL_METHOD_CHOICES",
         "DocumentKind": "apps.payments.models.DocumentKind",
+        "PaymentStatus": "apps.payments.models.PaymentStatus",
+        "PaymentProvider": "apps.payments.models.Provider",
         "InvitableRole": "apps.accounts.roles.InvitableRole",
         "OcFunction": "apps.accounts.roles.OcFunction",
         "UserRoleStatus": "apps.accounts.models.UserRoleStatus",

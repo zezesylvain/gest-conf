@@ -20,6 +20,26 @@ urlpatterns = [
         name="manage-billing-documents",
     ),
     path(
+        f"{E}/billing/documents/export",
+        views.DocumentsExportViewSet.as_view({"get": "export"}),
+        name="manage-billing-documents-export",
+    ),
+    path(
+        f"{E}/billing/payments",
+        views.PaymentsViewSet.as_view({"get": "list"}),
+        name="manage-billing-payments",
+    ),
+    path(
+        f"{E}/billing/payments/export",
+        views.PaymentsViewSet.as_view({"get": "export"}),
+        name="manage-billing-payments-export",
+    ),
+    path(
+        f"{E}/billing/dashboard",
+        views.FinanceDashboardViewSet.as_view({"get": "retrieve"}),
+        name="manage-billing-dashboard",
+    ),
+    path(
         f"{E}/billing/documents/issue-pending",
         views.IssuePendingInvoicesViewSet.as_view({"post": "create"}),
         name="manage-billing-issue-pending",

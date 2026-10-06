@@ -11,6 +11,7 @@ import hashlib
 from django.conf import settings
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.middleware.csrf import get_token
+from django.utils import timezone
 from django.utils.html import escape
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
@@ -26,16 +27,19 @@ from apps.accounts.roles import Capability as C
 from apps.accounts.services.roles import ensure_editable
 from apps.core.actor import Actor
 from apps.core.permissions import CsrfEnforced
-from apps.payments.models import BillingDocument
+from apps.core.spreadsheet import csv_response
+from apps.payments.models import BillingDocument, Payment
 from apps.payments.providers import fake
 from apps.payments.serializers import (
     BillingDocumentSerializer,
     BillingProfileSerializer,
+    FinanceDashboardSerializer,
     IssuedCountSerializer,
     ManualPaymentSerializer,
+    PaymentListSerializer,
     RefundSerializer,
 )
-from apps.payments.services import billing, documents, manual, online
+from apps.payments.services import billing, documents, finance, manual, online
 from apps.registrations.manage_views import detailed, manage_data
 from apps.registrations.models import Registration
 from apps.registrations.serializers import DocumentRefSerializer, ManageRegistrationSerializer
@@ -233,6 +237,117 @@ class BillingDocumentsViewSet(ManageViewSet):
             for row in page
         ]
         return self.get_paginated_response(BillingDocumentSerializer(data, many=True).data)
+
+
+def _payments(edition, params):
+    rows = (
+        Payment.objects.filter(registration__edition=edition)
+        .select_related("registration__edition")
+        .order_by("-created_at", "-id")
+    )
+    for name in ("status", "provider", "method"):
+        if params.get(name):
+            rows = rows.filter(**{name: params[name]})
+    return rows
+
+
+PAYMENT_FILTERS = [
+    OpenApiParameter("status", str, description="Statut du paiement."),
+    OpenApiParameter("provider", str, description="Fournisseur (manual, fake, cinetpay)."),
+    OpenApiParameter("method", str, description="Moyen de paiement."),
+]
+
+
+class PaymentsViewSet(ManageViewSet):
+    """``…/billing/payments`` : encaissements de l'édition (``finance.read``), les plus
+    récents d'abord ; ``…/billing/payments/export`` : CSV journalisé, réauthentification."""
+
+    serializer_class = PaymentListSerializer
+    required_capabilities = {"list": C.FINANCE_READ, "export": C.FINANCE_READ}
+    filter_backends = ()
+
+    def get_permissions(self):
+        permissions = super().get_permissions()
+        if self.action == "export":
+            permissions.append(RecentAuthRequired())
+        return permissions
+
+    @extend_schema(
+        operation_id="manage_billing_payments_list",
+        parameters=PAYMENT_FILTERS,
+        responses={200: PaymentListSerializer(many=True)},
+    )
+    def list(self, request: Request, edition_id: int) -> Response:
+        page = self.paginate_queryset(_payments(self.edition, request.query_params))
+        data = [
+            {
+                "id": row.pk,
+                "registration_id": row.registration_id,
+                "registration_reference": row.registration.reference,
+                "customer": row.registration.billing_name,
+                "provider": row.provider,
+                "method": row.method,
+                "reference": row.reference,
+                "provider_reference": row.provider_reference,
+                "amount": row.amount,
+                "currency": row.currency,
+                "status": row.status,
+                "provider_status": row.provider_status,
+                "created_at": row.created_at,
+                "completed_at": row.completed_at,
+                "received_on": row.received_on,
+                "note": row.note,
+            }
+            for row in page
+        ]
+        return self.get_paginated_response(PaymentListSerializer(data, many=True).data)
+
+    @extend_schema(
+        operation_id="manage_billing_payments_export",
+        parameters=PAYMENT_FILTERS,
+        responses={(200, "text/csv"): OpenApiTypes.BINARY},
+    )
+    def export(self, request: Request, edition_id: int) -> HttpResponse:
+        rows = _payments(self.edition, request.query_params)
+        content = finance.export_payments(self.edition, rows, actor=Actor.from_request(request))
+        return csv_response(content, f"paiements-{self.edition.code}-{timezone.now():%Y%m%d}.csv")
+
+
+class DocumentsExportViewSet(ManageViewSet):
+    """``…/billing/documents/export`` : pièces de facturation en CSV (export comptable),
+    journalisé, réauthentification (J1)."""
+
+    required_capabilities = {"export": C.FINANCE_READ}
+
+    def get_permissions(self):
+        return [*super().get_permissions(), RecentAuthRequired()]
+
+    @extend_schema(
+        operation_id="manage_billing_documents_export",
+        parameters=[OpenApiParameter("kind", str, description="Nature de la pièce.")],
+        responses={(200, "text/csv"): OpenApiTypes.BINARY},
+    )
+    def export(self, request: Request, edition_id: int) -> HttpResponse:
+        rows = (
+            BillingDocument.objects.filter(edition=self.edition)
+            .select_related("registration__edition", "original")
+            .order_by("kind", "year", "sequence")
+        )
+        if request.query_params.get("kind"):
+            rows = rows.filter(kind=request.query_params["kind"])
+        content = finance.export_documents(self.edition, rows, actor=Actor.from_request(request))
+        return csv_response(content, f"pieces-{self.edition.code}-{timezone.now():%Y%m%d}.csv")
+
+
+class FinanceDashboardViewSet(ManageViewSet):
+    """``…/billing/dashboard`` : tableau de bord financier (``finance.read``, J12)."""
+
+    serializer_class = FinanceDashboardSerializer
+    required_capabilities = {"retrieve": C.FINANCE_READ}
+
+    @extend_schema(operation_id="manage_billing_dashboard")
+    def retrieve(self, request: Request, edition_id: int) -> Response:
+        return Response(FinanceDashboardSerializer(finance.dashboard(self.edition)).data)
 
 
 class IssuePendingInvoicesViewSet(ManageViewSet):

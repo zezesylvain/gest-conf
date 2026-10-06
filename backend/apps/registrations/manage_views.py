@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from django.db.models import Exists, OuterRef, Q
 from django.http import Http404, HttpResponse
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
@@ -17,11 +18,12 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from apps.accounts.models import User
-from apps.accounts.permissions import ManageViewSet
+from apps.accounts.permissions import ManageViewSet, RecentAuthRequired
 from apps.accounts.roles import Capability as C
 from apps.accounts.services.invitations import display_name
 from apps.core.actor import Actor
 from apps.core.errors import Invalid
+from apps.core.spreadsheet import csv_response
 from apps.registrations.models import Registration
 from apps.registrations.serializers import (
     CancelSerializer,
@@ -31,7 +33,7 @@ from apps.registrations.serializers import (
     WaiverSerializer,
     registration_data,
 )
-from apps.registrations.services import orders
+from apps.registrations.services import exports, orders
 
 FILTERS = [
     OpenApiParameter("status", str, description="Statut (en attente, confirmée…)."),
@@ -133,8 +135,18 @@ class RegistrationListViewSet(_RegistrationsViewSet):
     existant (après la clôture : tarif « sur place »)."""
 
     serializer_class = ManageRegistrationListSerializer
-    required_capabilities = {"list": C.REGISTRATIONS_READ, "create": C.REGISTRATIONS_MANAGE}
+    required_capabilities = {
+        "list": C.REGISTRATIONS_READ,
+        "create": C.REGISTRATIONS_MANAGE,
+        "export": C.REGISTRATIONS_READ,
+    }
     filter_backends = ()
+
+    def get_permissions(self):
+        permissions = super().get_permissions()
+        if self.action == "export":
+            permissions.append(RecentAuthRequired())
+        return permissions
 
     def filtered(self):
         from apps.payments.models import BillingDocument, DocumentKind
@@ -203,6 +215,27 @@ class RegistrationListViewSet(_RegistrationsViewSet):
             for row in page
         ]
         return self.get_paginated_response(ManageRegistrationListSerializer(rows, many=True).data)
+
+    @extend_schema(
+        operation_id="manage_registrations_export",
+        parameters=FILTERS,
+        responses={(200, "text/csv"): OpenApiTypes.BINARY},
+    )
+    def export(self, request: Request, edition_id: int) -> HttpResponse:
+        """Export CSV des inscriptions filtrées (mêmes filtres que la liste), journalisé,
+        avec réauthentification (données personnelles en masse)."""
+        filters = {
+            key: request.query_params[key]
+            for key in ("status", "category", "method", "q")
+            if request.query_params.get(key)
+        }
+        rows = self.filtered().select_related("promo_code")
+        content = exports.export_registrations(
+            self.edition, rows, actor=self.actor(), filters=filters
+        )
+        return csv_response(
+            content, f"inscriptions-{self.edition.code}-{timezone.now():%Y%m%d}.csv"
+        )
 
     @extend_schema(
         operation_id="manage_registrations_create",

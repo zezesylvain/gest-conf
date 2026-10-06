@@ -25,10 +25,18 @@ export type { ManageAssignmentCancel$Params as ManageAssignmentCancel$Params } f
 export { manageAssignmentCancel as manageAssignmentCancel } from './fn/manage/manage-assignment-cancel';
 export type { ManageAuditList$Params as ManageAuditList$Params } from './fn/manage/manage-audit-list';
 export { manageAuditList as manageAuditList } from './fn/manage/manage-audit-list';
+export type { ManageBillingDashboard$Params as ManageBillingDashboard$Params } from './fn/manage/manage-billing-dashboard';
+export { manageBillingDashboard as manageBillingDashboard } from './fn/manage/manage-billing-dashboard';
 export type { ManageBillingDocumentsList$Params as ManageBillingDocumentsList$Params } from './fn/manage/manage-billing-documents-list';
 export { manageBillingDocumentsList as manageBillingDocumentsList } from './fn/manage/manage-billing-documents-list';
+export type { ManageBillingDocumentsExport$Params as ManageBillingDocumentsExport$Params } from './fn/manage/manage-billing-documents-export';
+export { manageBillingDocumentsExport as manageBillingDocumentsExport } from './fn/manage/manage-billing-documents-export';
 export type { ManageBillingIssuePending$Params as ManageBillingIssuePending$Params } from './fn/manage/manage-billing-issue-pending';
 export { manageBillingIssuePending as manageBillingIssuePending } from './fn/manage/manage-billing-issue-pending';
+export type { ManageBillingPaymentsList$Params as ManageBillingPaymentsList$Params } from './fn/manage/manage-billing-payments-list';
+export { manageBillingPaymentsList as manageBillingPaymentsList } from './fn/manage/manage-billing-payments-list';
+export type { ManageBillingPaymentsExport$Params as ManageBillingPaymentsExport$Params } from './fn/manage/manage-billing-payments-export';
+export { manageBillingPaymentsExport as manageBillingPaymentsExport } from './fn/manage/manage-billing-payments-export';
 export type { ManageBillingProfileRetrieve$Params as ManageBillingProfileRetrieve$Params } from './fn/manage/manage-billing-profile-retrieve';
 export { manageBillingProfileRetrieve as manageBillingProfileRetrieve } from './fn/manage/manage-billing-profile-retrieve';
 export type { ManageBillingProfileUpdate$Params as ManageBillingProfileUpdate$Params } from './fn/manage/manage-billing-profile-update';
@@ -199,6 +207,8 @@ export type { ManageRegistrationCategoriesUpdate$Params as ManageRegistrationCat
 export { manageRegistrationCategoriesUpdate as manageRegistrationCategoriesUpdate } from './fn/manage/manage-registration-categories-update';
 export type { ManageRegistrationCategoriesFees$Params as ManageRegistrationCategoriesFees$Params } from './fn/manage/manage-registration-categories-fees';
 export { manageRegistrationCategoriesFees as manageRegistrationCategoriesFees } from './fn/manage/manage-registration-categories-fees';
+export type { ManageRegistrationsExport$Params as ManageRegistrationsExport$Params } from './fn/manage/manage-registrations-export';
+export { manageRegistrationsExport as manageRegistrationsExport } from './fn/manage/manage-registrations-export';
 export type { ManageRegistrationOptionsList$Params as ManageRegistrationOptionsList$Params } from './fn/manage/manage-registration-options-list';
 export { manageRegistrationOptionsList as manageRegistrationOptionsList } from './fn/manage/manage-registration-options-list';
 export type { ManageRegistrationOptionsCreate$Params as ManageRegistrationOptionsCreate$Params } from './fn/manage/manage-registration-options-create';

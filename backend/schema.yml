@@ -332,6 +332,28 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedAuditEntryList'
           description: ''
+  /v1/manage/editions/{edition_id}/billing/dashboard:
+    get:
+      operationId: manage_billing_dashboard
+      description: '``…/billing/dashboard`` : tableau de bord financier (``finance.read``,
+        J12).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FinanceDashboard'
+          description: ''
   /v1/manage/editions/{edition_id}/billing/documents:
     get:
       operationId: manage_billing_documents_list
@@ -372,6 +394,35 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedBillingDocumentList'
           description: ''
+  /v1/manage/editions/{edition_id}/billing/documents/export:
+    get:
+      operationId: manage_billing_documents_export
+      description: |-
+        ``…/billing/documents/export`` : pièces de facturation en CSV (export comptable),
+        journalisé, réauthentification (J1).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: kind
+        schema:
+          type: string
+        description: Nature de la pièce.
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+          description: ''
   /v1/manage/editions/{edition_id}/billing/documents/issue-pending:
     post:
       operationId: manage_billing_issue_pending
@@ -394,6 +445,95 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/IssuedCount'
+          description: ''
+  /v1/manage/editions/{edition_id}/billing/payments:
+    get:
+      operationId: manage_billing_payments_list
+      description: |-
+        ``…/billing/payments`` : encaissements de l'édition (``finance.read``), les plus
+        récents d'abord ; ``…/billing/payments/export`` : CSV journalisé, réauthentification.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: method
+        schema:
+          type: string
+        description: Moyen de paiement.
+      - name: page
+        required: false
+        in: query
+        description: Un numéro de page de l'ensemble des résultats.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Nombre de résultats à retourner par page.
+        schema:
+          type: integer
+      - in: query
+        name: provider
+        schema:
+          type: string
+        description: Fournisseur (manual, fake, cinetpay).
+      - in: query
+        name: status
+        schema:
+          type: string
+        description: Statut du paiement.
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPaymentListList'
+          description: ''
+  /v1/manage/editions/{edition_id}/billing/payments/export:
+    get:
+      operationId: manage_billing_payments_export
+      description: |-
+        ``…/billing/payments`` : encaissements de l'édition (``finance.read``), les plus
+        récents d'abord ; ``…/billing/payments/export`` : CSV journalisé, réauthentification.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: method
+        schema:
+          type: string
+        description: Moyen de paiement.
+      - in: query
+        name: provider
+        schema:
+          type: string
+        description: Fournisseur (manual, fake, cinetpay).
+      - in: query
+        name: status
+        schema:
+          type: string
+        description: Statut du paiement.
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
           description: ''
   /v1/manage/editions/{edition_id}/billing/profile:
     get:
@@ -2837,6 +2977,50 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Category'
+          description: ''
+  /v1/manage/editions/{edition_id}/registrations/export:
+    get:
+      operationId: manage_registrations_export
+      description: |-
+        Export CSV des inscriptions filtrées (mêmes filtres que la liste), journalisé,
+        avec réauthentification (données personnelles en masse).
+      parameters:
+      - in: query
+        name: category
+        schema:
+          type: string
+        description: Code de catégorie.
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: method
+        schema:
+          type: string
+        description: Moyen de paiement.
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Nom, adresse ou référence.
+      - in: query
+        name: status
+        schema:
+          type: string
+        description: Statut (en attente, confirmée…).
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
           description: ''
   /v1/manage/editions/{edition_id}/registrations/options:
     get:
@@ -6372,6 +6556,27 @@ components:
       required:
       - code
       - label_fr
+    CategoryTotal:
+      type: object
+      properties:
+        code:
+          type: string
+        label_fr:
+          type: string
+        label_en:
+          type: string
+        confirmed:
+          type: integer
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+      required:
+      - amount
+      - code
+      - confirmed
+      - label_en
+      - label_fr
     Confidentiality:
       type: object
       description: Paramètres de l'évaluation (gestion, §6.1 ; plan L4 H4, H6, H12).
@@ -7465,6 +7670,69 @@ components:
           default: ''
       required:
       - file
+    FinanceDashboard:
+      type: object
+      description: |-
+        Tableau de bord financier (J12) : encaissé, remboursé, net, impayés (commandes en
+        attente), remboursements restant dus, répartitions, pièces, points à traiter.
+      properties:
+        currency:
+          $ref: '#/components/schemas/Currency'
+        registrations:
+          $ref: '#/components/schemas/RegistrationCounts'
+        collected:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        refunded:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        net:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        outstanding:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        refunds_due:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        by_method:
+          type: array
+          items:
+            $ref: '#/components/schemas/MethodTotal'
+        by_category:
+          type: array
+          items:
+            $ref: '#/components/schemas/CategoryTotal'
+        invoices:
+          $ref: '#/components/schemas/MoneyCount'
+        credit_notes:
+          $ref: '#/components/schemas/MoneyCount'
+        pending_invoices:
+          type: integer
+        orphan_payments:
+          type: integer
+        waivers:
+          type: integer
+      required:
+      - by_category
+      - by_method
+      - collected
+      - credit_notes
+      - currency
+      - invoices
+      - net
+      - orphan_payments
+      - outstanding
+      - pending_invoices
+      - refunded
+      - refunds_due
+      - registrations
+      - waivers
     Grid:
       type: object
       properties:
@@ -8570,6 +8838,33 @@ components:
           maxLength: 5000
       required:
       - body
+    MethodTotal:
+      type: object
+      properties:
+        count:
+          type: integer
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        method:
+          type: string
+      required:
+      - amount
+      - count
+      - method
+    MoneyCount:
+      type: object
+      properties:
+        count:
+          type: integer
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+      required:
+      - amount
+      - count
     MyRegistration:
       type: object
       description: |-
@@ -9199,6 +9494,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ManageRegistrationList'
+    PaginatedPaymentListList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentList'
     PaginatedReviewSubmissionList:
       type: object
       required:
@@ -10092,6 +10410,66 @@ components:
       required:
       - outcome
       - status
+    PaymentList:
+      type: object
+      description: 'Paiement (gestion, ``finance.read``) : rapprochement des encaissements.'
+      properties:
+        id:
+          type: integer
+        registration_id:
+          type: integer
+        registration_reference:
+          type: string
+        customer:
+          type: string
+        provider:
+          $ref: '#/components/schemas/PaymentProvider'
+        method:
+          type: string
+        reference:
+          type: string
+        provider_reference:
+          type: string
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        currency:
+          $ref: '#/components/schemas/Currency'
+        status:
+          $ref: '#/components/schemas/PaymentStatus'
+        provider_status:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+        received_on:
+          type: string
+          format: date
+          nullable: true
+        note:
+          type: string
+      required:
+      - amount
+      - completed_at
+      - created_at
+      - currency
+      - customer
+      - id
+      - method
+      - note
+      - provider
+      - provider_reference
+      - provider_status
+      - received_on
+      - reference
+      - registration_id
+      - registration_reference
+      - status
     PaymentMethod:
       enum:
       - online
@@ -10106,6 +10484,16 @@ components:
         * `onsite` - sur place
         * `free` - aucun paiement (montant nul)
         * `waiver` - gratuité accordée
+    PaymentProvider:
+      enum:
+      - manual
+      - fake
+      - cinetpay
+      type: string
+      description: |-
+        * `manual` - paiement manuel
+        * `fake` - fournisseur factice
+        * `cinetpay` - CinetPay
     PaymentRef:
       type: object
       properties:
@@ -10149,6 +10537,20 @@ components:
       required:
       - payment_url
       - reference
+    PaymentStatus:
+      enum:
+      - initiated
+      - pending
+      - succeeded
+      - failed
+      - cancelled
+      type: string
+      description: |-
+        * `initiated` - initié
+        * `pending` - en cours
+        * `succeeded` - réussi
+        * `failed` - échoué
+        * `cancelled` - abandonné
     PeerReview:
       type: object
       description: Évaluation d'un autre relecteur, sous pseudonyme (RG-08, H11).
@@ -12009,6 +12411,22 @@ components:
       - email
       - id
       - name
+    RegistrationCounts:
+      type: object
+      properties:
+        pending:
+          type: integer
+        confirmed:
+          type: integer
+        cancelled:
+          type: integer
+        expired:
+          type: integer
+      required:
+      - cancelled
+      - confirmed
+      - expired
+      - pending
     RegistrationEdition:
       type: object
       properties:
