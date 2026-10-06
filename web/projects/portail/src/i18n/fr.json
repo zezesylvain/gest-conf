@@ -23,7 +23,8 @@
         "myData": "Mes données",
         "notifications": "Notifications",
         "notificationsLabel": "Notifications ({{count}} non lue(s))",
-        "agenda": "Mon passage"
+        "agenda": "Mon passage",
+        "registration": "Mon inscription"
       },
       "fields": {
         "email": "Adresse e-mail",
@@ -234,7 +235,8 @@
           "SESSION_CHAIR": "président de session",
           "ATTENDEE": "participant",
           "SPONSOR": "partenaire",
-          "VOLUNTEER": "bénévole"
+          "VOLUNTEER": "bénévole",
+          "SIGNATORY": "signataire"
         }
       },
       "privacy": {
@@ -604,6 +606,118 @@
       "chairs": "Présidence",
       "instructions": "Consignes",
       "empty": "Aucun passage au programme publié pour l'instant. Il apparaîtra ici dès la publication du programme."
+    },
+    "registration": {
+      "unavailable": "Les inscriptions ne sont pas encore ouvertes : revenez bientôt.",
+      "currency": "Tarifs en {{currency}} ; dates et heures à l'heure de l'édition ({{zone}}).",
+      "register": "S'inscrire",
+      "accountHint": "L'inscription se fait depuis votre compte : le prix exact (période, zone de votre pays, code promo) y est calculé avant toute commande.",
+      "categories": "Catégories et tarifs",
+      "category": "Catégorie",
+      "period": {
+        "early": "Préférentiel",
+        "regular": "Normal",
+        "onsite": "Sur place"
+      },
+      "zone": {
+        "local": "local",
+        "international": "international"
+      },
+      "proof": "justificatif demandé",
+      "localCountries": "Tarif local : pays de votre profil parmi {{countries}} ; international sinon.",
+      "localEdition": "Tarif local : pays de l'édition ; international sinon.",
+      "periodHint": "La période dépend de la date de la commande.",
+      "options": "Options",
+      "limited": "Places limitées.",
+      "reservedTo": "Réservée aux catégories : {{categories}}.",
+      "methods": "Moyens de paiement",
+      "method": {
+        "online": "Paiement en ligne",
+        "transfer": "Virement (bon de commande, facture pro forma)",
+        "onsite": "Sur place",
+        "free": "Sans paiement",
+        "waiver": "Gratuité"
+      },
+      "paymentHint": "Aucune donnée de carte n'est saisie sur ce site : le paiement en ligne se fait sur la page sécurisée du prestataire. L'inscription est confirmée à réception du paiement.",
+      "status": {
+        "pending": "En attente de paiement",
+        "confirmed": "Confirmée",
+        "cancelled": "Annulée",
+        "expired": "Expirée"
+      },
+      "document": {
+        "invoice": "Facture",
+        "credit_note": "Avoir",
+        "proforma": "Facture pro forma"
+      },
+      "fields": {
+        "category": "Catégorie",
+        "options": "Options",
+        "promoCode": "Code promo",
+        "method": "Moyen de paiement",
+        "billingName": "Nom à facturer",
+        "billingOrganization": "Organisme",
+        "billingAddress": "Adresse de facturation"
+      },
+      "account": {
+        "title": "Mon inscription",
+        "lead": "Inscription à l'édition en cours : commande, paiement, factures et badge.",
+        "newTitle": "S'inscrire",
+        "profileIncomplete": "Indiquez votre pays dans votre profil : il détermine le tarif (local ou international).",
+        "proofRequired": "Cette catégorie demande un justificatif (carte d'étudiant…), à déposer après la commande.",
+        "optionsHint": "Prix local / international. Les places sont réservées à la commande.",
+        "quote": "Calculer le prix",
+        "quoteTitle": "Prix ({{period}}, tarif {{zone}})",
+        "billingHint": "Vide : votre nom. Indiquez l'organisme qui règle, le cas échéant.",
+        "placeOrder": "Confirmer la commande",
+        "orderHint": "Le prix est recalculé par le serveur à la commande. Paiement en ligne : vous serez dirigé vers la page sécurisée du prestataire.",
+        "ordered": "Commande enregistrée.",
+        "order": "Commande",
+        "total": "Total",
+        "pendingLead": "À régler : {{total}}, avant le {{date}}. Passé ce délai, la commande expire et les places sont libérées.",
+        "payOnline": "Payer en ligne",
+        "proforma": "Obtenir une facture pro forma",
+        "proformaIssued": "Facture pro forma émise.",
+        "cancel": "Annuler mon inscription",
+        "cancelled": "Inscription annulée.",
+        "cancelPending": {
+          "title": "Annuler cette commande ?",
+          "message": "La commande est annulée et les places libérées.",
+          "confirm": "Annuler la commande"
+        },
+        "cancelConfirmed": {
+          "title": "Annuler votre inscription ?",
+          "message": "L'annulation est définitive. Part remboursée : {{percent}} % du montant payé.",
+          "confirm": "Annuler mon inscription"
+        },
+        "cancelUntil": "Annulation possible jusqu'au {{date}} (remboursement de {{percent}} %).",
+        "cancelClosed": "La date limite d'annulation ({{date}}) est passée : contactez le comité d'organisation.",
+        "transferHint": "Virement : rappelez la référence de l'inscription. Le comité confirme l'inscription à réception.",
+        "onsiteHint": "Règlement sur place, à l'accueil de la conférence.",
+        "proof": "Justificatif",
+        "proofReceived": "Reçu : {{name}} ({{date}}).",
+        "proofMissing": "Justificatif attendu.",
+        "proofUpload": "Déposer le justificatif",
+        "proofReplace": "Remplacer le justificatif",
+        "proofHint": "PDF, JPEG ou PNG, 5 Mo au plus.",
+        "proofSaved": "Justificatif enregistré.",
+        "billing": "Facturation",
+        "editBilling": "Modifier",
+        "save": "Enregistrer",
+        "cancelEdit": "Annuler",
+        "billingSaved": "Facturation mise à jour.",
+        "documents": "Documents",
+        "qr": "Code d'accès",
+        "qrHint": "Présentez ce code à l'accueil de la conférence.",
+        "qrAlt": "Code QR d'accès de l'inscription {{reference}}",
+        "payment": {
+          "confirmed": "Paiement reçu : votre inscription est confirmée.",
+          "pending": "Paiement en cours de vérification auprès du prestataire : la confirmation arrivera par e-mail.",
+          "failed": "Le paiement n'a pas abouti. Vous pouvez réessayer."
+        },
+        "past": "Inscriptions précédentes",
+        "refundDue": "remboursement de {{amount}}"
+      }
     }
   }
 }

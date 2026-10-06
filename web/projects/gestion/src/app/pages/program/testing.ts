@@ -15,6 +15,7 @@ export function paper(
     default_duration_min: 20,
     presenters: [`Auteur ${id}`],
     confirmed: true,
+    presenter_registered: null,
     ...overrides,
   };
 }

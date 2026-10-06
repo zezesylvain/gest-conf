@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gestconf-backend\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-06 07:26+0000\n"
+"POT-Creation-Date: 2026-10-06 20:59+0000\n"
 "PO-Revision-Date: 2026-10-05 11:00+0000\n"
 "Last-Translator: GEST-CONF\n"
 "Language-Team: GEST-CONF\n"
@@ -20,7 +20,7 @@ msgid "adresse e-mail"
 msgstr "email address"
 
 #: apps/accounts/models.py:30 apps/accounts/models.py:226
-#: apps/conferences/models.py:278
+#: apps/conferences/models.py:278 apps/registrations/models.py:333
 msgid "actif"
 msgstr "active"
 
@@ -197,10 +197,14 @@ msgstr "system"
 #: apps/communications/models.py:45 apps/conferences/models.py:175
 #: apps/conferences/models.py:207 apps/conferences/models.py:251
 #: apps/conferences/models.py:338 apps/core/models.py:98
-#: apps/core/models.py:279 apps/portal/models.py:54 apps/portal/models.py:132
-#: apps/portal/models.py:213 apps/portal/models.py:268
-#: apps/program/models.py:46 apps/program/models.py:108
-#: apps/program/models.py:275 apps/program/models.py:298
+#: apps/core/models.py:279 apps/events/models.py:30 apps/events/models.py:98
+#: apps/payments/models.py:40 apps/payments/models.py:237
+#: apps/portal/models.py:54 apps/portal/models.py:132 apps/portal/models.py:213
+#: apps/portal/models.py:268 apps/program/models.py:46
+#: apps/program/models.py:108 apps/program/models.py:275
+#: apps/program/models.py:298 apps/registrations/models.py:89
+#: apps/registrations/models.py:160 apps/registrations/models.py:240
+#: apps/registrations/models.py:313 apps/registrations/models.py:396
 #: apps/reviews/models.py:32 apps/reviews/models.py:126
 #: apps/submissions/models.py:51
 msgid "édition"
@@ -217,7 +221,8 @@ msgstr "organising committee function"
 
 #: apps/accounts/models.py:265 apps/accounts/models.py:356
 #: apps/communications/models.py:58 apps/conferences/models.py:133
-#: apps/core/models.py:208 apps/reviews/models.py:178
+#: apps/core/models.py:208 apps/payments/models.py:136
+#: apps/registrations/models.py:413 apps/reviews/models.py:178
 #: apps/reviews/models.py:300 apps/submissions/models.py:89
 msgid "statut"
 msgstr "status"
@@ -260,11 +265,11 @@ msgid "refusée"
 msgstr "declined"
 
 #: apps/accounts/models.py:327 apps/core/models.py:187
-#: apps/reviews/models.py:146
+#: apps/registrations/models.py:372 apps/reviews/models.py:146
 msgid "annulée"
 msgstr "cancelled"
 
-#: apps/accounts/models.py:328
+#: apps/accounts/models.py:328 apps/registrations/models.py:373
 msgid "expirée"
 msgstr "expired"
 
@@ -272,7 +277,7 @@ msgstr "expired"
 msgid "adresse invitée"
 msgstr "invited address"
 
-#: apps/accounts/models.py:354
+#: apps/accounts/models.py:354 apps/registrations/models.py:526
 msgid "empreinte du jeton"
 msgstr "token hash"
 
@@ -324,87 +329,93 @@ msgstr "Confirm your identity with your two-factor authentication code."
 msgid "Confirmez votre mot de passe pour continuer."
 msgstr "Confirm your password to continue."
 
-#: apps/accounts/roles.py:20
+#: apps/accounts/roles.py:21
 msgid "administrateur de l'édition"
 msgstr "edition administrator"
 
-#: apps/accounts/roles.py:21
+#: apps/accounts/roles.py:22
 msgid "président de la conférence"
 msgstr "conference chair"
 
-#: apps/accounts/roles.py:22
+#: apps/accounts/roles.py:23
 msgid "membre du comité d'organisation"
 msgstr "organising committee member"
 
-#: apps/accounts/roles.py:23
+#: apps/accounts/roles.py:24
 msgid "président du comité scientifique"
 msgstr "scientific committee chair"
 
-#: apps/accounts/roles.py:24
+#: apps/accounts/roles.py:25
 msgid "membre du comité scientifique"
 msgstr "scientific committee member"
 
-#: apps/accounts/roles.py:25 apps/submissions/models.py:152
+#: apps/accounts/roles.py:26 apps/submissions/models.py:152
 msgid "auteur"
 msgstr "author"
 
-#: apps/accounts/roles.py:26
+#: apps/accounts/roles.py:27
 msgid "intervenant"
 msgstr "speaker"
 
-#: apps/accounts/roles.py:27
+#: apps/accounts/roles.py:28
 msgid "président de session"
 msgstr "session chair"
 
-#: apps/accounts/roles.py:28
+#: apps/accounts/roles.py:29 apps/registrations/models.py:402
 msgid "participant"
 msgstr "attendee"
 
-#: apps/accounts/roles.py:29
+#: apps/accounts/roles.py:30
 msgid "partenaire"
 msgstr "sponsor"
 
-#: apps/accounts/roles.py:30
+#: apps/accounts/roles.py:31
 msgid "bénévole"
 msgstr "volunteer"
 
-#: apps/accounts/roles.py:36
+#: apps/accounts/roles.py:33 apps/events/models.py:36
+msgid "signataire"
+msgstr "signatory"
+
+#: apps/accounts/roles.py:39
 msgid "aucune"
 msgstr "none"
 
-#: apps/accounts/roles.py:37
+#: apps/accounts/roles.py:40
 msgid "finances"
 msgstr "finance"
 
-#: apps/accounts/roles.py:38
+#: apps/accounts/roles.py:41
 msgid "programme"
 msgstr "programme"
 
-#: apps/accounts/roles.py:39
+#: apps/accounts/roles.py:42
 msgid "logistique"
 msgstr "logistics"
 
-#: apps/accounts/roles.py:40 apps/program/models.py:182
+#: apps/accounts/roles.py:43 apps/program/models.py:182
 #: apps/program/models.py:350
 msgid "communication"
 msgstr "communication"
 
-#: apps/accounts/roles.py:41
+#: apps/accounts/roles.py:44
 msgid "relations extérieures"
 msgstr "external relations"
 
-#: apps/accounts/roles.py:42
+#: apps/accounts/roles.py:45
 msgid "bénévoles"
 msgstr "volunteers"
 
-#: apps/accounts/roles.py:43
+#: apps/accounts/roles.py:46
 msgid "secrétariat"
 msgstr "secretariat"
 
 #: apps/accounts/services/account.py:66 apps/conferences/services.py:111
-#: apps/conferences/services.py:495 apps/program/services/planning.py:137
-#: apps/program/services/planning.py:239 apps/program/services/planning.py:520
-#: apps/program/services/settings.py:38
+#: apps/conferences/services.py:495 apps/payments/services/billing.py:77
+#: apps/program/services/planning.py:137 apps/program/services/planning.py:239
+#: apps/program/services/planning.py:534 apps/program/services/settings.py:38
+#: apps/registrations/services/pricing.py:389
+#: apps/registrations/services/settings.py:120
 msgid "Champ non modifiable."
 msgstr "This field cannot be changed."
 
@@ -419,10 +430,14 @@ msgstr "Acknowledging the notice cannot be withdrawn."
 #: apps/accounts/services/account.py:169 apps/accounts/services/account.py:191
 #: apps/accounts/services/mfa.py:84 apps/accounts/services/personal_data.py:205
 #: apps/accounts/services/roles.py:196 apps/conferences/services.py:301
+#: apps/events/services/checkin.py:331
+#: apps/registrations/services/orders.py:284
+#: apps/registrations/services/orders.py:308
+#: apps/registrations/services/orders.py:351
 #: apps/reviews/services/assignments.py:287
 #: apps/reviews/services/conflicts.py:178 apps/reviews/services/reviews.py:430
-#: apps/submissions/services.py:611 apps/submissions/workflow.py:178
-#: apps/submissions/workflow.py:181
+#: apps/submissions/services.py:611 apps/submissions/workflow.py:207
+#: apps/submissions/workflow.py:210 apps/submissions/workflow.py:213
 msgid "Motif obligatoire."
 msgstr "A reason is required."
 
@@ -542,13 +557,15 @@ msgstr "The last administrator of the edition can only be removed by command."
 #: apps/accounts/templates/account/email/_security_footer.txt:1
 #, python-format
 msgid ""
-"Si vous n'êtes pas à l'origine de cette opération, changez votre mot de passe sans attendre et prévenez les organisateurs. Origine de la demande :\n"
+"Si vous n'êtes pas à l'origine de cette opération, changez votre mot de "
+"passe sans attendre et prévenez les organisateurs. Origine de la demande :\n"
 "\n"
 "- adresse IP : %(ip)s\n"
 "- navigateur : %(user_agent)s\n"
 "- date : %(timestamp)s"
 msgstr ""
-"If you did not make this change, change your password immediately and inform the organizers. The request came from:\n"
+"If you did not make this change, change your password immediately and inform "
+"the organizers. The request came from:\n"
 "\n"
 "- IP address: %(ip)s\n"
 "- browser: %(user_agent)s\n"
@@ -572,19 +589,25 @@ msgstr ""
 msgid ""
 "Bonjour,\n"
 "\n"
-"Une inscription à %(site_name)s a été demandée avec cette adresse, mais un compte existe déjà. Vous pouvez vous connecter avec votre mot de passe ; si vous l'avez oublié, réinitialisez-le ici :\n"
+"Une inscription à %(site_name)s a été demandée avec cette adresse, mais un "
+"compte existe déjà. Vous pouvez vous connecter avec votre mot de passe ; si "
+"vous l'avez oublié, réinitialisez-le ici :\n"
 "\n"
 "%(password_reset_url)s\n"
 "\n"
-"Si vous n'êtes pas à l'origine de cette demande, ignorez ce message : votre compte n'a pas été modifié."
+"Si vous n'êtes pas à l'origine de cette demande, ignorez ce message : votre "
+"compte n'a pas été modifié."
 msgstr ""
 "Hello,\n"
 "\n"
-"A %(site_name)s sign-up was requested with this address, but an account already exists. You can sign in with your password; if you have forgotten it, reset it here:\n"
+"A %(site_name)s sign-up was requested with this address, but an account "
+"already exists. You can sign in with your password; if you have forgotten "
+"it, reset it here:\n"
 "\n"
 "%(password_reset_url)s\n"
 "\n"
-"If you did not make this request, ignore this message: your account has not been changed."
+"If you did not make this request, ignore this message: your account has not "
+"been changed."
 
 #: apps/accounts/templates/account/email/account_already_exists_subject.txt:1
 #, python-format
@@ -596,11 +619,13 @@ msgstr "[%(site_name)s] An account already exists with this address"
 msgid ""
 "Bonjour,\n"
 "\n"
-"L'adresse %(added_email)s vient d'être ajoutée à votre compte %(site_name)s. Elle ne pourra servir qu'une fois confirmée par le lien qui lui a été envoyé."
+"L'adresse %(added_email)s vient d'être ajoutée à votre compte %(site_name)s. "
+"Elle ne pourra servir qu'une fois confirmée par le lien qui lui a été envoyé."
 msgstr ""
 "Hello,\n"
 "\n"
-"The address %(added_email)s has just been added to your %(site_name)s account. It can only be used once confirmed through the link sent to it."
+"The address %(added_email)s has just been added to your %(site_name)s "
+"account. It can only be used once confirmed through the link sent to it."
 
 #: apps/accounts/templates/account/email/email_added_subject.txt:1
 #, python-format
@@ -612,11 +637,13 @@ msgstr "[%(site_name)s] An email address was added to your account"
 msgid ""
 "Bonjour,\n"
 "\n"
-"L'adresse principale de votre compte %(site_name)s est passée de %(from_email)s à %(to_email)s."
+"L'adresse principale de votre compte %(site_name)s est passée de "
+"%(from_email)s à %(to_email)s."
 msgstr ""
 "Hello,\n"
 "\n"
-"The primary address of your %(site_name)s account has changed from %(from_email)s to %(to_email)s."
+"The primary address of your %(site_name)s account has changed from "
+"%(from_email)s to %(to_email)s."
 
 #: apps/accounts/templates/account/email/email_changed_subject.txt:1
 #, python-format
@@ -628,7 +655,8 @@ msgstr "[%(site_name)s] Your primary email address was changed"
 msgid ""
 "Bonjour,\n"
 "\n"
-"Pour confirmer cette adresse sur votre compte %(site_name)s, ouvrez ce lien :\n"
+"Pour confirmer cette adresse sur votre compte %(site_name)s, ouvrez ce "
+"lien :\n"
 "\n"
 "%(activate_url)s\n"
 "\n"
@@ -647,19 +675,23 @@ msgstr ""
 msgid ""
 "Bonjour,\n"
 "\n"
-"Un compte %(site_name)s vient d'être créé avec cette adresse. Pour l'activer, confirmez votre adresse en ouvrant ce lien :\n"
+"Un compte %(site_name)s vient d'être créé avec cette adresse. Pour "
+"l'activer, confirmez votre adresse en ouvrant ce lien :\n"
 "\n"
 "%(activate_url)s\n"
 "\n"
-"Si vous n'avez pas créé de compte, ignorez ce message : aucun compte ne sera activé."
+"Si vous n'avez pas créé de compte, ignorez ce message : aucun compte ne sera "
+"activé."
 msgstr ""
 "Hello,\n"
 "\n"
-"A %(site_name)s account has just been created with this address. To activate it, confirm your address by opening this link:\n"
+"A %(site_name)s account has just been created with this address. To activate "
+"it, confirm your address by opening this link:\n"
 "\n"
 "%(activate_url)s\n"
 "\n"
-"If you did not create an account, ignore this message: no account will be activated."
+"If you did not create an account, ignore this message: no account will be "
+"activated."
 
 #: apps/accounts/templates/account/email/email_confirmation_signup_subject.txt:1
 #: apps/accounts/templates/account/email/email_confirmation_subject.txt:1
@@ -704,19 +736,24 @@ msgstr "[%(site_name)s] Your password was changed"
 msgid ""
 "Bonjour,\n"
 "\n"
-"Une réinitialisation du mot de passe de votre compte %(site_name)s a été demandée. Pour choisir un nouveau mot de passe, ouvrez ce lien, valable deux heures et utilisable une seule fois :\n"
+"Une réinitialisation du mot de passe de votre compte %(site_name)s a été "
+"demandée. Pour choisir un nouveau mot de passe, ouvrez ce lien, valable deux "
+"heures et utilisable une seule fois :\n"
 "\n"
 "%(password_reset_url)s\n"
 "\n"
-"Si vous n'êtes pas à l'origine de cette demande, ignorez ce message : votre mot de passe reste inchangé."
+"Si vous n'êtes pas à l'origine de cette demande, ignorez ce message : votre "
+"mot de passe reste inchangé."
 msgstr ""
 "Hello,\n"
 "\n"
-"A password reset was requested for your %(site_name)s account. To choose a new password, open this link, valid for two hours and usable only once:\n"
+"A password reset was requested for your %(site_name)s account. To choose a "
+"new password, open this link, valid for two hours and usable only once:\n"
 "\n"
 "%(password_reset_url)s\n"
 "\n"
-"If you did not make this request, ignore this message: your password remains unchanged."
+"If you did not make this request, ignore this message: your password remains "
+"unchanged."
 
 #: apps/accounts/templates/account/email/password_reset_key_subject.txt:1
 #, python-format
@@ -760,13 +797,18 @@ msgstr "[%(site_name)s] A password was set for your account"
 msgid ""
 "Bonjour,\n"
 "\n"
-"À votre demande, l'équipe %(site_name)s a réinitialisé la double authentification de votre compte (%(timestamp)s). Activez-la de nouveau depuis la page « Sécurité » de votre compte ; un rôle de gestion l'exige.\n"
+"À votre demande, l'équipe %(site_name)s a réinitialisé la double "
+"authentification de votre compte (%(timestamp)s). Activez-la de nouveau "
+"depuis la page « Sécurité » de votre compte ; un rôle de gestion l'exige.\n"
 "\n"
-"Si vous n'êtes pas à l'origine de cette demande, prévenez les organisateurs sans attendre."
+"Si vous n'êtes pas à l'origine de cette demande, prévenez les organisateurs "
+"sans attendre."
 msgstr ""
 "Hello,\n"
 "\n"
-"At your request, the %(site_name)s team reset the two-factor authentication of your account (%(timestamp)s). Enable it again from the “Security” page of your account; management roles require it.\n"
+"At your request, the %(site_name)s team reset the two-factor authentication "
+"of your account (%(timestamp)s). Enable it again from the “Security” page of "
+"your account; management roles require it.\n"
 "\n"
 "If you did not make this request, let the organisers know right away."
 
@@ -780,11 +822,13 @@ msgstr "[%(site_name)s] Two-factor authentication reset"
 msgid ""
 "Bonjour,\n"
 "\n"
-"De nouveaux codes de secours pour la double authentification ont été générés sur votre compte %(site_name)s. Les anciens codes ne sont plus valables."
+"De nouveaux codes de secours pour la double authentification ont été générés "
+"sur votre compte %(site_name)s. Les anciens codes ne sont plus valables."
 msgstr ""
 "Hello,\n"
 "\n"
-"New two-factor authentication recovery codes were generated for your %(site_name)s account. The previous codes are no longer valid."
+"New two-factor authentication recovery codes were generated for your "
+"%(site_name)s account. The previous codes are no longer valid."
 
 #: apps/accounts/templates/mfa/email/recovery_codes_generated_subject.txt:1
 #, python-format
@@ -796,11 +840,13 @@ msgstr "[%(site_name)s] New recovery codes"
 msgid ""
 "Bonjour,\n"
 "\n"
-"La double authentification (application TOTP) vient d'être activée sur votre compte %(site_name)s. Conservez vos codes de secours en lieu sûr."
+"La double authentification (application TOTP) vient d'être activée sur votre "
+"compte %(site_name)s. Conservez vos codes de secours en lieu sûr."
 msgstr ""
 "Hello,\n"
 "\n"
-"Two-factor authentication (TOTP app) has just been enabled on your %(site_name)s account. Keep your recovery codes somewhere safe."
+"Two-factor authentication (TOTP app) has just been enabled on your "
+"%(site_name)s account. Keep your recovery codes somewhere safe."
 
 #: apps/accounts/templates/mfa/email/totp_activated_subject.txt:1
 #, python-format
@@ -812,11 +858,15 @@ msgstr "[%(site_name)s] Two-factor authentication enabled"
 msgid ""
 "Bonjour,\n"
 "\n"
-"La double authentification (application TOTP) vient d'être désactivée sur votre compte %(site_name)s. Si votre compte a un rôle de gestion, vous devrez la réactiver pour accéder à l'espace de gestion."
+"La double authentification (application TOTP) vient d'être désactivée sur "
+"votre compte %(site_name)s. Si votre compte a un rôle de gestion, vous "
+"devrez la réactiver pour accéder à l'espace de gestion."
 msgstr ""
 "Hello,\n"
 "\n"
-"Two-factor authentication (TOTP app) has just been disabled on your %(site_name)s account. If your account has a management role, you will need to enable it again to access the management area."
+"Two-factor authentication (TOTP app) has just been disabled on your "
+"%(site_name)s account. If your account has a management role, you will need "
+"to enable it again to access the management area."
 
 #: apps/accounts/templates/mfa/email/totp_deactivated_subject.txt:1
 #, python-format
@@ -828,19 +878,25 @@ msgstr "[%(site_name)s] Two-factor authentication disabled"
 msgid ""
 "Bonjour,\n"
 "\n"
-"Une personne connectée à %(site_name)s demande à rattacher cette adresse à son compte pour accepter une invitation à l'édition %(edition_code)s. Si c'est vous, ouvrez ce lien depuis le même compte, dans l'heure :\n"
+"Une personne connectée à %(site_name)s demande à rattacher cette adresse à "
+"son compte pour accepter une invitation à l'édition %(edition_code)s. Si "
+"c'est vous, ouvrez ce lien depuis le même compte, dans l'heure :\n"
 "\n"
 "%(link_url)s\n"
 "\n"
-"Si vous n'êtes pas à l'origine de cette demande, ignorez ce message : l'adresse ne sera pas rattachée."
+"Si vous n'êtes pas à l'origine de cette demande, ignorez ce message : "
+"l'adresse ne sera pas rattachée."
 msgstr ""
 "Hello,\n"
 "\n"
-"Someone signed in to %(site_name)s asks to link this address to their account to accept an invitation to edition %(edition_code)s. If this is you, open this link from the same account within the hour:\n"
+"Someone signed in to %(site_name)s asks to link this address to their "
+"account to accept an invitation to edition %(edition_code)s. If this is you, "
+"open this link from the same account within the hour:\n"
 "\n"
 "%(link_url)s\n"
 "\n"
-"If you did not make this request, ignore this message: the address will not be linked."
+"If you did not make this request, ignore this message: the address will not "
+"be linked."
 
 #: apps/accounts/templates/role/email/invitation_link_subject.txt:1
 #, python-format
@@ -852,11 +908,14 @@ msgstr "[%(site_name)s] Confirm adding this address to your account"
 msgid ""
 "Bonjour,\n"
 "\n"
-"%(inviter_name)s vous invite à rejoindre l'édition « %(edition_title)s » (%(edition_code)s) de %(site_name)s avec le rôle : %(role_label)s."
+"%(inviter_name)s vous invite à rejoindre l'édition « %(edition_title)s "
+"» (%(edition_code)s) de %(site_name)s avec le rôle : %(role_label)s."
 msgstr ""
 "Hello,\n"
 "\n"
-"%(inviter_name)s invites you to join the edition “%(edition_title)s” (%(edition_code)s) of %(site_name)s with the role: %(role_label)s."
+"%(inviter_name)s invites you to join the edition "
+"“%(edition_title)s” (%(edition_code)s) of %(site_name)s with the role: "
+"%(role_label)s."
 
 #: apps/accounts/templates/role/email/invitation_message.txt:5
 msgid "Message de l'invitant :"
@@ -865,17 +924,20 @@ msgstr "Message from the inviter:"
 #: apps/accounts/templates/role/email/invitation_message.txt:8
 #, python-format
 msgid ""
-"Pour accepter ou refuser, ouvrez ce lien (valable jusqu'au %(expires_on)s) :\n"
+"Pour accepter ou refuser, ouvrez ce lien (valable jusqu'au "
+"%(expires_on)s) :\n"
 "\n"
 "%(invite_url)s\n"
 "\n"
-"Pour accepter, connectez-vous avec un compte qui porte cette adresse, ou créez-en un. Si vous ne connaissez pas l'expéditeur, ignorez ce message."
+"Pour accepter, connectez-vous avec un compte qui porte cette adresse, ou "
+"créez-en un. Si vous ne connaissez pas l'expéditeur, ignorez ce message."
 msgstr ""
 "To accept or decline, open this link (valid until %(expires_on)s):\n"
 "\n"
 "%(invite_url)s\n"
 "\n"
-"To accept, sign in with an account that holds this address, or create one. If you do not know the sender, ignore this message."
+"To accept, sign in with an account that holds this address, or create one. "
+"If you do not know the sender, ignore this message."
 
 #: apps/accounts/templates/role/email/invitation_subject.txt:1
 #, python-format
@@ -887,11 +949,15 @@ msgstr "[%(site_name)s] Invitation to join an edition"
 msgid ""
 "Bonjour,\n"
 "\n"
-"Le rôle « %(role_label)s » vous a été attribué pour l'édition « %(edition_title)s » (%(edition_code)s). Si vous ne vous y attendiez pas, prévenez les organisateurs."
+"Le rôle « %(role_label)s » vous a été attribué pour l'édition « "
+"%(edition_title)s » (%(edition_code)s). Si vous ne vous y attendiez pas, "
+"prévenez les organisateurs."
 msgstr ""
 "Hello,\n"
 "\n"
-"The role “%(role_label)s” was granted to you for the edition “%(edition_title)s” (%(edition_code)s). If you did not expect this, let the organisers know."
+"The role “%(role_label)s” was granted to you for the edition "
+"“%(edition_title)s” (%(edition_code)s). If you did not expect this, let the "
+"organisers know."
 
 #: apps/accounts/templates/role/email/role_granted_subject.txt:1
 #, python-format
@@ -903,11 +969,13 @@ msgstr "[%(site_name)s] A role was granted to you"
 msgid ""
 "Bonjour,\n"
 "\n"
-"Le rôle « %(role_label)s » vous a été retiré pour l'édition « %(edition_title)s » (%(edition_code)s)."
+"Le rôle « %(role_label)s » vous a été retiré pour l'édition « "
+"%(edition_title)s » (%(edition_code)s)."
 msgstr ""
 "Hello,\n"
 "\n"
-"The role “%(role_label)s” was revoked for the edition “%(edition_title)s” (%(edition_code)s)."
+"The role “%(role_label)s” was revoked for the edition "
+"“%(edition_title)s” (%(edition_code)s)."
 
 #: apps/accounts/templates/role/email/role_revoked_message.txt:4
 #, python-format
@@ -1009,6 +1077,7 @@ msgid "identifiant chez le fournisseur"
 msgstr "provider message ID"
 
 #: apps/communications/models.py:70 apps/core/models.py:220
+#: apps/events/models.py:128
 msgid "clé d'idempotence"
 msgstr "idempotency key"
 
@@ -1057,7 +1126,8 @@ msgid "compte"
 msgstr "account"
 
 #: apps/communications/models.py:113 apps/core/models.py:285
-#: apps/reviews/models.py:235 apps/submissions/models.py:177
+#: apps/payments/models.py:241 apps/reviews/models.py:235
+#: apps/submissions/models.py:177
 msgid "nature"
 msgstr "kind"
 
@@ -1082,13 +1152,16 @@ msgstr "notifications"
 msgid ""
 "Bonjour,\n"
 "\n"
-"Ce message de test a été envoyé par la file d'envoi de %(site_name)s. Sa réception confirme que la tâche planifiée (cron) et le fournisseur d'e-mails fonctionnent.\n"
+"Ce message de test a été envoyé par la file d'envoi de %(site_name)s. Sa "
+"réception confirme que la tâche planifiée (cron) et le fournisseur d'e-mails "
+"fonctionnent.\n"
 "\n"
 "Aucune action n'est attendue de votre part."
 msgstr ""
 "Hello,\n"
 "\n"
-"This test message was sent by the %(site_name)s sending queue. Receiving it confirms that the scheduled task (cron) and the email provider are working.\n"
+"This test message was sent by the %(site_name)s sending queue. Receiving it "
+"confirms that the scheduled task (cron) and the email provider are working.\n"
 "\n"
 "No action is required on your part."
 
@@ -1111,13 +1184,15 @@ msgstr "name (EN)"
 
 #: apps/conferences/models.py:31 apps/conferences/models.py:212
 #: apps/conferences/models.py:258 apps/portal/models.py:140
-#: apps/program/models.py:115
+#: apps/program/models.py:115 apps/registrations/models.py:167
+#: apps/registrations/models.py:247
 msgid "description (FR)"
 msgstr "description (FR)"
 
 #: apps/conferences/models.py:32 apps/conferences/models.py:213
 #: apps/conferences/models.py:259 apps/portal/models.py:141
-#: apps/program/models.py:116
+#: apps/program/models.py:116 apps/registrations/models.py:168
+#: apps/registrations/models.py:248
 msgid "description (EN)"
 msgstr "description (EN)"
 
@@ -1149,11 +1224,13 @@ msgstr "archived"
 
 #: apps/conferences/models.py:73 apps/conferences/models.py:209
 #: apps/conferences/models.py:255 apps/conferences/models.py:340
-#: apps/portal/models.py:57 apps/reviews/models.py:86
+#: apps/portal/models.py:57 apps/registrations/models.py:164
+#: apps/registrations/models.py:244 apps/registrations/models.py:317
+#: apps/reviews/models.py:86
 msgid "code"
 msgstr "code"
 
-#: apps/conferences/models.py:77
+#: apps/conferences/models.py:77 apps/payments/models.py:242
 msgid "année"
 msgstr "year"
 
@@ -1251,12 +1328,14 @@ msgstr "editions"
 #: apps/conferences/models.py:214 apps/conferences/models.py:277
 #: apps/conferences/models.py:346 apps/core/models.py:296
 #: apps/portal/models.py:228 apps/program/models.py:59
-#: apps/program/models.py:174 apps/reviews/models.py:97
+#: apps/program/models.py:174 apps/registrations/models.py:171
+#: apps/registrations/models.py:260 apps/reviews/models.py:97
 #: apps/submissions/models.py:134
 msgid "ordre"
 msgstr "order"
 
 #: apps/conferences/models.py:215 apps/program/models.py:58
+#: apps/registrations/models.py:170 apps/registrations/models.py:259
 #: apps/reviews/models.py:144
 msgid "active"
 msgstr "active"
@@ -1283,12 +1362,14 @@ msgid "obligatoire"
 msgstr "required"
 
 #: apps/conferences/models.py:256 apps/conferences/models.py:343
-#: apps/portal/models.py:216 apps/reviews/models.py:87
+#: apps/portal/models.py:216 apps/registrations/models.py:165
+#: apps/registrations/models.py:245 apps/reviews/models.py:87
 msgid "libellé (FR)"
 msgstr "label (FR)"
 
 #: apps/conferences/models.py:257 apps/conferences/models.py:344
-#: apps/portal/models.py:217 apps/reviews/models.py:88
+#: apps/portal/models.py:217 apps/registrations/models.py:166
+#: apps/registrations/models.py:246 apps/reviews/models.py:88
 msgid "libellé (EN)"
 msgstr "label (EN)"
 
@@ -1457,8 +1538,8 @@ msgstr "%(code)s must follow %(previous)s."
 msgid ""
 "Code invalide : une majuscule, puis 1 à 11 majuscules ou chiffres (ex. GC26)."
 msgstr ""
-"Invalid code: one capital letter, then 1 to 11 capital letters or digits "
-"(e.g. GC26)."
+"Invalid code: one capital letter, then 1 to 11 capital letters or digits (e."
+"g. GC26)."
 
 #: apps/conferences/validators.py:26
 msgid "Fuseau horaire inconnu."
@@ -1468,27 +1549,27 @@ msgstr "Unknown time zone."
 msgid "Échec de la vérification CSRF : rechargez la page puis réessayez."
 msgstr "CSRF verification failed: reload the page and try again."
 
-#: apps/core/errors.py:111
+#: apps/core/errors.py:119
 msgid "Opération refusée."
 msgstr "Operation refused."
 
-#: apps/core/errors.py:140
+#: apps/core/errors.py:148
 msgid "Opération impossible dans l'état actuel."
 msgstr "This operation is not possible in the current state."
 
-#: apps/core/errors.py:147
+#: apps/core/errors.py:155
 msgid "Action non autorisée."
 msgstr "Action not allowed."
 
-#: apps/core/errors.py:154 apps/core/exceptions.py:110
+#: apps/core/errors.py:162 apps/core/exceptions.py:110
 msgid "Données invalides."
 msgstr "Invalid data."
 
-#: apps/core/errors.py:161
+#: apps/core/errors.py:169
 msgid "Modifié entre-temps (autre onglet ?) : rechargez avant d'enregistrer."
 msgstr "Changed in the meantime (another tab?): reload before saving."
 
-#: apps/core/errors.py:172
+#: apps/core/errors.py:180
 msgid "Quota atteint."
 msgstr "Quota reached."
 
@@ -1530,7 +1611,8 @@ msgstr "before"
 msgid "après"
 msgstr "after"
 
-#: apps/core/models.py:112 apps/reviews/models.py:236
+#: apps/core/models.py:112 apps/registrations/models.py:527
+#: apps/registrations/models.py:563 apps/reviews/models.py:236
 #: apps/submissions/models.py:273 apps/submissions/models.py:303
 msgid "motif"
 msgstr "reason"
@@ -1551,7 +1633,7 @@ msgstr "audit log entry"
 msgid "journal d'audit"
 msgstr "audit log"
 
-#: apps/core/models.py:184 apps/core/models.py:233
+#: apps/core/models.py:184 apps/core/models.py:233 apps/payments/models.py:104
 msgid "en cours"
 msgstr "running"
 
@@ -1603,7 +1685,7 @@ msgstr "job"
 msgid "tâches"
 msgstr "jobs"
 
-#: apps/core/models.py:234
+#: apps/core/models.py:234 apps/payments/models.py:105
 msgid "réussi"
 msgstr "succeeded"
 
@@ -1679,7 +1761,8 @@ msgstr "content type"
 msgid "taille (octets)"
 msgstr "size (bytes)"
 
-#: apps/core/models.py:291 apps/submissions/models.py:182
+#: apps/core/models.py:291 apps/payments/models.py:273
+#: apps/submissions/models.py:182
 msgid "empreinte SHA-256"
 msgstr "SHA-256 digest"
 
@@ -1703,7 +1786,7 @@ msgstr "public file"
 msgid "fichiers publics"
 msgstr "public files"
 
-#: apps/core/models.py:331
+#: apps/core/models.py:331 apps/registrations/models.py:321
 msgid "portée"
 msgstr "scope"
 
@@ -1718,6 +1801,30 @@ msgstr "counter"
 #: apps/core/models.py:336
 msgid "compteurs"
 msgstr "counters"
+
+#: apps/core/money.py:27
+msgid "franc CFA (UEMOA)"
+msgstr "CFA franc (WAEMU)"
+
+#: apps/core/money.py:28
+msgid "franc CFA (CEMAC)"
+msgstr "CFA franc (CEMAC)"
+
+#: apps/core/money.py:29
+msgid "euro"
+msgstr "euro"
+
+#: apps/core/money.py:30
+msgid "dollar des États-Unis"
+msgstr "US dollar"
+
+#: apps/core/money.py:31
+msgid "franc guinéen"
+msgstr "Guinean franc"
+
+#: apps/core/money.py:32
+msgid "franc congolais"
+msgstr "Congolese franc"
 
 #: apps/core/public_files.py:90
 msgid "Archive illisible."
@@ -1743,11 +1850,11 @@ msgstr "The file name extension does not match the file content."
 msgid "Photo refusée : elle contient des métadonnées (EXIF). Exportez-la sans."
 msgstr "Photo refused: it contains metadata (EXIF). Export it without."
 
-#: apps/core/public_files.py:143
+#: apps/core/public_files.py:143 apps/events/services/signatures.py:108
 msgid "Image trop grande."
 msgstr "Image too large."
 
-#: apps/core/public_files.py:146
+#: apps/core/public_files.py:146 apps/events/services/signatures.py:112
 msgid "Image illisible."
 msgstr "Unreadable image."
 
@@ -1779,6 +1886,595 @@ msgstr "Resource not found."
 #: apps/core/views.py:200
 msgid "Erreur interne du serveur."
 msgstr "Internal server error."
+
+#: apps/events/models.py:40
+msgid "nom affiché"
+msgstr "display name"
+
+#: apps/events/models.py:41
+msgid "fonction (FR)"
+msgstr "position (FR)"
+
+#: apps/events/models.py:42
+msgid "fonction (EN)"
+msgstr "position (EN)"
+
+#: apps/events/models.py:44
+msgid "image (nom de stockage)"
+msgstr "image (storage name)"
+
+#: apps/events/models.py:47
+msgid "empreinte de l'image"
+msgstr "image hash"
+
+#: apps/events/models.py:49
+msgid "largeur (px)"
+msgstr "width (px)"
+
+#: apps/events/models.py:50
+msgid "hauteur (px)"
+msgstr "height (px)"
+
+#: apps/events/models.py:51
+msgid "image déposée le"
+msgstr "image uploaded at"
+
+#: apps/events/models.py:63
+msgid "signature"
+msgstr "signature"
+
+#: apps/events/models.py:78
+msgid "lecture du QR"
+msgstr "QR code scan"
+
+#: apps/events/models.py:79
+msgid "saisie manuelle"
+msgstr "manual entry"
+
+#: apps/events/models.py:104 apps/payments/models.py:123
+#: apps/payments/models.py:247 apps/payments/models.py:312
+#: apps/registrations/models.py:61 apps/registrations/models.py:474
+#: apps/registrations/models.py:522 apps/registrations/models.py:543
+msgid "inscription"
+msgstr "registration"
+
+#: apps/events/models.py:110 apps/program/models.py:149
+#: apps/program/models.py:172 apps/program/models.py:240
+msgid "session"
+msgstr "session"
+
+#: apps/events/models.py:116
+msgid "pointé le (appareil)"
+msgstr "checked in at (device)"
+
+#: apps/events/models.py:117 apps/payments/models.py:146
+msgid "reçu le"
+msgstr "received on"
+
+#: apps/events/models.py:120
+msgid "pointé par"
+msgstr "checked in by"
+
+#: apps/events/models.py:126 apps/payments/models.py:128
+#: apps/payments/models.py:326
+msgid "moyen"
+msgstr "method"
+
+#: apps/events/models.py:127
+msgid "appareil"
+msgstr "device"
+
+#: apps/events/models.py:130
+msgid "clé du pointage actif"
+msgstr "active check-in key"
+
+#: apps/events/models.py:132
+msgid "annulé le"
+msgstr "cancelled at"
+
+#: apps/events/models.py:135
+msgid "annulé par"
+msgstr "cancelled by"
+
+#: apps/events/models.py:142
+msgid "motif d'annulation"
+msgstr "cancellation reason"
+
+#: apps/events/models.py:157
+msgid "pointage"
+msgstr "check-in"
+
+#: apps/events/serializers.py:173 apps/program/services/planning.py:273
+msgid "Champ obligatoire."
+msgstr "Required field."
+
+#: apps/events/services/attendance.py:128
+msgid ""
+"Des présences sont enregistrées pour cette session : elle ne se supprime "
+"plus."
+msgstr "Attendance has been recorded for this session: it can no longer be deleted."
+
+#: apps/events/services/checkin.py:76
+msgid "pointé"
+msgstr "checked in"
+
+#: apps/events/services/checkin.py:77
+msgid "déjà pointé"
+msgstr "already checked in"
+
+#: apps/events/services/checkin.py:78
+msgid "badge inconnu"
+msgstr "unknown badge"
+
+#: apps/events/services/checkin.py:79
+msgid "badge d'une autre édition"
+msgstr "badge from another edition"
+
+#: apps/events/services/checkin.py:80 apps/registrations/models.py:510
+msgid "inscription annulée"
+msgstr "registration cancelled"
+
+#: apps/events/services/checkin.py:81
+msgid "inscription expirée"
+msgstr "registration expired"
+
+#: apps/events/services/checkin.py:82 apps/registrations/models.py:511
+msgid "badge remplacé"
+msgstr "badge replaced"
+
+#: apps/events/services/checkin.py:83 apps/registrations/models.py:370
+msgid "en attente de paiement"
+msgstr "awaiting payment"
+
+#: apps/events/services/checkin.py:84
+msgid "saisie manuelle non permise"
+msgstr "manual entry not allowed"
+
+#: apps/events/services/checkin.py:85
+msgid "session absente du programme publié"
+msgstr "session not in the published programme"
+
+#: apps/events/services/checkin.py:188
+msgid "Clé déjà utilisée."
+msgstr "Key already used."
+
+#: apps/events/services/checkin.py:254
+msgid "Clé mal formée."
+msgstr "Malformed key."
+
+#: apps/events/services/checkin.py:297
+msgid "200 pointages au plus par envoi."
+msgstr "200 check-ins at most per batch."
+
+#: apps/events/services/checkin.py:334
+msgid "Pointage déjà annulé."
+msgstr "Check-in already cancelled."
+
+#: apps/events/services/checkin.py:469 apps/payments/services/finance.py:118
+#: apps/registrations/services/exports.py:25
+#: apps/reviews/services/decisions.py:499 apps/submissions/services.py:711
+msgid "Référence"
+msgstr "Reference"
+
+#: apps/events/services/checkin.py:470
+#: apps/registrations/services/exports.py:26
+msgid "Nom"
+msgstr "Name"
+
+#: apps/events/services/checkin.py:471
+#: apps/registrations/services/exports.py:29
+msgid "Catégorie"
+msgstr "Category"
+
+#: apps/events/services/checkin.py:472
+msgid "Pointé le (UTC)"
+msgstr "Checked in at (UTC)"
+
+#: apps/events/services/checkin.py:473
+msgid "Reçu le (UTC)"
+msgstr "Received at (UTC)"
+
+#: apps/events/services/checkin.py:474 apps/payments/services/finance.py:122
+#: apps/registrations/services/exports.py:33
+msgid "Moyen"
+msgstr "Method"
+
+#: apps/events/services/checkin.py:475
+msgid "Pointé par"
+msgstr "Checked in by"
+
+#: apps/events/services/checkin.py:476
+msgid "Appareil"
+msgstr "Device"
+
+#: apps/events/services/signatures.py:52
+msgid "Seul un signataire de l'édition renseigne sa signature."
+msgstr "Only a signatory of the edition can fill in their signature."
+
+#: apps/events/services/signatures.py:101
+msgid "Image d'1 Mo au plus."
+msgstr "Image of 1 MB at most."
+
+#: apps/events/services/signatures.py:103
+msgid "PNG ou JPEG attendu."
+msgstr "PNG or JPEG expected."
+
+#: apps/events/services/signatures.py:115
+msgid "Image trop petite pour une signature lisible."
+msgstr "Image too small for a legible signature."
+
+#: apps/events/views.py:331
+msgid "Numéro de lot attendu (1, 2…)."
+msgstr "Batch number expected (1, 2…)."
+
+#: apps/payments/models.py:44
+msgid "raison sociale"
+msgstr "legal name"
+
+#: apps/payments/models.py:45 apps/portal/models.py:226
+msgid "adresse"
+msgstr "address"
+
+#: apps/payments/models.py:46
+msgid "identifiants (registre, fiscal)"
+msgstr "identifiers (registration, tax)"
+
+#: apps/payments/models.py:48
+msgid "taux de TVA (%)"
+msgstr "VAT rate (%)"
+
+#: apps/payments/models.py:55
+msgid "mention de TVA"
+msgstr "VAT statement"
+
+#: apps/payments/models.py:56 apps/portal/models.py:206
+msgid "pied de page"
+msgstr "footer"
+
+#: apps/payments/models.py:57
+msgid "coordonnées bancaires"
+msgstr "bank details"
+
+#: apps/payments/models.py:58
+msgid "préfixe des factures"
+msgstr "invoice prefix"
+
+#: apps/payments/models.py:59
+msgid "préfixe des avoirs"
+msgstr "credit note prefix"
+
+#: apps/payments/models.py:60
+msgid "préfixe des pro forma"
+msgstr "pro forma prefix"
+
+#: apps/payments/models.py:76 apps/payments/models.py:77
+msgid "mentions de facturation"
+msgstr "billing details"
+
+#: apps/payments/models.py:97
+msgid "paiement manuel"
+msgstr "manual payment"
+
+#: apps/payments/models.py:98
+msgid "fournisseur factice"
+msgstr "fake provider"
+
+#: apps/payments/models.py:99
+msgid "CinetPay"
+msgstr "CinetPay"
+
+#: apps/payments/models.py:103
+msgid "initié"
+msgstr "initiated"
+
+#: apps/payments/models.py:106
+msgid "échoué"
+msgstr "failed"
+
+#: apps/payments/models.py:107
+msgid "abandonné"
+msgstr "abandoned"
+
+#: apps/payments/models.py:127 apps/payments/models.py:189
+msgid "fournisseur"
+msgstr "provider"
+
+#: apps/payments/models.py:129 apps/payments/models.py:327
+#: apps/submissions/models.py:58
+msgid "référence"
+msgstr "reference"
+
+#: apps/payments/models.py:131
+msgid "référence du fournisseur"
+msgstr "provider reference"
+
+#: apps/payments/models.py:133 apps/payments/models.py:267
+#: apps/payments/models.py:324 apps/registrations/models.py:215
+#: apps/registrations/models.py:295
+msgid "montant"
+msgstr "amount"
+
+#: apps/payments/models.py:134 apps/payments/models.py:268
+#: apps/payments/models.py:325 apps/registrations/models.py:94
+#: apps/registrations/models.py:423
+msgid "devise"
+msgstr "currency"
+
+#: apps/payments/models.py:139
+msgid "dernier statut du fournisseur"
+msgstr "latest provider status"
+
+#: apps/payments/models.py:142
+msgid "empreinte du jeton de notification"
+msgstr "notification token hash"
+
+#: apps/payments/models.py:144
+msgid "terminé le"
+msgstr "completed on"
+
+#: apps/payments/models.py:145
+msgid "dernière interrogation"
+msgstr "last status check"
+
+#: apps/payments/models.py:149
+msgid "validé par"
+msgstr "validated by"
+
+#: apps/payments/models.py:155 apps/reviews/models.py:357
+msgid "note"
+msgstr "score"
+
+#: apps/payments/models.py:171 apps/payments/models.py:193
+#: apps/payments/models.py:261
+msgid "paiement"
+msgstr "payment"
+
+#: apps/payments/models.py:172
+msgid "paiements"
+msgstr "payments"
+
+#: apps/payments/models.py:190
+msgid "référence annoncée"
+msgstr "announced reference"
+
+#: apps/payments/models.py:199
+msgid "reçue le"
+msgstr "received on"
+
+#: apps/payments/models.py:200
+msgid "jeton valide"
+msgstr "valid token"
+
+#: apps/payments/models.py:201 apps/reviews/models.py:477
+msgid "issue"
+msgstr "outcome"
+
+#: apps/payments/models.py:202
+msgid "champs reçus"
+msgstr "received fields"
+
+#: apps/payments/models.py:205
+msgid "notification de paiement"
+msgstr "payment notification"
+
+#: apps/payments/models.py:206
+msgid "notifications de paiement"
+msgstr "payment notifications"
+
+#: apps/payments/models.py:218
+msgid "facture"
+msgstr "invoice"
+
+#: apps/payments/models.py:219 apps/payments/models.py:318
+msgid "avoir"
+msgstr "credit note"
+
+#: apps/payments/models.py:220
+msgid "pro forma"
+msgstr "pro forma"
+
+#: apps/payments/models.py:243
+msgid "rang dans la série"
+msgstr "rank in series"
+
+#: apps/payments/models.py:244 apps/submissions/models.py:216
+msgid "numéro"
+msgstr "number"
+
+#: apps/payments/models.py:253
+msgid "facture d'origine"
+msgstr "original invoice"
+
+#: apps/payments/models.py:269 apps/registrations/models.py:421
+msgid "lignes"
+msgstr "lines"
+
+#: apps/payments/models.py:270
+msgid "émetteur (mentions figées)"
+msgstr "issuer (frozen details)"
+
+#: apps/payments/models.py:271
+msgid "client (identité figée)"
+msgstr "customer (frozen identity)"
+
+#: apps/payments/models.py:272 apps/reviews/models.py:518
+msgid "fichier"
+msgstr "file"
+
+#: apps/payments/models.py:274
+msgid "taille"
+msgstr "size"
+
+#: apps/payments/models.py:275
+msgid "émise le"
+msgstr "issued on"
+
+#: apps/payments/models.py:278
+msgid "émise par"
+msgstr "issued by"
+
+#: apps/payments/models.py:286
+msgid "pièce de facturation"
+msgstr "billing document"
+
+#: apps/payments/models.py:287
+msgid "pièces de facturation"
+msgstr "billing documents"
+
+#: apps/payments/models.py:328
+msgid "remboursé le"
+msgstr "refunded on"
+
+#: apps/payments/models.py:331
+msgid "enregistré par"
+msgstr "recorded by"
+
+#: apps/payments/models.py:347
+msgid "remboursement"
+msgstr "refund"
+
+#: apps/payments/models.py:348
+msgid "remboursements"
+msgstr "refunds"
+
+#: apps/payments/services/billing.py:51
+msgid "Une à huit majuscules ou chiffres, en commençant par une lettre."
+msgstr "One to eight capital letters or digits, starting with a letter."
+
+#: apps/payments/services/billing.py:56
+msgid "Préfixe déjà utilisé par une autre série."
+msgstr "Prefix already used by another series."
+
+#: apps/payments/services/billing.py:63
+msgid "Préfixe figé : des pièces de cette série ont déjà été émises."
+msgstr "Prefix frozen: documents of this series have already been issued."
+
+#: apps/payments/services/billing.py:65
+msgid "Préfixe figé : des pièces de cette série existent."
+msgstr "Prefix frozen: documents of this series exist."
+
+#: apps/payments/services/documents.py:99
+msgid ""
+"Mentions de facturation incomplètes : raison sociale et adresse d'abord."
+msgstr "Incomplete billing details: legal name and address first."
+
+#: apps/payments/services/documents.py:217
+msgid "Pro forma réservée à une inscription en attente de paiement."
+msgstr "A pro forma is only for a registration awaiting payment."
+
+#: apps/payments/services/documents.py:243
+#, python-format
+msgid "Montant de 0 à %(max)s."
+msgstr "Amount from 0 to %(max)s."
+
+#: apps/payments/services/finance.py:119 apps/payments/services/finance.py:161
+msgid "Inscription"
+msgstr "Registration"
+
+#: apps/payments/services/finance.py:120
+msgid "Participant"
+msgstr "Attendee"
+
+#: apps/payments/services/finance.py:121
+msgid "Fournisseur"
+msgstr "Provider"
+
+#: apps/payments/services/finance.py:123
+msgid "Référence du fournisseur"
+msgstr "Provider reference"
+
+#: apps/payments/services/finance.py:124 apps/payments/services/finance.py:164
+msgid "Montant"
+msgstr "Amount"
+
+#: apps/payments/services/finance.py:125 apps/payments/services/finance.py:165
+#: apps/registrations/services/exports.py:35
+msgid "Devise"
+msgstr "Currency"
+
+#: apps/payments/services/finance.py:126
+#: apps/registrations/services/exports.py:30
+#: apps/reviews/services/decisions.py:503 apps/submissions/services.py:712
+msgid "Statut"
+msgstr "Status"
+
+#: apps/payments/services/finance.py:127
+msgid "Créé le"
+msgstr "Created on"
+
+#: apps/payments/services/finance.py:128
+msgid "Terminé le"
+msgstr "Completed on"
+
+#: apps/payments/services/finance.py:129
+msgid "Reçu le"
+msgstr "Received on"
+
+#: apps/payments/services/finance.py:158
+msgid "Numéro"
+msgstr "Number"
+
+#: apps/payments/services/finance.py:159
+msgid "Nature"
+msgstr "Kind"
+
+#: apps/payments/services/finance.py:160
+msgid "Facture d'origine"
+msgstr "Original invoice"
+
+#: apps/payments/services/finance.py:162
+msgid "Client"
+msgstr "Customer"
+
+#: apps/payments/services/finance.py:163
+msgid "Organisme"
+msgstr "Organisation"
+
+#: apps/payments/services/finance.py:166
+msgid "Émise le"
+msgstr "Issued on"
+
+#: apps/payments/services/manual.py:64 apps/payments/services/online.py:85
+msgid "Seule une inscription en attente de paiement peut être réglée."
+msgstr "Only a registration awaiting payment can be paid."
+
+#: apps/payments/services/manual.py:68
+msgid "Virement ou paiement sur place."
+msgstr "Bank transfer or on-site payment."
+
+#: apps/payments/services/manual.py:73
+#, python-format
+msgid "Montant attendu : %(total)s (paiement partiel non pris en charge)."
+msgstr "Expected amount: %(total)s (partial payment not supported)."
+
+#: apps/payments/services/manual.py:79 apps/payments/services/manual.py:150
+msgid "Date future."
+msgstr "Date in the future."
+
+#: apps/payments/services/manual.py:139
+msgid "Remboursement après annulation seulement."
+msgstr "Refund after cancellation only."
+
+#: apps/payments/services/manual.py:146
+msgid "Émettez d'abord la facture de cette inscription."
+msgstr "Issue this registration's invoice first."
+
+#: apps/payments/services/manual.py:152
+msgid "Moyen obligatoire."
+msgstr "Method required."
+
+#: apps/payments/services/online.py:75
+msgid "Le paiement en ligne n'est pas proposé."
+msgstr "Online payment is not offered."
+
+#: apps/payments/services/online.py:90
+#, python-format
+msgid "Paiement en ligne impossible : %(reason)s."
+msgstr "Online payment impossible: %(reason)s."
+
+#: apps/payments/services/online.py:127
+msgid "Le service de paiement ne répond pas : réessayez plus tard."
+msgstr "The payment service is not responding: try again later."
 
 #: apps/portal/models.py:27
 msgid "texte riche"
@@ -1889,17 +2585,9 @@ msgstr "placed sections"
 msgid "en-tête"
 msgstr "header"
 
-#: apps/portal/models.py:206
-msgid "pied de page"
-msgstr "footer"
-
 #: apps/portal/models.py:215
 msgid "emplacement"
 msgstr "location"
-
-#: apps/portal/models.py:226
-msgid "adresse"
-msgstr "address"
 
 #: apps/portal/models.py:227
 msgid "nouvel onglet"
@@ -2152,11 +2840,6 @@ msgstr "closing"
 msgid "consignes"
 msgstr "instructions"
 
-#: apps/program/models.py:149 apps/program/models.py:172
-#: apps/program/models.py:240
-msgid "session"
-msgstr "session"
-
 #: apps/program/models.py:150
 msgid "sessions"
 msgstr "sessions"
@@ -2257,7 +2940,7 @@ msgstr "programme publications"
 msgid "présentateurs (positions des auteurs)"
 msgstr "presenters (author positions)"
 
-#: apps/program/models.py:355
+#: apps/program/models.py:355 apps/registrations/models.py:436
 msgid "confirmée le"
 msgstr "confirmed on"
 
@@ -2305,7 +2988,7 @@ msgstr "moderation"
 msgid "- {start} · {room} · {role} : {title}"
 msgstr "- {start} · {room} · {role}: {title}"
 
-#: apps/program/serializers.py:250
+#: apps/program/serializers.py:270
 msgid "Une communication ou un titre libre, l'un ou l'autre."
 msgstr "Either a paper or a free title, not both."
 
@@ -2346,8 +3029,8 @@ msgstr "The session must take place during the edition."
 msgid "Type de session inconnu."
 msgstr "Unknown session type."
 
-#: apps/program/services/planning.py:246 apps/program/services/planning.py:441
-#: apps/program/services/planning.py:526
+#: apps/program/services/planning.py:246 apps/program/services/planning.py:455
+#: apps/program/services/planning.py:540
 msgid "Titre français obligatoire."
 msgstr "French title required."
 
@@ -2364,43 +3047,39 @@ msgstr "Room deactivated."
 msgid "Thématique d'une autre édition."
 msgstr "Track from another edition."
 
-#: apps/program/services/planning.py:273
-msgid "Champ obligatoire."
-msgstr "Required field."
-
-#: apps/program/services/planning.py:362
+#: apps/program/services/planning.py:376
 msgid "Durée de 1 à 600 minutes."
 msgstr "Duration from 1 to 600 minutes."
 
-#: apps/program/services/planning.py:387
+#: apps/program/services/planning.py:401
 msgid "Communication d'une autre édition."
 msgstr "Paper from another edition."
 
-#: apps/program/services/planning.py:390
+#: apps/program/services/planning.py:404
 msgid "Seule une communication confirmée se programme."
 msgstr "Only a confirmed paper can be scheduled."
 
-#: apps/program/services/planning.py:394
+#: apps/program/services/planning.py:408
 msgid "Communication déjà programmée : déplacez-la."
 msgstr "Paper already scheduled: move it instead."
 
-#: apps/program/services/planning.py:419
+#: apps/program/services/planning.py:433
 msgid "Intervenant inconnu."
 msgstr "Unknown speaker."
 
-#: apps/program/services/planning.py:478
+#: apps/program/services/planning.py:492
 msgid "Session d'une autre édition."
 msgstr "Session from another edition."
 
-#: apps/program/services/planning.py:571
+#: apps/program/services/planning.py:585
 msgid "Rôle de séance inconnu."
 msgstr "Unknown session role."
 
-#: apps/program/services/planning.py:573
+#: apps/program/services/planning.py:587
 msgid "Personne inconnue."
 msgstr "Unknown person."
 
-#: apps/program/services/planning.py:575
+#: apps/program/services/planning.py:589
 msgid "Cette personne a déjà ce rôle dans la session."
 msgstr "This person already has this role in the session."
 
@@ -2478,11 +3157,16 @@ msgstr "[%(site_name)s] Your appearance in the programme"
 msgid ""
 "Bonjour,\n"
 "\n"
-"La version finale de votre communication %(reference)s « %(title)s » (%(edition_title)s) a bien été reçue. Pour qu'elle puisse être programmée, désignez qui la présentera et confirmez votre venue dans votre espace auteur."
+"La version finale de votre communication %(reference)s « %(title)s "
+"» (%(edition_title)s) a bien été reçue. Pour qu'elle puisse être programmée, "
+"désignez qui la présentera et confirmez votre venue dans votre espace auteur."
 msgstr ""
 "Hello,\n"
 "\n"
-"The final version of your paper %(reference)s “%(title)s” (%(edition_title)s) has been received. So that it can be scheduled, choose who will present it and confirm your attendance in your author space."
+"The final version of your paper %(reference)s "
+"“%(title)s” (%(edition_title)s) has been received. So that it can be "
+"scheduled, choose who will present it and confirm your attendance in your "
+"author space."
 
 #: apps/program/templates/program/email/presentation_reminder_message.txt:5
 msgid "Sans confirmation, la communication ne pourra pas figurer au programme."
@@ -2504,11 +3188,13 @@ msgstr "[%(site_name)s] Confirm your presentation"
 msgid ""
 "Bonjour,\n"
 "\n"
-"Les auteurs ont retiré la communication %(reference)s « %(title)s » (%(edition_title)s)."
+"Les auteurs ont retiré la communication %(reference)s « %(title)s "
+"» (%(edition_title)s)."
 msgstr ""
 "Hello,\n"
 "\n"
-"The authors have withdrawn paper %(reference)s “%(title)s” (%(edition_title)s)."
+"The authors have withdrawn paper %(reference)s "
+"“%(title)s” (%(edition_title)s)."
 
 #: apps/program/templates/program/email/withdrawn_message.txt:5
 msgid ""
@@ -2527,6 +3213,664 @@ msgstr "Programme: %(link)s"
 #, python-format
 msgid "[%(site_name)s] Une communication a été retirée du programme"
 msgstr "[%(site_name)s] A paper has been withdrawn from the programme"
+
+#: apps/registrations/manage_views.py:254
+msgid "Aucun compte actif avec cette adresse."
+msgstr "No active account with this address."
+
+#: apps/registrations/models.py:34
+msgid "préférentiel"
+msgstr "early bird"
+
+#: apps/registrations/models.py:35
+msgid "normal"
+msgstr "regular"
+
+#: apps/registrations/models.py:36 apps/registrations/models.py:53
+msgid "sur place"
+msgstr "on site"
+
+#: apps/registrations/models.py:43
+msgid "local"
+msgstr "local"
+
+#: apps/registrations/models.py:44
+msgid "international"
+msgstr "international"
+
+#: apps/registrations/models.py:51
+msgid "paiement en ligne"
+msgstr "online payment"
+
+#: apps/registrations/models.py:52
+msgid "virement (bon de commande)"
+msgstr "bank transfer (purchase order)"
+
+#: apps/registrations/models.py:54
+msgid "aucun paiement (montant nul)"
+msgstr "no payment (zero amount)"
+
+#: apps/registrations/models.py:55
+msgid "gratuité accordée"
+msgstr "fee waiver"
+
+#: apps/registrations/models.py:62
+msgid "option"
+msgstr "option"
+
+#: apps/registrations/models.py:63
+msgid "remise"
+msgstr "discount"
+
+#: apps/registrations/models.py:96
+msgid "pays locaux"
+msgstr "local countries"
+
+#: apps/registrations/models.py:97
+msgid "paiement en ligne proposé"
+msgstr "online payment offered"
+
+#: apps/registrations/models.py:98
+msgid "virement proposé"
+msgstr "bank transfer offered"
+
+#: apps/registrations/models.py:99
+msgid "paiement sur place proposé"
+msgstr "on-site payment offered"
+
+#: apps/registrations/models.py:101
+msgid "délai de paiement en ligne (heures)"
+msgstr "online payment deadline (hours)"
+
+#: apps/registrations/models.py:106
+msgid "délai de paiement par virement (jours)"
+msgstr "bank transfer deadline (days)"
+
+#: apps/registrations/models.py:111
+msgid "annulation par le participant jusqu'au (UTC)"
+msgstr "participant cancellation until (UTC)"
+
+#: apps/registrations/models.py:114
+msgid "part remboursée avant la date limite (%)"
+msgstr "refunded share before the deadline (%)"
+
+#: apps/registrations/models.py:119
+msgid "part remboursée après la date limite (%)"
+msgstr "refunded share after the deadline (%)"
+
+#: apps/registrations/models.py:138 apps/registrations/models.py:139
+msgid "paramètres des inscriptions"
+msgstr "registration settings"
+
+#: apps/registrations/models.py:169
+msgid "justificatif demandé"
+msgstr "proof required"
+
+#: apps/registrations/models.py:174
+msgid "couleur du badge"
+msgstr "badge colour"
+
+#: apps/registrations/models.py:178
+msgid "Couleur « #RRGGBB » attendue."
+msgstr "Colour “#RRGGBB” expected."
+
+#: apps/registrations/models.py:192
+msgid "catégorie d'inscription"
+msgstr "registration category"
+
+#: apps/registrations/models.py:193
+msgid "catégories d'inscription"
+msgstr "registration categories"
+
+#: apps/registrations/models.py:209 apps/registrations/models.py:408
+msgid "catégorie"
+msgstr "category"
+
+#: apps/registrations/models.py:213 apps/registrations/models.py:418
+msgid "période"
+msgstr "period"
+
+#: apps/registrations/models.py:214 apps/registrations/models.py:419
+msgid "zone"
+msgstr "zone"
+
+#: apps/registrations/models.py:220
+msgid "tarif"
+msgstr "fee"
+
+#: apps/registrations/models.py:221
+msgid "tarifs"
+msgstr "fees"
+
+#: apps/registrations/models.py:249
+msgid "prix (local)"
+msgstr "price (local)"
+
+#: apps/registrations/models.py:250
+msgid "prix (international)"
+msgstr "price (international)"
+
+#: apps/registrations/models.py:251
+msgid "places"
+msgstr "places"
+
+#: apps/registrations/models.py:252
+msgid "places réservées"
+msgstr "reserved places"
+
+#: apps/registrations/models.py:255
+msgid "catégories autorisées"
+msgstr "allowed categories"
+
+#: apps/registrations/models.py:274
+msgid "option d'inscription"
+msgstr "registration option"
+
+#: apps/registrations/models.py:275
+msgid "options d'inscription"
+msgstr "registration options"
+
+#: apps/registrations/models.py:294
+msgid "pourcentage"
+msgstr "percentage"
+
+#: apps/registrations/models.py:299
+msgid "inscription seule"
+msgstr "registration only"
+
+#: apps/registrations/models.py:300
+msgid "inscription et options"
+msgstr "registration and options"
+
+#: apps/registrations/models.py:318
+msgid "type de remise"
+msgstr "discount type"
+
+#: apps/registrations/models.py:319
+msgid "valeur"
+msgstr "value"
+
+#: apps/registrations/models.py:327
+msgid "catégories visées"
+msgstr "targeted categories"
+
+#: apps/registrations/models.py:329
+msgid "utilisations maximales"
+msgstr "maximum uses"
+
+#: apps/registrations/models.py:330
+msgid "utilisations réservées"
+msgstr "reserved uses"
+
+#: apps/registrations/models.py:331
+msgid "utilisations consommées"
+msgstr "consumed uses"
+
+#: apps/registrations/models.py:332
+msgid "valable jusqu'au (UTC)"
+msgstr "valid until (UTC)"
+
+#: apps/registrations/models.py:346 apps/registrations/models.py:429
+msgid "code promo"
+msgstr "promo code"
+
+#: apps/registrations/models.py:347
+msgid "codes promo"
+msgstr "promo codes"
+
+#: apps/registrations/models.py:371
+msgid "confirmée"
+msgstr "confirmed"
+
+#: apps/registrations/models.py:420
+msgid "moyen de paiement"
+msgstr "payment method"
+
+#: apps/registrations/models.py:422
+msgid "total"
+msgstr "total"
+
+#: apps/registrations/models.py:425
+msgid "options"
+msgstr "options"
+
+#: apps/registrations/models.py:435
+msgid "échéance de paiement"
+msgstr "payment deadline"
+
+#: apps/registrations/models.py:437
+msgid "annulée ou expirée le"
+msgstr "cancelled or expired on"
+
+#: apps/registrations/models.py:438
+msgid "nom de facturation"
+msgstr "billing name"
+
+#: apps/registrations/models.py:440
+msgid "organisme de facturation"
+msgstr "billing organisation"
+
+#: apps/registrations/models.py:442
+msgid "adresse de facturation"
+msgstr "billing address"
+
+#: apps/registrations/models.py:444
+msgid "justificatif"
+msgstr "proof"
+
+#: apps/registrations/models.py:446
+msgid "nom du justificatif"
+msgstr "proof file name"
+
+#: apps/registrations/models.py:448
+msgid "type du justificatif"
+msgstr "proof type"
+
+#: apps/registrations/models.py:449
+msgid "taille du justificatif"
+msgstr "proof size"
+
+#: apps/registrations/models.py:450
+msgid "justificatif déposé le"
+msgstr "proof uploaded on"
+
+#: apps/registrations/models.py:452
+msgid "remboursement dû"
+msgstr "refund due"
+
+#: apps/registrations/models.py:453
+msgid "jeton QR"
+msgstr "QR token"
+
+#: apps/registrations/models.py:455 apps/reviews/models.py:191
+msgid "clé d'unicité active"
+msgstr "active uniqueness key"
+
+#: apps/registrations/models.py:475
+msgid "inscriptions"
+msgstr "registrations"
+
+#: apps/registrations/models.py:528
+msgid "retiré le"
+msgstr "retired at"
+
+#: apps/registrations/models.py:531
+msgid "jeton QR retiré"
+msgstr "retired QR token"
+
+#: apps/registrations/models.py:532
+msgid "jetons QR retirés"
+msgstr "retired QR tokens"
+
+#: apps/registrations/models.py:548
+msgid "statut de départ"
+msgstr "from status"
+
+#: apps/registrations/models.py:551
+msgid "statut d'arrivée"
+msgstr "to status"
+
+#: apps/registrations/models.py:553
+msgid "date du changement"
+msgstr "change date"
+
+#: apps/registrations/models.py:556
+msgid "auteur du changement"
+msgstr "changed by"
+
+#: apps/registrations/models.py:562
+msgid "acteur (commande ou tâche)"
+msgstr "actor (command or task)"
+
+#: apps/registrations/models.py:566
+msgid "historique d'une inscription"
+msgstr "registration history"
+
+#: apps/registrations/models.py:567
+msgid "historiques des inscriptions"
+msgstr "registration histories"
+
+#: apps/registrations/services/exports.py:27
+msgid "Adresse électronique"
+msgstr "Email address"
+
+#: apps/registrations/services/exports.py:28
+msgid "Pays"
+msgstr "Country"
+
+#: apps/registrations/services/exports.py:31
+msgid "Période"
+msgstr "Period"
+
+#: apps/registrations/services/exports.py:32
+msgid "Zone"
+msgstr "Zone"
+
+#: apps/registrations/services/exports.py:34
+msgid "Total"
+msgstr "Total"
+
+#: apps/registrations/services/exports.py:36
+msgid "Options"
+msgstr "Options"
+
+#: apps/registrations/services/exports.py:37
+msgid "Code promo"
+msgstr "Promo code"
+
+#: apps/registrations/services/exports.py:38
+msgid "Organisme de facturation"
+msgstr "Billing organisation"
+
+#: apps/registrations/services/exports.py:39
+msgid "Commandée le"
+msgstr "Ordered on"
+
+#: apps/registrations/services/exports.py:40
+msgid "Confirmée le"
+msgstr "Confirmed on"
+
+#: apps/registrations/services/orders.py:99
+msgid "Moyen de paiement impossible si près de la conférence."
+msgstr "This payment method is not possible so close to the conference."
+
+#: apps/registrations/services/orders.py:111 apps/registrations/views.py:386
+msgid "Indiquez votre pays dans votre profil : il détermine le tarif."
+msgstr "Enter your country in your profile: it determines the fee."
+
+#: apps/registrations/services/orders.py:113 apps/registrations/views.py:388
+msgid "Pays obligatoire."
+msgstr "Country required."
+
+#: apps/registrations/services/orders.py:130
+msgid "Vous avez déjà une inscription à cette édition."
+msgstr "You already have a registration for this edition."
+
+#: apps/registrations/services/orders.py:159 apps/registrations/views.py:392
+msgid "Les inscriptions en ligne sont fermées."
+msgstr "Online registration is closed."
+
+#: apps/registrations/services/orders.py:179
+msgid "Moyen de paiement non proposé."
+msgstr "Payment method not offered."
+
+#: apps/registrations/services/orders.py:265
+msgid ""
+"La date limite d'annulation est passée : contactez le comité d'organisation."
+msgstr ""
+"The cancellation deadline has passed: contact the organising committee."
+
+#: apps/registrations/services/orders.py:288
+msgid "Pourcentage de 0 à 100."
+msgstr "Percentage from 0 to 100."
+
+#: apps/registrations/services/orders.py:312
+msgid "Seule une inscription en attente de paiement peut être offerte."
+msgstr "Only a registration awaiting payment can be waived."
+
+#: apps/registrations/services/orders.py:357
+msgid "Seule une inscription confirmée a un badge."
+msgstr "Only a confirmed registration has a badge."
+
+#: apps/registrations/services/orders.py:390
+#: apps/registrations/services/orders.py:434
+msgid "Inscription annulée ou expirée."
+msgstr "Registration cancelled or expired."
+
+#: apps/registrations/services/orders.py:395
+msgid "Facture émise : l'identité de facturation ne change plus."
+msgstr "Invoice issued: the billing identity can no longer change."
+
+#: apps/registrations/services/orders.py:432
+msgid "Aucun justificatif demandé pour cette catégorie."
+msgstr "No proof is required for this category."
+
+#: apps/registrations/services/orders.py:436 apps/registrations/views.py:550
+msgid "Fichier de 5 Mo au plus."
+msgstr "File of 5 MB at most."
+
+#: apps/registrations/services/orders.py:439
+msgid "PDF, JPEG ou PNG attendu."
+msgstr "PDF, JPEG or PNG expected."
+
+#: apps/registrations/services/pricing.py:165
+#: apps/registrations/services/pricing.py:418
+msgid "Catégorie inconnue."
+msgstr "Unknown category."
+
+#: apps/registrations/services/pricing.py:173
+msgid "Option choisie deux fois."
+msgstr "Option chosen twice."
+
+#: apps/registrations/services/pricing.py:184
+#, python-format
+msgid "Option inconnue : %(code)s."
+msgstr "Unknown option: %(code)s."
+
+#: apps/registrations/services/pricing.py:190
+#, python-format
+msgid "Option non proposée à cette catégorie : %(code)s."
+msgstr "Option not offered to this category: %(code)s."
+
+#: apps/registrations/services/pricing.py:214
+msgid "Code promo inconnu ou expiré."
+msgstr "Unknown or expired promo code."
+
+#: apps/registrations/services/pricing.py:217
+msgid "Code promo non valable pour cette catégorie."
+msgstr "Promo code not valid for this category."
+
+#: apps/registrations/services/pricing.py:220
+#: apps/registrations/services/pricing.py:350
+msgid "Ce code promo a atteint son nombre d'utilisations."
+msgstr "This promo code has reached its number of uses."
+
+#: apps/registrations/services/pricing.py:222
+#: apps/registrations/services/pricing.py:352
+msgid "Code promo épuisé."
+msgstr "Promo code used up."
+
+#: apps/registrations/services/pricing.py:258
+msgid "Les inscriptions ne sont pas encore ouvertes."
+msgstr "Registration is not open yet."
+
+#: apps/registrations/services/pricing.py:266
+msgid "Catégorie non proposée pour cette période et cette zone."
+msgstr "Category not offered for this period and zone."
+
+#: apps/registrations/services/pricing.py:329
+#, python-format
+msgid "Plus de place disponible pour cette option : %(code)s."
+msgstr "No place left for this option: %(code)s."
+
+#: apps/registrations/services/pricing.py:397
+msgid "Montant positif ou nul attendu."
+msgstr "A positive or zero amount is expected."
+
+#: apps/registrations/services/pricing.py:399
+#, python-format
+msgid "Trop de décimales pour la devise %(currency)s."
+msgstr "Too many decimals for the currency %(currency)s."
+
+#: apps/registrations/services/pricing.py:477
+msgid "Catégorie utilisée par des inscriptions : désactivez-la."
+msgstr "Category used by registrations: deactivate it."
+
+#: apps/registrations/services/pricing.py:497
+msgid "Période et zone en double."
+msgstr "Duplicate period and zone."
+
+#: apps/registrations/services/pricing.py:565
+#, python-format
+msgid "Au moins %(count)s places, déjà réservées."
+msgstr "At least %(count)s places, already reserved."
+
+#: apps/registrations/services/pricing.py:591
+msgid "Option choisie par des inscriptions : désactivez-la."
+msgstr "Option chosen by registrations: deactivate it."
+
+#: apps/registrations/services/pricing.py:604
+msgid "Code obligatoire."
+msgstr "Code required."
+
+#: apps/registrations/services/pricing.py:609
+msgid "Valeur strictement positive attendue."
+msgstr "A strictly positive value is expected."
+
+#: apps/registrations/services/pricing.py:611
+msgid "Pourcentage de 100 au plus."
+msgstr "Percentage of 100 at most."
+
+#: apps/registrations/services/pricing.py:623
+msgid "Code déjà utilisé dans cette édition."
+msgstr "Code already used in this edition."
+
+#: apps/registrations/services/pricing.py:649
+#, python-format
+msgid "Au moins %(count)s, déjà utilisées."
+msgstr "At least %(count)s, already used."
+
+#: apps/registrations/services/pricing.py:673
+msgid "Code promo déjà utilisé : désactivez-le."
+msgstr "Promo code already used: deactivate it."
+
+#: apps/registrations/services/settings.py:77
+msgid "Liste de codes pays attendue."
+msgstr "A list of country codes is expected."
+
+#: apps/registrations/services/settings.py:92
+#: apps/registrations/services/settings.py:94
+msgid "Devise figée : des inscriptions existent déjà."
+msgstr "Currency frozen: registrations already exist."
+
+#: apps/registrations/services/settings.py:107
+msgid ""
+"Des tarifs ont plus de décimales que cette devise : corrigez-les d'abord."
+msgstr ""
+"Some fees have more decimals than this currency allows: correct them first."
+
+#: apps/registrations/services/settings.py:135
+msgid "Aucun fournisseur de paiement en ligne configuré."
+msgstr "No online payment provider is configured."
+
+#: apps/registrations/templates/registrations/email/cancelled_message.txt:1
+#, python-format
+msgid ""
+"Bonjour,\n"
+"\n"
+"Votre inscription %(reference)s à %(edition_title)s est annulée."
+msgstr ""
+"Hello,\n"
+"\n"
+"Your registration %(reference)s for %(edition_title)s is cancelled."
+
+#: apps/registrations/templates/registrations/email/cancelled_message.txt:5
+#, python-format
+msgid ""
+"Un remboursement de %(refund)s vous sera versé par le comité d'organisation, "
+"qui vous en informera."
+msgstr ""
+"A refund of %(refund)s will be paid to you by the organising committee, "
+"which will let you know."
+
+#: apps/registrations/templates/registrations/email/cancelled_message.txt:7
+#, python-format
+msgid "Détails : %(link)s"
+msgstr "Details: %(link)s"
+
+#: apps/registrations/templates/registrations/email/cancelled_subject.txt:1
+#, python-format
+msgid "[%(site_name)s] Inscription annulée"
+msgstr "[%(site_name)s] Registration cancelled"
+
+#: apps/registrations/templates/registrations/email/confirmed_message.txt:1
+#, python-format
+msgid ""
+"Bonjour,\n"
+"\n"
+"Votre inscription %(reference)s à %(edition_title)s est confirmée."
+msgstr ""
+"Hello,\n"
+"\n"
+"Your registration %(reference)s for %(edition_title)s is confirmed."
+
+#: apps/registrations/templates/registrations/email/confirmed_message.txt:5
+#, python-format
+msgid ""
+"Votre QR code d'accès et, le cas échéant, votre facture sont dans votre "
+"espace : %(link)s"
+msgstr ""
+"Your access QR code and, where applicable, your invoice are in your account: "
+"%(link)s"
+
+#: apps/registrations/templates/registrations/email/confirmed_subject.txt:1
+#, python-format
+msgid "[%(site_name)s] Inscription confirmée"
+msgstr "[%(site_name)s] Registration confirmed"
+
+#: apps/registrations/templates/registrations/email/expired_message.txt:1
+#, python-format
+msgid ""
+"Bonjour,\n"
+"\n"
+"Le paiement de votre inscription %(reference)s à %(edition_title)s n'a pas "
+"été reçu à l'échéance : l'inscription a expiré et les places réservées sont "
+"libérées."
+msgstr ""
+"Hello,\n"
+"\n"
+"The payment for your registration %(reference)s for %(edition_title)s was "
+"not received by the deadline: the registration has expired and the reserved "
+"places are released."
+
+#: apps/registrations/templates/registrations/email/expired_message.txt:5
+#, python-format
+msgid ""
+"Vous pouvez vous inscrire à nouveau tant que les inscriptions sont "
+"ouvertes : %(link)s"
+msgstr "You can register again while registration is open: %(link)s"
+
+#: apps/registrations/templates/registrations/email/expired_subject.txt:1
+#, python-format
+msgid "[%(site_name)s] Inscription expirée"
+msgstr "[%(site_name)s] Registration expired"
+
+#: apps/registrations/templates/registrations/email/ordered_message.txt:1
+#, python-format
+msgid ""
+"Bonjour,\n"
+"\n"
+"Votre inscription %(reference)s à %(edition_title)s est enregistrée. "
+"Montant : %(total)s, moyen de paiement : %(method)s."
+msgstr ""
+"Hello,\n"
+"\n"
+"Your registration %(reference)s for %(edition_title)s is recorded. Amount: "
+"%(total)s, payment method: %(method)s."
+
+#: apps/registrations/templates/registrations/email/ordered_message.txt:5
+#, python-format
+msgid ""
+"Elle sera confirmée à réception du paiement, attendu avant le %(due)s. Passé "
+"ce délai, elle expire et les places réservées sont libérées."
+msgstr ""
+"It will be confirmed when the payment is received, expected before %(due)s. "
+"After this deadline, it expires and the reserved places are released."
+
+#: apps/registrations/templates/registrations/email/ordered_message.txt:7
+#, python-format
+msgid "Suivi, pro forma et paiement : %(link)s"
+msgstr "Follow-up, pro forma and payment: %(link)s"
+
+#: apps/registrations/templates/registrations/email/ordered_subject.txt:1
+#, python-format
+msgid "[%(site_name)s] Inscription enregistrée"
+msgstr "[%(site_name)s] Registration recorded"
+
+#: apps/registrations/workflow.py:82
+#, python-format
+msgid "Changement de statut impossible depuis « %(status)s »."
+msgstr "Status change impossible from “%(status)s”."
 
 #: apps/reviews/models.py:46
 msgid "note minimale"
@@ -2629,10 +3973,6 @@ msgstr "reminders sent"
 #: apps/reviews/models.py:189
 msgid "rang du pseudonyme"
 msgstr "pseudonym rank"
-
-#: apps/reviews/models.py:191
-msgid "clé d'unicité active"
-msgstr "active uniqueness key"
 
 #: apps/reviews/models.py:197 apps/reviews/models.py:292
 msgid "affectation"
@@ -2755,10 +4095,6 @@ msgstr "review"
 msgid "évaluations"
 msgstr "reviews"
 
-#: apps/reviews/models.py:357
-msgid "note"
-msgstr "score"
-
 #: apps/reviews/models.py:360
 msgid "note de critère"
 msgstr "criterion score"
@@ -2815,10 +4151,6 @@ msgstr "waiting list"
 msgid "rejetée"
 msgstr "rejected"
 
-#: apps/reviews/models.py:477
-msgid "issue"
-msgstr "outcome"
-
 #: apps/reviews/models.py:480
 msgid "format attribué"
 msgstr "assigned format"
@@ -2838,10 +4170,6 @@ msgstr "decision"
 #: apps/reviews/models.py:500
 msgid "décisions"
 msgstr "decisions"
-
-#: apps/reviews/models.py:518
-msgid "fichier"
-msgstr "file"
 
 #: apps/reviews/models.py:522
 msgid "lettre de réponse"
@@ -2980,10 +4308,6 @@ msgstr "A PDF file (.pdf) is expected."
 msgid "Fichier trop volumineux."
 msgstr "File too large."
 
-#: apps/reviews/services/decisions.py:499 apps/submissions/services.py:711
-msgid "Référence"
-msgstr "Reference"
-
 #: apps/reviews/services/decisions.py:500 apps/submissions/services.py:713
 msgid "Titre"
 msgstr "Title"
@@ -2995,10 +4319,6 @@ msgstr "Track"
 #: apps/reviews/services/decisions.py:502 apps/submissions/services.py:715
 msgid "Type"
 msgstr "Type"
-
-#: apps/reviews/services/decisions.py:503 apps/submissions/services.py:712
-msgid "Statut"
-msgstr "Status"
 
 #: apps/reviews/services/decisions.py:504
 msgid "Note finale"
@@ -3182,23 +4502,27 @@ msgstr "Message of 1 to %(max)s characters."
 msgid ""
 "Bonjour,\n"
 "\n"
-"Le comité scientifique de %(edition_title)s vous confie l'évaluation de la soumission %(reference)s « %(title)s ».\n"
+"Le comité scientifique de %(edition_title)s vous confie l'évaluation de la "
+"soumission %(reference)s « %(title)s ».\n"
 "\n"
 "Échéance : %(due)s\n"
 "\n"
 "Pour lire la soumission et saisir votre évaluation : %(link)s\n"
 "\n"
-"Si vous êtes en conflit d'intérêts avec cette soumission, ou si vous ne pouvez pas l'évaluer, déclinez-la depuis le même lien."
+"Si vous êtes en conflit d'intérêts avec cette soumission, ou si vous ne "
+"pouvez pas l'évaluer, déclinez-la depuis le même lien."
 msgstr ""
 "Hello,\n"
 "\n"
-"The scientific committee of %(edition_title)s asks you to review submission %(reference)s “%(title)s”.\n"
+"The scientific committee of %(edition_title)s asks you to review submission "
+"%(reference)s “%(title)s”.\n"
 "\n"
 "Due date: %(due)s\n"
 "\n"
 "To read the submission and enter your review: %(link)s\n"
 "\n"
-"If you have a conflict of interest with this submission, or cannot review it, decline it from the same link."
+"If you have a conflict of interest with this submission, or cannot review "
+"it, decline it from the same link."
 
 #: apps/reviews/templates/review/email/assigned_subject.txt:1
 #, python-format
@@ -3210,11 +4534,13 @@ msgstr "[%(site_name)s] New review to complete"
 msgid ""
 "Bonjour,\n"
 "\n"
-"Le comité scientifique de %(edition_title)s a annulé votre évaluation de la soumission %(reference)s « %(title)s ». Vous n'avez plus à l'évaluer."
+"Le comité scientifique de %(edition_title)s a annulé votre évaluation de la "
+"soumission %(reference)s « %(title)s ». Vous n'avez plus à l'évaluer."
 msgstr ""
 "Hello,\n"
 "\n"
-"The scientific committee of %(edition_title)s has cancelled your review of submission %(reference)s “%(title)s”. You no longer need to review it."
+"The scientific committee of %(edition_title)s has cancelled your review of "
+"submission %(reference)s “%(title)s”. You no longer need to review it."
 
 #: apps/reviews/templates/review/email/cancelled_subject.txt:1
 #, python-format
@@ -3226,13 +4552,17 @@ msgstr "[%(site_name)s] Review cancelled"
 msgid ""
 "Bonjour,\n"
 "\n"
-"Un relecteur a décliné l'évaluation de la soumission %(reference)s « %(title)s » (%(edition_title)s). Désignez un remplaçant si le nombre de relecteurs requis n'est plus atteint.\n"
+"Un relecteur a décliné l'évaluation de la soumission %(reference)s « "
+"%(title)s » (%(edition_title)s). Désignez un remplaçant si le nombre de "
+"relecteurs requis n'est plus atteint.\n"
 "\n"
 "Pilotage de l'évaluation : %(link)s"
 msgstr ""
 "Hello,\n"
 "\n"
-"A reviewer has declined to review submission %(reference)s “%(title)s” (%(edition_title)s). Appoint a replacement if the required number of reviewers is no longer met.\n"
+"A reviewer has declined to review submission %(reference)s "
+"“%(title)s” (%(edition_title)s). Appoint a replacement if the required "
+"number of reviewers is no longer met.\n"
 "\n"
 "Review follow-up: %(link)s"
 
@@ -3246,13 +4576,18 @@ msgstr "[%(site_name)s] A reviewer declined a review"
 msgid ""
 "Bonjour,\n"
 "\n"
-"Les évaluations de la soumission %(reference)s « %(title)s » (%(edition_title)s) divergent : %(spread)s points d'écart sur 100, au-delà du seuil de %(threshold)s points. Vous pouvez ouvrir la discussion ou désigner un relecteur supplémentaire.\n"
+"Les évaluations de la soumission %(reference)s « %(title)s "
+"» (%(edition_title)s) divergent : %(spread)s points d'écart sur 100, au-delà "
+"du seuil de %(threshold)s points. Vous pouvez ouvrir la discussion ou "
+"désigner un relecteur supplémentaire.\n"
 "\n"
 "Pilotage de l'évaluation : %(link)s"
 msgstr ""
 "Hello,\n"
 "\n"
-"The reviews of submission %(reference)s “%(title)s” (%(edition_title)s) diverge: a %(spread)s-point gap out of 100, beyond the %(threshold)s-point threshold. You can open the discussion or appoint an additional reviewer.\n"
+"The reviews of submission %(reference)s “%(title)s” (%(edition_title)s) "
+"diverge: a %(spread)s-point gap out of 100, beyond the %(threshold)s-point "
+"threshold. You can open the discussion or appoint an additional reviewer.\n"
 "\n"
 "Review follow-up: %(link)s"
 
@@ -3264,8 +4599,8 @@ msgstr "[%(site_name)s] Diverging reviews"
 #: apps/reviews/templates/review/email/reminder_message.txt:3
 #, python-format
 msgid ""
-"L'échéance de votre évaluation de la soumission %(reference)s « %(title)s » "
-"(%(edition_title)s) est dépassée depuis le %(due)s. Merci de l'envoyer au "
+"L'échéance de votre évaluation de la soumission %(reference)s « %(title)s "
+"» (%(edition_title)s) est dépassée depuis le %(due)s. Merci de l'envoyer au "
 "plus vite, ou de la décliner pour qu'un autre relecteur soit désigné."
 msgstr ""
 "Your review of submission %(reference)s “%(title)s” (%(edition_title)s) was "
@@ -3275,8 +4610,8 @@ msgstr ""
 #: apps/reviews/templates/review/email/reminder_message.txt:3
 #, python-format
 msgid ""
-"Votre évaluation de la soumission %(reference)s « %(title)s » "
-"(%(edition_title)s) est attendue demain : échéance le %(due)s."
+"Votre évaluation de la soumission %(reference)s « %(title)s "
+"» (%(edition_title)s) est attendue demain : échéance le %(due)s."
 msgstr ""
 "Your review of submission %(reference)s “%(title)s” (%(edition_title)s) is "
 "expected tomorrow: due on %(due)s."
@@ -3284,8 +4619,8 @@ msgstr ""
 #: apps/reviews/templates/review/email/reminder_message.txt:3
 #, python-format
 msgid ""
-"Votre évaluation de la soumission %(reference)s « %(title)s » "
-"(%(edition_title)s) est attendue dans une semaine : échéance le %(due)s."
+"Votre évaluation de la soumission %(reference)s « %(title)s "
+"» (%(edition_title)s) est attendue dans une semaine : échéance le %(due)s."
 msgstr ""
 "Your review of submission %(reference)s “%(title)s” (%(edition_title)s) is "
 "expected in one week: due on %(due)s."
@@ -3339,10 +4674,6 @@ msgstr "published in the proceedings"
 #: apps/submissions/models.py:39
 msgid "retirée"
 msgstr "withdrawn"
-
-#: apps/submissions/models.py:58
-msgid "référence"
-msgstr "reference"
 
 #: apps/submissions/models.py:61
 msgid "soumissionnaire"
@@ -3419,10 +4750,6 @@ msgstr "submission file"
 #: apps/submissions/models.py:195
 msgid "fichiers de soumission"
 msgstr "submission files"
-
-#: apps/submissions/models.py:216
-msgid "numéro"
-msgstr "number"
 
 #: apps/submissions/models.py:241
 msgid "révision de soumission"
@@ -3579,7 +4906,7 @@ msgid "Cette soumission n'est plus modifiable."
 msgstr "This submission can no longer be changed."
 
 #: apps/submissions/services.py:199 apps/submissions/services.py:274
-#: apps/submissions/workflow.py:162
+#: apps/submissions/workflow.py:191
 msgid "L'appel à communications est clos."
 msgstr "The call for papers is closed."
 
@@ -3693,15 +5020,19 @@ msgstr "Updated on"
 msgid ""
 "Bonjour,\n"
 "\n"
-"%(submitter_name)s vous a déclaré co-auteur de la soumission « %(title)s » (%(reference)s) à %(edition_title)s.\n"
+"%(submitter_name)s vous a déclaré co-auteur de la soumission « %(title)s "
+"» (%(reference)s) à %(edition_title)s.\n"
 "\n"
-"Si ce n'est pas le cas, ou si votre adresse est erronée, prévenez %(submitter_name)s ou les organisateurs."
+"Si ce n'est pas le cas, ou si votre adresse est erronée, prévenez "
+"%(submitter_name)s ou les organisateurs."
 msgstr ""
 "Hello,\n"
 "\n"
-"%(submitter_name)s has listed you as a co-author of the submission “%(title)s” (%(reference)s) to %(edition_title)s.\n"
+"%(submitter_name)s has listed you as a co-author of the submission "
+"“%(title)s” (%(reference)s) to %(edition_title)s.\n"
 "\n"
-"If this is not the case, or if your address is wrong, please tell %(submitter_name)s or the organisers."
+"If this is not the case, or if your address is wrong, please tell "
+"%(submitter_name)s or the organisers."
 
 #: apps/submissions/templates/submission/email/coauthor_subject.txt:1
 #, python-format
@@ -3711,8 +5042,8 @@ msgstr "[%(site_name)s] You have been listed as a co-author of a submission"
 #: apps/submissions/templates/submission/email/decision_message.txt:3
 #, python-format
 msgid ""
-"Le comité scientifique de %(edition_title)s a le plaisir de vous annoncer que"
-" la soumission %(reference)s « %(title)s » est acceptée."
+"Le comité scientifique de %(edition_title)s a le plaisir de vous annoncer "
+"que la soumission %(reference)s « %(title)s » est acceptée."
 msgstr ""
 "The scientific committee of %(edition_title)s is pleased to announce that "
 "submission %(reference)s “%(title)s” is accepted."
@@ -3725,8 +5056,8 @@ msgid ""
 "dessous. Joignez une lettre de réponse aux relecteurs à la version finale."
 msgstr ""
 "The scientific committee of %(edition_title)s accepts submission "
-"%(reference)s “%(title)s”, subject to the corrections requested below. Attach"
-" a response letter to the reviewers to the final version."
+"%(reference)s “%(title)s”, subject to the corrections requested below. "
+"Attach a response letter to the reviewers to the final version."
 
 #: apps/submissions/templates/submission/email/decision_message.txt:3
 #, python-format
@@ -3776,13 +5107,17 @@ msgstr "[%(site_name)s] Decision on your submission"
 msgid ""
 "Bonjour,\n"
 "\n"
-"Votre brouillon « %(title)s » pour %(edition_title)s n'est pas encore soumis. L'appel à communications ferme le %(call_close)s : après cette date, il ne pourra plus l'être.\n"
+"Votre brouillon « %(title)s » pour %(edition_title)s n'est pas encore "
+"soumis. L'appel à communications ferme le %(call_close)s : après cette date, "
+"il ne pourra plus l'être.\n"
 "\n"
 "Pour le terminer et le soumettre : %(link)s"
 msgstr ""
 "Hello,\n"
 "\n"
-"Your draft “%(title)s” for %(edition_title)s has not been submitted yet. The call for papers closes on %(call_close)s: after that date, it can no longer be submitted.\n"
+"Your draft “%(title)s” for %(edition_title)s has not been submitted yet. The "
+"call for papers closes on %(call_close)s: after that date, it can no longer "
+"be submitted.\n"
 "\n"
 "To finish and submit it: %(link)s"
 
@@ -3796,13 +5131,15 @@ msgstr "[%(site_name)s] Your draft has not been submitted yet"
 msgid ""
 "Bonjour,\n"
 "\n"
-"Un délai supplémentaire vous est accordé pour votre soumission « %(title)s » (%(reference)s) à %(edition_title)s, jusqu'au %(until)s.\n"
+"Un délai supplémentaire vous est accordé pour votre soumission « %(title)s "
+"» (%(reference)s) à %(edition_title)s, jusqu'au %(until)s.\n"
 "\n"
 "Motif : %(reason)s"
 msgstr ""
 "Hello,\n"
 "\n"
-"You have been granted an extended deadline for your submission “%(title)s” (%(reference)s) to %(edition_title)s, until %(until)s.\n"
+"You have been granted an extended deadline for your submission "
+"“%(title)s” (%(reference)s) to %(edition_title)s, until %(until)s.\n"
 "\n"
 "Reason: %(reason)s"
 
@@ -3816,13 +5153,16 @@ msgstr "[%(site_name)s] Extended deadline for your submission"
 msgid ""
 "Bonjour,\n"
 "\n"
-"La version finale de votre soumission « %(title)s » (%(reference)s) à %(edition_title)s a bien été reçue. Vous pouvez la remplacer jusqu'à la date limite.\n"
+"La version finale de votre soumission « %(title)s » (%(reference)s) à "
+"%(edition_title)s a bien été reçue. Vous pouvez la remplacer jusqu'à la date "
+"limite.\n"
 "\n"
 "Votre soumission : %(link)s"
 msgstr ""
 "Hello,\n"
 "\n"
-"The final version of your submission “%(title)s” (%(reference)s) to %(edition_title)s has been received. You can replace it until the deadline.\n"
+"The final version of your submission “%(title)s” (%(reference)s) to "
+"%(edition_title)s has been received. You can replace it until the deadline.\n"
 "\n"
 "Your submission: %(link)s"
 
@@ -3836,15 +5176,19 @@ msgstr "[%(site_name)s] Final version received"
 msgid ""
 "Bonjour,\n"
 "\n"
-"Votre soumission « %(title)s » à %(edition_title)s a bien été reçue. Sa référence est %(reference)s.\n"
+"Votre soumission « %(title)s » à %(edition_title)s a bien été reçue. Sa "
+"référence est %(reference)s.\n"
 "\n"
-"Vous pouvez la modifier jusqu'à la clôture de l'appel (%(call_close)s) depuis votre espace : %(link)s"
+"Vous pouvez la modifier jusqu'à la clôture de l'appel (%(call_close)s) "
+"depuis votre espace : %(link)s"
 msgstr ""
 "Hello,\n"
 "\n"
-"Your submission “%(title)s” to %(edition_title)s has been received. Its reference is %(reference)s.\n"
+"Your submission “%(title)s” to %(edition_title)s has been received. Its "
+"reference is %(reference)s.\n"
 "\n"
-"You can change it until the call closes (%(call_close)s) from your space: %(link)s"
+"You can change it until the call closes (%(call_close)s) from your space: "
+"%(link)s"
 
 #: apps/submissions/templates/submission/email/received_subject.txt:1
 #, python-format
@@ -3856,7 +5200,9 @@ msgstr "[%(site_name)s] Submission received"
 msgid ""
 "Bonjour,\n"
 "\n"
-"Votre soumission « %(title)s » (%(reference)s) à %(edition_title)s n'a pas été jugée recevable lors du contrôle préalable à l'évaluation. Elle ne sera pas évaluée.\n"
+"Votre soumission « %(title)s » (%(reference)s) à %(edition_title)s n'a pas "
+"été jugée recevable lors du contrôle préalable à l'évaluation. Elle ne sera "
+"pas évaluée.\n"
 "\n"
 "Motif : %(reason)s\n"
 "\n"
@@ -3864,7 +5210,9 @@ msgid ""
 msgstr ""
 "Hello,\n"
 "\n"
-"Your submission “%(title)s” (%(reference)s) to %(edition_title)s was found inadmissible during the check that precedes reviewing. It will not be reviewed.\n"
+"Your submission “%(title)s” (%(reference)s) to %(edition_title)s was found "
+"inadmissible during the check that precedes reviewing. It will not be "
+"reviewed.\n"
 "\n"
 "Reason: %(reason)s\n"
 "\n"
@@ -3880,25 +5228,27 @@ msgstr "[%(site_name)s] Inadmissible submission"
 msgid ""
 "Bonjour,\n"
 "\n"
-"Votre soumission « %(title)s » (%(reference)s) à %(edition_title)s a été retirée. Elle ne sera pas évaluée."
+"Votre soumission « %(title)s » (%(reference)s) à %(edition_title)s a été "
+"retirée. Elle ne sera pas évaluée."
 msgstr ""
 "Hello,\n"
 "\n"
-"Your submission “%(title)s” (%(reference)s) to %(edition_title)s has been withdrawn. It will not be reviewed."
+"Your submission “%(title)s” (%(reference)s) to %(edition_title)s has been "
+"withdrawn. It will not be reviewed."
 
 #: apps/submissions/templates/submission/email/withdrawn_subject.txt:1
 #, python-format
 msgid "[%(site_name)s] Soumission retirée"
 msgstr "[%(site_name)s] Submission withdrawn"
 
-#: apps/submissions/workflow.py:166
+#: apps/submissions/workflow.py:195
 msgid "La soumission est incomplète."
 msgstr "The submission is incomplete."
 
-#: apps/submissions/workflow.py:174
+#: apps/submissions/workflow.py:203
 msgid "La recevabilité commence à la clôture de l'appel (et des dérogations)."
 msgstr "Screening starts when the call (and any extensions) closes."
 
-#: apps/submissions/workflow.py:208
+#: apps/submissions/workflow.py:240
 msgid "Changement de statut non autorisé."
 msgstr "Status change not allowed."

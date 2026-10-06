@@ -40,7 +40,7 @@ GEST-CONF/
 ├── backend/                 # Django
 │   ├── config/settings/ (base, dev, prod, test) ; urls.py (API uniquement) ; mount.py ; passenger_wsgi.py
 │   ├── apps/ core, accounts, conferences, portal, communications, submissions, reviews,
-│   │         program (à venir, lot par lot : registrations, payments, events,
+│   │         program, registrations, payments, events (à venir, lot par lot :
 │   │         sponsors, logistics, reports)
 │   ├── tests/               # tests transverses : matrice des droits, schéma, règles de plateforme
 │   ├── locale/              # traductions du backend (FR/EN)
@@ -85,7 +85,7 @@ npm run api:generate        # régénérer le client TypeScript après chaque é
 GESTCONF_E2E_PYTHON=../backend/.venv/bin/python npm run e2e   # Playwright lance Django, le portail et la gestion (ports 8000, 4200, 4201 libres) ; GESTCONF_E2E_CHROMIUM=<chemin> pour un Chromium déjà installé
 
 # Déploiement : deploy/deploy.sh puis deploy/smoke-test.sh (voir deploy/README.md)
-# Cron (deploy/cron.sh) : run_jobs (toutes les 5 min), close_call, remind_drafts, remind_reviewers et remind_presentations (horaires), cleanup et check_integrity (quotidiennes)
+# Cron (deploy/cron.sh) : run_jobs (toutes les 5 min), close_call, remind_drafts, remind_reviewers, remind_presentations, expire_registrations et sync_payments (horaires), cleanup et check_integrity (quotidiennes)
 ```
 
 Les URL Django sont déclarées **sans** le préfixe `/api` (`v1/...`) : `config/mount.py` gère le montage.
@@ -118,10 +118,11 @@ Les URL Django sont déclarées **sans** le préfixe `/api` (`v1/...`) : `config
 
 | Lot | État |
 |---|---|
-| L0 à L4 (MVP : squelette, socle, portail, soumission, évaluation et décision) | Livrés en code, testés en local et en CI (jusqu'à L5.2 par la PR #8, fusionnée) ; bilans dans `docs/`. **Aucune démo sur o2switch** encore faite |
-| L5 — Programme | **Livré en code et testé en local** (L5.0 à L5.7, E2E compris) ; bilan [`docs/L5-programme.md`](docs/L5-programme.md). L5.3 à L5.7 attendent leur passage en CI (nouvelle PR, sur demande). Ouverts : Q14, `ACCEPTED_MINOR → WITHDRAWN`, seuil d'avertissement du bundle du portail |
-| L6 — Inscriptions et paiements | **Plan proposé, en attente de validation** : [`docs/L6-inscriptions-plan.md`](docs/L6-inscriptions-plan.md) (décisions J1 à J16) ; dépend de Q7 (agrégateur, tarifs) et Q8 (entité de facturation) |
-| L7 et suivants | Non commencés |
+| L0 à L4 (MVP : squelette, socle, portail, soumission, évaluation et décision) | Livrés en code, testés en local et en CI ; bilans dans `docs/`. **Aucune démo sur o2switch** encore faite |
+| L5 — Programme | **Livré en code, testé en local et en CI** (L5.0 à L5.7, E2E compris ; PR #8 et #9, fusionnées) ; bilan [`docs/L5-programme.md`](docs/L5-programme.md). Ouverts : Q14, `ACCEPTED_MINOR → WITHDRAWN`, seuil d'avertissement du bundle du portail |
+| L6 — Inscriptions et paiements | **Livré en code et testé en local** (L6.0 à L6.7, E2E compris) ; bilan [`docs/L6-inscriptions.md`](docs/L6-inscriptions.md). Passage en CI : nouvelle PR, sur demande. Ouverts : Q7 (tarifs ; carte bancaire absente de l'API v1 de CinetPay), Q8 (entité de facturation, conservation, format du numéro), J15 reportée |
+| L7 — Jour J et attestations | **En cours** : plan [`docs/L7-jour-j-plan.md`](docs/L7-jour-j-plan.md) validé le 6 octobre 2026 (K1 à K17, plus K18 rôle signataire et K19 modèle officiel et signature électronique, issues des réponses à Q11 et Q14). Nouvelle question Q17 : prestataire de signature qualifiée |
+| L8 et suivants | Non commencés |
 
 ## Décisions du lot L1
 
@@ -179,6 +180,22 @@ Les décisions I1 à I18 du plan [`docs/L5-programme-plan.md`](docs/L5-programme
 - E2E : le parcours en série se prolonge jusqu'à la publication du programme, « Mon passage » et l'iCal ; le seed crée un CO « programme » et un Chair (2FA).
 
 Bilan du lot : [`docs/L5-programme.md`](docs/L5-programme.md).
+
+## Décisions du lot L6
+
+Les décisions J1 à J16 du plan [`docs/L6-inscriptions-plan.md`](docs/L6-inscriptions-plan.md) ont été validées le 6 octobre 2026 (J15 reportée). Elles sont reportées dans l'étude, **§22 « Mises à jour issues du lot L6 »**, qui prévaut sur les sections antérieures (§17 à §21 compris). Points à retenir :
+
+- applications `registrations` (tarifs, inscriptions) et `payments` (paiements, pièces) ; `registrations` ne dépend pas de `payments` (effets déclarés), ni `program` de `registrations` ;
+- capacités `registrations.read`, `registrations.manage` (CO « finances » et « secrétariat »), `pricing.write` (CO « finances »), `finance.read` (Chair, CO « finances ») ; réauthentification pour le paiement manuel, le remboursement, les exports et les mentions de facturation ;
+- statut d'une inscription écrit par `apps/registrations/workflow.py` seul (méta-test) ; montants en `Decimal`, exacts dans la devise de l'édition (`apps/core/money.py`), calculés par le serveur seul ;
+- **RG-15** : une notification n'est qu'un signal (jeton comparé à temps constant, empreinte seulement) ; seule l'interrogation du statut chez le prestataire confirme ; le navigateur est **dirigé** vers la page hébergée (`location.assign`), jamais par formulaire ; fournisseur factice refusé en production sauf recette déclarée ;
+- pièces (RG-14) : facture au paiement, avoir au remboursement, pro forma non comptable ; numéros `<préfixe>-<édition>-<année>-<rang>` sans trou ; ajout seul ; PDF `fpdf2` identiques pour des données identiques, empreinte vérifiée ; aucune facture sans mentions de facturation ;
+- RG-11 : conflit `registration` au planificateur quand le paramètre est actif, bloquant à la publication ;
+- espace participant **`/compte/mon-inscription`** (`/compte/inscription` reste la création de compte) ; page publique « Inscription » pré-rendue ;
+- cron : `expire_registrations` et `sync_payments`, toutes les heures ;
+- E2E : le parcours en série se prolonge jusqu'à l'inscription payée par le fournisseur factice, puis au virement, à l'annulation et à l'avoir ; le seed crée un CO « finances » et un second participant.
+
+Bilan du lot : [`docs/L6-inscriptions.md`](docs/L6-inscriptions.md).
 
 ## Questions ouvertes (étude §15, à ne pas trancher seul)
 

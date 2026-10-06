@@ -198,6 +198,16 @@ hr{border:0;border-top:1px solid var(--line);margin:2em 0}
 <li><a href="#21-7-tests-planning-et-points-ouverts">21.7 Tests, planning et points ouverts</a></li>
 </ul>
 </li>
+<li><a href="#22-mises-a-jour-issues-du-lot-l6">22. Mises à jour issues du lot L6 (version 1.6)</a><ul>
+<li><a href="#22-1-inscriptions-m9">22.1 Inscriptions (M9)</a></li>
+<li><a href="#22-2-paiements-et-facturation">22.2 Paiements et facturation</a></li>
+<li><a href="#22-3-rg-11-et-programme">22.3 RG-11 et programme</a></li>
+<li><a href="#22-4-droits-gestion-et-portail">22.4 Droits, gestion et portail</a></li>
+<li><a href="#22-5-modele-de-donnees-et-api">22.5 Modèle de données et API</a></li>
+<li><a href="#22-6-exploitation">22.6 Exploitation</a></li>
+<li><a href="#22-7-tests-planning-et-points-ouverts">22.7 Tests, planning et points ouverts</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </nav><main><h1 id="etude-fonctionnelle-et-technique">Étude fonctionnelle et technique</h1>
@@ -212,7 +222,7 @@ hr{border:0;border-top:1px solid var(--line);margin:2em 0}
 <tbody>
 <tr>
 <td><strong>Version</strong></td>
-<td>1.5 – document de cadrage, mis à jour après les lots L1 (§17), L2 (§18), L3 (§19), L4 (§20) et L5 (§21)</td>
+<td>1.6 – document de cadrage, mis à jour après les lots L1 (§17), L2 (§18), L3 (§19), L4 (§20), L5 (§21) et L6 (§22)</td>
 </tr>
 <tr>
 <td><strong>Date</strong></td>
@@ -3194,8 +3204,8 @@ def weighted_score(scores, criteria, scale_min, scale_max):
 </ul>
 <h3 id="17-5-api">17.5 API</h3>
 <ul>
-<li>401 pour une session absente ; erreurs normalisées <code>{code, message, fields}</code> avec un catalogue de codes stables (dont <code>csrf_failed</code>, <code>reauthentication_required</code>, <code>mfa_required</code>, <code>mfa_enrollment_required</code>, <code>invitation_<em></code>, <code>edition_</em></code>, <code>account_has_active_duties</code>) ; l'enveloppe d'erreur d'allauth est normalisée côté client, un 401 d'allauth étant un état du protocole.</li>
-<li>Endpoints <code>/api/v1/me/<em></code> (profil, préférences, consentements, <code>totp-qr</code>, <code>data-export</code>, <code>anonymization</code>), <code>/api/v1/invitations/</em></code> (dont <code>link-email</code>), <code>/api/v1/manage/editions/{id}/…</code> (paramétrage, membres, invitations, journal) et <code>/api/v1/public/editions/current</code>, qui intègre les dates clés publiques.</li>
+<li>401 pour une session absente ; erreurs normalisées <code>{code, message, fields}</code> avec un catalogue de codes stables (dont <code>csrf_failed</code>, <code>reauthentication_required</code>, <code>mfa_required</code>, <code>mfa_enrollment_required</code>, <code>invitation_*</code>, <code>edition_*</code>, <code>account_has_active_duties</code>) ; l'enveloppe d'erreur d'allauth est normalisée côté client, un 401 d'allauth étant un état du protocole.</li>
+<li>Endpoints <code>/api/v1/me/*</code> (profil, préférences, consentements, <code>totp-qr</code>, <code>data-export</code>, <code>anonymization</code>), <code>/api/v1/invitations/*</code> (dont <code>link-email</code>), <code>/api/v1/manage/editions/{id}/…</code> (paramétrage, membres, invitations, journal) et <code>/api/v1/public/editions/current</code>, qui intègre les dates clés publiques.</li>
 </ul>
 <h3 id="17-6-ecrans">17.6 Écrans</h3>
 <ul>
@@ -3439,6 +3449,56 @@ def weighted_score(scores, criteria, scale_min, scale_max):
 <li><strong>Avant la mise en ligne</strong> : démo F sur o2switch avec le cron <code>remind_presentations</code>, compression HTTP à vérifier, Q14 (noms des auteurs au programme public).</li>
 <li><strong>À trancher</strong> : transition <code>ACCEPTED_MINOR → WITHDRAWN</code> ; seuil d'avertissement du bundle initial du portail (367,8 kB pour 365 kB ; le framework en fait 96 %).</li>
 <li><strong>Reporté</strong> : indisponibilités, « Mon programme » du participant et notification des inscrits (après L6), PDF du programme, fiche intervenant complète (M10), minuterie du président de séance (P2) ; proposition automatique de planning et sessions hybrides (P3).</li>
+</ul>
+<h2 id="22-mises-a-jour-issues-du-lot-l6">22. Mises à jour issues du lot L6 (version 1.6)</h2>
+<p>Les décisions J1 à J16 du plan <a href="docs/L6-inscriptions-plan.md"><code>docs/L6-inscriptions-plan.md</code></a> ont été validées le 6 octobre 2026 et mises en œuvre dans le lot L6 (J15 reportée). Cette section les reporte dans l'étude ; <strong>en cas de divergence avec les sections précédentes (§17 à §21 compris), elle prévaut</strong>. Le détail (justifications, vérifications, défauts trouvés) est dans le plan, §2 et §11 à §18 ; le bilan du lot dans <a href="docs/L6-inscriptions.md"><code>docs/L6-inscriptions.md</code></a>.</p>
+<h3 id="22-1-inscriptions-m9">22.1 Inscriptions (M9)</h3>
+<ul>
+<li><strong>Tarifs</strong> (J2) : catégories par édition (libellés FR et EN, justificatif demandé ou non) ; tarif = catégorie × <strong>période</strong> × <strong>zone</strong>. Périodes déduites des dates clés : inscriptions fermées avant <code>registration_open</code>, préférentiel jusqu'à <code>early_bird_end</code>, normal jusqu'à <code>registration_close</code>, puis « sur place » (le CO seul inscrit). Zone « local » (pays listés, défaut : pays de l'édition) ou « international », d'après le pays du profil, obligatoire. <strong>Une devise par édition</strong> (XOF par défaut), décimales ISO 4217, montants en <code>Decimal</code> exacts dans la devise, sans conversion.</li>
+<li><strong>Options</strong> (J3) : prix par zone, <strong>quota</strong> réservé à la commande et rendu à l'expiration ou à l'annulation (verrou de ligne ; 409 <code>option_full</code>), catégories autorisées.</li>
+<li><strong>Codes promo et gratuités</strong> (J4) : pourcentage (arrondi une fois, au demi supérieur) ou montant plafonné, sur l'inscription seule ou avec les options, catégories visées, utilisations <strong>réservées</strong> à la commande et <strong>consommées</strong> à la confirmation, date limite <strong>à l'heure de l'édition</strong> (D13). Gratuité nominative par le CO, motif journalisé.</li>
+<li><strong>Cycle de vie</strong> (J5, <strong>écart</strong> avec §5.3 : statuts par un service unique, comme les soumissions) : <code>pending</code> → <code>confirmed</code>, <code>cancelled</code> ou <code>expired</code> ; <code>confirmed</code> → <code>cancelled</code>. Une inscription active par personne et par édition ; prix et lignes figés à la commande. Échéance : 72 h en ligne, 30 jours par virement, sans dépasser la veille de la conférence ; fin de la conférence sur place. Les e-mails mènent à « Mon inscription », sans pièce jointe.</li>
+<li><strong>Annulation</strong> (J9) : par le participant, toujours pour une commande en attente, et jusqu'à la date limite de l'édition une fois confirmée ; par le CO, avec un motif et une part remboursée fixée par lui ou par les règles. Le remboursement se fait <strong>hors plateforme</strong> ; le CO l'enregistre et l'avoir s'émet.</li>
+<li><strong>Justificatif</strong> (catégorie qui l'exige) : PDF, JPEG ou PNG, type vérifié par contenu, 5 Mo au plus, stocké hors racine web.</li>
+</ul>
+<h3 id="22-2-paiements-et-facturation">22.2 Paiements et facturation</h3>
+<ul>
+<li><strong>Paiement en ligne</strong> (J6, RG-15) : interface de fournisseur (initier, lire une notification, interroger le statut) ; fournisseur <strong>factice</strong> (tests, démonstration ; refusé en production sauf recette déclarée) ; premier fournisseur réel <strong>CinetPay, API v1</strong> (bilan de L6.0 : jeton OAuth, notification portant un jeton de transaction, sans signature HMAC). Page hébergée par le prestataire, vers laquelle le navigateur est <strong>dirigé</strong> (aucune donnée de carte, règle n° 7). Une notification n'est qu'un signal : jeton comparé à temps constant (empreinte seulement en base), puis <strong>interrogation du statut</strong>, seule décisive, avec contrôle du montant et de la devise quand le prestataire les renvoie. Notifications en ajout seul, rejeu sans effet ; reprise par tâche si le prestataire ne répond pas ; commande <code>sync_payments</code> pour les paiements restés en cours. Un paiement reçu sur une inscription expirée ou annulée est signalé au CO, sans reconfirmation.</li>
+<li><strong>Paiement manuel</strong> (J7) : virement (pro forma émise à la commande) ou sur place ; le CO enregistre le paiement reçu (montant égal au total, date, référence), avec réauthentification : l'inscription est confirmée et la facture émise. Paiement partiel : P3.</li>
+<li><strong>Pièces</strong> (J8, RG-14) : <strong>facture émise au paiement</strong>, valant reçu ; <strong>avoir</strong> à l'enregistrement d'un remboursement ; <strong>pro forma</strong> non comptable. Numéro <code>&lt;préfixe&gt;-&lt;code de l'édition&gt;-&lt;année&gt;-&lt;rang&gt;</code>, <strong>sans trou</strong> par série, édition et année (compteur verrouillé) ; pièces en ajout seul, PDF (<code>fpdf2</code>, police DejaVu Sans embarquée) identiques pour des données identiques, empreinte SHA-256 vérifiée à chaque téléchargement. <strong>Mentions de facturation</strong> par édition ; tant que la raison sociale et l'adresse manquent, aucune facture ne s'émet (émission groupée ensuite). Préfixes figés dès la première pièce de leur série.</li>
+<li><strong>QR</strong> (J11) : jeton de 192 bits à la confirmation, retiré à l'annulation ; image SVG (<code>segno</code>) servie au titulaire, jamais le jeton dans une URL ; lu au check-in en L7.</li>
+</ul>
+<h3 id="22-3-rg-11-et-programme">22.3 RG-11 et programme</h3>
+<ul>
+<li><strong>RG-11</strong> (J10) : avec le paramètre « Exiger l'inscription d'un présentateur » (L5), une communication placée dont <strong>aucun présentateur</strong> n'a d'inscription confirmée est un **conflit <code>registration</code><strong> : signalé dans le brouillon, </strong>bloquant à la publication<strong> comme RG-12 et RG-13 (</strong>écart** avec §6 : conflit, et non filtre de la liste « à programmer »). Présentateur reconnu par son compte ou une adresse vérifiée. Le planificateur affiche aussi l'état d'inscription sur chaque communication.</li>
+</ul>
+<h3 id="22-4-droits-gestion-et-portail">22.4 Droits, gestion et portail</h3>
+<ul>
+<li><strong>Capacités</strong> (J1, réponse partielle à Q12) : <code>registrations.read</code> (<code>ADMIN</code>, <code>CHAIR</code>, <code>OC_MEMBER</code>), <code>registrations.manage</code> (<code>ADMIN</code>, CO « finances » et « secrétariat »), <code>pricing.write</code> (<code>ADMIN</code>, CO « finances »), <code>finance.read</code> (<code>ADMIN</code>, <code>CHAIR</code>, CO « finances »). Le président du CS et les relecteurs n'ont aucun accès. Réauthentification récente : paiement manuel, remboursement, exports, mentions de facturation, émission groupée.</li>
+<li><strong>Gestion</strong> (J12) : rubrique « Inscriptions » (liste filtrée et export, fiche et actions, saisie pour un compte existant, « Paiements », « Factures et avoirs », « Finances »), « Paramétrage › Tarifs » et « Paramétrage › Facturation », carte « Inscriptions » du tableau de bord ; chaque écran est inscrit dans le rail et a sa fiche d'aide. Exports CSV journalisés, protégés contre l'injection de formules.</li>
+<li><strong>Portail</strong> (J13) : page publique « Inscription » <strong>pré-rendue</strong> (fin du « à venir ») : dates, grille, options (« places limitées », jamais le nombre restant), moyens de paiement ; à jour à la remise en ligne du portail. Espace **<code>/compte/mon-inscription</code><strong> (</strong>écart** d'adresse avec J13 : <code>/compte/inscription</code> est la création de compte depuis L1) : devis du serveur, commande, paiement, suivi, pro forma, justificatif, facturation, pièces, QR, annulation.</li>
+</ul>
+<h3 id="22-5-modele-de-donnees-et-api">22.5 Modèle de données et API</h3>
+<ul>
+<li>Application <code>registrations</code> : <code>registration_settings</code>, <code>registration_category</code>, <code>fee</code>, <code>registration_option</code>, <code>promo_code</code>, <code>registration</code> (lignes figées, total, devise, échéance, jeton QR, identité de facturation, justificatif), <code>registration_status_history</code> (ajout seul). Application <code>payments</code> : <code>billing_profile</code>, <code>payment</code>, <code>payment_notification</code> (ajout seul), <code>billing_document</code> (factures, avoirs, pro forma ; ajout seul), <code>refund</code>. <code>registrations</code> ne dépend pas de <code>payments</code> (effets déclarés), ni <code>program</code> de <code>registrations</code>.</li>
+<li><strong>Données personnelles</strong> (J14) : inscriptions, paiements, pièces et remboursements à l'export ; anonymisation refusée tant qu'une inscription est active dans une édition non archivée ; ensuite, identité de facturation et jeton QR effacés, <strong>factures et avoirs conservés</strong> (obligation légale, durée : Q8).</li>
+<li><strong>API</strong> : publique <code>/v1/public/registration</code> (cache de 5 minutes) ; participant <code>/v1/registrations</code> (liste, commande), <code>…/quote</code>, <code>…/{id}</code> (facturation), <code>…/cancel</code>, <code>…/proof</code>, <code>…/qr</code>, <code>…/documents/{doc}</code>, <code>…/proforma</code>, <code>…/pay</code>, <code>…/payment-check</code> ; prestataire <code>/v1/payments/webhook/{fournisseur}</code> (public, sans CSRF, limité en débit) ; gestion <code>…/manage/editions/{id}/registrations/…</code> (paramètres, catégories et grille, options, codes promo, inscriptions et actions, paiements, remboursements, pièces) et <code>…/billing/…</code> (mentions, paiements, pièces, émission groupée, tableau de bord, exports). Les échéances se saisissent à l'heure de l'édition (<code>cancellation_deadline_local</code>, <code>valid_until_local</code>, D13).</li>
+<li>Codes d'erreur ajoutés : <code>registration_closed</code>, <code>option_full</code>, <code>promo_code_exhausted</code>, <code>already_registered</code>, <code>payment_unavailable</code>.</li>
+</ul>
+<h3 id="22-6-exploitation">22.6 Exploitation</h3>
+<ul>
+<li>Cron : <code>expire_registrations</code> et <code>sync_payments</code>, toutes les heures, en plus des commandes des lots précédents ; idempotentes et verrouillées.</li>
+<li>Configuration par l'environnement (règle n° 11) : <code>GESTCONF_PAYMENT_PROVIDER</code>, <code>GESTCONF_ALLOW_FAKE_PAYMENTS</code>, <code>CINETPAY_API_KEY</code>, <code>CINETPAY_API_PASSWORD</code>, <code>CINETPAY_SANDBOX</code>, <code>CINETPAY_TIMEOUT_SECONDS</code>.</li>
+<li><code>check_integrity</code> contrôle aussi les totaux et les réservations des inscriptions, la continuité des séries de pièces et l'intégrité de leurs PDF.</li>
+<li>À vérifier sur o2switch : appels sortants vers le prestataire (V29), réception des notifications, compte marchand et bac à sable (Q7).</li>
+</ul>
+<h3 id="22-7-tests-planning-et-points-ouverts">22.7 Tests, planning et points ouverts</h3>
+<ul>
+<li>3 395 tests backend (3 404 sous MariaDB) : tarifs et remises, quotas et codes sous verrou (concurrence sur MariaDB), workflow, pièces et numérotation, PDF identiques, paiement en ligne avec le fournisseur factice (notification valide, falsifiée, rejouée, prestataire injoignable, réconciliation), client CinetPay sur HTTP simulé, RG-11, D13 ; matrice des droits (2 273 cas). 385 tests front. <strong>Parcours de bout en bout</strong> (Playwright) prolongé : RG-11 signalée, mentions de facturation, inscription payée par le fournisseur factice et confirmée par la notification vérifiée, facture et QR, virement reçu, annulation, remboursement et avoir.</li>
+<li>Charge de L6 estimée à 24 – 31 j-h (étude : 12 – 16).</li>
+<li><strong>Avant la mise en ligne</strong> : démo G sur o2switch avec le cron et une notification réelle ; compte marchand (Q7) ; mentions de facturation et durée de conservation (Q8).</li>
+<li><strong>À trancher</strong> : carte bancaire absente de l'API v1 de CinetPay (Q7) ; format du numéro de facture si une même entité facture toutes les éditions (Q8) ; Q14 ; <code>ACCEPTED_MINOR → WITHDRAWN</code> ; seuil d'avertissement du bundle initial du portail (368,6 kB pour 365 kB).</li>
+<li><strong>Reporté</strong> : « Mon programme » du participant et notification des inscrits (J15) ; inscription au comptoir sans compte et lecture des QR (L7) ; remboursement par l'API du prestataire, paiement partiel, groupes en un seul paiement (P3) ; hébergement groupé.</li>
 </ul>
 <hr />
 <p><em>Fin du document.</em></p></main></div>

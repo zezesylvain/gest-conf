@@ -25,6 +25,8 @@ const CHAIR = [
   'grids.write',
   'program.read',
   'program.publish',
+  'registrations.read',
+  'finance.read',
 ];
 /** Président qui évalue aussi (H19) et écrit le programme : tous les écrans lui sont ouverts. */
 const EVERYTHING = [...CHAIR, 'reviews.write', 'program.write'];
@@ -40,13 +42,14 @@ function items(capabilities: string[], role: Parameters<typeof buildNavigation>[
 }
 
 describe('Table de navigation de la gestion (plan L2 §2.3)', () => {
-  it('président : neuf catégories, ordre du rail numéroté', () => {
+  it('président : dix catégories, ordre du rail numéroté', () => {
     const groups = buildNavigation(3, CHAIR);
     expect(groups.map((group) => group.key)).toEqual([
       'steering',
       'submissions',
       'reviewing',
       'program',
+      'registrations',
       'settings',
       'committees',
       'portal',
@@ -148,6 +151,37 @@ describe('Table de navigation de la gestion (plan L2 §2.3)', () => {
     expect(helpForUrl('/editions/3/programme')).toBe('program-planner');
     expect(helpForUrl('/editions/3/programme/sessions')).toBe('program-sessions');
     expect(helpForUrl('/editions/3/parametrage/programme')).toBe('settings-program');
+  });
+
+  it('inscriptions (plan L6, J12) : liste avec registrations.read, finances avec finance.read', () => {
+    // CO sans fonction : inscriptions et tarifs en lecture, ni paiements ni pièces ni finances.
+    const oc = buildNavigation(
+      3,
+      ['edition.read', 'submissions.read', 'program.read', 'registrations.read'],
+      'OC_MEMBER',
+    );
+    expect(oc.find((group) => group.key === 'registrations')!.entries.map((e) => e.key)).toEqual([
+      'registrations',
+    ]);
+    const ocKeys = catalogue(oc).map((entry) => entry.key);
+    expect(ocKeys).toContain('pricing');
+    expect(ocKeys).not.toContain('billingProfile');
+    // Chair : suivi des finances.
+    const chair = buildNavigation(3, CHAIR);
+    expect(chair.find((group) => group.key === 'registrations')!.entries.map((e) => e.key)).toEqual(
+      ['registrations', 'payments', 'billingDocuments', 'finance'],
+    );
+    // Relecteur : rien.
+    const reviewer = catalogue(buildNavigation(3, ['reviews.write'])).map((entry) => entry.key);
+    expect(reviewer).not.toContain('registrations');
+    // Le détail d'une inscription relève de la fiche de la liste ; les sous-écrans, de la leur.
+    expect(helpForUrl('/editions/3/inscriptions/42')).toBe('registrations');
+    expect(activeGroup(chair, '/editions/3/inscriptions/42')).toBe('registrations');
+    expect(helpForUrl('/editions/3/inscriptions/paiements')).toBe('payments');
+    expect(helpForUrl('/editions/3/inscriptions/factures')).toBe('billing-documents');
+    expect(helpForUrl('/editions/3/inscriptions/finances')).toBe('finance-dashboard');
+    expect(helpForUrl('/editions/3/parametrage/tarifs')).toBe('settings-pricing');
+    expect(helpForUrl('/editions/3/parametrage/facturation')).toBe('settings-billing');
   });
 
   it('aucune capacité dans l’édition : rail vide (pas d’aide seule)', () => {

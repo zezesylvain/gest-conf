@@ -1,0 +1,100 @@
+:host {
+  display: block;
+}
+form {
+  display: grid;
+  gap: 0.5rem;
+  max-width: 48rem;
+}
+.card {
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 1px solid var(--gc-border);
+  border-radius: 0.5rem;
+  max-width: 48rem;
+}
+h2 {
+  margin-top: 0;
+}
+fieldset {
+  display: grid;
+  gap: 0.25rem;
+  border: 1px solid var(--gc-border);
+  border-radius: 0.25rem;
+  padding: 0.75rem;
+}
+.lines {
+  width: 100%;
+  max-width: 36rem;
+  border-collapse: collapse;
+  margin: 0.75rem 0;
+}
+.lines caption {
+  text-align: start;
+  font-weight: 600;
+  padding-bottom: 0.25rem;
+}
+.lines td,
+.lines th {
+  padding: 0.35rem 0.5rem;
+  border-bottom: 1px solid var(--gc-border);
+  text-align: start;
+}
+.amount {
+  text-align: end !important;
+  white-space: nowrap;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+.badge {
+  display: inline-block;
+  padding: 0 0.5rem;
+  border: 1px solid var(--gc-border);
+  border-radius: 1rem;
+  font-weight: 600;
+}
+.badge.ok {
+  border-color: var(--gc-primary);
+  color: var(--gc-primary);
+}
+.reference {
+  font-family: var(--gc-font-mono, monospace);
+  font-size: 0.95em;
+}
+.hint {
+  color: var(--gc-muted);
+}
+.notice {
+  border-left: 4px solid var(--gc-primary);
+  padding-left: 0.75rem;
+}
+.warning {
+  border-left: 4px solid var(--gc-warning, #b26a00);
+  padding-left: 0.75rem;
+}
+.address {
+  white-space: pre-line;
+}
+.file {
+  display: inline-grid;
+  gap: 0.25rem;
+}
+.qr {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  background: #fff;
+  border: 1px solid var(--gc-border);
+}
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

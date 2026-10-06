@@ -1,0 +1,431 @@
+<p>
+  <a [routerLink]="['/editions', editionId(), 'inscriptions']">{{
+    'gestion.registrations.detail.back' | translate
+  }}</a>
+</p>
+@if (detail(); as current) {
+  <gc-page-header [heading]="current.reference + ' — ' + current.person.name" />
+} @else {
+  <gc-page-header [heading]="'gestion.registrations.detail.title' | translate" />
+}
+<div aria-live="polite">
+  @if (status()) {
+    <p class="notice" role="status">{{ status() }}</p>
+  }
+</div>
+<gc-error-summary [messages]="errors()" />
+
+@if (loading()) {
+  <p role="status">{{ 'gestion.registrations.loading' | translate }}</p>
+} @else if (detail(); as current) {
+  <section class="card" aria-labelledby="summary-title">
+    <h2 id="summary-title">{{ 'gestion.registrations.detail.summary' | translate }}</h2>
+    <dl>
+      <dt>{{ 'gestion.registrations.fields.status' | translate }}</dt>
+      <dd>
+        <span class="badge">{{
+          'gestion.registrations.status.' + current.status | translate
+        }}</span>
+        @if (current.status === 'pending' && current.due_at) {
+          <span class="muted">
+            · {{ 'gestion.registrations.dueAt' | translate: { date: date(current.due_at) } }}</span
+          >
+        }
+      </dd>
+      <dt>{{ 'gestion.registrations.fields.person' | translate }}</dt>
+      <dd>
+        {{ current.person.name }} — {{ current.person.email }}
+        @if (current.person.country) {
+          ({{ current.person.country }})
+        }
+      </dd>
+      <dt>{{ 'gestion.registrations.fields.category' | translate }}</dt>
+      <dd>{{ category(current) }}</dd>
+      <dt>{{ 'gestion.registrations.fields.pricing' | translate }}</dt>
+      <dd>
+        {{ 'gestion.registrations.period.' + current.period | translate }} ·
+        {{ 'gestion.registrations.zone.' + current.zone | translate }}
+      </dd>
+      <dt>{{ 'gestion.registrations.fields.method' | translate }}</dt>
+      <dd>{{ 'gestion.registrations.method.' + current.method | translate }}</dd>
+      <dt>{{ 'gestion.registrations.fields.createdAt' | translate }}</dt>
+      <dd>{{ date(current.created_at) }}</dd>
+      @if (current.confirmed_at) {
+        <dt>{{ 'gestion.registrations.fields.confirmedAt' | translate }}</dt>
+        <dd>{{ date(current.confirmed_at) }}</dd>
+      }
+      @if (current.closed_at) {
+        <dt>{{ 'gestion.registrations.fields.closedAt' | translate }}</dt>
+        <dd>{{ date(current.closed_at) }}</dd>
+      }
+      @if (current.refund_due !== null) {
+        <dt>{{ 'gestion.registrations.fields.refundDue' | translate }}</dt>
+        <dd>{{ amount(current.refund_due) }}</dd>
+      }
+      <dt>{{ 'gestion.registrations.fields.qr' | translate }}</dt>
+      <dd>
+        {{ (current.has_qr ? 'gestion.settings.yes' : 'gestion.settings.no') | translate }}
+      </dd>
+    </dl>
+  </section>
+
+  <section class="card" aria-labelledby="lines-title">
+    <h2 id="lines-title">{{ 'gestion.registrations.detail.lines' | translate }}</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">{{ 'gestion.registrations.fields.line' | translate }}</th>
+            <th scope="col" class="amount">
+              {{ 'gestion.registrations.fields.amount' | translate }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (line of current.lines; track $index) {
+            <tr>
+              <td>{{ itemLabel(line) }}</td>
+              <td class="amount">{{ amount(line.amount) }}</td>
+            </tr>
+          }
+        </tbody>
+        <tfoot>
+          <tr>
+            <th scope="row">{{ 'gestion.registrations.fields.total' | translate }}</th>
+            <td class="amount">
+              <strong>{{ amount(current.total) }}</strong>
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="billing-title">
+    <h2 id="billing-title">{{ 'gestion.registrations.detail.billing' | translate }}</h2>
+    <dl>
+      <dt>{{ 'gestion.registrations.fields.billingName' | translate }}</dt>
+      <dd>{{ current.billing_name || '—' }}</dd>
+      <dt>{{ 'gestion.registrations.fields.billingOrganization' | translate }}</dt>
+      <dd>{{ current.billing_organization || '—' }}</dd>
+      <dt>{{ 'gestion.registrations.fields.billingAddress' | translate }}</dt>
+      <dd class="address">{{ current.billing_address || '—' }}</dd>
+    </dl>
+    @if (current.category.requires_proof) {
+      <h3>{{ 'gestion.registrations.detail.proof' | translate }}</h3>
+      @if (current.proof; as proof) {
+        <p>
+          <a [href]="proofHref()" download>{{ proof.name }}</a>
+          <span class="muted">
+            ·
+            {{
+              'gestion.registrations.detail.uploadedAt'
+                | translate: { date: date(proof.uploaded_at) }
+            }}</span
+          >
+        </p>
+      } @else {
+        <p class="muted">{{ 'gestion.registrations.proof.missing' | translate }}</p>
+      }
+    }
+  </section>
+
+  <section class="card" aria-labelledby="documents-title">
+    <h2 id="documents-title">{{ 'gestion.registrations.detail.documents' | translate }}</h2>
+    @if (current.documents.length) {
+      <ul>
+        @for (document of current.documents; track document.id) {
+          <li>
+            <a [href]="documentHref(document.id)" download>
+              {{ 'gestion.billingDocuments.kind.' + document.kind | translate }}
+              {{ document.number }}</a
+            >
+            · {{ amount(document.amount) }} · {{ date(document.issued_at) }}
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="muted">{{ 'gestion.registrations.detail.noDocuments' | translate }}</p>
+    }
+  </section>
+
+  <section class="card" aria-labelledby="payments-title">
+    <h2 id="payments-title">{{ 'gestion.registrations.detail.payments' | translate }}</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">{{ 'gestion.payments.fields.reference' | translate }}</th>
+            <th scope="col">{{ 'gestion.payments.fields.provider' | translate }}</th>
+            <th scope="col">{{ 'gestion.payments.fields.status' | translate }}</th>
+            <th scope="col" class="amount">{{ 'gestion.payments.fields.amount' | translate }}</th>
+            <th scope="col">{{ 'gestion.payments.fields.completedAt' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (payment of current.payments; track payment.id) {
+            <tr>
+              <td>
+                {{ payment.reference }}
+                @if (payment.provider_reference) {
+                  <br /><span class="muted">{{ payment.provider_reference }}</span>
+                }
+              </td>
+              <td>
+                {{ 'gestion.payments.provider.' + payment.provider | translate }}
+                @if (payment.recorded_by) {
+                  <br /><span class="muted">{{ payment.recorded_by }}</span>
+                }
+              </td>
+              <td>
+                <span class="badge">{{
+                  'gestion.payments.status.' + payment.status | translate
+                }}</span>
+                @if (payment.note) {
+                  <br /><span class="muted">{{ payment.note }}</span>
+                }
+              </td>
+              <td class="amount">{{ amount(payment.amount) }}</td>
+              <td>{{ payment.received_on ?? date(payment.completed_at) }}</td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="5" class="muted">
+                {{ 'gestion.registrations.detail.noPayments' | translate }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    @if (current.refunds.length) {
+      <h3>{{ 'gestion.registrations.detail.refunds' | translate }}</h3>
+      <ul>
+        @for (refund of current.refunds; track refund.id) {
+          <li>
+            {{ refund.refunded_on }} · {{ amount(refund.amount) }} · {{ refund.method }}
+            @if (refund.reference) {
+              ({{ refund.reference }})
+            }
+            @if (refund.credit_note) {
+              · {{ 'gestion.billingDocuments.kind.credit_note' | translate }}
+              {{ refund.credit_note }}
+            }
+          </li>
+        }
+      </ul>
+    }
+  </section>
+
+  @if (canManage()) {
+    <section class="card" aria-labelledby="actions-title">
+      <h2 id="actions-title">{{ 'gestion.registrations.detail.actions' | translate }}</h2>
+      @if (action() === null) {
+        <div class="actions">
+          @if (payable()) {
+            <button mat-flat-button type="button" (click)="open('payment')" [disabled]="busy()">
+              {{ 'gestion.registrations.detail.payment.action' | translate }}
+            </button>
+            <button mat-stroked-button type="button" (click)="issueProforma()" [disabled]="busy()">
+              {{ 'gestion.registrations.detail.proforma.action' | translate }}
+            </button>
+            <button mat-stroked-button type="button" (click)="open('waive')" [disabled]="busy()">
+              {{ 'gestion.registrations.detail.waive.action' | translate }}
+            </button>
+          }
+          @if (cancellable()) {
+            <button mat-stroked-button type="button" (click)="open('cancel')" [disabled]="busy()">
+              {{ 'gestion.registrations.detail.cancel.action' | translate }}
+            </button>
+          }
+          @if (refundable()) {
+            <button mat-flat-button type="button" (click)="open('refund')" [disabled]="busy()">
+              {{ 'gestion.registrations.detail.refund.action' | translate }}
+            </button>
+          }
+          @if (!payable() && !cancellable() && !refundable()) {
+            <p class="muted">{{ 'gestion.registrations.detail.noAction' | translate }}</p>
+          }
+        </div>
+      }
+
+      @switch (action()) {
+        @case ('payment') {
+          <form [formGroup]="paymentForm" (ngSubmit)="recordPayment()" novalidate>
+            <h3>{{ 'gestion.registrations.detail.payment.title' | translate }}</h3>
+            <p class="muted">{{ 'gestion.registrations.detail.payment.lead' | translate }}</p>
+            <div class="grid-2">
+              <mat-form-field appearance="outline">
+                <mat-label>{{ 'gestion.registrations.fields.method' | translate }}</mat-label>
+                <mat-select formControlName="method">
+                  <mat-option value="transfer">{{
+                    'gestion.registrations.method.transfer' | translate
+                  }}</mat-option>
+                  <mat-option value="onsite">{{
+                    'gestion.registrations.method.onsite' | translate
+                  }}</mat-option>
+                </mat-select>
+                <mat-error>{{ error(paymentForm, 'method') }}</mat-error>
+              </mat-form-field>
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>{{ 'gestion.registrations.fields.amount' | translate }}</mat-label>
+                <input matInput formControlName="amount" inputmode="decimal" required />
+                <mat-hint>{{
+                  'gestion.registrations.detail.payment.amountHint'
+                    | translate: { total: amount(current.total) }
+                }}</mat-hint>
+                <mat-error>{{ error(paymentForm, 'amount') }}</mat-error>
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>{{ 'gestion.registrations.fields.receivedOn' | translate }}</mat-label>
+                <input matInput type="date" formControlName="received_on" required />
+                <mat-error>{{ error(paymentForm, 'received_on') }}</mat-error>
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>{{
+                  'gestion.registrations.fields.paymentReference' | translate
+                }}</mat-label>
+                <input matInput formControlName="reference" maxlength="64" />
+                <mat-error>{{ error(paymentForm, 'reference') }}</mat-error>
+              </mat-form-field>
+            </div>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.registrations.fields.note' | translate }}</mat-label>
+              <input matInput formControlName="note" maxlength="255" />
+              <mat-error>{{ error(paymentForm, 'note') }}</mat-error>
+            </mat-form-field>
+            <div class="actions">
+              <button mat-flat-button type="submit" [disabled]="busy()">
+                {{ 'gestion.registrations.detail.payment.submit' | translate }}
+              </button>
+              <button mat-button type="button" (click)="close()">
+                {{ 'gestion.registrations.cancelForm' | translate }}
+              </button>
+            </div>
+          </form>
+        }
+        @case ('waive') {
+          <form [formGroup]="reasonForm" (ngSubmit)="waive()" novalidate>
+            <h3>{{ 'gestion.registrations.detail.waive.title' | translate }}</h3>
+            <p class="muted">{{ 'gestion.registrations.detail.waive.lead' | translate }}</p>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.registrations.fields.reason' | translate }}</mat-label>
+              <textarea
+                matInput
+                rows="2"
+                formControlName="reason"
+                required
+                maxlength="2000"
+              ></textarea>
+              <mat-error>{{ error(reasonForm, 'reason') }}</mat-error>
+            </mat-form-field>
+            <div class="actions">
+              <button mat-flat-button type="submit" [disabled]="busy()">
+                {{ 'gestion.registrations.detail.waive.submit' | translate }}
+              </button>
+              <button mat-button type="button" (click)="close()">
+                {{ 'gestion.registrations.cancelForm' | translate }}
+              </button>
+            </div>
+          </form>
+        }
+        @case ('cancel') {
+          <form [formGroup]="cancelForm" (ngSubmit)="cancel()" novalidate>
+            <h3>{{ 'gestion.registrations.detail.cancel.formTitle' | translate }}</h3>
+            <p class="muted">{{ 'gestion.registrations.detail.cancel.lead' | translate }}</p>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.registrations.fields.reason' | translate }}</mat-label>
+              <textarea
+                matInput
+                rows="2"
+                formControlName="reason"
+                required
+                maxlength="2000"
+              ></textarea>
+              <mat-error>{{ error(cancelForm, 'reason') }}</mat-error>
+            </mat-form-field>
+            @if (current.status === 'confirmed') {
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>{{
+                  'gestion.registrations.fields.refundPercent' | translate
+                }}</mat-label>
+                <input matInput type="number" min="0" max="100" formControlName="refund_percent" />
+                <mat-hint>{{
+                  'gestion.registrations.detail.cancel.percentHint' | translate
+                }}</mat-hint>
+                <mat-error>{{ error(cancelForm, 'refund_percent') }}</mat-error>
+              </mat-form-field>
+            }
+            <div class="actions">
+              <button mat-flat-button type="submit" [disabled]="busy()">
+                {{ 'gestion.registrations.detail.cancel.submit' | translate }}
+              </button>
+              <button mat-button type="button" (click)="close()">
+                {{ 'gestion.registrations.cancelForm' | translate }}
+              </button>
+            </div>
+          </form>
+        }
+        @case ('refund') {
+          <form [formGroup]="refundForm" (ngSubmit)="recordRefund()" novalidate>
+            <h3>{{ 'gestion.registrations.detail.refund.title' | translate }}</h3>
+            <p class="muted">{{ 'gestion.registrations.detail.refund.lead' | translate }}</p>
+            <div class="grid-2">
+              <mat-form-field appearance="outline">
+                <mat-label>{{ 'gestion.registrations.fields.amount' | translate }}</mat-label>
+                <input matInput formControlName="amount" inputmode="decimal" required />
+                <mat-error>{{ error(refundForm, 'amount') }}</mat-error>
+              </mat-form-field>
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>{{ 'gestion.registrations.fields.refundMethod' | translate }}</mat-label>
+                <input matInput formControlName="method" required maxlength="64" />
+                <mat-hint>{{
+                  'gestion.registrations.detail.refund.methodHint' | translate
+                }}</mat-hint>
+                <mat-error>{{ error(refundForm, 'method') }}</mat-error>
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>{{ 'gestion.registrations.fields.refundedOn' | translate }}</mat-label>
+                <input matInput type="date" formControlName="refunded_on" required />
+                <mat-error>{{ error(refundForm, 'refunded_on') }}</mat-error>
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>{{
+                  'gestion.registrations.fields.paymentReference' | translate
+                }}</mat-label>
+                <input matInput formControlName="reference" maxlength="64" />
+                <mat-error>{{ error(refundForm, 'reference') }}</mat-error>
+              </mat-form-field>
+            </div>
+            <div class="actions">
+              <button mat-flat-button type="submit" [disabled]="busy()">
+                {{ 'gestion.registrations.detail.refund.submit' | translate }}
+              </button>
+              <button mat-button type="button" (click)="close()">
+                {{ 'gestion.registrations.cancelForm' | translate }}
+              </button>
+            </div>
+          </form>
+        }
+      }
+    </section>
+  }
+
+  <section class="card" aria-labelledby="history-title">
+    <h2 id="history-title">{{ 'gestion.registrations.detail.history' | translate }}</h2>
+    <ol>
+      @for (row of current.history; track $index) {
+        <li>
+          {{ date(row.at) }} —
+          {{ 'gestion.registrations.status.' + row.to_status | translate }}
+          @if (row.actor) {
+            · {{ row.actor }}
+          }
+          @if (row.reason) {
+            <br /><span class="muted">{{ row.reason }}</span>
+          }
+        </li>
+      }
+    </ol>
+  </section>
+}

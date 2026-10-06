@@ -176,6 +176,48 @@
     </section>
   }
 
+  @if (registrations(); as counts) {
+    <section class="card" aria-labelledby="registrations-title">
+      <h2 id="registrations-title">{{ 'gestion.dashboard.registrations.title' | translate }}</h2>
+      <p>
+        {{
+          'gestion.dashboard.registrations.counts'
+            | translate: { confirmed: counts.confirmed, pending: counts.pending }
+        }}
+      </p>
+      @if (finance(); as board) {
+        <p>
+          {{
+            'gestion.dashboard.registrations.money'
+              | translate
+                : {
+                    collected: amount(board.collected, board.currency),
+                    outstanding: amount(board.outstanding, board.currency),
+                  }
+          }}
+        </p>
+        @if (board.pending_invoices > 0 || board.orphan_payments > 0) {
+          <p class="notice">
+            {{
+              'gestion.dashboard.registrations.todo'
+                | translate: { invoices: board.pending_invoices, orphans: board.orphan_payments }
+            }}
+          </p>
+        }
+      }
+      <p class="actions">
+        <a [routerLink]="['/editions', current.id, 'inscriptions']">{{
+          'gestion.nav.registrations' | translate
+        }}</a>
+        @if (finance()) {
+          <a [routerLink]="['/editions', current.id, 'inscriptions', 'finances']">{{
+            'gestion.nav.finance' | translate
+          }}</a>
+        }
+      </p>
+    </section>
+  }
+
   @if (pendingInvitations() !== null) {
     <section class="card" aria-labelledby="invitations-title">
       <h2 id="invitations-title">{{ 'gestion.nav.invitations' | translate }}</h2>

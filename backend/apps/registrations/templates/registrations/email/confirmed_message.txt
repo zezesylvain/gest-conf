@@ -1,0 +1,7 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate %}Bonjour,
+
+Votre inscription {{ reference }} à {{ edition_title }} est confirmée.{% endblocktranslate %}
+
+{% blocktranslate %}Votre QR code d'accès et, le cas échéant, votre facture sont dans votre espace : {{ link }}{% endblocktranslate %}
+
+{% include "account/email/_signature.txt" %}{% endautoescape %}

@@ -75,6 +75,11 @@
       "review_not_open": "L'évaluation de cette soumission n'est pas ouverte.",
       "discussion_closed": "La discussion s'ouvre une fois votre évaluation envoyée et la discussion lancée.",
       "deadline_passed": "L'échéance est passée.",
+      "registration_closed": "Les inscriptions sont fermées.",
+      "option_full": "Plus de place disponible pour cette option.",
+      "promo_code_exhausted": "Ce code promo a atteint son nombre d'utilisations.",
+      "already_registered": "Vous avez déjà une inscription à cette édition.",
+      "payment_unavailable": "Le paiement en ligne est indisponible : réessayez plus tard ou choisissez un autre moyen.",
       "program_conflicts": "Le programme contient des conflits : corrigez-les avant de publier.",
       "program_unchanged": "Aucune modification depuis la dernière publication."
     },

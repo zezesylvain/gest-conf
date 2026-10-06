@@ -41,9 +41,9 @@ def submit(submission, user=None, **kwargs):
 
 def test_table_covers_the_study_diagram():
     """Les 19 transitions de l'étude (§5.1), plus les 3 retraits (I5) et le retour à
-    « confirmée » (I6) ajoutés par le plan L5 ; celles des lots L3 à L5 sont disponibles, pas
-    les suivantes."""
-    assert len(workflow.TRANSITIONS) == 23
+    « confirmée » (I6) ajoutés par le plan L5, et la correction de « présentée » (K8) par le
+    plan L7 ; celles des lots L3 à L7 sont disponibles, pas les suivantes."""
+    assert len(workflow.TRANSITIONS) == 24
     available = {pair for pair, rule in workflow.TRANSITIONS.items() if rule.available}
     assert available == {
         (S.DRAFT, S.SUBMITTED),
@@ -69,10 +69,20 @@ def test_table_covers_the_study_diagram():
         # Plan L5 (I6) : à la publication du programme.
         (S.CONFIRMED, S.SCHEDULED),
         (S.SCHEDULED, S.CONFIRMED),
+        # Plan L7 (K8) : communication présentée, et sa correction.
+        (S.SCHEDULED, S.PRESENTED),
+        (S.PRESENTED, S.SCHEDULED),
     }
     L5_SOURCES = (S.CAMERA_READY_RECEIVED, S.CONFIRMED, S.SCHEDULED)
+    L7_PAIRS = {(S.SCHEDULED, S.PRESENTED), (S.PRESENTED, S.SCHEDULED)}
+
+    def lot(pair):
+        if pair in L7_PAIRS:
+            return "L7"
+        return "L5" if pair[0] in L5_SOURCES else "L4"
+
     assert all(
-        rule.lot == ("L5" if pair[0] in L5_SOURCES else "L4")
+        rule.lot == lot(pair)
         for pair, rule in workflow.TRANSITIONS.items()
         if rule.available
         and pair

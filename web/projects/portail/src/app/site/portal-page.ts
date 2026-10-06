@@ -20,6 +20,7 @@ import { Countdown } from './countdown';
 import { PortalData } from './portal-data';
 import { ProgramOverview } from './program/program-overview';
 import { PageContext } from './public-portal';
+import { RegistrationOverview } from './registration/registration-overview';
 import { SectionsView } from './sections';
 import { applySeo, clearSeo } from './seo';
 import {
@@ -61,6 +62,7 @@ const CALL_DATES = ['call_open', 'call_close', 'review_deadline', 'notification'
     DocumentsList,
     CommitteeList,
     ProgramOverview,
+    RegistrationOverview,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './portal-page.html',

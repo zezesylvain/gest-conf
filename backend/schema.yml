@@ -332,6 +332,486 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedAuditEntryList'
           description: ''
+  /v1/manage/editions/{edition_id}/billing/dashboard:
+    get:
+      operationId: manage_billing_dashboard
+      description: '``…/billing/dashboard`` : tableau de bord financier (``finance.read``,
+        J12).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FinanceDashboard'
+          description: ''
+  /v1/manage/editions/{edition_id}/billing/documents:
+    get:
+      operationId: manage_billing_documents_list
+      description: |-
+        ``…/billing/documents`` : factures, avoirs et pro forma de l'édition (``finance.read``),
+        les plus récentes d'abord ; filtre ``kind``.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: kind
+        schema:
+          type: string
+        description: Nature de la pièce.
+      - name: page
+        required: false
+        in: query
+        description: Un numéro de page de l'ensemble des résultats.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Nombre de résultats à retourner par page.
+        schema:
+          type: integer
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBillingDocumentList'
+          description: ''
+  /v1/manage/editions/{edition_id}/billing/documents/export:
+    get:
+      operationId: manage_billing_documents_export
+      description: |-
+        ``…/billing/documents/export`` : pièces de facturation en CSV (export comptable),
+        journalisé, réauthentification (J1).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: kind
+        schema:
+          type: string
+        description: Nature de la pièce.
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  /v1/manage/editions/{edition_id}/billing/documents/issue-pending:
+    post:
+      operationId: manage_billing_issue_pending
+      description: |-
+        ``…/billing/documents/issue-pending`` : factures des paiements reçus avant que les
+        mentions de facturation soient complètes (J8), avec réauthentification.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IssuedCount'
+          description: ''
+  /v1/manage/editions/{edition_id}/billing/payments:
+    get:
+      operationId: manage_billing_payments_list
+      description: |-
+        ``…/billing/payments`` : encaissements de l'édition (``finance.read``), les plus
+        récents d'abord ; ``…/billing/payments/export`` : CSV journalisé, réauthentification.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: method
+        schema:
+          type: string
+        description: Moyen de paiement.
+      - name: page
+        required: false
+        in: query
+        description: Un numéro de page de l'ensemble des résultats.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Nombre de résultats à retourner par page.
+        schema:
+          type: integer
+      - in: query
+        name: provider
+        schema:
+          type: string
+        description: Fournisseur (manual, fake, cinetpay).
+      - in: query
+        name: status
+        schema:
+          type: string
+        description: Statut du paiement.
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPaymentListList'
+          description: ''
+  /v1/manage/editions/{edition_id}/billing/payments/export:
+    get:
+      operationId: manage_billing_payments_export
+      description: |-
+        ``…/billing/payments`` : encaissements de l'édition (``finance.read``), les plus
+        récents d'abord ; ``…/billing/payments/export`` : CSV journalisé, réauthentification.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: method
+        schema:
+          type: string
+        description: Moyen de paiement.
+      - in: query
+        name: provider
+        schema:
+          type: string
+        description: Fournisseur (manual, fake, cinetpay).
+      - in: query
+        name: status
+        schema:
+          type: string
+        description: Statut du paiement.
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  /v1/manage/editions/{edition_id}/billing/profile:
+    get:
+      operationId: manage_billing_profile_retrieve
+      description: '``…/billing/profile`` : mentions de facturation de l''édition
+        (Q8).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BillingProfile'
+          description: ''
+    patch:
+      operationId: manage_billing_profile_update
+      description: '``…/billing/profile`` : mentions de facturation de l''édition
+        (Q8).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBillingProfileRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BillingProfile'
+          description: ''
+  /v1/manage/editions/{edition_id}/checkin:
+    get:
+      operationId: manage_checkin_list
+      description: '``…/checkin/…`` : pointage à l''accueil.'
+      parameters:
+      - in: query
+        name: cancelled
+        schema:
+          type: boolean
+        description: Inclure les pointages annulés.
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - name: ordering
+        required: false
+        in: query
+        description: Quel champ utiliser pour classer les résultats.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: Un numéro de page de l'ensemble des résultats.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Nombre de résultats à retourner par page.
+        schema:
+          type: integer
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Nom ou référence.
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCheckinListItemList'
+          description: ''
+  /v1/manage/editions/{edition_id}/checkin/{checkin_id}/cancel:
+    post:
+      operationId: manage_checkin_cancel
+      description: '``…/checkin/…`` : pointage à l''accueil.'
+      parameters:
+      - in: path
+        name: checkin_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReasonRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Checkin'
+          description: ''
+  /v1/manage/editions/{edition_id}/checkin/bundle:
+    get:
+      operationId: manage_checkin_bundle
+      description: 'Liste hors ligne (K5) : empreintes, références, noms, catégories
+        ; journalisée.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bundle'
+          description: ''
+  /v1/manage/editions/{edition_id}/checkin/export:
+    get:
+      operationId: manage_checkin_export
+      description: Présences à l'accueil en CSV (pointages non annulés), journalisé.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  /v1/manage/editions/{edition_id}/checkin/manual:
+    post:
+      operationId: manage_checkin_manual
+      description: 'Saisie de la référence (caméra en panne, badge oublié) : ``checkin.manage``.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ManualRequestRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckinResult'
+          description: ''
+  /v1/manage/editions/{edition_id}/checkin/scan:
+    post:
+      operationId: manage_checkin_scan
+      description: 'Lecture du QR d''un badge : pointé, déjà pointé, ou refus explicite
+        (K4).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScanRequestRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckinResult'
+          description: ''
+  /v1/manage/editions/{edition_id}/checkin/summary:
+    get:
+      operationId: manage_checkin_summary
+      description: '``…/checkin/…`` : pointage à l''accueil.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckinSummary'
+          description: ''
+  /v1/manage/editions/{edition_id}/checkin/sync:
+    post:
+      operationId: manage_checkin_sync
+      description: 'File hors ligne (K5) : chaque pointage est revérifié ; rejouable
+        sans doublon.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SyncRequestRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyncResponse'
+          description: ''
   /v1/manage/editions/{edition_id}/confidentiality:
     get:
       operationId: manage_confidentiality_retrieve
@@ -409,6 +889,230 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ConflictManage'
+          description: ''
+  /v1/manage/editions/{edition_id}/day/sessions:
+    get:
+      operationId: manage_day_sessions
+      description: |-
+        Sessions publiées (toutes, ou celles que préside le compte s'il n'a pas
+        ``checkin.scan``).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - name: ordering
+        required: false
+        in: query
+        description: Quel champ utiliser pour classer les résultats.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: Un numéro de page de l'ensemble des résultats.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Nombre de résultats à retourner par page.
+        schema:
+          type: integer
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedDaySessionList'
+          description: ''
+  /v1/manage/editions/{edition_id}/day/sessions/{session_id}/attendance:
+    get:
+      operationId: manage_day_attendance
+      description: Présents pointés à l'entrée de la session (K7).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - name: ordering
+        required: false
+        in: query
+        description: Quel champ utiliser pour classer les résultats.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: Un numéro de page de l'ensemble des résultats.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Nombre de résultats à retourner par page.
+        schema:
+          type: integer
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Nom ou référence.
+      - in: path
+        name: session_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCheckinListItemList'
+          description: ''
+  /v1/manage/editions/{edition_id}/day/sessions/{session_id}/attendance/export:
+    get:
+      operationId: manage_day_attendance_export
+      description: |-
+        ``…/day/sessions/…`` : sessions du programme publié, émargement, « présentée ».
+
+        Capacité de l'action, **ou** présidence de la session au programme publié pour les
+        actions de ``chair_actions`` (``CapabilityOrSessionChair``).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: session_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  /v1/manage/editions/{edition_id}/day/sessions/{session_id}/attendance/scan:
+    post:
+      operationId: manage_day_attendance_scan
+      description: 'Badge lu à l''entrée de la session : vaut présence, même sans
+        pointage d''accueil.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: session_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SessionScanRequestRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckinResult'
+          description: ''
+  /v1/manage/editions/{edition_id}/day/sessions/{session_id}/slots/{slot_id}/presented:
+    post:
+      operationId: manage_day_presented
+      description: 'Communication présentée (K8) : ``SCHEDULED → PRESENTED`` par le
+        workflow.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: session_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: slot_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DaySession'
+          description: ''
+  /v1/manage/editions/{edition_id}/day/sessions/{session_id}/slots/{slot_id}/unpresented:
+    post:
+      operationId: manage_day_unpresented
+      description: 'Correction (``PRESENTED → SCHEDULED``) : ``program.write``, motif
+        obligatoire.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: session_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: slot_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReasonRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DaySession'
           description: ''
   /v1/manage/editions/{edition_id}/decisions/batch:
     post:
@@ -643,7 +1347,9 @@ paths:
           - SC_CHAIR
           - SC_MEMBER
           - SESSION_CHAIR
+          - SIGNATORY
           - SPEAKER
+          - VOLUNTEER
         description: |-
           * `ADMIN` - administrateur de l'édition
           * `CHAIR` - président de la conférence
@@ -652,6 +1358,8 @@ paths:
           * `SC_MEMBER` - membre du comité scientifique
           * `SPEAKER` - intervenant
           * `SESSION_CHAIR` - président de session
+          * `VOLUNTEER` - bénévole
+          * `SIGNATORY` - signataire
       - in: query
         name: status
         schema:
@@ -2257,6 +2965,890 @@ paths:
               schema:
                 $ref: '#/components/schemas/Ranking'
           description: ''
+  /v1/manage/editions/{edition_id}/registrations:
+    get:
+      operationId: manage_registrations_list
+      description: |-
+        ``…/registrations`` : liste filtrable et paginée ; saisie par le CO pour un compte
+        existant (après la clôture : tarif « sur place »).
+      parameters:
+      - in: query
+        name: category
+        schema:
+          type: string
+        description: Code de catégorie.
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: method
+        schema:
+          type: string
+        description: Moyen de paiement.
+      - name: page
+        required: false
+        in: query
+        description: Un numéro de page de l'ensemble des résultats.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Nombre de résultats à retourner par page.
+        schema:
+          type: integer
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Nom, adresse ou référence.
+      - in: query
+        name: status
+        schema:
+          type: string
+        description: Statut (en attente, confirmée…).
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedManageRegistrationListList'
+          description: ''
+    post:
+      operationId: manage_registrations_create
+      description: |-
+        ``…/registrations`` : liste filtrable et paginée ; saisie par le CO pour un compte
+        existant (après la clôture : tarif « sur place »).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ManageOrderRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManageRegistration'
+          description: ''
+  /v1/manage/editions/{edition_id}/registrations/{item_id}:
+    get:
+      operationId: manage_registrations_retrieve
+      description: '``…/registrations/{id}`` : détail ; ``…/cancel``, ``…/waive``
+        : actions du CO.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManageRegistration'
+          description: ''
+  /v1/manage/editions/{edition_id}/registrations/{item_id}/cancel:
+    post:
+      operationId: manage_registrations_cancel
+      description: '``…/registrations/{id}`` : détail ; ``…/cancel``, ``…/waive``
+        : actions du CO.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancelRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManageRegistration'
+          description: ''
+  /v1/manage/editions/{edition_id}/registrations/{item_id}/documents/{document_id}:
+    get:
+      operationId: manage_registrations_document
+      description: '``…/registrations/{id}/documents/{doc}`` : PDF d''une pièce de
+        l''inscription.'
+      parameters:
+      - in: path
+        name: document_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  /v1/manage/editions/{edition_id}/registrations/{item_id}/payments:
+    post:
+      operationId: manage_registrations_payment
+      description: |-
+        ``…/registrations/{id}/payments`` : paiement reçu hors ligne, validé par le CO avec
+        réauthentification (J1, J7) ; confirme l'inscription et émet la facture.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ManualPaymentRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManageRegistration'
+          description: ''
+  /v1/manage/editions/{edition_id}/registrations/{item_id}/proforma:
+    post:
+      operationId: manage_registrations_proforma
+      description: '``…/registrations/{id}/proforma`` : nouvelle pro forma (bon de
+        commande, J7).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManageRegistration'
+          description: ''
+  /v1/manage/editions/{edition_id}/registrations/{item_id}/proof:
+    get:
+      operationId: manage_registrations_proof
+      description: 'Justificatif déposé (règle n° 8 : endpoint authentifié, type vérifié
+        au dépôt).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  /v1/manage/editions/{edition_id}/registrations/{item_id}/refunds:
+    post:
+      operationId: manage_registrations_refund
+      description: |-
+        ``…/registrations/{id}/refunds`` : remboursement fait hors plateforme, avoir émis
+        (J9), avec réauthentification (J1).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefundRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManageRegistration'
+          description: ''
+  /v1/manage/editions/{edition_id}/registrations/{item_id}/waive:
+    post:
+      operationId: manage_registrations_waive
+      description: '``…/registrations/{id}`` : détail ; ``…/cancel``, ``…/waive``
+        : actions du CO.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WaiverRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManageRegistration'
+          description: ''
+  /v1/manage/editions/{edition_id}/registrations/{registration_id}/badge:
+    get:
+      operationId: manage_badge_single
+      description: |-
+        ``…/registrations/badges`` (lots), ``…/registrations/{id}/badge`` (un badge) et
+        ``…/registrations/{id}/regenerate-token`` (badge perdu).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: registration_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  /v1/manage/editions/{edition_id}/registrations/{registration_id}/regenerate-token:
+    post:
+      operationId: manage_badge_regenerate
+      description: 'Badge perdu : nouveau jeton, l''ancien badge est refusé (« badge
+        remplacé »).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: registration_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReasonRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /v1/manage/editions/{edition_id}/registrations/badges:
+    get:
+      operationId: manage_badges_sheets
+      description: |-
+        ``…/registrations/badges`` (lots), ``…/registrations/{id}/badge`` (un badge) et
+        ``…/registrations/{id}/regenerate-token`` (badge perdu).
+      parameters:
+      - in: query
+        name: batch
+        schema:
+          type: integer
+        description: Lot de 200 badges, à partir de 1.
+      - in: query
+        name: category
+        schema:
+          type: string
+        description: Code de catégorie.
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  /v1/manage/editions/{edition_id}/registrations/badges/batches:
+    get:
+      operationId: manage_badges_batches
+      description: |-
+        ``…/registrations/badges`` (lots), ``…/registrations/{id}/badge`` (un badge) et
+        ``…/registrations/{id}/regenerate-token`` (badge perdu).
+      parameters:
+      - in: query
+        name: category
+        schema:
+          type: string
+        description: Code de catégorie.
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadgeBatches'
+          description: ''
+  /v1/manage/editions/{edition_id}/registrations/categories:
+    get:
+      operationId: manage_registration_categories_list
+      description: '``…/registrations/categories`` : catégories et grilles de tarifs
+        (J2).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+          description: ''
+    post:
+      operationId: manage_registration_categories_create
+      description: '``…/registrations/categories`` : catégories et grilles de tarifs
+        (J2).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+          description: ''
+  /v1/manage/editions/{edition_id}/registrations/categories/{item_id}:
+    patch:
+      operationId: manage_registration_categories_update
+      description: '``…/registrations/categories`` : catégories et grilles de tarifs
+        (J2).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCategoryRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+          description: ''
+    delete:
+      operationId: manage_registration_categories_delete
+      description: '``…/registrations/categories`` : catégories et grilles de tarifs
+        (J2).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /v1/manage/editions/{edition_id}/registrations/categories/{item_id}/fees:
+    put:
+      operationId: manage_registration_categories_fees
+      description: '``…/registrations/categories`` : catégories et grilles de tarifs
+        (J2).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FeeGridRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+          description: ''
+  /v1/manage/editions/{edition_id}/registrations/export:
+    get:
+      operationId: manage_registrations_export
+      description: |-
+        Export CSV des inscriptions filtrées (mêmes filtres que la liste), journalisé,
+        avec réauthentification (données personnelles en masse).
+      parameters:
+      - in: query
+        name: category
+        schema:
+          type: string
+        description: Code de catégorie.
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: method
+        schema:
+          type: string
+        description: Moyen de paiement.
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Nom, adresse ou référence.
+      - in: query
+        name: status
+        schema:
+          type: string
+        description: Statut (en attente, confirmée…).
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  /v1/manage/editions/{edition_id}/registrations/options:
+    get:
+      operationId: manage_registration_options_list
+      description: '``…/registrations/options`` : options à quota (J3).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Option'
+          description: ''
+    post:
+      operationId: manage_registration_options_create
+      description: '``…/registrations/options`` : options à quota (J3).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OptionRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Option'
+          description: ''
+  /v1/manage/editions/{edition_id}/registrations/options/{item_id}:
+    patch:
+      operationId: manage_registration_options_update
+      description: '``…/registrations/options`` : options à quota (J3).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedOptionRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Option'
+          description: ''
+    delete:
+      operationId: manage_registration_options_delete
+      description: '``…/registrations/options`` : options à quota (J3).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /v1/manage/editions/{edition_id}/registrations/promo-codes:
+    get:
+      operationId: manage_registration_promo_codes_list
+      description: '``…/registrations/promo-codes`` : codes promo (J4).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PromoCode'
+          description: ''
+    post:
+      operationId: manage_registration_promo_codes_create
+      description: '``…/registrations/promo-codes`` : codes promo (J4).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PromoCodeRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PromoCode'
+          description: ''
+  /v1/manage/editions/{edition_id}/registrations/promo-codes/{item_id}:
+    patch:
+      operationId: manage_registration_promo_codes_update
+      description: '``…/registrations/promo-codes`` : codes promo (J4).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPromoCodeRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PromoCode'
+          description: ''
+    delete:
+      operationId: manage_registration_promo_codes_delete
+      description: '``…/registrations/promo-codes`` : codes promo (J4).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /v1/manage/editions/{edition_id}/registrations/settings:
+    get:
+      operationId: manage_registration_settings_retrieve
+      description: '``…/registrations/settings`` : devise, pays locaux, moyens et
+        échéances, annulation.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistrationSettings'
+          description: ''
+    patch:
+      operationId: manage_registration_settings_update
+      description: '``…/registrations/settings`` : devise, pays locaux, moyens et
+        échéances, annulation.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedRegistrationSettingsRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistrationSettings'
+          description: ''
   /v1/manage/editions/{edition_id}/review-progress:
     get:
       operationId: manage_review_progress
@@ -3019,6 +4611,102 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MemberWithEmail'
+          description: ''
+  /v1/manage/editions/{edition_id}/signature:
+    get:
+      operationId: manage_signature_retrieve
+      description: '``…/signature`` : nom affiché et fonction (FR, EN).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Signature'
+          description: ''
+    patch:
+      operationId: manage_signature_update
+      description: '``…/signature`` : nom affiché et fonction (FR, EN).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSignatureRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Signature'
+          description: ''
+  /v1/manage/editions/{edition_id}/signature/image:
+    get:
+      operationId: manage_signature_image
+      description: 'Image déposée, pour l''aperçu du signataire (règle n° 8 : endpoint
+        authentifié).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+          description: ''
+    put:
+      operationId: manage_signature_image_upload
+      description: '``…/signature/image`` : dépôt (PNG ou JPEG, réencodé en PNG) et
+        aperçu.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SignatureImageUploadRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Signature'
           description: ''
   /v1/manage/editions/{edition_id}/status:
     post:
@@ -3878,6 +5566,45 @@ paths:
               schema:
                 $ref: '#/components/schemas/TotpQr'
           description: ''
+  /v1/payments/webhook/{provider}:
+    get:
+      operationId: payments_webhook_ping
+      description: |-
+        ``POST /v1/payments/webhook/{provider}`` : notification du fournisseur (J6).
+
+        Publique, sans session donc sans CSRF, limitée en débit. Le jeton de la notification est
+        vérifié, puis le statut **interrogé** : rien n'est cru du corps reçu (RG-15). Réponse
+        rapide et sans détail ; ``GET`` répond 200 (contrôle de l'adresse par l'agrégateur).
+      parameters:
+      - in: path
+        name: provider
+        schema:
+          type: string
+        required: true
+      tags:
+      - payments
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: payments_webhook
+      description: |-
+        ``POST /v1/payments/webhook/{provider}`` : notification du fournisseur (J6).
+
+        Publique, sans session donc sans CSRF, limitée en débit. Le jeton de la notification est
+        vérifié, puis le statut **interrogé** : rien n'est cru du corps reçu (RG-15). Réponse
+        rapide et sans détail ; ``GET`` répond 200 (contrôle de l'adresse par l'agrégateur).
+      parameters:
+      - in: path
+        name: provider
+        schema:
+          type: string
+        required: true
+      tags:
+      - payments
+      responses:
+        '200':
+          description: No response body
   /v1/public/editions/current:
     get:
       operationId: public_current_edition
@@ -4051,6 +5778,334 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PublicSession'
+          description: ''
+  /v1/public/registration:
+    get:
+      operationId: public_registration
+      description: |-
+        ``GET /v1/public/registration`` : catégories, tarifs, options, dates et moyens de
+        paiement de l'édition courante (J13), lus au build du portail ; 404 sans édition
+        publiée.
+      tags:
+      - public
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicRegistration'
+          description: ''
+  /v1/registrations:
+    get:
+      operationId: registrations_list
+      description: |-
+        ``GET /v1/registrations`` : inscriptions du compte, la plus récente d'abord ;
+        ``POST`` : commande pour l'édition courante (J5).
+      tags:
+      - registrations
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MyRegistration'
+          description: ''
+    post:
+      operationId: registrations_order
+      description: |-
+        ``GET /v1/registrations`` : inscriptions du compte, la plus récente d'abord ;
+        ``POST`` : commande pour l'édition courante (J5).
+      tags:
+      - registrations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyRegistration'
+          description: ''
+  /v1/registrations/{registration_id}:
+    get:
+      operationId: registrations_retrieve
+      description: |-
+        ``GET /v1/registrations/{id}`` ; ``PATCH`` : identité de facturation (jusqu'à la
+        facture).
+      parameters:
+      - in: path
+        name: registration_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - registrations
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyRegistration'
+          description: ''
+    patch:
+      operationId: registrations_billing
+      description: |-
+        ``GET /v1/registrations/{id}`` ; ``PATCH`` : identité de facturation (jusqu'à la
+        facture).
+      parameters:
+      - in: path
+        name: registration_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - registrations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBillingIdentityRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyRegistration'
+          description: ''
+  /v1/registrations/{registration_id}/badge:
+    get:
+      operationId: registrations_badge
+      description: |-
+        ``GET /v1/registrations/{id}/badge`` : le badge du participant (A6), dès la
+        confirmation ; 404 sinon.
+      parameters:
+      - in: path
+        name: registration_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - registrations
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  /v1/registrations/{registration_id}/cancel:
+    post:
+      operationId: registrations_cancel
+      description: '``POST /v1/registrations/{id}/cancel`` : annulation par le titulaire
+        (J9).'
+      parameters:
+      - in: path
+        name: registration_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - registrations
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyRegistration'
+          description: ''
+  /v1/registrations/{registration_id}/documents/{document_id}:
+    get:
+      operationId: registrations_document
+      description: '``GET /v1/registrations/{id}/documents/{doc}`` : PDF d''une pièce,
+        au titulaire seul.'
+      parameters:
+      - in: path
+        name: document_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: registration_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - registrations
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  /v1/registrations/{registration_id}/pay:
+    post:
+      operationId: registrations_pay
+      description: |-
+        ``POST /v1/registrations/{id}/pay`` : nouvelle tentative de paiement en ligne ;
+        le navigateur est ensuite **dirigé** vers la page hébergée du fournisseur (jamais un
+        formulaire : la CSP du portail l'interdirait, bilan de L6.0).
+      parameters:
+      - in: path
+        name: registration_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - registrations
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentStart'
+          description: ''
+  /v1/registrations/{registration_id}/payment-check:
+    post:
+      operationId: registrations_payment_check
+      description: |-
+        ``POST /v1/registrations/{id}/payment-check`` : au retour de la page de paiement,
+        interroge le fournisseur sur la dernière tentative (le retour lui-même ne prouve rien,
+        RG-15).
+      parameters:
+      - in: path
+        name: registration_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - registrations
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentCheck'
+          description: ''
+  /v1/registrations/{registration_id}/proforma:
+    post:
+      operationId: registrations_proforma
+      description: |-
+        ``POST /v1/registrations/{id}/proforma`` : nouvelle pro forma (après un changement
+        d'identité de facturation, par exemple), inscription en attente seulement.
+      parameters:
+      - in: path
+        name: registration_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - registrations
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentRef'
+          description: ''
+  /v1/registrations/{registration_id}/proof:
+    post:
+      operationId: registrations_proof
+      description: '``POST /v1/registrations/{id}/proof`` : justificatif (catégorie
+        qui l''exige, J2).'
+      parameters:
+      - in: path
+        name: registration_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - registrations
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProofUploadRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyRegistration'
+          description: ''
+  /v1/registrations/{registration_id}/qr:
+    get:
+      operationId: registrations_qr
+      description: |-
+        ``GET /v1/registrations/{id}/qr`` : QR d'accès (J11), SVG produit par ``segno`` ;
+        inscription confirmée seulement. Le jeton n'est jamais dans une URL.
+      parameters:
+      - in: path
+        name: registration_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - registrations
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            image/svg+xml:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  /v1/registrations/quote:
+    post:
+      operationId: registration_quote
+      description: |-
+        ``POST /v1/registrations/quote`` : prix d'une inscription à l'édition courante,
+        calculé par le serveur sans engagement (J2 à J4). Zone d'après le pays du profil,
+        obligatoire (409 ``profile_incomplete``).
+      tags:
+      - registrations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuoteRequestRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quote'
           description: ''
   /v1/submissions:
     get:
@@ -4866,9 +6921,203 @@ components:
             $ref: '#/components/schemas/AuthorWriteRequest'
       required:
       - authors
+    BadgeBatches:
+      type: object
+      properties:
+        count:
+          type: integer
+        batch_size:
+          type: integer
+        batches:
+          type: integer
+      required:
+      - batch_size
+      - batches
+      - count
+    BillingDocument:
+      type: object
+      description: Pièce de facturation (gestion, ``finance.read``).
+      properties:
+        id:
+          type: integer
+        kind:
+          $ref: '#/components/schemas/DocumentKind'
+        number:
+          type: string
+        registration_id:
+          type: integer
+        registration_reference:
+          type: string
+        customer:
+          type: string
+        original:
+          type: string
+          nullable: true
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        currency:
+          $ref: '#/components/schemas/Currency'
+        issued_at:
+          type: string
+          format: date-time
+      required:
+      - amount
+      - currency
+      - customer
+      - id
+      - issued_at
+      - kind
+      - number
+      - original
+      - registration_id
+      - registration_reference
+    BillingProfile:
+      type: object
+      description: |-
+        Mentions de facturation (J8, Q8) : lecture ``finance.read``, écriture
+        ``pricing.write`` avec réauthentification récente (J1). ``is_complete`` : raison sociale
+        et adresse renseignées, sans quoi aucune facture ne s'émet.
+      properties:
+        legal_name:
+          type: string
+          title: Raison sociale
+          maxLength: 255
+        address:
+          type: string
+          title: Adresse
+        tax_identifiers:
+          type: string
+          title: Identifiants (registre, fiscal)
+        vat_rate:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+          title: Taux de TVA (%)
+        vat_note:
+          type: string
+          title: Mention de TVA
+          maxLength: 255
+        footer:
+          type: string
+          title: Pied de page
+        bank_details:
+          type: string
+          title: Coordonnées bancaires
+        invoice_prefix:
+          type: string
+          title: Préfixe des factures
+          maxLength: 8
+        credit_note_prefix:
+          type: string
+          title: Préfixe des avoirs
+          maxLength: 8
+        proforma_prefix:
+          type: string
+          title: Préfixe des pro forma
+          maxLength: 8
+        is_complete:
+          type: boolean
+          readOnly: true
+      required:
+      - is_complete
     BlankEnum:
       enum:
       - ''
+    Bundle:
+      type: object
+      description: 'Liste de pointage hors ligne (K5) : minimale, sans jeton, à effacer
+        après 48 h.'
+      properties:
+        edition_id:
+          type: integer
+        generated_at:
+          type: string
+          format: date-time
+        expires_at:
+          type: string
+          format: date-time
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/BundleCategory'
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/BundleEntry'
+        retired:
+          type: array
+          items:
+            $ref: '#/components/schemas/BundleRetired'
+      required:
+      - categories
+      - edition_id
+      - entries
+      - expires_at
+      - generated_at
+      - retired
+    BundleCategory:
+      type: object
+      properties:
+        code:
+          type: string
+        label_fr:
+          type: string
+        label_en:
+          type: string
+      required:
+      - code
+      - label_en
+      - label_fr
+    BundleEntry:
+      type: object
+      properties:
+        token_hash:
+          type: string
+          description: SHA-256 (hexadécimal) du texte du QR.
+        reference:
+          type: string
+        name:
+          type: string
+        category:
+          type: string
+        checked_in:
+          type: boolean
+      required:
+      - category
+      - checked_in
+      - name
+      - reference
+      - token_hash
+    BundleRetired:
+      type: object
+      properties:
+        token_hash:
+          type: string
+        reference:
+          type: string
+        reason:
+          $ref: '#/components/schemas/RetiredTokenReason'
+      required:
+      - reason
+      - reference
+      - token_hash
+    CancelRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        refund_percent:
+          type: integer
+          maximum: 100
+          minimum: 0
+          nullable: true
+      required:
+      - reason
     Candidate:
       type: object
       description: Relecteur proposé pour une soumission (H6, H7, H8).
@@ -4959,6 +7208,15 @@ components:
       - program.read
       - program.write
       - program.publish
+      - registrations.read
+      - registrations.manage
+      - pricing.write
+      - finance.read
+      - checkin.scan
+      - checkin.manage
+      - certificates.manage
+      - letters.manage
+      - signature.manage
       type: string
       description: |-
         * `edition.read` - edition.read
@@ -4981,6 +7239,323 @@ components:
         * `program.read` - program.read
         * `program.write` - program.write
         * `program.publish` - program.publish
+        * `registrations.read` - registrations.read
+        * `registrations.manage` - registrations.manage
+        * `pricing.write` - pricing.write
+        * `finance.read` - finance.read
+        * `checkin.scan` - checkin.scan
+        * `checkin.manage` - checkin.manage
+        * `certificates.manage` - certificates.manage
+        * `letters.manage` - letters.manage
+        * `signature.manage` - signature.manage
+    Category:
+      type: object
+      description: 'Catégorie et sa grille de tarifs (gestion). ``code`` : fixé à
+        la création.'
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        code:
+          type: string
+          maxLength: 32
+          pattern: ^[-a-zA-Z0-9_]+$
+        label_fr:
+          type: string
+          title: Libellé (FR)
+          maxLength: 150
+        label_en:
+          type: string
+          title: Libellé (EN)
+          maxLength: 150
+        description_fr:
+          type: string
+          title: Description (FR)
+        description_en:
+          type: string
+          title: Description (EN)
+        requires_proof:
+          type: boolean
+          title: Justificatif demandé
+        is_active:
+          type: boolean
+          title: Actif
+        position:
+          type: integer
+          maximum: 65535
+          minimum: 0
+          title: Ordre
+        badge_color:
+          title: Couleur du badge
+          oneOf:
+          - type: string
+            pattern: ^#[0-9A-Fa-f]{6}$
+            maxLength: 7
+          - type: string
+            maxLength: 0
+        fees:
+          type: array
+          items:
+            $ref: '#/components/schemas/Fee'
+          readOnly: true
+        in_use:
+          type: boolean
+          readOnly: true
+      required:
+      - code
+      - fees
+      - id
+      - in_use
+      - label_fr
+    CategoryRef:
+      type: object
+      properties:
+        code:
+          type: string
+        label_fr:
+          type: string
+        label_en:
+          type: string
+        requires_proof:
+          type: boolean
+      required:
+      - code
+      - label_en
+      - label_fr
+      - requires_proof
+    CategoryRequest:
+      type: object
+      description: 'Catégorie et sa grille de tarifs (gestion). ``code`` : fixé à
+        la création.'
+      properties:
+        code:
+          type: string
+          minLength: 1
+          maxLength: 32
+          pattern: ^[-a-zA-Z0-9_]+$
+        label_fr:
+          type: string
+          minLength: 1
+          title: Libellé (FR)
+          maxLength: 150
+        label_en:
+          type: string
+          title: Libellé (EN)
+          maxLength: 150
+        description_fr:
+          type: string
+          title: Description (FR)
+        description_en:
+          type: string
+          title: Description (EN)
+        requires_proof:
+          type: boolean
+          title: Justificatif demandé
+        is_active:
+          type: boolean
+          title: Actif
+        position:
+          type: integer
+          maximum: 65535
+          minimum: 0
+          title: Ordre
+        badge_color:
+          title: Couleur du badge
+          oneOf:
+          - type: string
+            pattern: ^#[0-9A-Fa-f]{6}$
+            maxLength: 7
+          - type: string
+            maxLength: 0
+      required:
+      - code
+      - label_fr
+    CategoryTotal:
+      type: object
+      properties:
+        code:
+          type: string
+        label_fr:
+          type: string
+        label_en:
+          type: string
+        confirmed:
+          type: integer
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+      required:
+      - amount
+      - code
+      - confirmed
+      - label_en
+      - label_fr
+    Checkin:
+      type: object
+      properties:
+        id:
+          type: integer
+        scanned_at:
+          type: string
+          format: date-time
+        received_at:
+          type: string
+          format: date-time
+        method:
+          $ref: '#/components/schemas/CheckinMethod'
+        recorded_by:
+          type: string
+        device:
+          type: string
+        cancelled_at:
+          type: string
+          format: date-time
+          nullable: true
+        cancelled_by:
+          type: string
+        cancel_reason:
+          type: string
+      required:
+      - cancel_reason
+      - cancelled_at
+      - cancelled_by
+      - device
+      - id
+      - method
+      - received_at
+      - recorded_by
+      - scanned_at
+    CheckinListItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        scanned_at:
+          type: string
+          format: date-time
+        received_at:
+          type: string
+          format: date-time
+        method:
+          $ref: '#/components/schemas/CheckinMethod'
+        recorded_by:
+          type: string
+        device:
+          type: string
+        cancelled_at:
+          type: string
+          format: date-time
+          nullable: true
+        cancelled_by:
+          type: string
+        cancel_reason:
+          type: string
+        registration:
+          $ref: '#/components/schemas/CheckinPerson'
+      required:
+      - cancel_reason
+      - cancelled_at
+      - cancelled_by
+      - device
+      - id
+      - method
+      - received_at
+      - recorded_by
+      - registration
+      - scanned_at
+    CheckinMethod:
+      enum:
+      - scan
+      - manual
+      type: string
+      description: |-
+        * `scan` - lecture du QR
+        * `manual` - saisie manuelle
+    CheckinOutcome:
+      enum:
+      - checked_in
+      - already_checked_in
+      - unknown
+      - other_edition
+      - cancelled
+      - expired
+      - replaced
+      - pending_payment
+      - not_allowed
+      - unknown_session
+      type: string
+      description: |-
+        * `checked_in` - pointé
+        * `already_checked_in` - déjà pointé
+        * `unknown` - badge inconnu
+        * `other_edition` - badge d'une autre édition
+        * `cancelled` - inscription annulée
+        * `expired` - inscription expirée
+        * `replaced` - badge remplacé
+        * `pending_payment` - en attente de paiement
+        * `not_allowed` - saisie manuelle non permise
+        * `unknown_session` - session absente du programme publié
+    CheckinPerson:
+      type: object
+      description: 'Personne pointée : référence, nom, catégorie, statut ; ni adresse
+        ni institution.'
+      properties:
+        id:
+          type: integer
+        reference:
+          type: string
+        name:
+          type: string
+        category:
+          type: string
+        category_label_fr:
+          type: string
+        category_label_en:
+          type: string
+        status:
+          $ref: '#/components/schemas/RegistrationStatus'
+      required:
+      - category
+      - category_label_en
+      - category_label_fr
+      - id
+      - name
+      - reference
+      - status
+    CheckinResult:
+      type: object
+      properties:
+        outcome:
+          $ref: '#/components/schemas/CheckinOutcome'
+        idempotency_key:
+          type: string
+        registration:
+          allOf:
+          - $ref: '#/components/schemas/CheckinPerson'
+          nullable: true
+        checkin:
+          allOf:
+          - $ref: '#/components/schemas/Checkin'
+          nullable: true
+      required:
+      - checkin
+      - idempotency_key
+      - outcome
+      - registration
+    CheckinSummary:
+      type: object
+      properties:
+        confirmed:
+          type: integer
+        checked_in:
+          type: integer
+        pending:
+          type: integer
+      required:
+      - checked_in
+      - confirmed
+      - pending
     Confidentiality:
       type: object
       description: Paramètres de l'évaluation (gestion, §6.1 ; plan L4 H4, H6, H12).
@@ -5285,6 +7860,120 @@ components:
       - code
       - label_fr
       - weight
+    Currency:
+      enum:
+      - XOF
+      - XAF
+      - EUR
+      - USD
+      - GNF
+      - CDF
+      type: string
+      description: |-
+        * `XOF` - franc CFA (UEMOA)
+        * `XAF` - franc CFA (CEMAC)
+        * `EUR` - euro
+        * `USD` - dollar des États-Unis
+        * `GNF` - franc guinéen
+        * `CDF` - franc congolais
+    DaySession:
+      type: object
+      description: Session du programme publié, pour l'émargement (K7) et « présentée
+        » (K8).
+      properties:
+        id:
+          type: integer
+        title_fr:
+          type: string
+        title_en:
+          type: string
+        starts_at:
+          type: string
+          format: date-time
+        ends_at:
+          type: string
+          format: date-time
+        room:
+          type: string
+        chairs:
+          type: array
+          items:
+            type: string
+        chaired:
+          type: boolean
+          description: Le compte connecté préside la session.
+        attendance:
+          type: integer
+          description: Présents pointés à l'entrée.
+        slots:
+          type: array
+          items:
+            $ref: '#/components/schemas/DaySlot'
+      required:
+      - attendance
+      - chaired
+      - chairs
+      - ends_at
+      - id
+      - room
+      - slots
+      - starts_at
+      - title_en
+      - title_fr
+    DaySlot:
+      type: object
+      properties:
+        id:
+          type: integer
+        starts_at:
+          type: string
+          format: date-time
+        ends_at:
+          type: string
+          format: date-time
+        title:
+          type: string
+        reference:
+          type: string
+        submission_id:
+          type: integer
+          nullable: true
+        presenters:
+          type: array
+          items:
+            type: string
+        status:
+          description: |-
+            Statut courant de la communication (vide : élément libre).
+
+            * `draft` - brouillon
+            * `submitted` - soumise
+            * `screening` - vérification de recevabilité
+            * `under_review` - en cours d'évaluation
+            * `reviewed` - évaluée
+            * `accepted` - acceptée
+            * `accepted_minor` - acceptée sous réserve de corrections
+            * `waitlist` - liste d'attente
+            * `rejected` - rejetée
+            * `revision_requested` - corrections demandées
+            * `camera_ready_received` - version finale reçue
+            * `confirmed` - présentation confirmée
+            * `scheduled` - programmée
+            * `presented` - présentée
+            * `published` - publiée dans les actes
+            * `withdrawn` - retirée
+          oneOf:
+          - $ref: '#/components/schemas/SubmissionStatus'
+          - $ref: '#/components/schemas/BlankEnum'
+      required:
+      - ends_at
+      - id
+      - presenters
+      - reference
+      - starts_at
+      - status
+      - submission_id
+      - title
     DecisionBatchItemRequest:
       type: object
       properties:
@@ -5427,6 +8116,22 @@ components:
           description: Le relecteur déclare un conflit d'intérêts (H8).
       required:
       - reason
+    DiscountKind:
+      enum:
+      - percent
+      - amount
+      type: string
+      description: |-
+        * `percent` - pourcentage
+        * `amount` - montant
+    DiscountScope:
+      enum:
+      - registration
+      - all
+      type: string
+      description: |-
+        * `registration` - inscription seule
+        * `all` - inscription et options
     DiscussionMessageManage:
       type: object
       properties:
@@ -5504,6 +8209,42 @@ components:
       - reference
       - spread
       - title
+    DocumentKind:
+      enum:
+      - invoice
+      - credit_note
+      - proforma
+      type: string
+      description: |-
+        * `invoice` - facture
+        * `credit_note` - avoir
+        * `proforma` - pro forma
+    DocumentRef:
+      type: object
+      description: Pièce de facturation de l'inscription (le PDF se télécharge à part).
+      properties:
+        id:
+          type: integer
+        kind:
+          $ref: '#/components/schemas/DocumentKind'
+        number:
+          type: string
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        currency:
+          $ref: '#/components/schemas/Currency'
+        issued_at:
+          type: string
+          format: date-time
+      required:
+      - amount
+      - currency
+      - id
+      - issued_at
+      - kind
+      - number
     Duplicate:
       type: object
       properties:
@@ -5762,6 +8503,11 @@ components:
       - review_not_open
       - discussion_closed
       - deadline_passed
+      - registration_closed
+      - option_full
+      - promo_code_exhausted
+      - already_registered
+      - payment_unavailable
       type: string
       description: |-
         * `validation_error` - Validation Error
@@ -5808,6 +8554,11 @@ components:
         * `review_not_open` - Review Not Open
         * `discussion_closed` - Discussion Closed
         * `deadline_passed` - Deadline Passed
+        * `registration_closed` - Registration Closed
+        * `option_full` - Option Full
+        * `promo_code_exhausted` - Promo Code Exhausted
+        * `already_registered` - Already Registered
+        * `payment_unavailable` - Payment Unavailable
     Expertise:
       type: object
       description: Expertises du relecteur (H7) et thématiques proposées.
@@ -5900,6 +8651,47 @@ components:
       required:
       - reason
       - until_local
+    Fee:
+      type: object
+      properties:
+        period:
+          $ref: '#/components/schemas/Period'
+        zone:
+          $ref: '#/components/schemas/Zone'
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+      required:
+      - amount
+      - period
+      - zone
+    FeeGridRequest:
+      type: object
+      description: Grille complète d'une catégorie (une cellule par période et zone
+        proposées).
+      properties:
+        fees:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeeRequest'
+      required:
+      - fees
+    FeeRequest:
+      type: object
+      properties:
+        period:
+          $ref: '#/components/schemas/Period'
+        zone:
+          $ref: '#/components/schemas/Zone'
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+      required:
+      - amount
+      - period
+      - zone
     FilePolicy:
       enum:
       - none
@@ -5955,6 +8747,69 @@ components:
           default: ''
       required:
       - file
+    FinanceDashboard:
+      type: object
+      description: |-
+        Tableau de bord financier (J12) : encaissé, remboursé, net, impayés (commandes en
+        attente), remboursements restant dus, répartitions, pièces, points à traiter.
+      properties:
+        currency:
+          $ref: '#/components/schemas/Currency'
+        registrations:
+          $ref: '#/components/schemas/RegistrationCounts'
+        collected:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        refunded:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        net:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        outstanding:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        refunds_due:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        by_method:
+          type: array
+          items:
+            $ref: '#/components/schemas/MethodTotal'
+        by_category:
+          type: array
+          items:
+            $ref: '#/components/schemas/CategoryTotal'
+        invoices:
+          $ref: '#/components/schemas/MoneyCount'
+        credit_notes:
+          $ref: '#/components/schemas/MoneyCount'
+        pending_invoices:
+          type: integer
+        orphan_payments:
+          type: integer
+        waivers:
+          type: integer
+      required:
+      - by_category
+      - by_method
+      - collected
+      - credit_notes
+      - currency
+      - invoices
+      - net
+      - orphan_payments
+      - outstanding
+      - pending_invoices
+      - refunded
+      - refunds_due
+      - registrations
+      - waivers
     Grid:
       type: object
       properties:
@@ -6082,6 +8937,26 @@ components:
       description: |-
         * `ok` - Ok
         * `degraded` - Degraded
+    History:
+      type: object
+      properties:
+        from_status:
+          type: string
+        to_status:
+          $ref: '#/components/schemas/RegistrationStatus'
+        at:
+          type: string
+          format: date-time
+        actor:
+          type: string
+        reason:
+          type: string
+      required:
+      - actor
+      - at
+      - from_status
+      - reason
+      - to_status
     InvitableRole:
       enum:
       - ADMIN
@@ -6091,6 +8966,8 @@ components:
       - SC_MEMBER
       - SPEAKER
       - SESSION_CHAIR
+      - VOLUNTEER
+      - SIGNATORY
       type: string
       description: |-
         * `ADMIN` - administrateur de l'édition
@@ -6100,6 +8977,8 @@ components:
         * `SC_MEMBER` - membre du comité scientifique
         * `SPEAKER` - intervenant
         * `SESSION_CHAIR` - président de session
+        * `VOLUNTEER` - bénévole
+        * `SIGNATORY` - signataire
     InvitationBatch:
       type: object
       properties:
@@ -6261,6 +9140,13 @@ components:
       - role
       - send_count
       - status
+    IssuedCount:
+      type: object
+      properties:
+        issued:
+          type: integer
+      required:
+      - issued
     JobsStatus:
       enum:
       - ok
@@ -6344,6 +9230,37 @@ components:
       required:
       - at_local
       - code
+    Line:
+      type: object
+      properties:
+        kind:
+          $ref: '#/components/schemas/LineKind'
+        code:
+          type: string
+        label_fr:
+          type: string
+        label_en:
+          type: string
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+      required:
+      - amount
+      - code
+      - kind
+      - label_en
+      - label_fr
+    LineKind:
+      enum:
+      - registration
+      - option
+      - discount
+      type: string
+      description: |-
+        * `registration` - inscription
+        * `option` - option
+        * `discount` - remise
     Locale:
       enum:
       - fr
@@ -6428,6 +9345,305 @@ components:
       - from_status
       - reason
       - to_status
+    ManageOrderRequest:
+      type: object
+      description: |-
+        Inscription saisie par le CO pour un compte existant (après la clôture : tarif
+        « sur place », J2).
+      properties:
+        category:
+          type: string
+          minLength: 1
+          maxLength: 32
+        options:
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 32
+          maxItems: 20
+        promo_code:
+          type: string
+          default: ''
+          maxLength: 32
+        method:
+          $ref: '#/components/schemas/OrderMethod'
+        billing_name:
+          type: string
+          maxLength: 255
+        billing_organization:
+          type: string
+          maxLength: 255
+        billing_address:
+          type: string
+          maxLength: 2000
+        email:
+          type: string
+          format: email
+          minLength: 1
+      required:
+      - category
+      - email
+      - method
+    ManagePayment:
+      type: object
+      properties:
+        id:
+          type: integer
+        provider:
+          type: string
+        method:
+          $ref: '#/components/schemas/PaymentMethod'
+        reference:
+          type: string
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        currency:
+          $ref: '#/components/schemas/Currency'
+        status:
+          type: string
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+        provider_reference:
+          type: string
+        received_on:
+          type: string
+          format: date
+          nullable: true
+        recorded_by:
+          type: string
+        note:
+          type: string
+      required:
+      - amount
+      - completed_at
+      - currency
+      - id
+      - method
+      - note
+      - provider
+      - provider_reference
+      - received_on
+      - recorded_by
+      - reference
+      - status
+    ManageRegistration:
+      type: object
+      description: |-
+        Détail d'une inscription (gestion) : personne, historique, paiements complets,
+        remboursements.
+      properties:
+        id:
+          type: integer
+        reference:
+          type: string
+        edition:
+          $ref: '#/components/schemas/RegistrationEdition'
+        category:
+          $ref: '#/components/schemas/CategoryRef'
+        status:
+          $ref: '#/components/schemas/RegistrationStatus'
+        period:
+          $ref: '#/components/schemas/Period'
+        zone:
+          $ref: '#/components/schemas/Zone'
+        method:
+          $ref: '#/components/schemas/PaymentMethod'
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/Line'
+        total:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        currency:
+          $ref: '#/components/schemas/Currency'
+        due_at:
+          type: string
+          format: date-time
+          nullable: true
+        confirmed_at:
+          type: string
+          format: date-time
+          nullable: true
+        closed_at:
+          type: string
+          format: date-time
+          nullable: true
+        refund_due:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          nullable: true
+        billing_name:
+          type: string
+        billing_organization:
+          type: string
+        billing_address:
+          type: string
+        proof:
+          allOf:
+          - $ref: '#/components/schemas/Proof'
+          nullable: true
+        has_qr:
+          type: boolean
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentRef'
+        payments:
+          type: array
+          items:
+            $ref: '#/components/schemas/ManagePayment'
+        created_at:
+          type: string
+          format: date-time
+        person:
+          $ref: '#/components/schemas/Registrant'
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/History'
+        refunds:
+          type: array
+          items:
+            $ref: '#/components/schemas/RefundRef'
+      required:
+      - billing_address
+      - billing_name
+      - billing_organization
+      - category
+      - closed_at
+      - confirmed_at
+      - created_at
+      - currency
+      - documents
+      - due_at
+      - edition
+      - has_qr
+      - history
+      - id
+      - lines
+      - method
+      - payments
+      - period
+      - person
+      - proof
+      - reference
+      - refund_due
+      - refunds
+      - status
+      - total
+      - zone
+    ManageRegistrationList:
+      type: object
+      description: Ligne de la liste des inscriptions (gestion, ``registrations.read``).
+      properties:
+        id:
+          type: integer
+        reference:
+          type: string
+        person:
+          $ref: '#/components/schemas/Registrant'
+        category:
+          $ref: '#/components/schemas/CategoryRef'
+        status:
+          $ref: '#/components/schemas/RegistrationStatus'
+        method:
+          $ref: '#/components/schemas/PaymentMethod'
+        total:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        currency:
+          $ref: '#/components/schemas/Currency'
+        due_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        confirmed_at:
+          type: string
+          format: date-time
+          nullable: true
+        has_proof:
+          type: boolean
+        has_invoice:
+          type: boolean
+      required:
+      - category
+      - confirmed_at
+      - created_at
+      - currency
+      - due_at
+      - has_invoice
+      - has_proof
+      - id
+      - method
+      - person
+      - reference
+      - status
+      - total
+    ManualPaymentMethod:
+      enum:
+      - transfer
+      - onsite
+      type: string
+      description: |-
+        * `transfer` - virement (bon de commande)
+        * `onsite` - sur place
+    ManualPaymentRequest:
+      type: object
+      description: 'Paiement reçu hors ligne (J7) : virement ou sur place, montant
+        égal au total.'
+      properties:
+        method:
+          $ref: '#/components/schemas/ManualPaymentMethod'
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        reference:
+          type: string
+          default: ''
+          maxLength: 64
+        received_on:
+          type: string
+          format: date
+        note:
+          type: string
+          default: ''
+          maxLength: 255
+      required:
+      - amount
+      - method
+      - received_on
+    ManualRequestRequest:
+      type: object
+      properties:
+        reference:
+          type: string
+          minLength: 1
+          description: Référence « GC27-I00042 ».
+          maxLength: 32
+        device:
+          type: string
+          default: ''
+          maxLength: 64
+        idempotency_key:
+          type: string
+          default: ''
+          description: Clé de l'appareil (8 à 64 caractères [A-Za-z0-9_-]) ; rejouable.
+          maxLength: 64
+      required:
+      - reference
     Me:
       type: object
       description: |-
@@ -6722,6 +9938,141 @@ components:
           maxLength: 5000
       required:
       - body
+    MethodTotal:
+      type: object
+      properties:
+        count:
+          type: integer
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        method:
+          type: string
+      required:
+      - amount
+      - count
+      - method
+    MoneyCount:
+      type: object
+      properties:
+        count:
+          type: integer
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+      required:
+      - amount
+      - count
+    MyRegistration:
+      type: object
+      description: |-
+        Ajoute ce que le participant peut faire : annuler (et la part remboursée), demander
+        une pro forma.
+      properties:
+        id:
+          type: integer
+        reference:
+          type: string
+        edition:
+          $ref: '#/components/schemas/RegistrationEdition'
+        category:
+          $ref: '#/components/schemas/CategoryRef'
+        status:
+          $ref: '#/components/schemas/RegistrationStatus'
+        period:
+          $ref: '#/components/schemas/Period'
+        zone:
+          $ref: '#/components/schemas/Zone'
+        method:
+          $ref: '#/components/schemas/PaymentMethod'
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/Line'
+        total:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        currency:
+          $ref: '#/components/schemas/Currency'
+        due_at:
+          type: string
+          format: date-time
+          nullable: true
+        confirmed_at:
+          type: string
+          format: date-time
+          nullable: true
+        closed_at:
+          type: string
+          format: date-time
+          nullable: true
+        refund_due:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          nullable: true
+        billing_name:
+          type: string
+        billing_organization:
+          type: string
+        billing_address:
+          type: string
+        proof:
+          allOf:
+          - $ref: '#/components/schemas/Proof'
+          nullable: true
+        has_qr:
+          type: boolean
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentRef'
+        payments:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentRef'
+        created_at:
+          type: string
+          format: date-time
+        can_cancel:
+          type: boolean
+        refund_percent:
+          type: integer
+          nullable: true
+        cancellation_deadline:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - billing_address
+      - billing_name
+      - billing_organization
+      - can_cancel
+      - cancellation_deadline
+      - category
+      - closed_at
+      - confirmed_at
+      - created_at
+      - currency
+      - documents
+      - due_at
+      - edition
+      - has_qr
+      - id
+      - lines
+      - method
+      - payments
+      - period
+      - proof
+      - reference
+      - refund_due
+      - refund_percent
+      - status
+      - total
+      - zone
     Notification:
       type: object
       properties:
@@ -6852,6 +10203,172 @@ components:
       - institution
       - last_name
       - position
+    Option:
+      type: object
+      description: |-
+        Option à quota (gestion) : ``reserved`` places tenues par les inscriptions en attente
+        ou confirmées ; ``categories`` : codes des catégories autorisées (vide : toutes).
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        code:
+          type: string
+          maxLength: 32
+          pattern: ^[-a-zA-Z0-9_]+$
+        label_fr:
+          type: string
+          title: Libellé (FR)
+          maxLength: 150
+        label_en:
+          type: string
+          title: Libellé (EN)
+          maxLength: 150
+        description_fr:
+          type: string
+          title: Description (FR)
+        description_en:
+          type: string
+          title: Description (EN)
+        price_local:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          title: Prix (local)
+        price_international:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          title: Prix (international)
+        quota:
+          type: integer
+          maximum: 4294967295
+          minimum: 0
+          format: int64
+          nullable: true
+          title: Places
+        reserved:
+          type: integer
+          readOnly: true
+          title: Places réservées
+        categories:
+          type: array
+          items:
+            type: string
+        is_active:
+          type: boolean
+          title: Actif
+        position:
+          type: integer
+          maximum: 65535
+          minimum: 0
+          title: Ordre
+      required:
+      - code
+      - id
+      - label_fr
+      - reserved
+    OptionRequest:
+      type: object
+      description: |-
+        Option à quota (gestion) : ``reserved`` places tenues par les inscriptions en attente
+        ou confirmées ; ``categories`` : codes des catégories autorisées (vide : toutes).
+      properties:
+        code:
+          type: string
+          minLength: 1
+          maxLength: 32
+          pattern: ^[-a-zA-Z0-9_]+$
+        label_fr:
+          type: string
+          minLength: 1
+          title: Libellé (FR)
+          maxLength: 150
+        label_en:
+          type: string
+          title: Libellé (EN)
+          maxLength: 150
+        description_fr:
+          type: string
+          title: Description (FR)
+        description_en:
+          type: string
+          title: Description (EN)
+        price_local:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          title: Prix (local)
+        price_international:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          title: Prix (international)
+        quota:
+          type: integer
+          maximum: 4294967295
+          minimum: 0
+          format: int64
+          nullable: true
+          title: Places
+        categories:
+          type: array
+          items:
+            type: string
+            minLength: 1
+        is_active:
+          type: boolean
+          title: Actif
+        position:
+          type: integer
+          maximum: 65535
+          minimum: 0
+          title: Ordre
+      required:
+      - code
+      - label_fr
+    OrderMethod:
+      enum:
+      - online
+      - transfer
+      - onsite
+      type: string
+      description: |-
+        * `online` - paiement en ligne
+        * `transfer` - virement (bon de commande)
+        * `onsite` - sur place
+    OrderRequest:
+      type: object
+      properties:
+        category:
+          type: string
+          minLength: 1
+          maxLength: 32
+        options:
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 32
+          maxItems: 20
+        promo_code:
+          type: string
+          default: ''
+          maxLength: 32
+        method:
+          $ref: '#/components/schemas/OrderMethod'
+        billing_name:
+          type: string
+          maxLength: 255
+        billing_organization:
+          type: string
+          maxLength: 255
+        billing_address:
+          type: string
+          maxLength: 2000
+      required:
+      - category
+      - method
     Page:
       type: object
       properties:
@@ -7008,6 +10525,75 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/AuditEntry'
+    PaginatedBillingDocumentList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/BillingDocument'
+    PaginatedCheckinListItemList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CheckinListItem'
+    PaginatedDaySessionList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/DaySession'
     PaginatedInvitationWithEmailList:
       type: object
       required:
@@ -7031,6 +10617,52 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/InvitationWithEmail'
+    PaginatedManageRegistrationListList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ManageRegistrationList'
+    PaginatedPaymentListList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentList'
     PaginatedReviewSubmissionList:
       type: object
       required:
@@ -7100,6 +10732,110 @@ components:
           type: string
           format: date-time
           description: Nouvelle échéance, à l'heure de l'édition.
+    PatchedBillingIdentityRequest:
+      type: object
+      properties:
+        billing_name:
+          type: string
+          maxLength: 255
+        billing_organization:
+          type: string
+          maxLength: 255
+        billing_address:
+          type: string
+          maxLength: 2000
+    PatchedBillingProfileRequest:
+      type: object
+      description: |-
+        Mentions de facturation (J8, Q8) : lecture ``finance.read``, écriture
+        ``pricing.write`` avec réauthentification récente (J1). ``is_complete`` : raison sociale
+        et adresse renseignées, sans quoi aucune facture ne s'émet.
+      properties:
+        legal_name:
+          type: string
+          title: Raison sociale
+          maxLength: 255
+        address:
+          type: string
+          title: Adresse
+        tax_identifiers:
+          type: string
+          title: Identifiants (registre, fiscal)
+        vat_rate:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+          title: Taux de TVA (%)
+        vat_note:
+          type: string
+          title: Mention de TVA
+          maxLength: 255
+        footer:
+          type: string
+          title: Pied de page
+        bank_details:
+          type: string
+          title: Coordonnées bancaires
+        invoice_prefix:
+          type: string
+          minLength: 1
+          title: Préfixe des factures
+          maxLength: 8
+        credit_note_prefix:
+          type: string
+          minLength: 1
+          title: Préfixe des avoirs
+          maxLength: 8
+        proforma_prefix:
+          type: string
+          minLength: 1
+          title: Préfixe des pro forma
+          maxLength: 8
+    PatchedCategoryRequest:
+      type: object
+      description: 'Catégorie et sa grille de tarifs (gestion). ``code`` : fixé à
+        la création.'
+      properties:
+        code:
+          type: string
+          minLength: 1
+          maxLength: 32
+          pattern: ^[-a-zA-Z0-9_]+$
+        label_fr:
+          type: string
+          minLength: 1
+          title: Libellé (FR)
+          maxLength: 150
+        label_en:
+          type: string
+          title: Libellé (EN)
+          maxLength: 150
+        description_fr:
+          type: string
+          title: Description (FR)
+        description_en:
+          type: string
+          title: Description (EN)
+        requires_proof:
+          type: boolean
+          title: Justificatif demandé
+        is_active:
+          type: boolean
+          title: Actif
+        position:
+          type: integer
+          maximum: 65535
+          minimum: 0
+          title: Ordre
+        badge_color:
+          title: Couleur du badge
+          oneOf:
+          - type: string
+            pattern: ^#[0-9A-Fa-f]{6}$
+            maxLength: 7
+          - type: string
+            maxLength: 0
     PatchedConfidentialityRequest:
       type: object
       description: Paramètres de l'évaluation (gestion, §6.1 ; plan L4 H4, H6, H12).
@@ -7285,6 +11021,62 @@ components:
         published:
           type: boolean
           title: Publiée
+    PatchedOptionRequest:
+      type: object
+      description: |-
+        Option à quota (gestion) : ``reserved`` places tenues par les inscriptions en attente
+        ou confirmées ; ``categories`` : codes des catégories autorisées (vide : toutes).
+      properties:
+        code:
+          type: string
+          minLength: 1
+          maxLength: 32
+          pattern: ^[-a-zA-Z0-9_]+$
+        label_fr:
+          type: string
+          minLength: 1
+          title: Libellé (FR)
+          maxLength: 150
+        label_en:
+          type: string
+          title: Libellé (EN)
+          maxLength: 150
+        description_fr:
+          type: string
+          title: Description (FR)
+        description_en:
+          type: string
+          title: Description (EN)
+        price_local:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          title: Prix (local)
+        price_international:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          title: Prix (international)
+        quota:
+          type: integer
+          maximum: 4294967295
+          minimum: 0
+          format: int64
+          nullable: true
+          title: Places
+        categories:
+          type: array
+          items:
+            type: string
+            minLength: 1
+        is_active:
+          type: boolean
+          title: Actif
+        position:
+          type: integer
+          maximum: 65535
+          minimum: 0
+          title: Ordre
     PatchedPageRequest:
       type: object
       properties:
@@ -7374,6 +11166,49 @@ components:
         presenter_registration_required:
           type: boolean
           title: Présentateur inscrit exigé (RG-11)
+    PatchedPromoCodeRequest:
+      type: object
+      description: |-
+        Code promo (gestion) : utilisations réservées (commandes en attente) et consommées
+        (inscriptions confirmées). Date limite saisie à l'heure de l'édition (D13).
+      properties:
+        code:
+          type: string
+          minLength: 1
+          maxLength: 32
+        kind:
+          allOf:
+          - $ref: '#/components/schemas/DiscountKind'
+          title: Type de remise
+        value:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          title: Valeur
+        scope:
+          allOf:
+          - $ref: '#/components/schemas/DiscountScope'
+          title: Portée
+        categories:
+          type: array
+          items:
+            type: string
+            minLength: 1
+        max_uses:
+          type: integer
+          maximum: 4294967295
+          minimum: 0
+          format: int64
+          nullable: true
+          title: Utilisations maximales
+        valid_until_local:
+          type: string
+          format: date-time
+          nullable: true
+          description: Valable jusqu'au, à l'heure de l'édition, sans fuseau.
+        is_active:
+          type: boolean
+          title: Actif
     PatchedPublicFileRequest:
       type: object
       description: Gestion des fichiers de l'édition (documents et images).
@@ -7394,6 +11229,57 @@ components:
         published:
           type: boolean
           title: Publié
+    PatchedRegistrationSettingsRequest:
+      type: object
+      description: |-
+        Paramètres des inscriptions (J2, J5, J9) : lecture ``registrations.read``, écriture
+        ``pricing.write``. Date limite d'annulation saisie à l'heure de l'édition
+        (``cancellation_deadline_local``, D13), convertie en UTC par le serveur.
+      properties:
+        currency:
+          allOf:
+          - $ref: '#/components/schemas/Currency'
+          title: Devise
+        local_countries:
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 2
+        online_enabled:
+          type: boolean
+          title: Paiement en ligne proposé
+        transfer_enabled:
+          type: boolean
+          title: Virement proposé
+        onsite_enabled:
+          type: boolean
+          title: Paiement sur place proposé
+        online_deadline_hours:
+          type: integer
+          maximum: 720
+          minimum: 1
+          title: Délai de paiement en ligne (heures)
+        transfer_deadline_days:
+          type: integer
+          maximum: 180
+          minimum: 1
+          title: Délai de paiement par virement (jours)
+        cancellation_deadline_local:
+          type: string
+          format: date-time
+          nullable: true
+          description: Date limite d'annulation, à l'heure de l'édition, sans fuseau.
+        refund_percent_before:
+          type: integer
+          maximum: 100
+          minimum: 0
+          title: Part remboursée avant la date limite (%)
+        refund_percent_after:
+          type: integer
+          maximum: 100
+          minimum: 0
+          title: Part remboursée après la date limite (%)
     PatchedRoomWriteRequest:
       type: object
       properties:
@@ -7526,6 +11412,20 @@ components:
         instructions:
           type: string
           maxLength: 5000
+    PatchedSignatureRequest:
+      type: object
+      description: 'Signature du signataire connecté (K18) : jamais le nom de stockage
+        de l''image.'
+      properties:
+        display_name:
+          type: string
+          maxLength: 150
+        title_fr:
+          type: string
+          maxLength: 200
+        title_en:
+          type: string
+          maxLength: 200
     PatchedSlotUpdateRequest:
       type: object
       description: |-
@@ -7669,6 +11569,157 @@ components:
         is_active:
           type: boolean
           title: Actif
+    PaymentCheck:
+      type: object
+      properties:
+        outcome:
+          type: string
+        status:
+          type: string
+      required:
+      - outcome
+      - status
+    PaymentList:
+      type: object
+      description: 'Paiement (gestion, ``finance.read``) : rapprochement des encaissements.'
+      properties:
+        id:
+          type: integer
+        registration_id:
+          type: integer
+        registration_reference:
+          type: string
+        customer:
+          type: string
+        provider:
+          $ref: '#/components/schemas/PaymentProvider'
+        method:
+          type: string
+        reference:
+          type: string
+        provider_reference:
+          type: string
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        currency:
+          $ref: '#/components/schemas/Currency'
+        status:
+          $ref: '#/components/schemas/PaymentStatus'
+        provider_status:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+        received_on:
+          type: string
+          format: date
+          nullable: true
+        note:
+          type: string
+      required:
+      - amount
+      - completed_at
+      - created_at
+      - currency
+      - customer
+      - id
+      - method
+      - note
+      - provider
+      - provider_reference
+      - provider_status
+      - received_on
+      - reference
+      - registration_id
+      - registration_reference
+      - status
+    PaymentMethod:
+      enum:
+      - online
+      - transfer
+      - onsite
+      - free
+      - waiver
+      type: string
+      description: |-
+        * `online` - paiement en ligne
+        * `transfer` - virement (bon de commande)
+        * `onsite` - sur place
+        * `free` - aucun paiement (montant nul)
+        * `waiver` - gratuité accordée
+    PaymentProvider:
+      enum:
+      - manual
+      - fake
+      - cinetpay
+      type: string
+      description: |-
+        * `manual` - paiement manuel
+        * `fake` - fournisseur factice
+        * `cinetpay` - CinetPay
+    PaymentRef:
+      type: object
+      properties:
+        id:
+          type: integer
+        provider:
+          type: string
+        method:
+          $ref: '#/components/schemas/PaymentMethod'
+        reference:
+          type: string
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        currency:
+          $ref: '#/components/schemas/Currency'
+        status:
+          type: string
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - amount
+      - completed_at
+      - currency
+      - id
+      - method
+      - provider
+      - reference
+      - status
+    PaymentStart:
+      type: object
+      properties:
+        payment_url:
+          type: string
+          format: uri
+        reference:
+          type: string
+      required:
+      - payment_url
+      - reference
+    PaymentStatus:
+      enum:
+      - initiated
+      - pending
+      - succeeded
+      - failed
+      - cancelled
+      type: string
+      description: |-
+        * `initiated` - initié
+        * `pending` - en cours
+        * `succeeded` - réussi
+        * `failed` - échoué
+        * `cancelled` - abandonné
     PeerReview:
       type: object
       description: Évaluation d'un autre relecteur, sous pseudonyme (RG-08, H11).
@@ -7735,6 +11786,16 @@ components:
       - pseudonym_rank
       - scores
       - suggested_type
+    Period:
+      enum:
+      - early
+      - regular
+      - onsite
+      type: string
+      description: |-
+        * `early` - préférentiel
+        * `regular` - normal
+        * `onsite` - sur place
     Person:
       type: object
       properties:
@@ -8018,7 +12079,8 @@ components:
             type: integer
         person:
           type: string
-          description: Nom de la personne (conflit de personne).
+          description: Nom de la personne (conflit de personne) ou des présentateurs
+            (RG-11).
         minutes:
           type: integer
           description: Dépassement en minutes (RG-13).
@@ -8033,11 +12095,13 @@ components:
       - room
       - person
       - overflow
+      - registration
       type: string
       description: |-
         * `room` - room
         * `person` - person
         * `overflow` - overflow
+        * `registration` - registration
     ProgramPerson:
       type: object
       properties:
@@ -8065,6 +12129,144 @@ components:
         presenter_registration_required:
           type: boolean
           title: Présentateur inscrit exigé (RG-11)
+    PromoCode:
+      type: object
+      description: |-
+        Code promo (gestion) : utilisations réservées (commandes en attente) et consommées
+        (inscriptions confirmées). Date limite saisie à l'heure de l'édition (D13).
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        code:
+          type: string
+          maxLength: 32
+        kind:
+          allOf:
+          - $ref: '#/components/schemas/DiscountKind'
+          title: Type de remise
+        value:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          title: Valeur
+        scope:
+          allOf:
+          - $ref: '#/components/schemas/DiscountScope'
+          title: Portée
+        categories:
+          type: array
+          items:
+            type: string
+        max_uses:
+          type: integer
+          maximum: 4294967295
+          minimum: 0
+          format: int64
+          nullable: true
+          title: Utilisations maximales
+        reserved_uses:
+          type: integer
+          readOnly: true
+          title: Utilisations réservées
+        consumed_uses:
+          type: integer
+          readOnly: true
+          title: Utilisations consommées
+        valid_until:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Valable jusqu'au (UTC)
+        valid_until_local:
+          type: string
+          format: date-time
+          nullable: true
+          description: Valable jusqu'au, à l'heure de l'édition, sans fuseau.
+        is_active:
+          type: boolean
+          title: Actif
+      required:
+      - code
+      - consumed_uses
+      - id
+      - kind
+      - reserved_uses
+      - valid_until
+      - value
+    PromoCodeRequest:
+      type: object
+      description: |-
+        Code promo (gestion) : utilisations réservées (commandes en attente) et consommées
+        (inscriptions confirmées). Date limite saisie à l'heure de l'édition (D13).
+      properties:
+        code:
+          type: string
+          minLength: 1
+          maxLength: 32
+        kind:
+          allOf:
+          - $ref: '#/components/schemas/DiscountKind'
+          title: Type de remise
+        value:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          title: Valeur
+        scope:
+          allOf:
+          - $ref: '#/components/schemas/DiscountScope'
+          title: Portée
+        categories:
+          type: array
+          items:
+            type: string
+            minLength: 1
+        max_uses:
+          type: integer
+          maximum: 4294967295
+          minimum: 0
+          format: int64
+          nullable: true
+          title: Utilisations maximales
+        valid_until_local:
+          type: string
+          format: date-time
+          nullable: true
+          description: Valable jusqu'au, à l'heure de l'édition, sans fuseau.
+        is_active:
+          type: boolean
+          title: Actif
+      required:
+      - code
+      - kind
+      - value
+    Proof:
+      type: object
+      properties:
+        name:
+          type: string
+        kind:
+          type: string
+        size:
+          type: integer
+        uploaded_at:
+          type: string
+          format: date-time
+      required:
+      - kind
+      - name
+      - size
+      - uploaded_at
+    ProofUploadRequest:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+      required:
+      - file
     PublicAlternate:
       type: object
       description: |-
@@ -8075,6 +12277,33 @@ components:
           $ref: '#/components/schemas/PagePaths'
       required:
       - paths
+    PublicCategory:
+      type: object
+      properties:
+        code:
+          type: string
+        label_fr:
+          type: string
+        label_en:
+          type: string
+        description_fr:
+          type: string
+        description_en:
+          type: string
+        requires_proof:
+          type: boolean
+        fees:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicFee'
+      required:
+      - code
+      - description_en
+      - description_fr
+      - fees
+      - label_en
+      - label_fr
+      - requires_proof
     PublicCommittee:
       type: object
       properties:
@@ -8263,6 +12492,21 @@ components:
       - tracks
       - venue
       - year
+    PublicFee:
+      type: object
+      properties:
+        period:
+          $ref: '#/components/schemas/Period'
+        zone:
+          $ref: '#/components/schemas/Zone'
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+      required:
+      - amount
+      - period
+      - zone
     PublicFile:
       type: object
       description: Gestion des fichiers de l'édition (documents et images).
@@ -8468,6 +12712,44 @@ components:
       - label_fr
       - new_tab
       - page
+    PublicOption:
+      type: object
+      properties:
+        code:
+          type: string
+        label_fr:
+          type: string
+        label_en:
+          type: string
+        description_fr:
+          type: string
+        description_en:
+          type: string
+        price_local:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        price_international:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        limited:
+          type: boolean
+          description: Places limitées (quota).
+        categories:
+          type: array
+          items:
+            type: string
+      required:
+      - categories
+      - code
+      - description_en
+      - description_fr
+      - label_en
+      - label_fr
+      - limited
+      - price_international
+      - price_local
     PublicPage:
       type: object
       properties:
@@ -8720,6 +13002,55 @@ components:
       - code
       - label_en
       - label_fr
+    PublicRegistration:
+      type: object
+      description: |-
+        Page publique « Inscription » (J13), lue au build du portail : catégories et tarifs,
+        options, dates clés (UTC), moyens de paiement proposés, pays « locaux ». Ni quota
+        restant ni donnée personnelle.
+      properties:
+        currency:
+          $ref: '#/components/schemas/Currency'
+        timezone:
+          type: string
+        opens_at:
+          type: string
+          format: date-time
+          nullable: true
+        early_bird_end:
+          type: string
+          format: date-time
+          nullable: true
+        closes_at:
+          type: string
+          format: date-time
+          nullable: true
+        methods:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentMethod'
+        local_countries:
+          type: array
+          items:
+            type: string
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicCategory'
+        options:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicOption'
+      required:
+      - categories
+      - closes_at
+      - currency
+      - early_bird_end
+      - local_countries
+      - methods
+      - opens_at
+      - options
+      - timezone
     PublicRoutes:
       type: object
       properties:
@@ -9064,6 +13395,54 @@ components:
       - session_title_fr
       - starts_at
       - version
+    Quote:
+      type: object
+      description: Prix calculé par le serveur, sans engagement (aucune place ni code
+        réservés).
+      properties:
+        category:
+          type: string
+        period:
+          $ref: '#/components/schemas/Period'
+        zone:
+          $ref: '#/components/schemas/Zone'
+        currency:
+          $ref: '#/components/schemas/Currency'
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/Line'
+        total:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+      required:
+      - category
+      - currency
+      - lines
+      - period
+      - total
+      - zone
+    QuoteRequestRequest:
+      type: object
+      properties:
+        category:
+          type: string
+          minLength: 1
+          maxLength: 32
+        options:
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 32
+          maxItems: 20
+        promo_code:
+          type: string
+          default: ''
+          maxLength: 32
+      required:
+      - category
     Ranking:
       type: object
       properties:
@@ -9129,6 +13508,15 @@ components:
       - spread
       - status
       - title
+    ReasonRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 500
+      required:
+      - reason
     Recommendation:
       enum:
       - accept
@@ -9141,6 +13529,183 @@ components:
         * `accept_minor` - accepter avec corrections
         * `reject` - rejeter
         * `discuss` - discuter
+    RefundRef:
+      type: object
+      properties:
+        id:
+          type: integer
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        method:
+          type: string
+        reference:
+          type: string
+        refunded_on:
+          type: string
+          format: date
+        credit_note:
+          type: string
+          nullable: true
+      required:
+      - amount
+      - credit_note
+      - id
+      - method
+      - reference
+      - refunded_on
+    RefundRequest:
+      type: object
+      description: Remboursement fait hors plateforme (J9) ; l'avoir est émis sur
+        la facture.
+      properties:
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        method:
+          type: string
+          minLength: 1
+          maxLength: 64
+        reference:
+          type: string
+          default: ''
+          maxLength: 64
+        refunded_on:
+          type: string
+          format: date
+      required:
+      - amount
+      - method
+      - refunded_on
+    Registrant:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        country:
+          type: string
+      required:
+      - country
+      - email
+      - id
+      - name
+    RegistrationCounts:
+      type: object
+      properties:
+        pending:
+          type: integer
+        confirmed:
+          type: integer
+        cancelled:
+          type: integer
+        expired:
+          type: integer
+      required:
+      - cancelled
+      - confirmed
+      - expired
+      - pending
+    RegistrationEdition:
+      type: object
+      properties:
+        code:
+          type: string
+        title_fr:
+          type: string
+        title_en:
+          type: string
+        timezone:
+          type: string
+      required:
+      - code
+      - timezone
+      - title_en
+      - title_fr
+    RegistrationSettings:
+      type: object
+      description: |-
+        Paramètres des inscriptions (J2, J5, J9) : lecture ``registrations.read``, écriture
+        ``pricing.write``. Date limite d'annulation saisie à l'heure de l'édition
+        (``cancellation_deadline_local``, D13), convertie en UTC par le serveur.
+      properties:
+        currency:
+          allOf:
+          - $ref: '#/components/schemas/Currency'
+          title: Devise
+        local_countries:
+          type: array
+          items:
+            type: string
+            maxLength: 2
+        online_enabled:
+          type: boolean
+          title: Paiement en ligne proposé
+        transfer_enabled:
+          type: boolean
+          title: Virement proposé
+        onsite_enabled:
+          type: boolean
+          title: Paiement sur place proposé
+        online_deadline_hours:
+          type: integer
+          maximum: 720
+          minimum: 1
+          title: Délai de paiement en ligne (heures)
+        transfer_deadline_days:
+          type: integer
+          maximum: 180
+          minimum: 1
+          title: Délai de paiement par virement (jours)
+        cancellation_deadline:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Annulation par le participant jusqu'au (UTC)
+        cancellation_deadline_local:
+          type: string
+          format: date-time
+          nullable: true
+          description: Date limite d'annulation, à l'heure de l'édition, sans fuseau.
+        refund_percent_before:
+          type: integer
+          maximum: 100
+          minimum: 0
+          title: Part remboursée avant la date limite (%)
+        refund_percent_after:
+          type: integer
+          maximum: 100
+          minimum: 0
+          title: Part remboursée après la date limite (%)
+      required:
+      - cancellation_deadline
+    RegistrationStatus:
+      enum:
+      - pending
+      - confirmed
+      - cancelled
+      - expired
+      type: string
+      description: |-
+        * `pending` - en attente de paiement
+        * `confirmed` - confirmée
+        * `cancelled` - annulée
+        * `expired` - expirée
+    RetiredTokenReason:
+      enum:
+      - cancelled
+      - replaced
+      type: string
+      description: |-
+        * `cancelled` - inscription annulée
+        * `replaced` - badge remplacé
     ReviewManage:
       type: object
       description: 'Évaluation envoyée, avec le nom du relecteur (H11 : visible du
@@ -9945,6 +14510,7 @@ components:
       - ATTENDEE
       - SPONSOR
       - VOLUNTEER
+      - SIGNATORY
       type: string
       description: |-
         * `ADMIN` - administrateur de l'édition
@@ -9958,6 +14524,7 @@ components:
         * `ATTENDEE` - participant
         * `SPONSOR` - partenaire
         * `VOLUNTEER` - bénévole
+        * `SIGNATORY` - signataire
     RoleSource:
       enum:
       - invitation
@@ -10040,6 +14607,25 @@ components:
           type: integer
           maximum: 32767
           minimum: 0
+    ScanRequestRequest:
+      type: object
+      properties:
+        token:
+          type: string
+          minLength: 1
+          description: Texte lu dans le QR du badge.
+          maxLength: 128
+        device:
+          type: string
+          default: ''
+          maxLength: 64
+        idempotency_key:
+          type: string
+          default: ''
+          description: Clé de l'appareil (8 à 64 caractères [A-Za-z0-9_-]) ; rejouable.
+          maxLength: 64
+      required:
+      - token
     ScheduledSubmission:
       type: object
       description: 'Communication placée ou à programmer : présentateurs **nommés**,
@@ -10069,10 +14655,16 @@ components:
         confirmed:
           type: boolean
           description: Présentateurs désignés par l'auteur (I5).
+        presenter_registered:
+          type: boolean
+          nullable: true
+          description: Un présentateur au moins est inscrit (RG-11) ; nul sans les
+            inscriptions.
       required:
       - confirmed
       - default_duration_min
       - id
+      - presenter_registered
       - presenters
       - reference
       - status
@@ -10437,6 +15029,25 @@ components:
       required:
       - role
       - user
+    SessionScanRequestRequest:
+      type: object
+      properties:
+        token:
+          type: string
+          minLength: 1
+          description: Texte lu dans le QR du badge.
+          maxLength: 128
+        device:
+          type: string
+          default: ''
+          maxLength: 64
+        idempotency_key:
+          type: string
+          default: ''
+          description: Clé de l'appareil (8 à 64 caractères [A-Za-z0-9_-]) ; rejouable.
+          maxLength: 64
+      required:
+      - token
     SessionWriteRequest:
       type: object
       properties:
@@ -10472,6 +15083,63 @@ components:
         instructions:
           type: string
           maxLength: 5000
+    Signature:
+      type: object
+      description: 'Signature du signataire connecté (K18) : jamais le nom de stockage
+        de l''image.'
+      properties:
+        display_name:
+          type: string
+          maxLength: 150
+        title_fr:
+          type: string
+          maxLength: 200
+        title_en:
+          type: string
+          maxLength: 200
+        has_image:
+          type: boolean
+          readOnly: true
+        image_width:
+          type: integer
+          readOnly: true
+          nullable: true
+        image_height:
+          type: integer
+          readOnly: true
+          nullable: true
+        image_uploaded_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        complete:
+          type: boolean
+          readOnly: true
+          description: 'Nom, fonction en français et image : désignable.'
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - complete
+      - display_name
+      - has_image
+      - image_height
+      - image_uploaded_at
+      - image_width
+      - title_en
+      - title_fr
+      - updated_at
+    SignatureImageUploadRequest:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+      required:
+      - file
     Simulation:
       type: object
       description: 'US-06 : nombre de soumissions au-dessus du seuil, au total, par
@@ -11343,6 +16011,59 @@ components:
       required:
       - code
       - label_fr
+    SyncItemRequest:
+      type: object
+      properties:
+        idempotency_key:
+          type: string
+          minLength: 1
+          description: Clé de l'appareil (8 à 64 caractères [A-Za-z0-9_-]) ; rejouable.
+          pattern: ^[A-Za-z0-9_-]{8,64}$
+        method:
+          allOf:
+          - $ref: '#/components/schemas/CheckinMethod'
+          default: scan
+        token:
+          type: string
+          default: ''
+          maxLength: 128
+        reference:
+          type: string
+          default: ''
+          maxLength: 32
+        scanned_at:
+          type: string
+          format: date-time
+          description: Heure de l'appareil au pointage.
+        session:
+          type: integer
+          nullable: true
+          description: 'Session ; vide : accueil.'
+      required:
+      - idempotency_key
+      - scanned_at
+    SyncRequestRequest:
+      type: object
+      properties:
+        device:
+          type: string
+          default: ''
+          maxLength: 64
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/SyncItemRequest'
+      required:
+      - items
+    SyncResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CheckinResult'
+      required:
+      - results
     Timeline:
       type: object
       properties:
@@ -11502,6 +16223,15 @@ components:
       description: |-
         * `active` - actif
         * `revoked` - révoqué
+    WaiverRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 2000
+      required:
+      - reason
     WithdrawRequest:
       type: object
       properties:
@@ -11509,6 +16239,14 @@ components:
           type: string
           default: ''
           maxLength: 2000
+    Zone:
+      enum:
+      - local
+      - international
+      type: string
+      description: |-
+        * `local` - local
+        * `international` - international
   securitySchemes:
     cookieAuth:
       type: apiKey

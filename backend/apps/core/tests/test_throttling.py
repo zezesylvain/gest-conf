@@ -40,6 +40,12 @@ def test_throttle_settings_are_scoped_only():
         "submission_write": "600/hour",
         "submission_upload": "30/hour",
         "submission_submit": "20/hour",
+        "registration_quote": "300/hour",
+        "registration_write": "60/hour",
+        "registration_upload": "30/hour",
+        "payment_check": "60/hour",
+        "payment_webhook": "120/min",
+        "signature_upload": "20/hour",
     }
 
 

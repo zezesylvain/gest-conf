@@ -3,7 +3,7 @@
 
 | | |
 |---|---|
-| **Version** | 1.5 – document de cadrage, mis à jour après les lots L1 (§17), L2 (§18), L3 (§19), L4 (§20) et L5 (§21) |
+| **Version** | 1.6 – document de cadrage, mis à jour après les lots L1 (§17), L2 (§18), L3 (§19), L4 (§20), L5 (§21) et L6 (§22) |
 | **Date** | 6 octobre 2026 |
 | **Auteur** | Étude réalisée pour ZDS |
 | **Statut** | Pour validation |
@@ -1636,6 +1636,58 @@ Les décisions I1 à I18 du plan [`docs/L5-programme-plan.md`](docs/L5-programme
 - **Avant la mise en ligne** : démo F sur o2switch avec le cron `remind_presentations`, compression HTTP à vérifier, Q14 (noms des auteurs au programme public).
 - **À trancher** : transition `ACCEPTED_MINOR → WITHDRAWN` ; seuil d'avertissement du bundle initial du portail (367,8 kB pour 365 kB ; le framework en fait 96 %).
 - **Reporté** : indisponibilités, « Mon programme » du participant et notification des inscrits (après L6), PDF du programme, fiche intervenant complète (M10), minuterie du président de séance (P2) ; proposition automatique de planning et sessions hybrides (P3).
+
+## 22. Mises à jour issues du lot L6 (version 1.6)
+
+Les décisions J1 à J16 du plan [`docs/L6-inscriptions-plan.md`](docs/L6-inscriptions-plan.md) ont été validées le 6 octobre 2026 et mises en œuvre dans le lot L6 (J15 reportée). Cette section les reporte dans l'étude ; **en cas de divergence avec les sections précédentes (§17 à §21 compris), elle prévaut**. Le détail (justifications, vérifications, défauts trouvés) est dans le plan, §2 et §11 à §18 ; le bilan du lot dans [`docs/L6-inscriptions.md`](docs/L6-inscriptions.md).
+
+### 22.1 Inscriptions (M9)
+
+- **Tarifs** (J2) : catégories par édition (libellés FR et EN, justificatif demandé ou non) ; tarif = catégorie × **période** × **zone**. Périodes déduites des dates clés : inscriptions fermées avant `registration_open`, préférentiel jusqu'à `early_bird_end`, normal jusqu'à `registration_close`, puis « sur place » (le CO seul inscrit). Zone « local » (pays listés, défaut : pays de l'édition) ou « international », d'après le pays du profil, obligatoire. **Une devise par édition** (XOF par défaut), décimales ISO 4217, montants en `Decimal` exacts dans la devise, sans conversion.
+- **Options** (J3) : prix par zone, **quota** réservé à la commande et rendu à l'expiration ou à l'annulation (verrou de ligne ; 409 `option_full`), catégories autorisées.
+- **Codes promo et gratuités** (J4) : pourcentage (arrondi une fois, au demi supérieur) ou montant plafonné, sur l'inscription seule ou avec les options, catégories visées, utilisations **réservées** à la commande et **consommées** à la confirmation, date limite **à l'heure de l'édition** (D13). Gratuité nominative par le CO, motif journalisé.
+- **Cycle de vie** (J5, **écart** avec §5.3 : statuts par un service unique, comme les soumissions) : `pending` → `confirmed`, `cancelled` ou `expired` ; `confirmed` → `cancelled`. Une inscription active par personne et par édition ; prix et lignes figés à la commande. Échéance : 72 h en ligne, 30 jours par virement, sans dépasser la veille de la conférence ; fin de la conférence sur place. Les e-mails mènent à « Mon inscription », sans pièce jointe.
+- **Annulation** (J9) : par le participant, toujours pour une commande en attente, et jusqu'à la date limite de l'édition une fois confirmée ; par le CO, avec un motif et une part remboursée fixée par lui ou par les règles. Le remboursement se fait **hors plateforme** ; le CO l'enregistre et l'avoir s'émet.
+- **Justificatif** (catégorie qui l'exige) : PDF, JPEG ou PNG, type vérifié par contenu, 5 Mo au plus, stocké hors racine web.
+
+### 22.2 Paiements et facturation
+
+- **Paiement en ligne** (J6, RG-15) : interface de fournisseur (initier, lire une notification, interroger le statut) ; fournisseur **factice** (tests, démonstration ; refusé en production sauf recette déclarée) ; premier fournisseur réel **CinetPay, API v1** (bilan de L6.0 : jeton OAuth, notification portant un jeton de transaction, sans signature HMAC). Page hébergée par le prestataire, vers laquelle le navigateur est **dirigé** (aucune donnée de carte, règle n° 7). Une notification n'est qu'un signal : jeton comparé à temps constant (empreinte seulement en base), puis **interrogation du statut**, seule décisive, avec contrôle du montant et de la devise quand le prestataire les renvoie. Notifications en ajout seul, rejeu sans effet ; reprise par tâche si le prestataire ne répond pas ; commande `sync_payments` pour les paiements restés en cours. Un paiement reçu sur une inscription expirée ou annulée est signalé au CO, sans reconfirmation.
+- **Paiement manuel** (J7) : virement (pro forma émise à la commande) ou sur place ; le CO enregistre le paiement reçu (montant égal au total, date, référence), avec réauthentification : l'inscription est confirmée et la facture émise. Paiement partiel : P3.
+- **Pièces** (J8, RG-14) : **facture émise au paiement**, valant reçu ; **avoir** à l'enregistrement d'un remboursement ; **pro forma** non comptable. Numéro `<préfixe>-<code de l'édition>-<année>-<rang>`, **sans trou** par série, édition et année (compteur verrouillé) ; pièces en ajout seul, PDF (`fpdf2`, police DejaVu Sans embarquée) identiques pour des données identiques, empreinte SHA-256 vérifiée à chaque téléchargement. **Mentions de facturation** par édition ; tant que la raison sociale et l'adresse manquent, aucune facture ne s'émet (émission groupée ensuite). Préfixes figés dès la première pièce de leur série.
+- **QR** (J11) : jeton de 192 bits à la confirmation, retiré à l'annulation ; image SVG (`segno`) servie au titulaire, jamais le jeton dans une URL ; lu au check-in en L7.
+
+### 22.3 RG-11 et programme
+
+- **RG-11** (J10) : avec le paramètre « Exiger l'inscription d'un présentateur » (L5), une communication placée dont **aucun présentateur** n'a d'inscription confirmée est un **conflit `registration`** : signalé dans le brouillon, **bloquant à la publication** comme RG-12 et RG-13 (**écart** avec §6 : conflit, et non filtre de la liste « à programmer »). Présentateur reconnu par son compte ou une adresse vérifiée. Le planificateur affiche aussi l'état d'inscription sur chaque communication.
+
+### 22.4 Droits, gestion et portail
+
+- **Capacités** (J1, réponse partielle à Q12) : `registrations.read` (`ADMIN`, `CHAIR`, `OC_MEMBER`), `registrations.manage` (`ADMIN`, CO « finances » et « secrétariat »), `pricing.write` (`ADMIN`, CO « finances »), `finance.read` (`ADMIN`, `CHAIR`, CO « finances »). Le président du CS et les relecteurs n'ont aucun accès. Réauthentification récente : paiement manuel, remboursement, exports, mentions de facturation, émission groupée.
+- **Gestion** (J12) : rubrique « Inscriptions » (liste filtrée et export, fiche et actions, saisie pour un compte existant, « Paiements », « Factures et avoirs », « Finances »), « Paramétrage › Tarifs » et « Paramétrage › Facturation », carte « Inscriptions » du tableau de bord ; chaque écran est inscrit dans le rail et a sa fiche d'aide. Exports CSV journalisés, protégés contre l'injection de formules.
+- **Portail** (J13) : page publique « Inscription » **pré-rendue** (fin du « à venir ») : dates, grille, options (« places limitées », jamais le nombre restant), moyens de paiement ; à jour à la remise en ligne du portail. Espace **`/compte/mon-inscription`** (**écart** d'adresse avec J13 : `/compte/inscription` est la création de compte depuis L1) : devis du serveur, commande, paiement, suivi, pro forma, justificatif, facturation, pièces, QR, annulation.
+
+### 22.5 Modèle de données et API
+
+- Application `registrations` : `registration_settings`, `registration_category`, `fee`, `registration_option`, `promo_code`, `registration` (lignes figées, total, devise, échéance, jeton QR, identité de facturation, justificatif), `registration_status_history` (ajout seul). Application `payments` : `billing_profile`, `payment`, `payment_notification` (ajout seul), `billing_document` (factures, avoirs, pro forma ; ajout seul), `refund`. `registrations` ne dépend pas de `payments` (effets déclarés), ni `program` de `registrations`.
+- **Données personnelles** (J14) : inscriptions, paiements, pièces et remboursements à l'export ; anonymisation refusée tant qu'une inscription est active dans une édition non archivée ; ensuite, identité de facturation et jeton QR effacés, **factures et avoirs conservés** (obligation légale, durée : Q8).
+- **API** : publique `/v1/public/registration` (cache de 5 minutes) ; participant `/v1/registrations` (liste, commande), `…/quote`, `…/{id}` (facturation), `…/cancel`, `…/proof`, `…/qr`, `…/documents/{doc}`, `…/proforma`, `…/pay`, `…/payment-check` ; prestataire `/v1/payments/webhook/{fournisseur}` (public, sans CSRF, limité en débit) ; gestion `…/manage/editions/{id}/registrations/…` (paramètres, catégories et grille, options, codes promo, inscriptions et actions, paiements, remboursements, pièces) et `…/billing/…` (mentions, paiements, pièces, émission groupée, tableau de bord, exports). Les échéances se saisissent à l'heure de l'édition (`cancellation_deadline_local`, `valid_until_local`, D13).
+- Codes d'erreur ajoutés : `registration_closed`, `option_full`, `promo_code_exhausted`, `already_registered`, `payment_unavailable`.
+
+### 22.6 Exploitation
+
+- Cron : `expire_registrations` et `sync_payments`, toutes les heures, en plus des commandes des lots précédents ; idempotentes et verrouillées.
+- Configuration par l'environnement (règle n° 11) : `GESTCONF_PAYMENT_PROVIDER`, `GESTCONF_ALLOW_FAKE_PAYMENTS`, `CINETPAY_API_KEY`, `CINETPAY_API_PASSWORD`, `CINETPAY_SANDBOX`, `CINETPAY_TIMEOUT_SECONDS`.
+- `check_integrity` contrôle aussi les totaux et les réservations des inscriptions, la continuité des séries de pièces et l'intégrité de leurs PDF.
+- À vérifier sur o2switch : appels sortants vers le prestataire (V29), réception des notifications, compte marchand et bac à sable (Q7).
+
+### 22.7 Tests, planning et points ouverts
+
+- 3 395 tests backend (3 404 sous MariaDB) : tarifs et remises, quotas et codes sous verrou (concurrence sur MariaDB), workflow, pièces et numérotation, PDF identiques, paiement en ligne avec le fournisseur factice (notification valide, falsifiée, rejouée, prestataire injoignable, réconciliation), client CinetPay sur HTTP simulé, RG-11, D13 ; matrice des droits (2 273 cas). 385 tests front. **Parcours de bout en bout** (Playwright) prolongé : RG-11 signalée, mentions de facturation, inscription payée par le fournisseur factice et confirmée par la notification vérifiée, facture et QR, virement reçu, annulation, remboursement et avoir.
+- Charge de L6 estimée à 24 – 31 j-h (étude : 12 – 16).
+- **Avant la mise en ligne** : démo G sur o2switch avec le cron et une notification réelle ; compte marchand (Q7) ; mentions de facturation et durée de conservation (Q8).
+- **À trancher** : carte bancaire absente de l'API v1 de CinetPay (Q7) ; format du numéro de facture si une même entité facture toutes les éditions (Q8) ; Q14 ; `ACCEPTED_MINOR → WITHDRAWN` ; seuil d'avertissement du bundle initial du portail (368,6 kB pour 365 kB).
+- **Reporté** : « Mon programme » du participant et notification des inscrits (J15) ; inscription au comptoir sans compte et lecture des QR (L7) ; remboursement par l'API du prestataire, paiement partiel, groupes en un seul paiement (P3) ; hébergement groupé.
 
 ---
 

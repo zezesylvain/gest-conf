@@ -50,5 +50,10 @@ export const ERROR_CODE: ErrorCode[] = [
   'reviewers_missing',
   'review_not_open',
   'discussion_closed',
-  'deadline_passed'
+  'deadline_passed',
+  'registration_closed',
+  'option_full',
+  'promo_code_exhausted',
+  'already_registered',
+  'payment_unavailable'
 ];

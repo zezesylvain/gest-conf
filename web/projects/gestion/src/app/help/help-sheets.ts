@@ -56,6 +56,9 @@ const REVIEW_MANAGERS: readonly Role[] = ['SC_CHAIR', 'CHAIR', 'ADMIN'];
 // Programme (plan L5, I1) : lecture pour tous les profils de gestion ; écriture par
 // l'administrateur et le CO « programme » ; publication par le Chair.
 const PROGRAM_WRITERS: readonly Role[] = ['OC_MEMBER', 'ADMIN', 'CHAIR'];
+// Inscriptions (plan L6, J1) : lecture pour l'administrateur, le Chair et le CO ; gestion
+// par le CO « finances » ou « secrétariat » et l'administrateur ; finances : le Chair suit.
+const REGISTRATION_READERS: readonly Role[] = ['OC_MEMBER', 'ADMIN', 'CHAIR'];
 
 /** Constructeur : les clés d'une fiche sont toutes sous `gestion.help.sheets.<id>`. */
 function sheet(
@@ -251,6 +254,44 @@ export const HELP_SHEETS: readonly HelpSheet[] = [
     text(k('intro')),
     list(k('buffer'), k('registration')),
     callout('info', k, 'reflow'),
+  ]),
+  sheet('registrations', REGISTRATION_READERS, (k) => [
+    text(k('intro')),
+    steps(k, 'filter', 'detail', 'manual', 'cancel'),
+    callout('info', k, 'statuses'),
+    callout('warning', k, 'reauth'),
+    callout('info', k, 'who'),
+  ]),
+  sheet('payments', REGISTRATION_READERS, (k) => [
+    text(k('intro')),
+    list(k('online'), k('manual'), k('statuses')),
+    callout('warning', k, 'webhook'),
+    callout('info', k, 'export'),
+  ]),
+  sheet('billing-documents', REGISTRATION_READERS, (k) => [
+    text(k('intro')),
+    list(k('invoice'), k('creditNote'), k('proforma')),
+    callout('info', k, 'numbering'),
+    callout('warning', k, 'frozen'),
+  ]),
+  sheet('finance-dashboard', REGISTRATION_READERS, (k) => [
+    text(k('intro')),
+    list(k('collected'), k('outstanding'), k('refundsDue')),
+    callout('tip', k, 'pending'),
+    callout('warning', k, 'orphans'),
+  ]),
+  sheet('settings-pricing', REGISTRATION_READERS, (k) => [
+    text(k('intro')),
+    steps(k, 'settings', 'categories', 'fees', 'options', 'promo'),
+    callout('info', k, 'frozen'),
+    callout('warning', k, 'inUse'),
+    callout('info', k, 'online'),
+  ]),
+  sheet('settings-billing', REGISTRATION_READERS, (k) => [
+    text(k('intro')),
+    list(k('issuer'), k('vat'), k('bank'), k('prefixes')),
+    callout('warning', k, 'incomplete'),
+    callout('info', k, 'who'),
   ]),
   sheet('audit', SETTINGS_WRITERS, (k) => [
     text(k('intro')),

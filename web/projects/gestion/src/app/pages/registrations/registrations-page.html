@@ -1,0 +1,225 @@
+<gc-page-header
+  [heading]="'gestion.registrations.title' | translate"
+  [lead]="'gestion.registrations.lead' | translate"
+/>
+<gc-error-summary [messages]="errors()" />
+
+<form [formGroup]="form" (ngSubmit)="search()" novalidate class="card">
+  <div class="grid-2">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>{{ 'gestion.registrations.search' | translate }}</mat-label>
+      <input matInput formControlName="q" maxlength="100" />
+      <mat-hint>{{ 'gestion.registrations.searchHint' | translate }}</mat-hint>
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'gestion.registrations.fields.status' | translate }}</mat-label>
+      <mat-select formControlName="status">
+        <mat-option value="">{{ 'gestion.registrations.all' | translate }}</mat-option>
+        @for (status of statuses; track status) {
+          <mat-option [value]="status">{{
+            'gestion.registrations.status.' + status | translate
+          }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'gestion.registrations.fields.category' | translate }}</mat-label>
+      <mat-select formControlName="category">
+        <mat-option value="">{{ 'gestion.registrations.all' | translate }}</mat-option>
+        @for (category of categories(); track category.id) {
+          <mat-option [value]="category.code"
+            >{{ category.code }} — {{ itemLabel(category) }}</mat-option
+          >
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'gestion.registrations.fields.method' | translate }}</mat-label>
+      <mat-select formControlName="method">
+        <mat-option value="">{{ 'gestion.registrations.all' | translate }}</mat-option>
+        @for (method of methods; track method) {
+          <mat-option [value]="method">{{
+            'gestion.registrations.method.' + method | translate
+          }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+  <div class="actions">
+    <button mat-flat-button type="submit">{{ 'gestion.registrations.apply' | translate }}</button>
+    <button mat-button type="button" (click)="reset()">
+      {{ 'gestion.registrations.reset' | translate }}
+    </button>
+  </div>
+</form>
+
+@if (!loading()) {
+  <div class="actions">
+    <p class="muted" role="status">
+      {{ 'gestion.registrations.count' | translate: { count: count() } }}
+    </p>
+    <button mat-stroked-button type="button" (click)="exportCsv()" [disabled]="busy()">
+      {{ 'gestion.registrations.export' | translate }}
+    </button>
+    @if (canManage() && !creating()) {
+      <button mat-flat-button type="button" (click)="startCreate()">
+        {{ 'gestion.registrations.create.action' | translate }}
+      </button>
+    }
+  </div>
+
+  @if (creating()) {
+    <form [formGroup]="orderForm" (ngSubmit)="create()" novalidate class="card">
+      <h2>{{ 'gestion.registrations.create.title' | translate }}</h2>
+      <p class="muted">{{ 'gestion.registrations.create.lead' | translate }}</p>
+      <div class="grid-2">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>{{ 'gestion.registrations.fields.email' | translate }}</mat-label>
+          <input matInput type="email" formControlName="email" required maxlength="254" />
+          <mat-hint>{{ 'gestion.registrations.create.emailHint' | translate }}</mat-hint>
+          <mat-error>{{ error('email') }}</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'gestion.registrations.fields.category' | translate }}</mat-label>
+          <mat-select formControlName="category" required>
+            @for (category of activeCategories(); track category.id) {
+              <mat-option [value]="category.code"
+                >{{ category.code }} — {{ itemLabel(category) }}</mat-option
+              >
+            }
+          </mat-select>
+          <mat-error>{{ error('category') }}</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'gestion.registrations.fields.method' | translate }}</mat-label>
+          <mat-select formControlName="method">
+            @for (method of orderMethods; track method) {
+              <mat-option [value]="method">{{
+                'gestion.registrations.method.' + method | translate
+              }}</mat-option>
+            }
+          </mat-select>
+          <mat-error>{{ error('method') }}</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'gestion.registrations.fields.options' | translate }}</mat-label>
+          <mat-select formControlName="options" multiple>
+            @for (option of activeOptions(); track option.id) {
+              <mat-option [value]="option.code"
+                >{{ option.code }} — {{ itemLabel(option) }}</mat-option
+              >
+            }
+          </mat-select>
+          <mat-error>{{ error('options') }}</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'gestion.registrations.fields.promoCode' | translate }}</mat-label>
+          <input matInput formControlName="promo_code" maxlength="32" />
+          <mat-error>{{ error('promo_code') }}</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>{{ 'gestion.registrations.fields.billingName' | translate }}</mat-label>
+          <input matInput formControlName="billing_name" maxlength="255" />
+          <mat-hint>{{ 'gestion.registrations.create.billingHint' | translate }}</mat-hint>
+          <mat-error>{{ error('billing_name') }}</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{
+            'gestion.registrations.fields.billingOrganization' | translate
+          }}</mat-label>
+          <input matInput formControlName="billing_organization" maxlength="255" />
+          <mat-error>{{ error('billing_organization') }}</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'gestion.registrations.fields.billingAddress' | translate }}</mat-label>
+          <textarea matInput rows="2" formControlName="billing_address" maxlength="2000"></textarea>
+          <mat-error>{{ error('billing_address') }}</mat-error>
+        </mat-form-field>
+      </div>
+      <div class="actions">
+        <button mat-flat-button type="submit" [disabled]="busy()">
+          {{ 'gestion.registrations.create.submit' | translate }}
+        </button>
+        <button mat-button type="button" (click)="creating.set(false)">
+          {{ 'gestion.registrations.cancelForm' | translate }}
+        </button>
+      </div>
+    </form>
+  }
+
+  <div class="table-wrap">
+    <table>
+      <caption class="visually-hidden">
+        {{
+          'gestion.registrations.title' | translate
+        }}
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">{{ 'gestion.registrations.fields.reference' | translate }}</th>
+          <th scope="col">{{ 'gestion.registrations.fields.person' | translate }}</th>
+          <th scope="col">{{ 'gestion.registrations.fields.category' | translate }}</th>
+          <th scope="col">{{ 'gestion.registrations.fields.status' | translate }}</th>
+          <th scope="col">{{ 'gestion.registrations.fields.method' | translate }}</th>
+          <th scope="col" class="amount">{{ 'gestion.registrations.fields.total' | translate }}</th>
+          <th scope="col">{{ 'gestion.registrations.fields.createdAt' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows(); track row.id) {
+          <tr>
+            <td>
+              <a [routerLink]="[row.id]">{{ row.reference }}</a>
+            </td>
+            <td>
+              {{ row.person.name }}<br />
+              <span class="muted">{{ row.person.email }}</span>
+            </td>
+            <td>
+              {{ categoryName(row) }}
+              @if (row.category.requires_proof) {
+                <span class="badge">{{
+                  (row.has_proof
+                    ? 'gestion.registrations.proof.received'
+                    : 'gestion.registrations.proof.missing'
+                  ) | translate
+                }}</span>
+              }
+            </td>
+            <td>
+              <span class="badge">{{
+                'gestion.registrations.status.' + row.status | translate
+              }}</span>
+              @if (row.has_invoice) {
+                <span class="muted"> · {{ 'gestion.registrations.invoiced' | translate }}</span>
+              }
+              @if (row.status === 'pending' && row.due_at) {
+                <br /><span class="muted">{{
+                  'gestion.registrations.dueAt' | translate: { date: date(row.due_at) }
+                }}</span>
+              }
+            </td>
+            <td>{{ 'gestion.registrations.method.' + row.method | translate }}</td>
+            <td class="amount">{{ amount(row.total, row.currency) }}</td>
+            <td>{{ date(row.created_at) }}</td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="7" class="muted">{{ 'gestion.registrations.empty' | translate }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  @if (pages() > 1) {
+    <nav class="actions" [attr.aria-label]="'gestion.pagination.label' | translate">
+      <button mat-button type="button" [disabled]="page() <= 1" (click)="goTo(page() - 1)">
+        {{ 'gestion.pagination.previous' | translate }}
+      </button>
+      <span>{{ 'gestion.pagination.status' | translate: { page: page(), pages: pages() } }}</span>
+      <button mat-button type="button" [disabled]="page() >= pages()" (click)="goTo(page() + 1)">
+        {{ 'gestion.pagination.next' | translate }}
+      </button>
+    </nav>
+  }
+}

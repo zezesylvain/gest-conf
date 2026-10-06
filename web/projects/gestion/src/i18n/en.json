@@ -29,7 +29,8 @@
         "help": "Help",
         "submissions": "Submissions",
         "reviewing": "Reviewing",
-        "program": "Programme"
+        "program": "Programme",
+        "registrations": "Registration"
       },
       "keywords": {
         "dashboard": "home, status, publish, publication, archive, state, summary",
@@ -56,7 +57,13 @@
         "programSessions": "plenary, workshop, break, times, session chair, discussant, moderator, invited speaker",
         "programRooms": "lecture hall, capacity, equipment, accessibility, venue",
         "programPublication": "publish, version, history, conflicts, portal, emails, public programme",
-        "programSettings": "buffer, changeover, transition, duration, presenter registration"
+        "programSettings": "buffer, changeover, transition, duration, presenter registration",
+        "registrations": "participants, attendees, order, category, status, waiver, cancellation, refund, proof, export, csv",
+        "payments": "receipts, reconciliation, bank transfer, online payment, on site, provider, cinetpay, export, csv",
+        "billingDocuments": "invoice, credit note, pro forma, number, pdf, accounting, export, csv",
+        "finance": "dashboard, revenue, collected, refunded, unpaid, net, breakdown",
+        "pricing": "fees, categories, grid, period, early bird, on site, zone, options, quotas, promo codes, discount, currency, cancellation",
+        "billingProfile": "legal notices, company name, address, VAT, bank details, prefixes, numbering"
       },
       "portalSections": "Sections",
       "portalPages": "Pages",
@@ -72,7 +79,13 @@
       "programSessions": "Sessions",
       "programRooms": "Rooms",
       "programPublication": "Programme publication",
-      "programSettings": "Programme"
+      "programSettings": "Programme",
+      "registrations": "Registrations",
+      "payments": "Payments",
+      "billingDocuments": "Invoices and credit notes",
+      "finance": "Finance",
+      "pricing": "Fees",
+      "billingProfile": "Billing"
     },
     "status": {
       "draft": "draft",
@@ -90,7 +103,8 @@
       "SESSION_CHAIR": "Session chair",
       "ATTENDEE": "Attendee",
       "SPONSOR": "Sponsor",
-      "VOLUNTEER": "Volunteer"
+      "VOLUNTEER": "Volunteer",
+      "SIGNATORY": "Signatory"
     },
     "ocFunctions": {
       "finance": "finance",
@@ -182,6 +196,12 @@
       "program": {
         "title": "Programme",
         "counts": "{{sessions}} session(s), {{toSchedule}} paper(s) to schedule, {{conflicts}} conflict(s)."
+      },
+      "registrations": {
+        "title": "Registration",
+        "counts": "{{confirmed}} confirmed registration(s), {{pending}} awaiting payment.",
+        "money": "Collected: {{collected}}; unpaid: {{outstanding}}.",
+        "todo": "To do: {{invoices}} pending invoice(s), {{orphans}} payment(s) without a confirmed registration."
       }
     },
     "fields": {
@@ -285,7 +305,99 @@
         "buffer": "Buffer between slots (min)",
         "bufferHint": "From 0 to 30 minutes between the slots of a session (RG-13).",
         "registration": "Require a registered presenter (RG-11)",
-        "registrationHint": "No effect until registration opens (next stage)."
+        "registrationHint": "When enabled, a scheduled paper with no registered presenter (confirmed registration) is a conflict, which blocks programme publication."
+      },
+      "pricing": {
+        "title": "Fees",
+        "lead": "Registration settings, categories and fee grid, options and promo codes.",
+        "countriesInvalid": "Local countries: two-letter ISO codes (CI, SN, BF…).",
+        "settings": "Settings",
+        "currency": "Currency",
+        "currencyHint": "Frozen from the first registration.",
+        "localCountries": "“Local” countries",
+        "localCountriesHint": "ISO codes separated by commas (CI, SN…): local fee according to the profile's country.",
+        "methods": "Payment methods offered",
+        "onlineHint": "Online payment is only offered if a provider is configured on the server.",
+        "onlineDeadline": "Online payment deadline (hours)",
+        "transferDeadline": "Bank transfer deadline (days)",
+        "cancellationDeadline": "Cancellation deadline",
+        "localTimeHint": "Edition time ({{zone}}).",
+        "refundBefore": "Refunded before (%)",
+        "refundAfter": "Refunded after (%)",
+        "categories": "Categories and fee grid",
+        "categoriesLead": "An empty cell: combination not offered. Existing orders keep their price.",
+        "category": "Category",
+        "proof": "proof",
+        "inactive": "inactive",
+        "editFees": "Fees",
+        "addCategory": "Add a category",
+        "editCategory": "Edit the category",
+        "codeHint": "Letters, digits, hyphens; fixed at creation.",
+        "requiresProof": "Proof required (student…)",
+        "active": "Active",
+        "feesTitle": "Fee grid",
+        "feesLead": "Amounts in {{currency}}; leave a combination that is not offered empty.",
+        "options": "Options",
+        "optionsLead": "Gala dinner, visit…: places limited by a quota, reserved when ordering.",
+        "option": "Option",
+        "quota": "Places",
+        "allowedCategories": "Allowed categories",
+        "unlimited": "unlimited",
+        "reserved": "{{reserved}} / {{quota}} reserved",
+        "allCategories": "all",
+        "addOption": "Add an option",
+        "editOption": "Edit the option",
+        "priceLocal": "Price (local)",
+        "priceInternational": "Price (international)",
+        "quotaHint": "Empty: no limit.",
+        "allCategoriesHint": "None: all categories.",
+        "promoCodes": "Promo codes",
+        "promoLead": "Percentage or amount discount; a use is reserved when ordering, consumed on confirmation.",
+        "discount": "Discount",
+        "uses": "Uses",
+        "validUntil": "Valid until",
+        "scope": {
+          "registration": "registration only",
+          "all": "registration and options"
+        },
+        "usesValue": "{{consumed}} consumed, {{reserved}} reserved / {{max}}",
+        "addPromo": "Add a promo code",
+        "editPromo": "Edit the promo code",
+        "promoCodeHint": "Saved in capitals.",
+        "kind": "Discount type",
+        "kinds": {
+          "percent": "percentage",
+          "amount": "amount"
+        },
+        "value": "Value",
+        "scopeLabel": "Applies to",
+        "maxUses": "Maximum uses",
+        "maxUsesHint": "Empty: no limit.",
+        "refundHint": "Share of the amount paid refunded on cancellation, before or after the deadline."
+      },
+      "billing": {
+        "title": "Billing details",
+        "lead": "Issuer of the edition's invoices, credit notes and pro forma invoices.",
+        "complete": "Details complete: invoices are issued on confirmation.",
+        "incomplete": "Company name and address missing: no invoice is issued; confirmed registrations wait.",
+        "issuer": "Issuer",
+        "legalName": "Company name",
+        "address": "Address",
+        "taxIdentifiers": "Identifiers",
+        "taxIdentifiersHint": "Trade register, tax identifier…",
+        "bankDetails": "Bank details",
+        "bankDetailsHint": "Printed on pro forma invoices (payment by transfer).",
+        "vat": "VAT",
+        "vatRate": "VAT rate (%)",
+        "vatRateHint": "Empty: no VAT (then give the notice).",
+        "vatNote": "No-VAT notice",
+        "vatNoteHint": "E.g. “VAT not applicable”.",
+        "footer": "Footer",
+        "numbering": "Numbering",
+        "numberingLead": "Number: prefix, edition code, year, rank (F-GC27-2027-00001). A prefix is frozen from the first document of its series.",
+        "invoicePrefix": "Invoice prefix",
+        "creditNotePrefix": "Credit note prefix",
+        "proformaPrefix": "Pro forma prefix"
       }
     },
     "members": {
@@ -817,9 +929,104 @@
           "path": "Settings › Programme",
           "intro": "Two edition settings frame the programme.",
           "buffer": "Buffer: from 0 to 30 minutes between two slots of a session (RG-13).",
-          "registration": "Presenter registration (RG-11): disabled by default; it will take effect with registration.",
+          "registration": "Presenter registration (RG-11): disabled by default; when enabled, the planner flags a paper with no registered presenter, and publication is refused while any remains.",
           "reflowTitle": "Immediate effect",
           "reflowText": "Changing the buffer recalculates the time of every slot. Any overrun appears in the planner."
+        },
+        "registrations": {
+          "title": "Registrations",
+          "summary": "Follow registrations, record a payment received, cancel.",
+          "path": "Registration › Registrations",
+          "intro": "A registration is an order: category, options, promo code, price frozen when ordering. It is confirmed by a payment, a waiver or a zero total.",
+          "filterTitle": "Filter",
+          "filterBody": "By status, category, payment method or search (name, address, reference). The CSV export uses the same filters.",
+          "detailTitle": "Open a record",
+          "detailBody": "The record shows the order, the proof, the documents (PDF), payments, refunds and history.",
+          "manualTitle": "Record a payment received",
+          "manualBody": "Bank transfer or on-site payment of the full amount: the registration is confirmed and the invoice issued.",
+          "cancelTitle": "Cancel, refund",
+          "cancelBody": "A reason is required. A paid registration keeps a refund due; record it once made: a credit note is issued.",
+          "statusesTitle": "Statuses",
+          "statusesText": "Awaiting payment, confirmed, cancelled or expired (payment deadline passed: the place and options are released).",
+          "reauthTitle": "Re-authentication",
+          "reauthText": "Manual payment, refund and export require a recent authentication.",
+          "whoTitle": "Who manages?",
+          "whoText": "The OC “finance” or “secretariat” members and the administrator. The Chair and other OC members consult."
+        },
+        "payments": {
+          "title": "Payments",
+          "summary": "Reconcile receipts.",
+          "path": "Registration › Payments",
+          "intro": "Every online payment attempt and every manually entered payment is listed, with its reference and the provider's.",
+          "online": "Online: initiated, pending, succeeded, failed or abandoned, according to the provider's notification.",
+          "manual": "Manual entry: bank transfer or on site, recorded from the registration record.",
+          "statuses": "Only a “succeeded” payment confirms a registration.",
+          "webhookTitle": "Verified notification",
+          "webhookText": "An online payment is only valid on a notification verified with the provider (RG-15); the browser's return is not enough.",
+          "exportTitle": "Export",
+          "exportText": "The CSV export is logged and requires a recent authentication."
+        },
+        "billing-documents": {
+          "title": "Invoices and credit notes",
+          "summary": "Documents issued and accounting export.",
+          "path": "Registration › Invoices and credit notes",
+          "intro": "Documents are issued by the platform; their PDF is frozen.",
+          "invoice": "Invoice: when a paid registration is confirmed.",
+          "creditNote": "Credit note: when a refund is recorded, against the invoice.",
+          "proforma": "Pro forma: when ordering by bank transfer, or on request; it is not an invoice.",
+          "numberingTitle": "Numbering",
+          "numberingText": "Without gaps, per series and per year: prefix, edition code, year, rank.",
+          "frozenTitle": "Frozen document",
+          "frozenText": "A document is neither edited nor deleted: an error is corrected by a credit note."
+        },
+        "finance-dashboard": {
+          "title": "Finance",
+          "summary": "Revenue, unpaid amounts and items to handle.",
+          "path": "Registration › Finance",
+          "intro": "Amounts in the edition's currency.",
+          "collected": "Collected: successful payments; net: collected minus refunded.",
+          "outstanding": "Unpaid: total of the orders awaiting payment.",
+          "refundsDue": "Refunds still due: due on cancellation, not yet recorded.",
+          "pendingTitle": "Pending invoices",
+          "pendingText": "Without billing details, confirmed registrations wait for their invoice. Complete the details, then “Issue pending invoices”.",
+          "orphansTitle": "Payments to check",
+          "orphansText": "A successful payment on a cancelled or expired registration calls for a refund or an adjustment."
+        },
+        "settings-pricing": {
+          "title": "Fees",
+          "summary": "Registration settings, categories, options, promo codes.",
+          "path": "Settings › Fees",
+          "intro": "The fee depends on the category, the period (early bird, regular, on site, according to the calendar) and the zone (country of the profile).",
+          "settingsTitle": "Settings",
+          "settingsBody": "Currency, payment methods, local countries, payment deadlines, cancellation deadline and shares (edition time).",
+          "categoriesTitle": "Categories",
+          "categoriesBody": "Researcher, student…; a proof may be required.",
+          "feesTitle": "Grid",
+          "feesBody": "One amount per period and per zone; an empty cell is not offered.",
+          "optionsTitle": "Options",
+          "optionsBody": "Local and international price, quota of places, allowed categories.",
+          "promoTitle": "Promo codes",
+          "promoBody": "Percentage or amount, on the registration only or with options, number of uses and deadline.",
+          "frozenTitle": "Frozen price",
+          "frozenText": "An order keeps the price of the day it was placed.",
+          "inUseTitle": "Deletion refused",
+          "inUseText": "A category, option or code already used cannot be deleted: deactivate it.",
+          "onlineTitle": "Online payment",
+          "onlineText": "Offered only if a provider is configured on the server (aggregator to be chosen, Q7)."
+        },
+        "settings-billing": {
+          "title": "Billing details",
+          "summary": "Issuer of the invoices and numbering.",
+          "path": "Settings › Billing",
+          "intro": "These details are printed on every document of the edition.",
+          "issuer": "Issuer: company name, address, identifiers.",
+          "vat": "VAT: a rate, or an exemption notice.",
+          "bank": "Bank details: on pro forma invoices.",
+          "prefixes": "Prefixes of invoices, credit notes and pro forma invoices, frozen from the first document of their series.",
+          "incompleteTitle": "Incomplete details",
+          "incompleteText": "Without a company name and address, no invoice is issued (billing entity to be confirmed, Q8).",
+          "whoTitle": "Who edits?",
+          "whoText": "The OC “finance” members and the administrator, with a recent authentication."
         }
       }
     },
@@ -1514,7 +1721,8 @@
         "slot": "(in conflict)",
         "room": "{{room}}: {{sessions}} overlap (RG-12).",
         "person": "{{person}} is expected in two places at the same time: {{sessions}} (RG-12).",
-        "overflow": "{{sessions}} overruns by {{minutes}} min (RG-13)."
+        "overflow": "{{sessions}} overruns by {{minutes}} min (RG-13).",
+        "registration": "{{sessions}}: no registered presenter ({{person}}) (RG-11)."
       },
       "people": {
         "search": "Search for a person in the edition",
@@ -1644,7 +1852,219 @@
           "message": "Version {{version}} will be published. Everyone whose schedule changes will receive an email. This action is logged.",
           "confirm": "Publish"
         }
+      },
+      "notRegistered": "Presenter not registered"
+    },
+    "registrations": {
+      "title": "Registrations",
+      "lead": "Registrations of the edition: filter, open a record, export.",
+      "search": "Search",
+      "searchHint": "Name, email address or reference (GC27-I00012).",
+      "all": "All",
+      "apply": "Filter",
+      "reset": "Reset",
+      "count": "{{count}} registration(s)",
+      "export": "Export (CSV)",
+      "empty": "No registration.",
+      "loading": "Loading…",
+      "cancelForm": "Cancel",
+      "invoiced": "invoiced",
+      "dueAt": "payable by {{date}}",
+      "fields": {
+        "status": "Status",
+        "category": "Category",
+        "method": "Payment method",
+        "email": "Account email address",
+        "options": "Options",
+        "promoCode": "Promo code",
+        "billingName": "Bill to",
+        "billingOrganization": "Organisation",
+        "billingAddress": "Billing address",
+        "reference": "Reference",
+        "person": "Participant",
+        "total": "Total",
+        "createdAt": "Created on",
+        "pricing": "Fee",
+        "confirmedAt": "Confirmed on",
+        "closedAt": "Closed on",
+        "refundDue": "Refund due",
+        "qr": "Badge (QR code)",
+        "line": "Description",
+        "amount": "Amount",
+        "receivedOn": "Received on",
+        "paymentReference": "Reference (transfer, receipt…)",
+        "note": "Note",
+        "reason": "Reason",
+        "refundPercent": "Refunded share (%)",
+        "refundMethod": "Refund method",
+        "refundedOn": "Refunded on"
+      },
+      "status": {
+        "pending": "awaiting payment",
+        "confirmed": "confirmed",
+        "cancelled": "cancelled",
+        "expired": "expired"
+      },
+      "method": {
+        "online": "online payment",
+        "transfer": "bank transfer",
+        "onsite": "on site",
+        "free": "no payment",
+        "waiver": "fee waiver"
+      },
+      "period": {
+        "early": "early bird",
+        "regular": "regular",
+        "onsite": "on site"
+      },
+      "zone": {
+        "local": "local",
+        "international": "international"
+      },
+      "proof": {
+        "received": "proof received",
+        "missing": "proof missing"
+      },
+      "create": {
+        "action": "Enter a registration",
+        "title": "Enter a registration",
+        "lead": "For an existing account: same rules as for the participant (quotas, promo codes, fee period; on-site fee after closing). The participant receives the order email.",
+        "emailHint": "The account must exist and be active.",
+        "billingHint": "Empty: name from the participant's profile.",
+        "submit": "Save the order"
+      },
+      "detail": {
+        "title": "Registration",
+        "back": "← Registrations",
+        "summary": "Summary",
+        "lines": "Order",
+        "billing": "Billing",
+        "proof": "Proof",
+        "uploadedAt": "uploaded on {{date}}",
+        "documents": "Documents",
+        "noDocuments": "No document issued.",
+        "payments": "Payments",
+        "noPayments": "No payment.",
+        "refunds": "Refunds",
+        "actions": "Actions",
+        "noAction": "No action available in this status.",
+        "history": "History",
+        "payment": {
+          "action": "Record a payment received",
+          "title": "Offline payment",
+          "lead": "Bank transfer or on-site payment of the full amount (no partial payment). The registration is confirmed and the invoice issued.",
+          "amountHint": "Expected amount: {{total}}",
+          "submit": "Record the payment",
+          "done": "Payment recorded: registration confirmed."
+        },
+        "waive": {
+          "action": "Grant a fee waiver",
+          "title": "Fee waiver",
+          "lead": "The registration is confirmed without payment; the reason is logged.",
+          "submit": "Grant the waiver",
+          "done": "Waiver granted: registration confirmed."
+        },
+        "cancel": {
+          "action": "Cancel the registration",
+          "formTitle": "Cancellation",
+          "lead": "The reason is logged and sent to the participant. Refunded share: the edition's rules if left empty.",
+          "percentHint": "From 0 to 100; empty: edition rule (before or after the deadline).",
+          "submit": "Cancel the registration",
+          "done": "Registration cancelled.",
+          "title": "Cancel this registration?",
+          "message": "Cancellation is final; the place and options are released.",
+          "confirm": "Cancel the registration"
+        },
+        "refund": {
+          "action": "Record a refund",
+          "title": "Refund",
+          "lead": "Refund made outside the platform (transfer, cash…). A credit note is issued against the invoice.",
+          "methodHint": "E.g. bank transfer, mobile money, cash.",
+          "submit": "Record the refund",
+          "done": "Refund recorded, credit note issued."
+        },
+        "proforma": {
+          "action": "Issue a pro forma invoice",
+          "done": "Pro forma invoice issued."
+        }
       }
+    },
+    "payments": {
+      "title": "Payments",
+      "lead": "Receipts of the edition, for reconciliation.",
+      "count": "{{count}} payment(s)",
+      "export": "Export (CSV)",
+      "empty": "No payment.",
+      "fields": {
+        "reference": "Reference",
+        "registration": "Registration",
+        "provider": "Provider",
+        "status": "Status",
+        "amount": "Amount",
+        "completedAt": "Date"
+      },
+      "status": {
+        "initiated": "initiated",
+        "pending": "pending",
+        "succeeded": "succeeded",
+        "failed": "failed",
+        "cancelled": "abandoned"
+      },
+      "provider": {
+        "manual": "manual entry",
+        "fake": "fake provider",
+        "cinetpay": "CinetPay"
+      }
+    },
+    "billingDocuments": {
+      "title": "Invoices and credit notes",
+      "lead": "Documents issued (invoices, credit notes, pro forma), numbered without gaps per series.",
+      "count": "{{count}} document(s)",
+      "export": "Export (CSV)",
+      "empty": "No document.",
+      "original": "against invoice {{number}}",
+      "fields": {
+        "kind": "Type",
+        "number": "Number",
+        "registration": "Registration",
+        "amount": "Amount",
+        "issuedAt": "Issued on"
+      },
+      "kind": {
+        "invoice": "Invoice",
+        "credit_note": "Credit note",
+        "proforma": "Pro forma"
+      }
+    },
+    "finance": {
+      "title": "Finance",
+      "lead": "Revenue, refunds and items to handle for the edition.",
+      "profileIncomplete": "Billing details incomplete: no invoice is issued.",
+      "profileLink": "Complete the billing details",
+      "totals": "Amounts",
+      "collected": "Collected",
+      "refunded": "Refunded",
+      "net": "Net",
+      "outstanding": "Unpaid (pending)",
+      "refundsDue": "Refunds still due",
+      "registrations": "Registrations",
+      "waivers": "Waivers",
+      "registrationsLink": "See registrations",
+      "todo": "To do",
+      "pendingInvoices": "Invoices awaiting billing details: {{count}}",
+      "issuePending": "Issue pending invoices",
+      "issued": "{{count}} invoice(s) issued.",
+      "orphanPayments": "Successful payments on an unconfirmed registration (cancelled or expired): {{count}}",
+      "paymentsLink": "See payments",
+      "documents": "Documents",
+      "invoices": "{{count}} invoice(s), {{amount}}",
+      "creditNotes": "{{count}} credit note(s), {{amount}}",
+      "documentsLink": "See documents",
+      "byCategory": "By category (confirmed registrations)",
+      "byMethod": "By payment method (successful payments)",
+      "amount": "Amount",
+      "count": "Count",
+      "none": "Nothing yet."
     }
   }
 }

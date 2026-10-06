@@ -13,6 +13,11 @@ export interface ScheduledSubmission {
   confirmed: boolean;
   default_duration_min: number;
   id: number;
+
+  /**
+   * Un présentateur au moins est inscrit (RG-11) ; nul sans les inscriptions.
+   */
+  presenter_registered: boolean | null;
   presenters: Array<string>;
   reference: string | null;
   status: string;

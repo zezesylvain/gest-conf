@@ -109,10 +109,8 @@ export class InvitationsPage implements OnInit {
   );
   protected readonly roles = computed(() =>
     manageableRoles(
-      this.meStore
-        .me()
-        ?.editions.find((edition) => String(edition.id) === this.editionId())
-        ?.roles.map((item) => item.role) ?? [],
+      this.meStore.me()?.editions.find((edition) => String(edition.id) === this.editionId())
+        ?.roles ?? [],
     ),
   );
   protected readonly form = inject(NonNullableFormBuilder).group({

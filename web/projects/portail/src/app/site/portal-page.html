@@ -77,6 +77,10 @@
               <h1>{{ heading() }}</h1>
               <portail-program-overview [language]="lang()" />
             }
+            @case ('registration') {
+              <h1>{{ heading() }}</h1>
+              <portail-registration-overview [language]="lang()" />
+            }
             @default {
               <h1>{{ heading() }}</h1>
               @if (page.coming_soon) {

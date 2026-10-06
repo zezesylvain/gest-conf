@@ -101,7 +101,17 @@ TRANSITIONS: dict[tuple[str, str], Rule] = {
     (S.SCHEDULED, S.CONFIRMED): Rule(
         Who.ORGANIZERS, "L5", available=True, capability=Capability.PROGRAM_PUBLISH
     ),
-    (S.SCHEDULED, S.PRESENTED): Rule(Who.ORGANIZERS, "L7"),
+    # K8 (plan L7) : communication présentée, marquée depuis la session publiée par le CO
+    # « programme » ou l'administrateur (« program.write ») ; le président de séance de la
+    # session y est autorisé par une délégation de l'application events
+    # (``register_actor_grant``). Correction (retour à « programmée ») : « program.write »
+    # seulement, motif obligatoire.
+    (S.SCHEDULED, S.PRESENTED): Rule(
+        Who.ORGANIZERS, "L7", available=True, capability=Capability.PROGRAM_WRITE
+    ),
+    (S.PRESENTED, S.SCHEDULED): Rule(
+        Who.ORGANIZERS, "L7", available=True, capability=Capability.PROGRAM_WRITE
+    ),
     (S.PRESENTED, S.PUBLISHED): Rule(Who.ORGANIZERS, "L10"),
 }
 
@@ -115,6 +125,12 @@ _EFFECTS: list[Effect] = []
 type Guard = Callable[[Submission, str, datetime], None]
 _GUARDS: list[Guard] = []
 
+# Délégations inscrites par d'autres applications pour une transition précise : f(submission,
+# actor) -> True autorise un acteur qui n'a pas la capacité de la règle (président de séance,
+# plan L7, K8). Elles n'étendent jamais une transition à d'autres statuts.
+type ActorGrant = Callable[[Submission, Actor], bool]
+_ACTOR_GRANTS: dict[tuple[str, str], list[ActorGrant]] = {}
+
 
 def register_effect(effect: Effect) -> None:
     if effect not in _EFFECTS:
@@ -126,6 +142,14 @@ def register_guard(guard: Guard) -> None:
         _GUARDS.append(guard)
 
 
+def register_actor_grant(from_state: str, to_state: str, grant: ActorGrant) -> None:
+    if (from_state, to_state) not in TRANSITIONS:
+        raise ValueError(f"Transition inconnue : {from_state} → {to_state}")
+    grants = _ACTOR_GRANTS.setdefault((from_state, to_state), [])
+    if grant not in grants:
+        grants.append(grant)
+
+
 def allowed_targets(submission: Submission) -> list[str]:
     """Statuts atteignables depuis le statut courant (transitions disponibles)."""
     return [
@@ -133,7 +157,12 @@ def allowed_targets(submission: Submission) -> list[str]:
     ]
 
 
-def _check_actor(rule: Rule, submission: Submission, actor: Actor) -> None:
+def _granted(submission: Submission, to_state: str, actor: Actor) -> bool:
+    grants = _ACTOR_GRANTS.get((submission.status, to_state), [])
+    return any(grant(submission, actor) for grant in grants)
+
+
+def _check_actor(rule: Rule, submission: Submission, actor: Actor, to_state: str) -> None:
     if rule.who == Who.SUBMITTER:
         if actor.kind != ActorKind.USER or actor.user is None:
             raise NotAllowed()
@@ -149,7 +178,7 @@ def _check_actor(rule: Rule, submission: Submission, actor: Actor) -> None:
             access = edition_access(actor.user, submission.edition_id)
         except Http404 as error:
             raise NotAllowed() from error
-        if not access.has(rule.capability):
+        if not access.has(rule.capability) and not _granted(submission, to_state, actor):
             raise NotAllowed()
     else:  # pragma: no cover - règle sans capacité : aucune n'est disponible
         raise NotAllowed()
@@ -178,6 +207,9 @@ def _guard(submission: Submission, to_state: str, reason: str, now: datetime) ->
         raise Invalid(fields={"reason": [_("Motif obligatoire.")]})
     elif to_state == S.REJECTED and submission.status == S.SCREENING and not reason.strip():
         # Étude §5.2 : rejet de recevabilité motivé, notifié à l'auteur.
+        raise Invalid(fields={"reason": [_("Motif obligatoire.")]})
+    elif to_state == S.SCHEDULED and submission.status == S.PRESENTED and not reason.strip():
+        # K8 (plan L7) : correction d'une communication marquée présentée par erreur.
         raise Invalid(fields={"reason": [_("Motif obligatoire.")]})
     for guard in list(_GUARDS):
         guard(submission, to_state, now)
@@ -209,7 +241,7 @@ def transition(
         )
     if submission.edition.status == EditionStatus.ARCHIVED:
         raise RuleViolation(code=ErrorCode.EDITION_ARCHIVED)
-    _check_actor(rule, submission, actor)
+    _check_actor(rule, submission, actor, to_state)
     _guard(submission, to_state, reason, now)
 
     fields = ["status", "revision", "updated_at"]

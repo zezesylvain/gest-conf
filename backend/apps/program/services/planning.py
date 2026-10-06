@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import datetime as dt
 from collections import defaultdict
-from collections.abc import Iterable, Mapping
+from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass
 from typing import Any
 from zoneinfo import ZoneInfo
@@ -305,12 +305,26 @@ def update_session(
     return session
 
 
+# Refus de suppression d'une session déclarés par les autres applications (présences
+# enregistrées, plan L7) : f(session) lève une ``DomainError``. ``program`` n'en dépend pas.
+type SessionGuard = Callable[[Session], None]
+_SESSION_GUARDS: list[SessionGuard] = []
+
+
+def register_session_guard(guard: SessionGuard) -> None:
+    if guard not in _SESSION_GUARDS:
+        _SESSION_GUARDS.append(guard)
+
+
 @transaction.atomic
 def delete_session(session: Session, *, actor: Actor, revision: int | None = None) -> None:
     """Supprime la session, ses créneaux et ses rôles : les communications retournent dans
-    la liste « à programmer » (journalisé)."""
+    la liste « à programmer » (journalisé). Refusée si une autre application l'interdit
+    (présences enregistrées)."""
     edition = session.edition
     state = begin_write(edition, actor, revision)
+    for guard in list(_SESSION_GUARDS):
+        guard(session)
     slots = list(session.slots.values_list("submission__reference", flat=True))
     _audit(
         "session_deleted",
@@ -595,6 +609,40 @@ class ConflictType:
     ROOM = "room"  # RG-12 : deux sessions dans la même salle au même moment
     PERSON = "person"  # RG-12 : une personne à deux endroits au même moment
     OVERFLOW = "overflow"  # RG-13 : créneaux et tampons au-delà de la fin de la session
+    REGISTRATION = "registration"  # RG-11 : aucun présentateur inscrit (plan L6, J10)
+
+
+# RG-11 (plan L6, J10) : personnes inscrites (inscription confirmée) d'une édition, sous forme
+# de clés ``user:<id>`` et ``email:<adresse>``, fournies par l'application des inscriptions :
+# ``program`` n'en dépend pas.
+type RegisteredPeople = Callable[[Edition], frozenset[str]]
+_REGISTERED_PEOPLE: list[RegisteredPeople] = []
+
+
+def register_registered_people(source: RegisteredPeople) -> None:
+    if source not in _REGISTERED_PEOPLE:
+        _REGISTERED_PEOPLE.append(source)
+
+
+def registered_people(edition: Edition) -> frozenset[str] | None:
+    """Clés des personnes inscrites ; ``None`` sans source déclarée."""
+    if not _REGISTERED_PEOPLE:
+        return None
+    keys: set[str] = set()
+    for source in _REGISTERED_PEOPLE:
+        keys |= source(edition)
+    return frozenset(keys)
+
+
+def presenter_registered(submission: Submission, registered: frozenset[str]) -> bool:
+    """Un présentateur au moins est inscrit, reconnu par son compte ou par son adresse."""
+    for author in presenters(submission):
+        keys = {author_key(author)}
+        if author.email:
+            keys.add(f"email:{author.email.strip().lower()}")
+        if keys & registered:
+            return True
+    return False
 
 
 @dataclass(frozen=True, slots=True)
@@ -704,10 +752,26 @@ def detect_conflicts(
     edition: Edition, sessions: list[Session] | None = None
 ) -> list[ProgramConflict]:
     """Analyse complète du brouillon : salles (RG-12), personnes (RG-12), dépassements
-    (RG-13). Une personne présente deux fois dans la **même** session n'est pas en conflit
-    (président qui présente dans sa séance)."""
+    (RG-13), présentateurs non inscrits (RG-11, si l'édition l'exige). Une personne présente
+    deux fois dans la **même** session n'est pas en conflit (président qui présente dans sa
+    séance)."""
     sessions = list(program_sessions(edition)) if sessions is None else sessions
     conflicts: list[ProgramConflict] = []
+
+    registered = registered_people(edition) if edition.presenter_registration_required else None
+    if registered is not None:
+        for session in sessions:
+            for slot in sorted(session.slots.all(), key=lambda item: item.position):
+                if slot.submission_id and not presenter_registered(slot.submission, registered):
+                    names = ", ".join(
+                        f"{author.first_name} {author.last_name}".strip()
+                        for author in presenters(slot.submission)
+                    )
+                    conflicts.append(
+                        ProgramConflict(
+                            ConflictType.REGISTRATION, (session.pk,), (slot.pk,), person=names
+                        )
+                    )
 
     by_room: dict[int, list[Session]] = defaultdict(list)
     for session in sessions:

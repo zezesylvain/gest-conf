@@ -75,6 +75,11 @@
       "review_not_open": "Reviewing is not open for this submission.",
       "discussion_closed": "The discussion opens once your review is submitted and the discussion has started.",
       "deadline_passed": "The deadline has passed.",
+      "registration_closed": "Registration is closed.",
+      "option_full": "No place left for this option.",
+      "promo_code_exhausted": "This promo code has reached its number of uses.",
+      "already_registered": "You are already registered for this edition.",
+      "payment_unavailable": "Online payment is unavailable: try again later or choose another method.",
       "program_conflicts": "The programme has conflicts: fix them before publishing.",
       "program_unchanged": "Nothing has changed since the last publication."
     },

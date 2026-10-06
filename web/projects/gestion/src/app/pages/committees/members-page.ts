@@ -58,10 +58,8 @@ export class MembersPage implements OnInit {
   );
   private readonly myRoles = computed(
     () =>
-      this.meStore
-        .me()
-        ?.editions.find((edition) => String(edition.id) === this.editionId())
-        ?.roles.map((item) => item.role) ?? [],
+      this.meStore.me()?.editions.find((edition) => String(edition.id) === this.editionId())
+        ?.roles ?? [],
   );
   protected readonly canManage = computed(() =>
     editionCapabilities(this.meStore, this.editionId()).includes('members.manage'),

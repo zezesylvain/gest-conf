@@ -1,0 +1,93 @@
+<gc-page-header
+  [heading]="'gestion.billingDocuments.title' | translate"
+  [lead]="'gestion.billingDocuments.lead' | translate"
+/>
+<gc-error-summary [messages]="errors()" />
+
+<form [formGroup]="form" (ngSubmit)="search()" novalidate class="card">
+  <mat-form-field appearance="outline">
+    <mat-label>{{ 'gestion.billingDocuments.fields.kind' | translate }}</mat-label>
+    <mat-select formControlName="kind">
+      <mat-option value="">{{ 'gestion.registrations.all' | translate }}</mat-option>
+      @for (kind of kinds; track kind) {
+        <mat-option [value]="kind">{{
+          'gestion.billingDocuments.kind.' + kind | translate
+        }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+  <div class="actions">
+    <button mat-flat-button type="submit">{{ 'gestion.registrations.apply' | translate }}</button>
+  </div>
+</form>
+
+@if (!loading()) {
+  <div class="actions">
+    <p class="muted" role="status">
+      {{ 'gestion.billingDocuments.count' | translate: { count: count() } }}
+    </p>
+    <button mat-stroked-button type="button" (click)="exportCsv()" [disabled]="busy()">
+      {{ 'gestion.billingDocuments.export' | translate }}
+    </button>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <caption class="visually-hidden">
+        {{
+          'gestion.billingDocuments.title' | translate
+        }}
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">{{ 'gestion.billingDocuments.fields.number' | translate }}</th>
+          <th scope="col">{{ 'gestion.billingDocuments.fields.kind' | translate }}</th>
+          <th scope="col">{{ 'gestion.billingDocuments.fields.registration' | translate }}</th>
+          <th scope="col" class="amount">
+            {{ 'gestion.billingDocuments.fields.amount' | translate }}
+          </th>
+          <th scope="col">{{ 'gestion.billingDocuments.fields.issuedAt' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows(); track row.id) {
+          <tr>
+            <td>
+              <a [href]="href(row)" download>{{ row.number }}</a>
+            </td>
+            <td>
+              {{ 'gestion.billingDocuments.kind.' + row.kind | translate }}
+              @if (row.original) {
+                <br /><span class="muted">{{
+                  'gestion.billingDocuments.original' | translate: { number: row.original }
+                }}</span>
+              }
+            </td>
+            <td>
+              <a [routerLink]="['/editions', editionId(), 'inscriptions', row.registration_id]">{{
+                row.registration_reference
+              }}</a>
+              <br /><span class="muted">{{ row.customer }}</span>
+            </td>
+            <td class="amount">{{ amount(row) }}</td>
+            <td>{{ date(row.issued_at) }}</td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="5" class="muted">{{ 'gestion.billingDocuments.empty' | translate }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  @if (pages() > 1) {
+    <nav class="actions" [attr.aria-label]="'gestion.pagination.label' | translate">
+      <button mat-button type="button" [disabled]="page() <= 1" (click)="goTo(page() - 1)">
+        {{ 'gestion.pagination.previous' | translate }}
+      </button>
+      <span>{{ 'gestion.pagination.status' | translate: { page: page(), pages: pages() } }}</span>
+      <button mat-button type="button" [disabled]="page() >= pages()" (click)="goTo(page() + 1)">
+        {{ 'gestion.pagination.next' | translate }}
+      </button>
+    </nav>
+  }
+}

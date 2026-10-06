@@ -33,7 +33,8 @@ describe('InvitationsPage', () => {
     fixture.componentRef.setInput('editionId', '3');
     await fixture.whenStable();
     const roles = (fixture.componentInstance as unknown as { roles: () => string[] }).roles();
-    expect(roles).toEqual(['SC_CHAIR', 'OC_MEMBER', 'SC_MEMBER']);
+    // Plan L7 (K1, K18) : bénévoles et signataires aussi.
+    expect(roles).toEqual(['SC_CHAIR', 'OC_MEMBER', 'SC_MEMBER', 'VOLUNTEER', 'SIGNATORY']);
   });
 
   it('adresse invalide : aucun envoi, message sur le champ', async () => {

@@ -27,3 +27,6 @@ DATABASES = {"default": database_from_env(default=f"sqlite:///{BASE_DIR / 'db.sq
 
 # Le serveur de développement Angular (ng serve) relaie /api vers runserver.
 CSRF_TRUSTED_ORIGINS = ["http://localhost:4200", "http://localhost:4201"]
+
+# Paiement en ligne de démonstration (plan L6, J6) : fournisseur factice par défaut.
+GESTCONF_PAYMENT_PROVIDER = env.str("GESTCONF_PAYMENT_PROVIDER", default="fake")

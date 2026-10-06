@@ -10,6 +10,8 @@
  * * `SC_MEMBER` - membre du comité scientifique
  * * `SPEAKER` - intervenant
  * * `SESSION_CHAIR` - président de session
+ * * `VOLUNTEER` - bénévole
+ * * `SIGNATORY` - signataire
  */
-export type InvitableRole = 'ADMIN' | 'CHAIR' | 'SC_CHAIR' | 'OC_MEMBER' | 'SC_MEMBER' | 'SPEAKER' | 'SESSION_CHAIR';
+export type InvitableRole = 'ADMIN' | 'CHAIR' | 'SC_CHAIR' | 'OC_MEMBER' | 'SC_MEMBER' | 'SPEAKER' | 'SESSION_CHAIR' | 'VOLUNTEER' | 'SIGNATORY';
 

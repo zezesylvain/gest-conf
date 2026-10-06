@@ -32,6 +32,8 @@ export const CHAIR_EDITION: MeEdition = {
     'grids.write',
     'program.read',
     'program.publish',
+    'registrations.read',
+    'finance.read',
   ],
   mfa_required: true,
 };
@@ -41,6 +43,21 @@ export const PROGRAM_EDITION: MeEdition = {
   ...CHAIR_EDITION,
   roles: [{ role: 'OC_MEMBER', oc_function: 'program' }],
   capabilities: ['edition.read', 'submissions.read', 'program.read', 'program.write'],
+};
+
+/** Membre du CO de fonction « finances » (plan L6, J1) : inscriptions, tarifs et finances. */
+export const FINANCE_EDITION: MeEdition = {
+  ...CHAIR_EDITION,
+  roles: [{ role: 'OC_MEMBER', oc_function: 'finance' }],
+  capabilities: [
+    'edition.read',
+    'submissions.read',
+    'program.read',
+    'registrations.read',
+    'registrations.manage',
+    'pricing.write',
+    'finance.read',
+  ],
 };
 
 /** Relecteur (membre du comité scientifique) : ses évaluations seulement (plan L4, H19). */

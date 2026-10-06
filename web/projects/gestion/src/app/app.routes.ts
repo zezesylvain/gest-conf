@@ -103,6 +103,59 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/program/publication-page').then((m) => m.PublicationPage),
       },
+      // Inscriptions et finances (plan L6, J12).
+      {
+        path: 'inscriptions',
+        title: 'gestion.registrations.title',
+        canActivate: [capabilityGuard('registrations.read')],
+        loadComponent: () =>
+          import('./pages/registrations/registrations-page').then((m) => m.RegistrationsPage),
+      },
+      {
+        path: 'inscriptions/paiements',
+        title: 'gestion.payments.title',
+        canActivate: [capabilityGuard('finance.read')],
+        loadComponent: () =>
+          import('./pages/registrations/payments-page').then((m) => m.PaymentsPage),
+      },
+      {
+        path: 'inscriptions/factures',
+        title: 'gestion.billingDocuments.title',
+        canActivate: [capabilityGuard('finance.read')],
+        loadComponent: () =>
+          import('./pages/registrations/billing-documents-page').then(
+            (m) => m.BillingDocumentsPage,
+          ),
+      },
+      {
+        path: 'inscriptions/finances',
+        title: 'gestion.finance.title',
+        canActivate: [capabilityGuard('finance.read')],
+        loadComponent: () =>
+          import('./pages/registrations/finance-page').then((m) => m.FinancePage),
+      },
+      {
+        path: 'inscriptions/:registrationId',
+        title: 'gestion.registrations.detail.title',
+        canActivate: [capabilityGuard('registrations.read')],
+        loadComponent: () =>
+          import('./pages/registrations/registration-detail-page').then(
+            (m) => m.RegistrationDetailPage,
+          ),
+      },
+      {
+        path: 'parametrage/tarifs',
+        title: 'gestion.settings.pricing.title',
+        canActivate: [capabilityGuard('registrations.read')],
+        loadComponent: () => import('./pages/settings/pricing-page').then((m) => m.PricingPage),
+      },
+      {
+        path: 'parametrage/facturation',
+        title: 'gestion.settings.billing.title',
+        canActivate: [capabilityGuard('finance.read')],
+        loadComponent: () =>
+          import('./pages/settings/billing-profile-page').then((m) => m.BillingProfilePage),
+      },
       {
         path: 'parametrage/programme',
         title: 'gestion.settings.program.title',

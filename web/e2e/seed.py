@@ -3,7 +3,10 @@ comme un opérateur le ferait : conférence, édition publiée et courante, appe
 thématique, type à PDF obligatoire ; PDF de test porteur de métadonnées (retirées en double
 aveugle). Pour l'évaluation (L4) : grille par défaut, fin des évaluations et date de la
 version finale, président du comité scientifique et deux relecteurs (rôles attribués par
-commande, 2FA TOTP activée avec un secret de test connu du navigateur).
+commande, 2FA TOTP activée avec un secret de test connu du navigateur). Pour les inscriptions
+(L6) : dates d'inscription, paramètres (paiement en ligne par le fournisseur factice, virement,
+sur place ; pays local : CI), une catégorie et sa grille, une option à quota ; CO de fonction
+« finances » ; un second participant (Sénégal, tarif international) sans rôle.
 
 Lu sur l'entrée standard de ``manage.py shell`` par ``e2e/django.ts`` ; imprime du JSON.
 """
@@ -11,6 +14,7 @@ Lu sur l'entrée standard de ``manage.py shell`` par ``e2e/django.ts`` ; imprime
 import datetime as dt
 import json
 import tempfile
+from decimal import Decimal
 from zoneinfo import ZoneInfo
 
 from allauth.account.models import EmailAddress
@@ -23,6 +27,8 @@ from apps.accounts.models import Profile, Role, RoleSource, User
 from apps.accounts.services.roles import grant_role
 from apps.conferences import services as conferences
 from apps.core.actor import Actor
+from apps.registrations.services import pricing
+from apps.registrations.services.settings import update_registration_settings
 from apps.reviews.services.grids import create_grid
 
 actor = Actor.command("cli:e2e")
@@ -77,9 +83,46 @@ conferences.create_key_date(
     {"code": "camera_ready", "at_local": now + dt.timedelta(days=40)},
     actor=actor,
 )
+# Inscriptions (plan L6) : ouvertes, tarif préférentiel encore cinq jours.
+for code, delta in (("registration_open", -1), ("early_bird_end", 5), ("registration_close", 30)):
+    conferences.create_key_date(
+        edition, {"code": code, "at_local": now + dt.timedelta(days=delta)}, actor=actor
+    )
 create_grid(edition, name="Grille E2E", actor=actor)
 conferences.set_edition_status(edition, "published", actor=actor, reason="E2E")
 conferences.set_current_edition(conference, edition, actor=actor)
+update_registration_settings(
+    edition,
+    {"online_enabled": True, "transfer_enabled": True, "local_countries": ["CI"]},
+    actor=actor,
+)
+researcher = pricing.create_category(
+    edition,
+    {"code": "chercheur", "label_fr": "Chercheur", "label_en": "Researcher", "position": 0},
+    actor=actor,
+)
+pricing.set_fees(
+    researcher,
+    [
+        {"period": "early", "zone": "local", "amount": Decimal("40000")},
+        {"period": "early", "zone": "international", "amount": Decimal("100000")},
+        {"period": "regular", "zone": "local", "amount": Decimal("50000")},
+        {"period": "regular", "zone": "international", "amount": Decimal("120000")},
+    ],
+    actor=actor,
+)
+pricing.create_option(
+    edition,
+    {
+        "code": "diner",
+        "label_fr": "Dîner de gala",
+        "label_en": "Gala dinner",
+        "price_local": Decimal("10000"),
+        "price_international": Decimal("15000"),
+        "quota": 50,
+    },
+    actor=actor,
+)
 
 writer = PdfWriter()
 writer.add_blank_page(595, 842)
@@ -99,6 +142,14 @@ committee = {
         "Mariam",
         "Bamba",
         "INP-HB",
+        Role.OC_MEMBER,
+    ),
+    # Inscriptions (plan L6, J1) : CO « finances » (tarifs, facturation, paiements manuels).
+    "finance": (
+        "finances@e2e.example.org",
+        "Fatou",
+        "Sangaré",
+        "Université FHB",
         Role.OC_MEMBER,
     ),
     "conference_chair": (
@@ -144,8 +195,25 @@ for email, first_name, last_name, institution, role in committee.values():
         role=role,
         actor=actor,
         source=RoleSource.COMMAND,
-        oc_function="program" if role == Role.OC_MEMBER else "",
+        oc_function={
+            "programme@e2e.example.org": "program",
+            "finances@e2e.example.org": "finance",
+        }.get(email, ""),
     )
+
+# Second participant (plan L6) : compte vérifié, profil complet au Sénégal, sans rôle.
+PARTICIPANT = "participant@e2e.example.org"
+participant = User.objects.create_user(email=PARTICIPANT, password=PASSWORD)
+EmailAddress.objects.create(user=participant, email=PARTICIPANT, primary=True, verified=True)
+Profile.objects.update_or_create(
+    user=participant,
+    defaults={
+        "first_name": "Ousmane",
+        "last_name": "Ndiaye",
+        "institution": "Université Cheikh Anta Diop",
+        "country": "SN",
+    },
+)
 
 print(
     json.dumps(
@@ -155,6 +223,7 @@ print(
             "pdf": handle.name,
             "password": PASSWORD,
             "totp": TOTP_SECRET,
+            "participant": PARTICIPANT,
             **{key: value[0] for key, value in committee.items()},
         }
     )

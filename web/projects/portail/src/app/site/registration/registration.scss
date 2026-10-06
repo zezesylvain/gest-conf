@@ -1,0 +1,36 @@
+/* Page publique « Inscription » (plan L6, J13) : sans Material, comme le reste du portail. */
+.table-wrap {
+  overflow-x: auto;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th,
+td {
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--gc-border);
+  text-align: start;
+  vertical-align: top;
+}
+.amount {
+  text-align: end;
+  white-space: nowrap;
+}
+.tag {
+  display: inline-block;
+  margin-inline-start: 0.5rem;
+  padding: 0 0.4rem;
+  border: 1px solid var(--gc-border);
+  border-radius: 0.25rem;
+  font-size: 0.85rem;
+  font-weight: 400;
+}
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

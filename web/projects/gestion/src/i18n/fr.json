@@ -29,7 +29,8 @@
         "help": "Aide",
         "submissions": "Soumissions",
         "reviewing": "Évaluation",
-        "program": "Programme"
+        "program": "Programme",
+        "registrations": "Inscriptions"
       },
       "keywords": {
         "dashboard": "accueil, statut, publier, publication, archiver, état, résumé",
@@ -56,7 +57,13 @@
         "programSessions": "séances, plénière, atelier, pause, horaires, président de séance, discutant, modérateur, intervenant invité",
         "programRooms": "amphithéâtre, capacité, équipements, accessibilité, lieu",
         "programPublication": "publier, version, historique, conflits, portail, e-mails, programme public",
-        "programSettings": "tampon, battement, transition, durée, inscription des présentateurs"
+        "programSettings": "tampon, battement, transition, durée, inscription des présentateurs",
+        "registrations": "participants, inscrits, commande, catégorie, statut, gratuité, annulation, remboursement, justificatif, export, csv",
+        "payments": "encaissements, rapprochement, virement, paiement en ligne, sur place, fournisseur, cinetpay, export, csv",
+        "billingDocuments": "facture, avoir, pro forma, numéro, pdf, comptabilité, export, csv",
+        "finance": "tableau de bord, recettes, encaissé, remboursé, impayés, net, répartition",
+        "pricing": "tarifs, catégories, grille, période, préférentiel, sur place, zone, options, quotas, codes promo, remise, devise, annulation",
+        "billingProfile": "mentions légales, raison sociale, adresse, TVA, coordonnées bancaires, préfixes, numérotation"
       },
       "portalSections": "Sections",
       "portalPages": "Pages",
@@ -72,7 +79,13 @@
       "programSessions": "Sessions",
       "programRooms": "Salles",
       "programPublication": "Publication du programme",
-      "programSettings": "Programme"
+      "programSettings": "Programme",
+      "registrations": "Inscriptions",
+      "payments": "Paiements",
+      "billingDocuments": "Factures et avoirs",
+      "finance": "Finances",
+      "pricing": "Tarifs",
+      "billingProfile": "Facturation"
     },
     "status": {
       "draft": "brouillon",
@@ -90,7 +103,8 @@
       "SESSION_CHAIR": "Président de session",
       "ATTENDEE": "Participant",
       "SPONSOR": "Partenaire",
-      "VOLUNTEER": "Bénévole"
+      "VOLUNTEER": "Bénévole",
+      "SIGNATORY": "Signataire"
     },
     "ocFunctions": {
       "finance": "finances",
@@ -182,6 +196,12 @@
       "program": {
         "title": "Programme",
         "counts": "{{sessions}} session(s), {{toSchedule}} communication(s) à programmer, {{conflicts}} conflit(s)."
+      },
+      "registrations": {
+        "title": "Inscriptions",
+        "counts": "{{confirmed}} inscription(s) confirmée(s), {{pending}} en attente de paiement.",
+        "money": "Encaissé : {{collected}} ; impayés : {{outstanding}}.",
+        "todo": "À traiter : {{invoices}} facture(s) en attente, {{orphans}} paiement(s) sans inscription confirmée."
       }
     },
     "fields": {
@@ -285,7 +305,99 @@
         "buffer": "Tampon entre créneaux (min)",
         "bufferHint": "De 0 à 30 minutes entre les créneaux d'une session (RG-13).",
         "registration": "Exiger l'inscription d'un présentateur (RG-11)",
-        "registrationHint": "Sans effet tant que les inscriptions ne sont pas ouvertes (lot suivant)."
+        "registrationHint": "Activé : une communication placée sans présentateur inscrit (inscription confirmée) est un conflit, qui bloque la publication du programme."
+      },
+      "pricing": {
+        "title": "Tarifs",
+        "lead": "Paramètres des inscriptions, catégories et grille des tarifs, options et codes promo.",
+        "countriesInvalid": "Pays locaux : codes ISO à deux lettres (CI, SN, BF…).",
+        "settings": "Paramètres",
+        "currency": "Devise",
+        "currencyHint": "Figée dès la première inscription.",
+        "localCountries": "Pays « locaux »",
+        "localCountriesHint": "Codes ISO séparés par des virgules (CI, SN…) : tarif local selon le pays du profil.",
+        "methods": "Moyens de paiement proposés",
+        "onlineHint": "Le paiement en ligne n'est proposé que si un fournisseur est configuré sur le serveur.",
+        "onlineDeadline": "Délai du paiement en ligne (heures)",
+        "transferDeadline": "Délai du virement (jours)",
+        "cancellationDeadline": "Date limite d'annulation",
+        "localTimeHint": "Heure de l'édition ({{zone}}).",
+        "refundBefore": "Remboursé avant (%)",
+        "refundAfter": "Remboursé après (%)",
+        "categories": "Catégories et grille des tarifs",
+        "categoriesLead": "Une cellule vide : combinaison non proposée. Les inscriptions déjà passées gardent leur prix.",
+        "category": "Catégorie",
+        "proof": "justificatif",
+        "inactive": "inactive",
+        "editFees": "Tarifs",
+        "addCategory": "Ajouter une catégorie",
+        "editCategory": "Modifier la catégorie",
+        "codeHint": "Lettres, chiffres, tirets ; fixé à la création.",
+        "requiresProof": "Justificatif demandé (étudiant…)",
+        "active": "Active",
+        "feesTitle": "Grille des tarifs",
+        "feesLead": "Montants en {{currency}} ; laissez vide une combinaison non proposée.",
+        "options": "Options",
+        "optionsLead": "Dîner de gala, visite… : places limitées par un quota, réservées dès la commande.",
+        "option": "Option",
+        "quota": "Places",
+        "allowedCategories": "Catégories autorisées",
+        "unlimited": "illimité",
+        "reserved": "{{reserved}} / {{quota}} réservées",
+        "allCategories": "toutes",
+        "addOption": "Ajouter une option",
+        "editOption": "Modifier l'option",
+        "priceLocal": "Prix (local)",
+        "priceInternational": "Prix (international)",
+        "quotaHint": "Vide : sans limite.",
+        "allCategoriesHint": "Aucune : toutes les catégories.",
+        "promoCodes": "Codes promo",
+        "promoLead": "Remise en pourcentage ou en montant ; une utilisation est réservée à la commande, consommée à la confirmation.",
+        "discount": "Remise",
+        "uses": "Utilisations",
+        "validUntil": "Valable jusqu'au",
+        "scope": {
+          "registration": "inscription seule",
+          "all": "inscription et options"
+        },
+        "usesValue": "{{consumed}} consommée(s), {{reserved}} réservée(s) / {{max}}",
+        "addPromo": "Ajouter un code promo",
+        "editPromo": "Modifier le code promo",
+        "promoCodeHint": "Enregistré en majuscules.",
+        "kind": "Type de remise",
+        "kinds": {
+          "percent": "pourcentage",
+          "amount": "montant"
+        },
+        "value": "Valeur",
+        "scopeLabel": "S'applique à",
+        "maxUses": "Utilisations maximales",
+        "maxUsesHint": "Vide : sans limite.",
+        "refundHint": "Part du payé remboursée en cas d'annulation, avant ou après la date limite."
+      },
+      "billing": {
+        "title": "Mentions de facturation",
+        "lead": "Émetteur des factures, avoirs et pro forma de l'édition.",
+        "complete": "Mentions complètes : les factures s'émettent à la confirmation.",
+        "incomplete": "Raison sociale et adresse manquantes : aucune facture ne s'émet ; les inscriptions confirmées attendent.",
+        "issuer": "Émetteur",
+        "legalName": "Raison sociale",
+        "address": "Adresse",
+        "taxIdentifiers": "Identifiants",
+        "taxIdentifiersHint": "Registre du commerce, identifiant fiscal…",
+        "bankDetails": "Coordonnées bancaires",
+        "bankDetailsHint": "Imprimées sur les pro forma (règlement par virement).",
+        "vat": "TVA",
+        "vatRate": "Taux de TVA (%)",
+        "vatRateHint": "Vide : pas de TVA (indiquez alors la mention).",
+        "vatNote": "Mention sans TVA",
+        "vatNoteHint": "Ex. : « TVA non applicable ».",
+        "footer": "Pied de page",
+        "numbering": "Numérotation",
+        "numberingLead": "Numéro : préfixe, code de l'édition, année, rang (F-GC27-2027-00001). Un préfixe se fige dès la première pièce de sa série.",
+        "invoicePrefix": "Préfixe des factures",
+        "creditNotePrefix": "Préfixe des avoirs",
+        "proformaPrefix": "Préfixe des pro forma"
       }
     },
     "members": {
@@ -817,9 +929,104 @@
           "path": "Paramétrage › Programme",
           "intro": "Deux réglages de l'édition encadrent le programme.",
           "buffer": "Tampon : de 0 à 30 minutes entre deux créneaux d'une même session (RG-13).",
-          "registration": "Inscription des présentateurs (RG-11) : désactivée par défaut ; elle prendra effet avec les inscriptions.",
+          "registration": "Inscription des présentateurs (RG-11) : désactivée par défaut ; activée, le planificateur signale une communication sans présentateur inscrit, et la publication est refusée tant qu'il en reste.",
           "reflowTitle": "Effet immédiat",
           "reflowText": "Changer le tampon recalcule l'horaire de tous les créneaux. Un débordement éventuel apparaît dans le planificateur."
+        },
+        "registrations": {
+          "title": "Inscriptions",
+          "summary": "Suivre les inscriptions, saisir un paiement reçu, annuler.",
+          "path": "Inscriptions › Inscriptions",
+          "intro": "Une inscription est une commande : catégorie, options, code promo, prix figé à la commande. Elle est confirmée par un paiement, une gratuité ou un total nul.",
+          "filterTitle": "Filtrer",
+          "filterBody": "Par statut, catégorie, moyen de paiement ou recherche (nom, adresse, référence). L'export CSV reprend les mêmes filtres.",
+          "detailTitle": "Ouvrir une fiche",
+          "detailBody": "La fiche montre la commande, le justificatif, les pièces (PDF), les paiements, les remboursements et l'historique.",
+          "manualTitle": "Enregistrer un paiement reçu",
+          "manualBody": "Virement ou règlement sur place, du montant total : l'inscription est confirmée et la facture émise.",
+          "cancelTitle": "Annuler, rembourser",
+          "cancelBody": "Le motif est obligatoire. Une inscription payée garde un remboursement dû ; enregistrez-le une fois fait : un avoir est émis.",
+          "statusesTitle": "Statuts",
+          "statusesText": "En attente de paiement, confirmée, annulée ou expirée (délai de paiement dépassé : la place et les options sont libérées).",
+          "reauthTitle": "Nouvelle authentification",
+          "reauthText": "Paiement manuel, remboursement et export demandent une authentification récente.",
+          "whoTitle": "Qui gère ?",
+          "whoText": "Le CO « finances » ou « secrétariat » et l'administrateur. Le Chair et les autres membres du CO consultent."
+        },
+        "payments": {
+          "title": "Paiements",
+          "summary": "Rapprocher les encaissements.",
+          "path": "Inscriptions › Paiements",
+          "intro": "Chaque tentative de paiement en ligne et chaque paiement saisi à la main y figure, avec sa référence et celle du fournisseur.",
+          "online": "En ligne : initié, en cours, réussi, échoué ou abandonné, selon la notification du fournisseur.",
+          "manual": "Saisie manuelle : virement ou sur place, enregistré depuis la fiche de l'inscription.",
+          "statuses": "Seul un paiement « réussi » confirme une inscription.",
+          "webhookTitle": "Notification vérifiée",
+          "webhookText": "Un paiement en ligne n'est valide que sur notification vérifiée auprès du fournisseur (RG-15) ; le retour du navigateur ne suffit pas.",
+          "exportTitle": "Export",
+          "exportText": "L'export CSV est journalisé et demande une authentification récente."
+        },
+        "billing-documents": {
+          "title": "Factures et avoirs",
+          "summary": "Pièces émises et export comptable.",
+          "path": "Inscriptions › Factures et avoirs",
+          "intro": "Les pièces sont émises par la plateforme ; leur PDF est figé.",
+          "invoice": "Facture : à la confirmation d'une inscription payante.",
+          "creditNote": "Avoir : à l'enregistrement d'un remboursement, sur la facture.",
+          "proforma": "Pro forma : à la commande par virement, ou à la demande ; elle ne vaut pas facture.",
+          "numberingTitle": "Numérotation",
+          "numberingText": "Sans trou, par série et par année : préfixe, code de l'édition, année, rang.",
+          "frozenTitle": "Pièce figée",
+          "frozenText": "Une pièce ne se modifie ni ne se supprime : une erreur se corrige par un avoir."
+        },
+        "finance-dashboard": {
+          "title": "Finances",
+          "summary": "Recettes, impayés et points à traiter.",
+          "path": "Inscriptions › Finances",
+          "intro": "Montants dans la devise de l'édition.",
+          "collected": "Encaissé : paiements réussis ; net : encaissé moins remboursé.",
+          "outstanding": "Impayés : total des commandes en attente de paiement.",
+          "refundsDue": "Remboursements restant dus : dus à l'annulation, pas encore enregistrés.",
+          "pendingTitle": "Factures en attente",
+          "pendingText": "Sans mentions de facturation, les inscriptions confirmées attendent leur facture. Complétez les mentions, puis « Émettre les factures en attente ».",
+          "orphansTitle": "Paiements à vérifier",
+          "orphansText": "Un paiement réussi sur une inscription annulée ou expirée appelle un remboursement ou une régularisation."
+        },
+        "settings-pricing": {
+          "title": "Tarifs",
+          "summary": "Paramètres des inscriptions, catégories, options, codes promo.",
+          "path": "Paramétrage › Tarifs",
+          "intro": "Le tarif dépend de la catégorie, de la période (préférentiel, normal, sur place, selon le calendrier) et de la zone (pays du profil).",
+          "settingsTitle": "Paramètres",
+          "settingsBody": "Devise, moyens de paiement, pays locaux, délais de paiement, date limite et parts d'annulation (heure de l'édition).",
+          "categoriesTitle": "Catégories",
+          "categoriesBody": "Chercheur, étudiant… ; un justificatif peut être demandé.",
+          "feesTitle": "Grille",
+          "feesBody": "Un montant par période et par zone ; une cellule vide n'est pas proposée.",
+          "optionsTitle": "Options",
+          "optionsBody": "Prix local et international, quota de places, catégories autorisées.",
+          "promoTitle": "Codes promo",
+          "promoBody": "Pourcentage ou montant, sur l'inscription seule ou avec les options, nombre d'utilisations et date limite.",
+          "frozenTitle": "Prix figé",
+          "frozenText": "Une commande garde le prix du jour où elle a été passée.",
+          "inUseTitle": "Suppression refusée",
+          "inUseText": "Une catégorie, une option ou un code déjà utilisé ne se supprime pas : désactivez-le.",
+          "onlineTitle": "Paiement en ligne",
+          "onlineText": "Proposé seulement si un fournisseur est configuré sur le serveur (agrégateur à choisir, Q7)."
+        },
+        "settings-billing": {
+          "title": "Mentions de facturation",
+          "summary": "Émetteur des factures et numérotation.",
+          "path": "Paramétrage › Facturation",
+          "intro": "Ces mentions sont imprimées sur chaque pièce de l'édition.",
+          "issuer": "Émetteur : raison sociale, adresse, identifiants.",
+          "vat": "TVA : un taux, ou une mention d'exonération.",
+          "bank": "Coordonnées bancaires : sur les pro forma.",
+          "prefixes": "Préfixes des factures, avoirs et pro forma, figés dès la première pièce de leur série.",
+          "incompleteTitle": "Mentions incomplètes",
+          "incompleteText": "Sans raison sociale ni adresse, aucune facture ne s'émet (entité de facturation à confirmer, Q8).",
+          "whoTitle": "Qui modifie ?",
+          "whoText": "Le CO « finances » et l'administrateur, avec une authentification récente."
         }
       }
     },
@@ -1514,7 +1721,8 @@
         "slot": "(en conflit)",
         "room": "{{room}} : {{sessions}} se chevauchent (RG-12).",
         "person": "{{person}} est attendu(e) à deux endroits en même temps : {{sessions}} (RG-12).",
-        "overflow": "{{sessions}} déborde de {{minutes}} min (RG-13)."
+        "overflow": "{{sessions}} déborde de {{minutes}} min (RG-13).",
+        "registration": "{{sessions}} : aucun présentateur inscrit ({{person}}) (RG-11)."
       },
       "people": {
         "search": "Rechercher une personne de l'édition",
@@ -1644,7 +1852,219 @@
           "message": "La version {{version}} sera publiée. Chaque personne dont le passage change recevra un e-mail. Cette action est journalisée.",
           "confirm": "Publier"
         }
+      },
+      "notRegistered": "Présentateur non inscrit"
+    },
+    "registrations": {
+      "title": "Inscriptions",
+      "lead": "Inscriptions de l'édition : filtrez, ouvrez une fiche, exportez.",
+      "search": "Rechercher",
+      "searchHint": "Nom, adresse e-mail ou référence (GC27-I00012).",
+      "all": "Tous",
+      "apply": "Filtrer",
+      "reset": "Réinitialiser",
+      "count": "{{count}} inscription(s)",
+      "export": "Exporter (CSV)",
+      "empty": "Aucune inscription.",
+      "loading": "Chargement…",
+      "cancelForm": "Annuler",
+      "invoiced": "facturée",
+      "dueAt": "à régler avant le {{date}}",
+      "fields": {
+        "status": "Statut",
+        "category": "Catégorie",
+        "method": "Moyen de paiement",
+        "email": "Adresse e-mail du compte",
+        "options": "Options",
+        "promoCode": "Code promo",
+        "billingName": "Nom à facturer",
+        "billingOrganization": "Organisme",
+        "billingAddress": "Adresse de facturation",
+        "reference": "Référence",
+        "person": "Participant",
+        "total": "Total",
+        "createdAt": "Créée le",
+        "pricing": "Tarif",
+        "confirmedAt": "Confirmée le",
+        "closedAt": "Close le",
+        "refundDue": "Remboursement dû",
+        "qr": "Badge (code QR)",
+        "line": "Désignation",
+        "amount": "Montant",
+        "receivedOn": "Reçu le",
+        "paymentReference": "Référence (virement, reçu…)",
+        "note": "Note",
+        "reason": "Motif",
+        "refundPercent": "Part remboursée (%)",
+        "refundMethod": "Moyen du remboursement",
+        "refundedOn": "Remboursé le"
+      },
+      "status": {
+        "pending": "en attente de paiement",
+        "confirmed": "confirmée",
+        "cancelled": "annulée",
+        "expired": "expirée"
+      },
+      "method": {
+        "online": "paiement en ligne",
+        "transfer": "virement",
+        "onsite": "sur place",
+        "free": "sans paiement",
+        "waiver": "gratuité"
+      },
+      "period": {
+        "early": "préférentiel",
+        "regular": "normal",
+        "onsite": "sur place"
+      },
+      "zone": {
+        "local": "local",
+        "international": "international"
+      },
+      "proof": {
+        "received": "justificatif reçu",
+        "missing": "justificatif manquant"
+      },
+      "create": {
+        "action": "Saisir une inscription",
+        "title": "Saisir une inscription",
+        "lead": "Pour un compte existant : mêmes règles que pour le participant (quotas, codes promo, période tarifaire ; tarif « sur place » après la clôture). Le participant reçoit l'e-mail de commande.",
+        "emailHint": "Le compte doit exister et être actif.",
+        "billingHint": "Vide : nom du profil du participant.",
+        "submit": "Enregistrer la commande"
+      },
+      "detail": {
+        "title": "Inscription",
+        "back": "← Inscriptions",
+        "summary": "Résumé",
+        "lines": "Commande",
+        "billing": "Facturation",
+        "proof": "Justificatif",
+        "uploadedAt": "déposé le {{date}}",
+        "documents": "Pièces",
+        "noDocuments": "Aucune pièce émise.",
+        "payments": "Paiements",
+        "noPayments": "Aucun paiement.",
+        "refunds": "Remboursements",
+        "actions": "Actions",
+        "noAction": "Aucune action possible dans ce statut.",
+        "history": "Historique",
+        "payment": {
+          "action": "Enregistrer un paiement reçu",
+          "title": "Paiement reçu hors ligne",
+          "lead": "Virement ou règlement sur place, du montant total (pas de paiement partiel). L'inscription est confirmée et la facture émise.",
+          "amountHint": "Montant attendu : {{total}}",
+          "submit": "Enregistrer le paiement",
+          "done": "Paiement enregistré : inscription confirmée."
+        },
+        "waive": {
+          "action": "Accorder la gratuité",
+          "title": "Gratuité",
+          "lead": "L'inscription est confirmée sans paiement ; le motif est journalisé.",
+          "submit": "Accorder la gratuité",
+          "done": "Gratuité accordée : inscription confirmée."
+        },
+        "cancel": {
+          "action": "Annuler l'inscription",
+          "formTitle": "Annulation",
+          "lead": "Le motif est journalisé et communiqué au participant. Part remboursée : selon les règles de l'édition si vous la laissez vide.",
+          "percentHint": "De 0 à 100 ; vide : règle de l'édition (avant ou après la date limite).",
+          "submit": "Annuler l'inscription",
+          "done": "Inscription annulée.",
+          "title": "Annuler cette inscription ?",
+          "message": "L'annulation est définitive ; la place et les options sont libérées.",
+          "confirm": "Annuler l'inscription"
+        },
+        "refund": {
+          "action": "Enregistrer un remboursement",
+          "title": "Remboursement",
+          "lead": "Remboursement fait hors plateforme (virement, espèces…). Un avoir est émis sur la facture.",
+          "methodHint": "Ex. : virement, mobile money, espèces.",
+          "submit": "Enregistrer le remboursement",
+          "done": "Remboursement enregistré, avoir émis."
+        },
+        "proforma": {
+          "action": "Émettre une facture pro forma",
+          "done": "Facture pro forma émise."
+        }
       }
+    },
+    "payments": {
+      "title": "Paiements",
+      "lead": "Encaissements de l'édition, pour le rapprochement.",
+      "count": "{{count}} paiement(s)",
+      "export": "Exporter (CSV)",
+      "empty": "Aucun paiement.",
+      "fields": {
+        "reference": "Référence",
+        "registration": "Inscription",
+        "provider": "Fournisseur",
+        "status": "Statut",
+        "amount": "Montant",
+        "completedAt": "Date"
+      },
+      "status": {
+        "initiated": "initié",
+        "pending": "en cours",
+        "succeeded": "réussi",
+        "failed": "échoué",
+        "cancelled": "abandonné"
+      },
+      "provider": {
+        "manual": "saisie manuelle",
+        "fake": "fournisseur factice",
+        "cinetpay": "CinetPay"
+      }
+    },
+    "billingDocuments": {
+      "title": "Factures et avoirs",
+      "lead": "Pièces émises (factures, avoirs, pro forma), numérotées sans trou par série.",
+      "count": "{{count}} pièce(s)",
+      "export": "Exporter (CSV)",
+      "empty": "Aucune pièce.",
+      "original": "sur la facture {{number}}",
+      "fields": {
+        "kind": "Nature",
+        "number": "Numéro",
+        "registration": "Inscription",
+        "amount": "Montant",
+        "issuedAt": "Émise le"
+      },
+      "kind": {
+        "invoice": "Facture",
+        "credit_note": "Avoir",
+        "proforma": "Pro forma"
+      }
+    },
+    "finance": {
+      "title": "Finances",
+      "lead": "Recettes, remboursements et points à traiter de l'édition.",
+      "profileIncomplete": "Mentions de facturation incomplètes : aucune facture ne s'émet.",
+      "profileLink": "Compléter les mentions",
+      "totals": "Montants",
+      "collected": "Encaissé",
+      "refunded": "Remboursé",
+      "net": "Net",
+      "outstanding": "Impayés (en attente)",
+      "refundsDue": "Remboursements restant dus",
+      "registrations": "Inscriptions",
+      "waivers": "Gratuités",
+      "registrationsLink": "Voir les inscriptions",
+      "todo": "À traiter",
+      "pendingInvoices": "Factures en attente des mentions de facturation : {{count}}",
+      "issuePending": "Émettre les factures en attente",
+      "issued": "{{count}} facture(s) émise(s).",
+      "orphanPayments": "Paiements réussis sur une inscription non confirmée (annulée ou expirée) : {{count}}",
+      "paymentsLink": "Voir les paiements",
+      "documents": "Pièces",
+      "invoices": "{{count}} facture(s), {{amount}}",
+      "creditNotes": "{{count}} avoir(s), {{amount}}",
+      "documentsLink": "Voir les pièces",
+      "byCategory": "Par catégorie (inscriptions confirmées)",
+      "byMethod": "Par moyen de paiement (paiements réussis)",
+      "amount": "Montant",
+      "count": "Nombre",
+      "none": "Rien pour l'instant."
     }
   }
 }

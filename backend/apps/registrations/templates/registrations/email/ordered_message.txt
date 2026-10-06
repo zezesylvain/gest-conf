@@ -1,0 +1,9 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate %}Bonjour,
+
+Votre inscription {{ reference }} à {{ edition_title }} est enregistrée. Montant : {{ total }}, moyen de paiement : {{ method }}.{% endblocktranslate %}
+{% if due %}
+{% blocktranslate %}Elle sera confirmée à réception du paiement, attendu avant le {{ due }}. Passé ce délai, elle expire et les places réservées sont libérées.{% endblocktranslate %}
+{% endif %}
+{% blocktranslate %}Suivi, pro forma et paiement : {{ link }}{% endblocktranslate %}
+
+{% include "account/email/_signature.txt" %}{% endautoescape %}

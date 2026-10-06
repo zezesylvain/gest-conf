@@ -49,29 +49,61 @@ DD, DP, GW = "decisions.decide", "decisions.publish", "grids.write"
 # Plan L5 (I1) : programme lu par les comités, écrit par le CO « programme » et
 # l'administrateur, publié par le Chair.
 PGR, PGW, PGP = "program.read", "program.write", "program.publish"
+# Plan L6 (J1) : inscriptions lues par le CO et le Chair, gérées par les finances et le
+# secrétariat ; tarifs par les finances ; paiements et factures lus par les finances et le Chair.
+RGR, RGM = "registrations.read", "registrations.manage"
+PRW, FIR = "pricing.write", "finance.read"
+# Plan L7 (K1, K18) : pointer (bénévoles, tout le CO, administrateur) ; gérer les pointages
+# (secrétariat, logistique, bénévoles) ; attestations (Chair, secrétariat) ; lettres
+# d'invitation (secrétariat, relations extérieures) ; signature (le signataire seul).
+CKS, CKM = "checkin.scan", "checkin.manage"
+CEM, LEM, SGM = "certificates.manage", "letters.manage", "signature.manage"
 
 SPEC: dict[str, set[str]] = {
     # H19 : l'administrateur n'évalue pas et ne décide pas ; I1 : il ne publie pas le
-    # programme.
-    "ADMIN": {R, W, PUB, ARC, MR, MM, AR, PW, SR, SE, SX, RM, RA, GW, PGR, PGW},
-    # I1 : le Chair lit et publie le programme, sans l'écrire.
-    "CHAIR": {R, W, PUB, MR, MM, AR, PW, SR, SE, SX, RM, RA, DD, DP, GW, PGR, PGP},
+    # programme. J1 : toutes les capacités des inscriptions et des finances.
+    # K18 : il ne renseigne pas la signature d'un signataire.
+    "ADMIN": {R, W, PUB, ARC, MR, MM, AR, PW, SR, SE, SX, RM, RA, GW, PGR, PGW, RGR, RGM}
+    | {PRW, FIR, CKS, CKM, CEM, LEM},
+    # I1 : le Chair lit et publie le programme, sans l'écrire. J1 : il lit les inscriptions
+    # et les finances, sans les gérer. K1 : il émet les attestations, ne pointe pas.
+    "CHAIR": {R, W, PUB, MR, MM, AR, PW, SR, SE, SX, RM, RA, DD, DP, GW, PGR, PGP, RGR, FIR}
+    | {CEM},
     # D8 validée : lecture du paramétrage ; membres du CS seulement. F10, F8 (plan L3) :
     # soumissions (lecture, dérogations, export). H19 : évalue, pilote, décide, publie.
-    # I1 : lit le programme.
+    # I1 : lit le programme. J1 : aucun accès aux inscriptions.
     "SC_CHAIR": {R, MR, MM, SR, SE, SX, RW, RM, RA, DD, DP, GW, PGR},
-    # D8 : lecture seule (fonction « finances ») ; F10 : soumissions ; I1 : programme lu.
-    "OC_MEMBER": {R, SR, PGR},
+    # D8 : lecture seule (fonction « logistique ») ; F10 : soumissions ; I1 : programme lu ;
+    # J1 : inscriptions lues. K1 (plan L7) : tout le CO pointe ; la logistique gère les
+    # pointages.
+    "OC_MEMBER": {R, SR, PGR, RGR, CKS, CKM},
     # E11 (plan L2) : le CO « communication » écrit le portail.
-    "OC_COMMUNICATION": {R, PW, SR, PGR},
-    "OC_PROGRAM": {R, SR, PGR, PGW},  # I1 (plan L5) : le CO « programme » écrit le programme
+    "OC_COMMUNICATION": {R, PW, SR, PGR, RGR, CKS},
+    # I1 (plan L5) : le CO « programme » écrit le programme.
+    "OC_PROGRAM": {R, SR, PGR, PGW, RGR, CKS},
+    # J1 (plan L6) : le CO « finances » gère inscriptions, tarifs et finances ; le
+    # « secrétariat » gère les inscriptions, et en L7 (K1) le jour J, les attestations et les
+    # lettres d'invitation.
+    "OC_FINANCE": {R, SR, PGR, RGR, RGM, PRW, FIR, CKS},
+    "OC_SECRETARIAT": {R, SR, PGR, RGR, RGM, CKS, CKM, CEM, LEM},
+    # K1 (plan L7) : le CO « bénévoles » gère les pointages et les bénévoles (eux seuls) ; les
+    # « relations extérieures » instruisent les lettres d'invitation.
+    "OC_VOLUNTEERS": {R, SR, PGR, RGR, CKS, CKM, MR, MM},
+    "OC_EXTERNAL_RELATIONS": {R, SR, PGR, RGR, CKS, LEM},
     "SC_MEMBER": {RW},  # F10 : pas les soumissions ; H19 : ses affectations seulement
+    "VOLUNTEER": {CKS},  # K1 (plan L7) : pointer, rien d'autre
+    "SIGNATORY": {SGM},  # K18 (plan L7) : sa signature, rien d'autre
     "AUTHOR": set(),
 }
 # Profils qui ne sont pas un rôle seul : (rôle, fonction au CO).
 PROFILE_ROLES = {
+    "OC_MEMBER": (Role.OC_MEMBER, "logistics"),
     "OC_COMMUNICATION": (Role.OC_MEMBER, "communication"),
     "OC_PROGRAM": (Role.OC_MEMBER, "program"),
+    "OC_FINANCE": (Role.OC_MEMBER, "finance"),
+    "OC_SECRETARIAT": (Role.OC_MEMBER, "secretariat"),
+    "OC_VOLUNTEERS": (Role.OC_MEMBER, "volunteers"),
+    "OC_EXTERNAL_RELATIONS": (Role.OC_MEMBER, "external_relations"),
 }
 # Profils sans rôle actif dans l'édition visée : 404 (D5).
 NON_MEMBERS = ("no_role", "other_edition_chair", "revoked_chair", "invited")
@@ -111,6 +143,241 @@ CASES = [
         "/v1/manage/editions/{e}/confidentiality",
         # Réglage non gelé : la soumission en recevabilité du monde gèle double_blind (RG-19).
         {"max_reviews_per_reviewer": 12},
+        recent_auth=True,
+    ),
+    # Plan L6 (L6.1) : paramètres des inscriptions et mentions de facturation (J1).
+    Case(
+        "manage-registration-settings",
+        "GET",
+        RGR,
+        200,
+        "/v1/manage/editions/{e}/registrations/settings",
+    ),
+    Case(
+        "manage-registration-settings",
+        "PATCH",
+        PRW,
+        200,
+        "/v1/manage/editions/{e}/registrations/settings",
+        {"online_deadline_hours": 48},
+    ),
+    # Plan L6 (L6.2) : catalogue des inscriptions (J2 à J4), lu par registrations.read, écrit
+    # par pricing.write.
+    Case(
+        "manage-registration-categories",
+        "GET",
+        RGR,
+        200,
+        "/v1/manage/editions/{e}/registrations/categories",
+    ),
+    Case(
+        "manage-registration-categories",
+        "POST",
+        PRW,
+        201,
+        "/v1/manage/editions/{e}/registrations/categories",
+        {"code": "matrice", "label_fr": "Matrice"},
+    ),
+    Case(
+        "manage-registration-category",
+        "PATCH",
+        PRW,
+        200,
+        "/v1/manage/editions/{e}/registrations/categories/{reg_category}",
+        {"label_fr": "Étudiant"},
+    ),
+    Case(
+        "manage-registration-category",
+        "DELETE",
+        PRW,
+        204,
+        "/v1/manage/editions/{e}/registrations/categories/{reg_free_category}",
+    ),
+    Case(
+        "manage-registration-category-fees",
+        "PUT",
+        PRW,
+        200,
+        "/v1/manage/editions/{e}/registrations/categories/{reg_category}/fees",
+        {"fees": [{"period": "early", "zone": "local", "amount": "25000"}]},
+    ),
+    Case(
+        "manage-registration-options",
+        "GET",
+        RGR,
+        200,
+        "/v1/manage/editions/{e}/registrations/options",
+    ),
+    Case(
+        "manage-registration-options",
+        "POST",
+        PRW,
+        201,
+        "/v1/manage/editions/{e}/registrations/options",
+        {"code": "visite", "label_fr": "Visite"},
+    ),
+    Case(
+        "manage-registration-option",
+        "PATCH",
+        PRW,
+        200,
+        "/v1/manage/editions/{e}/registrations/options/{reg_option}",
+        {"quota": 50},
+    ),
+    Case(
+        "manage-registration-option",
+        "DELETE",
+        PRW,
+        204,
+        "/v1/manage/editions/{e}/registrations/options/{reg_option}",
+    ),
+    Case(
+        "manage-registration-promo-codes",
+        "GET",
+        RGR,
+        200,
+        "/v1/manage/editions/{e}/registrations/promo-codes",
+    ),
+    Case(
+        "manage-registration-promo-codes",
+        "POST",
+        PRW,
+        201,
+        "/v1/manage/editions/{e}/registrations/promo-codes",
+        {"code": "MATRICE", "kind": "percent", "value": "10"},
+    ),
+    Case(
+        "manage-registration-promo-code",
+        "PATCH",
+        PRW,
+        200,
+        "/v1/manage/editions/{e}/registrations/promo-codes/{reg_promo}",
+        {"is_active": False},
+    ),
+    Case(
+        "manage-registration-promo-code",
+        "DELETE",
+        PRW,
+        204,
+        "/v1/manage/editions/{e}/registrations/promo-codes/{reg_promo}",
+    ),
+    # Plan L6 (L6.3) : inscriptions (lecture registrations.read, actions registrations.manage),
+    # paiements manuels, remboursements et factures en attente avec réauthentification (J1).
+    Case("manage-registrations", "GET", RGR, 200, "/v1/manage/editions/{e}/registrations"),
+    Case(
+        "manage-registrations",
+        "POST",
+        RGM,
+        201,
+        "/v1/manage/editions/{e}/registrations",
+        lambda ids: {"email": ids["reg_newcomer"], "category": "etudiant", "method": "onsite"},
+    ),
+    Case(
+        "manage-registration",
+        "GET",
+        RGR,
+        200,
+        "/v1/manage/editions/{e}/registrations/{reg_pending}",
+    ),
+    Case(
+        "manage-registration-cancel",
+        "POST",
+        RGM,
+        200,
+        "/v1/manage/editions/{e}/registrations/{reg_pending}/cancel",
+        {"reason": "Matrice"},
+    ),
+    Case(
+        "manage-registration-waive",
+        "POST",
+        RGM,
+        200,
+        "/v1/manage/editions/{e}/registrations/{reg_pending}/waive",
+        {"reason": "Matrice"},
+    ),
+    Case(
+        "manage-registration-proof",
+        "GET",
+        RGR,
+        200,
+        "/v1/manage/editions/{e}/registrations/{reg_pending}/proof",
+    ),
+    Case(
+        "manage-registration-payments",
+        "POST",
+        RGM,
+        201,
+        "/v1/manage/editions/{e}/registrations/{reg_pending}/payments",
+        lambda ids: {"method": "transfer", "amount": "2000", "received_on": ids["today"]},
+        recent_auth=True,
+    ),
+    Case(
+        "manage-registration-refunds",
+        "POST",
+        RGM,
+        201,
+        "/v1/manage/editions/{e}/registrations/{reg_cancelled}/refunds",
+        lambda ids: {"amount": "2000", "method": "Virement", "refunded_on": ids["today"]},
+        recent_auth=True,
+    ),
+    Case(
+        "manage-registration-proforma",
+        "POST",
+        RGM,
+        201,
+        "/v1/manage/editions/{e}/registrations/{reg_pending}/proforma",
+    ),
+    Case(
+        "manage-registration-document",
+        "GET",
+        RGR,
+        200,
+        "/v1/manage/editions/{e}/registrations/{reg_paid}/documents/{reg_invoice}",
+    ),
+    Case("manage-billing-documents", "GET", FIR, 200, "/v1/manage/editions/{e}/billing/documents"),
+    # Plan L6 (L6.5) : suivi financier et exports journalisés (réauthentification, J1).
+    Case(
+        "manage-registrations-export",
+        "GET",
+        RGR,
+        200,
+        "/v1/manage/editions/{e}/registrations/export",
+        recent_auth=True,
+    ),
+    Case("manage-billing-payments", "GET", FIR, 200, "/v1/manage/editions/{e}/billing/payments"),
+    Case(
+        "manage-billing-payments-export",
+        "GET",
+        FIR,
+        200,
+        "/v1/manage/editions/{e}/billing/payments/export",
+        recent_auth=True,
+    ),
+    Case(
+        "manage-billing-documents-export",
+        "GET",
+        FIR,
+        200,
+        "/v1/manage/editions/{e}/billing/documents/export",
+        recent_auth=True,
+    ),
+    Case("manage-billing-dashboard", "GET", FIR, 200, "/v1/manage/editions/{e}/billing/dashboard"),
+    Case(
+        "manage-billing-issue-pending",
+        "POST",
+        RGM,
+        200,
+        "/v1/manage/editions/{e}/billing/documents/issue-pending",
+        recent_auth=True,
+    ),
+    Case("manage-billing-profile", "GET", FIR, 200, "/v1/manage/editions/{e}/billing/profile"),
+    Case(
+        "manage-billing-profile",
+        "PATCH",
+        PRW,
+        200,
+        "/v1/manage/editions/{e}/billing/profile",
+        {"legal_name": "Association matrice"},
         recent_auth=True,
     ),
     Case("manage-program-settings", "GET", PGR, 200, "/v1/manage/editions/{e}/program/settings"),
@@ -311,7 +578,8 @@ CASES = [
         MM,
         201,
         "/v1/manage/editions/{e}/invitations",
-        {"emails": ["nouveau.relecteur@example.org"], "role": "SC_MEMBER"},
+        # Rôle que le profil gère : comité scientifique, bénévoles pour le CO « bénévoles ».
+        lambda ids: {"emails": ["nouveau.membre@example.org"], "role": ids["invite_role"]},
     ),
     Case(
         "manage-invitation-resend",
@@ -758,6 +1026,158 @@ CASES = [
         "/v1/manage/editions/{e}/reviews/expertise",
         lambda ids: {"tracks": [ids["track_code"]]},
     ),
+    # --- Signature du signataire (plan L7, K18) : la sienne, lue et écrite par lui seul ------
+    Case("manage-signature", "GET", SGM, 200, "/v1/manage/editions/{e}/signature"),
+    Case(
+        "manage-signature",
+        "PATCH",
+        SGM,
+        200,
+        "/v1/manage/editions/{e}/signature",
+        {"title_en": "Conference chair"},
+        recent_auth=True,
+    ),
+    Case("manage-signature-image", "GET", SGM, 200, "/v1/manage/editions/{e}/signature/image"),
+    Case(
+        "manage-signature-image",
+        "PUT",
+        SGM,
+        200,
+        "/v1/manage/editions/{e}/signature/image",
+        lambda ids: {"file": SimpleUploadedFile("signature.png", _signature_png(), "image/png")},
+        recent_auth=True,
+        format="multipart",
+    ),
+    # --- Pointage à l'accueil et badges (plan L7, K2 à K5) -----------------------------------
+    Case("manage-checkin-summary", "GET", CKS, 200, "/v1/manage/editions/{e}/checkin/summary"),
+    Case("manage-checkin-bundle", "GET", CKS, 200, "/v1/manage/editions/{e}/checkin/bundle"),
+    Case(
+        "manage-checkin-scan",
+        "POST",
+        CKS,
+        200,
+        "/v1/manage/editions/{e}/checkin/scan",
+        lambda ids: {"token": ids["reg_token"]},
+    ),
+    Case(
+        "manage-checkin-sync",
+        "POST",
+        CKS,
+        200,
+        "/v1/manage/editions/{e}/checkin/sync",
+        lambda ids: {
+            "items": [
+                {
+                    "idempotency_key": "matrice-0001",
+                    "token": ids["reg_token"],
+                    "scanned_at": "2027-06-01T08:00:00Z",
+                }
+            ]
+        },
+    ),
+    Case(
+        "manage-checkin-manual",
+        "POST",
+        CKM,
+        200,
+        "/v1/manage/editions/{e}/checkin/manual",
+        lambda ids: {"reference": ids["reg_reference"]},
+    ),
+    Case("manage-checkin", "GET", CKM, 200, "/v1/manage/editions/{e}/checkin"),
+    Case(
+        "manage-checkin-cancel",
+        "POST",
+        CKM,
+        200,
+        "/v1/manage/editions/{e}/checkin/{checkin}/cancel",
+        {"reason": "Erreur d'accueil"},
+    ),
+    Case(
+        "manage-checkin-export",
+        "GET",
+        CKM,
+        200,
+        "/v1/manage/editions/{e}/checkin/export",
+        recent_auth=True,
+    ),
+    Case(
+        "manage-badges-batches",
+        "GET",
+        RGR,
+        200,
+        "/v1/manage/editions/{e}/registrations/badges/batches",
+    ),
+    # Paramètre lu dans les objets d'inscription : leur création (paresseuse) précède l'appel.
+    Case(
+        "manage-badges",
+        "GET",
+        RGR,
+        200,
+        "/v1/manage/editions/{e}/registrations/badges?category={reg_category_code}",
+    ),
+    Case(
+        "manage-badge",
+        "GET",
+        RGR,
+        200,
+        "/v1/manage/editions/{e}/registrations/{reg_paid}/badge",
+    ),
+    Case(
+        "manage-badge-regenerate",
+        "POST",
+        CKM,
+        204,
+        "/v1/manage/editions/{e}/registrations/{reg_paid}/regenerate-token",
+        {"reason": "Badge perdu"},
+    ),
+    # --- Émargement et « présentée » (plan L7, K7, K8) : capacité, ou présidence de séance
+    # (testée à part, le président de la session du jour J n'étant pas un profil de la matrice).
+    # Paramètre ignoré par la vue : il fait créer le programme publié avant l'appel.
+    Case(
+        "manage-day-sessions",
+        "GET",
+        CKS,
+        200,
+        "/v1/manage/editions/{e}/day/sessions?session={day_session}",
+    ),
+    Case(
+        "manage-day-attendance",
+        "GET",
+        CKM,
+        200,
+        "/v1/manage/editions/{e}/day/sessions/{day_session}/attendance",
+    ),
+    Case(
+        "manage-day-attendance-scan",
+        "POST",
+        CKS,
+        200,
+        "/v1/manage/editions/{e}/day/sessions/{day_session}/attendance/scan",
+        lambda ids: {"token": ids["day_token"]},
+    ),
+    Case(
+        "manage-day-attendance-export",
+        "GET",
+        CKM,
+        200,
+        "/v1/manage/editions/{e}/day/sessions/{day_session}/attendance/export",
+        recent_auth=True,
+    ),
+    Case(
+        "manage-day-presented",
+        "POST",
+        PGW,
+        200,
+        "/v1/manage/editions/{e}/day/sessions/{day_session}/slots/{day_scheduled_slot}/presented",
+    ),
+    Case(
+        "manage-day-unpresented",
+        "POST",
+        PGW,
+        200,
+        "/v1/manage/editions/{e}/day/sessions/{day_session}/slots/{day_presented_slot}/unpresented",
+        {"reason": "Erreur de saisie"},
+    ),
     Case("manage-portal-poster", "GET", R, 200, "/v1/manage/editions/{e}/portal/poster"),
     Case(
         "manage-portal-poster",
@@ -790,6 +1210,13 @@ MATRIX = [
     for case in CASES
     for profile in PROFILES
 ]
+
+
+@pytest.fixture(autouse=True)
+def _cheap_pdf(monkeypatch):
+    """La matrice teste les droits, pas les PDF (testés dans ``apps.payments``) : un PDF
+    minimal évite le coût du sous-ensemble de police à chaque pièce émise."""
+    monkeypatch.setattr("apps.payments.pdf.render", lambda data: b"%PDF-1.7\n%%EOF\n")
 
 
 @pytest.fixture
@@ -862,32 +1289,105 @@ def world():
     grid = create_grid(edition, name="Grille", actor=Actor.command("cli:matrice"))
     review_submission, reviewer, assignment = _review_objects(edition)
     reviewing = _reviewer_objects(edition, users)
-    ids = {
-        **reviewing,
-        **_program_objects(edition, users),
-        "track_code": track.code,
-        "grid": grid.pk,
-        "review_submission": review_submission.pk,
-        "reviewer": reviewer.pk,
-        "assignment": assignment.pk,
-        "submission": submission.pk,
-        "submission_file": submission_file.pk,
-        "extension": extension.pk,
-        "file": document.pk,
-        "image": image.pk,
-        "section": section.pk,
-        "placed_section": placed.pk,
-        "page": page.pk,
-        "menu": header_menu[0],
-        "header_menu": header_menu,
-        "e": edition.pk,
-        "track": track.pk,
-        "type": submission_type.pk,
-        "date": key_date.pk,
-        "role": target_role.pk,
-        "invitation": invitation.pk,
-    }
+    # Mentions de facturation complètes (plan L6, J8) : les pièces peuvent s'émettre.
+    from apps.payments.services.billing import billing_profile
+
+    profile = billing_profile(edition)
+    profile.legal_name, profile.address = "Association matrice", "Abidjan"
+    profile.save()
+    reviewing["per_profile"]["OC_VOLUNTEERS"] = _member_objects(edition, users, now)
+    ids = LazyIds(
+        {
+            **reviewing,
+            **_program_objects(edition, users),
+            "track_code": track.code,
+            "grid": grid.pk,
+            "review_submission": review_submission.pk,
+            "reviewer": reviewer.pk,
+            "assignment": assignment.pk,
+            "submission": submission.pk,
+            "submission_file": submission_file.pk,
+            "extension": extension.pk,
+            "file": document.pk,
+            "image": image.pk,
+            "section": section.pk,
+            "placed_section": placed.pk,
+            "page": page.pk,
+            "menu": header_menu[0],
+            "header_menu": header_menu,
+            "e": edition.pk,
+            "track": track.pk,
+            "type": submission_type.pk,
+            "date": key_date.pk,
+            "role": target_role.pk,
+            "invitation": invitation.pk,
+            "invite_role": "SC_MEMBER",
+        },
+        # Inscriptions, paiements et pièces (plan L6) : créés au premier cas qui les vise,
+        # leurs PDF coûtant cher à produire pour chacun des cas. Programme publié du jour J
+        # (plan L7) : à part, pour que les cas de publication du programme restent valables.
+        loaders=(lambda: _registration_objects(edition), lambda: _day_objects(edition)),
+    )
     return edition, users, ids
+
+
+def _day_objects(edition) -> dict:
+    """Plan L7 (K7, K8) : session publiée (instantané posé directement, sans toucher à l'état
+    du programme), présidée par une personne hors des profils de la matrice, avec une
+    communication programmée et une présentée ; une inscription confirmée à pointer."""
+    from apps.program.models import ProgramPublication, Room, Session, SessionRole, Slot
+    from apps.program.services.publication import build_snapshot
+    from apps.registrations.models import RegistrationStatus
+    from apps.registrations.tests.factories import make_registration
+    from apps.submissions.models import Submission, SubmissionStatus
+    from apps.submissions.tests.factories import author_user, complete_submission
+
+    room = Room.objects.create(edition=edition, name="Salle du jour J")
+    start = dt.datetime(2027, 6, 2, 9, tzinfo=dt.UTC)
+    day = Session.objects.create(
+        edition=edition,
+        kind="parallel",
+        title_fr="Session du jour J",
+        room=room,
+        starts_at=start,
+        ends_at=start + dt.timedelta(hours=2),
+    )
+    SessionRole.objects.create(
+        session=day, user=make_member(edition, Role.SESSION_CHAIR), role="chair"
+    )
+    slots = {}
+    for position, (status, number, last) in enumerate(
+        ((SubmissionStatus.SCHEDULED, 6, "Boateng"), (SubmissionStatus.PRESENTED, 7, "Ofori"))
+    ):
+        paper = complete_submission(edition, author_user(first="Yaw", last=last))
+        Submission.objects.filter(pk=paper.pk).update(
+            status=status, reference=f"{edition.code}-{number:04d}"
+        )
+        begins = start + dt.timedelta(minutes=30 * position)
+        slots[status] = Slot.objects.create(
+            session=day,
+            position=position,
+            duration_min=20,
+            submission_id=paper.pk,
+            starts_at=begins,
+            ends_at=begins + dt.timedelta(minutes=20),
+        )
+    ProgramPublication.objects.create(
+        edition=edition,
+        version=1000,
+        revision=0,
+        published_at=timezone.now(),
+        snapshot=build_snapshot(edition, [day]),
+    )
+    registration = make_registration(
+        edition, VerifiedUserFactory(), status=RegistrationStatus.CONFIRMED
+    )
+    return {
+        "day_session": day.pk,
+        "day_scheduled_slot": slots[SubmissionStatus.SCHEDULED].pk,
+        "day_presented_slot": slots[SubmissionStatus.PRESENTED].pk,
+        "day_token": registration.qr_token,
+    }
 
 
 def _program_objects(edition, users) -> dict:
@@ -929,6 +1429,102 @@ def _program_objects(edition, users) -> dict:
         "session_role": role.pk,
         "confirmed_submission": paper.pk,
         "program_member": users["SC_MEMBER"].pk,
+    }
+
+
+def _registration_objects(edition) -> dict:
+    """Plan L6 : catalogue (catégorie à tarif, option et code promo supprimables), dates
+    d'inscription ouvertes, mentions complètes ; une inscription en attente (avec
+    justificatif), une payée (facture), une payée puis annulée ; un compte sans inscription."""
+    from decimal import Decimal
+
+    from apps.accounts.models import Profile
+    from apps.conferences.models import KeyDate
+    from apps.core.actor import Actor
+    from apps.payments.models import BillingDocument
+    from apps.payments.services import documents, manual
+    from apps.registrations.models import Fee, PromoCode, RegistrationCategory, RegistrationOption
+    from apps.registrations.services import orders
+
+    now = timezone.now()
+    KeyDate.objects.create(edition=edition, code="registration_open", at=now - dt.timedelta(1))
+    KeyDate.objects.create(edition=edition, code="early_bird_end", at=now + dt.timedelta(10))
+    category = RegistrationCategory.objects.create(
+        edition=edition, code="etudiant", label_fr="Étudiant", requires_proof=True
+    )
+    Fee.objects.create(category=category, period="early", zone="local", amount=Decimal("1000"))
+    for period in ("early", "onsite"):
+        Fee.objects.create(
+            category=category, period=period, zone="international", amount=Decimal("2000")
+        )
+    free = RegistrationCategory.objects.create(edition=edition, code="libre", label_fr="Libre")
+    option = RegistrationOption.objects.create(edition=edition, code="diner", label_fr="Dîner")
+    promo = PromoCode.objects.create(
+        edition=edition, code="ETU", kind="percent", value=Decimal("10")
+    )
+    documents.prepare_series(edition)
+    command = Actor.command("cli:matrice")
+
+    def person():
+        user = VerifiedUserFactory()
+        Profile.objects.create(user=user, first_name="Ama", last_name="Mensah", country="FR")
+        return user
+
+    def order():
+        # Saisie par le CO : l'édition de la matrice n'est pas publiée.
+        return orders.place_order(
+            edition,
+            person(),
+            category="etudiant",
+            method="transfer",
+            actor=command,
+            by_committee=True,
+        )
+
+    def pay(registration):
+        manual.record_manual_payment(
+            registration,
+            method="transfer",
+            amount=registration.total,
+            reference="",
+            received_on=timezone.localdate(),
+            actor=command,
+        )
+
+    pending = order()
+    orders.upload_proof(pending, data=PDF, name="carte.pdf", actor=command)
+    paid = order()
+    pay(paid)
+    cancelled = order()
+    pay(cancelled)
+    orders.cancel_by_committee(cancelled, reason="Matrice", percent=100, actor=command)
+    invoice = BillingDocument.objects.get(registration=paid, kind="invoice")
+    # Plan L7 : jeton du badge de l'inscription payée, et un pointage à annuler (celui d'une
+    # autre inscription confirmée, pour que le badge payé reste à pointer).
+    from apps.events.services import checkin as checkin_services
+    from apps.registrations.models import Registration
+
+    token = Registration.objects.get(pk=paid.pk).qr_token
+    checked = order()
+    pay(checked)
+    checkin = checkin_services.check_in(
+        edition, token=Registration.objects.get(pk=checked.pk).qr_token, actor=command
+    ).checkin
+    return {
+        "reg_category": category.pk,
+        "reg_free_category": free.pk,
+        "reg_option": option.pk,
+        "reg_promo": promo.pk,
+        "reg_pending": pending.pk,
+        "reg_paid": paid.pk,
+        "reg_cancelled": cancelled.pk,
+        "reg_invoice": invoice.pk,
+        "reg_token": token,
+        "reg_category_code": category.code,
+        "reg_reference": paid.reference,
+        "checkin": checkin.pk,
+        "reg_newcomer": person().email,
+        "today": timezone.localdate().isoformat(),
     }
 
 
@@ -1084,18 +1680,57 @@ def _reviewer_objects(edition, users):
     }
 
 
-def _png() -> bytes:
+def _png(size=(20, 10)) -> bytes:
     import io
 
     from PIL import Image
 
     output = io.BytesIO()
-    Image.new("RGB", (20, 10), "navy").save(output, "PNG")
+    Image.new("RGB", size, "navy").save(output, "PNG")
     return output.getvalue()
 
 
+def _signature_png() -> bytes:
+    return _png((240, 80))
+
+
+def _member_objects(edition, users, now) -> dict:
+    """Plan L7 (K1, K18) : un bénévole et une invitation de bénévole, cibles du CO
+    « bénévoles », qui ne voit qu'eux ; la signature complète du signataire."""
+    from apps.core.actor import Actor
+    from apps.events.services import signatures
+
+    volunteer = make_member(edition, Role.VOLUNTEER)
+    invitation = RoleInvitation.objects.create(
+        edition=edition,
+        email="benevole.invite@example.org",
+        role=Role.VOLUNTEER,
+        token_hash=token_hash("jeton-benevole"),
+        pending_key=pending_key(edition.pk, "benevole.invite@example.org", Role.VOLUNTEER, ""),
+        expires_at=now + dt.timedelta(days=14),
+        locale="fr",
+        last_sent_at=now,
+    )
+    signatory = users["SIGNATORY"]
+    command = Actor.command("cli:matrice")
+    signatures.update_details(
+        edition,
+        signatory,
+        display_name="Pr Awa Diallo",
+        title_fr="Présidente du comité d'organisation",
+        title_en="",
+        actor=command,
+    )
+    signatures.upload_image(edition, signatory, data=_signature_png(), actor=command)
+    return {
+        "role": UserRole.objects.get(user=volunteer, edition=edition).pk,
+        "invitation": invitation.pk,
+        "invite_role": "VOLUNTEER",
+    }
+
+
 def call(client: APIClient, case: Case, ids: dict):
-    path = case.path.format(**ids)
+    path = case.path.format_map(ids)
     method = getattr(client, case.method.lower())
     if case.body is None:
         return method(path)
@@ -1112,14 +1747,34 @@ def test_matrix(world, case, profile, expected):
     assert response.status_code == expected, response.content
 
 
+class LazyIds(dict):
+    """Identifiants du monde, dont une partie est créée à la première lecture d'une clé
+    absente (``loaders``, dans l'ordre, chacun une fois) ; une vue par profil délègue à son
+    parent les clés qu'elle n'a pas."""
+
+    def __init__(self, data, *, loaders=(), parent=None):
+        super().__init__(data)
+        self._loaders = list(loaders)
+        self._parent = parent
+
+    def __missing__(self, key):
+        if self._parent is not None:
+            return self._parent[key]
+        while self._loaders:
+            self.update(self._loaders.pop(0)())
+            if dict.__contains__(self, key):
+                return self[key]
+        raise KeyError(key)
+
+
 def for_profile(ids: dict, profile: str) -> dict:
     """Identifiants propres au profil (affectations du relecteur : 404 pour un autre)."""
-    return {**ids, **ids.get("per_profile", {}).get(profile, {})}
+    return LazyIds(ids.get("per_profile", {}).get(profile, {}), parent=ids)
 
 
 def holder(capability: str) -> str:
-    """Premier profil de gestion qui détient ``capability``."""
-    return next(p for p in ("ADMIN", "CHAIR", "SC_CHAIR", "SC_MEMBER") if capability in SPEC[p])
+    """Premier profil de gestion qui détient ``capability`` (ordre de ``SPEC``)."""
+    return next(profile for profile in SPEC if capability in SPEC[profile])
 
 
 @pytest.mark.parametrize(
@@ -1137,6 +1792,7 @@ def test_matrix_stale_reauthentication(world, case):
 def test_matrix_archived_edition_is_read_only(world):
     """§6.3 : une édition archivée est en lecture seule (409 ``edition_archived``)."""
     edition, users, ids = world
+    assert ids["reg_pending"]  # objets d'inscription créés avant l'archivage
     edition.status = EditionStatus.ARCHIVED
     edition.save()
     clients = {}
@@ -1272,3 +1928,51 @@ def test_h2_reviewer_routes_require_two_factor_authentication(world):
     response = client_for(users["SC_MEMBER"], mfa=False).get(path)
     assert (response.status_code, response.json()["code"]) == (403, "mfa_enrollment_required")
     assert client_for(users["SC_MEMBER"]).get(path).status_code == 200
+
+
+def test_profile_capabilities_match_spec(world):
+    """Les capacités de chaque profil, lues par ``/v1/me``, sont celles de la spécification,
+    y compris celles qui n'ont pas encore de route (plan L7 : pointage, attestations,
+    lettres)."""
+    edition, users, _ids = world
+    for profile in SPEC:
+        body = client_for(users[profile]).get("/v1/me").json()
+        mine = next(item for item in body["editions"] if item["id"] == edition.pk)
+        assert set(mine["capabilities"]) == SPEC[profile], profile
+
+
+def test_k1_volunteers_committee_sees_and_manages_volunteers_only(world):
+    """K1 (plan L7) : le CO « bénévoles » ne voit que les bénévoles parmi les membres et les
+    invitations ; il invite des bénévoles, pas d'autres rôles ; un autre membre lui est
+    introuvable."""
+    _edition, users, ids = world
+    client = client_for(users["OC_VOLUNTEERS"])
+    base = f"/v1/manage/editions/{ids['e']}"
+    roles = {member["role"] for member in client.get(f"{base}/roles").json()}
+    assert roles == {"VOLUNTEER"}
+    invitations = client.get(f"{base}/invitations").json()["results"]
+    assert {item["role"] for item in invitations} == {"VOLUNTEER"}
+    response = client.post(
+        f"{base}/invitations", {"emails": ["x@example.org"], "role": "SC_MEMBER"}, format="json"
+    )
+    assert response.status_code == 403
+    response = client.post(
+        f"{base}/roles/{ids['role']}/revoke", {"reason": "Hors périmètre"}, format="json"
+    )
+    assert response.status_code == 404
+
+
+@pytest.mark.parametrize(
+    ("profile", "route"), [("VOLUNTEER", "checkin/summary"), ("SIGNATORY", "signature")]
+)
+def test_k1_k18_volunteer_and_signatory_require_two_factor_authentication(world, profile, route):
+    """K1 et K18 (plan L7) : 2FA imposée aux bénévoles et aux signataires, annoncée par
+    ``/v1/me`` et exigée sur leurs routes."""
+    edition, users, ids = world
+    client = client_for(users[profile], mfa=False)
+    mine = next(
+        item for item in client.get("/v1/me").json()["editions"] if item["id"] == edition.pk
+    )
+    assert mine["mfa_required"] is True
+    response = client.get(f"/v1/manage/editions/{ids['e']}/{route}")
+    assert (response.status_code, response.json()["code"]) == (403, "mfa_enrollment_required")

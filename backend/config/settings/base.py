@@ -49,6 +49,9 @@ INSTALLED_APPS = [
     "apps.submissions",
     "apps.reviews",
     "apps.program",
+    "apps.registrations",
+    "apps.payments",
+    "apps.events",
     # Après les applications du projet : leurs gabarits d'e-mails (account/email/*) priment.
     "allauth",
     "allauth.account",
@@ -314,6 +317,14 @@ REST_FRAMEWORK = {
         "submission_write": "600/hour",
         "submission_upload": "30/hour",
         "submission_submit": "20/hour",
+        # Inscriptions (plan L6) : devis, par compte.
+        "registration_quote": "300/hour",
+        "registration_write": "60/hour",  # commandes
+        "registration_upload": "30/hour",  # justificatifs
+        "payment_check": "60/hour",  # interrogation au retour de la page de paiement
+        "payment_webhook": "120/min",  # notifications des fournisseurs, par adresse IP
+        # Jour J et attestations (plan L7) : images de signature, par compte.
+        "signature_upload": "20/hour",
     },
     "NUM_PROXIES": GESTCONF_TRUSTED_PROXY_COUNT,
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
@@ -344,6 +355,24 @@ SPECTACULAR_SETTINGS = {
         "ConsentRequestSource": "apps.accounts.serializers.ConsentRequestSource",
         "Role": "apps.accounts.roles.Role",
         "Capability": "apps.accounts.roles.CAPABILITY_CHOICES",
+        "Currency": "apps.core.money.Currency",
+        # Plan L6 : inscriptions.
+        "Period": "apps.registrations.models.Period",
+        "Zone": "apps.registrations.models.Zone",
+        "PaymentMethod": "apps.registrations.models.PaymentMethod",
+        "DiscountKind": "apps.registrations.models.DiscountKind",
+        "DiscountScope": "apps.registrations.models.DiscountScope",
+        "LineKind": "apps.registrations.models.LineKind",
+        "RegistrationStatus": "apps.registrations.models.RegistrationStatus",
+        "OrderMethod": "apps.registrations.models.ORDER_METHOD_CHOICES",
+        "ManualPaymentMethod": "apps.payments.models.MANUAL_METHOD_CHOICES",
+        "DocumentKind": "apps.payments.models.DocumentKind",
+        "PaymentStatus": "apps.payments.models.PaymentStatus",
+        "PaymentProvider": "apps.payments.models.Provider",
+        # Plan L7 : jour J.
+        "CheckinOutcome": "apps.events.services.checkin.OUTCOME_CHOICES",
+        "CheckinMethod": "apps.events.models.CheckinMethod",
+        "RetiredTokenReason": "apps.registrations.models.RetiredTokenReason",
         "InvitableRole": "apps.accounts.roles.InvitableRole",
         "OcFunction": "apps.accounts.roles.OcFunction",
         "UserRoleStatus": "apps.accounts.models.UserRoleStatus",
@@ -445,6 +474,17 @@ GESTCONF_PRIVATE_FILES_DIR = Path(
 # par le commanditaire (les purges imposées par la sécurité s'appliquent toujours).
 GESTCONF_RETENTION_ENFORCED = env.bool("GESTCONF_RETENTION_ENFORCED", default=False)
 
+# --- Paiement en ligne (plan L6, J6 ; bilan de L6.0) ----------------------------------------
+# Fournisseur : vide (paiement manuel seul), « fake » (démonstration et tests, refusé en
+# production sauf recette déclarée) ou « cinetpay » (API v1). Secrets dans l'environnement
+# seulement (règle n° 11), jamais dans le dépôt.
+GESTCONF_PAYMENT_PROVIDER = env.str("GESTCONF_PAYMENT_PROVIDER", default="")
+GESTCONF_ALLOW_FAKE_PAYMENTS = env.bool("GESTCONF_ALLOW_FAKE_PAYMENTS", default=False)
+CINETPAY_API_KEY = env.str("CINETPAY_API_KEY", default="")
+CINETPAY_API_PASSWORD = env.str("CINETPAY_API_PASSWORD", default="")
+CINETPAY_SANDBOX = env.bool("CINETPAY_SANDBOX", default=True)
+CINETPAY_TIMEOUT_SECONDS = env.float("CINETPAY_TIMEOUT_SECONDS", default=8.0)
+
 # --- Sécurité (valeurs communes ; durcies dans prod.py) ------------------------
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = "Lax"
@@ -478,5 +518,8 @@ LOGGING = {
             "level": "INFO",
             "propagate": False,
         },
+        # Sous-ensemble de police à chaque PDF (fpdf2, plan L6) : une dizaine de lignes INFO
+        # par facture, sans intérêt pour l'exploitation.
+        "fontTools": {"level": "WARNING"},
     },
 }

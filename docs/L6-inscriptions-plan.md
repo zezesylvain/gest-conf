@@ -1,7 +1,12 @@
 # Lot L6 — Inscriptions et paiements : plan d'implémentation
 
-> **Statut : proposition, à valider** (décisions J1 à J16 au §2, questions au §10). Rien n'est
-> implémenté avant validation. L5 est clos (bilan : `docs/L5-programme.md`).
+> **Statut : validé le 6 octobre 2026, livré en code et testé en local** (bilan :
+> `docs/L6-inscriptions.md` ; décisions J1 à J16 telles que proposées,
+> au §2). J15 (« Mon programme » et notification des inscrits) n'a pas été demandée : elle est
+> **reportée**. Restent ouvertes, avec les hypothèses du plan : **Q7** (tarifs, agrégateur :
+> interface de fournisseur et fournisseur factice, CinetPay candidat), **Q8** (entité de
+> facturation : aucune facture émise sans mentions de facturation), règles d'annulation et
+> inscriptions de groupe (§10, questions 4 et 5). L5 est clos (bilan : `docs/L5-programme.md`).
 >
 > Sources :
 > - étude §4 M9, §5.3 (parcours d'inscription et de paiement), §6 (RG-11, RG-14, RG-15,
@@ -49,7 +54,7 @@
 - facture émise au paiement seulement ; le bon de commande est une pro forma non numérotée
   dans la série des factures (J7, J8).
 
-## 2. Décisions à valider
+## 2. Décisions (validées)
 
 | # | Sujet | Proposition |
 |---|---|---|
@@ -198,3 +203,766 @@ tarifs, options, codes promo, règles, mentions), `finance/dashboard`, exports C
 5. Inscriptions de groupe (une institution paie pour plusieurs personnes) : nécessaires pour
    cette édition ?
 6. Charge de 24 à 31 j-h, contre 12 à 16 dans l'étude.
+
+## 11. Bilan de L6.0 (6 octobre 2026)
+
+**Agrégateur (J6, Q7)** : la documentation en ligne de CinetPay (`docs.cinetpay.com`) n'est
+pas joignable depuis l'environnement de développement (refusée par sa politique réseau).
+La vérification porte donc sur les **SDK officiels** :
+
+- `cinetpay-python` 0.1.0 (PyPI, licence MIT, publié par CinetPay en mars 2026), lu sans
+  être installé ;
+- `cinetpay-php-sdk` (dépôt GitHub de CinetPay), lu dans son README.
+
+**Constat : CinetPay a publié une nouvelle API (« v1 »)**, différente de celle que décrit la
+documentation historique :
+
+| | API historique (« v2 », `api-checkout.cinetpay.com`) | **API v1** (SDK de 2026) |
+|---|---|---|
+| Identifiants | `apikey` et `site_id` | `api_key` (`sk_test_…`, `sk_live_…`) et `api_password`, échangés contre un jeton (`POST /v1/oauth/login`, valable 24 h) ; **un compte par pays** |
+| Hôtes | un seul | bac à sable `api.cinetpay.net`, production `api.cinetpay.co` |
+| Initiation | `POST /v2/payment` | `POST /v1/payment` : renvoie `payment_url` (page hébergée), `payment_token`, `transaction_id` et **`notify_token`** |
+| Notification | formulaire et en-tête `x-token` (HMAC-SHA256 de 16 champs concaténés, clé secrète du compte) | corps (JSON ou formulaire) : `notify_token`, `transaction_id`, `merchant_transaction_id` ; **aucun statut à croire** |
+| Vérification | `POST /v2/payment/check` | `GET /v1/payment/{merchant_transaction_id}` : `status` (`SUCCESS`, `FAILED`, `PENDING`…) |
+
+**Retenu : l'API v1.** C'est celle des SDK officiels actuels. L'API v2 ne serait implémentée
+que si le compte marchand obtenu restait sur elle (adaptateur distinct derrière la même
+interface, +0,5 à 1 j-h).
+
+**Précision de J6 (« notification vérifiée »)** :
+
+- avec l'API v1, la notification ne porte pas de signature HMAC ;
+- elle porte un **jeton propre à la transaction**, remis par CinetPay à l'initiation, de
+  serveur à serveur ;
+- nous n'en gardons que l'**empreinte SHA-256**, comparée à temps constant ;
+- la confirmation ne vient **que** de l'interrogation `GET /v1/payment/{id}` : statut
+  `SUCCESS`, identifiants identiques, montant et devise contrôlés contre le paiement.
+
+RG-15 est donc tenue :
+
+- une notification sans jeton valide est rejetée et journalisée ;
+- une notification valide n'est qu'un signal, la décision vient de l'interrogation ;
+- le retour du navigateur (`success_url`) n'a aucun effet.
+
+**Contraintes de l'API v1 relevées dans le SDK** :
+
+- devises **XOF, XAF, GNF, CDF, USD** : pas d'euro, donc une édition en EUR n'aura que le
+  paiement manuel ;
+- la devise doit être celle du pays du compte (XOF pour la Côte d'Ivoire, le Sénégal…) ;
+- montant **entier**, de 100 à 2 500 000 par transaction ;
+- `merchant_transaction_id` de 30 caractères au plus, unique : **une référence par
+  tentative** (`TRANSACTION_EXIST` sinon) ;
+- `success_url`, `failed_url` et `notify_url` de 120 caractères au plus ;
+- nom et prénom du client de 2 à 255 caractères, adresse valide ; langue `fr` ou `en` ;
+- canaux `PUSH`, `OTP` et `QRCODE` ; moyens énumérés **mobile money seulement** (Orange,
+  MTN, Moov, Wave… par pays). **La carte bancaire n'apparaît pas dans l'API v1** : à
+  confirmer avec CinetPay (Q7). À défaut, la carte internationale passera par le virement
+  (J7) ou par un second agrégateur ;
+- réponse au webhook en HTTP 200 **en moins de 10 secondes**, la vérification pouvant être
+  différée ;
+- jeton d'accès à mettre en cache (24 h) : cache de la base, partagé entre processus
+  Passenger et cron, jamais journalisé.
+
+**Conséquences pour L6.4** :
+
+- client écrit à la main sur **`requests`**, déjà installé par `django-anymail` : pas de
+  nouvelle dépendance. Le SDK officiel tire `httpx` et n'a qu'une version (0.1.0) ;
+- le webhook enregistre la notification (en ajout seul) et vérifie le jeton ;
+- il tente ensuite l'interrogation avec un délai court (5 s). En cas d'échec, un job la
+  reprend, puis `sync_payments` toutes les heures ;
+- le navigateur est envoyé sur `payment_url` par **navigation** (`location.assign`), jamais
+  par formulaire : la CSP du portail (`form-action 'self'`) l'interdirait. Aucun script de
+  CinetPay n'est chargé (le SDK « seamless » JavaScript est exclu) ;
+- secrets dans l'environnement : `CINETPAY_API_KEY`, `CINETPAY_API_PASSWORD`,
+  `CINETPAY_COUNTRY`, `CINETPAY_SANDBOX` (règle n° 11).
+
+**Non vérifiable ici (Q7, compte marchand)** :
+
+- frais ;
+- bac à sable réel : il faut des clés `sk_test_` ;
+- règle d'arrondi éventuelle (l'API v2 imposait des multiples de 5 en XOF ; le SDK v1 ne le
+  contrôle pas) ;
+- disponibilité effective des opérateurs ;
+- réception des notifications sur o2switch (pare-feu applicatif éventuel).
+
+Ces points sont repris au contrôle manuel de la démo G.
+
+**PDF (J8)** : **`fpdf2` 2.8.9 retenu**.
+
+- **Licence et paquet** : pur Python (roue `py3-none-any`), licence LGPL-3.0, utilisée sans
+  modification. Ses dépendances sont `defusedxml` (PSF) et `fonttools` (MIT, roue pur
+  Python), plus Pillow, déjà installé.
+- **ReportLab 5.0.1** (BSD, aussi pur Python désormais) reste possible. Il est écarté pour son
+  API plus lourde, sans gain pour des factures.
+- **Essai** : facture A4 avec tableau, accents, `Œ`, `Ł`, `ş`, vietnamien, espaces fines
+  insécables et signe moins.
+  - Rendu correct, texte relu à l'identique par `pypdf`.
+  - 23 ko grâce au sous-ensemble de police embarqué ; 110 ms.
+  - Sortie **identique octet pour octet** à date de création fixée, ce qui permet l'empreinte
+    SHA-256 et sa vérification.
+- **Police** : les polices de base du PDF ne couvrent que le latin-1, alors que les noms des
+  participants n'y tiennent pas tous. On versionne **DejaVu Sans** 2.37 (normal et gras,
+  environ 1,5 Mo) et sa licence (Bitstream Vera ; modifications de DejaVu dans le domaine
+  public). Rien n'est supposé sur les polices installées chez o2switch.
+
+**QR (J11)** : **`segno` 1.6.6** retenu.
+
+- Pur Python, sans dépendance, licence BSD ; déjà prévu par l'étude (§7) et réservé depuis
+  L1 aux badges de L7.
+- Essai : jeton de 192 bits (`secrets.token_urlsafe(24)`), QR version 3, correction relevée
+  à Q, SVG de 1,5 ko.
+- `qrcode`, installé par allauth pour la 2FA, n'est pas réutilisé : c'est une dépendance
+  transitive, que nous n'épinglons pas.
+
+**Devises (J2)** : décimales selon **ISO 4217** (liste publiée le 1er janvier 2026, lue dans
+le paquet de données `iso4217`, sans l'installer) :
+
+| Devise | Décimales |
+|---|---|
+| XOF | 0 |
+| XAF | 0 |
+| GNF | 0 |
+| CDF | 2 |
+| USD | 2 |
+| EUR | 2 |
+
+- **Table fermée dans le code**, sans dépendance.
+- `Intl.NumberFormat` affiche aussi XOF sans décimale (« 25 000 F CFA » en français).
+- Montants en `Decimal`, arrondis à la décimale de la devise (au demi supérieur) **une seule
+  fois**, sur chaque ligne de remise.
+
+**Webhook et hébergement** :
+
+- **`.htaccess` du portail** : sa règle 1 laisse passer tout `/api/` vers Passenger,
+  donc aussi `/api/v1/payments/webhook/…`. Aucune modification.
+- **CSRF** : les vues DRF sont exemptées de CSRF, qui n'est appliqué que par
+  `SessionAuthentication`. Le webhook, sans authentification, n'en aura pas. Un test le
+  vérifiera en L6.4.
+- **Appels sortants depuis o2switch** : nouveau contrôle automatique **V29** dans
+  `deploy/check-o2switch.sh` et dans la fiche `docs/L1-verifications-o2switch.md` (`curl`
+  sans clé vers le bac à sable et la production). Sans accès sortant, seul le paiement
+  manuel reste possible.
+
+**Numérotation (J8)** : `core.Counter` exige que la ligne du compteur existe **avant** la
+transaction qui prend un numéro (verrous d'intervalle de MariaDB, voir `ensure_counter`).
+
+- Les séries annuelles (`invoice:<édition>:<année>`) sont créées hors transaction au moment
+  de l'émission.
+- L'année est celle de la date d'émission **dans le fuseau de l'édition**.
+
+**Hypothèses maintenues** (Q7 et Q8 sans réponse) :
+
+- fournisseur factice pour les tests et la démo ;
+- CinetPay (API v1) pour le premier fournisseur réel ;
+- aucune facture émise sans mentions de facturation ;
+- J15 reportée.
+
+## 12. Bilan de L6.1 (6 octobre 2026)
+
+**Capacités (J1)** : `registrations.read`, `registrations.manage`, `pricing.write` et
+`finance.read`, dans `apps/accounts/roles.py`.
+
+| Profil | Inscriptions (lecture) | Inscriptions (gestion) | Tarifs et mentions | Finances (lecture) |
+|---|---|---|---|---|
+| Administrateur | oui | oui | oui | oui |
+| Chair | oui | non | non | oui |
+| CO « finances » | oui | oui | oui | oui |
+| CO « secrétariat » | oui | oui | non | non |
+| Autres fonctions du CO | oui | non | non | non |
+| Président du CS, relecteurs, auteurs | non | non | non | non |
+
+**Modèles** (application `registrations`, puis `payments`, migrations initiales) :
+
+- `RegistrationSettings` (une ligne par édition, créée à la première lecture) :
+  - devise ;
+  - pays locaux ;
+  - moyens proposés : en ligne (désactivé par défaut), virement, sur place ;
+  - délais : 72 h en ligne, 30 jours par virement ;
+  - annulation : date limite et parts remboursées (100 % avant, 0 % après par défaut).
+- `RegistrationCategory`, `Fee` (unique par catégorie, période et zone ; montant positif ou
+  nul), `RegistrationOption` (prix par zone, quota, places réservées ≤ quota),
+  `PromoCode` (pourcentage ≤ 100, utilisations réservées et consommées ≤ maximum).
+- `Registration` :
+  - statut, période, zone, moyen ;
+  - lignes figées, total et devise ;
+  - options et code promo ;
+  - échéance ;
+  - identité de facturation ;
+  - `active_key` : une seule inscription active par personne et par édition, sans unicité
+    conditionnelle (même procédé que les affectations de L4) ;
+  - `qr_token` : seulement sur une inscription confirmée (contrainte CHECK).
+- `RegistrationStatusHistory` : en ajout seul.
+- `BillingProfile` (mentions de facturation) :
+  - raison sociale, adresse, identifiants, TVA éventuelle, pied de page, coordonnées
+    bancaires ;
+  - préfixes des trois séries, distincts et **figés dès la première pièce** de leur série ;
+  - `is_complete` : raison sociale et adresse renseignées, condition d'émission des
+    factures (J8).
+- `Payment` :
+  - unique par (fournisseur, référence) ;
+  - montant strictement positif ;
+  - empreinte du jeton de notification seulement ;
+  - validation manuelle : `recorded_by`, `received_on`.
+- `PaymentNotification` : en ajout seul, champs en liste blanche.
+- `BillingDocument` : facture, avoir ou pro forma, **en ajout seul** :
+  - numéro unique par (édition, nature, année, rang) et par (édition, numéro) ;
+  - un avoir a toujours une facture d'origine, une facture jamais.
+  - Nom choisi plutôt qu'« Invoice », puisque la table porte aussi avoirs et pro forma.
+- `Refund` : remboursement fait hors plateforme, lié à son avoir (J9).
+
+**Montants** : `apps/core/money.py`.
+
+- Table ISO 4217 fermée (XOF, XAF, EUR, USD, GNF, CDF) ; colonnes `Decimal(12, 2)`.
+- Arrondi au demi supérieur à la décimale de la devise ; contrôle `is_exact`.
+- Affichage des PDF et des e-mails en français et en anglais (espace fine insécable, vrai
+  signe moins).
+
+**Routes de gestion** (matrice des droits) :
+
+- `…/registrations/settings` : lecture `registrations.read`, écriture `pricing.write` ;
+- `…/billing/profile` : lecture `finance.read`, écriture `pricing.write` avec
+  **réauthentification récente** (J1).
+
+Les deux routes passent par des services qui :
+
+- verrouillent la ligne et journalisent l'avant et l'après (`registrations.settings_changed`,
+  `billing.profile_changed`) ;
+- refusent une édition archivée ;
+- figent la devise dès la première inscription (409 `setting_frozen`). Avant, un changement
+  de devise exige des tarifs exacts dans la nouvelle devise (12,50 n'existe pas en XOF).
+
+**Matrice des droits** : profils `OC_FINANCE` et `OC_SECRETARIAT` ajoutés ; le profil
+`OC_MEMBER` devient explicitement « logistique », sans écriture (la fonction « finances »,
+choisie par défaut par les aides de test, a désormais des droits propres). 1 817 cas.
+
+**Registre des données personnelles (J14)** :
+
+- **Export** : inscriptions avec leur historique, paiements (sans l'empreinte du jeton),
+  pièces de facturation et remboursements. Le jeton QR n'est pas exporté.
+- **Anonymisation refusée** tant qu'une inscription est en attente ou confirmée dans une
+  édition non archivée (`registration:<code>`).
+- **Ensuite** : identité de facturation et jeton QR effacés ; **factures et avoirs
+  conservés** avec l'identité figée, leur nombre consigné au journal
+  (`billing.documents_retained`, sans donnée personnelle).
+
+**Tests** : paramètres, mentions, montants, contraintes en base (SQLite et MariaDB),
+données personnelles, matrice.
+
+**Reporté à L6.4** : refuser `online_enabled` tant qu'aucun fournisseur de paiement n'est
+configuré. Le service de commande n'existe pas encore, donc ce réglage est aujourd'hui sans
+effet.
+
+## 13. Bilan de L6.2 (6 octobre 2026)
+
+**Service `apps/registrations/services/pricing.py`** :
+
+- **Périodes (J2)** : `period_at`.
+  - Avant `registration_open` (ou sans cette date) : inscriptions fermées.
+  - Puis préférentiel jusqu'à `early_bird_end` (exclu), normal jusqu'à `registration_close`
+    (exclu), ensuite « sur place ».
+  - `is_open_online` : édition publiée et période préférentielle ou normale. Après la
+    clôture, seul le CO inscrira (sur place, L6.3).
+- **Prix** : `quote(edition, category=…, options=…, promo_code=…, country=…)`.
+  - Le navigateur n'envoie que des **codes**.
+  - Tarif selon la période et la zone (pays du profil) ; combinaison absente : catégorie non
+    proposée.
+  - Options au prix de la zone, limitées aux catégories autorisées.
+  - Lignes figées : nature, code, libellés FR et EN, montant.
+- **Remises (J4)** :
+  - pourcentage arrondi **une fois**, au demi supérieur, à la décimale de la devise (10 % de
+    25 005 F CFA = 2 501) ;
+  - montant plafonné à la base ;
+  - base : inscription seule, ou inscription et options ;
+  - libellé figé dans les deux langues, indépendant de la langue de la requête ;
+  - code inconnu, inactif, expiré ou hors catégorie : 400 sur `promo_code` ; épuisé : 409
+    `promo_code_exhausted`.
+- **Réservations (J3, J4)**, à appeler dans la transaction de la commande (sinon
+  `RuntimeError`) :
+  - places d'options sous verrou de ligne, dans l'ordre des clés ; option complète : 409
+    `option_full` ;
+  - utilisations de codes réservées, consommées à la confirmation, rendues à
+    l'expiration.
+  - Test de concurrence sur MariaDB : deux commandes pour la dernière place, une seule
+    l'obtient.
+- **Catalogue (`pricing.write`)**, chaque écriture journalisée :
+  - catégories ; grille de tarifs remplacée d'un bloc (`registrations.fees_changed`, avant
+    et après par cellule) ; options ; codes promo, en majuscules et uniques sans tenir
+    compte de la casse ;
+  - montants positifs et **exacts dans la devise** (pas de 25 000,50 F CFA) ;
+  - **codes non modifiables après création**, puisqu'ils sont recopiés dans les lignes ;
+  - élément utilisé : suppression refusée (409 `in_use`), désactivation possible ;
+  - quota jamais sous les places réservées, maximum d'utilisations jamais sous les
+    utilisations.
+
+**Routes** :
+
+- gestion : `…/registrations/categories` (et `…/{id}`, `…/{id}/fees`),
+  `…/registrations/options`, `…/registrations/promo-codes`. Lecture `registrations.read`,
+  écriture `pricing.write` ; listes sans pagination. Ajoutées à la matrice (2 012 cas).
+- public : `GET /v1/public/registration`, pour l'édition courante publiée, cache de
+  5 minutes, lu au build du portail (J13). Il donne :
+  - catégories actives et leurs tarifs, options actives ;
+  - dates clés, moyens proposés, pays locaux ;
+  - **ni quota restant ni place réservée** : `limited` dit seulement qu'une option a des
+    places limitées, puisque la page pré-rendue serait vite périmée.
+- participant : `POST /v1/registrations/quote`, prix sans engagement (rien n'est réservé).
+  - Pays du profil obligatoire (409 `profile_incomplete`).
+  - Inscriptions en ligne fermées : 409 `registration_closed`.
+  - Limité à 300 appels par heure et par compte.
+  - **Écart avec le plan (§4)** : `POST /v1/registrations/{id}/quote` y figurait, mais le
+    devis précède la commande et n'a donc pas d'identifiant.
+
+**Nouveaux codes d'erreur** : `registration_closed`, `option_full`, `promo_code_exhausted`
+et `already_registered` (utilisé en L6.3), traduits côté serveur et dans le front.
+
+**Énumérations nommées du schéma** : `Currency`, `Period`, `Zone`, `PaymentMethod`,
+`DiscountKind`, `DiscountScope`, `LineKind`.
+
+## 14. Bilan de L6.3 (6 octobre 2026)
+
+**Workflow (J5)** : `apps/registrations/workflow.py` est le **seul** module qui écrit le
+statut d'une inscription (méta-test, comme pour les soumissions).
+
+| De | Vers | Effets |
+|---|---|---|
+| en attente | confirmée | jeton QR (192 bits), utilisation du code promo consommée |
+| en attente | annulée ou expirée | places et utilisation du code rendues |
+| confirmée | annulée | places rendues, jeton QR retiré, remboursement dû |
+
+Chaque transition est verrouillée, inscrite à l'historique (en ajout seul) et au journal, et
+envoie un e-mail : commande enregistrée, confirmée, annulée, expirée. Les objets ne
+contiennent que le nom du site ; ni facture ni QR en pièce jointe, seulement un lien vers
+« Mon inscription » (J11).
+
+**Commande (`services/orders.py`)** :
+
+- **Prix figé** et réservations dans la même transaction ; une seule inscription active par
+  personne (409 `already_registered`, doublé par la contrainte d'unicité) ; pays du profil
+  obligatoire.
+- **Moyens** : seulement ceux que l'édition propose. Le CO peut tout choisir et inscrire
+  après la clôture, au tarif « sur place » (J2). Montant nul : confirmée aussitôt, moyen
+  « aucun paiement ».
+- **Échéances** :
+  - 72 h en ligne, 30 jours par virement, **sans dépasser la veille de la conférence** ; un
+    moyen devenu impossible est refusé ;
+  - sur place : fin de la conférence.
+- **Identité de facturation** : préremplie depuis le profil (nom, institution),
+  modifiable jusqu'à la facture (409 ensuite).
+- **Justificatif** (catégorie qui l'exige) :
+  - PDF, JPEG ou PNG, **type vérifié par contenu**, 5 Mo au plus ;
+  - stocké hors racine web (`apps/core/private_files.py`, stockage privé générique,
+    orphelins purgés par `cleanup`).
+  - Il n'est pas exigé avant le paiement : le CO le voit et peut annuler.
+- **Annulation (J9)** :
+  - par le participant : toujours pour une commande en attente ; une fois confirmée,
+    jusqu'à la date limite de l'édition (sans date, par le CO seulement) ;
+  - par le CO : motif obligatoire, part remboursée selon les règles ou fixée par lui ;
+  - le **remboursement dû** est calculé sur le payé et arrondi à la devise.
+- **Gratuité (J4)** : ligne « Gratuité » égale au total, moyen `waiver`, motif journalisé,
+  confirmation.
+- **Expiration** : `expire_registrations` (cron horaire, idempotente, verrouillée). Elle
+  crée aussi les compteurs de facturation de l'année, hors contention.
+
+**Paiement manuel (J7)** : `POST …/registrations/{id}/payments`, avec
+`registrations.manage` et réauthentification.
+
+- Montant **égal** au total (paiement partiel : P3), date de réception non future, référence
+  du virement.
+- Il confirme l'inscription et émet la facture.
+
+**Pièces (J8, RG-14)** : `apps/payments/services/documents.py` et `pdf.py`.
+
+- **Numérotation sans trou** par (édition, nature, année d'émission dans le fuseau de
+  l'édition), avec le compteur verrouillé de L3.
+- **Numéro** `<préfixe>-<code de l'édition>-<année>-<rang>` (« F-GC27-2027-00001 »).
+  Écart avec l'exemple du plan (« F2027-00001 ») : le code de l'édition rend le numéro
+  unique quand deux éditions facturent la même année, par exemple les inscriptions de
+  l'édition suivante ouvertes en fin d'année. **À valider avec Q8** : si une même entité
+  facture toutes les éditions, la loi peut exiger une série unique pour la plateforme.
+- **Facture** :
+  - émise au paiement, valant reçu (« acquittée », date, moyen, référence) ;
+  - **une par inscription** (idempotente) ;
+  - sans mentions de facturation : aucune facture, puis émission groupée
+    (`…/billing/documents/issue-pending`, réauthentification).
+- **Pro forma** : émise d'office à la commande (virement ou sur place, si les mentions sont
+  complètes), ou à la demande. Elle porte « document non comptable », l'échéance, les
+  coordonnées bancaires et la référence à rappeler.
+- **Avoir** : à l'enregistrement d'un remboursement fait hors plateforme (inscription
+  annulée), dans sa propre série, lié à sa facture ; jamais plus que le facturé non encore
+  crédité.
+- **PDF** :
+  - libellés bilingues ; lignes figées ; TVA décomposée si un taux est paramétré, sinon la
+    mention de TVA ;
+  - police DejaVu Sans versionnée (`apps/payments/fonts/`, provenance et empreintes
+    consignées) ;
+  - **sortie identique** pour des données identiques ;
+  - empreinte SHA-256 contrôlée **à chaque téléchargement** et par `check_integrity`.
+- Les pièces sont en ajout seul (ni modification ni suppression).
+
+**Contrôles d'intégrité** :
+
+- `registrations.totals` : total égal à la somme des lignes ; confirmée payée, offerte ou
+  gratuite ;
+- `registrations.reservations` : places et utilisations de codes cohérentes ;
+- `billing.series` : séries continues ;
+- `billing.files` : PDF présents et intacts.
+
+**Routes** :
+
+| Qui | Routes |
+|---|---|
+| Participant | `GET/POST /v1/registrations` ; `GET/PATCH …/{id}` ; `POST …/{id}/cancel` ; `POST …/{id}/proof` ; `GET …/{id}/qr` (SVG produit par `segno`, jeton jamais dans une URL ni dans le JSON) ; `GET …/{id}/documents/{doc}` ; `POST …/{id}/proforma` |
+| Gestion, inscriptions | `…/registrations` (liste filtrable et paginée, saisie par le CO) ; `…/{id}` ; `…/{id}/cancel` ; `…/{id}/waive` ; `…/{id}/proof` |
+| Gestion, finances | `…/{id}/payments` et `…/{id}/refunds` (réauthentification) ; `…/{id}/proforma` ; `…/{id}/documents/{doc}` ; `…/billing/documents` (`finance.read`) ; `…/billing/documents/issue-pending` |
+
+Limites de débit : 60 commandes et 30 justificatifs par heure et par compte.
+
+**Dépendances** : `fpdf2` 2.8.9 (et `fonttools`, `defusedxml`) et `segno` 1.6.6, verrouillés
+avec empreintes ; installation à blanc vérifiée sous Python 3.13. Journaux INFO de
+`fontTools` coupés (une dizaine de lignes par PDF).
+
+**Dépendances entre applications** : `registrations` ne dépend pas de `payments`. La pro
+forma d'une commande passe par un effet déclaré (`register_order_effect`), comme les
+gardes du workflow des soumissions en L4.
+
+**Matrice** :
+
+- 2 195 cas, CO « finances » et « secrétariat » compris.
+- Objets d'inscription créés **à la demande** (`LazyIds`) et PDF remplacé par un PDF minimal :
+  la matrice teste les droits, les PDF sont testés dans `apps.payments`. Durée : environ
+  4 minutes.
+
+**Reporté** :
+
+- vers L6.4 : paiement en ligne (initiation, webhook, interrogation du statut, `sync_payments`)
+  et RG-11 ;
+- vers L7 : inscription sur place au comptoir pour une personne **sans compte**. Le CO
+  n'inscrit ici que des comptes existants.
+
+## 15. Bilan de L6.4 (6 octobre 2026)
+
+**Interface de fournisseur** (`apps/payments/providers/`) : `supports` (devise et montant),
+`initiate` (page hébergée), `parse_notification`, `check` (statut interrogé). Configuration
+par l'environnement seulement (règle n° 11) : `GESTCONF_PAYMENT_PROVIDER` (vide, `fake` ou
+`cinetpay`), `CINETPAY_API_KEY`, `CINETPAY_API_PASSWORD`, `CINETPAY_SANDBOX`,
+`CINETPAY_TIMEOUT_SECONDS` (documentés dans `backend/.env.example`).
+
+Garde-fous de `config/settings/prod.py` :
+
+- fournisseur inconnu refusé ;
+- fournisseur factice refusé, sauf recette déclarée (`GESTCONF_ALLOW_FAKE_PAYMENTS`) ;
+- CinetPay sans identifiants refusé.
+
+**Fournisseur factice** : sa « page hébergée » est `/v1/payments/fake/{référence}`, absente
+si le fournisseur configuré n'est pas `fake`. « Payer » ou « Refuser » y fixe le statut côté
+fournisseur, envoie la notification et renvoie le navigateur au portail. Il sert à la
+démonstration, à l'E2E et aux tests.
+
+**CinetPay (API v1)** : client écrit sur `requests` d'après le SDK officiel, testé avec un
+HTTP simulé, sans appel réel.
+
+- **Jeton** : mis en cache 23 h dans le cache de la base, renouvelé une fois s'il a expiré,
+  jamais journalisé.
+- **Initiation** : montant entier, canal `PUSH`, adresses de 120 caractères au plus,
+  nom et prénom complétés à 2 caractères.
+- **Statut** : `SUCCESS` → réussi ; `FAILED`, `EXPIRED`… → échoué ; `INITIATED`, `PENDING`,
+  `NOT_FOUND` → en cours. Un succès annoncé pour une autre référence est refusé.
+- **Notification** : liste blanche. Ni le jeton ni l'identité du payeur (`user`) ne sont
+  gardés.
+- **Montant** : l'interrogation v1 ne renvoie ni montant ni devise. Le montant est lié à la
+  référence à l'initiation (une référence par tentative). Le contrôle du montant et de la
+  devise s'applique aux fournisseurs qui les renvoient (fournisseur factice).
+
+**Service `services/online.py` (RG-15)** :
+
+- **Initiation** : la ligne de paiement est créée et validée **avant** l'appel réseau, pour
+  ne tenir aucun verrou pendant l'appel. On garde l'empreinte SHA-256 du jeton de
+  notification, jamais le jeton.
+  - Fournisseur injoignable : tentative « échouée » et 409 `payment_unavailable`.
+  - Une commande passée par virement peut être réglée en ligne (le moyen devient
+    « en ligne »).
+- **Notification** (`POST /v1/payments/webhook/{fournisseur}`) :
+  - publique, sans session donc sans CSRF (vérifié par un client qui exige le CSRF),
+    limitée à 120 par minute et par adresse ;
+  - JSON, formulaire ou multipart ; `GET` répond 200 (contrôle de l'adresse par
+    l'agrégateur).
+  - Jeton comparé **à temps constant**, puis statut **interrogé** : seule cette
+    interrogation confirme.
+  - Chaque notification est enregistrée (en ajout seul) avec son issue : `confirmed`,
+    `failed`, `pending`, `mismatch`, `deferred`, `invalid_token`, `unknown_payment` ou
+    `unreadable`. Jeton faux : 401, sans effet.
+- **Idempotence** : un paiement final n'est plus interrogé. Une notification rejouée ne
+  produit ni seconde confirmation ni seconde facture.
+- **Fournisseur injoignable** à la notification : une tâche `payments.reconcile` reprend
+  l'interrogation (file `Job`, `run_jobs`).
+- **Retour du navigateur** : sans effet. « Mon inscription » demande une interrogation
+  (`POST /v1/registrations/{id}/payment-check`, 60 par heure).
+- **Paiement reçu hors attente** (inscription expirée, annulée ou déjà réglée) : marqué et
+  journalisé (`payment.orphan`) pour remboursement ou rattachement par le CO, sans
+  reconfirmation automatique.
+- **Réconciliation** : commande `sync_payments` (cron horaire, à 41 minutes).
+  - Elle interroge les tentatives en cours depuis plus de 10 minutes et abandonne celles de
+    plus de 7 jours.
+  - Elle crée aussi les compteurs de facturation de l'année (déplacé depuis
+    `expire_registrations` : `registrations` ne dépend pas de `payments`).
+- **Expiration** (J5) : avant d'expirer une commande, ses paiements en cours sont
+  interrogés. L'expiration est reportée si le fournisseur ne répond pas, ou si une
+  tentative de moins de deux heures est en cours (`register_expiry_check`).
+- **Paramètres** : « paiement en ligne proposé » est refusé sans fournisseur configuré
+  (reporté de L6.1). Le moyen « en ligne » n'est proposé qu'avec un fournisseur.
+- **Participant** : `POST /v1/registrations/{id}/pay` renvoie l'adresse de la page
+  hébergée. Le portail y **dirige** le navigateur, jamais par formulaire (CSP).
+
+**RG-11 (J10)** :
+
+- **Conflit `registration`** dans le planificateur quand l'édition exige un présentateur
+  inscrit : aucun présentateur de la communication placée n'a d'inscription **confirmée**.
+  - Le présentateur est reconnu par son compte, ou par son adresse : celle du compte ou
+    une adresse vérifiée.
+  - Le conflit bloque la publication, comme RG-12 et RG-13.
+- **Indicateur** : `presenter_registered` sur chaque communication du brouillon, placée ou
+  à programmer.
+- **Découplage** : `program` ne dépend pas de `registrations`. Celle-ci déclare la liste
+  des personnes inscrites (`register_registered_people`).
+- **Gestion** : traduction du nouveau conflit ; affichage complet de l'indicateur en L6.5.
+
+**Tests** :
+
+- RG-15 avec le fournisseur factice :
+  - notification valide, jeton faux, rejeu ;
+  - échec annoncé à l'interrogation, montant différent ;
+  - fournisseur injoignable puis tâche ;
+  - paiement après expiration, report de l'expiration ;
+  - réconciliation, abandon ;
+  - webhook en formulaire, page factice.
+- Client CinetPay sur HTTP simulé.
+- RG-11 : conflit, résolution par compte ou par adresse vérifiée, désactivée par défaut,
+  publication refusée.
+- Sous MariaDB aussi.
+
+**Écart avec le plan** : aucun.
+
+## 16. Bilan de L6.5 (6 octobre 2026)
+
+**Rubrique « Inscriptions » de la gestion** (J12), après « Programme » dans le rail. Chaque
+écran est inscrit dans `core/navigation.ts` (rail, recherche) et a sa fiche d'aide.
+
+| Écran | Adresse | Capacité | Contenu |
+|---|---|---|---|
+| Inscriptions | `inscriptions` | `registrations.read` | Liste filtrée (statut, catégorie, moyen, recherche par nom, adresse ou référence), paginée ; export CSV ; saisie par le CO pour un compte existant (`registrations.manage`) |
+| Fiche | `inscriptions/:id` | `registrations.read` | Commande figée, justificatif, mentions de facturation, pièces (PDF), paiements, remboursements, historique ; actions du CO |
+| Paiements | `inscriptions/paiements` | `finance.read` | Rapprochement : fournisseur, statut, référence du fournisseur, saisie manuelle ; export CSV |
+| Factures et avoirs | `inscriptions/factures` | `finance.read` | Pièces par nature, PDF, facture d'origine des avoirs ; export CSV |
+| Finances | `inscriptions/finances` | `finance.read` | Encaissé, remboursé, net, impayés, remboursements dus ; répartitions ; points à traiter ; émission des factures en attente (`registrations.manage`) |
+| Tarifs | `parametrage/tarifs` | `registrations.read` (écriture `pricing.write`) | Paramètres, catégories et grille période × zone, options à quota, codes promo |
+| Facturation | `parametrage/facturation` | `finance.read` (écriture `pricing.write`) | Émetteur, TVA, coordonnées bancaires, préfixes |
+
+**Actions de la fiche** (CO « finances » ou « secrétariat », administrateur), proposées selon
+le statut et revérifiées par le serveur (règle n° 2) :
+
+- paiement reçu hors ligne (J7) : virement ou sur place, montant total proposé, date du jour ;
+- pro forma et gratuité motivée (J4), en attente de paiement seulement ;
+- annulation motivée, confirmée par un dialogue ; part remboursée vide : règle de l'édition (J9) ;
+- remboursement fait hors plateforme, après annulation d'une inscription facturée ; le reste
+  dû est proposé ; l'avoir est émis par le serveur.
+
+Paiement manuel, remboursement, exports et mentions de facturation demandent une
+réauthentification récente : l'intercepteur ouvre la fenêtre et rejoue. Les exports passent
+donc par l'API (fichier reçu puis enregistré), pas par un lien direct. Les PDF et les
+justificatifs restent des liens vers les endpoints authentifiés (règle n° 8).
+
+**D13 (reporté de L6.2)** : la date limite d'annulation et la date de validité d'un code
+promo se saisissent désormais **à l'heure de l'édition** (`cancellation_deadline_local`,
+`valid_until_local`). Le serveur les convertit en UTC, refuse une heure inexistante ou ambiguë
+au changement d'heure (erreur sur le champ saisi) et renvoie les deux formes. Les champs UTC
+passent en lecture seule.
+
+**Autres écrans** :
+
+- **Tableau de bord** : carte « Inscriptions » (confirmées, en attente) ; avec `finance.read`,
+  encaissé, impayés et points à traiter.
+- **Planificateur** : badge « Présentateur non inscrit » sur la communication, placée ou à
+  programmer, dont aucun présentateur n'est inscrit (RG-11, indicateur de L6.4) ; rien quand
+  l'information est inconnue (RG-11 désactivée).
+- **Aide** : fiches `registrations`, `payments`, `billing-documents`, `finance-dashboard`,
+  `settings-pricing`, `settings-billing` ; la fiche `settings-program` décrit maintenant l'effet
+  réel de RG-11.
+
+**Tests** :
+
+- Vitest : liste, filtres et export ; saisie par le CO ; fiche (paiement, gratuité sans
+  motif refusée, annulation, remboursement du reste dû) ; paiements, pièces, finances ; tarifs
+  (lecture seule, D13, pays invalides, grille, erreur du serveur) ; mentions de facturation ;
+  badge RG-11 du planificateur ; navigation et rail mis à jour.
+- pytest : conversion D13 des deux dates (heure d'été, heure inexistante, heure ambiguë).
+- Totaux : gestion 163 tests, portail 131, shared 76 ; lint et format au vert.
+
+**Écarts avec le plan** :
+
+- La rubrique « Inscriptions » a quatre écrans (liste, paiements, pièces, finances) au lieu
+  d'un écran à onglets : chacun a son adresse, sa fiche d'aide et sa capacité (`finance.read`
+  pour les trois derniers).
+- La carte du tableau de bord se contente des compteurs, faute de `finance.read`, pour le CO
+  sans fonction.
+
+## 17. Bilan de L6.6 (6 octobre 2026)
+
+**Écart d'adresse avec J13 : `/compte/mon-inscription`, pas `/compte/inscription`.**
+`/compte/inscription` est la **création de compte** depuis L1 : adresse `account_signup`
+d'allauth, liens de la connexion et des invitations, parcours E2E de l'auteur. Les e-mails de
+commande (L6.3) et le retour de la page de paiement (L6.4) y menaient donc à tort. Ils
+mènent maintenant à `/compte/mon-inscription`, sur le modèle de « Mon passage »
+(`/compte/mon-passage`).
+
+- L'adresse est écrite une seule fois côté serveur (`MY_REGISTRATION_PATH`,
+  `apps/registrations/notifications.py`), et le retour de paiement la réutilise.
+- Un test le vérifie : l'e-mail de commande mène à « Mon inscription », jamais à la création
+  de compte.
+- **Proposition** : reporter cette adresse dans l'étude (§22) et dans J13.
+
+**Page publique « Inscription »** (fin du « à venir », `site-pages.json` et
+`apps/portal/site.py`) :
+
+- **Pré-rendu** depuis `/v1/public/registration`. Le gabarit `registration` de la page du
+  site affiche, avant les sections du CMS :
+  - les dates d'ouverture, de fin du tarif préférentiel et de clôture, à l'heure de
+    l'édition ;
+  - la grille catégories × (période, zone), limitée aux couples proposés ;
+  - la mention de justificatif ;
+  - les pays « locaux », nommés par `Intl.DisplayNames` ;
+  - les options (prix local et international, places limitées, catégories autorisées) ;
+  - les moyens de paiement, avec une mention : aucune donnée de carte sur le site.
+- **Bouton** « S'inscrire » vers « Mon inscription ».
+- **Sans édition ouverte** (404) : la page annonce l'ouverture prochaine, sans erreur.
+- **Présentation** : sans Material ; le tableau défile dans un cadre focalisable
+  (375 px).
+- **Mise en ligne** : la page n'est à jour qu'à la publication du portail
+  (`deploy.sh --portal-only`), comme le programme.
+
+**« Mon inscription »** (`/compte/mon-inscription`, connexion exigée, lien dans la navigation
+et sur l'accueil du compte) :
+
+- **Commande** :
+  - catégorie ; les options affichées sont celles de la catégorie, vidées quand elle change ;
+  - code promo ;
+  - « Calculer le prix » : devis du serveur, avec la période et la zone ;
+  - moyen de paiement parmi ceux de l'édition, choisi d'office s'il n'y en a qu'un ;
+  - identité de facturation.
+  - Un profil sans pays est signalé, avec un lien vers le profil. Les refus du serveur
+    (quota, code épuisé, période close) sont affichés avec leur message.
+- **Paiement en ligne** : le navigateur est **dirigé** vers la page hébergée
+  (`location.assign`, service `PaymentRedirect`), jamais par un formulaire (CSP
+  `form-action 'self'`).
+  - Au retour (`?paiement=`, `&echec=1`), le prestataire est interrogé (`payment-check`).
+  - Le message suit le statut réel : confirmée, vérification en cours ou échec. Puis
+    l'adresse est nettoyée.
+  - Le retour seul ne confirme jamais rien (RG-15).
+- **Suivi** :
+  - statut, période, zone, lignes et total ;
+  - échéance et consignes du virement ou du règlement sur place ;
+  - pro forma ;
+  - justificatif : PDF, JPEG ou PNG, remplaçable ;
+  - identité de facturation, modifiable jusqu'à la facture ;
+  - pièces (PDF) et code QR d'accès, servis par des endpoints authentifiés (règle n° 8 ;
+    CSP `img-src 'self'`) ;
+  - annulation confirmée par un dialogue, avec la part remboursée et la date limite ;
+  - inscriptions précédentes, avec le remboursement dû.
+
+**Partagé** : `formatMoney` (`shared/ui-kit`) remplace le formateur propre à la gestion.
+
+**Tests** :
+
+- Vitest :
+  - outils de la grille ;
+  - page publique (grille, dates, pays, options, moyens, lien) et cas 404 ;
+  - « Mon inscription » : devis puis commande par virement, options par catégorie,
+    commande en ligne redirigée, refus 409 affiché ;
+  - paiement, pro forma et annulation d'une commande en attente ;
+  - retour de paiement confirmé, en vérification ou échoué ;
+  - inscription confirmée : facture, QR, annulation close, facturation figée ;
+  - cas 404 ;
+  - `formatMoney`.
+- pytest : lien de l'e-mail de commande ; adresses de retour du paiement mises à jour.
+- Totaux : shared 78, portail 144, gestion 163 ; lint et format au vert.
+
+**Budget** : bundle initial du portail à 368,6 ko pour un avertissement à 365 ko, contre
+367,8 ko avant L6 (point ouvert depuis L5) ; seuil d'erreur à 380 ko.
+
+## 18. Bilan de L6.7 (6 octobre 2026)
+
+**Parcours de bout en bout** (Playwright) : la série de L5 se prolonge de trois étapes. Les
+données sont préparées par `web/e2e/seed.py`, comme un opérateur :
+
+- dates d'inscription : ouverture la veille, fin du tarif préférentiel dans cinq jours,
+  clôture dans trente ;
+- paramètres : paiement en ligne par le fournisseur factice, virement, pays local CI ;
+- une catégorie, sa grille et une option à quota ;
+- un CO « finances » (2FA) et un second participant sans rôle (Sénégal).
+
+Les trois étapes :
+
+1. **Comité** :
+   - le CO « programme » exige RG-11 : le planificateur signale la présentatrice non
+     inscrite (conflit et badge) ;
+   - le CO « finances » complète les mentions de facturation et retrouve la grille dans
+     « Paramétrage › Tarifs ».
+2. **Auteure** :
+   - page publique « Inscription », puis « Mon inscription » ;
+   - devis du serveur (préférentiel, tarif local, option comprise), commande en ligne ;
+   - page du fournisseur factice, « Payer » ;
+   - retour : « Paiement reçu », inscription confirmée par la notification vérifiée (RG-15),
+     e-mail de confirmation ;
+   - facture téléchargée (PDF) et code QR affiché ;
+   - le planificateur ne signale plus de conflit.
+3. **CO « finances »** :
+   - saisie de l'inscription du second participant par virement (tarif international
+     préférentiel), puis paiement reçu : facture n° 2 ;
+   - annulation avec remboursement intégral, puis remboursement enregistré : avoir ;
+   - pièces et tableau de bord (encaissé 150 000 F CFA).
+
+**Défauts trouvés et corrigés** :
+
+- **Outil de test** : deux connexions du même membre du comité dans la même fenêtre de
+  30 secondes réemployaient le même code TOTP, ce qu'allauth refuse, à juste titre (rejeu).
+  `freshTotpCode` attend désormais la fenêtre suivante quand le compte a déjà employé le
+  code en cours.
+- **Aide périmée** : « Exiger l'inscription d'un présentateur » annonçait « sans effet
+  (lot suivant) » ; elle décrit maintenant le conflit bloquant (FR et EN).
+
+**Recette locale dans Chromium** (base laissée par le parcours, captures à 1366 et 375 px,
+débordement horizontal mesuré, console surveillée) :
+
+- **Gestion** : les huit écrans d'inscriptions, de finances et de paramétrage, plus les
+  formulaires ouverts (saisie d'une inscription, remboursement, catégorie, grille, option,
+  code promo).
+- **Portail** : page publique, « Mon inscription » d'une inscription confirmée (facture et
+  QR) et formulaire de commande.
+- **Défauts corrigés** :
+  - **Fiche d'une inscription à 375 px** : la colonne des libellés (`max-content`)
+    poussait les valeurs hors de l'écran (102 px). La liste passe sur une colonne sous
+    40 rem, et les mots longs (adresses) se coupent.
+  - **« Paramétrage › Tarifs » à 375 px** : deux libellés trop longs (« Part remboursée
+    avant/après la date limite (%) »), une fois flottants, débordaient de 19 px. Ils
+    deviennent « Remboursé avant (%) » et « Remboursé après (%) », avec une aide.
+  - **Aides longues** : elles chevauchaient le champ suivant ; elles le poussent désormais
+    (`subscriptSizing="dynamic"`).
+- **Résultat** : aucun débordement, aucune erreur dans la console.
+
+**Documentation** :
+
+- bilan du lot : `docs/L6-inscriptions.md` ;
+- étude : §22 « Mises à jour issues du lot L6 », en Markdown et en HTML (version 1.6). Dans
+  l'HTML, deux emphases mal fermées du §17 (`/api/v1/me/*`, `invitation_*`) sont corrigées :
+  le document est de nouveau bien formé ;
+- `CLAUDE.md` : état d'avancement et « Décisions du lot L6 ».
+
+**Tests** :
+
+- E2E : 11 tests (9 étapes du parcours en série, 2 de fumée), 2,4 minutes ;
+- backend : 3 395 tests sous SQLite et 3 404 sous MariaDB, dont la matrice des droits
+  (2 273 cas) ;
+- front : 385 tests Vitest (shared 78, portail 144, gestion 163) et 11 tests des scripts ;
+- lint, format et `ruff` au vert.
+
+**Écart avec le plan** : la démo G sur o2switch (critère de fin de L6.7) reste à faire. Aucune
+démo n'a encore eu lieu sur l'hébergement, et le compte marchand CinetPay manque (Q7).

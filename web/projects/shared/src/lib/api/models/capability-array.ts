@@ -26,5 +26,14 @@ export const CAPABILITY: Capability[] = [
   'grids.write',
   'program.read',
   'program.write',
-  'program.publish'
+  'program.publish',
+  'registrations.read',
+  'registrations.manage',
+  'pricing.write',
+  'finance.read',
+  'checkin.scan',
+  'checkin.manage',
+  'certificates.manage',
+  'letters.manage',
+  'signature.manage'
 ];

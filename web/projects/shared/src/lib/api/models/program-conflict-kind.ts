@@ -6,6 +6,7 @@
  * * `room` - room
  * * `person` - person
  * * `overflow` - overflow
+ * * `registration` - registration
  */
-export type ProgramConflictKind = 'room' | 'person' | 'overflow';
+export type ProgramConflictKind = 'room' | 'person' | 'overflow' | 'registration';
 

@@ -56,6 +56,11 @@ import { PrivacyNotice } from '../ui/privacy-notice';
         <a routerLink="/compte/soumissions">{{ 'portail.account.nav.submissions' | translate }}</a>
       </p>
       <p>
+        <a routerLink="/compte/mon-inscription">{{
+          'portail.account.nav.registration' | translate
+        }}</a>
+      </p>
+      <p>
         <a routerLink="/compte/mon-passage">{{ 'portail.account.nav.agenda' | translate }}</a>
       </p>
 

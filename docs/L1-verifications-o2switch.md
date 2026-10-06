@@ -6,7 +6,7 @@ serveur réel** : aucune ligne n'a encore été vérifiée sur o2switch. Le crit
 est : fiche remplie, décisions bloquantes (§5) validées.
 
 Deux types de contrôles :
-- **automatiques (V00 à V28)** : `deploy/check-o2switch.sh`, script en lecture seule lancé en SSH ;
+- **automatiques (V00 à V29)** : `deploy/check-o2switch.sh`, script en lecture seule lancé en SSH ;
 - **manuels (M01 à M10)** : cPanel, navigateur ou `curl` depuis le poste local (procédures au §4).
 
 **Mode SQL de MariaDB.** Depuis L1.1, l'application impose son mode SQL à chaque connexion
@@ -49,7 +49,7 @@ Ce que fait le script :
 
 Le lancer **deux fois** : avant le premier déploiement de L1.1, puis après (V25 et M10).
 
-`--no-network` saute les téléchargements et les accès HTTPS sortants (V03, V04, V19 à V21).
+`--no-network` saute les téléchargements et les accès HTTPS sortants (V03, V04, V19 à V21, V29).
 
 ## 2. Contrôles automatiques (`deploy/check-o2switch.sh`)
 
@@ -84,6 +84,7 @@ Le lancer **deux fois** : avant le premier déploiement de L1.1, puis après (V2
 | V26 | Processus et limites du compte | Script : processus Passenger visibles, nombre de CPU, `ulimit` | Informatif | _à remplir_ | À recouper avec M07 |
 | V27 | Format de ligne InnoDB | Script : `@@innodb_default_row_format`, `@@innodb_page_size` et `ROW_FORMAT` des tables InnoDB existantes (`information_schema.TABLES`) | Format `DYNAMIC` (ou `COMPRESSED`), pages ≥ 8 Kio | _à remplir_ | Index utf8mb4 longs : clé primaire `varchar(255)` du cache (1 020 octets), unicité de `django_content_type` (800 octets). En `COMPACT` ou `REDUNDANT` (767 octets) ou avec des pages de 4 Kio (768 octets), `migrate` échoue dès le premier déploiement (erreur 1709, constaté en essai local), puis `createcachetable`. ÉCHEC : **bloquant** ; demander à o2switch le format `DYNAMIC` par défaut, ou `ALTER TABLE … ROW_FORMAT=DYNAMIC` sur les tables existantes (base sans donnée réelle en L1) |
 | V28 | Pillow en roue binaire (lot L2, décision E4) | Script : même venv jetable que V03, `pip install --only-binary=:all: pillow==12.3.0`, puis réencodage réel d'un JPEG portant un EXIF en JPEG, WebP et PNG redimensionnés (1 600 px) | OK, avec la version, l'étiquette de la roue et les modules `jpeg`, `webp`, `zlib` ; EXIF supprimé | _à remplir_ | Les roues de Pillow 12 exigent **glibc ≥ 2.27** (`manylinux_2_27`/`2_28`, vérifié le 2026-10-05) : voir V02. ÉCHEC : repli de E4 (JPEG portant un EXIF refusé, pas de redimensionnement), ou version de Pillow plus ancienne à évaluer (correctifs de sécurité) |
+| V29 | HTTPS sortant vers l'API CinetPay (lot L6, J6) | Script : `curl` sur `/v1/oauth/login` du bac à sable (`api.cinetpay.net`) et de la production (`api.cinetpay.co`), sans clé ni corps | Une réponse HTTP (4xx attendu sans identifiants) : DNS, connexion et TLS fonctionnent | _à remplir_ | ÉCHEC : ni initiation de paiement ni interrogation du statut (RG-15) depuis le serveur ; demander l'ouverture à o2switch. En attendant, paiement manuel seul (J7). La notification entrante (CinetPay vers `/api/v1/payments/webhook/cinetpay`) se vérifie en bac à sable, pas par ce script |
 
 ## 3. Contrôles manuels
 

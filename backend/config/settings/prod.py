@@ -33,6 +33,18 @@ if not env.str("GESTCONF_PUBLIC_URL", default="").startswith("https://"):
 if not GESTCONF_MFA_ENCRYPTION_KEYS:
     raise ImproperlyConfigured("GESTCONF_MFA_ENCRYPTION_KEYS est obligatoire en production.")
 
+# Paiement en ligne (plan L6, J6) : jamais le fournisseur factice en production, sauf sur une
+# recette déclarée ; CinetPay exige ses identifiants (règle n° 11 : dans l'environnement).
+if GESTCONF_PAYMENT_PROVIDER not in ("", "fake", "cinetpay"):
+    raise ImproperlyConfigured("GESTCONF_PAYMENT_PROVIDER : vide, « fake » ou « cinetpay ».")
+if GESTCONF_PAYMENT_PROVIDER == "fake" and not GESTCONF_ALLOW_FAKE_PAYMENTS:
+    raise ImproperlyConfigured(
+        "Fournisseur de paiement factice en production : réservé à une recette "
+        "(GESTCONF_ALLOW_FAKE_PAYMENTS=true)."
+    )
+if GESTCONF_PAYMENT_PROVIDER == "cinetpay" and not (CINETPAY_API_KEY and CINETPAY_API_PASSWORD):
+    raise ImproperlyConfigured("CINETPAY_API_KEY et CINETPAY_API_PASSWORD sont obligatoires.")
+
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
