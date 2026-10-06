@@ -7,6 +7,7 @@ leur lot (langues des soumissions en L3, seuils en L4, devise en L6...).
 
 from __future__ import annotations
 
+from decimal import Decimal
 from typing import ClassVar
 
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -50,6 +51,8 @@ class Conference(TimeStampedModel):
 
 
 SUBMISSION_LANGUAGES = ("fr", "en")
+# Jeu de choix exposé dans le schéma OpenAPI (énumération « SubmissionLanguage »).
+SUBMISSION_LANGUAGE_CHOICES = [(code, code) for code in SUBMISSION_LANGUAGES]
 
 
 def default_submission_languages() -> list[str]:
@@ -100,6 +103,22 @@ class Edition(TimeStampedModel):
         default=2,
         validators=[MinValueValidator(1), MaxValueValidator(10)],
     )
+    # Évaluation (plan L4, H4, H6, H12) : paramètres typés de l'édition (plan L1 §3.4).
+    max_reviews_per_reviewer = models.PositiveSmallIntegerField(
+        _("évaluations au plus par relecteur"),
+        default=10,
+        validators=[MinValueValidator(1), MaxValueValidator(100)],
+    )
+    divergence_threshold = models.DecimalField(
+        _("seuil de divergence (points sur 100)"),
+        max_digits=5,
+        decimal_places=2,
+        default=Decimal("30"),
+        validators=[MinValueValidator(Decimal("0")), MaxValueValidator(Decimal("100"))],
+    )
+    confidence_weighted_score = models.BooleanField(
+        _("score final pondéré par la confiance"), default=False
+    )
     status = models.CharField(
         _("statut"), max_length=10, choices=EditionStatus.choices, default=EditionStatus.DRAFT
     )
@@ -134,6 +153,9 @@ class Edition(TimeStampedModel):
         "double_blind",
         "submission_languages",
         "reviewers_per_submission",
+        "max_reviews_per_reviewer",
+        "divergence_threshold",
+        "confidence_weighted_score",
         "status",
     )
 

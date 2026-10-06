@@ -249,7 +249,8 @@ def test_screening_starts_at_call_close_by_the_system_only():
     assert StatusHistory.objects.filter(to_status=S.SCREENING, actor_label="job:close_call")
 
 
-def test_effects_run_after_commit(django_capture_on_commit_callbacks):
+def test_effects_run_inside_the_transition():
+    """Effets dans la transaction : un effet qui échoue annule la transition."""
     calls = []
 
     def effect(submission, frm, to, actor):
@@ -257,11 +258,23 @@ def test_effects_run_after_commit(django_capture_on_commit_callbacks):
 
     workflow.register_effect(effect)
     try:
-        with django_capture_on_commit_callbacks(execute=True):
-            submitted = submit(complete_submission())
+        submitted = submit(complete_submission())
         assert calls == [(submitted.reference, S.DRAFT, S.SUBMITTED)]
     finally:
         workflow._EFFECTS.remove(effect)
+
+    def failing(submission, frm, to, actor):
+        raise RuntimeError("panne")
+
+    workflow.register_effect(failing)
+    try:
+        draft = complete_submission()
+        with pytest.raises(RuntimeError):
+            submit(draft)
+        draft.refresh_from_db()
+        assert draft.status == S.DRAFT and draft.reference is None
+    finally:
+        workflow._EFFECTS.remove(failing)
 
 
 def test_allowed_targets():

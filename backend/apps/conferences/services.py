@@ -14,6 +14,7 @@ from zoneinfo import ZoneInfo
 
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, models, transaction
+from django.db.models import ProtectedError, RestrictedError
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
@@ -46,8 +47,16 @@ EDITION_INFO_FIELDS = (
     "city",
     "country",
     "timezone",
+    "submission_languages",
 )
-CONFIDENTIALITY_FIELDS = ("double_blind", "reviewers_per_submission")
+# Évaluation (§6.1 ; plan L4 H4, H6, H12 : charge, divergence, pondération par la confiance).
+CONFIDENTIALITY_FIELDS = (
+    "double_blind",
+    "reviewers_per_submission",
+    "max_reviews_per_reviewer",
+    "divergence_threshold",
+    "confidence_weighted_score",
+)
 TRACK_FIELDS = (
     "code",
     "name_fr",
@@ -65,6 +74,8 @@ SUBMISSION_TYPE_FIELDS = (
     "description_en",
     "default_duration_min",
     "abstract_max_words",
+    "file_policy",
+    "max_file_mb",
     "position",
     "is_active",
 )
@@ -218,8 +229,9 @@ def update_edition(
 def update_confidentiality(
     edition: Edition, data: Mapping[str, Any], *, actor: Actor, reason: str = ""
 ) -> Edition:
-    """Double aveugle et nombre de relecteurs : changement classé critique (§6.1).
-    ``double_blind`` gelé dès la première soumission (RG-19)."""
+    """Paramètres de l'évaluation : double aveugle, relecteurs par soumission, charge
+    maximale, seuil de divergence, pondération par la confiance. Changement classé critique
+    (§6.1). ``double_blind`` gelé dès la première soumission (RG-19)."""
     edition = Edition.objects.select_for_update().get(pk=edition.pk)
     _writable(edition, actor)
     _check_frozen(edition, data, actor, reason)
@@ -357,11 +369,18 @@ def _update_child(instance, data: Mapping[str, Any], allowed, action: str, actor
 
 
 def _delete_child(instance, action: str, actor: Actor) -> None:
-    """Suppression : possible en L1 (aucune référence) ; à partir de L3, un élément utilisé
-    renverra 409 ``in_use`` et devra être désactivé."""
+    """Suppression d'un élément sans référence. Un élément utilisé (thématique ou type d'une
+    soumission, depuis L3) répond 409 ``in_use`` : il se désactive, il ne se supprime pas.
+    Le refus vient des clés étrangères ``RESTRICT`` : aucune liste de références à tenir."""
     _writable(instance.edition, actor)
     record(action, actor=actor, edition=instance.edition, obj=instance, before=snapshot(instance))
-    instance.delete()
+    try:
+        instance.delete()
+    except (ProtectedError, RestrictedError) as error:
+        raise RuleViolation(
+            _("Élément utilisé par des soumissions : désactivez-le plutôt que de le supprimer."),
+            code=ErrorCode.IN_USE,
+        ) from error
 
 
 @transaction.atomic

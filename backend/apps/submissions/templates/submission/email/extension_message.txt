@@ -1,0 +1,7 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate %}Bonjour,
+
+Un délai supplémentaire vous est accordé pour votre soumission « {{ title }} » ({{ reference }}) à {{ edition_title }}, jusqu'au {{ until }}.
+
+Motif : {{ reason }}{% endblocktranslate %}
+
+{% include "account/email/_signature.txt" %}{% endautoescape %}

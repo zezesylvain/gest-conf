@@ -2,9 +2,9 @@
 
 ``transition(submission, to_state, actor)`` est le **seul** chemin qui écrit ``status`` :
 il vérifie la légalité de la transition, les droits de l'acteur et les gardes métier,
-écrit ``StatusHistory`` et le journal d'audit, puis déclenche les effets (notifications)
-après validation de la transaction. Un méta-test vérifie qu'aucun autre module n'écrit
-``status``.
+écrit ``StatusHistory`` et le journal d'audit, puis déclenche les effets (notifications
+mises en file dans la même transaction, envoyées après validation). Un méta-test vérifie
+qu'aucun autre module n'écrit ``status``.
 
 La table reprend **toutes** les transitions de l'étude ; celles des lots suivants sont
 déclarées mais refusées (``invalid_transition``) jusqu'à leur lot.
@@ -71,7 +71,7 @@ TRANSITIONS: dict[tuple[str, str], Rule] = {
     (S.PRESENTED, S.PUBLISHED): Rule(Who.ORGANIZERS, "L10"),
 }
 
-# Effets après validation de la transaction (notifications, L3.2) : f(submission,
+# Effets de la transition, dans sa transaction (notifications, L3.2) : f(submission,
 # from_status, to_status, actor).
 type Effect = Callable[[Submission, str, str, Actor], None]
 _EFFECTS: list[Effect] = []
@@ -189,6 +189,8 @@ def transition(
         after={"status": to_state, "reference": submission.reference},
         reason=reason.strip(),
     )
+    # Effets dans la transaction : les e-mails sont mis en file (outbox) avec la transition,
+    # ou pas du tout ; l'envoi a lieu après validation (file de tâches).
     for effect in list(_EFFECTS):
-        transaction.on_commit(lambda effect=effect: effect(submission, from_state, to_state, actor))
+        effect(submission, from_state, to_state, actor)
     return submission

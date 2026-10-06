@@ -5,7 +5,14 @@ from __future__ import annotations
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
-from apps.conferences.models import Edition, EditionStatus, KeyDate, SubmissionType, Track
+from apps.conferences.models import (
+    SUBMISSION_LANGUAGE_CHOICES,
+    Edition,
+    EditionStatus,
+    KeyDate,
+    SubmissionType,
+    Track,
+)
 from apps.conferences.services import utc_to_local
 
 
@@ -39,6 +46,18 @@ class _FreezeMixin(serializers.Serializer):
 
 
 class EditionSerializer(_FreezeMixin, serializers.ModelSerializer):
+    """Informations générales de l'édition (gestion, §6.1)."""
+
+    submission_languages = serializers.ListField(
+        child=serializers.ChoiceField(choices=SUBMISSION_LANGUAGE_CHOICES),
+        min_length=1,
+        required=False,
+        help_text="Langues acceptées pour les soumissions (plan L3, F11).",
+    )
+
+    def validate_submission_languages(self, value: list[str]) -> list[str]:
+        return list(dict.fromkeys(value))
+
     class Meta:
         model = Edition
         fields = (
@@ -56,6 +75,7 @@ class EditionSerializer(_FreezeMixin, serializers.ModelSerializer):
             "city",
             "country",
             "timezone",
+            "submission_languages",
             "status",
             "published_at",
             "archived_at",
@@ -67,9 +87,19 @@ class EditionSerializer(_FreezeMixin, serializers.ModelSerializer):
 
 
 class ConfidentialitySerializer(_FreezeMixin, serializers.ModelSerializer):
+    """Paramètres de l'évaluation (gestion, §6.1 ; plan L4 H4, H6, H12)."""
+
     class Meta:
         model = Edition
-        fields = ("double_blind", "reviewers_per_submission", "frozen_fields", "reason")
+        fields = (
+            "double_blind",
+            "reviewers_per_submission",
+            "max_reviews_per_reviewer",
+            "divergence_threshold",
+            "confidence_weighted_score",
+            "frozen_fields",
+            "reason",
+        )
 
 
 class EditionStatusChangeSerializer(serializers.Serializer):
@@ -105,6 +135,8 @@ class SubmissionTypeSerializer(serializers.ModelSerializer):
             "description_en",
             "default_duration_min",
             "abstract_max_words",
+            "file_policy",
+            "max_file_mb",
             "position",
             "is_active",
         )
@@ -165,6 +197,8 @@ class PublicSubmissionTypeSerializer(serializers.ModelSerializer):
             "description_en",
             "default_duration_min",
             "abstract_max_words",
+            "file_policy",
+            "max_file_mb",
         )
         read_only_fields = fields
 
@@ -182,6 +216,9 @@ class PublicEditionSerializer(serializers.ModelSerializer):
     tracks = serializers.SerializerMethodField()
     submission_types = serializers.SerializerMethodField()
     key_dates = serializers.SerializerMethodField()
+    submission_languages = serializers.ListField(
+        child=serializers.ChoiceField(choices=SUBMISSION_LANGUAGE_CHOICES), read_only=True
+    )
 
     class Meta:
         model = Edition
@@ -199,6 +236,7 @@ class PublicEditionSerializer(serializers.ModelSerializer):
             "city",
             "country",
             "timezone",
+            "submission_languages",
             "tracks",
             "submission_types",
             "key_dates",

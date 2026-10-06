@@ -21,6 +21,9 @@ export const CHAIR_EDITION: MeEdition = {
     'members.read',
     'members.manage',
     'audit.read',
+    'submissions.read',
+    'submissions.extend',
+    'submissions.export',
   ],
   mfa_required: true,
 };

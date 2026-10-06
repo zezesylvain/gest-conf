@@ -100,13 +100,24 @@ export const HELP_SHEETS: readonly HelpSheet[] = [
     callout('warning', k, 'noReturn'),
     callout('info', k, 'who'),
   ]),
+  sheet('submissions', ALL, (k) => [
+    text(k('intro')),
+    steps(k, 'filter', 'detail', 'export', 'extension'),
+    callout('info', k, 'drafts'),
+    callout('info', k, 'duplicates'),
+    callout('warning', k, 'closing'),
+    callout('info', k, 'who'),
+  ]),
   sheet('settings-general', ALL, (k) => [
     text(k('intro')),
+    list(k('languages')),
     callout('warning', k, 'timezone'),
+    callout('warning', k, 'frozen'),
     callout('info', k, 'readOnly'),
   ]),
   sheet('settings-lists', ALL, (k) => [
     text(k('intro')),
+    list(k('filePolicy')),
     steps(k, 'add', 'edit'),
     callout('warning', k, 'deactivate'),
     callout('info', k, 'publish'),
@@ -121,6 +132,7 @@ export const HELP_SHEETS: readonly HelpSheet[] = [
     text(k('intro')),
     list(k('reviewers')),
     callout('warning', k, 'sensitive'),
+    callout('warning', k, 'frozen'),
   ]),
   sheet('members', MEMBER_MANAGERS, (k) => [
     text(k('intro')),

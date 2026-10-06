@@ -9,7 +9,8 @@ import {
   signal,
 } from '@angular/core';
 import { Meta } from '@angular/platform-browser';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import {
   AuthApi,
   LanguageService,
@@ -19,7 +20,9 @@ import {
   SessionStore,
 } from '@gestconf/shared';
 import { TranslatePipe } from '@ngx-translate/core';
+import { filter } from 'rxjs';
 
+import { NotificationsStore } from './notifications/notifications.store';
 import { ensureThemeStylesheet } from './theme';
 
 /**
@@ -27,7 +30,8 @@ import { ensureThemeStylesheet } from './theme';
  * `noindex`, thème Material chargé à la demande, navigation et déconnexion. Après la
  * connexion, l'interface adopte la langue du compte ; un changement de langue ensuite
  * est enregistré dans le compte (plan L1 §10.4). Fournit la fenêtre de réauthentification
- * (`ReauthenticationPrompt`) aux pages de l'espace compte.
+ * (`ReauthenticationPrompt`) aux pages de l'espace compte. Cloche (plan L3, F13) : nombre de
+ * notifications non lues, relu à chaque navigation (pas de temps réel, règle n° 9).
  */
 @Component({
   selector: 'portail-account-shell',
@@ -42,6 +46,23 @@ import { ensureThemeStylesheet } from './theme';
           [routerLinkActiveOptions]="{ exact: true }"
         >
           {{ 'portail.account.nav.home' | translate }}
+        </a>
+        <a routerLink="/compte/soumissions" routerLinkActive="active">
+          {{ 'portail.account.nav.submissions' | translate }}
+        </a>
+        <a
+          routerLink="/compte/notifications"
+          routerLinkActive="active"
+          class="bell"
+          [attr.aria-label]="
+            'portail.account.nav.notificationsLabel' | translate: { count: notifications.unread() }
+          "
+        >
+          <span aria-hidden="true">🔔</span>
+          {{ 'portail.account.nav.notifications' | translate }}
+          @if (notifications.unread() > 0) {
+            <span class="count" aria-hidden="true">{{ notifications.unread() }}</span>
+          }
         </a>
         <a routerLink="/compte/profil" routerLinkActive="active">
           {{ 'portail.account.nav.profile' | translate }}
@@ -78,6 +99,18 @@ import { ensureThemeStylesheet } from './theme';
     a.active {
       font-weight: 700;
     }
+    .count {
+      display: inline-block;
+      min-width: 1.25rem;
+      margin-left: 0.25rem;
+      padding: 0 0.35rem;
+      border-radius: 1rem;
+      background: var(--gc-primary);
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-align: center;
+    }
     .link-button {
       margin-left: auto;
       font: inherit;
@@ -99,6 +132,8 @@ export class AccountShell implements OnInit, OnDestroy {
   private readonly document = inject(DOCUMENT);
   private readonly reauthenticationDialog = inject(ReauthenticationDialog);
   private readonly reauthentication = inject(ReauthenticationPrompt);
+  private readonly router = inject(Router);
+  protected readonly notifications = inject(NotificationsStore);
   private unregisterReauthentication: (() => void) | null = null;
 
   protected readonly loggingOut = signal(false);
@@ -129,6 +164,24 @@ export class AccountShell implements OnInit, OnDestroy {
         void this.meStore.load().catch(() => undefined);
       }
     });
+    // Cloche : à l'ouverture de l'espace (session établie), puis à chaque navigation.
+    effect(() => {
+      if (this.session.authenticated()) {
+        this.refreshNotifications();
+      }
+    });
+    this.router.events
+      .pipe(
+        filter((event) => event instanceof NavigationEnd),
+        takeUntilDestroyed(),
+      )
+      .subscribe(() => this.refreshNotifications());
+  }
+
+  private refreshNotifications(): void {
+    if (this.session.authenticated()) {
+      void this.notifications.refresh().catch(() => undefined);
+    }
   }
 
   ngOnInit(): void {

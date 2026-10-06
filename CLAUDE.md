@@ -65,7 +65,7 @@ cd backend && python3.12 -m venv .venv && source .venv/bin/activate
 pip install -r requirements/dev.txt
 python manage.py migrate && python manage.py runserver   # http://localhost:8000/api/v1/health
 pytest                      # SQLite par défaut ; DATABASE_URL=mysql://... pour MariaDB (fait foi en CI)
-ruff check . ../deploy && ruff format --check . ../deploy
+ruff check . ../deploy ../web/e2e && ruff format --check . ../deploy ../web/e2e
 DATABASE_URL=mysql://... python manage.py spectacular --file schema.yml --validate   # schéma OpenAPI (versionné), généré sur MariaDB comme en CI (bornes des entiers)
 
 # Frontend (Node >= 22.22.3 ou >= 24.15, exigence d'Angular 22)
@@ -119,6 +119,19 @@ Les décisions E1 à E14 du plan [`docs/L2-portail-plan.md`](docs/L2-portail-pla
 - gestion : chaque nouvel écran s'inscrit dans `core/navigation.ts` (rail et recherche) et reçoit sa fiche d'aide (`help/help-sheets.ts`), sous peine d'échec des tests de cohérence.
 
 Bilan du lot : [`docs/L2-portail.md`](docs/L2-portail.md).
+
+## Décisions du lot L3
+
+Les décisions F1 à F17 du plan [`docs/L3-soumission-plan.md`](docs/L3-soumission-plan.md) ont été validées le 5 octobre 2026. Elles sont reportées dans l'étude, **§19 « Mises à jour issues du lot L3 »**, qui prévaut sur les sections antérieures (§17 et §18 compris). Points à retenir :
+
+- statut des soumissions écrit par `apps/submissions/workflow.py` seul (`transition()`, méta-test) ; transitions des lots suivants déclarées mais refusées jusqu'à leur lot ;
+- fichiers des auteurs : règle n° 8 **sans adaptation** (`GESTCONF_PRIVATE_FILES_DIR`, endpoints authentifiés) ; en double aveugle, PDF réécrit sans métadonnées ;
+- capacités `submissions.read`, `submissions.extend`, `submissions.export` ; sérialiseurs par rôle, la vue relecteur (RG-04) arrive en L4 ;
+- cron : `close_call` et `remind_drafts`, toutes les heures ;
+- client de l'API : `npm run api:generate` réécrit l'index en réexportations « étoile » (`web/scripts/api-barrel.mjs`), sans quoi les fonctions d'API gonflent le bundle initial ;
+- E2E : `npm run e2e` (Playwright lance Django et le portail ; données préparées par `web/e2e/seed.py`).
+
+Bilan du lot : [`docs/L3-soumission.md`](docs/L3-soumission.md).
 
 ## Questions ouvertes (étude §15, à ne pas trancher seul)
 

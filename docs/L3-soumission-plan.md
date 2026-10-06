@@ -345,3 +345,348 @@ avec les décisions. Le méta-test l'admet explicitement.
 
 **Reporté** : l'écran « Confidentialité » de la gestion n'affiche pas encore le gel
 (`frozen_fields`) ; le serveur le fait respecter. À faire en L3.4.
+
+## 13. Bilan de L3.2 (5 octobre 2026)
+
+**API de l'espace auteur** (`/v1/submissions…`, connecté, **ses** soumissions seulement,
+404 sinon) :
+
+- **Brouillon** :
+  - `POST` avec le **code** de l'édition (l'édition publique n'expose toujours pas son
+    identifiant : choix du lot L1 respecté) ;
+  - profil complet exigé (409 `profile_incomplete`) ; appel ouvert exigé ;
+  - le soumissionnaire devient premier auteur, correspondant et présentateur (F6) ;
+  - rôle `AUTHOR` attribué au premier brouillon (D7).
+- **Écriture** :
+  - `PATCH` partiel (sauvegarde automatique) ; `If-Match` facultatif sur `revision`, 412
+    `stale_revision` si la soumission a changé entre-temps ;
+  - après la soumission, chaque écriture crée une **révision** avec son cliché (F3).
+- **Auteurs** : `PUT …/authors`, liste complète ; adresses uniques ; rattachement au compte
+  dont l'adresse vérifiée correspond (F5) ; journal sans adresse.
+- **Fichier** :
+  - `POST`/`DELETE …/file`, `GET …/file/content` (`attachment`, `nosniff`, `no-store`) ;
+  - contrôles : type par le contenu, `.pdf`, taille du type, PDF chiffré, 500 pages au plus ;
+  - en double aveugle, PDF stocké **nettoyé** (`pdf.py`, défauts de L3.0 corrigés, aucun
+    dictionnaire `/Info`) ;
+  - versions conservées ; orphelins purgés par `cleanup`.
+- **Soumission et suivi** :
+  - `GET …/check` (RG-01, sans écriture) ; `POST …/submit` ;
+  - `POST …/withdraw` (motif obligatoire une fois soumise) ;
+  - `GET …/timeline` (historique et révisions) ;
+  - `DELETE` d'un brouillon seulement (409 `submission_locked` ensuite).
+- **RG-02** :
+  - écritures refusées après la clôture (409 `call_closed`), sauf dérogation en cours ;
+  - services `grant_extension` (échéance saisie à l'heure de l'édition, D13) et
+    `revoke_extension` (l'API de gestion vient en L3.4) ;
+  - `can_edit`, `deadline` et `allowed_actions` exposés à l'auteur.
+- **E-mails** (F13, mis en file **dans** la transaction de la transition) :
+  - accusé de réception, information des co-auteurs, retrait, dérogation ;
+  - objets sans variable (règle de L1 : l'objet survit à la purge des corps).
+- **Réglages exposés** :
+  - `file_policy` et `max_file_mb` dans les types de communication (gestion et public) ;
+  - `submission_languages` dans l'édition (gestion) et dans l'édition publique ;
+  - `double_blind` dans la vue auteur de sa soumission (et non dans l'édition publique).
+- **Limites de débit** : `submission_write` (600/h, sauvegarde automatique comprise),
+  `submission_upload` (30/h), `submission_submit` (20/h).
+- **Codes d'erreur** : `stale_revision` (412), `submission_locked`, `profile_incomplete`.
+
+**Défauts trouvés et corrigés pendant l'étape** :
+
+- **Analyseurs multipart** : DRF les choisit avant de connaître l'action, d'où une classe de
+  vue dédiée au fichier.
+- **PDF chiffré** : le nombre de pages était lu avant le contrôle du chiffrement (message
+  « illisible »).
+- **Champ `Producer`** : pypdf l'ajoute par défaut ; il est retiré.
+- **Identifiant de l'édition** : une substitution hors de la bonne classe l'avait retiré du
+  sérialiseur de **gestion**. Le build l'a détecté et il est restauré.
+
+**Vérifications** :
+
+- **Backend** : 1 396 tests sous SQLite, 1 403 sous MariaDB, dont 50 pour les soumissions :
+  - droits : 404 pour autrui, 401 anonyme ;
+  - If-Match, révisions, auteurs ;
+  - PDF : double aveugle, revue ouverte, 4 refus, politique et taille ;
+  - corpus de nettoyage versionné (`test_pdf.py`) ;
+  - e-mails, retrait, RG-02 et dérogation, suppression d'un brouillon, auteurs figés.
+- **Contrôles** : `ruff` ; migrations ; schéma régénéré sur MariaDB et identique ;
+  traductions à jour ; `pip-audit`.
+- **Front** : 234 tests, lint, format, build (types vérifiés).
+
+**Reporté en L3.4** (gestion) : écrans de saisie de `file_policy`, `max_file_mb`,
+`submission_languages` et du gel RG-19 ; API de gestion des dérogations.
+
+## 14. Bilan de L3.3 (5 octobre 2026)
+
+**Espace auteur du portail** (`/compte/soumissions`, rendu navigateur, `authGuard`) :
+
+- **« Mes soumissions »** :
+  - liste : référence (ou « Brouillon »), titre, état traduit, échéance de modification ;
+  - « Nouvelle soumission » si l'appel de l'édition courante est ouvert (dates clés
+    publiques ; le serveur revérifie, RG-02) ;
+  - profil incomplet : lien vers le profil et bouton désactivé (le serveur refuse aussi,
+    409 `profile_incomplete`) ;
+  - lien depuis l'accueil du compte et la navigation du compte.
+- **Assistant en 5 étapes** (informations, auteurs, fichier, déclarations, récapitulatif) :
+  - **sauvegarde automatique** des informations et des déclarations (anti-rebond de
+    1,2 s, indicateur « Enregistré à… » à l'heure de l'édition) ; auteurs et fichier par
+    une action explicite ;
+  - compteur de mots du résumé, même règle que le serveur (apostrophes et traits d'union
+    internes) ;
+  - écritures **sérialisées** : chacune part avec la révision rendue par la précédente
+    (`If-Match`) ; un 412 affiche « modifiée ailleurs » et propose de recharger ;
+  - fichier : politique du type, avertissement en double aveugle, lien vers l'endpoint
+    authentifié, versions, « métadonnées supprimées » ;
+  - récapitulatif : manques lus sur `check` (RG-01) ; « Soumettre » désactivé tant que la
+    soumission est incomplète ; suppression d'un brouillon ;
+  - après la soumission : référence annoncée, lecture seule si l'appel est clos, retrait
+    motivé, historique des états et nombre de révisions.
+- **Choix de l'API** (ajustés à l'étape) :
+  - thématique et type de communication échangés par leur **code** (l'édition publique
+    n'expose pas d'identifiants) ;
+  - mots-clés typés en liste ;
+  - liste des soumissions non paginée : quelques soumissions par auteur.
+- **Traductions** : clés `portail.submissions.*` (FR et EN), 16 états de l'étude (M6) et
+  textes provisoires des 4 déclarations (Q14).
+
+**Bundle initial du portail : 367,7 kB** (371,4 kB à la fin de L2 ; avertissement à
+365 kB, erreur à 380 kB) :
+
+- **Cause** : l'index du client généré utilise des réexportations nommées. Avec elles,
+  esbuild range dans le bundle initial **toute fonction d'API utilisée**, même par une seule
+  page chargée à la demande. L'étape l'aurait porté à 375,3 kB.
+- **Vérification** : sans l'index, la fonction suit sa page. Avec des réexportations
+  « étoile », chaque fonction suit les pages qui l'utilisent.
+- **Correction** : `scripts/api-barrel.mjs` réécrit l'index en `export * from …` à chaque
+  `npm run api:generate`. Le script a 3 tests. Le client n'est pas édité à la main et le
+  contrôle « client obsolète » de la CI reste valable.
+- **Effet** : le portail gagne aussi les fonctions déjà utilisées par les pages du compte
+  (L1, L2). La gestion est à 359,9 kB.
+- **Pages groupées** : les deux pages auteur forment un seul morceau chargé à la demande.
+
+**Défauts trouvés dans le navigateur et corrigés** :
+
+- **Bouton « Enregistrer les auteurs » sans effet** : le formulaire n'avait pas de
+  `[formGroup]`, donc `ngSubmit` n'était jamais émis. Les tests unitaires appelaient la
+  méthode directement ; un test clique désormais sur le bouton.
+- **« Vous pouvez la soumettre »** restait affiché après la soumission.
+- **Liste à 375 px** : débordement horizontal de 76 px. Le tableau défile maintenant dans
+  son cadre (région focalisable).
+- **Formulaire de retrait** mal aligné.
+
+**Vérifications** :
+
+- **Front** : portail 104 tests (20 nouveaux : service, liste, assistant), gestion 74,
+  shared 76, scripts 11 ; lint, format, build.
+- **Backend** : 1 396 tests sous SQLite, 1 403 sous MariaDB ; `ruff` ; schéma régénéré sur
+  MariaDB et identique.
+- **Parcours complet dans Chromium**, base locale avec un appel ouvert :
+  - brouillon, sauvegarde automatique, compteur de mots ;
+  - auteur prérempli, co-auteur ajouté ;
+  - faux PDF refusé, vrai PDF déposé puis téléchargé (`attachment`), métadonnées
+    supprimées ;
+  - manques RG-01 affichés, puis déclarations enregistrées automatiquement ;
+  - **conflit entre deux onglets** (412) puis rechargement ;
+  - soumission (référence GC27-0001), liste, retrait motivé, historique, lecture seule ;
+  - 375 px sans débordement à chaque étape ; aucune erreur dans la console.
+
+## 15. Bilan de L3.4 (5 octobre 2026)
+
+**API de gestion** (`/v1/manage/editions/{id}/submissions…`, `ManageViewSet` : 401, 404, 403,
+2FA) :
+
+- **Capacités** :
+  - `submissions.read` : `ADMIN`, `CHAIR`, `SC_CHAIR`, CO (toutes fonctions) ;
+  - `submissions.extend` et `submissions.export` : `ADMIN`, `CHAIR`, `SC_CHAIR` ;
+  - `SC_MEMBER` : aucun accès avant L4 ;
+  - matrice des droits étendue : 7 routes, une case par profil.
+- **Liste** :
+  - paginée ; filtres : statuts (plusieurs), thématique et type (codes), langue ;
+  - recherche dans la référence, le titre et le nom des auteurs ;
+  - tri explicite (référence, brouillons à la fin, ou dates, ou titre) ;
+  - noms des auteurs, **sans adresse** ; nombre de pages ; dérogation en cours ;
+  - nombre de requêtes borné, indépendant du nombre de soumissions (testé).
+- **Brouillons dans la liste** : une dérogation peut être accordée à un auteur que la clôture
+  a interrompu (F8). Ils sont signalés comme tels.
+- **Détail** :
+  - métadonnées, auteurs **avec adresses**, versions du PDF, déclarations ;
+  - historique avec l'auteur de chaque changement, révisions, dérogations ;
+  - sérialiseurs nommés par rôle (`SubmissionManage*`) ; la vue relecteur (RG-04) reste à
+    écrire en L4.
+- **Fichier** : chaque version du PDF se télécharge (`…/files/{id}/content`, `attachment`,
+  `nosniff`, `no-store`).
+- **Compteurs par statut** (`…/stats`) pour le tableau de bord.
+- **Export CSV** (`…/export`, mêmes filtres que la liste) :
+  - séparateur « ; » et BOM UTF-8 (tableur en français), dates à l'heure de l'édition ;
+  - **journalisé** (RG-17 : nombre de lignes et filtres) ;
+  - cellules **neutralisées contre l'injection de formules** (`=`, `+`, `-`, `@`, tabulation,
+    retour chariot : apostrophe en tête).
+- **Dérogations** :
+  - accordées (`…/extensions`) et révoquées (`…/extensions/{id}/revoke`, idempotente) par les
+    services de L3.2 ;
+  - révocation refusée sur une édition archivée (409 `edition_archived`).
+- **Clôture** : commande `close_call`, ajoutée au cron (toutes les heures, `deploy/cron.sh` et
+  `deploy/README.md`) :
+  - `SUBMITTED` → `SCREENING` par `transition()`, acteur `cron:close_call` ;
+  - une soumission en dérogation passe au premier passage après l'échéance ;
+  - brouillons et éditions archivées ignorés ; idempotente, verrouillée, battement de cœur ;
+  - une soumission en recevabilité ne reçoit plus de dérogation (409 `submission_locked`).
+
+**Défaut trouvé et corrigé** : supprimer une thématique ou un type **utilisé** par une
+soumission levait une `RestrictedError` (erreur 500). Il répond maintenant 409 `in_use`
+(« désactivez-le »), comme l'annonçait le commentaire de L1. Un test dédié couvre le cas. La
+matrice a mis le défaut au jour dès qu'une soumission a existé dans son jeu de données.
+
+**Écrans de la gestion** :
+
+- **Rubrique « Soumissions »**, nouvelle catégorie du rail après le pilotage :
+  - entrée dans `core/navigation.ts` ; fiche d'aide `submissions` ;
+  - recherche d'écran (« dérogation », « export »…) ;
+  - le détail relève de la même fiche et de la même catégorie.
+- **Liste** : filtres, tri, pagination ; lien « Exporter (CSV) » aux mêmes filtres, affiché avec
+  `submissions.export` seulement.
+- **Détail** :
+  - auteurs (`mailto:`), versions du PDF, déclarations, historique ;
+  - dérogations : échéance à l'heure de l'édition, motif ; révocation après confirmation.
+- **Tableau de bord** : carte « Soumissions » (envoyées, brouillons, nombre par statut).
+- **Paramétrage** :
+  - types : fichier PDF (aucun, facultatif, obligatoire) et taille maximale ;
+  - informations générales : langues des soumissions ;
+  - **RG-19** : code et double aveugle gelés après la première soumission, avec une
+    explication. Pour un non-administrateur, la case est désactivée. Pour l'administrateur,
+    un motif est exigé et transmis ; le serveur reste juge (`setting_frozen`).
+- **Fiches d'aide** : `submissions` (nouvelle). `settings-general`, `settings-lists` et
+  `settings-confidentiality` sont complétées : gel, politique de fichier, « élément utilisé ».
+
+**Vérifications** :
+
+- **Backend** : 1 511 tests sous SQLite, 1 518 sous MariaDB (115 nouveaux, dont 7 routes ×
+  12 profils dans la matrice). Également : `ruff`, schéma régénéré sur MariaDB, traductions à
+  jour.
+- **Front** : gestion 87 tests (13 nouveaux : liste, export, détail, dérogations, RG-19,
+  navigation), portail 104, shared 76, scripts 11 ; lint, format, build. Bundle initial : gestion
+  360,7 kB, portail 367,7 kB.
+- **Chromium**, base locale, administratrice avec 2FA :
+  - compteurs du tableau de bord ; liste et filtre « Soumise » ;
+  - export CSV (200, `text/csv`, BOM, en-têtes traduits) ;
+  - PDF téléchargé (`attachment`) ;
+  - dérogation accordée puis révoquée ;
+  - politique de fichier des types ; gel RG-19 et motif demandé ;
+  - recherche d'écran ; 375 px sans débordement ; aucune erreur dans la console.
+- **`close_call` sur la base locale** : 2 soumissions passent en recevabilité, puis 0 au second
+  passage ; les brouillons restent intacts.
+- **Défaut corrigé pendant la vérification** : après l'octroi d'une dérogation, le formulaire
+  vidé s'affichait en erreur (état « soumis » conservé). Il est maintenant réinitialisé par sa
+  directive.
+
+**Reporté en L3.5** :
+
+- rappels des brouillons ;
+- doublons (F15 : signalement dans la liste de gestion) ;
+- cloche de notifications (portail).
+
+## 16. Bilan de L3.5 (5 octobre 2026)
+
+**Doublons (F15)** :
+
+- **Titre normalisé** : `Submission.title_key` est tenu à jour par les services (sans
+  accents, en minuscules, ponctuation retirée, espaces réduits). La migration remplit les
+  soumissions existantes avec une copie figée de la normalisation ; un test vérifie que la
+  copie ne diverge pas du service.
+- **Doublon** : autre soumission non retirée du même soumissionnaire, dans la même édition, au
+  même titre normalisé.
+- **Auteur** : `GET …/check` renvoie `duplicates` ; le récapitulatif l'avertit, sans bloquer.
+- **Gestion** :
+  - indicateur `possible_duplicate`, calculé par une sous-requête (aucune requête par ligne) ;
+  - filtre « Doublons possibles seulement » ; badge dans la liste et le détail ;
+  - une soumission retirée n'est jamais signalée.
+
+**Rappels des brouillons (F13, étude A2)** :
+
+- **Commande `remind_drafts`**, ajoutée au cron (toutes les heures) :
+  - rappel sept jours avant la clôture, puis la veille, aux brouillons des éditions publiées
+    dont l'appel est ouvert ;
+  - e-mail (lien vers le brouillon, clôture à l'heure de l'édition) et cloche.
+- **Idempotence** : la table `DraftReminder` a une contrainte d'unicité (brouillon, échéance).
+  Un passage manqué n'est pas rattrapé : à la veille, seul le rappel de la veille part.
+
+**Cloche (F13)** :
+
+- **Modèle** `communications.Notification` (compte, nature, éléments, date de lecture).
+  - Le texte n'est pas stocké : l'interface le compose depuis la nature et les éléments.
+  - Les éléments ne viennent que de la soumission (référence, titre, échéance), jamais d'un
+    tiers.
+- **Natures en L3** : soumission reçue, soumission retirée, co-auteur déclaré, dérogation
+  accordée, rappel de brouillon.
+  - Elles doublent les e-mails existants.
+  - Le co-auteur avec compte est notifié sans lien : il n'a pas accès à la soumission avant
+    P2 (F5).
+- **API** : `GET /v1/me/notifications` (50 dernières et nombre de non lues) et
+  `POST /v1/me/notifications/read` (désignées ou toutes ; celles d'un autre compte ignorées).
+- **Portail** :
+  - cloche dans la navigation de l'espace compte : nombre de non lues, libellé accessible ;
+  - nombre relu à l'ouverture et à chaque navigation (règle n° 9 : pas de temps réel) ;
+  - page `/compte/notifications` : marquer tout comme lu, ouvrir la soumission.
+- **Données personnelles** : export ; suppression à l'anonymisation ; conservation D15 (non
+  validée, en simulation) : 6 mois après lecture, 12 mois au plus.
+
+**Vérifications** :
+
+- **Backend** : 1 524 tests sous SQLite, 1 531 sous MariaDB. 13 sont nouveaux :
+  normalisation, F15 côté auteur et gestion, fenêtres et idempotence des rappels, commande,
+  notifications des transitions, API de la cloche, comptes inactifs, export et
+  anonymisation, purge. Également : `ruff`, migrations,
+  schéma régénéré sur MariaDB, traductions à jour.
+- **Front** : portail 110 tests, gestion 88, shared 76 ; lint, format, build. Bundles initiaux
+  inchangés : portail 367,7 kB, gestion 360,8 kB.
+- **Chromium**, base locale :
+  - migration appliquée : titres normalisés remplis ;
+  - `remind_drafts` : 2 rappels, e-mail rendu en français avec la clôture à l'heure de
+    l'édition ;
+  - cloche à 2, puis 0 après « Tout marquer comme lu » ;
+  - textes composés par l'interface ;
+  - doublons listés au récapitulatif ;
+  - aucune erreur dans la console.
+
+## 17. Bilan de L3.6 (5 octobre 2026) et clôture du lot
+
+**Bout en bout (F14)** : `web/e2e/tests/author.spec.ts`, lancé en CI par le job « E2E
+(Playwright) ».
+
+- **Préparation** : `web/e2e/seed.py` crée, **par les services**, la conférence, l'édition
+  publiée et courante, l'appel ouvert, une thématique et un type à PDF obligatoire, ainsi qu'un
+  PDF de test porteur de métadonnées. Le script est lu par `manage.py shell` et contrôlé par
+  `ruff` en CI.
+- **Accès au backend** : `web/e2e/django.ts` lance `manage.py` sur la base de la série, comme
+  un opérateur. Le lien de vérification de l'adresse part en console : sa clé est recalculée
+  (`EmailConfirmationHMAC`) et la vraie page de vérification la consomme.
+- **Parcours** :
+  - inscription, vérification, connexion, profil ;
+  - brouillon (sauvegarde automatique), co-auteur ;
+  - PDF (métadonnées supprimées) ;
+  - manques RG-01, déclarations ;
+  - soumission (`E2E27-0001`), accusé et e-mail aux co-auteurs (lus dans le registre d'envoi) ;
+  - modification (une révision) ;
+  - clôture simulée : lecture seule ; `close_call` : recevabilité.
+- **Durée et stabilité** : 14 s pour le parcours, 28 s pour la série (fumée comprise) ; stable
+  sur quatre exécutions successives.
+- **Défauts de test corrigés en écrivant le parcours** :
+  - confirmation du mot de passe à l'inscription ;
+  - lien de vérification sur la page déjà ouverte : seul le fragment changeait, sans
+    rechargement ;
+  - apostrophe typographique du nom de pays fourni par `Intl`.
+
+**Recette** (démo D, en local) :
+
+- **Côté auteur** : L3.3 dans Chromium, puis le parcours de bout en bout. Brouillon retrouvé,
+  co-auteurs, PDF nettoyé, accusé, révision avant clôture, refus après la clôture.
+- **Côté gestion** (L3.4) : liste filtrée, détail ; dérogation accordée puis révoquée,
+  journalisée ; le CO en lecture (tests de la matrice et des écrans).
+- **Sur o2switch** : non faite, faute d'accès ; reste à faire avec les deux lignes de cron.
+
+**Documentation** :
+
+- [`docs/L3-soumission.md`](L3-soumission.md) : bilan et exploitation ;
+- étude : §19 « Mises à jour issues du lot L3 » (version 1.3, Markdown et HTML) ;
+- `CLAUDE.md` : décisions du lot L3 ; commande `ruff` étendue à `web/e2e`.
+
+**Charge** : dans l'estimation du §8 (16 à 19,5 j-h).

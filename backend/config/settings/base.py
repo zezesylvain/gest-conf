@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "apps.conferences",
     "apps.portal",
     "apps.submissions",
+    "apps.reviews",
     # Après les applications du projet : leurs gabarits d'e-mails (account/email/*) priment.
     "allauth",
     "allauth.account",
@@ -307,6 +308,11 @@ REST_FRAMEWORK = {
         "data_export": "3/hour",
         "account_deletion": "3/hour",
         "portal_upload": "60/hour",  # téléversements de fichiers publics, par compte
+        # Soumissions (plan L3) : écritures (sauvegarde automatique comprise), dépôts de
+        # fichier, soumissions et retraits, par compte.
+        "submission_write": "600/hour",
+        "submission_upload": "30/hour",
+        "submission_submit": "20/hour",
     },
     "NUM_PROXIES": GESTCONF_TRUSTED_PROXY_COUNT,
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
@@ -345,10 +351,16 @@ SPECTACULAR_SETTINGS = {
         "SkippedReason": "apps.accounts.services.invitations.SkippedReason",
         "ActorKind": "apps.core.actor.ActorKind",
         "EditionStatus": "apps.conferences.models.EditionStatus",
+        "FilePolicy": "apps.conferences.models.FilePolicy",
+        "SubmissionLanguage": "apps.conferences.models.SUBMISSION_LANGUAGE_CHOICES",
+        "SubmissionStatus": "apps.submissions.models.SubmissionStatus",
+        "SubmissionFileKind": "apps.submissions.models.SubmissionFileKind",
+        "SubmissionAction": "apps.submissions.serializers.SUBMISSION_ACTION_CHOICES",
         "SectionType": "apps.portal.models.SectionType",
         "MenuLocation": "apps.portal.models.MenuLocation",
         "PublicFileKind": "apps.core.models.PublicFileKind",
         "PortalFileKind": "apps.portal.serializers.PORTAL_FILE_KIND_CHOICES",
+        "NotificationKind": "apps.communications.models.NotificationKind",
         "ErrorCode": "apps.core.errors.ErrorCode",
     },
     "POSTPROCESSING_HOOKS": [

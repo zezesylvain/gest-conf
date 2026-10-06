@@ -11,6 +11,15 @@
  * * `members.manage` - members.manage
  * * `audit.read` - audit.read
  * * `portal.write` - portal.write
+ * * `submissions.read` - submissions.read
+ * * `submissions.extend` - submissions.extend
+ * * `submissions.export` - submissions.export
+ * * `reviews.write` - reviews.write
+ * * `reviews.manage` - reviews.manage
+ * * `reviews.read_all` - reviews.read_all
+ * * `decisions.decide` - decisions.decide
+ * * `decisions.publish` - decisions.publish
+ * * `grids.write` - grids.write
  */
-export type Capability = 'edition.read' | 'edition.write' | 'edition.publish' | 'edition.archive' | 'members.read' | 'members.manage' | 'audit.read' | 'portal.write';
+export type Capability = 'edition.read' | 'edition.write' | 'edition.publish' | 'edition.archive' | 'members.read' | 'members.manage' | 'audit.read' | 'portal.write' | 'submissions.read' | 'submissions.extend' | 'submissions.export' | 'reviews.write' | 'reviews.manage' | 'reviews.read_all' | 'decisions.decide' | 'decisions.publish' | 'grids.write';
 

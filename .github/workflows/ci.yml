@@ -52,8 +52,8 @@ jobs:
 
       - name: Lint et formatage (ruff)
         run: |
-          ruff check . ../deploy
-          ruff format --check . ../deploy
+          ruff check . ../deploy ../web/e2e
+          ruff format --check . ../deploy ../web/e2e
 
       - name: Migrations à jour
         run: python manage.py makemigrations --check --dry-run

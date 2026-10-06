@@ -292,6 +292,154 @@ paths:
               schema:
                 $ref: '#/components/schemas/Confidentiality'
           description: ''
+  /v1/manage/editions/{edition_id}/grids:
+    get:
+      operationId: manage_grids_list
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Grid'
+          description: ''
+    post:
+      operationId: manage_grid_create
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GridCreateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Grid'
+          description: ''
+  /v1/manage/editions/{edition_id}/grids/{grid_id}:
+    get:
+      operationId: manage_grid_retrieve
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: grid_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Grid'
+          description: ''
+    patch:
+      operationId: manage_grid_update
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: grid_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedGridUpdateRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Grid'
+          description: ''
+    delete:
+      operationId: manage_grid_delete
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: grid_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /v1/manage/editions/{edition_id}/grids/{grid_id}/duplicate:
+    post:
+      operationId: manage_grid_duplicate
+      description: 'RG-05 : nouvelle version modifiable d''une grille (verrouillée
+        ou non).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: grid_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Grid'
+          description: ''
   /v1/manage/editions/{edition_id}/invitations:
     get:
       operationId: manage_invitations_list
@@ -1594,6 +1742,280 @@ paths:
       responses:
         '204':
           description: No response body
+  /v1/manage/editions/{edition_id}/submissions:
+    get:
+      operationId: manage_submissions_list
+      parameters:
+      - in: query
+        name: duplicates
+        schema:
+          type: boolean
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: language
+        schema:
+          type: string
+      - in: query
+        name: ordering
+        schema:
+          type: string
+          enum:
+          - -submitted_at
+          - -updated_at
+          - reference
+          - title
+        description: |-
+          * `reference` - reference
+          * `-submitted_at` - -submitted_at
+          * `-updated_at` - -updated_at
+          * `title` - title
+      - name: page
+        required: false
+        in: query
+        description: Un numéro de page de l'ensemble des résultats.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Nombre de résultats à retourner par page.
+        schema:
+          type: integer
+      - in: query
+        name: q
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: array
+          items:
+            type: string
+            title: Statut
+            enum:
+            - accepted
+            - accepted_minor
+            - camera_ready_received
+            - confirmed
+            - draft
+            - presented
+            - published
+            - rejected
+            - reviewed
+            - revision_requested
+            - scheduled
+            - screening
+            - submitted
+            - under_review
+            - waitlist
+            - withdrawn
+        description: |-
+          * `draft` - brouillon
+          * `submitted` - soumise
+          * `screening` - vérification de recevabilité
+          * `under_review` - en cours d'évaluation
+          * `reviewed` - évaluée
+          * `accepted` - acceptée
+          * `accepted_minor` - acceptée sous réserve de corrections
+          * `waitlist` - liste d'attente
+          * `rejected` - rejetée
+          * `revision_requested` - corrections demandées
+          * `camera_ready_received` - version finale reçue
+          * `confirmed` - présentation confirmée
+          * `scheduled` - programmée
+          * `presented` - présentée
+          * `published` - publiée dans les actes
+          * `withdrawn` - retirée
+        explode: true
+        style: form
+      - in: query
+        name: submission_type
+        schema:
+          type: string
+      - in: query
+        name: track
+        schema:
+          type: string
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSubmissionManageList'
+          description: ''
+  /v1/manage/editions/{edition_id}/submissions/{submission_id}:
+    get:
+      operationId: manage_submission_retrieve
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmissionManageDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/submissions/{submission_id}/extensions:
+    post:
+      operationId: manage_submission_extension_grant
+      description: Dérogation RG-02 (F8), journalisée ; l'auteur en est informé par
+        e-mail.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExtensionGrantRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmissionManageDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/submissions/{submission_id}/extensions/{extension_id}/revoke:
+    post:
+      operationId: manage_submission_extension_revoke
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: extension_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmissionManageDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/submissions/{submission_id}/files/{file_id}/content:
+    get:
+      operationId: manage_submission_file_content
+      description: 'Une version du PDF (règle n° 8 : endpoint authentifié, jamais
+        servi par Apache).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: file_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  /v1/manage/editions/{edition_id}/submissions/export:
+    get:
+      operationId: manage_submissions_export
+      description: Export CSV des soumissions filtrées (mêmes filtres que la liste),
+        journalisé.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  /v1/manage/editions/{edition_id}/submissions/stats:
+    get:
+      operationId: manage_submissions_stats
+      description: Compteurs par statut (tableau de bord).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmissionStats'
+          description: ''
   /v1/manage/editions/{edition_id}/tracks:
     get:
       operationId: manage_editions_tracks_list
@@ -1818,6 +2240,39 @@ paths:
                 type: object
                 additionalProperties: {}
           description: Export JSON.
+  /v1/me/notifications:
+    get:
+      operationId: me_notifications
+      tags:
+      - me
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationList'
+          description: ''
+  /v1/me/notifications/read:
+    post:
+      operationId: me_notifications_read
+      tags:
+      - me
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationReadRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnreadCount'
+          description: ''
   /v1/me/photo:
     get:
       operationId: me_photo
@@ -2063,6 +2518,315 @@ paths:
               schema:
                 $ref: '#/components/schemas/PublicSite'
           description: ''
+  /v1/submissions:
+    get:
+      operationId: submissions_list
+      parameters:
+      - in: query
+        name: edition
+        schema:
+          type: integer
+      tags:
+      - submissions
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Submission'
+          description: ''
+    post:
+      operationId: submissions_create
+      tags:
+      - submissions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmissionCreateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Submission'
+          description: ''
+  /v1/submissions/{submission_id}:
+    get:
+      operationId: submissions_retrieve
+      parameters:
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - submissions
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Submission'
+          description: ''
+    patch:
+      operationId: submissions_update
+      parameters:
+      - in: header
+        name: If-Match
+        schema:
+          type: integer
+        description: Révision lue ; 412 « stale_revision » si la soumission a changé
+          depuis.
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - submissions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSubmissionWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Submission'
+          description: ''
+    delete:
+      operationId: submissions_delete
+      parameters:
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - submissions
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /v1/submissions/{submission_id}/authors:
+    put:
+      operationId: submissions_authors
+      parameters:
+      - in: header
+        name: If-Match
+        schema:
+          type: integer
+        description: Révision lue ; 412 « stale_revision » si la soumission a changé
+          depuis.
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - submissions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthorsWriteRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Submission'
+          description: ''
+  /v1/submissions/{submission_id}/check:
+    get:
+      operationId: submissions_check
+      description: 'RG-01 : ce qui manque pour soumettre, sans rien écrire ; F15 :
+        doublons possibles.'
+      parameters:
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - submissions
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmissionCheck'
+          description: ''
+  /v1/submissions/{submission_id}/file:
+    post:
+      operationId: submissions_file_upload
+      description: |-
+        Route du fichier : multipart pour le dépôt (DRF choisit les analyseurs avant de
+        connaître l'action, d'où une classe dédiée).
+      parameters:
+      - in: header
+        name: If-Match
+        schema:
+          type: integer
+        description: Révision lue ; 412 « stale_revision » si la soumission a changé
+          depuis.
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - submissions
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SubmissionFileUploadRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Submission'
+          description: ''
+    delete:
+      operationId: submissions_file_remove
+      description: |-
+        Route du fichier : multipart pour le dépôt (DRF choisit les analyseurs avant de
+        connaître l'action, d'où une classe dédiée).
+      parameters:
+      - in: header
+        name: If-Match
+        schema:
+          type: integer
+        description: Révision lue ; 412 « stale_revision » si la soumission a changé
+          depuis.
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - submissions
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Submission'
+          description: ''
+  /v1/submissions/{submission_id}/file/content:
+    get:
+      operationId: submissions_file_content
+      description: 'Fichier courant, pour son auteur (règle n° 8 : endpoint authentifié).'
+      parameters:
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - submissions
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  /v1/submissions/{submission_id}/submit:
+    post:
+      operationId: submissions_submit
+      parameters:
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - submissions
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Submission'
+          description: ''
+  /v1/submissions/{submission_id}/timeline:
+    get:
+      operationId: submissions_timeline
+      parameters:
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - submissions
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Timeline'
+          description: ''
+  /v1/submissions/{submission_id}/withdraw:
+    post:
+      operationId: submissions_withdraw
+      parameters:
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - submissions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WithdrawRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Submission'
+          description: ''
 components:
   schemas:
     AcceptRequest:
@@ -2189,6 +2953,46 @@ components:
       - object_id
       - object_type
       - reason
+    AuthorWriteRequest:
+      type: object
+      properties:
+        first_name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        last_name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          minLength: 1
+        institution:
+          type: string
+          maxLength: 255
+        country:
+          type: string
+          maxLength: 2
+        is_corresponding:
+          type: boolean
+          default: false
+        is_presenter:
+          type: boolean
+          default: false
+      required:
+      - email
+      - first_name
+      - last_name
+    AuthorsWriteRequest:
+      type: object
+      properties:
+        authors:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuthorWriteRequest'
+      required:
+      - authors
     BlankEnum:
       enum:
       - ''
@@ -2202,6 +3006,15 @@ components:
       - members.manage
       - audit.read
       - portal.write
+      - submissions.read
+      - submissions.extend
+      - submissions.export
+      - reviews.write
+      - reviews.manage
+      - reviews.read_all
+      - decisions.decide
+      - decisions.publish
+      - grids.write
       type: string
       description: |-
         * `edition.read` - edition.read
@@ -2212,10 +3025,18 @@ components:
         * `members.manage` - members.manage
         * `audit.read` - audit.read
         * `portal.write` - portal.write
+        * `submissions.read` - submissions.read
+        * `submissions.extend` - submissions.extend
+        * `submissions.export` - submissions.export
+        * `reviews.write` - reviews.write
+        * `reviews.manage` - reviews.manage
+        * `reviews.read_all` - reviews.read_all
+        * `decisions.decide` - decisions.decide
+        * `decisions.publish` - decisions.publish
+        * `grids.write` - grids.write
     Confidentiality:
       type: object
-      description: 'RG-19 : réglages gelés (lecture) et motif d''un changement forcé
-        par un ADMIN.'
+      description: Paramètres de l'évaluation (gestion, §6.1 ; plan L4 H4, H6, H12).
       properties:
         double_blind:
           type: boolean
@@ -2225,6 +3046,19 @@ components:
           maximum: 10
           minimum: 1
           title: Relecteurs par soumission
+        max_reviews_per_reviewer:
+          type: integer
+          maximum: 100
+          minimum: 1
+          title: Évaluations au plus par relecteur
+        divergence_threshold:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          title: Seuil de divergence (points sur 100)
+        confidence_weighted_score:
+          type: boolean
+          title: Score final pondéré par la confiance
         frozen_fields:
           type: array
           items:
@@ -2330,10 +3164,116 @@ components:
       required:
       - history
       - states
+    Criterion:
+      type: object
+      properties:
+        code:
+          type: string
+          maxLength: 32
+          pattern: ^[-a-zA-Z0-9_]+$
+        label_fr:
+          type: string
+          title: Libellé (FR)
+          maxLength: 255
+        label_en:
+          type: string
+          title: Libellé (EN)
+          maxLength: 255
+        help_fr:
+          type: string
+          title: Aide à la notation (FR)
+        help_en:
+          type: string
+          title: Aide à la notation (EN)
+        weight:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          title: Poids (%)
+        is_required:
+          type: boolean
+          title: Obligatoire
+        position:
+          type: integer
+          readOnly: true
+          title: Ordre
+      required:
+      - code
+      - label_fr
+      - position
+      - weight
+    CriterionWriteRequest:
+      type: object
+      properties:
+        code:
+          type: string
+          minLength: 1
+          maxLength: 32
+          pattern: ^[-a-zA-Z0-9_]+$
+        label_fr:
+          type: string
+          minLength: 1
+          maxLength: 255
+        label_en:
+          type: string
+          maxLength: 255
+        help_fr:
+          type: string
+        help_en:
+          type: string
+        weight:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+        is_required:
+          type: boolean
+          default: true
+      required:
+      - code
+      - label_fr
+      - weight
+    DeclarationState:
+      type: object
+      properties:
+        code:
+          type: string
+        accepted:
+          type: boolean
+          description: Acceptée dans la version courante du texte.
+        text_version:
+          type: string
+      required:
+      - accepted
+      - code
+      - text_version
+    Duplicate:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        reference:
+          type: string
+          readOnly: true
+          nullable: true
+          title: Référence
+        status:
+          allOf:
+          - $ref: '#/components/schemas/SubmissionStatus'
+          readOnly: true
+          title: Statut
+        title:
+          type: string
+          readOnly: true
+          title: Titre
+      required:
+      - id
+      - reference
+      - status
+      - title
     Edition:
       type: object
-      description: 'RG-19 : réglages gelés (lecture) et motif d''un changement forcé
-        par un ADMIN.'
+      description: Informations générales de l'édition (gestion, §6.1).
       properties:
         id:
           type: integer
@@ -2393,6 +3333,12 @@ components:
           type: string
           title: Fuseau horaire
           maxLength: 64
+        submission_languages:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubmissionLanguage'
+          description: Langues acceptées pour les soumissions (plan L3, F11).
+          minItems: 1
         status:
           allOf:
           - $ref: '#/components/schemas/EditionStatus'
@@ -2526,6 +3472,10 @@ components:
       - submission_incomplete
       - call_closed
       - setting_frozen
+      - stale_revision
+      - submission_locked
+      - profile_incomplete
+      - grid_locked
       type: string
       description: |-
         * `validation_error` - Validation Error
@@ -2560,6 +3510,76 @@ components:
         * `submission_incomplete` - Submission Incomplete
         * `call_closed` - Call Closed
         * `setting_frozen` - Setting Frozen
+        * `stale_revision` - Stale Revision
+        * `submission_locked` - Submission Locked
+        * `profile_incomplete` - Profile Incomplete
+        * `grid_locked` - Grid Locked
+    Extension:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        until:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Échéance (UTC)
+        reason:
+          type: string
+          readOnly: true
+          title: Motif
+        granted_by_name:
+          type: string
+          readOnly: true
+        granted_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Accordée le
+        revoked_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Révoquée le
+        is_active:
+          type: boolean
+          readOnly: true
+      required:
+      - granted_at
+      - granted_by_name
+      - id
+      - is_active
+      - reason
+      - revoked_at
+      - until
+    ExtensionGrantRequest:
+      type: object
+      description: 'Dérogation (RG-02, F8) : échéance à l''heure de l''édition (D13),
+        motif obligatoire.'
+      properties:
+        until_local:
+          type: string
+          format: date-time
+          description: Échéance dans le fuseau de l'édition, sans fuseau (2027-04-02T23:59).
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 2000
+      required:
+      - reason
+      - until_local
+    FilePolicy:
+      enum:
+      - none
+      - optional
+      - required
+      type: string
+      description: |-
+        * `none` - aucun fichier
+        * `optional` - facultatif
+        * `required` - obligatoire
     FileUploadRequest:
       type: object
       properties:
@@ -2580,6 +3600,87 @@ components:
       required:
       - file
       - kind
+    Grid:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        submission_type:
+          type: string
+          readOnly: true
+          nullable: true
+        version:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+          title: Nom
+        scale_min:
+          type: integer
+          readOnly: true
+          title: Note minimale
+        scale_max:
+          type: integer
+          readOnly: true
+          title: Note maximale
+        locked_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Verrouillée le
+        is_locked:
+          type: boolean
+          readOnly: true
+          description: 'Utilisée par une évaluation (RG-05) : on la duplique pour
+            la modifier.'
+        criteria:
+          type: array
+          items:
+            $ref: '#/components/schemas/Criterion'
+          readOnly: true
+      required:
+      - criteria
+      - id
+      - is_locked
+      - locked_at
+      - name
+      - scale_max
+      - scale_min
+      - submission_type
+      - version
+    GridCreateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        submission_type:
+          type: string
+          nullable: true
+          minLength: 1
+          description: 'Code du type ; absent ou nul : grille de tous les types.'
+          maxLength: 32
+        scale_min:
+          type: integer
+          maximum: 99
+          minimum: 0
+          default: 0
+        scale_max:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 5
+        criteria:
+          type: array
+          items:
+            $ref: '#/components/schemas/CriterionWriteRequest'
+          description: 'Liste complète ; absente : grille par défaut de l''étude (25/30/15/15/15).'
+      required:
+      - name
     Health:
       type: object
       properties:
@@ -2877,6 +3978,82 @@ components:
       description: |-
         * `fr` - Français
         * `en` - English
+    ManageAuthor:
+      type: object
+      description: 'Auteur vu par la gestion : adresse comprise (contact des auteurs,
+        F10).'
+      properties:
+        position:
+          type: integer
+          readOnly: true
+          title: Ordre
+        first_name:
+          type: string
+          title: Prénom
+          maxLength: 150
+        last_name:
+          type: string
+          title: Nom
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          title: Adresse e-mail
+          maxLength: 254
+        institution:
+          type: string
+          maxLength: 255
+        country:
+          type: string
+          title: Pays
+          maxLength: 2
+        is_corresponding:
+          type: boolean
+          title: Auteur correspondant
+        is_presenter:
+          type: boolean
+          title: Auteur présentateur
+        has_account:
+          type: boolean
+          readOnly: true
+          description: Rattaché à un compte dont l'adresse vérifiée correspond (F5).
+      required:
+      - email
+      - first_name
+      - has_account
+      - last_name
+      - position
+    ManageHistoryEntry:
+      type: object
+      properties:
+        from_status:
+          allOf:
+          - $ref: '#/components/schemas/SubmissionStatus'
+          readOnly: true
+          title: Statut précédent
+        to_status:
+          allOf:
+          - $ref: '#/components/schemas/SubmissionStatus'
+          readOnly: true
+          title: Nouveau statut
+        at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Date
+        reason:
+          type: string
+          readOnly: true
+          title: Motif
+        actor_name:
+          type: string
+          readOnly: true
+      required:
+      - actor_name
+      - at
+      - from_status
+      - reason
+      - to_status
     Me:
       type: object
       description: |-
@@ -3147,6 +4324,75 @@ components:
       required:
       - items
       - location
+    Notification:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        kind:
+          allOf:
+          - $ref: '#/components/schemas/NotificationKind'
+          readOnly: true
+        payload:
+          type: object
+          additionalProperties: {}
+          readOnly: true
+          description: Éléments du texte (référence, titre, échéance), composé par
+            l'interface.
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        read_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Lue le
+      required:
+      - created_at
+      - id
+      - kind
+      - payload
+      - read_at
+    NotificationKind:
+      enum:
+      - submission_received
+      - submission_withdrawn
+      - coauthor_added
+      - extension_granted
+      - draft_reminder
+      type: string
+      description: |-
+        * `submission_received` - soumission reçue
+        * `submission_withdrawn` - soumission retirée
+        * `coauthor_added` - déclaré co-auteur
+        * `extension_granted` - dérogation accordée
+        * `draft_reminder` - brouillon à soumettre
+    NotificationList:
+      type: object
+      properties:
+        unread:
+          type: integer
+          description: Notifications non lues (toutes).
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Notification'
+      required:
+      - results
+      - unread
+    NotificationReadRequest:
+      type: object
+      properties:
+        ids:
+          type: array
+          items:
+            type: integer
+            minimum: 1
+          description: Notifications à marquer comme lues ; toutes si absent.
+          maxItems: 200
     OcFunction:
       enum:
       - finance
@@ -3345,10 +4591,32 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/InvitationWithEmail'
+    PaginatedSubmissionManageList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubmissionManage'
     PatchedConfidentialityRequest:
       type: object
-      description: 'RG-19 : réglages gelés (lecture) et motif d''un changement forcé
-        par un ADMIN.'
+      description: Paramètres de l'évaluation (gestion, §6.1 ; plan L4 H4, H6, H12).
       properties:
         double_blind:
           type: boolean
@@ -3358,6 +4626,19 @@ components:
           maximum: 10
           minimum: 1
           title: Relecteurs par soumission
+        max_reviews_per_reviewer:
+          type: integer
+          maximum: 100
+          minimum: 1
+          title: Évaluations au plus par relecteur
+        divergence_threshold:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          title: Seuil de divergence (points sur 100)
+        confidence_weighted_score:
+          type: boolean
+          title: Score final pondéré par la confiance
         reason:
           type: string
           writeOnly: true
@@ -3366,8 +4647,7 @@ components:
             (RG-19).
     PatchedEditionRequest:
       type: object
-      description: 'RG-19 : réglages gelés (lecture) et motif d''un changement forcé
-        par un ADMIN.'
+      description: Informations générales de l'édition (gestion, §6.1).
       properties:
         code:
           type: string
@@ -3428,12 +4708,38 @@ components:
           minLength: 1
           title: Fuseau horaire
           maxLength: 64
+        submission_languages:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubmissionLanguage'
+          description: Langues acceptées pour les soumissions (plan L3, F11).
+          minItems: 1
         reason:
           type: string
           writeOnly: true
           default: ''
           description: Motif, obligatoire pour qu'un ADMIN change un réglage gelé
             (RG-19).
+    PatchedGridUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        scale_min:
+          type: integer
+          maximum: 99
+          minimum: 0
+        scale_max:
+          type: integer
+          maximum: 100
+          minimum: 1
+        criteria:
+          type: array
+          items:
+            $ref: '#/components/schemas/CriterionWriteRequest'
+          description: 'Liste complète et ordonnée (RG-05 : somme 100).'
     PatchedKeyDateWriteRequest:
       type: object
       description: Saisie à l'heure de l'édition (D13), convertie en UTC par le serveur.
@@ -3689,6 +4995,15 @@ components:
           maximum: 2000
           minimum: 50
           title: Mots maximum du résumé
+        file_policy:
+          allOf:
+          - $ref: '#/components/schemas/FilePolicy'
+          title: Fichier PDF
+        max_file_mb:
+          type: integer
+          maximum: 50
+          minimum: 1
+          title: Taille maximale du fichier (Mo)
         position:
           type: integer
           maximum: 65535
@@ -3697,6 +5012,42 @@ components:
         is_active:
           type: boolean
           title: Actif
+    PatchedSubmissionWriteRequest:
+      type: object
+      description: 'Écriture partielle (sauvegarde automatique) : valeurs incomplètes
+        admises.'
+      properties:
+        title:
+          type: string
+          maxLength: 300
+        abstract:
+          type: string
+        keywords:
+          type: array
+          items:
+            type: string
+            maxLength: 200
+          maxItems: 20
+        language:
+          type: string
+          maxLength: 2
+        track:
+          type: string
+          nullable: true
+          minLength: 1
+          description: Code de la thématique (édition de la soumission).
+          maxLength: 32
+        submission_type:
+          type: string
+          nullable: true
+          minLength: 1
+          description: Code du type de communication (édition de la soumission).
+          maxLength: 32
+        declarations:
+          type: object
+          additionalProperties:
+            type: boolean
+          description: Code → accepté ; la version courante du texte est enregistrée.
     PatchedTrackRequest:
       type: object
       properties:
@@ -4050,6 +5401,11 @@ components:
           type: string
           readOnly: true
           title: Fuseau horaire
+        submission_languages:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubmissionLanguage'
+          readOnly: true
         tracks:
           type: array
           items:
@@ -4073,6 +5429,7 @@ components:
       - key_dates
       - slug
       - start_date
+      - submission_languages
       - submission_types
       - theme_en
       - theme_fr
@@ -4493,14 +5850,25 @@ components:
           type: integer
           readOnly: true
           title: Mots maximum du résumé
+        file_policy:
+          allOf:
+          - $ref: '#/components/schemas/FilePolicy'
+          readOnly: true
+          title: Fichier PDF
+        max_file_mb:
+          type: integer
+          readOnly: true
+          title: Taille maximale du fichier (Mo)
       required:
       - abstract_max_words
       - code
       - default_duration_min
       - description_en
       - description_fr
+      - file_policy
       - label_en
       - label_fr
+      - max_file_mb
     PublicTrack:
       type: object
       properties:
@@ -4550,6 +5918,17 @@ components:
       - pending_changes
       - pending_since
       - release
+    RevisionSummary:
+      type: object
+      properties:
+        number:
+          type: integer
+        at:
+          type: string
+          format: date-time
+      required:
+      - at
+      - number
     RevokeRequest:
       type: object
       properties:
@@ -4829,6 +6208,580 @@ components:
       description: |-
         * `already_pending` - invitation déjà en attente
         * `already_member` - rôle déjà actif
+    Submission:
+      type: object
+      description: Vue de l'auteur sur **sa** soumission.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        edition:
+          type: integer
+          readOnly: true
+          title: Édition
+        edition_code:
+          type: string
+          readOnly: true
+        double_blind:
+          type: boolean
+          readOnly: true
+          description: 'Double aveugle : le PDF doit être anonyme ; ses métadonnées
+            sont retirées.'
+        reference:
+          type: string
+          readOnly: true
+          nullable: true
+          title: Référence
+        status:
+          allOf:
+          - $ref: '#/components/schemas/SubmissionStatus'
+          readOnly: true
+          title: Statut
+        title:
+          type: string
+          readOnly: true
+          title: Titre
+        abstract:
+          type: string
+          readOnly: true
+          title: Résumé
+        keywords:
+          type: array
+          items:
+            type: string
+          readOnly: true
+        language:
+          type: string
+          readOnly: true
+          title: Langue
+        track:
+          type: string
+          readOnly: true
+          nullable: true
+        submission_type:
+          type: string
+          readOnly: true
+          nullable: true
+        revision:
+          type: integer
+          readOnly: true
+          title: Révision
+        submitted_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Soumise le
+        withdrawn_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Retirée le
+        withdraw_reason:
+          type: string
+          readOnly: true
+          title: Motif du retrait
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        authors:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubmissionAuthor'
+          readOnly: true
+        file:
+          allOf:
+          - $ref: '#/components/schemas/SubmissionFile'
+          nullable: true
+          readOnly: true
+        declarations:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeclarationState'
+          readOnly: true
+        can_edit:
+          type: boolean
+          readOnly: true
+          description: 'Modifiable maintenant (état, RG-02 : appel ouvert ou dérogation).'
+        deadline:
+          type: string
+          format: date-time
+          nullable: true
+          readOnly: true
+          description: 'Fin de la période de modification : dérogation en cours, sinon
+            clôture.'
+        allowed_actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubmissionAction'
+          readOnly: true
+      required:
+      - abstract
+      - allowed_actions
+      - authors
+      - can_edit
+      - created_at
+      - deadline
+      - declarations
+      - double_blind
+      - edition
+      - edition_code
+      - file
+      - id
+      - keywords
+      - language
+      - reference
+      - revision
+      - status
+      - submission_type
+      - submitted_at
+      - title
+      - track
+      - updated_at
+      - withdraw_reason
+      - withdrawn_at
+    SubmissionAction:
+      enum:
+      - submit
+      - withdraw
+      type: string
+      description: |-
+        * `submit` - submit
+        * `withdraw` - withdraw
+    SubmissionAuthor:
+      type: object
+      properties:
+        position:
+          type: integer
+          readOnly: true
+          title: Ordre
+        first_name:
+          type: string
+          title: Prénom
+          maxLength: 150
+        last_name:
+          type: string
+          title: Nom
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          title: Adresse e-mail
+          maxLength: 254
+        institution:
+          type: string
+          maxLength: 255
+        country:
+          type: string
+          title: Pays
+          maxLength: 2
+        is_corresponding:
+          type: boolean
+          title: Auteur correspondant
+        is_presenter:
+          type: boolean
+          title: Auteur présentateur
+        has_account:
+          type: boolean
+          readOnly: true
+          description: Rattaché à un compte dont l'adresse vérifiée correspond (F5).
+      required:
+      - email
+      - first_name
+      - has_account
+      - last_name
+      - position
+    SubmissionCheck:
+      type: object
+      properties:
+        complete:
+          type: boolean
+        missing:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+        duplicates:
+          type: array
+          items:
+            $ref: '#/components/schemas/Duplicate'
+          description: 'F15 : ses autres soumissions au même titre (avertissement,
+            non bloquant).'
+      required:
+      - complete
+      - duplicates
+      - missing
+    SubmissionCreateRequest:
+      type: object
+      properties:
+        edition:
+          type: string
+          minLength: 1
+          description: Code de l'édition (édition publique courante).
+          maxLength: 12
+      required:
+      - edition
+    SubmissionFile:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        kind:
+          allOf:
+          - $ref: '#/components/schemas/SubmissionFileKind'
+          readOnly: true
+          title: Nature
+        version:
+          type: integer
+          readOnly: true
+        original_name:
+          type: string
+          readOnly: true
+          title: Nom d'origine
+        size:
+          type: integer
+          readOnly: true
+          title: Taille (octets)
+        pages:
+          type: integer
+          readOnly: true
+        metadata_removed:
+          type: boolean
+          readOnly: true
+          title: Métadonnées retirées
+        uploaded_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - id
+      - kind
+      - metadata_removed
+      - original_name
+      - pages
+      - size
+      - uploaded_at
+      - version
+    SubmissionFileKind:
+      enum:
+      - main
+      - camera_ready
+      type: string
+      description: |-
+        * `main` - fichier principal
+        * `camera_ready` - version finale
+    SubmissionFileUploadRequest:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+          description: PDF ; taille maximale selon le type.
+      required:
+      - file
+    SubmissionLanguage:
+      enum:
+      - fr
+      - en
+      type: string
+      description: |-
+        * `fr` - fr
+        * `en` - en
+    SubmissionManage:
+      type: object
+      description: 'Ligne de la liste de gestion : identité des auteurs (noms), sans
+        adresse e-mail.'
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        reference:
+          type: string
+          readOnly: true
+          nullable: true
+          title: Référence
+        status:
+          allOf:
+          - $ref: '#/components/schemas/SubmissionStatus'
+          readOnly: true
+          title: Statut
+        title:
+          type: string
+          readOnly: true
+          title: Titre
+        track:
+          type: string
+          readOnly: true
+          nullable: true
+        submission_type:
+          type: string
+          readOnly: true
+          nullable: true
+        language:
+          type: string
+          readOnly: true
+          title: Langue
+        authors_label:
+          type: string
+          readOnly: true
+          description: 'Auteurs dans l''ordre : « Prénom Nom ; Prénom Nom ».'
+        authors_count:
+          type: integer
+          readOnly: true
+        pages:
+          type: integer
+          nullable: true
+          readOnly: true
+          description: 'Pages du PDF courant (null : aucun).'
+        extension_until:
+          type: string
+          format: date-time
+          nullable: true
+          readOnly: true
+          description: Échéance de la dérogation en cours (RG-02), sinon null.
+        possible_duplicate:
+          type: boolean
+          readOnly: true
+          description: 'F15 : même soumissionnaire, même titre normalisé, autre soumission
+            active.'
+        submitted_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Soumise le
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - authors_count
+      - authors_label
+      - extension_until
+      - id
+      - language
+      - pages
+      - possible_duplicate
+      - reference
+      - status
+      - submission_type
+      - submitted_at
+      - title
+      - track
+      - updated_at
+    SubmissionManageDetail:
+      type: object
+      description: |-
+        Détail de gestion : métadonnées, auteurs avec adresses, fichiers, historique,
+        révisions, dérogations. Réservé à ``submissions.read`` (jamais aux relecteurs, RG-04).
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        reference:
+          type: string
+          readOnly: true
+          nullable: true
+          title: Référence
+        status:
+          allOf:
+          - $ref: '#/components/schemas/SubmissionStatus'
+          readOnly: true
+          title: Statut
+        title:
+          type: string
+          readOnly: true
+          title: Titre
+        track:
+          type: string
+          readOnly: true
+          nullable: true
+        submission_type:
+          type: string
+          readOnly: true
+          nullable: true
+        language:
+          type: string
+          readOnly: true
+          title: Langue
+        authors_label:
+          type: string
+          readOnly: true
+          description: 'Auteurs dans l''ordre : « Prénom Nom ; Prénom Nom ».'
+        authors_count:
+          type: integer
+          readOnly: true
+        pages:
+          type: integer
+          nullable: true
+          readOnly: true
+          description: 'Pages du PDF courant (null : aucun).'
+        extension_until:
+          type: string
+          format: date-time
+          nullable: true
+          readOnly: true
+          description: Échéance de la dérogation en cours (RG-02), sinon null.
+        possible_duplicate:
+          type: boolean
+          readOnly: true
+          description: 'F15 : même soumissionnaire, même titre normalisé, autre soumission
+            active.'
+        submitted_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Soumise le
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        abstract:
+          type: string
+          readOnly: true
+          title: Résumé
+        keywords:
+          type: array
+          items:
+            type: string
+          readOnly: true
+        withdrawn_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Retirée le
+        withdraw_reason:
+          type: string
+          readOnly: true
+          title: Motif du retrait
+        submitter_name:
+          type: string
+          readOnly: true
+        authors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ManageAuthor'
+          readOnly: true
+        files:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubmissionFile'
+          readOnly: true
+        declarations:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeclarationState'
+          readOnly: true
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/ManageHistoryEntry'
+          readOnly: true
+        revisions:
+          type: array
+          items:
+            $ref: '#/components/schemas/RevisionSummary'
+          readOnly: true
+        extensions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Extension'
+          readOnly: true
+        can_extend:
+          type: boolean
+          readOnly: true
+          description: Une dérogation peut être accordée (brouillon ou soumise, édition
+            non archivée).
+      required:
+      - abstract
+      - authors
+      - authors_count
+      - authors_label
+      - can_extend
+      - declarations
+      - extension_until
+      - extensions
+      - files
+      - history
+      - id
+      - keywords
+      - language
+      - pages
+      - possible_duplicate
+      - reference
+      - revisions
+      - status
+      - submission_type
+      - submitted_at
+      - submitter_name
+      - title
+      - track
+      - updated_at
+      - withdraw_reason
+      - withdrawn_at
+    SubmissionStats:
+      type: object
+      properties:
+        by_status:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Statut → nombre (tous les statuts).
+        total:
+          type: integer
+          description: Soumissions hors brouillons.
+        drafts:
+          type: integer
+      required:
+      - by_status
+      - drafts
+      - total
+    SubmissionStatus:
+      enum:
+      - draft
+      - submitted
+      - screening
+      - under_review
+      - reviewed
+      - accepted
+      - accepted_minor
+      - waitlist
+      - rejected
+      - revision_requested
+      - camera_ready_received
+      - confirmed
+      - scheduled
+      - presented
+      - published
+      - withdrawn
+      type: string
+      description: |-
+        * `draft` - brouillon
+        * `submitted` - soumise
+        * `screening` - vérification de recevabilité
+        * `under_review` - en cours d'évaluation
+        * `reviewed` - évaluée
+        * `accepted` - acceptée
+        * `accepted_minor` - acceptée sous réserve de corrections
+        * `waitlist` - liste d'attente
+        * `rejected` - rejetée
+        * `revision_requested` - corrections demandées
+        * `camera_ready_received` - version finale reçue
+        * `confirmed` - présentation confirmée
+        * `scheduled` - programmée
+        * `presented` - présentée
+        * `published` - publiée dans les actes
+        * `withdrawn` - retirée
     SubmissionType:
       type: object
       properties:
@@ -4864,6 +6817,15 @@ components:
           maximum: 2000
           minimum: 50
           title: Mots maximum du résumé
+        file_policy:
+          allOf:
+          - $ref: '#/components/schemas/FilePolicy'
+          title: Fichier PDF
+        max_file_mb:
+          type: integer
+          maximum: 50
+          minimum: 1
+          title: Taille maximale du fichier (Mo)
         position:
           type: integer
           maximum: 65535
@@ -4910,6 +6872,15 @@ components:
           maximum: 2000
           minimum: 50
           title: Mots maximum du résumé
+        file_policy:
+          allOf:
+          - $ref: '#/components/schemas/FilePolicy'
+          title: Fichier PDF
+        max_file_mb:
+          type: integer
+          maximum: 50
+          minimum: 1
+          title: Taille maximale du fichier (Mo)
         position:
           type: integer
           maximum: 65535
@@ -4921,6 +6892,47 @@ components:
       required:
       - code
       - label_fr
+    Timeline:
+      type: object
+      properties:
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/TimelineEntry'
+        revisions:
+          type: array
+          items:
+            $ref: '#/components/schemas/RevisionSummary'
+      required:
+      - history
+      - revisions
+    TimelineEntry:
+      type: object
+      properties:
+        from_status:
+          allOf:
+          - $ref: '#/components/schemas/SubmissionStatus'
+          readOnly: true
+          title: Statut précédent
+        to_status:
+          allOf:
+          - $ref: '#/components/schemas/SubmissionStatus'
+          readOnly: true
+          title: Nouveau statut
+        at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Date
+        reason:
+          type: string
+          readOnly: true
+          title: Motif
+      required:
+      - at
+      - from_status
+      - reason
+      - to_status
     TokenRequest:
       type: object
       properties:
@@ -5008,6 +7020,13 @@ components:
       required:
       - code
       - name_fr
+    UnreadCount:
+      type: object
+      properties:
+        unread:
+          type: integer
+      required:
+      - unread
     UserRoleStatus:
       enum:
       - active
@@ -5016,6 +7035,13 @@ components:
       description: |-
         * `active` - actif
         * `revoked` - révoqué
+    WithdrawRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+          default: ''
+          maxLength: 2000
   securitySchemes:
     cookieAuth:
       type: apiKey

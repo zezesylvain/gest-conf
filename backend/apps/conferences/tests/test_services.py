@@ -278,3 +278,20 @@ def test_delete_key_date_audited():
     services.delete_key_date(edition.key_dates.get(code="call_close"), actor=COMMAND)
     assert not KeyDate.objects.filter(edition=edition, code="call_close").exists()
     assert AuditLog.objects.filter(action="key_date.deleted", edition=edition).exists()
+
+
+def test_delete_used_track_or_type_is_refused_in_use():
+    """Plan L3 : une thématique ou un type utilisé par une soumission ne se supprime pas
+    (409 ``in_use``, à désactiver) ; rien n'est supprimé ni journalisé."""
+    from apps.submissions.tests.factories import complete_submission
+
+    submission = complete_submission()
+    for item, delete in (
+        (submission.track, services.delete_track),
+        (submission.submission_type, services.delete_submission_type),
+    ):
+        with pytest.raises(RuleViolation) as error:
+            delete(item, actor=COMMAND)
+        assert error.value.code == "in_use"
+        assert type(item).objects.filter(pk=item.pk).exists()
+    assert not AuditLog.objects.filter(action__endswith=".deleted").exists()

@@ -83,6 +83,32 @@
     }
   </section>
 
+  @if (submissionStats(); as stats) {
+    <section class="card" aria-labelledby="submissions-title">
+      <h2 id="submissions-title">{{ 'gestion.dashboard.submissions.title' | translate }}</h2>
+      <p>
+        {{
+          'gestion.dashboard.submissions.summary'
+            | translate: { total: stats.total, drafts: stats.drafts }
+        }}
+      </p>
+      @if (statusCounts().length) {
+        <ul>
+          @for (item of statusCounts(); track item.status) {
+            <li>
+              {{ 'gestion.submissions.status.' + item.status | translate }} : {{ item.count }}
+            </li>
+          }
+        </ul>
+      }
+      <p>
+        <a [routerLink]="['/editions', current.id, 'soumissions']">
+          {{ 'gestion.dashboard.submissions.see' | translate }}
+        </a>
+      </p>
+    </section>
+  }
+
   @if (pendingInvitations() !== null) {
     <section class="card" aria-labelledby="invitations-title">
       <h2 id="invitations-title">{{ 'gestion.nav.invitations' | translate }}</h2>

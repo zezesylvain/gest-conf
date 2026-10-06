@@ -4,6 +4,7 @@
 import { PublicKeyDate } from '../models/public-key-date';
 import { PublicSubmissionType } from '../models/public-submission-type';
 import { PublicTrack } from '../models/public-track';
+import { SubmissionLanguage } from '../models/submission-language';
 
 /**
  * Édition courante publiée (§9.3) : tracks et types actifs, dates publiques seulement.
@@ -16,6 +17,7 @@ export interface PublicEdition {
   key_dates: Array<PublicKeyDate>;
   slug: string;
   start_date: string | null;
+  submission_languages: Array<SubmissionLanguage>;
   submission_types: Array<PublicSubmissionType>;
   theme_en: string;
   theme_fr: string;

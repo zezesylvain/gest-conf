@@ -15,11 +15,14 @@
       "nav": {
         "label": "Account navigation",
         "home": "Home",
+        "submissions": "My submissions",
         "profile": "Profile",
         "logout": "Sign out",
         "security": "Security",
         "privacy": "Privacy",
-        "myData": "My data"
+        "myData": "My data",
+        "notifications": "Notifications",
+        "notificationsLabel": "Notifications ({{count}} unread)"
       },
       "fields": {
         "email": "Email address",
@@ -337,6 +340,141 @@
         "website": "Website",
         "scholar": "Google Scholar",
         "linkedin": "LinkedIn"
+      }
+    },
+    "submissions": {
+      "list": {
+        "title": "My submissions",
+        "lead": "Your proposals for the current edition and their status.",
+        "new": "New submission ({{edition}})",
+        "closed": "The call for papers is not open: no new submission is possible.",
+        "empty": "You have no submissions yet.",
+        "profileIncomplete": "Complete your profile (first name, last name, institution, country) before submitting."
+      },
+      "edit": {
+        "title": "Submission",
+        "titleWithReference": "Submission {{reference}}",
+        "lead": "Complete each step; the summary shows what is missing before you submit.",
+        "back": "← My submissions",
+        "editableUntil": "can be edited until {{date}}",
+        "readOnly": "read only"
+      },
+      "draft": "Draft",
+      "untitled": "(untitled)",
+      "fields": {
+        "reference": "Reference",
+        "title": "Title",
+        "abstract": "Abstract",
+        "keywords": "Keywords",
+        "track": "Track",
+        "type": "Submission type",
+        "language": "Language of the paper",
+        "status": "Status",
+        "deadline": "Editable until"
+      },
+      "status": {
+        "draft": "Draft",
+        "submitted": "Submitted",
+        "screening": "Eligibility check",
+        "under_review": "Under review",
+        "reviewed": "Reviewed",
+        "accepted": "Accepted",
+        "accepted_minor": "Accepted with minor revisions",
+        "waitlist": "Waiting list",
+        "rejected": "Rejected",
+        "revision_requested": "Revisions requested",
+        "camera_ready_received": "Camera-ready received",
+        "confirmed": "Presentation confirmed",
+        "scheduled": "Scheduled",
+        "presented": "Presented",
+        "published": "Published in the proceedings",
+        "withdrawn": "Withdrawn"
+      },
+      "steps": {
+        "label": "Submission steps",
+        "info": "Information",
+        "authors": "Authors",
+        "file": "File",
+        "declarations": "Declarations",
+        "review": "Summary"
+      },
+      "save": {
+        "saving": "Saving…",
+        "saved": "Saved at {{time}}.",
+        "conflict": "This submission was changed elsewhere (another tab or device). Reload it before continuing: your latest unsaved changes will be lost.",
+        "reload": "Reload",
+        "error": "Saving failed."
+      },
+      "info": {
+        "words": "{{words}} words (at most {{max}})",
+        "keywordsHint": "1 to 6 keywords, separated by commas.",
+        "autosave": "Information and declarations are saved automatically."
+      },
+      "authors": {
+        "lead": "List all authors in publication order, including yourself, with at least one corresponding author.",
+        "author": "Author {{n}}",
+        "email": "Email address",
+        "corresponding": "Corresponding author",
+        "presenter": "Will present the paper",
+        "up": "Move up",
+        "down": "Move down",
+        "remove": "Remove",
+        "add": "Add an author",
+        "save": "Save authors",
+        "saved": "Authors saved."
+      },
+      "file": {
+        "policy": {
+          "none": "This submission type does not require a file.",
+          "optional": "Optional PDF file, {{max}} MB at most.",
+          "required": "Required PDF file, {{max}} MB at most."
+        },
+        "chooseType": "First choose a submission type (\"Information\" step).",
+        "doubleBlind": "Double-blind review: remove your names, affiliations and acknowledgements from your file. PDF metadata (author, software) is removed on upload.",
+        "details": "version {{version}}, {{pages}} page(s)",
+        "cleaned": "metadata removed",
+        "choose": "Upload a PDF file",
+        "remove": "Remove the file",
+        "saved": "File uploaded."
+      },
+      "declarations": {
+        "originality": "I certify that this work is original and is not under review elsewhere.",
+        "ethics": "I certify that this work complies with the applicable research ethics rules.",
+        "conflicts": "I have declared, or will declare to the committee, any conflict of interest.",
+        "publication": "If accepted, I agree to the publication of the abstract in the programme and the proceedings.",
+        "version": "Provisional texts: a new version of the declarations will require a new acceptance."
+      },
+      "review": {
+        "complete": "Your submission is complete: you can submit it.",
+        "missing": "Before submitting, complete:",
+        "submit": "Submit",
+        "submitted": "Submission recorded under reference {{reference}}. An acknowledgement has been sent to you by email.",
+        "delete": "Delete the draft",
+        "duplicates": "Warning: you already have a submission with the same title in this edition. Check that it is not a duplicate (submitting remains possible):"
+      },
+      "withdraw": {
+        "title": "Withdraw the submission",
+        "reason": "Reason for withdrawal",
+        "confirm": "Withdraw permanently",
+        "done": "Submission withdrawn."
+      },
+      "timeline": {
+        "title": "History",
+        "revisions": "{{count}} version(s) recorded after submission."
+      }
+    },
+    "notifications": {
+      "title": "Notifications",
+      "markAll": "Mark all as read",
+      "unread": "Unread:",
+      "open": "Open the submission",
+      "empty": "No notifications.",
+      "kinds": {
+        "submission_received": "Your submission {{reference}} “{{title}}” has been received.",
+        "submission_withdrawn": "Your submission {{reference}} “{{title}}” has been withdrawn.",
+        "coauthor_added": "You have been listed as a co-author of submission {{reference}} “{{title}}” ({{edition}}).",
+        "extension_granted": "Extended deadline for your submission {{reference}} “{{title}}”, until {{until}}.",
+        "draft_reminder": "Your draft “{{title}}” has not been submitted yet: the call closes on {{closes}}."
       }
     }
   }

@@ -25,6 +25,20 @@ export const routes: Routes = [
           import('./pages/dashboard/dashboard-page').then((m) => m.DashboardPage),
       },
       {
+        path: 'soumissions',
+        title: 'gestion.submissions.title',
+        canActivate: [capabilityGuard('submissions.read')],
+        loadComponent: () =>
+          import('./pages/submissions/submissions-page').then((m) => m.SubmissionsPage),
+      },
+      {
+        path: 'soumissions/:submissionId',
+        title: 'gestion.submissions.detail.title',
+        canActivate: [capabilityGuard('submissions.read')],
+        loadComponent: () =>
+          import('./pages/submissions/submission-detail-page').then((m) => m.SubmissionDetailPage),
+      },
+      {
         path: 'parametrage/general',
         title: 'gestion.settings.general.title',
         canActivate: [capabilityGuard('edition.read')],

@@ -8,6 +8,11 @@ class CommunicationsConfig(AppConfig):
 
     def ready(self) -> None:
         from apps.communications import jobs  # noqa: F401  (enregistre les tâches)
+        from apps.communications.notifications import (
+            anonymize_notifications,
+            export_notifications,
+            purge_old_notifications,
+        )
         from apps.communications.personal_data import (
             anonymize_emails,
             export_emails,
@@ -26,6 +31,13 @@ class CommunicationsConfig(AppConfig):
         )
         register_retention_task("communications.old_bodies", purge_old_bodies)
         register_retention_task("communications.old_metadata", purge_old_metadata)
+        register_retention_task("communications.old_notifications", purge_old_notifications)
+        register_personal_data(
+            "communications.notifications",
+            models=("communications.Notification",),
+            export=export_notifications,
+            anonymize=anonymize_notifications,
+        )
         register_personal_data(
             "communications.outbox",
             models=("communications.OutboxEmail",),

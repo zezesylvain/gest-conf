@@ -80,3 +80,38 @@ class OutboxEmail(TimeStampedModel):
 
     def __str__(self) -> str:
         return f"{self.template_code}#{self.pk} ({self.status})"
+
+
+class NotificationKind(models.TextChoices):
+    """Notifications dans l'application (plan L3, F13). Lot L3 : soumissions."""
+
+    SUBMISSION_RECEIVED = "submission_received", _("soumission reçue")
+    SUBMISSION_WITHDRAWN = "submission_withdrawn", _("soumission retirée")
+    COAUTHOR_ADDED = "coauthor_added", _("déclaré co-auteur")
+    EXTENSION_GRANTED = "extension_granted", _("dérogation accordée")
+    DRAFT_REMINDER = "draft_reminder", _("brouillon à soumettre")
+
+
+class Notification(TimeStampedModel):
+    """Notification de la cloche (plan L3, F13), doublée d'un e-mail quand il y en a un.
+
+    Le texte n'est pas stocké : l'interface le compose à partir de ``kind`` et de
+    ``payload`` (clés de traduction), dans la langue courante. ``payload`` ne contient que
+    des éléments de l'objet visé (référence, titre, échéance), jamais de donnée d'un tiers.
+    """
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("compte"),
+        on_delete=models.RESTRICT,
+        related_name="+",
+    )
+    kind = models.CharField(_("nature"), max_length=32, choices=NotificationKind.choices)
+    payload = models.JSONField(_("données"), default=dict, blank=True)
+    read_at = models.DateTimeField(_("lue le"), null=True, blank=True)
+
+    class Meta:
+        verbose_name = _("notification")
+        verbose_name_plural = _("notifications")
+        ordering = ("-created_at", "-id")
+        indexes = (models.Index(fields=["user", "read_at"], name="comm_notification_unread"),)

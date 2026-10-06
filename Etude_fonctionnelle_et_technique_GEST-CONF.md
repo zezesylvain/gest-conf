@@ -3,7 +3,7 @@
 
 | | |
 |---|---|
-| **Version** | 1.2 – document de cadrage, mis à jour après les lots L1 (§17) et L2 (§18) |
+| **Version** | 1.3 – document de cadrage, mis à jour après les lots L1 (§17), L2 (§18) et L3 (§19) |
 | **Date** | 5 octobre 2026 |
 | **Auteur** | Étude réalisée pour ZDS |
 | **Statut** | Pour validation |
@@ -1458,6 +1458,60 @@ Les décisions E1 à E14 du plan [`docs/L2-portail-plan.md`](docs/L2-portail-pla
 - Charge de L2 réestimée à 17 – 21,5 j-h (étude : 10 – 14), du fait du CMS-lite complet et de l'ergonomie de toute la gestion.
 - **Budget du portail** : bundle initial de 371,4 kB pour un avertissement à 365 kB (erreur à 380 kB) ; relever l'avertissement ou optimiser : décision du commanditaire.
 - À vérifier sur o2switch : Pillow (V28), aperçu Open Graph réel et démo C en production. Questions ouvertes ajoutées : textes définitifs des consentements « annuaire » et « photo » (Q14), cadence de publication du portail (D18), titres affichés (liste de `ProfileTitle`).
+
+
+## 19. Mises à jour issues du lot L3 (version 1.3)
+
+Les décisions F1 à F17 du plan [`docs/L3-soumission-plan.md`](docs/L3-soumission-plan.md) ont été validées le 5 octobre 2026 et mises en œuvre dans le lot L3. Cette section les reporte dans l'étude ; **en cas de divergence avec les sections précédentes (§17 et §18 compris), elle prévaut**. Le détail (justifications, vérifications, défauts trouvés) est dans le plan, §2 et §11 à §17 ; le bilan du lot dans [`docs/L3-soumission.md`](docs/L3-soumission.md).
+
+### 19.1 Soumission (M4)
+
+- **Espace auteur dans le portail** (F17), sous `/compte/soumissions`, jamais pré-rendu : liste de ses soumissions, assistant en cinq étapes (informations, auteurs, fichier, déclarations, récapitulatif), sauvegarde automatique, écritures protégées par `If-Match` (412 si la soumission a changé ailleurs).
+- **Résumé toujours ; PDF selon le type** (F1, Q5) : aucun, facultatif ou obligatoire, taille maximale de 1 à 50 Mo. **Un seul PDF principal**, versionné ; pas d'annexe (F2). **Langues des soumissions** choisies par édition (F11).
+- **Référence** `GC27-0001` attribuée à la première soumission définitive, sans trou ni doublon, conservée au retrait (F4). **Modification jusqu'à la clôture** : chaque écriture après la soumission crée une révision (F3). **Retrait** motivé.
+- **Co-auteurs** (F5) : données figées dans la soumission, rattachement au compte dont l'adresse vérifiée correspond, information par e-mail ; accès des co-auteurs : P2. Le soumissionnaire est toujours auteur et doit avoir un profil complet (F6).
+- **Déclarations** (F7) : originalité, éthique, conflits d'intérêts, publication, enregistrées avec la version du texte ; textes « v0 » provisoires (Q14).
+- **Doublons** (F15) : avertissement non bloquant à l'auteur, signalement dans la gestion (même soumissionnaire, même titre normalisé). **Pas de captcha** (F12).
+
+### 19.2 Workflow et règles de gestion
+
+- **Service unique** `transition(submission, to_state, actor)` (règle n° 4) avec la table complète des transitions de l'étude ; L3 active `DRAFT → SUBMITTED`, `SUBMITTED → SCREENING` (clôture) et le retrait. Un méta-test vérifie que seul `workflow.py` écrit le statut. **Écart signalé** : `REVISION_REQUESTED` n'a aucune transition dans le diagramme du §5.1 (à préciser en L4).
+- **RG-01** : `check` liste ce qui manque, sans rien écrire ; la soumission est refusée tant qu'il manque quelque chose.
+- **RG-02** : écritures refusées après la clôture, saisie à l'heure de l'édition. **Dérogation par soumission** (F8), avec échéance et motif, accordée par `ADMIN`, `CHAIR` ou `SC_CHAIR`, journalisée et notifiée. À la clôture, la commande `close_call` fait passer les soumissions en recevabilité ; une soumission en dérogation y passe à l'échéance. Une soumission en recevabilité ne reçoit plus de dérogation.
+- **RG-19** : code de l'édition et double aveugle gelés dès la première soumission ; seul un `ADMIN` les change, avec un motif journalisé (F9).
+- Une thématique ou un type utilisé par une soumission ne se supprime plus (409 `in_use`) : il se désactive.
+
+### 19.3 Fichiers des auteurs (règle n° 8, sans adaptation)
+
+- Stockage privé (`GESTCONF_PRIVATE_FILES_DIR`), hors racine web, nom aléatoire, empreinte SHA-256 ; servis seulement par des endpoints authentifiés (l'auteur, la gestion), avec `attachment`, `nosniff` et `no-store`.
+- Contrôles : signature `%PDF-`, analyse par `pypdf` (pur Python, règle n° 10), PDF chiffré refusé, 500 pages au plus, taille du type. **Double aveugle** : le PDF stocké est réécrit sans dictionnaire `/Info` ni métadonnées XMP (corpus de PDF porteurs d'identité testé) ; un PDF qui ne se réécrit pas est refusé.
+
+### 19.4 Gestion
+
+- Capacités **`submissions.read`** (`ADMIN`, `CHAIR`, `SC_CHAIR`, CO), **`submissions.extend`** et **`submissions.export`** (`ADMIN`, `CHAIR`, `SC_CHAIR`) ; `SC_MEMBER` : aucun accès avant L4 (F10).
+- Rubrique « Soumissions » : liste filtrée (brouillons compris, pour les dérogations), détail avec les adresses des auteurs, versions du PDF, historique, dérogations ; **export CSV journalisé** (RG-17), protégé contre l'injection de formules ; compteurs par statut au tableau de bord ; politique de fichier, langues et gel RG-19 dans le paramétrage.
+- Sérialiseurs par rôle (`SubmissionManage*`) ; la vue relecteur sans identité (RG-04) est écrite en L4 avec le premier endpoint relecteur.
+
+### 19.5 Notifications (F13, A2)
+
+- **E-mails** : accusé de réception, information des co-auteurs, retrait, dérogation, **rappels des brouillons** sept jours puis la veille de la clôture (commande `remind_drafts`, une fois par brouillon et par échéance).
+- **Cloche minimale** dans l'espace compte : notifications en base, texte composé par l'interface, éléments de la soumission seulement ; pas de temps réel (règle n° 9), le nombre de non lues est relu à chaque navigation.
+
+### 19.6 Modèle de données et API
+
+- Application `submissions` : `submission` (avec `title_key`, titre normalisé), `submission_author`, `submission_file`, `submission_revision`, `status_history`, `submission_extension`, `draft_reminder` ; `core_counter` ; `communications_notification` ; `submission_type.file_policy` et `max_file_mb` ; `edition.submission_languages`. Registre des données personnelles étendu (auteurs tiers, révisions, notifications) ; l'anonymisation d'un auteur est refusée tant qu'une soumission non brouillon d'une édition non archivée existe (F16).
+- API auteur `/api/v1/submissions…` (brouillon, écriture, auteurs, fichier, `check`, `submit`, `withdraw`, `timeline`) ; gestion `…/manage/editions/{id}/submissions…` (liste, détail, compteurs, export, fichier, dérogations) ; cloche `/api/v1/me/notifications`.
+
+### 19.7 Exploitation
+
+- Cron : `close_call` et `remind_drafts` toutes les heures, en plus de `run_jobs`, `cleanup` et `check_integrity` ; commandes idempotentes et verrouillées.
+- Variable `GESTCONF_PRIVATE_FILES_DIR`, à sauvegarder avec la base ; fichiers orphelins purgés par `cleanup`, fichiers manquants et références signalés par `check_integrity`.
+
+### 19.8 Tests, planning et points ouverts
+
+- 1 524 tests backend (1 531 sous MariaDB), 274 tests front, **parcours auteur de bout en bout** (Playwright) en CI : inscription, profil, brouillon, co-auteur, PDF, déclarations, soumission, accusé, révision, clôture simulée, refus, recevabilité.
+- Charge de L3 réestimée à 16 – 19,5 j-h (étude : 12 – 16).
+- **Avant l'ouverture réelle de l'appel** : textes définitifs des déclarations et de la notice (Q14), fournisseur d'e-mails de production (D10), décision sur le déploiement continu (D18), démo D sur o2switch. Durées de conservation des notifications (D15, non validées). Budget du portail : 367,7 kB pour un avertissement à 365 kB.
 
 ---
 

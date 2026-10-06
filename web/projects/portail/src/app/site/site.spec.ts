@@ -28,6 +28,7 @@ const SITE: PublicSite = {
     city: 'Abidjan',
     country: 'CI',
     timezone: 'Africa/Abidjan',
+    submission_languages: ['fr', 'en'],
     tracks: [{ code: 'ia', name_fr: 'IA', name_en: 'AI', description_fr: '', description_en: '' }],
     submission_types: [],
     key_dates: [

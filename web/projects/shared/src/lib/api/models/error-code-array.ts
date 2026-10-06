@@ -38,5 +38,9 @@ export const ERROR_CODE: ErrorCode[] = [
   'account_has_active_duties',
   'submission_incomplete',
   'call_closed',
-  'setting_frozen'
+  'setting_frozen',
+  'stale_revision',
+  'submission_locked',
+  'profile_incomplete',
+  'grid_locked'
 ];

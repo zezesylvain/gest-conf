@@ -3,14 +3,17 @@
 
 
 /**
- * RG-19 : réglages gelés (lecture) et motif d'un changement forcé par un ADMIN.
+ * Paramètres de l'évaluation (gestion, §6.1 ; plan L4 H4, H6, H12).
  */
 export interface Confidentiality {
+  confidence_weighted_score?: boolean;
+  divergence_threshold?: string;
   double_blind?: boolean;
 
   /**
    * Réglages gelés depuis la première soumission (RG-19).
    */
   frozen_fields: Array<string>;
+  max_reviews_per_reviewer?: number;
   reviewers_per_submission?: number;
 }

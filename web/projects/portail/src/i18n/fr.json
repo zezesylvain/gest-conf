@@ -15,11 +15,14 @@
       "nav": {
         "label": "Navigation de l'espace compte",
         "home": "Accueil",
+        "submissions": "Mes soumissions",
         "profile": "Profil",
         "logout": "Se déconnecter",
         "security": "Sécurité",
         "privacy": "Confidentialité",
-        "myData": "Mes données"
+        "myData": "Mes données",
+        "notifications": "Notifications",
+        "notificationsLabel": "Notifications ({{count}} non lue(s))"
       },
       "fields": {
         "email": "Adresse e-mail",
@@ -337,6 +340,141 @@
         "website": "Site web",
         "scholar": "Google Scholar",
         "linkedin": "LinkedIn"
+      }
+    },
+    "submissions": {
+      "list": {
+        "title": "Mes soumissions",
+        "lead": "Vos propositions de communication pour l'édition en cours et leur état.",
+        "new": "Nouvelle soumission ({{edition}})",
+        "closed": "L'appel à communications n'est pas ouvert : aucune nouvelle soumission n'est possible.",
+        "empty": "Vous n'avez encore aucune soumission.",
+        "profileIncomplete": "Complétez votre profil (nom, prénom, institution, pays) avant de soumettre."
+      },
+      "edit": {
+        "title": "Soumission",
+        "titleWithReference": "Soumission {{reference}}",
+        "lead": "Complétez chaque étape ; le récapitulatif indique ce qui manque avant de soumettre.",
+        "back": "← Mes soumissions",
+        "editableUntil": "modifiable jusqu'au {{date}}",
+        "readOnly": "lecture seule"
+      },
+      "draft": "Brouillon",
+      "untitled": "(sans titre)",
+      "fields": {
+        "reference": "Référence",
+        "title": "Titre",
+        "abstract": "Résumé",
+        "keywords": "Mots-clés",
+        "track": "Thématique",
+        "type": "Type de communication",
+        "language": "Langue de la communication",
+        "status": "État",
+        "deadline": "Modifiable jusqu'au"
+      },
+      "status": {
+        "draft": "Brouillon",
+        "submitted": "Soumise",
+        "screening": "Vérification de recevabilité",
+        "under_review": "En cours d'évaluation",
+        "reviewed": "Évaluée",
+        "accepted": "Acceptée",
+        "accepted_minor": "Acceptée sous réserve de corrections",
+        "waitlist": "Liste d'attente",
+        "rejected": "Rejetée",
+        "revision_requested": "Corrections demandées",
+        "camera_ready_received": "Version finale reçue",
+        "confirmed": "Présentation confirmée",
+        "scheduled": "Programmée",
+        "presented": "Présentée",
+        "published": "Publiée dans les actes",
+        "withdrawn": "Retirée"
+      },
+      "steps": {
+        "label": "Étapes de la soumission",
+        "info": "Informations",
+        "authors": "Auteurs",
+        "file": "Fichier",
+        "declarations": "Déclarations",
+        "review": "Récapitulatif"
+      },
+      "save": {
+        "saving": "Enregistrement…",
+        "saved": "Enregistré à {{time}}.",
+        "conflict": "Cette soumission a été modifiée ailleurs (autre onglet ou autre appareil). Rechargez-la avant de continuer : vos dernières saisies non enregistrées seront perdues.",
+        "reload": "Recharger",
+        "error": "Échec de l'enregistrement."
+      },
+      "info": {
+        "words": "{{words}} mots (au plus {{max}})",
+        "keywordsHint": "De 1 à 6 mots-clés, séparés par des virgules.",
+        "autosave": "Les informations et les déclarations sont enregistrées automatiquement."
+      },
+      "authors": {
+        "lead": "Indiquez tous les auteurs dans l'ordre de publication, vous compris, et au moins un auteur correspondant.",
+        "author": "Auteur {{n}}",
+        "email": "Adresse e-mail",
+        "corresponding": "Auteur correspondant",
+        "presenter": "Présentera la communication",
+        "up": "Monter",
+        "down": "Descendre",
+        "remove": "Retirer",
+        "add": "Ajouter un auteur",
+        "save": "Enregistrer les auteurs",
+        "saved": "Auteurs enregistrés."
+      },
+      "file": {
+        "policy": {
+          "none": "Ce type de communication ne demande pas de fichier.",
+          "optional": "Fichier PDF facultatif, {{max}} Mo au plus.",
+          "required": "Fichier PDF obligatoire, {{max}} Mo au plus."
+        },
+        "chooseType": "Choisissez d'abord un type de communication (étape « Informations »).",
+        "doubleBlind": "Évaluation en double aveugle : retirez de votre fichier vos noms, affiliations et remerciements. Les métadonnées du PDF (auteur, logiciel) sont supprimées au dépôt.",
+        "details": "version {{version}}, {{pages}} page(s)",
+        "cleaned": "métadonnées supprimées",
+        "choose": "Déposer un fichier PDF",
+        "remove": "Retirer le fichier",
+        "saved": "Fichier déposé."
+      },
+      "declarations": {
+        "originality": "Je certifie que ce travail est original et n'est pas en cours d'évaluation ailleurs.",
+        "ethics": "Je certifie que ce travail respecte les règles d'éthique de la recherche applicables.",
+        "conflicts": "J'ai déclaré, ou je déclarerai au comité, tout conflit d'intérêts.",
+        "publication": "J'accepte, en cas d'acceptation, la publication du résumé dans le programme et les actes.",
+        "version": "Textes provisoires : une nouvelle version des déclarations demandera une nouvelle acceptation."
+      },
+      "review": {
+        "complete": "Votre soumission est complète : vous pouvez la soumettre.",
+        "missing": "Avant de soumettre, complétez :",
+        "submit": "Soumettre",
+        "submitted": "Soumission enregistrée sous la référence {{reference}}. Un accusé de réception vous a été envoyé par e-mail.",
+        "delete": "Supprimer le brouillon",
+        "duplicates": "Attention : vous avez déjà une soumission au même titre dans cette édition. Vérifiez qu'il ne s'agit pas d'un doublon (la soumission reste possible) :"
+      },
+      "withdraw": {
+        "title": "Retirer la soumission",
+        "reason": "Motif du retrait",
+        "confirm": "Retirer définitivement",
+        "done": "Soumission retirée."
+      },
+      "timeline": {
+        "title": "Historique",
+        "revisions": "{{count}} version(s) enregistrée(s) après la soumission."
+      }
+    },
+    "notifications": {
+      "title": "Notifications",
+      "markAll": "Tout marquer comme lu",
+      "unread": "Non lue :",
+      "open": "Ouvrir la soumission",
+      "empty": "Aucune notification.",
+      "kinds": {
+        "submission_received": "Votre soumission {{reference}} « {{title}} » a bien été reçue.",
+        "submission_withdrawn": "Votre soumission {{reference}} « {{title}} » a été retirée.",
+        "coauthor_added": "Vous êtes déclaré co-auteur de la soumission {{reference}} « {{title}} » ({{edition}}).",
+        "extension_granted": "Délai supplémentaire pour votre soumission {{reference}} « {{title}} », jusqu'au {{until}}.",
+        "draft_reminder": "Votre brouillon « {{title}} » n'est pas encore soumis : l'appel ferme le {{closes}}."
       }
     }
   }

@@ -75,6 +75,14 @@ class ErrorCode(models.TextChoices):
     SUBMISSION_INCOMPLETE = "submission_incomplete"
     CALL_CLOSED = "call_closed"
     SETTING_FROZEN = "setting_frozen"
+    # Écriture concurrente (If-Match périmé, plan L3 §4) : relire avant de réécrire.
+    STALE_REVISION = "stale_revision"
+    # Soumission dans un état qui n'admet plus de modification par l'auteur ; profil
+    # incomplet (prérequis de la soumission, plan L1 §3.3).
+    SUBMISSION_LOCKED = "submission_locked"
+    PROFILE_INCOMPLETE = "profile_incomplete"
+    # Évaluation (plan L4) : grille utilisée par une évaluation (RG-05 : on la duplique).
+    GRID_LOCKED = "grid_locked"
 
 
 class DomainError(Exception):
@@ -130,6 +138,13 @@ class Invalid(DomainError):
 
     default_code = ErrorCode.VALIDATION_ERROR
     default_message = _("Données invalides.")
+
+
+class StaleRevision(DomainError):
+    """La ressource a changé depuis sa lecture (``If-Match`` périmé, HTTP 412)."""
+
+    default_code = ErrorCode.STALE_REVISION
+    default_message = _("Modifié entre-temps (autre onglet ?) : rechargez avant d'enregistrer.")
 
 
 class QuotaExceeded(DomainError):

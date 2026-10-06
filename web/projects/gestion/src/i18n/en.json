@@ -26,7 +26,8 @@
         "committees": "Committees",
         "portal": "Portal",
         "control": "Oversight",
-        "help": "Help"
+        "help": "Help",
+        "submissions": "Submissions"
       },
       "keywords": {
         "dashboard": "home, status, publish, publication, archive, state, summary",
@@ -42,12 +43,14 @@
         "portalSections": "blocks, content, text, banner, home, writing",
         "portalPages": "compose, composer, custom page, practical information, website",
         "portalMenus": "navigation, links, header, footer",
-        "portalFiles": "template, download, pdf, file, poster, image, picture"
+        "portalFiles": "template, download, pdf, file, poster, image, picture",
+        "submissions": "proposals, papers, abstracts, authors, extension, deadline, export, csv, references"
       },
       "portalSections": "Sections",
       "portalPages": "Pages",
       "portalMenus": "Menus",
-      "portalFiles": "Documents and images"
+      "portalFiles": "Documents and images",
+      "submissions": "Submissions"
     },
     "status": {
       "draft": "draft",
@@ -141,6 +144,11 @@
         "message": "The edition will become read-only. Only possible after the conference has ended.",
         "confirm": "Archive",
         "done": "Edition archived."
+      },
+      "submissions": {
+        "title": "Submissions",
+        "summary": "{{total}} submission(s) sent, {{drafts}} draft(s) in progress.",
+        "see": "See the submissions"
       }
     },
     "fields": {
@@ -168,7 +176,11 @@
       "duration": "Default duration (min)",
       "abstractMaxWords": "Abstract word limit",
       "keyDate": "Key date",
-      "public": "Shown on the portal"
+      "public": "Shown on the portal",
+      "filePolicy": "PDF file",
+      "maxFileMb": "Maximum size (MB)",
+      "maxFileMbShort": "{{mb}} MB at most",
+      "submissionLanguages": "Submission languages"
     },
     "settings": {
       "readOnly": "Read only: your roles do not allow changing the setup.",
@@ -188,7 +200,8 @@
         "title": "General information",
         "codeHint": "One capital letter, then 1 to 11 capital letters or digits (e.g. GC27).",
         "codeFormat": "Expected format: one capital letter, then 1 to 11 capital letters or digits.",
-        "timezoneHint": "IANA time zone (e.g. Africa/Abidjan): deadlines are entered in this time zone."
+        "timezoneHint": "IANA time zone (e.g. Africa/Abidjan): deadlines are entered in this time zone.",
+        "submissionLanguagesHint": "Languages in which authors may submit."
       },
       "tracks": {
         "title": "Tracks",
@@ -200,7 +213,8 @@
         "title": "Submission types",
         "lead": "Formats offered to authors (oral presentation, poster…).",
         "add": "Add a type",
-        "editTitle": "Edit the type"
+        "editTitle": "Edit the type",
+        "filePolicyHint": "The abstract is always required; the PDF according to this setting."
       },
       "calendar": {
         "title": "Calendar",
@@ -219,6 +233,12 @@
         "doubleBlindHint": "Reviewers see neither the name, the email address nor the affiliation of authors.",
         "reviewers": "Reviewers per submission (1 to 10)",
         "sensitive": "Sensitive change: you may be asked to confirm your identity; it is logged."
+      },
+      "frozen": {
+        "hint": "Frozen since the first submission (RG-19).",
+        "admin": "Submissions exist: this setting is frozen. As an administrator, you can change it by giving a reason, which is logged.",
+        "locked": "Submissions exist: this setting is frozen. Only an administrator of the edition can change it, with a reason.",
+        "reason": "Reason for the change (required, logged)"
       }
     },
     "members": {
@@ -394,21 +414,25 @@
           "timezoneTitle": "Changing the time zone",
           "timezoneText": "Deadlines already entered keep their instant: their displayed local times shift. Check the calendar after any time zone change.",
           "readOnlyTitle": "Read-only",
-          "readOnlyText": "Only the administrator and the conference chair change the settings; other roles view them. An archived edition can no longer be changed."
+          "readOnlyText": "Only the administrator and the conference chair change the settings; other roles view them. An archived edition can no longer be changed.",
+          "languages": "Submission languages: those in which authors may write their proposal.",
+          "frozenTitle": "Code frozen after the first submission",
+          "frozenText": "As soon as a submission is sent, the edition code (prefix of the references) is frozen (RG-19). Only an administrator can change it, with a logged reason."
         },
         "settings-lists": {
           "title": "Tracks and presentation types",
           "summary": "Lists offered to authors: bilingual, ordered, can be deactivated.",
           "path": "Settings › Tracks; Settings › Presentation types",
-          "intro": "Each item has a name in French and English, a display order and an active state. Types also carry a default duration and a maximum number of words for the abstract.",
+          "intro": "Each item has a French and an English name, a display order and an active state. Types also carry a default duration, a maximum number of words for the abstract and the expected PDF file.",
           "addTitle": "Add",
           "addBody": "“Add” button, then “Save”: the item takes its place according to its order.",
           "editTitle": "Edit or delete",
           "editBody": "Row buttons. Every change and every deletion is logged.",
           "deactivateTitle": "Deactivate rather than delete",
-          "deactivateText": "Once submissions exist, an item in use can no longer be deleted: it will have to be deactivated.",
+          "deactivateText": "An item used by a submission can no longer be deleted (refusal “item in use”): deactivate it, and it disappears from the choices offered to authors.",
           "publishTitle": "Publication requirement",
-          "publishText": "At least one active track and one active presentation type are required to publish the edition."
+          "publishText": "At least one active track and one active presentation type are required to publish the edition.",
+          "filePolicy": "PDF file of a type: none, optional or required, with a maximum size from 1 to 50 MB."
         },
         "settings-calendar": {
           "title": "Calendar",
@@ -430,7 +454,9 @@
           "intro": "In double-blind review, reviewers see neither the name, nor the address, nor the affiliation of the authors. The server removes this information, not the display.",
           "reviewers": "Reviewers per submission: from 1 to 10.",
           "sensitiveTitle": "Sensitive change",
-          "sensitiveText": "The change requires a recent identity confirmation; it is logged with the before and after values."
+          "sensitiveText": "The change requires a recent identity confirmation; it is logged with the before and after values.",
+          "frozenTitle": "Double-blind frozen after the first submission",
+          "frozenText": "As soon as a submission is sent, double-blind review is frozen (RG-19): authors prepared their file accordingly. Only an administrator can change it, with a logged reason."
         },
         "members": {
           "title": "Members",
@@ -557,6 +583,28 @@
           "refusedText": "The type is checked from the content, not the name: a file whose extension does not match, an SVG, an executable or an archive too large once uncompressed is refused.",
           "inUseTitle": "Deletion refused",
           "inUseText": "A file in use (section, poster) cannot be deleted: the “Used by” column says where to remove it first."
+        },
+        "submissions": {
+          "title": "Submissions",
+          "summary": "Filtered list, details, CSV export and extensions after the call closes.",
+          "path": "Submissions",
+          "intro": "All proposals of the edition, drafts included, with their authors. The details show the metadata, the authors' addresses, the PDF versions, the declarations and the status history.",
+          "filterTitle": "Filter",
+          "filterBody": "Combine statuses, track, type and language; the search covers the reference, the title and the authors' names.",
+          "detailTitle": "View",
+          "detailBody": "Click the reference. Each PDF version can be downloaded; with double-blind review, the file metadata was removed on upload.",
+          "exportTitle": "Export",
+          "exportBody": "“Export (CSV)” uses the filters shown. The file opens in a spreadsheet (separator “;”); every export is logged.",
+          "extensionTitle": "Grant an extension",
+          "extensionBody": "In the details: deadline in the edition's time and a reason, sent to the author. An extension can be revoked at any time.",
+          "draftsTitle": "Drafts",
+          "draftsText": "Drafts appear in the list so that an extension can be granted to an author interrupted by the closing; they have not been submitted yet.",
+          "closingTitle": "Closing of the call",
+          "closingText": "When the call closes, submissions move to the eligibility check automatically, within the hour. A submission under extension moves when its extension ends. A submission under eligibility check can no longer receive an extension.",
+          "whoTitle": "Who can do it",
+          "whoText": "Viewing: administrator, chairs and organising committee. Extensions and export: administrator, conference chair and scientific committee chair.",
+          "duplicatesTitle": "Possible duplicates",
+          "duplicatesText": "A submission is flagged when the same submitter has another one, not withdrawn, with the same title (case, accents and punctuation ignored). It is a signal, not a refusal: the author was warned before submitting."
         }
       }
     },
@@ -742,6 +790,118 @@
         "imageHint": "Public images of the edition (Portal › Documents and images). It must be published.",
         "imageUnpublished": "This image is not published: it will not appear on the portal until it is (Portal › Documents and images)."
       }
+    },
+    "filePolicies": {
+      "none": "No file",
+      "optional": "Optional",
+      "required": "Required"
+    },
+    "submissions": {
+      "title": "Submissions",
+      "lead": "Proposals of the edition: search, filters, details, extensions and export.",
+      "search": "Search",
+      "searchHint": "Reference, title or author name.",
+      "all": "All",
+      "ordering": "Sort",
+      "orderings": {
+        "reference": "Reference",
+        "-submitted_at": "Most recently submitted",
+        "-updated_at": "Most recently changed",
+        "title": "Title"
+      },
+      "apply": "Filter",
+      "reset": "Reset",
+      "count": "{{count}} submission(s)",
+      "export": "Export (CSV)",
+      "draft": "Draft",
+      "untitled": "(untitled)",
+      "extensionUntil": "extension until {{date}}",
+      "empty": "No matching submission.",
+      "fields": {
+        "reference": "Reference",
+        "title": "Title",
+        "authors": "Authors",
+        "track": "Track",
+        "type": "Type",
+        "status": "Status",
+        "submittedAt": "Submitted on",
+        "updatedAt": "Changed on",
+        "language": "Language",
+        "keywords": "Keywords",
+        "abstract": "Abstract",
+        "submitter": "Submitter",
+        "withdrawn": "Withdrawn on"
+      },
+      "status": {
+        "draft": "Draft",
+        "submitted": "Submitted",
+        "screening": "Eligibility check",
+        "under_review": "Under review",
+        "reviewed": "Reviewed",
+        "accepted": "Accepted",
+        "accepted_minor": "Accepted with minor revisions",
+        "waitlist": "Waiting list",
+        "rejected": "Rejected",
+        "revision_requested": "Revisions requested",
+        "camera_ready_received": "Camera-ready received",
+        "confirmed": "Presentation confirmed",
+        "scheduled": "Scheduled",
+        "presented": "Presented",
+        "published": "Published in the proceedings",
+        "withdrawn": "Withdrawn"
+      },
+      "detail": {
+        "title": "Submission",
+        "titleWithReference": "Submission {{reference}}",
+        "back": "← Submissions",
+        "metadata": "Information",
+        "files": "PDF file",
+        "fileDetails": "version {{version}}, {{pages}} page(s)",
+        "cleaned": "metadata removed",
+        "current": "current version",
+        "noFile": "No file uploaded.",
+        "declarations": "Author declarations",
+        "history": "History",
+        "noHistory": "No status change.",
+        "revisions": "{{count}} revision(s) recorded after submission.",
+        "notFound": "Submission not found."
+      },
+      "authors": {
+        "name": "Name",
+        "email": "Email address",
+        "institution": "Institution",
+        "roles": "Role",
+        "corresponding": "Corresponding",
+        "presenter": "Presenter",
+        "account": "linked account"
+      },
+      "declarations": {
+        "originality": "Original work, not under review elsewhere",
+        "ethics": "Research ethics rules complied with",
+        "conflicts": "Conflicts of interest declared",
+        "publication": "Agreement to publish the abstract"
+      },
+      "extensions": {
+        "title": "Extensions (RG-02)",
+        "lead": "After the call closes, an extension reopens changes to this submission until its deadline. The author is informed by email.",
+        "until": "Until {{date}}",
+        "active": "active",
+        "revoke": "Revoke",
+        "revokedAt": "revoked on {{date}}",
+        "expired": "expired",
+        "none": "No extension.",
+        "untilLocal": "Deadline",
+        "timezoneHint": "Edition time ({{zone}}).",
+        "reason": "Reason (sent to the author)",
+        "grant": "Grant the extension",
+        "granted": "Extension granted; the author is notified by email.",
+        "revoked": "Extension revoked.",
+        "revokeTitle": "Revoke the extension",
+        "revokeMessage": "Changes to the submission will be refused again (planned deadline: {{date}})."
+      },
+      "duplicatesOnly": "Possible duplicates only (same author, same title)",
+      "duplicate": "possible duplicate",
+      "duplicateHint": "The same submitter has another submission with the same title: filter “Possible duplicates” to compare them."
     }
   }
 }
