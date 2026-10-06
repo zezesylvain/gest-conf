@@ -19,7 +19,8 @@ export const lastEditionRedirect: CanActivateFn = () => {
 
 /**
  * `/gestion/editions/:id` : tableau de bord avec `edition.read`, sinon « Membres » avec
- * `members.read` (cas du président du CS si D8 n'est pas retenue), sinon accès refusé.
+ * `members.read` (cas du président du CS si D8 n'est pas retenue), sinon « Mes évaluations »
+ * avec `reviews.write` (relecteur), sinon accès refusé.
  */
 export const editionHomeRedirect: CanActivateFn = (route) => {
   const router = inject(Router);
@@ -29,6 +30,10 @@ export const editionHomeRedirect: CanActivateFn = (route) => {
   }
   if (edition?.capabilities.includes('members.read')) {
     return router.createUrlTree(['/editions', edition.id, 'comites', 'membres']);
+  }
+  // Relecteur (plan L4, H1) : « Mes évaluations ».
+  if (edition?.capabilities.includes('reviews.write')) {
+    return router.createUrlTree(['/editions', edition.id, 'evaluations']);
   }
   return router.parseUrl(FORBIDDEN_PATH);
 };

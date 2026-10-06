@@ -27,7 +27,8 @@
         "portal": "Portal",
         "control": "Oversight",
         "help": "Help",
-        "submissions": "Submissions"
+        "submissions": "Submissions",
+        "reviewing": "Reviewing"
       },
       "keywords": {
         "dashboard": "home, status, publish, publication, archive, state, summary",
@@ -44,13 +45,23 @@
         "portalPages": "compose, composer, custom page, practical information, website",
         "portalMenus": "navigation, links, header, footer",
         "portalFiles": "template, download, pdf, file, poster, image, picture",
-        "submissions": "proposals, papers, abstracts, authors, extension, deadline, export, csv, references"
+        "submissions": "proposals, papers, abstracts, authors, extension, deadline, export, csv, references",
+        "myReviews": "review, reviewer, evaluate, score, grid, recommendation, discussion, decline",
+        "expertise": "tracks, skills, fields, specialities, reviewer",
+        "followUp": "screening, assign, assignment, reviewers, conflicts, late, reminders, divergence, discussion",
+        "ranking": "ranking, threshold, simulation, decision, publish, results, waiting list, export, csv",
+        "grids": "criteria, weighting, weights, scale, scoring, version"
       },
       "portalSections": "Sections",
       "portalPages": "Pages",
       "portalMenus": "Menus",
       "portalFiles": "Documents and images",
-      "submissions": "Submissions"
+      "submissions": "Submissions",
+      "myReviews": "My reviews",
+      "expertise": "My expertise",
+      "followUp": "Review follow-up",
+      "ranking": "Ranking and decisions",
+      "grids": "Evaluation grids"
     },
     "status": {
       "draft": "draft",
@@ -149,6 +160,13 @@
         "title": "Submissions",
         "summary": "{{total}} submission(s) sent, {{drafts}} draft(s) in progress.",
         "see": "See the submissions"
+      },
+      "reviewing": {
+        "title": "Reviewing",
+        "counts": "{{screening}} in screening, {{underReview}} under review, {{reviewed}} reviewed.",
+        "alerts": "{{divergent}} submission(s) with diverging reviews, {{late}} late review(s).",
+        "followUp": "Review follow-up",
+        "ranking": "Ranking and decisions"
       }
     },
     "fields": {
@@ -605,6 +623,92 @@
           "whoText": "Viewing: administrator, chairs and organising committee. Extensions and export: administrator, conference chair and scientific committee chair.",
           "duplicatesTitle": "Possible duplicates",
           "duplicatesText": "A submission is flagged when the same submitter has another one, not withdrawn, with the same title (case, accents and punctuation ignored). It is a signal, not a refusal: the author was warned before submitting."
+        },
+        "my-reviews": {
+          "title": "My reviews",
+          "summary": "Read, score, submit, discuss; decline in case of conflict.",
+          "path": "Reviewing › My reviews",
+          "intro": "Each submission entrusted to you appears here once reviewing opens, with its due date. You review with the edition's grid.",
+          "listTitle": "Choose a submission",
+          "listBody": "The list shows the due date and the state of your review: to do, draft, submitted.",
+          "readTitle": "Read",
+          "readBody": "Abstract, keywords and PDF. In double-blind review, the PDF was stripped of its metadata and downloads under the reference.",
+          "scoreTitle": "Score",
+          "scoreBody": "Score each criterion; the indicative weighted score is shown as you type. Save the draft at any time.",
+          "submitTitle": "Submit",
+          "submitBody": "Required criteria, recommendation, confidence and comment to the authors are required. Each submission is a version; you can resubmit until the decision.",
+          "discussTitle": "Discuss",
+          "discussBody": "Once your review is submitted and the discussion is open, you read the other reviews, under pseudonyms, and talk with the committee.",
+          "anonymityTitle": "Anonymity",
+          "anonymityText": "You never receive the authors' identity in double-blind review; the other reviewers only know your pseudonym.",
+          "declineTitle": "Decline",
+          "declineText": "In case of conflict of interest or unavailability, decline with a reason: the chair appoints a replacement. A submitted review can no longer be declined.",
+          "expertiseTitle": "Expertise",
+          "expertiseText": "Declare your tracks of expertise in “My expertise”: they guide the assignments.",
+          "frozenTitle": "After the decision",
+          "frozenText": "Once a decision is recorded, reviews can no longer be changed; they remain readable."
+        },
+        "review-follow-up": {
+          "title": "Review follow-up",
+          "summary": "Screening, assignments, conflicts, follow-up, discussion and decision.",
+          "path": "Reviewing › Review follow-up",
+          "intro": "After the call closes, submissions go through screening. The scientific committee chair assigns reviewers, opens reviewing, follows delays and divergences, then decides.",
+          "assignTitle": "Assign",
+          "assignBody": "In a submission's record, choose among the available reviewers: load, expertise and conflicts are shown.",
+          "screenTitle": "Declare admissible",
+          "screenBody": "Once the required reviewers are assigned, “Admissible” opens reviewing and notifies the reviewers. “Inadmissible” rejects, with a reason sent to the author.",
+          "followTitle": "Follow",
+          "followBody": "The list flags missing reviewers and delays; the progress shows each reviewer's load and the divergences.",
+          "discussTitle": "Discuss",
+          "discussBody": "The discussion opens by itself when all reviews are submitted; you can open it earlier and post in it.",
+          "decideTitle": "Decide",
+          "decideBody": "On a reviewed submission, record a provisional decision; it stays hidden from the authors until publication.",
+          "conflictsTitle": "Conflicts of interest",
+          "conflictsText": "A reviewer who is an author of the submission can never review it. Same institution or declared conflict: can be overridden with a reason, logged, after confirming your identity.",
+          "loadTitle": "Load",
+          "loadText": "Beyond the edition's maximum load (Settings › Confidentiality), the assignment is refused.",
+          "remindersTitle": "Reminders",
+          "remindersText": "Reviewers are reminded automatically seven days and one day before the due date, then after it, once each.",
+          "divergenceTitle": "Divergence",
+          "divergenceText": "Beyond the edition's threshold, the submission is flagged and you receive an email; it is up to you to open the discussion or add a reviewer."
+        },
+        "ranking": {
+          "title": "Ranking and decisions",
+          "summary": "Simulate a threshold, decide in batch, publish, export.",
+          "path": "Reviewing › Ranking and decisions",
+          "intro": "Reviewed submissions are ranked by final score (average of the reviews, possibly weighted by confidence), with divergence and recommendations.",
+          "simulateTitle": "Simulate",
+          "simulateBody": "Enter a threshold: the number of submissions kept is shown, in total, by type and by track.",
+          "batchTitle": "Decide in batch",
+          "batchBody": "“Prepare decisions” proposes “accepted” above the threshold and “rejected” below; adjust, then save. All or nothing.",
+          "publishTitle": "Publish",
+          "publishBody": "Publication changes the statuses and notifies the authors. It asks you to confirm your identity.",
+          "exportTitle": "Export",
+          "exportBody": "The CSV has one line per review, with the reviewer's name; each export is logged.",
+          "noReturnTitle": "Publication cannot be undone",
+          "noReturnText": "A published decision cannot be cancelled. Only a waitlisted submission can then be accepted.",
+          "authorsTitle": "What the authors receive",
+          "authorsText": "The decision, the assigned format, your message and the reviewers' comments under pseudonyms; never their names, scores or confidential comments.",
+          "waitlistTitle": "Waiting list",
+          "waitlistText": "From the submission's record, “Accept from the waiting list” notifies the authors at once."
+        },
+        "grids": {
+          "title": "Evaluation grids",
+          "summary": "Weighted criteria, versions, locking.",
+          "path": "Settings › Evaluation grids",
+          "intro": "One grid per edition, and if needed one per presentation type: reviewers score each criterion on the grid's scale.",
+          "createTitle": "Create",
+          "createBody": "The new grid uses the study's default grid; adapt it before the first review.",
+          "criteriaTitle": "Weight",
+          "criteriaBody": "Code, French and English labels, weight and whether it is required. An optional criterion left unscored is excluded from the calculation.",
+          "duplicateTitle": "New version",
+          "duplicateBody": "“Duplicate” creates an editable version; reviews already made keep their version.",
+          "sumTitle": "Sum of weights",
+          "sumText": "The weights must add up to exactly 100; otherwise saving is refused.",
+          "lockedTitle": "Locked grid",
+          "lockedText": "From the first saved review, the grid can no longer be changed or deleted: duplicate it.",
+          "scopeTitle": "Which grid applies?",
+          "scopeText": "The latest version of the grid of the submission's type, otherwise that of the “all types” grid."
         }
       }
     },
@@ -902,6 +1006,353 @@
       "duplicatesOnly": "Possible duplicates only (same author, same title)",
       "duplicate": "possible duplicate",
       "duplicateHint": "The same submitter has another submission with the same title: filter “Possible duplicates” to compare them."
+    },
+    "reviews": {
+      "title": "My reviews",
+      "lead": "The submissions entrusted to you. In double-blind review, the authors' identity is never sent to you.",
+      "loading": "Loading…",
+      "empty": "No review is assigned to you yet.",
+      "back": "← My reviews",
+      "fields": {
+        "submission": "Submission",
+        "track": "Track",
+        "due": "Due date",
+        "state": "State"
+      },
+      "states": {
+        "todo": "to do",
+        "draft": "draft",
+        "submitted": "submitted",
+        "closed": "closed"
+      },
+      "recommendations": {
+        "accept": "accept",
+        "accept_minor": "accept with corrections",
+        "reject": "reject",
+        "discuss": "discuss",
+        "": "—"
+      },
+      "confidence": {
+        "1": "1 — low",
+        "2": "2",
+        "3": "3 — medium",
+        "4": "4",
+        "5": "5 — expert"
+      },
+      "form": {
+        "title": "Review",
+        "lead": "Score each criterion, then submit. The weighted score shown is indicative: the server recomputes it.",
+        "submission": "Submission",
+        "keywords": "Keywords:",
+        "download": "Download the PDF",
+        "blind": "Double-blind: the authors are not shown to you.",
+        "authors": "Authors",
+        "grid": "Grid",
+        "scale": "Scores from {{min}} to {{max}}.",
+        "optional": "optional",
+        "liveScore": "Indicative weighted score:",
+        "liveScoreHint": "(computed as you type; the server is authoritative)",
+        "recommendation": "Recommendation",
+        "confidence": "Confidence",
+        "toAuthors": "Comment to the authors",
+        "toAuthorsHint": "Required to submit. Sent to the authors under a pseudonym, with the decision.",
+        "toCommittee": "Confidential comment to the committee",
+        "toCommitteeHint": "Never sent to the authors.",
+        "ethics": "Ethics concern",
+        "plagiarism": "Suspected plagiarism",
+        "stateDraft": "Draft saved.",
+        "stateSubmitted": "Submitted (version {{version}}) on {{at}}.",
+        "serverScore": "score kept by the server: {{score}} / 100",
+        "save": "Save draft",
+        "send": "Submit review",
+        "resubmit": "Resubmit the changed review",
+        "saved": "Draft saved.",
+        "submitted": "Review submitted.",
+        "readOnly": "This review can no longer be changed (assignment ended or decision made).",
+        "noGrid": "No evaluation grid is available: notify the scientific committee chair.",
+        "submitConfirm": {
+          "title": "Submit the review?",
+          "message": "All required criteria, the recommendation, the confidence and the comment to the authors are required. You can still change it until the decision.",
+          "confirm": "Submit"
+        },
+        "resubmitConfirm": {
+          "title": "Resubmit the review?",
+          "message": "A new version is recorded; the previous one stays in the history.",
+          "confirm": "Resubmit"
+        }
+      },
+      "discussion": {
+        "title": "Discussion",
+        "summary": "Final score: {{final}} / 100 · gap between reviews: {{spread}} points.",
+        "messages": "Messages",
+        "empty": "No message.",
+        "message": "Your message",
+        "send": "Post",
+        "you": "You",
+        "reviewer": "Reviewer {{rank}}",
+        "chair": "Committee chair",
+        "notOpen": "The discussion is not open yet: it will be once all reviews are submitted, or by the chair."
+      },
+      "decline": {
+        "title": "Decline the review",
+        "lead": "You cannot review this submission, or you have a conflict of interest? Decline it: the committee chair will appoint a replacement.",
+        "open": "Decline…",
+        "reason": "Reason",
+        "conflict": "I declare a conflict of interest with this submission",
+        "submit": "Decline",
+        "cancel": "Cancel",
+        "confirm": {
+          "title": "Decline the review?",
+          "message": "The assignment ends; you will no longer see the submission.",
+          "confirm": "Decline"
+        }
+      }
+    },
+    "expertise": {
+      "title": "My expertise",
+      "lead": "The tracks you can review. They guide the committee chair when assigning.",
+      "tracks": "Tracks of the edition",
+      "none": "No active track.",
+      "save": "Save",
+      "saved": "Expertise saved."
+    },
+    "followUp": {
+      "title": "Review follow-up",
+      "lead": "From screening to decision: assigned reviewers, submitted reviews, delays and divergences.",
+      "back": "← Review follow-up",
+      "search": "Search (reference, title)",
+      "missingOnly": "Required reviewers not assigned",
+      "lateOnly": "Late reviews",
+      "missing": "reviewers missing",
+      "lateCount": "{{count}} late",
+      "empty": "No submission.",
+      "close": "Close",
+      "summary": "Summary",
+      "counts": "{{assigned}} reviewer(s) assigned out of {{required}} required, {{reviews}} review(s) submitted.",
+      "submissionLink": "Full submission record (authors, files, history)",
+      "fields": {
+        "reviewer": "Reviewer",
+        "reviewers": "Reviewers",
+        "active": "Assignments",
+        "submitted": "Reviews submitted",
+        "late": "Late",
+        "rank": "Pseudonym",
+        "state": "Assignment",
+        "due": "Due date",
+        "review": "Review",
+        "actions": "Actions",
+        "institution": "Institution",
+        "load": "Load",
+        "expertise": "Expertise",
+        "conflicts": "Conflicts"
+      },
+      "progress": {
+        "title": "Progress",
+        "reviewers": "By reviewer",
+        "divergent": "{{count}} submission(s) with diverging reviews (threshold: {{threshold}} points):",
+        "spread": "{{spread}}-point gap",
+        "noDivergence": "No divergence beyond the threshold.",
+        "noReviewers": "No scientific committee member.",
+        "track": "{{reviewed}} reviewed out of {{total}}"
+      },
+      "assignmentStatus": {
+        "active": "active",
+        "declined": "declined",
+        "cancelled": "cancelled"
+      },
+      "reviewStatus": {
+        "none": "not started",
+        "draft": "draft",
+        "submitted": "submitted"
+      },
+      "screening": {
+        "title": "Screening",
+        "lead": "First assign the required reviewers ({{assigned}} of {{required}}), then declare the submission admissible: reviewing opens and the reviewers are notified.",
+        "reason": "Rejection reason",
+        "reasonHint": "Required to reject; sent to the author.",
+        "reasonRequired": "Enter the rejection reason.",
+        "admit": {
+          "action": "Admissible: open reviewing",
+          "title": "Open reviewing?",
+          "message": "The assigned reviewers are notified by email.",
+          "confirm": "Open",
+          "done": "Reviewing opened."
+        },
+        "reject": {
+          "action": "Inadmissible: reject",
+          "title": "Reject the submission?",
+          "message": "The rejection is final; the author receives the reason by email.",
+          "confirm": "Reject",
+          "done": "Submission rejected."
+        }
+      },
+      "assignments": {
+        "title": "Assignments",
+        "empty": "No reviewer assigned.",
+        "reschedule": "Due date…",
+        "cancel": "Cancel…",
+        "cancelReason": "Cancellation reason",
+        "cancelConfirm": "Cancel the assignment",
+        "cancelled": "Assignment cancelled.",
+        "newDue": "New due date",
+        "dueHint": "Edition time. Reminders start over.",
+        "rescheduleConfirm": "Save the due date",
+        "rescheduled": "Due date changed."
+      },
+      "candidates": {
+        "title": "Available reviewers",
+        "lead": "Maximum load: {{max}} reviews per reviewer. Expertise matching the track is highlighted.",
+        "assign": "Assign…",
+        "assigned": "already assigned",
+        "declare": "Conflict…",
+        "empty": "No scientific committee member."
+      },
+      "assign": {
+        "title": "Assign {{name}}",
+        "due": "Due date (optional)",
+        "dueHint": "Edition time; by default, the review deadline.",
+        "overrideLead": "Overridable conflict of interest: give the reason for overriding it. It is logged and asks you to confirm your identity.",
+        "override": "Reason for overriding the conflict",
+        "overrideRequired": "Enter the reason for overriding the conflict.",
+        "submit": "Assign",
+        "done": "Reviewer assigned."
+      },
+      "conflicts": {
+        "title": "Conflicts of interest",
+        "author": "author",
+        "institution": "same institution",
+        "declared": "Conflict declared; any assignment is cancelled.",
+        "overridden": "overridden",
+        "overriddenBy": "overridden by {{name}}: {{reason}}",
+        "declareTitle": "Declare a conflict for {{name}}",
+        "reason": "Reason",
+        "declare": "Declare the conflict"
+      },
+      "reviews": {
+        "title": "Reviews",
+        "summary": "Final score: {{final}} / 100 · gap: {{spread}} points.",
+        "divergent": "divergence (threshold {{threshold}})",
+        "empty": "No review submitted."
+      },
+      "discussion": {
+        "open": "Open the discussion",
+        "opened": "Discussion opened.",
+        "openedAt": "Opened on {{at}}.",
+        "posted": "Message posted."
+      },
+      "outcomes": {
+        "accepted": "accepted",
+        "accepted_minor": "accepted subject to corrections",
+        "waitlist": "waiting list",
+        "rejected": "rejected"
+      },
+      "decision": {
+        "title": "Decision",
+        "provisional": "provisional: hidden from the authors until publication.",
+        "published": "published on {{at}}.",
+        "outcome": "Outcome",
+        "type": "Assigned format",
+        "sameType": "Submission type",
+        "comment": "Committee message to the authors",
+        "commentHint": "Optional; sent with the decision and the reviewers' comments.",
+        "save": "Save the decision",
+        "saved": "Provisional decision saved.",
+        "cancel": {
+          "action": "Cancel the decision",
+          "title": "Cancel the provisional decision?",
+          "message": "The reviews can be changed again.",
+          "confirm": "Cancel the decision",
+          "done": "Decision cancelled."
+        },
+        "promote": {
+          "action": "Accept from the waiting list",
+          "title": "Accept the submission?",
+          "message": "The authors are notified at once.",
+          "confirm": "Accept",
+          "done": "Submission accepted."
+        }
+      }
+    },
+    "ranking": {
+      "title": "Ranking and decisions",
+      "lead": "Reviewed submissions by final score. Simulate a threshold, prepare decisions in batch, then publish the results.",
+      "simulation": {
+        "title": "Threshold simulation",
+        "threshold": "Threshold (out of 100)",
+        "hint": "A submission is kept if its final score reaches the threshold.",
+        "run": "Simulate",
+        "prefill": "Prepare decisions from the threshold",
+        "result": "{{accepted}} submission(s) kept out of {{total}} at the {{threshold}} threshold.",
+        "byType": "By type",
+        "byTrack": "By track"
+      },
+      "fields": {
+        "final": "Final score",
+        "reviews": "Reviews",
+        "recommendations": "Recommendations",
+        "decision": "Decision"
+      },
+      "divergent": "divergence: {{spread}}",
+      "provisional": "provisional",
+      "published": "published",
+      "empty": "No reviewed submission.",
+      "batch": {
+        "outcome": "Decision",
+        "none": "—",
+        "save": "Save the decisions ({{count}})",
+        "done": "{{count}} provisional decision(s) saved."
+      },
+      "publish": {
+        "action": "Publish the results ({{count}})",
+        "title": "Publish the results?",
+        "message": "{{count}} decision(s) become visible to the authors, who are notified by email. Publication cannot be undone.",
+        "confirm": "Publish",
+        "done": "{{count}} decision(s) published."
+      },
+      "export": "Export the reviews (CSV)"
+    },
+    "grids": {
+      "title": "Evaluation grids",
+      "lead": "Weighted criteria of the edition, or of a presentation type. The weights add up to 100.",
+      "allTypes": "all types",
+      "locked": "locked",
+      "scale": "Scores from {{min}} to {{max}}.",
+      "fields": {
+        "code": "Code",
+        "label": "Label",
+        "labelFr": "Label (FR)",
+        "labelEn": "Label (EN)",
+        "weight": "Weight (%)",
+        "required": "Required",
+        "name": "Name",
+        "scaleMin": "Minimum score",
+        "scaleMax": "Maximum score",
+        "type": "Presentation type"
+      },
+      "mandatory": "required",
+      "optional": "optional",
+      "edit": "Edit",
+      "duplicate": "Duplicate as a new version",
+      "save": "Save the grid",
+      "addCriterion": "Add a criterion",
+      "removeCriterion": "Remove",
+      "total": "Sum of weights: {{total}} (100 expected).",
+      "empty": "No grid: create the edition's grid.",
+      "created": "Grid created.",
+      "saved": "Grid saved.",
+      "duplicated": "New version created.",
+      "deleted": "Grid deleted.",
+      "create": {
+        "title": "New grid",
+        "lead": "Created from the study's default grid (25 / 30 / 15 / 15 / 15, scores from 0 to 5), to adapt afterwards.",
+        "submit": "Create the grid"
+      },
+      "delete": {
+        "action": "Delete",
+        "title": "Delete the grid?",
+        "message": "The grid “{{name}}” will be deleted.",
+        "confirm": "Delete"
+      }
     }
   }
 }

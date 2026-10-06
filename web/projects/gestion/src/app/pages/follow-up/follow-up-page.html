@@ -1,0 +1,181 @@
+<gc-page-header
+  [heading]="'gestion.followUp.title' | translate"
+  [lead]="'gestion.followUp.lead' | translate"
+/>
+<gc-error-summary [messages]="errors()" />
+
+@if (progress(); as state) {
+  <section class="card" aria-labelledby="progress-title">
+    <h2 id="progress-title">{{ 'gestion.followUp.progress.title' | translate }}</h2>
+    @if (state.divergent.length) {
+      <p>
+        <strong>{{
+          'gestion.followUp.progress.divergent'
+            | translate: { count: state.divergent.length, threshold: state.threshold }
+        }}</strong>
+      </p>
+      <ul>
+        @for (item of state.divergent; track item.id) {
+          <li>
+            <a [routerLink]="[item.id]">{{ item.reference }}</a> — {{ item.title }} ({{
+              'gestion.followUp.progress.spread' | translate: { spread: item.spread }
+            }})
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="muted">{{ 'gestion.followUp.progress.noDivergence' | translate }}</p>
+    }
+    <div class="table-wrap">
+      <table>
+        <caption>
+          {{
+            'gestion.followUp.progress.reviewers' | translate
+          }}
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">{{ 'gestion.followUp.fields.reviewer' | translate }}</th>
+            <th scope="col">{{ 'gestion.followUp.fields.active' | translate }}</th>
+            <th scope="col">{{ 'gestion.followUp.fields.submitted' | translate }}</th>
+            <th scope="col">{{ 'gestion.followUp.fields.late' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (reviewer of state.reviewers; track reviewer.id) {
+            <tr>
+              <td>{{ reviewer.name }}</td>
+              <td>{{ reviewer.active }}</td>
+              <td>{{ reviewer.submitted }}</td>
+              <td>
+                @if (reviewer.late) {
+                  <span class="badge warning">{{ reviewer.late }}</span>
+                } @else {
+                  0
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="4" class="muted">
+                {{ 'gestion.followUp.progress.noReviewers' | translate }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    @if (state.tracks.length) {
+      <ul>
+        @for (track of state.tracks; track track.code) {
+          <li>
+            {{ track.code ?? '—' }} :
+            {{
+              'gestion.followUp.progress.track'
+                | translate: { reviewed: track.reviewed, total: track.in_review }
+            }}
+          </li>
+        }
+      </ul>
+    }
+  </section>
+}
+
+<form [formGroup]="form" (ngSubmit)="search()" novalidate class="card">
+  <div class="grid-2">
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'gestion.followUp.search' | translate }}</mat-label>
+      <input matInput formControlName="q" maxlength="100" />
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'gestion.submissions.fields.status' | translate }}</mat-label>
+      <mat-select formControlName="status" multiple>
+        @for (status of statuses; track status) {
+          <mat-option [value]="status">{{
+            'gestion.submissions.status.' + status | translate
+          }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+  <mat-checkbox formControlName="missing">{{
+    'gestion.followUp.missingOnly' | translate
+  }}</mat-checkbox>
+  <mat-checkbox formControlName="late">{{ 'gestion.followUp.lateOnly' | translate }}</mat-checkbox>
+  <div class="actions">
+    <button mat-flat-button type="submit">{{ 'gestion.submissions.apply' | translate }}</button>
+    <button mat-button type="button" (click)="reset()">
+      {{ 'gestion.submissions.reset' | translate }}
+    </button>
+  </div>
+</form>
+
+@if (!loading()) {
+  <p class="muted" role="status">
+    {{ 'gestion.submissions.count' | translate: { count: count() } }}
+  </p>
+  <div class="table-wrap">
+    <table>
+      <caption class="visually-hidden">
+        {{
+          'gestion.followUp.title' | translate
+        }}
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">{{ 'gestion.submissions.fields.reference' | translate }}</th>
+          <th scope="col">{{ 'gestion.submissions.fields.title' | translate }}</th>
+          <th scope="col">{{ 'gestion.submissions.fields.track' | translate }}</th>
+          <th scope="col">{{ 'gestion.submissions.fields.status' | translate }}</th>
+          <th scope="col">{{ 'gestion.followUp.fields.reviewers' | translate }}</th>
+          <th scope="col">{{ 'gestion.followUp.fields.submitted' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows(); track row.id) {
+          <tr>
+            <td>
+              <a [routerLink]="[row.id]">{{ row.reference }}</a>
+            </td>
+            <td>{{ row.title }}</td>
+            <td>{{ row.track ?? '—' }}</td>
+            <td>
+              <span class="badge">{{
+                'gestion.submissions.status.' + row.status | translate
+              }}</span>
+            </td>
+            <td>
+              {{ row.assignment_count }} / {{ row.required }}
+              @if (row.assignment_count < row.required && row.status === 'screening') {
+                <span class="badge warning">{{ 'gestion.followUp.missing' | translate }}</span>
+              }
+            </td>
+            <td>
+              {{ row.review_count }}
+              @if (row.late_count) {
+                <span class="badge warning">{{
+                  'gestion.followUp.lateCount' | translate: { count: row.late_count }
+                }}</span>
+              }
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="6" class="muted">{{ 'gestion.followUp.empty' | translate }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  @if (pages() > 1) {
+    <nav class="actions" [attr.aria-label]="'gestion.pagination.label' | translate">
+      <button mat-button type="button" [disabled]="page() <= 1" (click)="goTo(page() - 1)">
+        {{ 'gestion.pagination.previous' | translate }}
+      </button>
+      <span>{{ 'gestion.pagination.status' | translate: { page: page(), pages: pages() } }}</span>
+      <button mat-button type="button" [disabled]="page() >= pages()" (click)="goTo(page() + 1)">
+        {{ 'gestion.pagination.next' | translate }}
+      </button>
+    </nav>
+  }
+}

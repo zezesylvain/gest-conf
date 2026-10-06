@@ -2,7 +2,11 @@ import { TestBed } from '@angular/core/testing';
 import { ActivatedRouteSnapshot, convertToParamMap, UrlTree } from '@angular/router';
 import { ActiveContext, MeEdition } from '@gestconf/shared';
 
-import { CHAIR_EDITION, provideGestionTesting } from '../../testing/gestion-testing';
+import {
+  CHAIR_EDITION,
+  provideGestionTesting,
+  REVIEWER_EDITION,
+} from '../../testing/gestion-testing';
 import { editionHomeRedirect, lastEditionRedirect } from './redirects';
 
 const SC_CHAIR: MeEdition = {
@@ -42,5 +46,12 @@ describe('Redirections de la gestion', () => {
     expect(run(editionHomeRedirect, '3')).toBe('/editions/3/tableau-de-bord');
     expect(run(editionHomeRedirect, '4')).toBe('/editions/4/comites/membres');
     expect(run(editionHomeRedirect, '99')).toBe('/acces-refuse');
+  });
+
+  it('relecteur (plan L4, H1) : « Mes évaluations »', () => {
+    TestBed.configureTestingModule({
+      providers: provideGestionTesting([{ ...REVIEWER_EDITION, id: 5 }]),
+    });
+    expect(run(editionHomeRedirect, '5')).toBe('/editions/5/evaluations');
   });
 });

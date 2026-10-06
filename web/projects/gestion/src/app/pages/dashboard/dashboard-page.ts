@@ -22,6 +22,7 @@ import {
   LanguageService,
   MeStore,
   PageHeader,
+  ReviewProgress,
   SubmissionStats,
   SubmissionStatus,
 } from '@gestconf/shared';
@@ -31,6 +32,7 @@ import { firstValueFrom } from 'rxjs';
 import { EditionApi } from '../../core/edition-api';
 import { editionTitle } from '../../core/managed-editions';
 import { editionCapabilities, errorMessages } from '../../core/page-support';
+import { ReviewsApi } from '../../core/reviews-api';
 import { SubmissionsApi } from '../../core/submissions-api';
 
 interface CheckItem {
@@ -42,8 +44,9 @@ interface CheckItem {
 /**
  * Tableau de bord de l'édition (squelette US-12, plan L1 §10.3) : statut et publication,
  * paramétrage à compléter, dates clés, invitations en attente, état de la 2FA ; compteurs
- * de soumissions par statut avec `submissions.read` (plan L3). Autres indicateurs en L4. La liste de contrôle est indicative : le serveur revérifie les
- * préconditions à la publication (`edition_incomplete`).
+ * de soumissions par statut avec `submissions.read` (plan L3) ; avancement de l'évaluation
+ * avec `reviews.manage` (plan L4 : divergences, retards). La liste de contrôle est
+ * indicative : le serveur revérifie les préconditions à la publication (`edition_incomplete`).
  */
 @Component({
   selector: 'gestion-dashboard-page',
@@ -57,6 +60,7 @@ export class DashboardPage implements OnInit {
 
   private readonly api = inject(EditionApi);
   private readonly submissions = inject(SubmissionsApi);
+  private readonly reviewsApi = inject(ReviewsApi);
   private readonly meStore = inject(MeStore);
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
@@ -67,6 +71,20 @@ export class DashboardPage implements OnInit {
   protected readonly checklist = signal<CheckItem[]>([]);
   protected readonly pendingInvitations = signal<number | null>(null);
   protected readonly submissionStats = signal<SubmissionStats | null>(null);
+  protected readonly reviewProgress = signal<ReviewProgress | null>(null);
+  /** Évaluations en retard, tous relecteurs confondus. */
+  protected readonly lateReviews = computed(() =>
+    (this.reviewProgress()?.reviewers ?? []).reduce((sum, reviewer) => sum + reviewer.late, 0),
+  );
+  /** Soumissions de l'évaluation, par statut (compteurs des soumissions). */
+  protected readonly reviewCounts = computed(() => {
+    const byStatus = this.submissionStats()?.by_status ?? {};
+    return {
+      screening: byStatus['screening'] ?? 0,
+      underReview: byStatus['under_review'] ?? 0,
+      reviewed: byStatus['reviewed'] ?? 0,
+    };
+  });
   /** Statuts non nuls, dans l'ordre du serveur (celui du workflow). */
   protected readonly statusCounts = computed(() =>
     Object.entries(this.submissionStats()?.by_status ?? {})
@@ -174,6 +192,9 @@ export class DashboardPage implements OnInit {
       }
       if (this.can('submissions.read')) {
         this.submissionStats.set(await this.submissions.stats(id));
+      }
+      if (this.can('reviews.manage')) {
+        this.reviewProgress.set(await this.reviewsApi.progress(id));
       }
     } catch (error) {
       this.errors.set(errorMessages(this.translate, error));

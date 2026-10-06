@@ -529,7 +529,75 @@ nettoyées à son anonymisation.
 **Vérifications** :
 
 - 2 073 tests backend sous SQLite, 2 080 sous MariaDB. La matrice compte 1 188 cas, dont les
-  7 routes de L4.4 ;
-  le contrôle de réauthentification emploie un profil qui détient la capacité.
+  7 routes de L4.4 ; le contrôle de réauthentification emploie un profil qui détient la
+  capacité.
 - Schéma régénéré sur MariaDB ; client régénéré ; traductions du backend et du portail à
   jour ; front 274 tests.
+
+## 16. Bilan de L4.5 (6 octobre 2026)
+
+**Rubrique « Évaluation » du rail** : nouvelle catégorie entre « Soumissions » et
+« Paramétrage », chaque écran avec sa fiche d'aide et ses mots-clés de recherche.
+
+- Côté relecteur, « Mes évaluations » et « Mes expertises » (`reviews.write`).
+- Côté président, « Pilotage de l'évaluation » (`reviews.manage`) et « Classement et
+  décisions » (`reviews.read_all`).
+- Dans le paramétrage, « Grilles d'évaluation » (lecture `edition.read`, écriture
+  `grids.write`).
+- Le relecteur arrive directement sur « Mes évaluations », la seule catégorie de son rôle.
+
+**Relecteur** :
+
+- **Liste** : échéance et état de chaque évaluation (à faire, brouillon, envoyée, close).
+- **Formulaire**, pour l'évaluation elle-même :
+  - soumission anonymisée et PDF par l'endpoint relecteur ;
+  - grille avec la **note indicative calculée pendant la saisie** (`core/review-score.ts`,
+    même formule que le serveur, qui fait foi) ;
+  - recommandation, confiance, commentaires, signalements ;
+  - enregistrement en brouillon, envoi et renvoi confirmés.
+- **Formulaire**, autour de l'évaluation :
+  - refus motivé, avec conflit facultatif ;
+  - discussion sous pseudonymes ;
+  - auteurs affichés si l'édition n'est pas en double aveugle ;
+  - lecture seule après la décision.
+- **Format suggéré (H5)** : il reste disponible dans l'API mais pas dans le formulaire, car le
+  relecteur n'a pas accès à la liste des types de l'édition.
+
+**Président** :
+
+- **Pilotage** :
+  - avancement par relecteur et par thématique, soumissions divergentes ;
+  - liste filtrable (statut, recherche, relecteurs manquants, retards) ;
+  - fiche de la soumission : recevabilité (motif exigé pour un rejet), affectations
+    (échéance, annulation motivée), candidats avec charge, expertises et conflits ;
+  - un relecteur auteur de la soumission n'a pas de bouton « Affecter » ; un conflit levable
+    exige un motif, et l'intercepteur ouvre la réauthentification ;
+  - conflits déclarés ; évaluations nominatives, divergence et discussion ; décision
+    provisoire, annulation, acceptation depuis la liste d'attente.
+- **Classement** :
+  - simulation de seuil (total, par type, par thématique) et décisions préparées selon le
+    seuil ;
+  - enregistrement en lot, puis publication confirmée ;
+  - export CSV lu par `HttpClient`, pour que la réauthentification soit gérée, puis
+    enregistré côté navigateur.
+- **Grilles** :
+  - liste avec verrouillage et somme des poids affichée pendant la saisie ;
+  - modification, duplication en nouvelle version, suppression, création avec la grille par
+    défaut.
+- **Tableau de bord** : carte « Évaluation » (soumissions en recevabilité, en évaluation et
+  évaluées ; divergences ; retards).
+
+**Vérifications** :
+
+- Front : 109 tests de la gestion. La table de navigation, la redirection du relecteur, la note
+  indicative, chaque écran et la cohérence de l'aide et des traductions sont couverts.
+- Lint, format et build passent. Bundle initial de la gestion : 364,1 kB, contre 360,8 kB ; le
+  dépassement du budget du portail (367,7 kB) est antérieur et inchangé.
+- **Chromium** : parcours complet sur des données réelles, sans erreur dans la console.
+  - Président du CS : affectation de deux relecteurs, recevabilité.
+  - Deux relecteurs : notes en direct (77,00), envoi, divergence de 57 points, discussion.
+  - Président : évaluations nominatives, simulation, décisions en lot, publication.
+  - Grilles : verrou, puis duplication.
+- **Défaut corrigé** : à 375 px, les libellés longs des critères débordaient de 19 px, et les
+  aides des commentaires chevauchaient le champ suivant. Libellés placés au-dessus des champs,
+  aides de hauteur variable : aucun débordement sur les sept écrans de L4.

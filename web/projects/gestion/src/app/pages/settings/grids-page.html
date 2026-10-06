@@ -1,0 +1,162 @@
+<gc-page-header
+  [heading]="'gestion.grids.title' | translate"
+  [lead]="'gestion.grids.lead' | translate"
+/>
+<div aria-live="polite">
+  @if (status()) {
+    <p class="notice" role="status">{{ status() }}</p>
+  }
+</div>
+<gc-error-summary [messages]="errors()" />
+
+@if (!loading()) {
+  @for (grid of grids(); track grid.id) {
+    <section class="card" [attr.aria-labelledby]="'grid-' + grid.id">
+      <h2 [id]="'grid-' + grid.id">
+        {{ grid.name }} — v{{ grid.version }}
+        <span class="badge">{{ typeLabel(grid.submission_type) }}</span>
+        @if (grid.is_locked) {
+          <span class="badge">{{ 'gestion.grids.locked' | translate }}</span>
+        }
+      </h2>
+      <p class="muted">
+        {{ 'gestion.grids.scale' | translate: { min: grid.scale_min, max: grid.scale_max } }}
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">{{ 'gestion.grids.fields.code' | translate }}</th>
+              <th scope="col">{{ 'gestion.grids.fields.label' | translate }}</th>
+              <th scope="col">{{ 'gestion.grids.fields.weight' | translate }}</th>
+              <th scope="col">{{ 'gestion.grids.fields.required' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (criterion of grid.criteria; track criterion.code) {
+              <tr>
+                <td>{{ criterion.code }}</td>
+                <td>{{ criterion.label_fr }}</td>
+                <td>{{ criterion.weight }} %</td>
+                <td>
+                  {{
+                    (criterion.is_required === false
+                      ? 'gestion.grids.optional'
+                      : 'gestion.grids.mandatory'
+                    ) | translate
+                  }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      @if (canWrite()) {
+        <div class="actions">
+          @if (!grid.is_locked) {
+            <button mat-stroked-button type="button" (click)="edit(grid)" [disabled]="busy()">
+              {{ 'gestion.grids.edit' | translate }}
+            </button>
+          }
+          <button mat-button type="button" (click)="duplicate(grid)" [disabled]="busy()">
+            {{ 'gestion.grids.duplicate' | translate }}
+          </button>
+          @if (!grid.is_locked) {
+            <button mat-button type="button" (click)="remove(grid)" [disabled]="busy()">
+              {{ 'gestion.grids.delete.action' | translate }}
+            </button>
+          }
+        </div>
+      }
+      @if (editing()?.id === grid.id) {
+        <form [formGroup]="editForm" (ngSubmit)="save()" novalidate>
+          <div class="grid-2">
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.grids.fields.name' | translate }}</mat-label>
+              <input matInput formControlName="name" required />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.grids.fields.scaleMin' | translate }}</mat-label>
+              <input matInput type="number" formControlName="scale_min" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.grids.fields.scaleMax' | translate }}</mat-label>
+              <input matInput type="number" formControlName="scale_max" />
+            </mat-form-field>
+          </div>
+          <div formArrayName="criteria">
+            @for (criterion of criteria.controls; track criterion; let i = $index) {
+              <div class="criterion" [formGroupName]="i">
+                <mat-form-field appearance="outline">
+                  <mat-label>{{ 'gestion.grids.fields.code' | translate }}</mat-label>
+                  <input matInput formControlName="code" required />
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>{{ 'gestion.grids.fields.labelFr' | translate }}</mat-label>
+                  <input matInput formControlName="label_fr" required />
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>{{ 'gestion.grids.fields.labelEn' | translate }}</mat-label>
+                  <input matInput formControlName="label_en" />
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>{{ 'gestion.grids.fields.weight' | translate }}</mat-label>
+                  <input matInput type="number" step="0.01" formControlName="weight" required />
+                </mat-form-field>
+                <mat-checkbox formControlName="is_required">{{
+                  'gestion.grids.mandatory' | translate
+                }}</mat-checkbox>
+                <button mat-button type="button" (click)="removeCriterion(i)">
+                  {{ 'gestion.grids.removeCriterion' | translate }}
+                </button>
+              </div>
+            }
+          </div>
+          <p aria-live="polite" [class.ko]="total() !== 100" [class.ok]="total() === 100">
+            {{ 'gestion.grids.total' | translate: { total: total() } }}
+          </p>
+          <div class="actions">
+            <button mat-button type="button" (click)="addCriterion()">
+              {{ 'gestion.grids.addCriterion' | translate }}
+            </button>
+            <button mat-flat-button type="submit" [disabled]="busy()">
+              {{ 'gestion.grids.save' | translate }}
+            </button>
+            <button mat-button type="button" (click)="editing.set(null)">
+              {{ 'gestion.followUp.close' | translate }}
+            </button>
+          </div>
+        </form>
+      }
+    </section>
+  } @empty {
+    <p class="muted">{{ 'gestion.grids.empty' | translate }}</p>
+  }
+
+  @if (canWrite()) {
+    <form [formGroup]="createForm" (ngSubmit)="create()" novalidate class="card">
+      <h2>{{ 'gestion.grids.create.title' | translate }}</h2>
+      <p class="muted">{{ 'gestion.grids.create.lead' | translate }}</p>
+      <div class="grid-2">
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'gestion.grids.fields.name' | translate }}</mat-label>
+          <input matInput formControlName="name" required />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'gestion.grids.fields.type' | translate }}</mat-label>
+          <mat-select formControlName="submission_type">
+            <mat-option value="">{{ 'gestion.grids.allTypes' | translate }}</mat-option>
+            @for (type of types(); track type.id) {
+              <mat-option [value]="type.code">{{ type.code }} — {{ type.label_fr }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="actions">
+        <button mat-flat-button type="submit" [disabled]="busy()">
+          {{ 'gestion.grids.create.submit' | translate }}
+        </button>
+      </div>
+    </form>
+  }
+}

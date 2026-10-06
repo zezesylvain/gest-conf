@@ -14,7 +14,18 @@ class Blank {}
 
 const ROUTES: Routes = [{ path: '**', component: Blank }];
 
-async function render(edition: MeEdition = CHAIR_EDITION) {
+/** Toutes les capacités des écrans du rail : la recherche les liste tous. */
+const EVERY_SCREEN: MeEdition = {
+  ...CHAIR_EDITION,
+  capabilities: [
+    ...new Set([
+      ...CHAIR_EDITION.capabilities,
+      ...SCREENS.flatMap((screen) => (screen.capability ? [screen.capability] : [])),
+    ]),
+  ],
+};
+
+async function render(edition: MeEdition = EVERY_SCREEN) {
   TestBed.configureTestingModule({
     imports: [ScreenSearch],
     providers: provideGestionTesting([edition], ROUTES),
@@ -67,8 +78,10 @@ describe('ScreenSearch', () => {
     const { type, options } = await render();
     await type('parametrage');
     expect(options()[0]).toBe('Informations générales');
-    await type('relecteur');
+    await type('anonymat');
     expect(options()).toEqual(['Confidentialité']);
+    await type('relecteur');
+    expect(options()[0]).toBe('Mes évaluations');
   });
 
   it('Entrée sans toucher aux flèches ouvre le premier résultat', async () => {
