@@ -54,3 +54,29 @@ def option(edition, code: str = "diner", **fields) -> RegistrationOption:
     fields.setdefault("price_local", Decimal("10000"))
     fields.setdefault("price_international", Decimal("20000"))
     return RegistrationOption.objects.create(edition=edition, code=code, **fields)
+
+
+def participant_user(country: str = "CI", **profile):
+    """Compte vérifié avec un profil (pays obligatoire pour le tarif)."""
+    from apps.accounts.models import Profile
+    from apps.accounts.tests.factories import VerifiedUserFactory
+
+    user = VerifiedUserFactory()
+    profile.setdefault("first_name", "Awa")
+    profile.setdefault("last_name", "Zadi")
+    Profile.objects.create(user=user, country=country, **profile)
+    return user
+
+
+def complete_billing(edition, **fields):
+    """Mentions de facturation complètes (J8)."""
+    from apps.payments.services.billing import billing_profile
+
+    profile = billing_profile(edition)
+    profile.legal_name = fields.pop("legal_name", "Association GEST-CONF")
+    profile.address = fields.pop("address", "Cocody, Abidjan, Côte d'Ivoire")
+    profile.bank_details = fields.pop("bank_details", "IBAN CI00 0000 0000")
+    for name, value in fields.items():
+        setattr(profile, name, value)
+    profile.save()
+    return profile

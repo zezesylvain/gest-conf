@@ -2,7 +2,7 @@
 
 from django.urls import path
 
-from apps.registrations import views
+from apps.registrations import manage_views, views
 
 app_name = "registrations"
 
@@ -49,6 +49,52 @@ urlpatterns = [
         views.PromoCodeViewSet.as_view({"patch": "partial_update", "delete": "destroy"}),
         name="manage-registration-promo-code",
     ),
+    path(
+        f"{E}/registrations",
+        manage_views.RegistrationListViewSet.as_view({"get": "list", "post": "create"}),
+        name="manage-registrations",
+    ),
+    path(
+        f"{E}/registrations/<int:item_id>",
+        manage_views.RegistrationDetailViewSet.as_view({"get": "retrieve"}),
+        name="manage-registration",
+    ),
+    path(
+        f"{E}/registrations/<int:item_id>/cancel",
+        manage_views.RegistrationDetailViewSet.as_view({"post": "cancel"}),
+        name="manage-registration-cancel",
+    ),
+    path(
+        f"{E}/registrations/<int:item_id>/waive",
+        manage_views.RegistrationDetailViewSet.as_view({"post": "waive"}),
+        name="manage-registration-waive",
+    ),
+    path(
+        f"{E}/registrations/<int:item_id>/proof",
+        manage_views.RegistrationDetailViewSet.as_view({"get": "proof"}),
+        name="manage-registration-proof",
+    ),
     path("public/registration", views.PublicRegistrationView.as_view(), name="public-registration"),
+    path("registrations", views.MyRegistrationsView.as_view(), name="registrations"),
     path("registrations/quote", views.QuoteView.as_view(), name="registration-quote"),
+    path(
+        "registrations/<int:registration_id>",
+        views.MyRegistrationView.as_view(),
+        name="registration",
+    ),
+    path(
+        "registrations/<int:registration_id>/cancel",
+        views.MyRegistrationCancelView.as_view(),
+        name="registration-cancel",
+    ),
+    path(
+        "registrations/<int:registration_id>/proof",
+        views.MyRegistrationProofView.as_view(),
+        name="registration-proof",
+    ),
+    path(
+        "registrations/<int:registration_id>/qr",
+        views.MyRegistrationQrView.as_view(),
+        name="registration-qr",
+    ),
 ]

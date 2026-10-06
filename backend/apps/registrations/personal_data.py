@@ -5,8 +5,9 @@ L6, J14).
   de facturation) et leur historique.
 - **Anonymisation** : refusée tant que la personne a une inscription en attente ou confirmée
   dans une édition non archivée (``registration_duties``) : elle l'annule d'abord, ou attend
-  l'archivage. Ensuite : identité de facturation et jeton QR effacés ; l'inscription reste
-  (statistiques, rattachement des factures, que ``apps.payments`` conserve, J14).
+  l'archivage. Ensuite : identité de facturation, jeton QR et justificatif (fichier compris)
+  effacés ; l'inscription reste (statistiques, rattachement des factures, que
+  ``apps.payments`` conserve, J14).
 """
 
 from __future__ import annotations
@@ -58,6 +59,8 @@ def _export(user) -> dict[str, Any]:
                 "billing_name": row.billing_name,
                 "billing_organization": row.billing_organization,
                 "billing_address": row.billing_address,
+                "proof": row.proof_original_name,
+                "proof_uploaded_at": _iso(row.proof_uploaded_at),
                 "created_at": _iso(row.created_at),
                 "confirmed_at": _iso(row.confirmed_at),
                 "history": [
@@ -76,8 +79,20 @@ def _export(user) -> dict[str, Any]:
 
 
 def _anonymize(user, context: AnonymizationContext) -> None:
-    Registration.objects.filter(user=user).update(
-        billing_name="", billing_organization="", billing_address="", qr_token=None
+    from apps.registrations.services.orders import PROOFS
+
+    rows = Registration.objects.filter(user=user)
+    for name in rows.exclude(proof_storage_name="").values_list("proof_storage_name", flat=True):
+        PROOFS.remove_after_commit(name)
+    rows.update(
+        billing_name="",
+        billing_organization="",
+        billing_address="",
+        qr_token=None,
+        proof_storage_name="",
+        proof_original_name="",
+        proof_kind="",
+        proof_size=0,
     )
 
 

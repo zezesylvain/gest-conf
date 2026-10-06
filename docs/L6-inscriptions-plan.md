@@ -516,3 +516,124 @@ et `already_registered` (utilisé en L6.3), traduits côté serveur et dans le f
 
 **Énumérations nommées du schéma** : `Currency`, `Period`, `Zone`, `PaymentMethod`,
 `DiscountKind`, `DiscountScope`, `LineKind`.
+
+## 14. Bilan de L6.3 (6 octobre 2026)
+
+**Workflow (J5)** : `apps/registrations/workflow.py` est le **seul** module qui écrit le
+statut d'une inscription (méta-test, comme pour les soumissions).
+
+| De | Vers | Effets |
+|---|---|---|
+| en attente | confirmée | jeton QR (192 bits), utilisation du code promo consommée |
+| en attente | annulée ou expirée | places et utilisation du code rendues |
+| confirmée | annulée | places rendues, jeton QR retiré, remboursement dû |
+
+Chaque transition est verrouillée, inscrite à l'historique (en ajout seul) et au journal, et
+envoie un e-mail : commande enregistrée, confirmée, annulée, expirée. Les objets ne
+contiennent que le nom du site ; ni facture ni QR en pièce jointe, seulement un lien vers
+« Mon inscription » (J11).
+
+**Commande (`services/orders.py`)** :
+
+- **Prix figé** et réservations dans la même transaction ; une seule inscription active par
+  personne (409 `already_registered`, doublé par la contrainte d'unicité) ; pays du profil
+  obligatoire.
+- **Moyens** : seulement ceux que l'édition propose. Le CO peut tout choisir et inscrire
+  après la clôture, au tarif « sur place » (J2). Montant nul : confirmée aussitôt, moyen
+  « aucun paiement ».
+- **Échéances** :
+  - 72 h en ligne, 30 jours par virement, **sans dépasser la veille de la conférence** ; un
+    moyen devenu impossible est refusé ;
+  - sur place : fin de la conférence.
+- **Identité de facturation** : préremplie depuis le profil (nom, institution),
+  modifiable jusqu'à la facture (409 ensuite).
+- **Justificatif** (catégorie qui l'exige) :
+  - PDF, JPEG ou PNG, **type vérifié par contenu**, 5 Mo au plus ;
+  - stocké hors racine web (`apps/core/private_files.py`, stockage privé générique,
+    orphelins purgés par `cleanup`).
+  - Il n'est pas exigé avant le paiement : le CO le voit et peut annuler.
+- **Annulation (J9)** :
+  - par le participant : toujours pour une commande en attente ; une fois confirmée,
+    jusqu'à la date limite de l'édition (sans date, par le CO seulement) ;
+  - par le CO : motif obligatoire, part remboursée selon les règles ou fixée par lui ;
+  - le **remboursement dû** est calculé sur le payé et arrondi à la devise.
+- **Gratuité (J4)** : ligne « Gratuité » égale au total, moyen `waiver`, motif journalisé,
+  confirmation.
+- **Expiration** : `expire_registrations` (cron horaire, idempotente, verrouillée). Elle
+  crée aussi les compteurs de facturation de l'année, hors contention.
+
+**Paiement manuel (J7)** : `POST …/registrations/{id}/payments`, avec
+`registrations.manage` et réauthentification.
+
+- Montant **égal** au total (paiement partiel : P3), date de réception non future, référence
+  du virement.
+- Il confirme l'inscription et émet la facture.
+
+**Pièces (J8, RG-14)** : `apps/payments/services/documents.py` et `pdf.py`.
+
+- **Numérotation sans trou** par (édition, nature, année d'émission dans le fuseau de
+  l'édition), avec le compteur verrouillé de L3.
+- **Numéro** `<préfixe>-<code de l'édition>-<année>-<rang>` (« F-GC27-2027-00001 »).
+  Écart avec l'exemple du plan (« F2027-00001 ») : le code de l'édition rend le numéro
+  unique quand deux éditions facturent la même année, par exemple les inscriptions de
+  l'édition suivante ouvertes en fin d'année. **À valider avec Q8** : si une même entité
+  facture toutes les éditions, la loi peut exiger une série unique pour la plateforme.
+- **Facture** :
+  - émise au paiement, valant reçu (« acquittée », date, moyen, référence) ;
+  - **une par inscription** (idempotente) ;
+  - sans mentions de facturation : aucune facture, puis émission groupée
+    (`…/billing/documents/issue-pending`, réauthentification).
+- **Pro forma** : émise d'office à la commande (virement ou sur place, si les mentions sont
+  complètes), ou à la demande. Elle porte « document non comptable », l'échéance, les
+  coordonnées bancaires et la référence à rappeler.
+- **Avoir** : à l'enregistrement d'un remboursement fait hors plateforme (inscription
+  annulée), dans sa propre série, lié à sa facture ; jamais plus que le facturé non encore
+  crédité.
+- **PDF** :
+  - libellés bilingues ; lignes figées ; TVA décomposée si un taux est paramétré, sinon la
+    mention de TVA ;
+  - police DejaVu Sans versionnée (`apps/payments/fonts/`, provenance et empreintes
+    consignées) ;
+  - **sortie identique** pour des données identiques ;
+  - empreinte SHA-256 contrôlée **à chaque téléchargement** et par `check_integrity`.
+- Les pièces sont en ajout seul (ni modification ni suppression).
+
+**Contrôles d'intégrité** :
+
+- `registrations.totals` : total égal à la somme des lignes ; confirmée payée, offerte ou
+  gratuite ;
+- `registrations.reservations` : places et utilisations de codes cohérentes ;
+- `billing.series` : séries continues ;
+- `billing.files` : PDF présents et intacts.
+
+**Routes** :
+
+| Qui | Routes |
+|---|---|
+| Participant | `GET/POST /v1/registrations` ; `GET/PATCH …/{id}` ; `POST …/{id}/cancel` ; `POST …/{id}/proof` ; `GET …/{id}/qr` (SVG produit par `segno`, jeton jamais dans une URL ni dans le JSON) ; `GET …/{id}/documents/{doc}` ; `POST …/{id}/proforma` |
+| Gestion, inscriptions | `…/registrations` (liste filtrable et paginée, saisie par le CO) ; `…/{id}` ; `…/{id}/cancel` ; `…/{id}/waive` ; `…/{id}/proof` |
+| Gestion, finances | `…/{id}/payments` et `…/{id}/refunds` (réauthentification) ; `…/{id}/proforma` ; `…/{id}/documents/{doc}` ; `…/billing/documents` (`finance.read`) ; `…/billing/documents/issue-pending` |
+
+Limites de débit : 60 commandes et 30 justificatifs par heure et par compte.
+
+**Dépendances** : `fpdf2` 2.8.9 (et `fonttools`, `defusedxml`) et `segno` 1.6.6, verrouillés
+avec empreintes ; installation à blanc vérifiée sous Python 3.13. Journaux INFO de
+`fontTools` coupés (une dizaine de lignes par PDF).
+
+**Dépendances entre applications** : `registrations` ne dépend pas de `payments`. La pro
+forma d'une commande passe par un effet déclaré (`register_order_effect`), comme les
+gardes du workflow des soumissions en L4.
+
+**Matrice** :
+
+- 2 195 cas, CO « finances » et « secrétariat » compris.
+- Objets d'inscription créés **à la demande** (`LazyIds`) et PDF remplacé par un PDF minimal :
+  la matrice teste les droits, les PDF sont testés dans `apps.payments`. Durée : environ
+  4 minutes.
+
+**Reporté** :
+
+- vers L6.4 : paiement en ligne (initiation, webhook, interrogation du statut, `sync_payments`)
+  et RG-11 ;
+- vers L7 : inscription sur place au comptoir pour une personne **sans compte**. Le CO
+  n'inscrit ici que des comptes existants.

@@ -63,6 +63,14 @@ class LineKind(models.TextChoices):
     DISCOUNT = "discount", _("remise")
 
 
+# Moyens qu'un participant (ou le CO) choisit à la commande ; ``free`` et ``waiver`` sont
+# attribués par le serveur.
+ORDER_METHOD_CHOICES = [
+    (method.value, method.label)
+    for method in (PaymentMethod.ONLINE, PaymentMethod.TRANSFER, PaymentMethod.ONSITE)
+]
+
+
 # --- Paramètres de l'édition (J2, J5, J9) -----------------------------------------------------
 
 
@@ -423,6 +431,16 @@ class Registration(TimeStampedModel):
         _("organisme de facturation"), max_length=255, blank=True, default=""
     )
     billing_address = models.TextField(_("adresse de facturation"), blank=True, default="")
+    # Justificatif (catégorie qui l'exige, J2) : fichier privé, type vérifié par contenu.
+    proof_storage_name = models.CharField(_("justificatif"), max_length=64, blank=True, default="")
+    proof_original_name = models.CharField(
+        _("nom du justificatif"), max_length=255, blank=True, default=""
+    )
+    proof_kind = models.CharField(_("type du justificatif"), max_length=8, blank=True, default="")
+    proof_size = models.PositiveIntegerField(_("taille du justificatif"), default=0)
+    proof_uploaded_at = models.DateTimeField(_("justificatif déposé le"), null=True, blank=True)
+    # Annulation d'une inscription payée (J9) : montant à rembourser hors plateforme.
+    refund_due = money_field(_("remboursement dû"), null=True, blank=True)
     qr_token = models.CharField(_("jeton QR"), max_length=64, null=True, blank=True, unique=True)
     active_key = models.CharField(
         _("clé d'unicité active"), max_length=64, null=True, blank=True, unique=True
@@ -472,6 +490,11 @@ class Registration(TimeStampedModel):
     @staticmethod
     def make_active_key(edition_id: int, user_id: int) -> str:
         return f"{edition_id}:{user_id}"
+
+    @property
+    def reference(self) -> str:
+        """Référence affichée (« GC27-I00042 ») : édition et rang de l'inscription."""
+        return f"{self.edition.code}-I{self.pk:05d}"
 
 
 class RegistrationStatusHistory(AppendOnlyModel):

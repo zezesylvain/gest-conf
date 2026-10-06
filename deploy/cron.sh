@@ -8,6 +8,7 @@
 #   13 * * * *   $HOME/gestconf-app/deploy/cron.sh remind_drafts
 #   19 * * * *   $HOME/gestconf-app/deploy/cron.sh remind_reviewers
 #   23 * * * *   $HOME/gestconf-app/deploy/cron.sh remind_presentations
+#   37 * * * *   $HOME/gestconf-app/deploy/cron.sh expire_registrations
 #   17 3 * * *   $HOME/gestconf-app/deploy/cron.sh cleanup
 #   47 3 * * *   $HOME/gestconf-app/deploy/cron.sh check_integrity
 #
@@ -24,7 +25,7 @@ command="${1:?Usage : $0 <commande> [options]}"
 # Liste fermée : ce script n'est pas un accès générique à manage.py.
 case "$command" in
   run_jobs | close_call | remind_drafts | remind_reviewers | remind_presentations | cleanup | \
-    check_integrity) ;;
+    check_integrity | expire_registrations) ;;
   *)
     echo "Commande non planifiable : $command" >&2
     exit 2

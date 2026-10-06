@@ -318,6 +318,8 @@ REST_FRAMEWORK = {
         "submission_submit": "20/hour",
         # Inscriptions (plan L6) : devis, par compte.
         "registration_quote": "300/hour",
+        "registration_write": "60/hour",  # commandes
+        "registration_upload": "30/hour",  # justificatifs
     },
     "NUM_PROXIES": GESTCONF_TRUSTED_PROXY_COUNT,
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
@@ -356,6 +358,10 @@ SPECTACULAR_SETTINGS = {
         "DiscountKind": "apps.registrations.models.DiscountKind",
         "DiscountScope": "apps.registrations.models.DiscountScope",
         "LineKind": "apps.registrations.models.LineKind",
+        "RegistrationStatus": "apps.registrations.models.RegistrationStatus",
+        "OrderMethod": "apps.registrations.models.ORDER_METHOD_CHOICES",
+        "ManualPaymentMethod": "apps.payments.models.MANUAL_METHOD_CHOICES",
+        "DocumentKind": "apps.payments.models.DocumentKind",
         "InvitableRole": "apps.accounts.roles.InvitableRole",
         "OcFunction": "apps.accounts.roles.OcFunction",
         "UserRoleStatus": "apps.accounts.models.UserRoleStatus",
@@ -490,5 +496,8 @@ LOGGING = {
             "level": "INFO",
             "propagate": False,
         },
+        # Sous-ensemble de police à chaque PDF (fpdf2, plan L6) : une dizaine de lignes INFO
+        # par facture, sans intérêt pour l'exploitation.
+        "fontTools": {"level": "WARNING"},
     },
 }

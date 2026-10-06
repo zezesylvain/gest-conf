@@ -87,6 +87,12 @@ class BillingProfile(TimeStampedModel):
 # --- Paiements (J6, J7, RG-15) ----------------------------------------------------------------
 
 
+# Moyens d'un paiement validé à la main par le CO (J7).
+MANUAL_METHOD_CHOICES = [
+    (method.value, method.label) for method in (PaymentMethod.TRANSFER, PaymentMethod.ONSITE)
+]
+
+
 class Provider(models.TextChoices):
     MANUAL = "manual", _("paiement manuel")
     FAKE = "fake", _("fournisseur factice")
@@ -323,6 +329,8 @@ class Refund(TimeStampedModel):
     recorded_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_("enregistré par"),
+        null=True,
+        blank=True,
         on_delete=models.RESTRICT,
         related_name="+",
     )

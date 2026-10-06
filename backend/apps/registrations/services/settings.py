@@ -18,6 +18,7 @@ from apps.core.errors import ErrorCode, Invalid, RuleViolation
 from apps.core.money import is_exact
 from apps.registrations.models import (
     Fee,
+    PaymentMethod,
     Registration,
     RegistrationOption,
     RegistrationSettings,
@@ -56,6 +57,18 @@ def zone_for(edition: Edition, settings: RegistrationSettings, country: str) -> 
         if country and country in local_countries(edition, settings)
         else (Zone.INTERNATIONAL)
     )
+
+
+def offered_methods(settings: RegistrationSettings) -> list[str]:
+    """Moyens de paiement proposés aux participants (J6, J7), dans un ordre fixe."""
+    methods = []
+    if settings.online_enabled:
+        methods.append(PaymentMethod.ONLINE)
+    if settings.transfer_enabled:
+        methods.append(PaymentMethod.TRANSFER)
+    if settings.onsite_enabled:
+        methods.append(PaymentMethod.ONSITE)
+    return methods
 
 
 def _validate_countries(value: Any) -> list[str]:

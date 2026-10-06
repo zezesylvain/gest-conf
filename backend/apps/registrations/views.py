@@ -8,10 +8,13 @@ paramètres et tarifs ``pricing.write`` (J1). Chaque écriture passe par un serv
 from __future__ import annotations
 
 from django.db.models import Count, Prefetch
-from django.http import Http404
+from django.http import Http404, HttpResponse
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
+from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -21,26 +24,32 @@ from apps.accounts.models import Profile
 from apps.accounts.permissions import ManageViewSet
 from apps.accounts.roles import Capability as C
 from apps.core.actor import Actor
-from apps.core.errors import ErrorCode, RuleViolation
+from apps.core.errors import ErrorCode, Invalid, RuleViolation
 from apps.registrations.models import (
     Fee,
-    PaymentMethod,
     PromoCode,
+    Registration,
     RegistrationCategory,
     RegistrationOption,
+    RegistrationStatus,
 )
 from apps.registrations.serializers import (
     PERIODS,
+    BillingIdentitySerializer,
     CategorySerializer,
     FeeGridSerializer,
+    MyRegistrationSerializer,
     OptionSerializer,
+    OrderSerializer,
     PromoCodeSerializer,
+    ProofUploadSerializer,
     PublicRegistrationSerializer,
     QuoteRequestSerializer,
     QuoteSerializer,
     RegistrationSettingsSerializer,
+    registration_data,
 )
-from apps.registrations.services import pricing
+from apps.registrations.services import orders, pricing
 from apps.registrations.services import settings as registration_settings
 
 
@@ -250,18 +259,6 @@ def _current_edition():
     return edition
 
 
-def offered_methods(settings) -> list[str]:
-    """Moyens de paiement proposés aux participants (J6, J7), dans un ordre fixe."""
-    methods = []
-    if settings.online_enabled:
-        methods.append(PaymentMethod.ONLINE)
-    if settings.transfer_enabled:
-        methods.append(PaymentMethod.TRANSFER)
-    if settings.onsite_enabled:
-        methods.append(PaymentMethod.ONSITE)
-    return methods
-
-
 def public_registration(edition) -> dict:
     settings = registration_settings.registration_settings(edition)
     window = pricing.registration_window(edition)
@@ -281,7 +278,7 @@ def public_registration(edition) -> dict:
         "opens_at": window.opens_at,
         "early_bird_end": window.early_bird_end,
         "closes_at": window.closes_at,
-        "methods": offered_methods(settings),
+        "methods": registration_settings.offered_methods(settings),
         "local_countries": sorted(registration_settings.local_countries(edition, settings)),
         "categories": [
             {
@@ -381,3 +378,184 @@ class QuoteView(APIView):
                 }
             ).data
         )
+
+
+# --- « Mon inscription » (J13) : le titulaire seul ------------------------------------------------
+
+
+def my_registration_data(registration: Registration) -> dict:
+    data = registration_data(registration)
+    settings = registration_settings.registration_settings(registration.edition)
+    deadline = settings.cancellation_deadline
+    now = timezone.now()
+    confirmed_cancellable = (
+        registration.status == RegistrationStatus.CONFIRMED
+        and deadline is not None
+        and now < deadline
+    )
+    data["can_cancel"] = registration.status == RegistrationStatus.PENDING or confirmed_cancellable
+    data["refund_percent"] = settings.refund_percent_before if confirmed_cancellable else None
+    data["cancellation_deadline"] = deadline
+    return data
+
+
+def _mine(request: Request):
+    return (
+        Registration.objects.filter(user=request.user)
+        .select_related("edition", "category")
+        .prefetch_related("billing_documents", "payments")
+    )
+
+
+class MyRegistrationsView(APIView):
+    """``GET /v1/registrations`` : inscriptions du compte, la plus récente d'abord ;
+    ``POST`` : commande pour l'édition courante (J5)."""
+
+    permission_classes = (IsAuthenticated,)
+    throttle_scope = "registration_write"
+
+    def get_throttles(self):
+        return super().get_throttles() if self.request.method == "POST" else []
+
+    @extend_schema(
+        operation_id="registrations_list", responses={200: MyRegistrationSerializer(many=True)}
+    )
+    def get(self, request: Request) -> Response:
+        rows = _mine(request).order_by("-created_at", "-id")
+        return Response(
+            MyRegistrationSerializer([my_registration_data(r) for r in rows], many=True).data
+        )
+
+    @extend_schema(
+        operation_id="registrations_order",
+        request=OrderSerializer,
+        responses={201: MyRegistrationSerializer},
+    )
+    def post(self, request: Request) -> Response:
+        serializer = OrderSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = dict(serializer.validated_data)
+        billing = {name: data.pop(name) for name in orders.BILLING_FIELDS if name in data}
+        registration = orders.place_order(
+            _current_edition(),
+            request.user,
+            billing=billing,
+            actor=Actor.from_request(request),
+            **data,
+        )
+        return Response(
+            MyRegistrationSerializer(
+                my_registration_data(_mine(request).get(pk=registration.pk))
+            ).data,
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class _MyRegistrationView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def registration(self, request: Request, registration_id: int) -> Registration:
+        found = _mine(request).filter(pk=registration_id).first()
+        if found is None:
+            raise Http404
+        return found
+
+    def respond(self, request: Request, registration_id: int) -> Response:
+        return Response(
+            MyRegistrationSerializer(
+                my_registration_data(self.registration(request, registration_id))
+            ).data
+        )
+
+
+class MyRegistrationView(_MyRegistrationView):
+    """``GET /v1/registrations/{id}`` ; ``PATCH`` : identité de facturation (jusqu'à la
+    facture)."""
+
+    @extend_schema(operation_id="registrations_retrieve", responses={200: MyRegistrationSerializer})
+    def get(self, request: Request, registration_id: int) -> Response:
+        return self.respond(request, registration_id)
+
+    @extend_schema(
+        operation_id="registrations_billing",
+        request=BillingIdentitySerializer,
+        responses={200: MyRegistrationSerializer},
+    )
+    def patch(self, request: Request, registration_id: int) -> Response:
+        registration = self.registration(request, registration_id)
+        serializer = BillingIdentitySerializer(data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        orders.update_billing(
+            registration, serializer.validated_data, actor=Actor.from_request(request)
+        )
+        return self.respond(request, registration_id)
+
+
+class MyRegistrationCancelView(_MyRegistrationView):
+    """``POST /v1/registrations/{id}/cancel`` : annulation par le titulaire (J9)."""
+
+    @extend_schema(
+        operation_id="registrations_cancel", request=None, responses={200: MyRegistrationSerializer}
+    )
+    def post(self, request: Request, registration_id: int) -> Response:
+        orders.cancel_by_participant(
+            self.registration(request, registration_id), actor=Actor.from_request(request)
+        )
+        return self.respond(request, registration_id)
+
+
+class MyRegistrationProofView(_MyRegistrationView):
+    """``POST /v1/registrations/{id}/proof`` : justificatif (catégorie qui l'exige, J2)."""
+
+    parser_classes = (MultiPartParser,)
+    throttle_scope = "registration_upload"
+
+    @extend_schema(
+        operation_id="registrations_proof",
+        request={"multipart/form-data": ProofUploadSerializer},
+        responses={200: MyRegistrationSerializer},
+    )
+    def post(self, request: Request, registration_id: int) -> Response:
+        registration = self.registration(request, registration_id)
+        serializer = ProofUploadSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        upload = serializer.validated_data["file"]
+        if upload.size > orders.PROOF_MAX_BYTES:
+            raise Invalid(fields={"file": [_("Fichier de 5 Mo au plus.")]})
+        orders.upload_proof(
+            registration,
+            data=upload.read(),
+            name=upload.name or "",
+            actor=Actor.from_request(request),
+        )
+        return self.respond(request, registration_id)
+
+
+class MyRegistrationQrView(_MyRegistrationView):
+    """``GET /v1/registrations/{id}/qr`` : QR d'accès (J11), SVG produit par ``segno`` ;
+    inscription confirmée seulement. Le jeton n'est jamais dans une URL."""
+
+    @extend_schema(
+        operation_id="registrations_qr", responses={(200, "image/svg+xml"): OpenApiTypes.BINARY}
+    )
+    def get(self, request: Request, registration_id: int) -> HttpResponse:
+        registration = self.registration(request, registration_id)
+        if not registration.qr_token:
+            raise Http404
+        return qr_response(registration.qr_token)
+
+
+def qr_response(token: str) -> HttpResponse:
+    import io
+
+    import segno
+
+    buffer = io.BytesIO()
+    segno.make(token, error="m", micro=False).save(
+        buffer, kind="svg", scale=6, border=4, xmldecl=False
+    )
+    response = HttpResponse(buffer.getvalue(), content_type="image/svg+xml")
+    response["X-Content-Type-Options"] = "nosniff"
+    response["Cache-Control"] = "private, no-store"
+    response["Content-Security-Policy"] = "default-src 'none'; style-src 'unsafe-inline'"
+    return response

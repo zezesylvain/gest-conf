@@ -173,7 +173,7 @@ CASES = [
         "DELETE",
         PRW,
         204,
-        "/v1/manage/editions/{e}/registrations/categories/{reg_category}",
+        "/v1/manage/editions/{e}/registrations/categories/{reg_free_category}",
     ),
     Case(
         "manage-registration-category-fees",
@@ -242,6 +242,88 @@ CASES = [
         PRW,
         204,
         "/v1/manage/editions/{e}/registrations/promo-codes/{reg_promo}",
+    ),
+    # Plan L6 (L6.3) : inscriptions (lecture registrations.read, actions registrations.manage),
+    # paiements manuels, remboursements et factures en attente avec réauthentification (J1).
+    Case("manage-registrations", "GET", RGR, 200, "/v1/manage/editions/{e}/registrations"),
+    Case(
+        "manage-registrations",
+        "POST",
+        RGM,
+        201,
+        "/v1/manage/editions/{e}/registrations",
+        lambda ids: {"email": ids["reg_newcomer"], "category": "etudiant", "method": "onsite"},
+    ),
+    Case(
+        "manage-registration",
+        "GET",
+        RGR,
+        200,
+        "/v1/manage/editions/{e}/registrations/{reg_pending}",
+    ),
+    Case(
+        "manage-registration-cancel",
+        "POST",
+        RGM,
+        200,
+        "/v1/manage/editions/{e}/registrations/{reg_pending}/cancel",
+        {"reason": "Matrice"},
+    ),
+    Case(
+        "manage-registration-waive",
+        "POST",
+        RGM,
+        200,
+        "/v1/manage/editions/{e}/registrations/{reg_pending}/waive",
+        {"reason": "Matrice"},
+    ),
+    Case(
+        "manage-registration-proof",
+        "GET",
+        RGR,
+        200,
+        "/v1/manage/editions/{e}/registrations/{reg_pending}/proof",
+    ),
+    Case(
+        "manage-registration-payments",
+        "POST",
+        RGM,
+        201,
+        "/v1/manage/editions/{e}/registrations/{reg_pending}/payments",
+        lambda ids: {"method": "transfer", "amount": "2000", "received_on": ids["today"]},
+        recent_auth=True,
+    ),
+    Case(
+        "manage-registration-refunds",
+        "POST",
+        RGM,
+        201,
+        "/v1/manage/editions/{e}/registrations/{reg_cancelled}/refunds",
+        lambda ids: {"amount": "2000", "method": "Virement", "refunded_on": ids["today"]},
+        recent_auth=True,
+    ),
+    Case(
+        "manage-registration-proforma",
+        "POST",
+        RGM,
+        201,
+        "/v1/manage/editions/{e}/registrations/{reg_pending}/proforma",
+    ),
+    Case(
+        "manage-registration-document",
+        "GET",
+        RGR,
+        200,
+        "/v1/manage/editions/{e}/registrations/{reg_paid}/documents/{reg_invoice}",
+    ),
+    Case("manage-billing-documents", "GET", FIR, 200, "/v1/manage/editions/{e}/billing/documents"),
+    Case(
+        "manage-billing-issue-pending",
+        "POST",
+        RGM,
+        200,
+        "/v1/manage/editions/{e}/billing/documents/issue-pending",
+        recent_auth=True,
     ),
     Case("manage-billing-profile", "GET", FIR, 200, "/v1/manage/editions/{e}/billing/profile"),
     Case(
@@ -932,6 +1014,13 @@ MATRIX = [
 ]
 
 
+@pytest.fixture(autouse=True)
+def _cheap_pdf(monkeypatch):
+    """La matrice teste les droits, pas les PDF (testés dans ``apps.payments``) : un PDF
+    minimal évite le coût du sous-ensemble de police à chaque pièce émise."""
+    monkeypatch.setattr("apps.payments.pdf.render", lambda data: b"%PDF-1.7\n%%EOF\n")
+
+
 @pytest.fixture
 def world():
     """Édition complète (publiable) avec un membre de chaque rôle et les objets visés. Sans
@@ -1002,32 +1091,42 @@ def world():
     grid = create_grid(edition, name="Grille", actor=Actor.command("cli:matrice"))
     review_submission, reviewer, assignment = _review_objects(edition)
     reviewing = _reviewer_objects(edition, users)
-    ids = {
-        **reviewing,
-        **_program_objects(edition, users),
-        **_registration_objects(edition),
-        "track_code": track.code,
-        "grid": grid.pk,
-        "review_submission": review_submission.pk,
-        "reviewer": reviewer.pk,
-        "assignment": assignment.pk,
-        "submission": submission.pk,
-        "submission_file": submission_file.pk,
-        "extension": extension.pk,
-        "file": document.pk,
-        "image": image.pk,
-        "section": section.pk,
-        "placed_section": placed.pk,
-        "page": page.pk,
-        "menu": header_menu[0],
-        "header_menu": header_menu,
-        "e": edition.pk,
-        "track": track.pk,
-        "type": submission_type.pk,
-        "date": key_date.pk,
-        "role": target_role.pk,
-        "invitation": invitation.pk,
-    }
+    # Mentions de facturation complètes (plan L6, J8) : les pièces peuvent s'émettre.
+    from apps.payments.services.billing import billing_profile
+
+    profile = billing_profile(edition)
+    profile.legal_name, profile.address = "Association matrice", "Abidjan"
+    profile.save()
+    ids = LazyIds(
+        {
+            **reviewing,
+            **_program_objects(edition, users),
+            "track_code": track.code,
+            "grid": grid.pk,
+            "review_submission": review_submission.pk,
+            "reviewer": reviewer.pk,
+            "assignment": assignment.pk,
+            "submission": submission.pk,
+            "submission_file": submission_file.pk,
+            "extension": extension.pk,
+            "file": document.pk,
+            "image": image.pk,
+            "section": section.pk,
+            "placed_section": placed.pk,
+            "page": page.pk,
+            "menu": header_menu[0],
+            "header_menu": header_menu,
+            "e": edition.pk,
+            "track": track.pk,
+            "type": submission_type.pk,
+            "date": key_date.pk,
+            "role": target_role.pk,
+            "invitation": invitation.pk,
+        },
+        # Inscriptions, paiements et pièces (plan L6) : créés au premier cas qui les vise,
+        # leurs PDF coûtant cher à produire pour chacun des cas.
+        loader=lambda: _registration_objects(edition),
+    )
     return edition, users, ids
 
 
@@ -1074,20 +1173,84 @@ def _program_objects(edition, users) -> dict:
 
 
 def _registration_objects(edition) -> dict:
-    """Plan L6 : catégorie avec un tarif, option et code promo inutilisés (supprimables)."""
+    """Plan L6 : catalogue (catégorie à tarif, option et code promo supprimables), dates
+    d'inscription ouvertes, mentions complètes ; une inscription en attente (avec
+    justificatif), une payée (facture), une payée puis annulée ; un compte sans inscription."""
     from decimal import Decimal
 
+    from apps.accounts.models import Profile
+    from apps.conferences.models import KeyDate
+    from apps.core.actor import Actor
+    from apps.payments.models import BillingDocument
+    from apps.payments.services import documents, manual
     from apps.registrations.models import Fee, PromoCode, RegistrationCategory, RegistrationOption
+    from apps.registrations.services import orders
 
+    now = timezone.now()
+    KeyDate.objects.create(edition=edition, code="registration_open", at=now - dt.timedelta(1))
+    KeyDate.objects.create(edition=edition, code="early_bird_end", at=now + dt.timedelta(10))
     category = RegistrationCategory.objects.create(
-        edition=edition, code="etudiant", label_fr="Étudiant"
+        edition=edition, code="etudiant", label_fr="Étudiant", requires_proof=True
     )
     Fee.objects.create(category=category, period="early", zone="local", amount=Decimal("1000"))
+    for period in ("early", "onsite"):
+        Fee.objects.create(
+            category=category, period=period, zone="international", amount=Decimal("2000")
+        )
+    free = RegistrationCategory.objects.create(edition=edition, code="libre", label_fr="Libre")
     option = RegistrationOption.objects.create(edition=edition, code="diner", label_fr="Dîner")
     promo = PromoCode.objects.create(
         edition=edition, code="ETU", kind="percent", value=Decimal("10")
     )
-    return {"reg_category": category.pk, "reg_option": option.pk, "reg_promo": promo.pk}
+    documents.prepare_series(edition)
+    command = Actor.command("cli:matrice")
+
+    def person():
+        user = VerifiedUserFactory()
+        Profile.objects.create(user=user, first_name="Ama", last_name="Mensah", country="FR")
+        return user
+
+    def order():
+        # Saisie par le CO : l'édition de la matrice n'est pas publiée.
+        return orders.place_order(
+            edition,
+            person(),
+            category="etudiant",
+            method="transfer",
+            actor=command,
+            by_committee=True,
+        )
+
+    def pay(registration):
+        manual.record_manual_payment(
+            registration,
+            method="transfer",
+            amount=registration.total,
+            reference="",
+            received_on=timezone.localdate(),
+            actor=command,
+        )
+
+    pending = order()
+    orders.upload_proof(pending, data=PDF, name="carte.pdf", actor=command)
+    paid = order()
+    pay(paid)
+    cancelled = order()
+    pay(cancelled)
+    orders.cancel_by_committee(cancelled, reason="Matrice", percent=100, actor=command)
+    invoice = BillingDocument.objects.get(registration=paid, kind="invoice")
+    return {
+        "reg_category": category.pk,
+        "reg_free_category": free.pk,
+        "reg_option": option.pk,
+        "reg_promo": promo.pk,
+        "reg_pending": pending.pk,
+        "reg_paid": paid.pk,
+        "reg_cancelled": cancelled.pk,
+        "reg_invoice": invoice.pk,
+        "reg_newcomer": person().email,
+        "today": timezone.localdate().isoformat(),
+    }
 
 
 def _submission_with_extension(edition):
@@ -1253,7 +1416,7 @@ def _png() -> bytes:
 
 
 def call(client: APIClient, case: Case, ids: dict):
-    path = case.path.format(**ids)
+    path = case.path.format_map(ids)
     method = getattr(client, case.method.lower())
     if case.body is None:
         return method(path)
@@ -1270,9 +1433,28 @@ def test_matrix(world, case, profile, expected):
     assert response.status_code == expected, response.content
 
 
+class LazyIds(dict):
+    """Identifiants du monde, dont une partie est créée à la première lecture d'une clé
+    absente (``loader``) ; une vue par profil délègue à son parent les clés qu'elle n'a pas."""
+
+    def __init__(self, data, *, loader=None, parent=None):
+        super().__init__(data)
+        self._loader = loader
+        self._parent = parent
+
+    def __missing__(self, key):
+        if self._parent is not None:
+            return self._parent[key]
+        if self._loader is not None:
+            loader, self._loader = self._loader, None
+            self.update(loader())
+            return self[key]
+        raise KeyError(key)
+
+
 def for_profile(ids: dict, profile: str) -> dict:
     """Identifiants propres au profil (affectations du relecteur : 404 pour un autre)."""
-    return {**ids, **ids.get("per_profile", {}).get(profile, {})}
+    return LazyIds(ids.get("per_profile", {}).get(profile, {}), parent=ids)
 
 
 def holder(capability: str) -> str:
@@ -1295,6 +1477,7 @@ def test_matrix_stale_reauthentication(world, case):
 def test_matrix_archived_edition_is_read_only(world):
     """§6.3 : une édition archivée est en lecture seule (409 ``edition_archived``)."""
     edition, users, ids = world
+    assert ids["reg_pending"]  # objets d'inscription créés avant l'archivage
     edition.status = EditionStatus.ARCHIVED
     edition.save()
     clients = {}

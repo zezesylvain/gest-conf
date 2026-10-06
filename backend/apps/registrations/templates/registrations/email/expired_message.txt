@@ -1,0 +1,7 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate %}Bonjour,
+
+Le paiement de votre inscription {{ reference }} à {{ edition_title }} n'a pas été reçu à l'échéance : l'inscription a expiré et les places réservées sont libérées.{% endblocktranslate %}
+
+{% blocktranslate %}Vous pouvez vous inscrire à nouveau tant que les inscriptions sont ouvertes : {{ link }}{% endblocktranslate %}
+
+{% include "account/email/_signature.txt" %}{% endautoescape %}

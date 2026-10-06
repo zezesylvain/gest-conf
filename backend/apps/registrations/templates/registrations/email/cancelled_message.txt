@@ -1,0 +1,9 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate %}Bonjour,
+
+Votre inscription {{ reference }} à {{ edition_title }} est annulée.{% endblocktranslate %}
+{% if refund %}
+{% blocktranslate %}Un remboursement de {{ refund }} vous sera versé par le comité d'organisation, qui vous en informera.{% endblocktranslate %}
+{% endif %}
+{% blocktranslate %}Détails : {{ link }}{% endblocktranslate %}
+
+{% include "account/email/_signature.txt" %}{% endautoescape %}
