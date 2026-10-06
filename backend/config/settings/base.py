@@ -361,6 +361,11 @@ SPECTACULAR_SETTINGS = {
         "PublicFileKind": "apps.core.models.PublicFileKind",
         "PortalFileKind": "apps.portal.serializers.PORTAL_FILE_KIND_CHOICES",
         "NotificationKind": "apps.communications.models.NotificationKind",
+        "AssignmentStatus": "apps.reviews.models.AssignmentStatus",
+        "ConflictKind": "apps.reviews.models.ConflictKind",
+        "ConflictSource": "apps.reviews.models.ConflictSource",
+        "ReviewStatus": "apps.reviews.models.ReviewStatus",
+        "ScreeningDecision": "apps.reviews.serializers.SCREENING_DECISION_CHOICES",
         "ErrorCode": "apps.core.errors.ErrorCode",
     },
     "POSTPROCESSING_HOOKS": [

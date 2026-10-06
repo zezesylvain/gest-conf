@@ -1,0 +1,5 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate %}Bonjour,
+
+Le comité scientifique de {{ edition_title }} a annulé votre évaluation de la soumission {{ reference }} « {{ title }} ». Vous n'avez plus à l'évaluer.{% endblocktranslate %}
+
+{% include "account/email/_signature.txt" %}{% endautoescape %}

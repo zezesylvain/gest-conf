@@ -68,7 +68,11 @@
       "stale_revision": "Modifié entre-temps (autre onglet ?) : rechargez avant d'enregistrer.",
       "submission_locked": "Cette soumission n'est plus modifiable.",
       "profile_incomplete": "Complétez votre profil avant de soumettre.",
-      "grid_locked": "Grille déjà utilisée par une évaluation : dupliquez-la en nouvelle version."
+      "grid_locked": "Grille déjà utilisée par une évaluation : dupliquez-la en nouvelle version.",
+      "conflict_of_interest": "Conflit d'intérêts : ce relecteur ne peut pas évaluer cette soumission.",
+      "reviewer_overloaded": "Ce relecteur a atteint sa charge maximale d'évaluations.",
+      "reviewers_missing": "Affectez d'abord le nombre de relecteurs requis.",
+      "review_not_open": "L'évaluation de cette soumission n'est pas ouverte."
     },
     "form": {
       "errorSummary": "Le formulaire contient des erreurs :",

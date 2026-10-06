@@ -39,6 +39,10 @@
  * * `submission_locked` - Submission Locked
  * * `profile_incomplete` - Profile Incomplete
  * * `grid_locked` - Grid Locked
+ * * `conflict_of_interest` - Conflict Of Interest
+ * * `reviewer_overloaded` - Reviewer Overloaded
+ * * `reviewers_missing` - Reviewers Missing
+ * * `review_not_open` - Review Not Open
  */
-export type ErrorCode = 'validation_error' | 'bad_request' | 'not_authenticated' | 'permission_denied' | 'not_found' | 'throttled' | 'server_error' | 'parse_error' | 'method_not_allowed' | 'not_acceptable' | 'unsupported_media_type' | 'csrf_failed' | 'in_use' | 'reauthentication_required' | 'mfa_enrollment_required' | 'mfa_required' | 'last_admin' | 'invitation_expired' | 'invitation_not_pending' | 'invitation_email_mismatch' | 'invitation_email_unverified' | 'invitation_link_invalid' | 'invitation_self_accept' | 'invitation_resend_limit' | 'email_address_limit' | 'edition_archived' | 'invalid_transition' | 'edition_incomplete' | 'account_has_active_duties' | 'submission_incomplete' | 'call_closed' | 'setting_frozen' | 'stale_revision' | 'submission_locked' | 'profile_incomplete' | 'grid_locked';
+export type ErrorCode = 'validation_error' | 'bad_request' | 'not_authenticated' | 'permission_denied' | 'not_found' | 'throttled' | 'server_error' | 'parse_error' | 'method_not_allowed' | 'not_acceptable' | 'unsupported_media_type' | 'csrf_failed' | 'in_use' | 'reauthentication_required' | 'mfa_enrollment_required' | 'mfa_required' | 'last_admin' | 'invitation_expired' | 'invitation_not_pending' | 'invitation_email_mismatch' | 'invitation_email_unverified' | 'invitation_link_invalid' | 'invitation_self_accept' | 'invitation_resend_limit' | 'email_address_limit' | 'edition_archived' | 'invalid_transition' | 'edition_incomplete' | 'account_has_active_duties' | 'submission_incomplete' | 'call_closed' | 'setting_frozen' | 'stale_revision' | 'submission_locked' | 'profile_incomplete' | 'grid_locked' | 'conflict_of_interest' | 'reviewer_overloaded' | 'reviewers_missing' | 'review_not_open';
 

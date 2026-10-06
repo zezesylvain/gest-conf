@@ -8,6 +8,7 @@
  * * `coauthor_added` - déclaré co-auteur
  * * `extension_granted` - dérogation accordée
  * * `draft_reminder` - brouillon à soumettre
+ * * `screening_rejected` - soumission non recevable
  */
-export type NotificationKind = 'submission_received' | 'submission_withdrawn' | 'coauthor_added' | 'extension_granted' | 'draft_reminder';
+export type NotificationKind = 'submission_received' | 'submission_withdrawn' | 'coauthor_added' | 'extension_granted' | 'draft_reminder' | 'screening_rejected';
 

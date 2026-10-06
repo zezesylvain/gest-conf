@@ -26,6 +26,7 @@ COAUTHOR = "submission/email/coauthor"
 WITHDRAWN = "submission/email/withdrawn"
 EXTENSION = "submission/email/extension"
 DRAFT_REMINDER = "submission/email/draft_reminder"
+SCREENING_REJECTED = "submission/email/screening_rejected"
 
 
 def register_submission_templates() -> None:
@@ -34,6 +35,7 @@ def register_submission_templates() -> None:
     register_email_template(WITHDRAWN)
     register_email_template(EXTENSION, fast_path=True)
     register_email_template(DRAFT_REMINDER)
+    register_email_template(SCREENING_REJECTED)
 
 
 def local_datetime(value: datetime | None, tz_name: str, locale: str) -> str:
@@ -84,7 +86,8 @@ def _send_to_submitter(template: str, submission: Submission, **extra: str) -> N
 
 def on_transition(submission: Submission, from_state: str, to_state: str, actor: Actor) -> None:
     """Effet du workflow : accusé de réception et information des co-auteurs à la première
-    soumission ; confirmation du retrait d'une soumission déjà soumise."""
+    soumission ; confirmation du retrait d'une soumission déjà soumise ; rejet de
+    recevabilité motivé (étude §5.2, plan L4 H10), notifié au soumissionnaire."""
     edition = submission.edition
     if from_state == S.DRAFT and to_state == S.SUBMITTED:
         locale = resolve_locale(None, submission.submitter)
@@ -122,6 +125,16 @@ def on_transition(submission: Submission, from_state: str, to_state: str, actor:
     elif to_state == S.WITHDRAWN and from_state != S.DRAFT:
         _send_to_submitter(WITHDRAWN, submission)
         notify(submission.submitter, NotificationKind.SUBMISSION_WITHDRAWN, _payload(submission))
+    elif from_state == S.SCREENING and to_state == S.REJECTED:
+        # Motif : celui de la transition, que ``transition()`` vient d'historiser.
+        last = submission.status_history.order_by("-at", "-id").first()
+        _send_to_submitter(
+            SCREENING_REJECTED,
+            submission,
+            reason=last.reason if last is not None else "",
+            link=submission_link(submission),
+        )
+        notify(submission.submitter, NotificationKind.SCREENING_REJECTED, _payload(submission))
 
 
 def extension_granted(extension: SubmissionExtension) -> None:

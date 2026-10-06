@@ -280,3 +280,100 @@ exposés et journalisés avec la confidentialité :
   traductions du backend à jour ; client régénéré ; front 274 tests.
 - **Défaut de test corrigé** : la somme des poids était rendue « 95 » par SQLite et « 95.00 »
   par MariaDB ; le contrôle d'intégrité normalise maintenant à deux décimales.
+
+## 13. Bilan de L4.2 (6 octobre 2026)
+
+**Recevabilité (H10)** : deux transitions du workflow deviennent disponibles.
+
+- `SCREENING → REJECTED` : motif obligatoire. Le soumissionnaire reçoit un e-mail avec le motif
+  et une notification (`screening_rejected`). Les affectations éventuelles sont annulées, sans
+  e-mail : le relecteur n'avait pas encore été prévenu.
+- `SCREENING → UNDER_REVIEW` : refusée tant que les relecteurs requis
+  (`reviewers_per_submission`) ne sont pas affectés (409 `reviewers_missing`). Les relecteurs
+  sont prévenus à ce moment.
+- **Droit revérifié par le workflow** : `Rule.capability` est contrôlée dans `transition()`
+  (`reviews.manage` dans l'édition), pas seulement par la vue.
+- **Garde du nombre de relecteurs** : elle s'inscrit par `register_guard`, l'application
+  `submissions` ne dépend donc pas de `reviews`.
+- **Parcours** : le président affecte d'abord les relecteurs, puis déclare la soumission
+  recevable, ce qui ouvre l'évaluation.
+
+**Affectations (H6, H11, H14)** : `services/assignments.py`.
+
+- Relecteurs : rôles qui portent `reviews.write` (`SC_MEMBER`, `SC_CHAIR`). Affectation possible
+  en recevabilité, en évaluation et une fois évaluée : un relecteur supplémentaire ne fait pas
+  revenir en arrière.
+- Refus :
+  - conflit non levé : 409 `conflict_of_interest` ;
+  - charge maximale de l'édition atteinte, qui ne compte que les affectations actives : 409
+    `reviewer_overloaded` ;
+  - affectation en double ou compte hors du comité scientifique : 400 ;
+  - soumission hors évaluation : 409 `review_not_open`.
+- **Concurrence** : le verrou de la soumission et des rôles du relecteur met en série les
+  affectations simultanées.
+- **Échéance** : saisie à l'heure de l'édition (D13). Par défaut, la date clé
+  `review_deadline` ; si celle-ci est passée, une échéance est exigée.
+- **Pseudonyme** : rang tiré au hasard parmi les rangs libres. Il est stable : un relecteur
+  remplacé garde le sien et le remplaçant en reçoit un nouveau.
+- **Annulation** : motif obligatoire ; impossible si l'évaluation est envoyée (il faut alors
+  déclarer un conflit). Le relecteur prévenu reçoit un e-mail sans le motif, interne au comité.
+- **Nouvelle échéance** : les relances repartent de zéro.
+
+**Conflits (H8, RG-03)** : `services/conflicts.py`.
+
+- **Auteur**, jamais levable : compte du soumissionnaire, compte d'un co-auteur, ou une
+  quelconque adresse du relecteur égale à celle d'un auteur.
+- **Même institution** : comparaison normalisée (accents, casse, ponctuation) du profil et des
+  affiliations déclarées. Levable avec un motif.
+- **Déclaré** par le président (`POST …/conflicts`) : annule l'affectation active, même si
+  l'évaluation est envoyée. Levable avec un motif ; une nouvelle déclaration efface la levée.
+- **Levée** : motif obligatoire et **réauthentification récente** (403
+  `reauthentication_required`). Elle est journalisée (`review.conflict_overridden`) et
+  enregistrée dans `ConflictOfInterest`.
+- **RG-03** : `reviewable_assignments` ne rend que les affectations actives d'une soumission en
+  évaluation, sans conflit déclaré non levé, et jamais une soumission dont le relecteur est
+  auteur. Les vues relecteur de L4.3 s'y appuient.
+
+**Expertises et candidats (H7)** :
+
+- **Candidats** : `GET …/review-submissions/{id}/candidates` donne pour chaque relecteur sa
+  charge, ses expertises, son affectation éventuelle et ses conflits (levables ou non, levés ou
+  non), en nombre de requêtes constant.
+- **Expertises** : le service `set_expertise` est prêt ; sa route relecteur arrive en L4.3, avec
+  les autres routes relecteur et leur test de fuite.
+
+**Relances (H15)** : commande `remind_reviewers`, ajoutée au cron toutes les heures (`cron.sh`,
+README du déploiement).
+
+- J-7, J-1, puis au premier passage après l'échéance, une fois chacune ; idempotente et
+  verrouillée.
+- Pas de relance dans la fenêtre où l'affectation est née : l'e-mail d'affectation vient
+  d'annoncer l'échéance.
+- Ni évaluation envoyée, ni soumission en recevabilité, ni édition archivée.
+- **RG-04 dans les e-mails aux relecteurs** : référence, titre, échéance et lien vers
+  `/gestion/editions/{id}/evaluations/{affectation}`, route à créer en L4.5. Aucun nom
+  d'auteur : un test le vérifie.
+
+**API de gestion** (`reviews.manage`) :
+
+- `GET …/review-submissions` : compteurs d'affectations, d'évaluations envoyées et de retards.
+  Filtres : statut, thématique, type, recherche, relecteurs manquants, retard.
+- `GET …/review-submissions/{id}` : affectations et conflits, avec les noms des relecteurs,
+  jamais leurs adresses.
+- `POST …/review-submissions/{id}/screening`.
+- `POST …/assignments`, `PATCH …/assignments/{id}` (échéance),
+  `POST …/assignments/{id}/cancel`.
+- `POST …/conflicts`.
+- Codes d'erreur ajoutés et traduits dans l'interface : `conflict_of_interest`,
+  `reviewer_overloaded`, `reviewers_missing`, `review_not_open`.
+
+**Intégrité** : clé active cohérente avec le statut ; aucune affectation active d'un relecteur
+auteur de la soumission.
+
+**Vérifications** :
+
+- 1 762 tests backend sous SQLite, 1 769 sous MariaDB. La matrice compte 924 cas, dont les
+  8 routes de L4.2 ; la case « confidentialité » modifie désormais un réglage non gelé, car la
+  soumission en recevabilité du monde de test gèle `double_blind` (RG-19).
+- Schéma régénéré sur MariaDB : statut d'évaluation nullable, d'où le composant `NullEnum` du
+  client. Client régénéré ; traductions du backend et du portail à jour ; front 274 tests.

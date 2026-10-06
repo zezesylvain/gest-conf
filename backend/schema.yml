@@ -184,6 +184,96 @@ paths:
               schema:
                 $ref: '#/components/schemas/Edition'
           description: ''
+  /v1/manage/editions/{edition_id}/assignments:
+    post:
+      operationId: manage_assignment_create
+      description: 'Affectations (H6, H8, H15) : création, échéance, annulation motivée.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignmentCreateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignmentManage'
+          description: ''
+  /v1/manage/editions/{edition_id}/assignments/{assignment_id}:
+    patch:
+      operationId: manage_assignment_update
+      description: 'Affectations (H6, H8, H15) : création, échéance, annulation motivée.'
+      parameters:
+      - in: path
+        name: assignment_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAssignmentUpdateRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignmentManage'
+          description: ''
+  /v1/manage/editions/{edition_id}/assignments/{assignment_id}/cancel:
+    post:
+      operationId: manage_assignment_cancel
+      description: 'Affectations (H6, H8, H15) : création, échéance, annulation motivée.'
+      parameters:
+      - in: path
+        name: assignment_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignmentCancelRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignmentManage'
+          description: ''
   /v1/manage/editions/{edition_id}/audit:
     get:
       operationId: manage_audit_list
@@ -291,6 +381,34 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Confidentiality'
+          description: ''
+  /v1/manage/editions/{edition_id}/conflicts:
+    post:
+      operationId: manage_conflict_create
+      description: Conflit déclaré par le président (H8) ; annule l'affectation active
+        éventuelle.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConflictCreateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConflictManage'
           description: ''
   /v1/manage/editions/{edition_id}/grids:
     get:
@@ -1514,6 +1632,184 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PublicationStatus'
+          description: ''
+  /v1/manage/editions/{edition_id}/review-submissions:
+    get:
+      operationId: manage_review_submissions_list
+      description: Suivi de l'évaluation par soumission (H6, H10).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: late
+        schema:
+          type: boolean
+      - in: query
+        name: missing
+        schema:
+          type: boolean
+      - name: page
+        required: false
+        in: query
+        description: Un numéro de page de l'ensemble des résultats.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Nombre de résultats à retourner par page.
+        schema:
+          type: integer
+      - in: query
+        name: q
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: array
+          items:
+            type: string
+            title: Statut
+            enum:
+            - accepted
+            - accepted_minor
+            - camera_ready_received
+            - confirmed
+            - presented
+            - published
+            - rejected
+            - reviewed
+            - revision_requested
+            - scheduled
+            - screening
+            - under_review
+            - waitlist
+            - withdrawn
+        description: |-
+          * `screening` - vérification de recevabilité
+          * `under_review` - en cours d'évaluation
+          * `reviewed` - évaluée
+          * `accepted` - acceptée
+          * `accepted_minor` - acceptée sous réserve de corrections
+          * `waitlist` - liste d'attente
+          * `rejected` - rejetée
+          * `revision_requested` - corrections demandées
+          * `camera_ready_received` - version finale reçue
+          * `confirmed` - présentation confirmée
+          * `scheduled` - programmée
+          * `presented` - présentée
+          * `published` - publiée dans les actes
+          * `withdrawn` - retirée
+        explode: true
+        style: form
+      - in: query
+        name: submission_type
+        schema:
+          type: string
+      - in: query
+        name: track
+        schema:
+          type: string
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedReviewSubmissionList'
+          description: ''
+  /v1/manage/editions/{edition_id}/review-submissions/{submission_id}:
+    get:
+      operationId: manage_review_submission_retrieve
+      description: Suivi de l'évaluation par soumission (H6, H10).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewSubmissionDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/review-submissions/{submission_id}/candidates:
+    get:
+      operationId: manage_review_submission_candidates
+      description: 'Relecteurs de l''édition : charge, expertises, affectation, conflits
+        (H6 à H8).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CandidateList'
+          description: ''
+  /v1/manage/editions/{edition_id}/review-submissions/{submission_id}/screening:
+    post:
+      operationId: manage_review_submission_screening
+      description: 'H10 : recevable (relecteurs requis affectés) ou rejet motivé,
+        notifié à l''auteur.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScreeningRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewSubmissionDetail'
           description: ''
   /v1/manage/editions/{edition_id}/roles:
     get:
@@ -2893,6 +3189,112 @@ components:
       - code
       - fields
       - message
+    AssignmentCancelRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 2000
+      required:
+      - reason
+    AssignmentCreateRequest:
+      type: object
+      properties:
+        submission:
+          type: integer
+        reviewer:
+          type: integer
+        due_local:
+          type: string
+          format: date-time
+          nullable: true
+          description: Échéance dans le fuseau de l'édition, sans fuseau ; par défaut,
+            la date clé review_deadline.
+        override_reason:
+          type: string
+          default: ''
+          description: Motif de levée d'un conflit levable (réauthentification récente
+            exigée).
+          maxLength: 2000
+      required:
+      - reviewer
+      - submission
+    AssignmentManage:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        reviewer:
+          allOf:
+          - $ref: '#/components/schemas/Person'
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/AssignmentStatus'
+          readOnly: true
+          title: Statut
+        assigned_by:
+          allOf:
+          - $ref: '#/components/schemas/Person'
+          nullable: true
+          readOnly: true
+        assigned_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Affectée le
+        due_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Échéance
+        reason:
+          type: string
+          readOnly: true
+          title: Motif (refus ou annulation)
+        conflict_override_reason:
+          type: string
+          readOnly: true
+          title: Motif de la levée de conflit
+        pseudonym_rank:
+          type: integer
+          readOnly: true
+          title: Rang du pseudonyme
+        reminders:
+          readOnly: true
+          title: Relances envoyées
+        review_status:
+          description: 'Évaluation : null (non commencée), draft ou submitted.'
+          nullable: true
+          readOnly: true
+          oneOf:
+          - $ref: '#/components/schemas/ReviewStatus'
+          - $ref: '#/components/schemas/NullEnum'
+      required:
+      - assigned_at
+      - assigned_by
+      - conflict_override_reason
+      - due_at
+      - id
+      - pseudonym_rank
+      - reason
+      - reminders
+      - review_status
+      - reviewer
+      - status
+    AssignmentStatus:
+      enum:
+      - active
+      - declined
+      - cancelled
+      type: string
+      description: |-
+        * `active` - actif
+        * `declined` - déclinée
+        * `cancelled` - annulée
     AuditEntry:
       type: object
       description: Entrée du journal d'une édition, **sans IP ni navigateur** (minimisation,
@@ -2996,6 +3398,74 @@ components:
     BlankEnum:
       enum:
       - ''
+    Candidate:
+      type: object
+      description: Relecteur proposé pour une soumission (H6, H7, H8).
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+          readOnly: true
+        institution:
+          type: string
+          readOnly: true
+        load:
+          type: integer
+          description: Affectations actives dans l'édition.
+        tracks:
+          type: array
+          items:
+            type: string
+          description: Expertises.
+        assignment_id:
+          type: integer
+          nullable: true
+          readOnly: true
+          description: Affectation active sur cette soumission, sinon null.
+        conflicts:
+          type: array
+          items:
+            $ref: '#/components/schemas/CandidateConflict'
+      required:
+      - assignment_id
+      - conflicts
+      - id
+      - institution
+      - load
+      - name
+      - tracks
+    CandidateConflict:
+      type: object
+      properties:
+        kind:
+          $ref: '#/components/schemas/ConflictKind'
+        overridable:
+          type: boolean
+        overridden:
+          type: boolean
+      required:
+      - kind
+      - overridable
+      - overridden
+    CandidateList:
+      type: object
+      properties:
+        max_load:
+          type: integer
+          description: Charge maximale par relecteur (édition).
+        track:
+          type: string
+          nullable: true
+          description: Thématique de la soumission.
+        candidates:
+          type: array
+          items:
+            $ref: '#/components/schemas/Candidate'
+      required:
+      - candidates
+      - max_load
+      - track
     Capability:
       enum:
       - edition.read
@@ -3067,6 +3537,100 @@ components:
           description: Réglages gelés depuis la première soumission (RG-19).
       required:
       - frozen_fields
+    ConflictCreateRequest:
+      type: object
+      properties:
+        submission:
+          type: integer
+        reviewer:
+          type: integer
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 2000
+      required:
+      - reason
+      - reviewer
+      - submission
+    ConflictKind:
+      enum:
+      - author
+      - institution
+      - declared
+      type: string
+      description: |-
+        * `author` - auteur de la soumission
+        * `institution` - même institution
+        * `declared` - déclaré
+    ConflictManage:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        reviewer:
+          allOf:
+          - $ref: '#/components/schemas/Person'
+          readOnly: true
+        kind:
+          allOf:
+          - $ref: '#/components/schemas/ConflictKind'
+          readOnly: true
+          title: Nature
+        source:
+          allOf:
+          - $ref: '#/components/schemas/ConflictSource'
+          readOnly: true
+          title: Origine
+        reason:
+          type: string
+          readOnly: true
+          title: Motif
+        declared_by:
+          allOf:
+          - $ref: '#/components/schemas/Person'
+          nullable: true
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        overridden_by:
+          allOf:
+          - $ref: '#/components/schemas/Person'
+          nullable: true
+          readOnly: true
+        overridden_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Levé le
+        overridden_reason:
+          type: string
+          readOnly: true
+          title: Motif de la levée
+      required:
+      - created_at
+      - declared_by
+      - id
+      - kind
+      - overridden_at
+      - overridden_by
+      - overridden_reason
+      - reason
+      - reviewer
+      - source
+    ConflictSource:
+      enum:
+      - reviewer
+      - system
+      - chair
+      type: string
+      description: |-
+        * `reviewer` - déclaré par le relecteur
+        * `system` - détecté par le système
+        * `chair` - déclaré par le président
     ConsentCreateRequest:
       type: object
       properties:
@@ -3476,6 +4040,10 @@ components:
       - submission_locked
       - profile_incomplete
       - grid_locked
+      - conflict_of_interest
+      - reviewer_overloaded
+      - reviewers_missing
+      - review_not_open
       type: string
       description: |-
         * `validation_error` - Validation Error
@@ -3514,6 +4082,10 @@ components:
         * `submission_locked` - Submission Locked
         * `profile_incomplete` - Profile Incomplete
         * `grid_locked` - Grid Locked
+        * `conflict_of_interest` - Conflict Of Interest
+        * `reviewer_overloaded` - Reviewer Overloaded
+        * `reviewers_missing` - Reviewers Missing
+        * `review_not_open` - Review Not Open
     Extension:
       type: object
       properties:
@@ -4363,6 +4935,7 @@ components:
       - coauthor_added
       - extension_granted
       - draft_reminder
+      - screening_rejected
       type: string
       description: |-
         * `submission_received` - soumission reçue
@@ -4370,6 +4943,7 @@ components:
         * `coauthor_added` - déclaré co-auteur
         * `extension_granted` - dérogation accordée
         * `draft_reminder` - brouillon à soumettre
+        * `screening_rejected` - soumission non recevable
     NotificationList:
       type: object
       properties:
@@ -4393,6 +4967,9 @@ components:
             minimum: 1
           description: Notifications à marquer comme lues ; toutes si absent.
           maxItems: 200
+    NullEnum:
+      enum:
+      - null
     OcFunction:
       enum:
       - finance
@@ -4591,6 +5168,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/InvitationWithEmail'
+    PaginatedReviewSubmissionList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReviewSubmission'
     PaginatedSubmissionManageList:
       type: object
       required:
@@ -4614,6 +5214,13 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SubmissionManage'
+    PatchedAssignmentUpdateRequest:
+      type: object
+      properties:
+        due_local:
+          type: string
+          format: date-time
+          description: Nouvelle échéance, à l'heure de l'édition.
     PatchedConfidentialityRequest:
       type: object
       description: Paramètres de l'évaluation (gestion, §6.1 ; plan L4 H4, H6, H12).
@@ -5079,6 +5686,17 @@ components:
         is_active:
           type: boolean
           title: Actif
+    Person:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+          description: Nom du profil, sinon adresse masquée.
+      required:
+      - id
+      - name
     PhotoUploadRequest:
       type: object
       properties:
@@ -5918,6 +6536,162 @@ components:
       - pending_changes
       - pending_since
       - release
+    ReviewStatus:
+      enum:
+      - draft
+      - submitted
+      type: string
+    ReviewSubmission:
+      type: object
+      description: 'Ligne du suivi de l''évaluation : compteurs annotés par la vue.'
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        reference:
+          type: string
+          readOnly: true
+          nullable: true
+          title: Référence
+        status:
+          allOf:
+          - $ref: '#/components/schemas/SubmissionStatus'
+          readOnly: true
+          title: Statut
+        title:
+          type: string
+          readOnly: true
+          title: Titre
+        track:
+          type: string
+          readOnly: true
+          nullable: true
+        submission_type:
+          type: string
+          readOnly: true
+          nullable: true
+        language:
+          type: string
+          readOnly: true
+          title: Langue
+        submitted_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Soumise le
+        assignment_count:
+          type: integer
+          description: Affectations actives.
+        review_count:
+          type: integer
+          description: Évaluations envoyées (actives).
+        late_count:
+          type: integer
+          description: Affectations actives en retard.
+        required:
+          type: integer
+          readOnly: true
+          description: Relecteurs requis (édition).
+      required:
+      - assignment_count
+      - id
+      - language
+      - late_count
+      - reference
+      - required
+      - review_count
+      - status
+      - submission_type
+      - submitted_at
+      - title
+      - track
+    ReviewSubmissionDetail:
+      type: object
+      description: 'Ligne du suivi de l''évaluation : compteurs annotés par la vue.'
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        reference:
+          type: string
+          readOnly: true
+          nullable: true
+          title: Référence
+        status:
+          allOf:
+          - $ref: '#/components/schemas/SubmissionStatus'
+          readOnly: true
+          title: Statut
+        title:
+          type: string
+          readOnly: true
+          title: Titre
+        track:
+          type: string
+          readOnly: true
+          nullable: true
+        submission_type:
+          type: string
+          readOnly: true
+          nullable: true
+        language:
+          type: string
+          readOnly: true
+          title: Langue
+        submitted_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Soumise le
+        assignment_count:
+          type: integer
+          description: Affectations actives.
+        review_count:
+          type: integer
+          description: Évaluations envoyées (actives).
+        late_count:
+          type: integer
+          description: Affectations actives en retard.
+        required:
+          type: integer
+          readOnly: true
+          description: Relecteurs requis (édition).
+        abstract:
+          type: string
+          readOnly: true
+          title: Résumé
+        keywords:
+          readOnly: true
+          title: Mots-clés
+        assignments:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssignmentManage'
+          readOnly: true
+        conflicts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConflictManage'
+          readOnly: true
+      required:
+      - abstract
+      - assignment_count
+      - assignments
+      - conflicts
+      - id
+      - keywords
+      - language
+      - late_count
+      - reference
+      - required
+      - review_count
+      - status
+      - submission_type
+      - submitted_at
+      - title
+      - track
     RevisionSummary:
       type: object
       properties:
@@ -5974,6 +6748,26 @@ components:
         * `invitation` - invitation
         * `command` - commande
         * `system` - système
+    ScreeningDecision:
+      enum:
+      - admissible
+      - reject
+      type: string
+      description: |-
+        * `admissible` - admissible
+        * `reject` - reject
+    ScreeningRequest:
+      type: object
+      description: 'H10 : recevable (ouvre l''évaluation) ou rejet motivé.'
+      properties:
+        decision:
+          $ref: '#/components/schemas/ScreeningDecision'
+        reason:
+          type: string
+          default: ''
+          maxLength: 2000
+      required:
+      - decision
     Section:
       type: object
       description: Section avec les pages qui la portent (« posée sur »).

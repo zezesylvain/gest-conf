@@ -97,7 +97,8 @@ CASES = [
         W,
         200,
         "/v1/manage/editions/{e}/confidentiality",
-        {"double_blind": False},
+        # Réglage non gelé : la soumission en recevabilité du monde gèle double_blind (RG-19).
+        {"max_reviews_per_reviewer": 12},
         recent_auth=True,
     ),
     Case("manage-tracks-list", "GET", R, 200, "/v1/manage/editions/{e}/tracks"),
@@ -416,6 +417,72 @@ CASES = [
     Case(
         "manage-grids-duplicate", "POST", GW, 201, "/v1/manage/editions/{e}/grids/{grid}/duplicate"
     ),
+    # --- Recevabilité, affectations, conflits (L4.2) ------------------------------------------
+    Case(
+        "manage-review-submissions-list",
+        "GET",
+        RM,
+        200,
+        "/v1/manage/editions/{e}/review-submissions",
+    ),
+    Case(
+        "manage-review-submissions-detail",
+        "GET",
+        RM,
+        200,
+        "/v1/manage/editions/{e}/review-submissions/{review_submission}",
+    ),
+    Case(
+        "manage-review-submissions-candidates",
+        "GET",
+        RM,
+        200,
+        "/v1/manage/editions/{e}/review-submissions/{review_submission}/candidates",
+    ),
+    Case(
+        "manage-review-submissions-screening",
+        "POST",
+        RM,
+        200,
+        "/v1/manage/editions/{e}/review-submissions/{review_submission}/screening",
+        {"decision": "reject", "reason": "Hors du champ de la conférence"},
+    ),
+    Case(
+        "manage-assignments-list",
+        "POST",
+        RM,
+        201,
+        "/v1/manage/editions/{e}/assignments",
+        lambda ids: {"submission": ids["review_submission"], "reviewer": ids["reviewer"]},
+    ),
+    Case(
+        "manage-assignments-detail",
+        "PATCH",
+        RM,
+        200,
+        "/v1/manage/editions/{e}/assignments/{assignment}",
+        {"due_local": "2099-05-01T23:59"},
+    ),
+    Case(
+        "manage-assignments-cancel",
+        "POST",
+        RM,
+        200,
+        "/v1/manage/editions/{e}/assignments/{assignment}/cancel",
+        {"reason": "Remplacement"},
+    ),
+    Case(
+        "manage-conflicts-list",
+        "POST",
+        RM,
+        201,
+        "/v1/manage/editions/{e}/conflicts",
+        lambda ids: {
+            "submission": ids["review_submission"],
+            "reviewer": ids["reviewer"],
+            "reason": "Collaboration récente",
+        },
+    ),
     Case("manage-portal-poster", "GET", R, 200, "/v1/manage/editions/{e}/portal/poster"),
     Case(
         "manage-portal-poster",
@@ -516,8 +583,12 @@ def world():
     from apps.reviews.services.grids import create_grid
 
     grid = create_grid(edition, name="Grille", actor=Actor.command("cli:matrice"))
+    review_submission, reviewer, assignment = _review_objects(edition)
     ids = {
         "grid": grid.pk,
+        "review_submission": review_submission.pk,
+        "reviewer": reviewer.pk,
+        "assignment": assignment.pk,
         "submission": submission.pk,
         "submission_file": submission_file.pk,
         "extension": extension.pk,
@@ -568,6 +639,29 @@ def _submission_with_extension(edition):
         granted_at=timezone.now(),
     )
     return submission, submission_file, extension
+
+
+def _review_objects(edition):
+    """Soumission en recevabilité (statut posé directement : la clôture de l'appel n'est pas
+    passée), un relecteur libre et une affectation active d'un autre relecteur."""
+    from apps.reviews.models import ReviewAssignment
+    from apps.submissions.models import Submission, SubmissionStatus
+    from apps.submissions.tests.factories import author_user, complete_submission
+
+    submission = complete_submission(edition, author_user(first="Kofi", last="Mensah"))
+    Submission.objects.filter(pk=submission.pk).update(
+        status=SubmissionStatus.SCREENING, reference=f"{edition.code}-0001"
+    )
+    reviewer = make_member(edition, Role.SC_MEMBER)
+    assigned = make_member(edition, Role.SC_MEMBER)
+    assignment = ReviewAssignment.objects.create(
+        submission=submission,
+        reviewer=assigned,
+        assigned_at=timezone.now(),
+        pseudonym_rank=1,
+        active_key=f"{submission.pk}:{assigned.pk}",
+    )
+    return submission, reviewer, assignment
 
 
 def _png() -> bytes:

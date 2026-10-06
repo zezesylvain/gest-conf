@@ -83,13 +83,15 @@ class OutboxEmail(TimeStampedModel):
 
 
 class NotificationKind(models.TextChoices):
-    """Notifications dans l'application (plan L3, F13). Lot L3 : soumissions."""
+    """Notifications dans l'application (plan L3, F13). Lot L3 : soumissions ; lot L4 :
+    recevabilité."""
 
     SUBMISSION_RECEIVED = "submission_received", _("soumission reçue")
     SUBMISSION_WITHDRAWN = "submission_withdrawn", _("soumission retirée")
     COAUTHOR_ADDED = "coauthor_added", _("déclaré co-auteur")
     EXTENSION_GRANTED = "extension_granted", _("dérogation accordée")
     DRAFT_REMINDER = "draft_reminder", _("brouillon à soumettre")
+    SCREENING_REJECTED = "screening_rejected", _("soumission non recevable")
 
 
 class Notification(TimeStampedModel):

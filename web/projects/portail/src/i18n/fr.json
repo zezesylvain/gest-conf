@@ -474,7 +474,8 @@
         "submission_withdrawn": "Votre soumission {{reference}} « {{title}} » a été retirée.",
         "coauthor_added": "Vous êtes déclaré co-auteur de la soumission {{reference}} « {{title}} » ({{edition}}).",
         "extension_granted": "Délai supplémentaire pour votre soumission {{reference}} « {{title}} », jusqu'au {{until}}.",
-        "draft_reminder": "Votre brouillon « {{title}} » n'est pas encore soumis : l'appel ferme le {{closes}}."
+        "draft_reminder": "Votre brouillon « {{title}} » n'est pas encore soumis : l'appel ferme le {{closes}}.",
+        "screening_rejected": "Votre soumission {{reference}} « {{title}} » n'a pas été jugée recevable : elle ne sera pas évaluée."
       }
     }
   }

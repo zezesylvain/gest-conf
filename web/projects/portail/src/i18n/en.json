@@ -474,7 +474,8 @@
         "submission_withdrawn": "Your submission {{reference}} “{{title}}” has been withdrawn.",
         "coauthor_added": "You have been listed as a co-author of submission {{reference}} “{{title}}” ({{edition}}).",
         "extension_granted": "Extended deadline for your submission {{reference}} “{{title}}”, until {{until}}.",
-        "draft_reminder": "Your draft “{{title}}” has not been submitted yet: the call closes on {{closes}}."
+        "draft_reminder": "Your draft “{{title}}” has not been submitted yet: the call closes on {{closes}}.",
+        "screening_rejected": "Your submission {{reference}} “{{title}}” was found inadmissible: it will not be reviewed."
       }
     }
   }

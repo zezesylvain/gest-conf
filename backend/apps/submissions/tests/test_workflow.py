@@ -40,7 +40,8 @@ def submit(submission, user=None, **kwargs):
 
 
 def test_table_covers_the_study_diagram():
-    """Les 19 transitions de l'étude (§5.1) ; seules celles de L3 sont disponibles."""
+    """Les 19 transitions de l'étude (§5.1) ; seules celles de L3 et de la recevabilité (L4.2,
+    H10) sont disponibles."""
     assert len(workflow.TRANSITIONS) == 19
     available = {pair for pair, rule in workflow.TRANSITIONS.items() if rule.available}
     assert available == {
@@ -48,6 +49,8 @@ def test_table_covers_the_study_diagram():
         (S.SUBMITTED, S.SCREENING),
         (S.DRAFT, S.WITHDRAWN),
         (S.SUBMITTED, S.WITHDRAWN),
+        (S.SCREENING, S.UNDER_REVIEW),
+        (S.SCREENING, S.REJECTED),
     }
     used = {status for pair in workflow.TRANSITIONS for status in pair}
     # REVISION_REQUESTED : aucun arc dans le diagramme de l'étude (écart signalé, L4).
