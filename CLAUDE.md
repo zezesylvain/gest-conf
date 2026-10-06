@@ -40,7 +40,7 @@ GEST-CONF/
 ├── backend/                 # Django
 │   ├── config/settings/ (base, dev, prod, test) ; urls.py (API uniquement) ; mount.py ; passenger_wsgi.py
 │   ├── apps/ core, accounts, conferences, portal, communications, submissions, reviews,
-│   │         program (à venir, lot par lot : registrations, payments, events,
+│   │         program, registrations, payments (à venir, lot par lot : events,
 │   │         sponsors, logistics, reports)
 │   ├── tests/               # tests transverses : matrice des droits, schéma, règles de plateforme
 │   ├── locale/              # traductions du backend (FR/EN)

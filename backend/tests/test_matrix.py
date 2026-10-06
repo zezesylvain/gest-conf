@@ -49,29 +49,43 @@ DD, DP, GW = "decisions.decide", "decisions.publish", "grids.write"
 # Plan L5 (I1) : programme lu par les comités, écrit par le CO « programme » et
 # l'administrateur, publié par le Chair.
 PGR, PGW, PGP = "program.read", "program.write", "program.publish"
+# Plan L6 (J1) : inscriptions lues par le CO et le Chair, gérées par les finances et le
+# secrétariat ; tarifs par les finances ; paiements et factures lus par les finances et le Chair.
+RGR, RGM = "registrations.read", "registrations.manage"
+PRW, FIR = "pricing.write", "finance.read"
 
 SPEC: dict[str, set[str]] = {
     # H19 : l'administrateur n'évalue pas et ne décide pas ; I1 : il ne publie pas le
-    # programme.
-    "ADMIN": {R, W, PUB, ARC, MR, MM, AR, PW, SR, SE, SX, RM, RA, GW, PGR, PGW},
-    # I1 : le Chair lit et publie le programme, sans l'écrire.
-    "CHAIR": {R, W, PUB, MR, MM, AR, PW, SR, SE, SX, RM, RA, DD, DP, GW, PGR, PGP},
+    # programme. J1 : toutes les capacités des inscriptions et des finances.
+    "ADMIN": {R, W, PUB, ARC, MR, MM, AR, PW, SR, SE, SX, RM, RA, GW, PGR, PGW, RGR, RGM}
+    | {PRW, FIR},
+    # I1 : le Chair lit et publie le programme, sans l'écrire. J1 : il lit les inscriptions
+    # et les finances, sans les gérer.
+    "CHAIR": {R, W, PUB, MR, MM, AR, PW, SR, SE, SX, RM, RA, DD, DP, GW, PGR, PGP, RGR, FIR},
     # D8 validée : lecture du paramétrage ; membres du CS seulement. F10, F8 (plan L3) :
     # soumissions (lecture, dérogations, export). H19 : évalue, pilote, décide, publie.
-    # I1 : lit le programme.
+    # I1 : lit le programme. J1 : aucun accès aux inscriptions.
     "SC_CHAIR": {R, MR, MM, SR, SE, SX, RW, RM, RA, DD, DP, GW, PGR},
-    # D8 : lecture seule (fonction « finances ») ; F10 : soumissions ; I1 : programme lu.
-    "OC_MEMBER": {R, SR, PGR},
+    # D8 : lecture seule (fonction « logistique ») ; F10 : soumissions ; I1 : programme lu ;
+    # J1 : inscriptions lues.
+    "OC_MEMBER": {R, SR, PGR, RGR},
     # E11 (plan L2) : le CO « communication » écrit le portail.
-    "OC_COMMUNICATION": {R, PW, SR, PGR},
-    "OC_PROGRAM": {R, SR, PGR, PGW},  # I1 (plan L5) : le CO « programme » écrit le programme
+    "OC_COMMUNICATION": {R, PW, SR, PGR, RGR},
+    "OC_PROGRAM": {R, SR, PGR, PGW, RGR},  # I1 (plan L5) : le CO « programme » écrit le programme
+    # J1 (plan L6) : le CO « finances » gère inscriptions, tarifs et finances ; le
+    # « secrétariat » gère les inscriptions.
+    "OC_FINANCE": {R, SR, PGR, RGR, RGM, PRW, FIR},
+    "OC_SECRETARIAT": {R, SR, PGR, RGR, RGM},
     "SC_MEMBER": {RW},  # F10 : pas les soumissions ; H19 : ses affectations seulement
     "AUTHOR": set(),
 }
 # Profils qui ne sont pas un rôle seul : (rôle, fonction au CO).
 PROFILE_ROLES = {
+    "OC_MEMBER": (Role.OC_MEMBER, "logistics"),
     "OC_COMMUNICATION": (Role.OC_MEMBER, "communication"),
     "OC_PROGRAM": (Role.OC_MEMBER, "program"),
+    "OC_FINANCE": (Role.OC_MEMBER, "finance"),
+    "OC_SECRETARIAT": (Role.OC_MEMBER, "secretariat"),
 }
 # Profils sans rôle actif dans l'édition visée : 404 (D5).
 NON_MEMBERS = ("no_role", "other_edition_chair", "revoked_chair", "invited")
@@ -111,6 +125,32 @@ CASES = [
         "/v1/manage/editions/{e}/confidentiality",
         # Réglage non gelé : la soumission en recevabilité du monde gèle double_blind (RG-19).
         {"max_reviews_per_reviewer": 12},
+        recent_auth=True,
+    ),
+    # Plan L6 (L6.1) : paramètres des inscriptions et mentions de facturation (J1).
+    Case(
+        "manage-registration-settings",
+        "GET",
+        RGR,
+        200,
+        "/v1/manage/editions/{e}/registrations/settings",
+    ),
+    Case(
+        "manage-registration-settings",
+        "PATCH",
+        PRW,
+        200,
+        "/v1/manage/editions/{e}/registrations/settings",
+        {"online_deadline_hours": 48},
+    ),
+    Case("manage-billing-profile", "GET", FIR, 200, "/v1/manage/editions/{e}/billing/profile"),
+    Case(
+        "manage-billing-profile",
+        "PATCH",
+        PRW,
+        200,
+        "/v1/manage/editions/{e}/billing/profile",
+        {"legal_name": "Association matrice"},
         recent_auth=True,
     ),
     Case("manage-program-settings", "GET", PGR, 200, "/v1/manage/editions/{e}/program/settings"),

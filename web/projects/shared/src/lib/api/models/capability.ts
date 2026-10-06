@@ -23,6 +23,10 @@
  * * `program.read` - program.read
  * * `program.write` - program.write
  * * `program.publish` - program.publish
+ * * `registrations.read` - registrations.read
+ * * `registrations.manage` - registrations.manage
+ * * `pricing.write` - pricing.write
+ * * `finance.read` - finance.read
  */
-export type Capability = 'edition.read' | 'edition.write' | 'edition.publish' | 'edition.archive' | 'members.read' | 'members.manage' | 'audit.read' | 'portal.write' | 'submissions.read' | 'submissions.extend' | 'submissions.export' | 'reviews.write' | 'reviews.manage' | 'reviews.read_all' | 'decisions.decide' | 'decisions.publish' | 'grids.write' | 'program.read' | 'program.write' | 'program.publish';
+export type Capability = 'edition.read' | 'edition.write' | 'edition.publish' | 'edition.archive' | 'members.read' | 'members.manage' | 'audit.read' | 'portal.write' | 'submissions.read' | 'submissions.extend' | 'submissions.export' | 'reviews.write' | 'reviews.manage' | 'reviews.read_all' | 'decisions.decide' | 'decisions.publish' | 'grids.write' | 'program.read' | 'program.write' | 'program.publish' | 'registrations.read' | 'registrations.manage' | 'pricing.write' | 'finance.read';
 

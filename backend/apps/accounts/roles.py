@@ -82,6 +82,12 @@ class Capability(StrEnum):
     PROGRAM_READ = "program.read"
     PROGRAM_WRITE = "program.write"
     PROGRAM_PUBLISH = "program.publish"
+    # Lot L6 (J1) : inscriptions (lues par le CO, gérées par les finances et le secrétariat),
+    # tarifs (finances), paiements et factures (finances, Chair en lecture).
+    REGISTRATIONS_READ = "registrations.read"
+    REGISTRATIONS_MANAGE = "registrations.manage"
+    PRICING_WRITE = "pricing.write"
+    FINANCE_READ = "finance.read"
 
 
 C = Capability
@@ -116,6 +122,9 @@ CAPABILITIES: Mapping[str, frozenset[Capability]] = {
             # I1 : le Chair lit et valide (publie) le programme ; il ne l'écrit pas.
             C.PROGRAM_READ,
             C.PROGRAM_PUBLISH,
+            # J1 (plan L6) : il suit les inscriptions et les finances, sans les gérer.
+            C.REGISTRATIONS_READ,
+            C.FINANCE_READ,
         }
     ),
     # Président du CS : il peut aussi évaluer (H19).
@@ -138,9 +147,11 @@ CAPABILITIES: Mapping[str, frozenset[Capability]] = {
     ),
     # CO en lecture seule en L1, quelle que soit sa fonction (D8) ; écritures partielles
     # attribuées fonction par fonction dans leur lot (FUNCTION_CAPABILITIES). Lecture des
-    # soumissions, identité des auteurs comprise (F10, matrice §3.3 de l'étude), et du
-    # programme brouillon (I1).
-    Role.OC_MEMBER: frozenset({C.EDITION_READ, C.SUBMISSIONS_READ, C.PROGRAM_READ}),
+    # soumissions, identité des auteurs comprise (F10, matrice §3.3 de l'étude), du
+    # programme brouillon (I1) et des inscriptions (J1, plan L6).
+    Role.OC_MEMBER: frozenset(
+        {C.EDITION_READ, C.SUBMISSIONS_READ, C.PROGRAM_READ, C.REGISTRATIONS_READ}
+    ),
     # Relecteur : ses affectations seulement, sans identité des auteurs (RG-04, H9).
     Role.SC_MEMBER: frozenset({C.REVIEWS_WRITE}),
     Role.AUTHOR: frozenset(),
@@ -184,12 +195,17 @@ SCIENTIFIC_COMMITTEE: frozenset[str] = frozenset({Role.SC_CHAIR, Role.SC_MEMBER}
 
 # Capacités ajoutées par la fonction au comité d'organisation (rôle, fonction) → capacités.
 # E11 (plan L2) : le CO « communication » rédige les contenus du portail ; I1 (plan L5) : le CO
-# « programme » écrit le programme. Les autres fonctions reçoivent leurs écritures dans leur
-# lot (finances L6).
+# « programme » écrit le programme ; J1 (plan L6) : le CO « finances » gère inscriptions,
+# tarifs et finances, le « secrétariat » les inscriptions. Les autres fonctions reçoivent leurs
+# écritures dans leur lot.
 FUNCTION_CAPABILITIES: Mapping[tuple[str, str], frozenset[Capability]] = {
     (Role.OC_MEMBER, "communication"): frozenset({C.PORTAL_WRITE}),
     # I1 (plan L5) : le CO « programme » écrit le programme ; les autres fonctions le lisent.
     (Role.OC_MEMBER, "program"): frozenset({C.PROGRAM_WRITE}),
+    (Role.OC_MEMBER, "finance"): frozenset(
+        {C.REGISTRATIONS_MANAGE, C.PRICING_WRITE, C.FINANCE_READ}
+    ),
+    (Role.OC_MEMBER, "secretariat"): frozenset({C.REGISTRATIONS_MANAGE}),
 }
 
 

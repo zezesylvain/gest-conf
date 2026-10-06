@@ -355,3 +355,98 @@ transaction qui prend un numéro (verrous d'intervalle de MariaDB, voir `ensure_
 - CinetPay (API v1) pour le premier fournisseur réel ;
 - aucune facture émise sans mentions de facturation ;
 - J15 reportée.
+
+## 12. Bilan de L6.1 (6 octobre 2026)
+
+**Capacités (J1)** : `registrations.read`, `registrations.manage`, `pricing.write` et
+`finance.read`, dans `apps/accounts/roles.py`.
+
+| Profil | Inscriptions (lecture) | Inscriptions (gestion) | Tarifs et mentions | Finances (lecture) |
+|---|---|---|---|---|
+| Administrateur | oui | oui | oui | oui |
+| Chair | oui | non | non | oui |
+| CO « finances » | oui | oui | oui | oui |
+| CO « secrétariat » | oui | oui | non | non |
+| Autres fonctions du CO | oui | non | non | non |
+| Président du CS, relecteurs, auteurs | non | non | non | non |
+
+**Modèles** (application `registrations`, puis `payments`, migrations initiales) :
+
+- `RegistrationSettings` (une ligne par édition, créée à la première lecture) :
+  - devise ;
+  - pays locaux ;
+  - moyens proposés : en ligne (désactivé par défaut), virement, sur place ;
+  - délais : 72 h en ligne, 30 jours par virement ;
+  - annulation : date limite et parts remboursées (100 % avant, 0 % après par défaut).
+- `RegistrationCategory`, `Fee` (unique par catégorie, période et zone ; montant positif ou
+  nul), `RegistrationOption` (prix par zone, quota, places réservées ≤ quota),
+  `PromoCode` (pourcentage ≤ 100, utilisations réservées et consommées ≤ maximum).
+- `Registration` :
+  - statut, période, zone, moyen ;
+  - lignes figées, total et devise ;
+  - options et code promo ;
+  - échéance ;
+  - identité de facturation ;
+  - `active_key` : une seule inscription active par personne et par édition, sans unicité
+    conditionnelle (même procédé que les affectations de L4) ;
+  - `qr_token` : seulement sur une inscription confirmée (contrainte CHECK).
+- `RegistrationStatusHistory` : en ajout seul.
+- `BillingProfile` (mentions de facturation) :
+  - raison sociale, adresse, identifiants, TVA éventuelle, pied de page, coordonnées
+    bancaires ;
+  - préfixes des trois séries, distincts et **figés dès la première pièce** de leur série ;
+  - `is_complete` : raison sociale et adresse renseignées, condition d'émission des
+    factures (J8).
+- `Payment` :
+  - unique par (fournisseur, référence) ;
+  - montant strictement positif ;
+  - empreinte du jeton de notification seulement ;
+  - validation manuelle : `recorded_by`, `received_on`.
+- `PaymentNotification` : en ajout seul, champs en liste blanche.
+- `BillingDocument` : facture, avoir ou pro forma, **en ajout seul** :
+  - numéro unique par (édition, nature, année, rang) et par (édition, numéro) ;
+  - un avoir a toujours une facture d'origine, une facture jamais.
+  - Nom choisi plutôt qu'« Invoice », puisque la table porte aussi avoirs et pro forma.
+- `Refund` : remboursement fait hors plateforme, lié à son avoir (J9).
+
+**Montants** : `apps/core/money.py`.
+
+- Table ISO 4217 fermée (XOF, XAF, EUR, USD, GNF, CDF) ; colonnes `Decimal(12, 2)`.
+- Arrondi au demi supérieur à la décimale de la devise ; contrôle `is_exact`.
+- Affichage des PDF et des e-mails en français et en anglais (espace fine insécable, vrai
+  signe moins).
+
+**Routes de gestion** (matrice des droits) :
+
+- `…/registrations/settings` : lecture `registrations.read`, écriture `pricing.write` ;
+- `…/billing/profile` : lecture `finance.read`, écriture `pricing.write` avec
+  **réauthentification récente** (J1).
+
+Les deux routes passent par des services qui :
+
+- verrouillent la ligne et journalisent l'avant et l'après (`registrations.settings_changed`,
+  `billing.profile_changed`) ;
+- refusent une édition archivée ;
+- figent la devise dès la première inscription (409 `setting_frozen`). Avant, un changement
+  de devise exige des tarifs exacts dans la nouvelle devise (12,50 n'existe pas en XOF).
+
+**Matrice des droits** : profils `OC_FINANCE` et `OC_SECRETARIAT` ajoutés ; le profil
+`OC_MEMBER` devient explicitement « logistique », sans écriture (la fonction « finances »,
+choisie par défaut par les aides de test, a désormais des droits propres). 1 817 cas.
+
+**Registre des données personnelles (J14)** :
+
+- **Export** : inscriptions avec leur historique, paiements (sans l'empreinte du jeton),
+  pièces de facturation et remboursements. Le jeton QR n'est pas exporté.
+- **Anonymisation refusée** tant qu'une inscription est en attente ou confirmée dans une
+  édition non archivée (`registration:<code>`).
+- **Ensuite** : identité de facturation et jeton QR effacés ; **factures et avoirs
+  conservés** avec l'identité figée, leur nombre consigné au journal
+  (`billing.documents_retained`, sans donnée personnelle).
+
+**Tests** : paramètres, mentions, montants, contraintes en base (SQLite et MariaDB),
+données personnelles, matrice.
+
+**Reporté à L6.4** : refuser `online_enabled` tant qu'aucun fournisseur de paiement n'est
+configuré. Le service de commande n'existe pas encore, donc ce réglage est aujourd'hui sans
+effet.

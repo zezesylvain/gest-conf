@@ -332,6 +332,54 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedAuditEntryList'
           description: ''
+  /v1/manage/editions/{edition_id}/billing/profile:
+    get:
+      operationId: manage_billing_profile_retrieve
+      description: '``…/billing/profile`` : mentions de facturation de l''édition
+        (Q8).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BillingProfile'
+          description: ''
+    patch:
+      operationId: manage_billing_profile_update
+      description: '``…/billing/profile`` : mentions de facturation de l''édition
+        (Q8).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBillingProfileRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BillingProfile'
+          description: ''
   /v1/manage/editions/{edition_id}/confidentiality:
     get:
       operationId: manage_confidentiality_retrieve
@@ -2256,6 +2304,54 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Ranking'
+          description: ''
+  /v1/manage/editions/{edition_id}/registrations/settings:
+    get:
+      operationId: manage_registration_settings_retrieve
+      description: '``…/registrations/settings`` : devise, pays locaux, moyens et
+        échéances, annulation.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistrationSettings'
+          description: ''
+    patch:
+      operationId: manage_registration_settings_update
+      description: '``…/registrations/settings`` : devise, pays locaux, moyens et
+        échéances, annulation.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedRegistrationSettingsRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistrationSettings'
           description: ''
   /v1/manage/editions/{edition_id}/review-progress:
     get:
@@ -4866,6 +4962,56 @@ components:
             $ref: '#/components/schemas/AuthorWriteRequest'
       required:
       - authors
+    BillingProfile:
+      type: object
+      description: |-
+        Mentions de facturation (J8, Q8) : lecture ``finance.read``, écriture
+        ``pricing.write`` avec réauthentification récente (J1). ``is_complete`` : raison sociale
+        et adresse renseignées, sans quoi aucune facture ne s'émet.
+      properties:
+        legal_name:
+          type: string
+          title: Raison sociale
+          maxLength: 255
+        address:
+          type: string
+          title: Adresse
+        tax_identifiers:
+          type: string
+          title: Identifiants (registre, fiscal)
+        vat_rate:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+          title: Taux de TVA (%)
+        vat_note:
+          type: string
+          title: Mention de TVA
+          maxLength: 255
+        footer:
+          type: string
+          title: Pied de page
+        bank_details:
+          type: string
+          title: Coordonnées bancaires
+        invoice_prefix:
+          type: string
+          title: Préfixe des factures
+          maxLength: 8
+        credit_note_prefix:
+          type: string
+          title: Préfixe des avoirs
+          maxLength: 8
+        proforma_prefix:
+          type: string
+          title: Préfixe des pro forma
+          maxLength: 8
+        is_complete:
+          type: boolean
+          readOnly: true
+      required:
+      - is_complete
     BlankEnum:
       enum:
       - ''
@@ -4959,6 +5105,10 @@ components:
       - program.read
       - program.write
       - program.publish
+      - registrations.read
+      - registrations.manage
+      - pricing.write
+      - finance.read
       type: string
       description: |-
         * `edition.read` - edition.read
@@ -4981,6 +5131,10 @@ components:
         * `program.read` - program.read
         * `program.write` - program.write
         * `program.publish` - program.publish
+        * `registrations.read` - registrations.read
+        * `registrations.manage` - registrations.manage
+        * `pricing.write` - pricing.write
+        * `finance.read` - finance.read
     Confidentiality:
       type: object
       description: Paramètres de l'évaluation (gestion, §6.1 ; plan L4 H4, H6, H12).
@@ -5285,6 +5439,22 @@ components:
       - code
       - label_fr
       - weight
+    Currency:
+      enum:
+      - XOF
+      - XAF
+      - EUR
+      - USD
+      - GNF
+      - CDF
+      type: string
+      description: |-
+        * `XOF` - franc CFA (UEMOA)
+        * `XAF` - franc CFA (CEMAC)
+        * `EUR` - euro
+        * `USD` - dollar des États-Unis
+        * `GNF` - franc guinéen
+        * `CDF` - franc congolais
     DecisionBatchItemRequest:
       type: object
       properties:
@@ -7100,6 +7270,54 @@ components:
           type: string
           format: date-time
           description: Nouvelle échéance, à l'heure de l'édition.
+    PatchedBillingProfileRequest:
+      type: object
+      description: |-
+        Mentions de facturation (J8, Q8) : lecture ``finance.read``, écriture
+        ``pricing.write`` avec réauthentification récente (J1). ``is_complete`` : raison sociale
+        et adresse renseignées, sans quoi aucune facture ne s'émet.
+      properties:
+        legal_name:
+          type: string
+          title: Raison sociale
+          maxLength: 255
+        address:
+          type: string
+          title: Adresse
+        tax_identifiers:
+          type: string
+          title: Identifiants (registre, fiscal)
+        vat_rate:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+          title: Taux de TVA (%)
+        vat_note:
+          type: string
+          title: Mention de TVA
+          maxLength: 255
+        footer:
+          type: string
+          title: Pied de page
+        bank_details:
+          type: string
+          title: Coordonnées bancaires
+        invoice_prefix:
+          type: string
+          minLength: 1
+          title: Préfixe des factures
+          maxLength: 8
+        credit_note_prefix:
+          type: string
+          minLength: 1
+          title: Préfixe des avoirs
+          maxLength: 8
+        proforma_prefix:
+          type: string
+          minLength: 1
+          title: Préfixe des pro forma
+          maxLength: 8
     PatchedConfidentialityRequest:
       type: object
       description: Paramètres de l'évaluation (gestion, §6.1 ; plan L4 H4, H6, H12).
@@ -7394,6 +7612,56 @@ components:
         published:
           type: boolean
           title: Publié
+    PatchedRegistrationSettingsRequest:
+      type: object
+      description: |-
+        Paramètres des inscriptions (J2, J5, J9) : lecture ``registrations.read``, écriture
+        ``pricing.write``.
+      properties:
+        currency:
+          allOf:
+          - $ref: '#/components/schemas/Currency'
+          title: Devise
+        local_countries:
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 2
+        online_enabled:
+          type: boolean
+          title: Paiement en ligne proposé
+        transfer_enabled:
+          type: boolean
+          title: Virement proposé
+        onsite_enabled:
+          type: boolean
+          title: Paiement sur place proposé
+        online_deadline_hours:
+          type: integer
+          maximum: 720
+          minimum: 1
+          title: Délai de paiement en ligne (heures)
+        transfer_deadline_days:
+          type: integer
+          maximum: 180
+          minimum: 1
+          title: Délai de paiement par virement (jours)
+        cancellation_deadline:
+          type: string
+          format: date-time
+          nullable: true
+          title: Annulation par le participant jusqu'au (UTC)
+        refund_percent_before:
+          type: integer
+          maximum: 100
+          minimum: 0
+          title: Part remboursée avant la date limite (%)
+        refund_percent_after:
+          type: integer
+          maximum: 100
+          minimum: 0
+          title: Part remboursée après la date limite (%)
     PatchedRoomWriteRequest:
       type: object
       properties:
@@ -9141,6 +9409,55 @@ components:
         * `accept_minor` - accepter avec corrections
         * `reject` - rejeter
         * `discuss` - discuter
+    RegistrationSettings:
+      type: object
+      description: |-
+        Paramètres des inscriptions (J2, J5, J9) : lecture ``registrations.read``, écriture
+        ``pricing.write``.
+      properties:
+        currency:
+          allOf:
+          - $ref: '#/components/schemas/Currency'
+          title: Devise
+        local_countries:
+          type: array
+          items:
+            type: string
+            maxLength: 2
+        online_enabled:
+          type: boolean
+          title: Paiement en ligne proposé
+        transfer_enabled:
+          type: boolean
+          title: Virement proposé
+        onsite_enabled:
+          type: boolean
+          title: Paiement sur place proposé
+        online_deadline_hours:
+          type: integer
+          maximum: 720
+          minimum: 1
+          title: Délai de paiement en ligne (heures)
+        transfer_deadline_days:
+          type: integer
+          maximum: 180
+          minimum: 1
+          title: Délai de paiement par virement (jours)
+        cancellation_deadline:
+          type: string
+          format: date-time
+          nullable: true
+          title: Annulation par le participant jusqu'au (UTC)
+        refund_percent_before:
+          type: integer
+          maximum: 100
+          minimum: 0
+          title: Part remboursée avant la date limite (%)
+        refund_percent_after:
+          type: integer
+          maximum: 100
+          minimum: 0
+          title: Part remboursée après la date limite (%)
     ReviewManage:
       type: object
       description: 'Évaluation envoyée, avec le nom du relecteur (H11 : visible du

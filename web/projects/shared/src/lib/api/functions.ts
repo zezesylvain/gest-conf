@@ -25,6 +25,10 @@ export type { ManageAssignmentCancel$Params as ManageAssignmentCancel$Params } f
 export { manageAssignmentCancel as manageAssignmentCancel } from './fn/manage/manage-assignment-cancel';
 export type { ManageAuditList$Params as ManageAuditList$Params } from './fn/manage/manage-audit-list';
 export { manageAuditList as manageAuditList } from './fn/manage/manage-audit-list';
+export type { ManageBillingProfileRetrieve$Params as ManageBillingProfileRetrieve$Params } from './fn/manage/manage-billing-profile-retrieve';
+export { manageBillingProfileRetrieve as manageBillingProfileRetrieve } from './fn/manage/manage-billing-profile-retrieve';
+export type { ManageBillingProfileUpdate$Params as ManageBillingProfileUpdate$Params } from './fn/manage/manage-billing-profile-update';
+export { manageBillingProfileUpdate as manageBillingProfileUpdate } from './fn/manage/manage-billing-profile-update';
 export type { ManageConfidentialityRetrieve$Params as ManageConfidentialityRetrieve$Params } from './fn/manage/manage-confidentiality-retrieve';
 export { manageConfidentialityRetrieve as manageConfidentialityRetrieve } from './fn/manage/manage-confidentiality-retrieve';
 export type { ManageConfidentialityUpdate$Params as ManageConfidentialityUpdate$Params } from './fn/manage/manage-confidentiality-update';
@@ -161,6 +165,10 @@ export type { ManageProgramSlotsUpdate$Params as ManageProgramSlotsUpdate$Params
 export { manageProgramSlotsUpdate as manageProgramSlotsUpdate } from './fn/manage/manage-program-slots-update';
 export type { ManageRanking$Params as ManageRanking$Params } from './fn/manage/manage-ranking';
 export { manageRanking as manageRanking } from './fn/manage/manage-ranking';
+export type { ManageRegistrationSettingsRetrieve$Params as ManageRegistrationSettingsRetrieve$Params } from './fn/manage/manage-registration-settings-retrieve';
+export { manageRegistrationSettingsRetrieve as manageRegistrationSettingsRetrieve } from './fn/manage/manage-registration-settings-retrieve';
+export type { ManageRegistrationSettingsUpdate$Params as ManageRegistrationSettingsUpdate$Params } from './fn/manage/manage-registration-settings-update';
+export { manageRegistrationSettingsUpdate as manageRegistrationSettingsUpdate } from './fn/manage/manage-registration-settings-update';
 export type { ManageReviewProgress$Params as ManageReviewProgress$Params } from './fn/manage/manage-review-progress';
 export { manageReviewProgress as manageReviewProgress } from './fn/manage/manage-review-progress';
 export type { ManageReviewSubmissionsList$Params as ManageReviewSubmissionsList$Params } from './fn/manage/manage-review-submissions-list';

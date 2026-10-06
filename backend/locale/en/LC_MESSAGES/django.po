@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gestconf-backend\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-06 07:26+0000\n"
+"POT-Creation-Date: 2026-10-06 16:51+0000\n"
 "PO-Revision-Date: 2026-10-05 11:00+0000\n"
 "Last-Translator: GEST-CONF\n"
 "Language-Team: GEST-CONF\n"
@@ -20,7 +20,7 @@ msgid "adresse e-mail"
 msgstr "email address"
 
 #: apps/accounts/models.py:30 apps/accounts/models.py:226
-#: apps/conferences/models.py:278
+#: apps/conferences/models.py:278 apps/registrations/models.py:308
 msgid "actif"
 msgstr "active"
 
@@ -197,10 +197,14 @@ msgstr "system"
 #: apps/communications/models.py:45 apps/conferences/models.py:175
 #: apps/conferences/models.py:207 apps/conferences/models.py:251
 #: apps/conferences/models.py:338 apps/core/models.py:98
-#: apps/core/models.py:279 apps/portal/models.py:54 apps/portal/models.py:132
-#: apps/portal/models.py:213 apps/portal/models.py:268
-#: apps/program/models.py:46 apps/program/models.py:108
-#: apps/program/models.py:275 apps/program/models.py:298
+#: apps/core/models.py:279 apps/payments/models.py:40
+#: apps/payments/models.py:231 apps/portal/models.py:54
+#: apps/portal/models.py:132 apps/portal/models.py:213
+#: apps/portal/models.py:268 apps/program/models.py:46
+#: apps/program/models.py:108 apps/program/models.py:275
+#: apps/program/models.py:298 apps/registrations/models.py:73
+#: apps/registrations/models.py:144 apps/registrations/models.py:215
+#: apps/registrations/models.py:288 apps/registrations/models.py:371
 #: apps/reviews/models.py:32 apps/reviews/models.py:126
 #: apps/submissions/models.py:51
 msgid "édition"
@@ -217,7 +221,8 @@ msgstr "organising committee function"
 
 #: apps/accounts/models.py:265 apps/accounts/models.py:356
 #: apps/communications/models.py:58 apps/conferences/models.py:133
-#: apps/core/models.py:208 apps/reviews/models.py:178
+#: apps/core/models.py:208 apps/payments/models.py:130
+#: apps/registrations/models.py:388 apps/reviews/models.py:178
 #: apps/reviews/models.py:300 apps/submissions/models.py:89
 msgid "statut"
 msgstr "status"
@@ -260,11 +265,11 @@ msgid "refusée"
 msgstr "declined"
 
 #: apps/accounts/models.py:327 apps/core/models.py:187
-#: apps/reviews/models.py:146
+#: apps/registrations/models.py:347 apps/reviews/models.py:146
 msgid "annulée"
 msgstr "cancelled"
 
-#: apps/accounts/models.py:328
+#: apps/accounts/models.py:328 apps/registrations/models.py:348
 msgid "expirée"
 msgstr "expired"
 
@@ -356,7 +361,7 @@ msgstr "speaker"
 msgid "président de session"
 msgstr "session chair"
 
-#: apps/accounts/roles.py:28
+#: apps/accounts/roles.py:28 apps/registrations/models.py:377
 msgid "participant"
 msgstr "attendee"
 
@@ -402,9 +407,10 @@ msgid "secrétariat"
 msgstr "secretariat"
 
 #: apps/accounts/services/account.py:66 apps/conferences/services.py:111
-#: apps/conferences/services.py:495 apps/program/services/planning.py:137
-#: apps/program/services/planning.py:239 apps/program/services/planning.py:520
-#: apps/program/services/settings.py:38
+#: apps/conferences/services.py:495 apps/payments/services/billing.py:77
+#: apps/program/services/planning.py:137 apps/program/services/planning.py:239
+#: apps/program/services/planning.py:520 apps/program/services/settings.py:38
+#: apps/registrations/services/settings.py:106
 msgid "Champ non modifiable."
 msgstr "This field cannot be changed."
 
@@ -1057,7 +1063,8 @@ msgid "compte"
 msgstr "account"
 
 #: apps/communications/models.py:113 apps/core/models.py:285
-#: apps/reviews/models.py:235 apps/submissions/models.py:177
+#: apps/payments/models.py:235 apps/reviews/models.py:235
+#: apps/submissions/models.py:177
 msgid "nature"
 msgstr "kind"
 
@@ -1111,13 +1118,15 @@ msgstr "name (EN)"
 
 #: apps/conferences/models.py:31 apps/conferences/models.py:212
 #: apps/conferences/models.py:258 apps/portal/models.py:140
-#: apps/program/models.py:115
+#: apps/program/models.py:115 apps/registrations/models.py:151
+#: apps/registrations/models.py:222
 msgid "description (FR)"
 msgstr "description (FR)"
 
 #: apps/conferences/models.py:32 apps/conferences/models.py:213
 #: apps/conferences/models.py:259 apps/portal/models.py:141
-#: apps/program/models.py:116
+#: apps/program/models.py:116 apps/registrations/models.py:152
+#: apps/registrations/models.py:223
 msgid "description (EN)"
 msgstr "description (EN)"
 
@@ -1149,11 +1158,13 @@ msgstr "archived"
 
 #: apps/conferences/models.py:73 apps/conferences/models.py:209
 #: apps/conferences/models.py:255 apps/conferences/models.py:340
-#: apps/portal/models.py:57 apps/reviews/models.py:86
+#: apps/portal/models.py:57 apps/registrations/models.py:148
+#: apps/registrations/models.py:219 apps/registrations/models.py:292
+#: apps/reviews/models.py:86
 msgid "code"
 msgstr "code"
 
-#: apps/conferences/models.py:77
+#: apps/conferences/models.py:77 apps/payments/models.py:236
 msgid "année"
 msgstr "year"
 
@@ -1251,12 +1262,14 @@ msgstr "editions"
 #: apps/conferences/models.py:214 apps/conferences/models.py:277
 #: apps/conferences/models.py:346 apps/core/models.py:296
 #: apps/portal/models.py:228 apps/program/models.py:59
-#: apps/program/models.py:174 apps/reviews/models.py:97
+#: apps/program/models.py:174 apps/registrations/models.py:155
+#: apps/registrations/models.py:235 apps/reviews/models.py:97
 #: apps/submissions/models.py:134
 msgid "ordre"
 msgstr "order"
 
 #: apps/conferences/models.py:215 apps/program/models.py:58
+#: apps/registrations/models.py:154 apps/registrations/models.py:234
 #: apps/reviews/models.py:144
 msgid "active"
 msgstr "active"
@@ -1283,12 +1296,14 @@ msgid "obligatoire"
 msgstr "required"
 
 #: apps/conferences/models.py:256 apps/conferences/models.py:343
-#: apps/portal/models.py:216 apps/reviews/models.py:87
+#: apps/portal/models.py:216 apps/registrations/models.py:149
+#: apps/registrations/models.py:220 apps/reviews/models.py:87
 msgid "libellé (FR)"
 msgstr "label (FR)"
 
 #: apps/conferences/models.py:257 apps/conferences/models.py:344
-#: apps/portal/models.py:217 apps/reviews/models.py:88
+#: apps/portal/models.py:217 apps/registrations/models.py:150
+#: apps/registrations/models.py:221 apps/reviews/models.py:88
 msgid "libellé (EN)"
 msgstr "label (EN)"
 
@@ -1530,8 +1545,9 @@ msgstr "before"
 msgid "après"
 msgstr "after"
 
-#: apps/core/models.py:112 apps/reviews/models.py:236
-#: apps/submissions/models.py:273 apps/submissions/models.py:303
+#: apps/core/models.py:112 apps/registrations/models.py:494
+#: apps/reviews/models.py:236 apps/submissions/models.py:273
+#: apps/submissions/models.py:303
 msgid "motif"
 msgstr "reason"
 
@@ -1551,7 +1567,7 @@ msgstr "audit log entry"
 msgid "journal d'audit"
 msgstr "audit log"
 
-#: apps/core/models.py:184 apps/core/models.py:233
+#: apps/core/models.py:184 apps/core/models.py:233 apps/payments/models.py:98
 msgid "en cours"
 msgstr "running"
 
@@ -1603,7 +1619,7 @@ msgstr "job"
 msgid "tâches"
 msgstr "jobs"
 
-#: apps/core/models.py:234
+#: apps/core/models.py:234 apps/payments/models.py:99
 msgid "réussi"
 msgstr "succeeded"
 
@@ -1679,7 +1695,8 @@ msgstr "content type"
 msgid "taille (octets)"
 msgstr "size (bytes)"
 
-#: apps/core/models.py:291 apps/submissions/models.py:182
+#: apps/core/models.py:291 apps/payments/models.py:267
+#: apps/submissions/models.py:182
 msgid "empreinte SHA-256"
 msgstr "SHA-256 digest"
 
@@ -1703,7 +1720,7 @@ msgstr "public file"
 msgid "fichiers publics"
 msgstr "public files"
 
-#: apps/core/models.py:331
+#: apps/core/models.py:331 apps/registrations/models.py:296
 msgid "portée"
 msgstr "scope"
 
@@ -1718,6 +1735,30 @@ msgstr "counter"
 #: apps/core/models.py:336
 msgid "compteurs"
 msgstr "counters"
+
+#: apps/core/money.py:27
+msgid "franc CFA (UEMOA)"
+msgstr "CFA franc (WAEMU)"
+
+#: apps/core/money.py:28
+msgid "franc CFA (CEMAC)"
+msgstr "CFA franc (CEMAC)"
+
+#: apps/core/money.py:29
+msgid "euro"
+msgstr "euro"
+
+#: apps/core/money.py:30
+msgid "dollar des États-Unis"
+msgstr "US dollar"
+
+#: apps/core/money.py:31
+msgid "franc guinéen"
+msgstr "Guinean franc"
+
+#: apps/core/money.py:32
+msgid "franc congolais"
+msgstr "Congolese franc"
 
 #: apps/core/public_files.py:90
 msgid "Archive illisible."
@@ -1779,6 +1820,266 @@ msgstr "Resource not found."
 #: apps/core/views.py:200
 msgid "Erreur interne du serveur."
 msgstr "Internal server error."
+
+#: apps/payments/models.py:44
+msgid "raison sociale"
+msgstr "legal name"
+
+#: apps/payments/models.py:45 apps/portal/models.py:226
+msgid "adresse"
+msgstr "address"
+
+#: apps/payments/models.py:46
+msgid "identifiants (registre, fiscal)"
+msgstr "identifiers (registration, tax)"
+
+#: apps/payments/models.py:48
+msgid "taux de TVA (%)"
+msgstr "VAT rate (%)"
+
+#: apps/payments/models.py:55
+msgid "mention de TVA"
+msgstr "VAT statement"
+
+#: apps/payments/models.py:56 apps/portal/models.py:206
+msgid "pied de page"
+msgstr "footer"
+
+#: apps/payments/models.py:57
+msgid "coordonnées bancaires"
+msgstr "bank details"
+
+#: apps/payments/models.py:58
+msgid "préfixe des factures"
+msgstr "invoice prefix"
+
+#: apps/payments/models.py:59
+msgid "préfixe des avoirs"
+msgstr "credit note prefix"
+
+#: apps/payments/models.py:60
+msgid "préfixe des pro forma"
+msgstr "pro forma prefix"
+
+#: apps/payments/models.py:76 apps/payments/models.py:77
+msgid "mentions de facturation"
+msgstr "billing details"
+
+#: apps/payments/models.py:91
+msgid "paiement manuel"
+msgstr "manual payment"
+
+#: apps/payments/models.py:92
+msgid "fournisseur factice"
+msgstr "fake provider"
+
+#: apps/payments/models.py:93
+msgid "CinetPay"
+msgstr "CinetPay"
+
+#: apps/payments/models.py:97
+msgid "initié"
+msgstr "initiated"
+
+#: apps/payments/models.py:100
+msgid "échoué"
+msgstr "failed"
+
+#: apps/payments/models.py:101
+msgid "abandonné"
+msgstr "abandoned"
+
+#: apps/payments/models.py:117 apps/payments/models.py:241
+#: apps/payments/models.py:306 apps/registrations/models.py:439
+#: apps/registrations/models.py:474
+msgid "inscription"
+msgstr "registration"
+
+#: apps/payments/models.py:121 apps/payments/models.py:183
+msgid "fournisseur"
+msgstr "provider"
+
+#: apps/payments/models.py:122 apps/payments/models.py:320
+msgid "moyen"
+msgstr "method"
+
+#: apps/payments/models.py:123 apps/payments/models.py:321
+#: apps/submissions/models.py:58
+msgid "référence"
+msgstr "reference"
+
+#: apps/payments/models.py:125
+msgid "référence du fournisseur"
+msgstr "provider reference"
+
+#: apps/payments/models.py:127 apps/payments/models.py:261
+#: apps/payments/models.py:318 apps/registrations/models.py:190
+#: apps/registrations/models.py:270
+msgid "montant"
+msgstr "amount"
+
+#: apps/payments/models.py:128 apps/payments/models.py:262
+#: apps/payments/models.py:319 apps/registrations/models.py:78
+#: apps/registrations/models.py:398
+msgid "devise"
+msgstr "currency"
+
+#: apps/payments/models.py:133
+msgid "dernier statut du fournisseur"
+msgstr "latest provider status"
+
+#: apps/payments/models.py:136
+msgid "empreinte du jeton de notification"
+msgstr "notification token hash"
+
+#: apps/payments/models.py:138
+msgid "terminé le"
+msgstr "completed on"
+
+#: apps/payments/models.py:139
+msgid "dernière interrogation"
+msgstr "last status check"
+
+#: apps/payments/models.py:140
+msgid "reçu le"
+msgstr "received on"
+
+#: apps/payments/models.py:143
+msgid "validé par"
+msgstr "validated by"
+
+#: apps/payments/models.py:149 apps/reviews/models.py:357
+msgid "note"
+msgstr "score"
+
+#: apps/payments/models.py:165 apps/payments/models.py:187
+#: apps/payments/models.py:255
+msgid "paiement"
+msgstr "payment"
+
+#: apps/payments/models.py:166
+msgid "paiements"
+msgstr "payments"
+
+#: apps/payments/models.py:184
+msgid "référence annoncée"
+msgstr "announced reference"
+
+#: apps/payments/models.py:193
+msgid "reçue le"
+msgstr "received on"
+
+#: apps/payments/models.py:194
+msgid "jeton valide"
+msgstr "valid token"
+
+#: apps/payments/models.py:195 apps/reviews/models.py:477
+msgid "issue"
+msgstr "outcome"
+
+#: apps/payments/models.py:196
+msgid "champs reçus"
+msgstr "received fields"
+
+#: apps/payments/models.py:199
+msgid "notification de paiement"
+msgstr "payment notification"
+
+#: apps/payments/models.py:200
+msgid "notifications de paiement"
+msgstr "payment notifications"
+
+#: apps/payments/models.py:212
+msgid "facture"
+msgstr "invoice"
+
+#: apps/payments/models.py:213 apps/payments/models.py:312
+msgid "avoir"
+msgstr "credit note"
+
+#: apps/payments/models.py:214
+msgid "pro forma"
+msgstr "pro forma"
+
+#: apps/payments/models.py:237
+msgid "rang dans la série"
+msgstr "rank in series"
+
+#: apps/payments/models.py:238 apps/submissions/models.py:216
+msgid "numéro"
+msgstr "number"
+
+#: apps/payments/models.py:247
+msgid "facture d'origine"
+msgstr "original invoice"
+
+#: apps/payments/models.py:263 apps/registrations/models.py:396
+msgid "lignes"
+msgstr "lines"
+
+#: apps/payments/models.py:264
+msgid "émetteur (mentions figées)"
+msgstr "issuer (frozen details)"
+
+#: apps/payments/models.py:265
+msgid "client (identité figée)"
+msgstr "customer (frozen identity)"
+
+#: apps/payments/models.py:266 apps/reviews/models.py:518
+msgid "fichier"
+msgstr "file"
+
+#: apps/payments/models.py:268
+msgid "taille"
+msgstr "size"
+
+#: apps/payments/models.py:269
+msgid "émise le"
+msgstr "issued on"
+
+#: apps/payments/models.py:272
+msgid "émise par"
+msgstr "issued by"
+
+#: apps/payments/models.py:280
+msgid "pièce de facturation"
+msgstr "billing document"
+
+#: apps/payments/models.py:281
+msgid "pièces de facturation"
+msgstr "billing documents"
+
+#: apps/payments/models.py:322
+msgid "remboursé le"
+msgstr "refunded on"
+
+#: apps/payments/models.py:325
+msgid "enregistré par"
+msgstr "recorded by"
+
+#: apps/payments/models.py:339
+msgid "remboursement"
+msgstr "refund"
+
+#: apps/payments/models.py:340
+msgid "remboursements"
+msgstr "refunds"
+
+#: apps/payments/services/billing.py:51
+msgid "Une à huit majuscules ou chiffres, en commençant par une lettre."
+msgstr "One to eight capital letters or digits, starting with a letter."
+
+#: apps/payments/services/billing.py:56
+msgid "Préfixe déjà utilisé par une autre série."
+msgstr "Prefix already used by another series."
+
+#: apps/payments/services/billing.py:63
+msgid "Préfixe figé : des pièces de cette série ont déjà été émises."
+msgstr "Prefix frozen: documents of this series have already been issued."
+
+#: apps/payments/services/billing.py:65
+msgid "Préfixe figé : des pièces de cette série existent."
+msgstr "Prefix frozen: documents of this series exist."
 
 #: apps/portal/models.py:27
 msgid "texte riche"
@@ -1889,17 +2190,9 @@ msgstr "placed sections"
 msgid "en-tête"
 msgstr "header"
 
-#: apps/portal/models.py:206
-msgid "pied de page"
-msgstr "footer"
-
 #: apps/portal/models.py:215
 msgid "emplacement"
 msgstr "location"
-
-#: apps/portal/models.py:226
-msgid "adresse"
-msgstr "address"
 
 #: apps/portal/models.py:227
 msgid "nouvel onglet"
@@ -2257,7 +2550,7 @@ msgstr "programme publications"
 msgid "présentateurs (positions des auteurs)"
 msgstr "presenters (author positions)"
 
-#: apps/program/models.py:355
+#: apps/program/models.py:355 apps/registrations/models.py:411
 msgid "confirmée le"
 msgstr "confirmed on"
 
@@ -2528,6 +2821,285 @@ msgstr "Programme: %(link)s"
 msgid "[%(site_name)s] Une communication a été retirée du programme"
 msgstr "[%(site_name)s] A paper has been withdrawn from the programme"
 
+#: apps/registrations/models.py:34
+msgid "préférentiel"
+msgstr "early bird"
+
+#: apps/registrations/models.py:35
+msgid "normal"
+msgstr "regular"
+
+#: apps/registrations/models.py:36 apps/registrations/models.py:53
+msgid "sur place"
+msgstr "on site"
+
+#: apps/registrations/models.py:43
+msgid "local"
+msgstr "local"
+
+#: apps/registrations/models.py:44
+msgid "international"
+msgstr "international"
+
+#: apps/registrations/models.py:51
+msgid "paiement en ligne"
+msgstr "online payment"
+
+#: apps/registrations/models.py:52
+msgid "virement (bon de commande)"
+msgstr "bank transfer (purchase order)"
+
+#: apps/registrations/models.py:54
+msgid "aucun paiement (montant nul)"
+msgstr "no payment (zero amount)"
+
+#: apps/registrations/models.py:55
+msgid "gratuité accordée"
+msgstr "fee waiver"
+
+#: apps/registrations/models.py:80
+msgid "pays locaux"
+msgstr "local countries"
+
+#: apps/registrations/models.py:81
+msgid "paiement en ligne proposé"
+msgstr "online payment offered"
+
+#: apps/registrations/models.py:82
+msgid "virement proposé"
+msgstr "bank transfer offered"
+
+#: apps/registrations/models.py:83
+msgid "paiement sur place proposé"
+msgstr "on-site payment offered"
+
+#: apps/registrations/models.py:85
+msgid "délai de paiement en ligne (heures)"
+msgstr "online payment deadline (hours)"
+
+#: apps/registrations/models.py:90
+msgid "délai de paiement par virement (jours)"
+msgstr "bank transfer deadline (days)"
+
+#: apps/registrations/models.py:95
+msgid "annulation par le participant jusqu'au (UTC)"
+msgstr "participant cancellation until (UTC)"
+
+#: apps/registrations/models.py:98
+msgid "part remboursée avant la date limite (%)"
+msgstr "refunded share before the deadline (%)"
+
+#: apps/registrations/models.py:103
+msgid "part remboursée après la date limite (%)"
+msgstr "refunded share after the deadline (%)"
+
+#: apps/registrations/models.py:122 apps/registrations/models.py:123
+msgid "paramètres des inscriptions"
+msgstr "registration settings"
+
+#: apps/registrations/models.py:153
+msgid "justificatif demandé"
+msgstr "proof required"
+
+#: apps/registrations/models.py:167
+msgid "catégorie d'inscription"
+msgstr "registration category"
+
+#: apps/registrations/models.py:168
+msgid "catégories d'inscription"
+msgstr "registration categories"
+
+#: apps/registrations/models.py:184 apps/registrations/models.py:383
+msgid "catégorie"
+msgstr "category"
+
+#: apps/registrations/models.py:188 apps/registrations/models.py:393
+msgid "période"
+msgstr "period"
+
+#: apps/registrations/models.py:189 apps/registrations/models.py:394
+msgid "zone"
+msgstr "zone"
+
+#: apps/registrations/models.py:195
+msgid "tarif"
+msgstr "fee"
+
+#: apps/registrations/models.py:196
+msgid "tarifs"
+msgstr "fees"
+
+#: apps/registrations/models.py:224
+msgid "prix (local)"
+msgstr "price (local)"
+
+#: apps/registrations/models.py:225
+msgid "prix (international)"
+msgstr "price (international)"
+
+#: apps/registrations/models.py:226
+msgid "places"
+msgstr "places"
+
+#: apps/registrations/models.py:227
+msgid "places réservées"
+msgstr "reserved places"
+
+#: apps/registrations/models.py:230
+msgid "catégories autorisées"
+msgstr "allowed categories"
+
+#: apps/registrations/models.py:249
+msgid "option d'inscription"
+msgstr "registration option"
+
+#: apps/registrations/models.py:250
+msgid "options d'inscription"
+msgstr "registration options"
+
+#: apps/registrations/models.py:269
+msgid "pourcentage"
+msgstr "percentage"
+
+#: apps/registrations/models.py:274
+msgid "inscription seule"
+msgstr "registration only"
+
+#: apps/registrations/models.py:275
+msgid "inscription et options"
+msgstr "registration and options"
+
+#: apps/registrations/models.py:293
+msgid "type de remise"
+msgstr "discount type"
+
+#: apps/registrations/models.py:294
+msgid "valeur"
+msgstr "value"
+
+#: apps/registrations/models.py:302
+msgid "catégories visées"
+msgstr "targeted categories"
+
+#: apps/registrations/models.py:304
+msgid "utilisations maximales"
+msgstr "maximum uses"
+
+#: apps/registrations/models.py:305
+msgid "utilisations réservées"
+msgstr "reserved uses"
+
+#: apps/registrations/models.py:306
+msgid "utilisations consommées"
+msgstr "consumed uses"
+
+#: apps/registrations/models.py:307
+msgid "valable jusqu'au (UTC)"
+msgstr "valid until (UTC)"
+
+#: apps/registrations/models.py:321 apps/registrations/models.py:404
+msgid "code promo"
+msgstr "promo code"
+
+#: apps/registrations/models.py:322
+msgid "codes promo"
+msgstr "promo codes"
+
+#: apps/registrations/models.py:345
+msgid "en attente de paiement"
+msgstr "awaiting payment"
+
+#: apps/registrations/models.py:346
+msgid "confirmée"
+msgstr "confirmed"
+
+#: apps/registrations/models.py:395
+msgid "moyen de paiement"
+msgstr "payment method"
+
+#: apps/registrations/models.py:397
+msgid "total"
+msgstr "total"
+
+#: apps/registrations/models.py:400
+msgid "options"
+msgstr "options"
+
+#: apps/registrations/models.py:410
+msgid "échéance de paiement"
+msgstr "payment deadline"
+
+#: apps/registrations/models.py:412
+msgid "annulée ou expirée le"
+msgstr "cancelled or expired on"
+
+#: apps/registrations/models.py:413
+msgid "nom de facturation"
+msgstr "billing name"
+
+#: apps/registrations/models.py:415
+msgid "organisme de facturation"
+msgstr "billing organisation"
+
+#: apps/registrations/models.py:417
+msgid "adresse de facturation"
+msgstr "billing address"
+
+#: apps/registrations/models.py:418
+msgid "jeton QR"
+msgstr "QR token"
+
+#: apps/registrations/models.py:420 apps/reviews/models.py:191
+msgid "clé d'unicité active"
+msgstr "active uniqueness key"
+
+#: apps/registrations/models.py:440
+msgid "inscriptions"
+msgstr "registrations"
+
+#: apps/registrations/models.py:479
+msgid "statut de départ"
+msgstr "from status"
+
+#: apps/registrations/models.py:482
+msgid "statut d'arrivée"
+msgstr "to status"
+
+#: apps/registrations/models.py:484
+msgid "date du changement"
+msgstr "change date"
+
+#: apps/registrations/models.py:487
+msgid "auteur du changement"
+msgstr "changed by"
+
+#: apps/registrations/models.py:493
+msgid "acteur (commande ou tâche)"
+msgstr "actor (command or task)"
+
+#: apps/registrations/models.py:497
+msgid "historique d'une inscription"
+msgstr "registration history"
+
+#: apps/registrations/models.py:498
+msgid "historiques des inscriptions"
+msgstr "registration histories"
+
+#: apps/registrations/services/settings.py:63
+msgid "Liste de codes pays attendue."
+msgstr "A list of country codes is expected."
+
+#: apps/registrations/services/settings.py:78
+#: apps/registrations/services/settings.py:80
+msgid "Devise figée : des inscriptions existent déjà."
+msgstr "Currency frozen: registrations already exist."
+
+#: apps/registrations/services/settings.py:93
+msgid ""
+"Des tarifs ont plus de décimales que cette devise : corrigez-les d'abord."
+msgstr ""
+"Some fees have more decimals than this currency allows: correct them first."
+
 #: apps/reviews/models.py:46
 msgid "note minimale"
 msgstr "minimum score"
@@ -2629,10 +3201,6 @@ msgstr "reminders sent"
 #: apps/reviews/models.py:189
 msgid "rang du pseudonyme"
 msgstr "pseudonym rank"
-
-#: apps/reviews/models.py:191
-msgid "clé d'unicité active"
-msgstr "active uniqueness key"
 
 #: apps/reviews/models.py:197 apps/reviews/models.py:292
 msgid "affectation"
@@ -2755,10 +3323,6 @@ msgstr "review"
 msgid "évaluations"
 msgstr "reviews"
 
-#: apps/reviews/models.py:357
-msgid "note"
-msgstr "score"
-
 #: apps/reviews/models.py:360
 msgid "note de critère"
 msgstr "criterion score"
@@ -2815,10 +3379,6 @@ msgstr "waiting list"
 msgid "rejetée"
 msgstr "rejected"
 
-#: apps/reviews/models.py:477
-msgid "issue"
-msgstr "outcome"
-
 #: apps/reviews/models.py:480
 msgid "format attribué"
 msgstr "assigned format"
@@ -2838,10 +3398,6 @@ msgstr "decision"
 #: apps/reviews/models.py:500
 msgid "décisions"
 msgstr "decisions"
-
-#: apps/reviews/models.py:518
-msgid "fichier"
-msgstr "file"
 
 #: apps/reviews/models.py:522
 msgid "lettre de réponse"
@@ -3340,10 +3896,6 @@ msgstr "published in the proceedings"
 msgid "retirée"
 msgstr "withdrawn"
 
-#: apps/submissions/models.py:58
-msgid "référence"
-msgstr "reference"
-
 #: apps/submissions/models.py:61
 msgid "soumissionnaire"
 msgstr "submitter"
@@ -3419,10 +3971,6 @@ msgstr "submission file"
 #: apps/submissions/models.py:195
 msgid "fichiers de soumission"
 msgstr "submission files"
-
-#: apps/submissions/models.py:216
-msgid "numéro"
-msgstr "number"
 
 #: apps/submissions/models.py:241
 msgid "révision de soumission"

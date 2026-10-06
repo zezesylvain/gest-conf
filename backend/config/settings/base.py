@@ -49,6 +49,8 @@ INSTALLED_APPS = [
     "apps.submissions",
     "apps.reviews",
     "apps.program",
+    "apps.registrations",
+    "apps.payments",
     # Après les applications du projet : leurs gabarits d'e-mails (account/email/*) priment.
     "allauth",
     "allauth.account",
@@ -344,6 +346,7 @@ SPECTACULAR_SETTINGS = {
         "ConsentRequestSource": "apps.accounts.serializers.ConsentRequestSource",
         "Role": "apps.accounts.roles.Role",
         "Capability": "apps.accounts.roles.CAPABILITY_CHOICES",
+        "Currency": "apps.core.money.Currency",
         "InvitableRole": "apps.accounts.roles.InvitableRole",
         "OcFunction": "apps.accounts.roles.OcFunction",
         "UserRoleStatus": "apps.accounts.models.UserRoleStatus",
