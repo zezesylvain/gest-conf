@@ -952,3 +952,75 @@ Cette vérification a révélé trois défauts, corrigés :
 
 **Critère de fin** (« Démo H côté gestion ») : atteint pour la gestion. La démo complète,
 téléphone réel compris, relève de L7.8.
+
+## 18. Bilan de L7.7 (6 octobre 2026)
+
+**« Mes documents »** (K15 ; `/compte/mes-documents`, `account/documents/`) :
+
+- **badge** :
+  - pour l'inscription confirmée dont le QR existe : téléchargement du PDF par l'endpoint
+    authentifié (généré à la demande, jamais stocké) ;
+  - rappel que le QR est l'accès à l'accueil et ne se partage pas ;
+  - avant la confirmation : renvoi vers « Mon inscription » ;
+- **attestations** (`GET /v1/me/certificates`) :
+  - nature, édition et titre de la communication ;
+  - date d'émission, PDF et page de vérification ;
+  - une attestation révoquée est signalée, sans PDF (le serveur le refuse) ;
+- **lettre d'invitation** (K12), pour l'inscription en cours :
+  - demande : nom du passeport, nationalité, numéro, dates du séjour, ambassade ;
+  - suivi :
+    - en cours d'examen ;
+    - refusée avec son motif, puis nouvelle demande pré-remplie (sans le numéro de
+      passeport, jamais renvoyé en clair) ;
+    - émise : PDF et rappel de sa portée ;
+    - révoquée ;
+  - erreurs de champ posées sur le formulaire ; refus de règle (409), message du serveur ;
+- liens :
+  - menu de l'espace compte ;
+  - accueil du compte ;
+  - « Mon inscription », sous le QR ;
+- l'e-mail « attestation disponible » (L7.4) pointait déjà vers cette adresse.
+
+**Vérification publique** (K10 ; `/verification/<code>` et `/verification`) :
+
+- page hors des préfixes de langue, **rendue dans le navigateur** (`RenderMode.Client`,
+  jamais pré-rendue), servie par le repli SPA existant du `.htaccess` ;
+- résultat :
+  - nature ;
+  - titulaire, ou « non communiqué » si la personne est anonymisée ;
+  - conférence et ses dates ;
+  - date d'émission ;
+  - statut : authentique, ou révoquée avec sa date ;
+  - lettre d'invitation distinguée de l'attestation ;
+- code inconnu ou mal formé : un seul message, sans détail ; débit dépassé : message
+  d'erreur ;
+- saisie manuelle du code : majuscules, espaces et tirets de recopie retirés ;
+- `noindex` :
+  - balise meta posée par la page ;
+  - `Disallow: /verification` dans `robots.txt` ;
+  - **précision de K10** : pas d'en-tête `X-Robots-Tag` par chemin (`<If>` du
+    `.htaccess`), dont la prise en charge chez o2switch n'est pas vérifiée ;
+- `deploy/smoke-test.sh` contrôle :
+  - le `Disallow` ;
+  - le service de `/verification/<code>` par la coquille rendue dans le navigateur.
+
+**Vérifié au navigateur** (build de production du portail, API de vérification
+simulée) :
+
+- titre de la page ;
+- résultat « Attestation authentique » avec titulaire, conférence et dates ;
+- balise `noindex` ;
+- code inconnu : message unique ;
+- aucune erreur JavaScript.
+
+**Tests** :
+
+- portail : **158 tests**, dont 14 nouveaux :
+  - « Mes documents » : badge, attestations valides et révoquées ;
+  - lettre : demande, refus de règle, nouvelle demande, lettre émise ;
+  - vérification : valide, révoquée et anonymisée, lettre, inconnue, débit, saisie ;
+- lint, `format:check` ;
+- build complet ;
+- budget du portail : 368,9 ko (avertissement déjà connu, +0,3 ko pour les deux routes).
+
+**Critère de fin** (« Démo H côté portail ») : atteint, hors démo sur o2switch (L7.8).

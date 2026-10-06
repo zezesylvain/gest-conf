@@ -56,6 +56,9 @@ import { ensureThemeStylesheet } from './theme';
         <a routerLink="/compte/mon-passage" routerLinkActive="active">
           {{ 'portail.account.nav.agenda' | translate }}
         </a>
+        <a routerLink="/compte/mes-documents" routerLinkActive="active">
+          {{ 'portail.account.nav.documents' | translate }}
+        </a>
         <a
           routerLink="/compte/notifications"
           routerLinkActive="active"

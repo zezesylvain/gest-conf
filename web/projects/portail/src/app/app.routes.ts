@@ -48,6 +48,20 @@ export const routes: Routes = [
     path: 'compte',
     loadChildren: () => import('./account/account.routes').then((m) => m.accountRoutes),
   },
+  // Vérification publique d'une attestation ou d'une lettre (plan L7, K10) : adresse du QR,
+  // hors des préfixes de langue, rendue dans le navigateur (jamais pré-rendue).
+  {
+    path: 'verification',
+    title: 'portail.verification.title',
+    loadComponent: () =>
+      import('./pages/verification/verification-page').then((m) => m.VerificationPage),
+  },
+  {
+    path: 'verification/:code',
+    title: 'portail.verification.title',
+    loadComponent: () =>
+      import('./pages/verification/verification-page').then((m) => m.VerificationPage),
+  },
   {
     path: '**',
     title: 'portail.notFound.title',

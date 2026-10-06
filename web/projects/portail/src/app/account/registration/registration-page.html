@@ -216,6 +216,11 @@
           [alt]="'portail.registration.account.qrAlt' | translate: { reference: current.reference }"
         />
       }
+      <p>
+        <a routerLink="/compte/mes-documents">{{
+          'portail.registration.account.documentsLink' | translate
+        }}</a>
+      </p>
     </section>
   } @else if (catalog(); as offer) {
     <!-- Commande : prix calculé par le serveur avant engagement. -->

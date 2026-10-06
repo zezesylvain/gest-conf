@@ -9,3 +9,6 @@ Disallow: /gestion/
 Disallow: /compte/
 # Page d'accueil de l'espace compte, sans barre oblique finale (« $ » : fin d'URL, RFC 9309).
 Disallow: /compte$
+# Vérification publique des attestations (plan L7, K10) : pages à usage ponctuel, portant
+# un nom ; balise meta « noindex » posée par la page.
+Disallow: /verification

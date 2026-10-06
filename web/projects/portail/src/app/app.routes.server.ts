@@ -91,5 +91,7 @@ export const serverRoutes: ServerRoute[] = [
   ...sitePageRoutes,
   // Espace compte : jamais pré-rendu (lecture des jetons du fragment, état de session).
   { path: 'compte/**', renderMode: RenderMode.Client },
+  // Vérification publique (plan L7, K10) : lue à chaque visite, jamais figée au build.
+  { path: 'verification/**', renderMode: RenderMode.Client },
   { path: '**', renderMode: RenderMode.Client },
 ];

@@ -77,9 +77,14 @@ check "portail : CSP en <meta> sur le repli SPA (pages /compte/*)" "$(has_meta_c
 robots=$("${CURL[@]}" -D - "$BASE_URL/robots.txt")
 check "portail : /robots.txt servi tel quel (texte, pas le repli SPA)" \
   "$(has_header "$robots" content-type 'text/plain' && [[ "$robots" != *"<portail-root"* ]] && echo 1)"
-check "portail : robots.txt exclut /api/, /gestion/ et /compte/" \
+check "portail : robots.txt exclut /api/, /gestion/, /compte/ et /verification" \
   "$(grep -Eq '^Disallow:[[:space:]]*/api/' <<<"$robots" && grep -Eq '^Disallow:[[:space:]]*/gestion/' <<<"$robots" \
-    && grep -Eq '^Disallow:[[:space:]]*/compte/' <<<"$robots" && echo 1)"
+    && grep -Eq '^Disallow:[[:space:]]*/compte/' <<<"$robots" \
+    && grep -Eq '^Disallow:[[:space:]]*/verification' <<<"$robots" && echo 1)"
+# Vérification publique (plan L7, K10) : rendue dans le navigateur, servie par le repli SPA.
+body=$("${CURL[@]}" "$BASE_URL/verification/CODEINCONNU")
+check "portail : /verification/<code> servie par la coquille rendue dans le navigateur" \
+  "$([[ "$body" == *"<portail-root"* ]] && echo 1)"
 
 body=$("${CURL[@]}" "$BASE_URL/gestion/")
 check "gestion : /gestion/ servie avec base href /gestion/" "$([[ "$body" == *'<base href="/gestion/"'* ]] && echo 1)"
