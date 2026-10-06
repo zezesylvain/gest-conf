@@ -40,6 +40,9 @@ describe('RG-19 : réglages gelés après la première soumission', () => {
       confidentiality: vi.fn().mockResolvedValue({
         double_blind: true,
         reviewers_per_submission: 3,
+        max_reviews_per_reviewer: 8,
+        divergence_threshold: '25.50',
+        confidence_weighted_score: true,
         frozen_fields: ['code', 'double_blind'],
       }),
       updateConfidentiality: vi.fn().mockResolvedValue({
@@ -81,7 +84,35 @@ describe('RG-19 : réglages gelés après la première soumission', () => {
     expect(api['updateConfidentiality']).toHaveBeenCalledWith(3, {
       double_blind: false,
       reviewers_per_submission: 3,
+      max_reviews_per_reviewer: 8,
+      divergence_threshold: '25.5',
+      confidence_weighted_score: true,
       reason: 'Décision du comité',
+    });
+  });
+
+  it('paramètres de l’évaluation (plan L4 H4, H6, H12) : chargés, contrôlés, transmis', async () => {
+    const { fixture, root } = await render(ConfidentialityPage, CHAIR_EDITION);
+    const field = (name: string) =>
+      root.querySelector<HTMLInputElement>(`input[formcontrolname=${name}]`)!;
+    expect(field('max_reviews_per_reviewer').value).toBe('8');
+    expect(field('divergence_threshold').value).toBe('25.5');
+    expect(root.textContent).toContain('Note finale pondérée par la confiance');
+    const page = fixture.componentInstance as unknown as {
+      form: { patchValue(v: object): void };
+      submit(): Promise<void>;
+    };
+    page.form.patchValue({ max_reviews_per_reviewer: 0 });
+    await page.submit();
+    expect(api['updateConfidentiality']).not.toHaveBeenCalled();
+    page.form.patchValue({ max_reviews_per_reviewer: 12, divergence_threshold: 40 });
+    await page.submit();
+    expect(api['updateConfidentiality']).toHaveBeenCalledWith(3, {
+      double_blind: true,
+      reviewers_per_submission: 3,
+      max_reviews_per_reviewer: 12,
+      divergence_threshold: '40',
+      confidence_weighted_score: true,
     });
   });
 

@@ -76,7 +76,7 @@ npm run build               # portail pré-rendu + gestion + CSP à empreintes
 npm run api:generate        # régénérer le client TypeScript après chaque évolution du schéma
 
 # Déploiement : deploy/deploy.sh puis deploy/smoke-test.sh (voir deploy/README.md)
-# Cron (deploy/cron.sh) : run_jobs (toutes les 5 min), cleanup et check_integrity (quotidiennes)
+# Cron (deploy/cron.sh) : run_jobs (toutes les 5 min), close_call, remind_drafts et remind_reviewers (horaires), cleanup et check_integrity (quotidiennes)
 ```
 
 Les URL Django sont déclarées **sans** le préfixe `/api` (`v1/...`) : `config/mount.py` gère le montage.
@@ -133,6 +133,20 @@ Les décisions F1 à F17 du plan [`docs/L3-soumission-plan.md`](docs/L3-soumissi
 
 Bilan du lot : [`docs/L3-soumission.md`](docs/L3-soumission.md).
 
+## Décisions du lot L4
+
+Les décisions H1 à H19 du plan [`docs/L4-evaluation-plan.md`](docs/L4-evaluation-plan.md) ont été validées le 5 octobre 2026. Elles sont reportées dans l'étude, **§20 « Mises à jour issues du lot L4 »**, qui prévaut sur les sections antérieures (§17 à §19 compris). Points à retenir :
+
+- espace évaluateur dans la gestion (rubrique « Évaluations »), 2FA imposée à `SC_MEMBER` ; capacités `reviews.*`, `decisions.*`, `grids.write` ; le CO n'a aucun accès aux évaluations ;
+- RG-04 : tout sérialiseur relecteur dérive de `ReviewerSerializer` ou `ReviewerModelSerializer` (`apps/reviews/anonymity.py`, liste blanche contrôlée par méta-test) ; toute route `reviewer-…` doit figurer dans `LEAK_TESTED_ROUTES` (`apps/reviews/tests/test_anonymity.py`) avec son test de fuite (`test_leaks.py`), sous peine d'échec de la suite ;
+- note pondérée calculée par le serveur seul (`apps/reviews/services/scoring.py`, `Decimal`) ; grille verrouillée à la première évaluation (RG-05) ;
+- décisions provisoires invisibles des auteurs, transitions et e-mails à la publication seulement (RG-09) ; côté auteur, commentaires sous pseudonymes « Relecteur N », jamais de note ni de commentaire au comité (RG-10) ; `REVISION_REQUESTED` non utilisé (`accepted_minor`) ;
+- gardes et effets de l'évaluation inscrits dans le workflow par `register_guard` et `register_effect` (`apps/reviews/apps.py`) : `submissions` ne dépend pas de `reviews` ;
+- cron : `remind_reviewers`, toutes les heures ;
+- E2E : un seul parcours en série, de l'inscription de l'auteur à sa version finale ; Playwright lance aussi la gestion ; le comité se connecte avec un secret TOTP de test (`web/e2e/seed.py`, `web/e2e/totp.ts`).
+
+Bilan du lot : [`docs/L4-evaluation.md`](docs/L4-evaluation.md).
+
 ## Questions ouvertes (étude §15, à ne pas trancher seul)
 
-Date de la conférence, mono- ou multi-conférences, niveau de double aveugle, grille et pondérations définitives, résumé seul ou article complet, tarifs et agrégateur de paiement, entité de facturation, actes (DOI/ISBN), sessions hybrides, lettres d'invitation, emplacement de l'espace évaluateur (proposé : application `gestion`).
+Date de la conférence, mono- ou multi-conférences, niveau de double aveugle, grille et pondérations définitives, résumé seul ou article complet, tarifs et agrégateur de paiement, entité de facturation, actes (DOI/ISBN), sessions hybrides, lettres d'invitation. (L'emplacement de l'espace évaluateur est tranché : application `gestion`, décision H1.)

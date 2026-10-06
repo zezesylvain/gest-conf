@@ -5,8 +5,9 @@ import { BACKEND_ENV, PYTHON } from './django';
 /**
  * Tests de bout en bout (CLAUDE.md, « Tests » ; plan L3 F14).
  *
- * Playwright lance lui-même l'API Django (base SQLite dédiée, recréée à chaque série) et le
- * portail (`ng serve`, mandataire `/api` → :8000). Variables utiles :
+ * Playwright lance lui-même l'API Django (base SQLite dédiée, recréée à chaque série), le
+ * portail et la gestion (`ng serve`, mandataire `/api` → :8000 ; la gestion sert sous
+ * `/gestion/`, sur :4201). Variables utiles :
  * - `GESTCONF_E2E_PYTHON` : interpréteur Python du backend (défaut : `python`) ;
  * - `GESTCONF_E2E_CHROMIUM` : Chromium déjà installé (poste sans téléchargement de
  *   navigateurs) ; en CI, `npx playwright install --with-deps chromium`.
@@ -51,6 +52,14 @@ export default defineConfig({
       command: 'npx ng serve portail --port 4200',
       cwd: '..',
       url: 'http://localhost:4200/compte/connexion',
+      timeout: 240_000,
+      reuseExistingServer: false,
+    },
+    {
+      // Plan L4 (L4.7) : recevabilité, évaluation et décision passent par la gestion.
+      command: 'npx ng serve gestion --port 4201',
+      cwd: '..',
+      url: 'http://localhost:4201/gestion/',
       timeout: 240_000,
       reuseExistingServer: false,
     },

@@ -169,7 +169,7 @@ export const HELP_SHEETS: readonly HelpSheet[] = [
   ]),
   sheet('settings-confidentiality', SETTINGS_WRITERS, (k) => [
     text(k('intro')),
-    list(k('reviewers')),
+    list(k('reviewers'), k('load'), k('divergence'), k('confidence')),
     callout('warning', k, 'sensitive'),
     callout('warning', k, 'frozen'),
   ]),

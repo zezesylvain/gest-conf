@@ -36,7 +36,7 @@
         "tracks": "thèmes, axes, sujets, domaines",
         "types": "formats, oral, poster, atelier, communication, résumé, durée",
         "calendar": "dates clés, échéances, appel, ouverture, clôture, inscriptions, notification",
-        "confidentiality": "double aveugle, anonymat, relecteurs, évaluateurs, évaluation",
+        "confidentiality": "double aveugle, anonymat, relecteurs, évaluateurs, évaluation, charge, divergence, confiance, note finale",
         "members": "rôles, comité, utilisateurs, équipe, retirer, révoquer, personnes",
         "invitations": "inviter, ajouter, membre, relance, e-mail, comité",
         "audit": "historique, traces, qui a fait, modifications, audit",
@@ -246,10 +246,16 @@
         "labelHint": "Obligatoire pour un code libre."
       },
       "confidentiality": {
-        "title": "Confidentialité de l'évaluation",
+        "title": "Confidentialité et paramètres de l'évaluation",
         "doubleBlind": "Évaluation en double aveugle",
         "doubleBlindHint": "Les relecteurs ne voient ni le nom, ni l'adresse, ni l'affiliation des auteurs.",
         "reviewers": "Relecteurs par soumission (1 à 10)",
+        "maxReviews": "Charge maximale par relecteur",
+        "maxReviewsHint": "De 1 à 100 évaluations actives ; au-delà, une nouvelle affectation est refusée.",
+        "divergence": "Seuil de divergence (sur 100)",
+        "divergenceHint": "De 0 à 100 : écart entre deux notes au-delà duquel la soumission est signalée.",
+        "confidenceWeighted": "Note finale pondérée par la confiance des relecteurs",
+        "confidenceWeightedHint": "Sinon, moyenne simple des évaluations envoyées.",
         "sensitive": "Changement sensible : une confirmation de votre identité peut être demandée ; il est journalisé."
       },
       "frozen": {
@@ -466,11 +472,14 @@
           "publishText": "L'ouverture et la clôture de l'appel sont exigées pour publier l'édition."
         },
         "settings-confidentiality": {
-          "title": "Confidentialité de l'évaluation",
-          "summary": "Double aveugle et nombre de relecteurs par soumission.",
+          "title": "Confidentialité et paramètres de l'évaluation",
+          "summary": "Double aveugle, relecteurs par soumission, charge des relecteurs, divergence et note finale.",
           "path": "Paramétrage › Confidentialité",
           "intro": "En double aveugle, les relecteurs ne voient ni le nom, ni l'adresse, ni l'affiliation des auteurs. C'est le serveur qui retire ces informations, pas l'affichage.",
           "reviewers": "Relecteurs par soumission : de 1 à 10.",
+          "load": "Charge maximale : nombre d'évaluations actives au plus par relecteur (10 par défaut) ; au-delà, l'affectation est refusée.",
+          "divergence": "Seuil de divergence : écart entre la plus haute et la plus basse note (sur 100) au-delà duquel la soumission est signalée au pilotage et par e-mail au président du comité scientifique (30 par défaut).",
+          "confidence": "Note finale : moyenne simple des évaluations envoyées, ou moyenne pondérée par la confiance déclarée par chaque relecteur.",
           "sensitiveTitle": "Changement sensible",
           "sensitiveText": "La modification demande une confirmation d'identité récente ; elle est journalisée avec l'avant et l'après.",
           "frozenTitle": "Double aveugle gelé après la première soumission",

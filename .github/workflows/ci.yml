@@ -188,9 +188,10 @@ jobs:
         run: npm audit --omit=dev --audit-level=high
 
   e2e:
-    # Plan L3 (F14) : parcours de bout en bout, API Django + portail servis par Playwright
-    # (web/e2e/playwright.config.ts). L3.0 : fumée de l'infrastructure ; L3.6 : parcours
-    # auteur complet.
+    # Plan L3 (F14) : parcours de bout en bout, API Django, portail et gestion servis par
+    # Playwright (web/e2e/playwright.config.ts). L3.0 : fumée de l'infrastructure ; L3.6 :
+    # parcours auteur complet ; L4.7 : recevabilité, évaluation, décision, publication et
+    # version finale (comité dans la gestion, 2FA TOTP de test).
     name: E2E (Playwright)
     runs-on: ubuntu-24.04
     steps:

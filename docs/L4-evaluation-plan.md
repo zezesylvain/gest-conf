@@ -4,6 +4,9 @@
 > correction). L3 est clos (bilan : `docs/L3-soumission.md`) : H17 se réduit à l'ordre
 > serveur (L4.0 à L4.4), puis écrans (L4.5, L4.6), puis E2E (L4.7).
 >
+> **L4 est clos le 6 octobre 2026** : bilans des étapes aux §11 à §18 ; bilan du lot et
+> exploitation dans `docs/L4-evaluation.md` ; étude mise à jour (§20).
+>
 > Sources :
 > - étude §3.3 (matrice), §4 M5 et M6, §5.1 et §5.2, §6 (RG-03 à RG-10, RG-17), §8.2
 >   (« Évaluation »), §9.2, §10.2, §15 (Q3, Q4, Q16), A2, A3 (US-03 à US-06) ;
@@ -639,3 +642,54 @@ nettoyées à son anonymisation.
   - aucun débordement à 375 px, aucune erreur dans la console.
 - **Défaut corrigé** : la lettre vide était aussi signalée « trop longue ». Le `required` du
   gabarit ajoute un validateur ; seule l'erreur `maxlength` est désormais testée.
+
+## 18. Bilan de L4.7 (6 octobre 2026)
+
+**Parcours de bout en bout** (`web/e2e/tests/author.spec.ts`, en série) : Playwright lance
+aussi la gestion (`ng serve gestion`, :4201).
+
+- **Données** (`web/e2e/seed.py`) :
+  - grille par défaut, dates `review_deadline` et `camera_ready` ;
+  - président du CS et deux relecteurs, rôles attribués par commande ;
+  - comptes vérifiés, profils complets, 2FA TOTP avec un secret de test.
+- **Codes TOTP** : calculés par le test (`web/e2e/totp.ts`, RFC 6238), comme le ferait
+  l'application d'authentification. Un code qui expire dans moins de 5 s est remplacé par
+  celui de la fenêtre suivante.
+- **Comité**, chacun dans son navigateur :
+  - le président affecte deux relecteurs et ouvre l'évaluation ;
+  - chaque relecteur évalue sans voir ni nom, ni adresse, ni institution des auteurs
+    (RG-04), avec une note indicative de 80 ;
+  - la seconde évaluation fait passer la soumission en « évaluée » (RG-07) ;
+  - le président enregistre une décision provisoire : aucun e-mail à l'auteur. Puis il
+    publie : transition et e-mail (RG-09).
+- **Auteur** :
+  - décision, message du comité, « Relecteur 1 » et « Relecteur 2 » avec leurs
+    commentaires ;
+  - ni commentaire confidentiel, ni nom de relecteur, ni note (RG-10) ;
+  - lettre de réponse exigée, puis dépôt (H18) : statut `camera_ready_received`, accusé par
+    e-mail, PDF téléchargeable.
+- Trois séries au vert (5 tests, environ une minute), dont la dernière après la correction
+  ci-dessous.
+
+**Défaut trouvé à la recette** :
+
+- **Constat** : les paramètres de l'évaluation de l'édition, exposés par l'API depuis L4.1,
+  n'avaient pas d'écran. Il s'agit de la charge maximale par relecteur, du seuil de
+  divergence et de la note finale pondérée par la confiance.
+- **Correction** : ils rejoignent « Paramétrage › Confidentialité », renommé « Confidentialité
+  et paramètres de l'évaluation ». Mêmes droits (`edition.write`), même réauthentification,
+  même journal avant et après ; fiche d'aide et mots-clés de recherche complétés.
+- **Contrôle dans Chromium** :
+  - enregistrement, puis relecture des valeurs et du journal ;
+  - à 375 px, un libellé trop long débordait de 35 px : libellés raccourcis, bornes passées
+    dans les aides.
+
+**Recette** :
+
+- Backend : 2 073 tests sous SQLite, 2 080 sous MariaDB.
+- Front : 302 tests (portail 116, gestion 110, shared 76) et 11 tests des scripts de build.
+  Lint, format et build passent ; schéma OpenAPI inchangé.
+- E2E : 5 tests, trois séries.
+- `ruff` couvre `web/e2e`.
+- Documentation : `docs/L4-evaluation.md`, étude §20 (version 1.4, Markdown et HTML), décisions
+  du lot dans `CLAUDE.md`.

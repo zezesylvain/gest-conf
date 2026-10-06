@@ -36,7 +36,7 @@
         "tracks": "themes, topics, subjects, areas",
         "types": "formats, oral, poster, workshop, presentation, abstract, duration",
         "calendar": "key dates, deadlines, call, opening, closing, registration, notification",
-        "confidentiality": "double blind, anonymity, reviewers, review",
+        "confidentiality": "double blind, anonymity, reviewers, review, load, divergence, confidence, final score",
         "members": "roles, committee, users, team, remove, revoke, people",
         "invitations": "invite, add, member, reminder, email, committee",
         "audit": "history, log, trail, who did, changes, audit",
@@ -246,10 +246,16 @@
         "labelHint": "Required for a custom code."
       },
       "confidentiality": {
-        "title": "Review confidentiality",
+        "title": "Review confidentiality and settings",
         "doubleBlind": "Double-blind review",
         "doubleBlindHint": "Reviewers see neither the name, the email address nor the affiliation of authors.",
         "reviewers": "Reviewers per submission (1 to 10)",
+        "maxReviews": "Maximum load per reviewer",
+        "maxReviewsHint": "1 to 100 active reviews; beyond this, a new assignment is refused.",
+        "divergence": "Divergence threshold (out of 100)",
+        "divergenceHint": "0 to 100: gap between two scores beyond which the submission is flagged.",
+        "confidenceWeighted": "Final score weighted by the reviewers' confidence",
+        "confidenceWeightedHint": "Otherwise, plain average of the submitted reviews.",
         "sensitive": "Sensitive change: you may be asked to confirm your identity; it is logged."
       },
       "frozen": {
@@ -466,11 +472,14 @@
           "publishText": "Call opening and closing dates are required to publish the edition."
         },
         "settings-confidentiality": {
-          "title": "Review confidentiality",
-          "summary": "Double-blind review and number of reviewers per submission.",
+          "title": "Review confidentiality and settings",
+          "summary": "Double-blind review, reviewers per submission, reviewer load, divergence and final score.",
           "path": "Settings › Confidentiality",
           "intro": "In double-blind review, reviewers see neither the name, nor the address, nor the affiliation of the authors. The server removes this information, not the display.",
           "reviewers": "Reviewers per submission: from 1 to 10.",
+          "load": "Maximum load: number of active reviews per reviewer (10 by default); beyond this, the assignment is refused.",
+          "divergence": "Divergence threshold: gap between the highest and the lowest score (out of 100) beyond which the submission is flagged in the follow-up and by e-mail to the scientific committee chair (30 by default).",
+          "confidence": "Final score: plain average of the submitted reviews, or average weighted by the confidence each reviewer declared.",
           "sensitiveTitle": "Sensitive change",
           "sensitiveText": "The change requires a recent identity confirmation; it is logged with the before and after values.",
           "frozenTitle": "Double-blind frozen after the first submission",
