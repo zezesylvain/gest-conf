@@ -2,7 +2,7 @@
 # Vérifications de l'hébergement o2switch, étape L1.0 (plan L1 §13 et §14.2).
 #
 # Script en LECTURE SEULE, à lancer en SSH dans le compte o2switch. Résultats à reporter
-# dans docs/L1-verifications-o2switch.md (identifiants V00 à V28).
+# dans docs/L1-verifications-o2switch.md (identifiants V00 à V29).
 #
 #   # Sans copier le script sur le serveur (sortie enregistrée sur le poste local) :
 #   ssh compte@serveur 'bash -s' < deploy/check-o2switch.sh | tee check-o2switch.txt
@@ -758,6 +758,7 @@ PY
     report V19 INFO "HTTPS sortant vers api.brevo.com" "non exécuté (--no-network)"
     report V20 INFO "HTTPS sortant vers api.mailjet.com" "non exécuté (--no-network)"
     report V21 INFO "HTTPS sortant vers PyPI" "non exécuté (--no-network)"
+    report V29 INFO "HTTPS sortant vers l'API CinetPay" "non exécuté (--no-network)"
   elif ! command -v curl >/dev/null; then
     report V19 ÉCHEC "HTTPS sortant (curl)" "curl introuvable"
   else
@@ -765,6 +766,9 @@ PY
     https_check V20 "HTTPS sortant vers api.mailjet.com (D10)" https://api.mailjet.com/v3/REST/user
     https_check V21 "HTTPS sortant vers PyPI (pip install du déploiement)" \
       https://pypi.org/simple/pip/ https://files.pythonhosted.org/
+    # Lot L6 (J6) : bac à sable (api.cinetpay.net) et production (api.cinetpay.co), sans clé.
+    https_check V29 "HTTPS sortant vers l'API CinetPay (L6, J6)" \
+      https://api.cinetpay.net/v1/oauth/login https://api.cinetpay.co/v1/oauth/login
   fi
 
   # --- Application et cPanel ----------------------------------------------------------

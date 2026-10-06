@@ -202,3 +202,156 @@ tarifs, options, codes promo, règles, mentions), `finance/dashboard`, exports C
 5. Inscriptions de groupe (une institution paie pour plusieurs personnes) : nécessaires pour
    cette édition ?
 6. Charge de 24 à 31 j-h, contre 12 à 16 dans l'étude.
+
+## 11. Bilan de L6.0 (6 octobre 2026)
+
+**Agrégateur (J6, Q7)** : la documentation en ligne de CinetPay (`docs.cinetpay.com`) n'est
+pas joignable depuis l'environnement de développement (refusée par sa politique réseau).
+La vérification porte donc sur les **SDK officiels** :
+
+- `cinetpay-python` 0.1.0 (PyPI, licence MIT, publié par CinetPay en mars 2026), lu sans
+  être installé ;
+- `cinetpay-php-sdk` (dépôt GitHub de CinetPay), lu dans son README.
+
+**Constat : CinetPay a publié une nouvelle API (« v1 »)**, différente de celle que décrit la
+documentation historique :
+
+| | API historique (« v2 », `api-checkout.cinetpay.com`) | **API v1** (SDK de 2026) |
+|---|---|---|
+| Identifiants | `apikey` et `site_id` | `api_key` (`sk_test_…`, `sk_live_…`) et `api_password`, échangés contre un jeton (`POST /v1/oauth/login`, valable 24 h) ; **un compte par pays** |
+| Hôtes | un seul | bac à sable `api.cinetpay.net`, production `api.cinetpay.co` |
+| Initiation | `POST /v2/payment` | `POST /v1/payment` : renvoie `payment_url` (page hébergée), `payment_token`, `transaction_id` et **`notify_token`** |
+| Notification | formulaire et en-tête `x-token` (HMAC-SHA256 de 16 champs concaténés, clé secrète du compte) | corps (JSON ou formulaire) : `notify_token`, `transaction_id`, `merchant_transaction_id` ; **aucun statut à croire** |
+| Vérification | `POST /v2/payment/check` | `GET /v1/payment/{merchant_transaction_id}` : `status` (`SUCCESS`, `FAILED`, `PENDING`…) |
+
+**Retenu : l'API v1.** C'est celle des SDK officiels actuels. L'API v2 ne serait implémentée
+que si le compte marchand obtenu restait sur elle (adaptateur distinct derrière la même
+interface, +0,5 à 1 j-h).
+
+**Précision de J6 (« notification vérifiée »)** :
+
+- avec l'API v1, la notification ne porte pas de signature HMAC ;
+- elle porte un **jeton propre à la transaction**, remis par CinetPay à l'initiation, de
+  serveur à serveur ;
+- nous n'en gardons que l'**empreinte SHA-256**, comparée à temps constant ;
+- la confirmation ne vient **que** de l'interrogation `GET /v1/payment/{id}` : statut
+  `SUCCESS`, identifiants identiques, montant et devise contrôlés contre le paiement.
+
+RG-15 est donc tenue :
+
+- une notification sans jeton valide est rejetée et journalisée ;
+- une notification valide n'est qu'un signal, la décision vient de l'interrogation ;
+- le retour du navigateur (`success_url`) n'a aucun effet.
+
+**Contraintes de l'API v1 relevées dans le SDK** :
+
+- devises **XOF, XAF, GNF, CDF, USD** : pas d'euro, donc une édition en EUR n'aura que le
+  paiement manuel ;
+- la devise doit être celle du pays du compte (XOF pour la Côte d'Ivoire, le Sénégal…) ;
+- montant **entier**, de 100 à 2 500 000 par transaction ;
+- `merchant_transaction_id` de 30 caractères au plus, unique : **une référence par
+  tentative** (`TRANSACTION_EXIST` sinon) ;
+- `success_url`, `failed_url` et `notify_url` de 120 caractères au plus ;
+- nom et prénom du client de 2 à 255 caractères, adresse valide ; langue `fr` ou `en` ;
+- canaux `PUSH`, `OTP` et `QRCODE` ; moyens énumérés **mobile money seulement** (Orange,
+  MTN, Moov, Wave… par pays). **La carte bancaire n'apparaît pas dans l'API v1** : à
+  confirmer avec CinetPay (Q7). À défaut, la carte internationale passera par le virement
+  (J7) ou par un second agrégateur ;
+- réponse au webhook en HTTP 200 **en moins de 10 secondes**, la vérification pouvant être
+  différée ;
+- jeton d'accès à mettre en cache (24 h) : cache de la base, partagé entre processus
+  Passenger et cron, jamais journalisé.
+
+**Conséquences pour L6.4** :
+
+- client écrit à la main sur **`requests`**, déjà installé par `django-anymail` : pas de
+  nouvelle dépendance. Le SDK officiel tire `httpx` et n'a qu'une version (0.1.0) ;
+- le webhook enregistre la notification (en ajout seul) et vérifie le jeton ;
+- il tente ensuite l'interrogation avec un délai court (5 s). En cas d'échec, un job la
+  reprend, puis `sync_payments` toutes les heures ;
+- le navigateur est envoyé sur `payment_url` par **navigation** (`location.assign`), jamais
+  par formulaire : la CSP du portail (`form-action 'self'`) l'interdirait. Aucun script de
+  CinetPay n'est chargé (le SDK « seamless » JavaScript est exclu) ;
+- secrets dans l'environnement : `CINETPAY_API_KEY`, `CINETPAY_API_PASSWORD`,
+  `CINETPAY_COUNTRY`, `CINETPAY_SANDBOX` (règle n° 11).
+
+**Non vérifiable ici (Q7, compte marchand)** :
+
+- frais ;
+- bac à sable réel : il faut des clés `sk_test_` ;
+- règle d'arrondi éventuelle (l'API v2 imposait des multiples de 5 en XOF ; le SDK v1 ne le
+  contrôle pas) ;
+- disponibilité effective des opérateurs ;
+- réception des notifications sur o2switch (pare-feu applicatif éventuel).
+
+Ces points sont repris au contrôle manuel de la démo G.
+
+**PDF (J8)** : **`fpdf2` 2.8.9 retenu**.
+
+- **Licence et paquet** : pur Python (roue `py3-none-any`), licence LGPL-3.0, utilisée sans
+  modification. Ses dépendances sont `defusedxml` (PSF) et `fonttools` (MIT, roue pur
+  Python), plus Pillow, déjà installé.
+- **ReportLab 5.0.1** (BSD, aussi pur Python désormais) reste possible. Il est écarté pour son
+  API plus lourde, sans gain pour des factures.
+- **Essai** : facture A4 avec tableau, accents, `Œ`, `Ł`, `ş`, vietnamien, espaces fines
+  insécables et signe moins.
+  - Rendu correct, texte relu à l'identique par `pypdf`.
+  - 23 ko grâce au sous-ensemble de police embarqué ; 110 ms.
+  - Sortie **identique octet pour octet** à date de création fixée, ce qui permet l'empreinte
+    SHA-256 et sa vérification.
+- **Police** : les polices de base du PDF ne couvrent que le latin-1, alors que les noms des
+  participants n'y tiennent pas tous. On versionne **DejaVu Sans** 2.37 (normal et gras,
+  environ 1,5 Mo) et sa licence (Bitstream Vera ; modifications de DejaVu dans le domaine
+  public). Rien n'est supposé sur les polices installées chez o2switch.
+
+**QR (J11)** : **`segno` 1.6.6** retenu.
+
+- Pur Python, sans dépendance, licence BSD ; déjà prévu par l'étude (§7) et réservé depuis
+  L1 aux badges de L7.
+- Essai : jeton de 192 bits (`secrets.token_urlsafe(24)`), QR version 3, correction relevée
+  à Q, SVG de 1,5 ko.
+- `qrcode`, installé par allauth pour la 2FA, n'est pas réutilisé : c'est une dépendance
+  transitive, que nous n'épinglons pas.
+
+**Devises (J2)** : décimales selon **ISO 4217** (liste publiée le 1er janvier 2026, lue dans
+le paquet de données `iso4217`, sans l'installer) :
+
+| Devise | Décimales |
+|---|---|
+| XOF | 0 |
+| XAF | 0 |
+| GNF | 0 |
+| CDF | 2 |
+| USD | 2 |
+| EUR | 2 |
+
+- **Table fermée dans le code**, sans dépendance.
+- `Intl.NumberFormat` affiche aussi XOF sans décimale (« 25 000 F CFA » en français).
+- Montants en `Decimal`, arrondis à la décimale de la devise (au demi supérieur) **une seule
+  fois**, sur chaque ligne de remise.
+
+**Webhook et hébergement** :
+
+- **`.htaccess` du portail** : sa règle 1 laisse passer tout `/api/` vers Passenger,
+  donc aussi `/api/v1/payments/webhook/…`. Aucune modification.
+- **CSRF** : les vues DRF sont exemptées de CSRF, qui n'est appliqué que par
+  `SessionAuthentication`. Le webhook, sans authentification, n'en aura pas. Un test le
+  vérifiera en L6.4.
+- **Appels sortants depuis o2switch** : nouveau contrôle automatique **V29** dans
+  `deploy/check-o2switch.sh` et dans la fiche `docs/L1-verifications-o2switch.md` (`curl`
+  sans clé vers le bac à sable et la production). Sans accès sortant, seul le paiement
+  manuel reste possible.
+
+**Numérotation (J8)** : `core.Counter` exige que la ligne du compteur existe **avant** la
+transaction qui prend un numéro (verrous d'intervalle de MariaDB, voir `ensure_counter`).
+
+- Les séries annuelles (`invoice:<édition>:<année>`) sont créées hors transaction au moment
+  de l'émission.
+- L'année est celle de la date d'émission **dans le fuseau de l'édition**.
+
+**Hypothèses maintenues** (Q7 et Q8 sans réponse) :
+
+- fournisseur factice pour les tests et la démo ;
+- CinetPay (API v1) pour le premier fournisseur réel ;
+- aucune facture émise sans mentions de facturation ;
+- J15 reportée.
