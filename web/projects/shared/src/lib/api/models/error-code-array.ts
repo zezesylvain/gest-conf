@@ -46,5 +46,6 @@ export const ERROR_CODE: ErrorCode[] = [
   'conflict_of_interest',
   'reviewer_overloaded',
   'reviewers_missing',
-  'review_not_open'
+  'review_not_open',
+  'discussion_closed'
 ];

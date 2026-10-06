@@ -89,6 +89,8 @@ class ErrorCode(models.TextChoices):
     REVIEWER_OVERLOADED = "reviewer_overloaded"
     REVIEWERS_MISSING = "reviewers_missing"
     REVIEW_NOT_OPEN = "review_not_open"
+    # Discussion (RG-08) : non ouverte, ou évaluation du relecteur pas encore envoyée.
+    DISCUSSION_CLOSED = "discussion_closed"
 
 
 class DomainError(Exception):

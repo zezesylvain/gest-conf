@@ -14,7 +14,9 @@ from apps.reviews.models import (
     ConflictKind,
     ConflictOfInterest,
     Criterion,
+    DiscussionMessage,
     EvaluationGrid,
+    Review,
     ReviewAssignment,
     ReviewStatus,
 )
@@ -316,3 +318,114 @@ class ConflictCreateSerializer(serializers.Serializer):
     submission = serializers.IntegerField()
     reviewer = serializers.IntegerField()
     reason = serializers.CharField(max_length=2000)
+
+
+# --- Évaluations, discussion, suivi (président, L4.3) ----------------------------------------
+
+
+class ReviewManageSerializer(serializers.ModelSerializer):
+    """Évaluation envoyée, avec le nom du relecteur (H11 : visible du président et du Chair)."""
+
+    assignment_id = serializers.IntegerField(source="assignment.pk", read_only=True)
+    reviewer = serializers.SerializerMethodField()
+    pseudonym_rank = serializers.IntegerField(source="assignment.pseudonym_rank", read_only=True)
+    suggested_type = serializers.SlugRelatedField(
+        slug_field="code", read_only=True, allow_null=True
+    )
+    scores = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Review
+        fields = (
+            "id",
+            "assignment_id",
+            "reviewer",
+            "pseudonym_rank",
+            "recommendation",
+            "confidence",
+            "comment_to_authors",
+            "comment_to_committee",
+            "ethics_flag",
+            "plagiarism_flag",
+            "suggested_type",
+            "weighted_score",
+            "submitted_at",
+            "version",
+            "scores",
+        )
+        read_only_fields = fields
+
+    @extend_schema_field(PersonSerializer)
+    def get_reviewer(self, review: Review):
+        return person(review.assignment.reviewer)
+
+    @extend_schema_field(
+        serializers.DictField(child=serializers.DecimalField(max_digits=4, decimal_places=1))
+    )
+    def get_scores(self, review: Review):
+        return {score.criterion.code: str(score.value) for score in review.scores.all()}
+
+
+class DiscussionMessageManageSerializer(serializers.ModelSerializer):
+    author = serializers.SerializerMethodField()
+    pseudonym_rank = serializers.SerializerMethodField(
+        help_text="Rang du pseudonyme si l'auteur est relecteur de la soumission."
+    )
+
+    class Meta:
+        model = DiscussionMessage
+        fields = ("id", "author", "pseudonym_rank", "body", "at")
+        read_only_fields = fields
+
+    @extend_schema_field(PersonSerializer)
+    def get_author(self, message: DiscussionMessage):
+        return person(message.author)
+
+    def get_pseudonym_rank(self, message: DiscussionMessage) -> int | None:
+        return self.context.get("ranks", {}).get(message.author_id)
+
+
+class SubmissionReviewsSerializer(serializers.Serializer):
+    """Évaluations envoyées d'une soumission, note finale, divergence (H12), discussion."""
+
+    final_score = serializers.DecimalField(max_digits=5, decimal_places=2, allow_null=True)
+    spread = serializers.DecimalField(max_digits=5, decimal_places=2)
+    threshold = serializers.DecimalField(max_digits=5, decimal_places=2)
+    divergent = serializers.BooleanField()
+    reviews = ReviewManageSerializer(many=True)
+    discussion_opened_at = serializers.DateTimeField(allow_null=True)
+    messages = DiscussionMessageManageSerializer(many=True)
+
+
+class MessageCreateSerializer(serializers.Serializer):
+    body = serializers.CharField(max_length=5000)
+
+
+class ReviewerProgressSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    active = serializers.IntegerField(help_text="Affectations actives.")
+    submitted = serializers.IntegerField(help_text="Évaluations envoyées (affectations actives).")
+    late = serializers.IntegerField(help_text="Affectations en retard.")
+
+
+class TrackProgressSerializer(serializers.Serializer):
+    code = serializers.CharField(allow_null=True)
+    in_review = serializers.IntegerField(help_text="Soumissions en évaluation ou évaluées.")
+    reviewed = serializers.IntegerField(help_text="Soumissions évaluées (RG-07).")
+
+
+class DivergentSubmissionSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    reference = serializers.CharField(allow_null=True)
+    title = serializers.CharField()
+    spread = serializers.DecimalField(max_digits=5, decimal_places=2)
+
+
+class ReviewProgressSerializer(serializers.Serializer):
+    """Suivi de l'évaluation (plan L4 §4) : par relecteur, par thématique, divergences."""
+
+    threshold = serializers.DecimalField(max_digits=5, decimal_places=2)
+    reviewers = ReviewerProgressSerializer(many=True)
+    tracks = TrackProgressSerializer(many=True)
+    divergent = DivergentSubmissionSerializer(many=True)

@@ -377,3 +377,87 @@ auteur de la soumission.
   soumission en recevabilité du monde de test gèle `double_blind` (RG-19).
 - Schéma régénéré sur MariaDB : statut d'évaluation nullable, d'où le composant `NullEnum` du
   client. Client régénéré ; traductions du backend et du portail à jour ; front 274 tests.
+
+## 14. Bilan de L4.3 (6 octobre 2026)
+
+**Espace relecteur** (`…/reviews/…`, `reviews.write`, 2FA). Un relecteur ne voit que **ses**
+affectations actives, sans conflit déclaré, sur une soumission en évaluation ou déjà décidée
+(lecture seule) ; toute autre affectation répond 404 (RG-03).
+
+- `GET assignments` (« Mes évaluations ») et `GET assignments/{id}` : soumission anonymisée,
+  grille, sa propre évaluation, état de la discussion, réglage du double aveugle.
+- `GET …/file` : PDF courant, nettoyé en double aveugle (L3). Nom de téléchargement : la
+  référence.
+- `GET …/authors` : sans double aveugle seulement (H9, Q3), avec noms et affiliations, jamais
+  les adresses. En double aveugle, elle répond 404. Elle est servie par un sérialiseur
+  volontairement **hors** de la liste blanche RG-04.
+- `POST …/decline` : motif obligatoire, conflit facultatif. Le président du CS reçoit un e-mail
+  sans le nom du relecteur.
+- `PUT …/review` (brouillon) et `POST …/review/submit` (envoi).
+- `GET` et `POST …/discussion` ; `GET` et `PUT reviews/expertise`.
+
+**Évaluation (H4, H5, H13, RG-05, RG-06)** : `services/reviews.py`.
+
+- **Brouillon** : copie complète.
+  - Notes validées : critère de la grille, échelle, une décimale.
+  - Note pondérée recalculée par le serveur (la valeur envoyée est ignorée).
+  - Grille verrouillée au premier enregistrement.
+- **Envoi** : contrôle de complétude (critères obligatoires, recommandation, confiance,
+  commentaire aux auteurs), puis version en ajout seul et journal (`review.submitted`,
+  `review.resubmitted`).
+- **Après envoi** : l'évaluation ne se modifie que par un nouvel envoi, tant que la soumission
+  est en évaluation (H13).
+- **Sans grille applicable** : 409 `review_not_open`.
+
+**RG-07** : la transition `UNDER_REVIEW → REVIEWED` devient disponible. Elle est déclenchée par
+le système au dernier envoi requis. La garde inscrite par `reviews` compte les évaluations
+envoyées des affectations actives.
+
+**RG-08 (discussion)** :
+
+- **Ouverture** : automatique quand toutes les évaluations actives sont envoyées, ou par le
+  président.
+- **Accès du relecteur** : seulement après l'envoi de sa propre évaluation, sinon 409
+  `discussion_closed` (nouveau code, traduit).
+- **Pseudonymes** (H11) : les autres évaluations et les messages paraissent sous « Relecteur
+  N » ; un message du président n'a pas de rang. Les messages sont fermés après la décision.
+
+**Divergence (H12)** :
+
+- Écart maximal entre notes au-delà du seuil de l'édition : signalé dans le suivi et par un
+  e-mail **unique** (clé d'idempotence) aux présidents du CS, ou à défaut de la conférence.
+- Note finale : moyenne, ou moyenne pondérée par la confiance (option de l'édition).
+
+**Président** :
+
+- `GET …/review-submissions/{id}/reviews` (`reviews.read_all`) : évaluations envoyées avec les
+  noms des relecteurs, note finale, divergence, discussion.
+- `POST …/discussion/open`, `POST …/discussion/messages`.
+- `GET …/review-progress` : par relecteur (actives, envoyées, en retard), par thématique, et
+  liste des soumissions divergentes.
+
+**RG-04, test de fuite** (`tests/test_leaks.py`) : les 9 routes relecteur sont parcourues en
+double aveugle.
+
+- Traceurs : auteurs, institution, nom d'origine du fichier, président et autre relecteur.
+  Aucune réponse n'en contient, erreurs comprises.
+- La table des routes testées renvoie à des tests existants (contrôlé).
+- Variante sans double aveugle : noms des auteurs par la seule route dédiée, jamais
+  d'adresse.
+
+**Matrice** :
+
+- Identifiants propres à chaque profil, car un relecteur n'accède qu'à ses affectations.
+- Le contrôle « édition archivée » emploie un profil qui détient la capacité de la case.
+- 2FA exigée du relecteur sur ses routes (H2).
+- Édition du monde de test sans double aveugle, pour la route des auteurs.
+
+**Liens des e-mails** : à créer en L4.5, avec ces routes de la gestion.
+
+- `/editions/{id}/evaluations/{affectation}` : relecteur.
+- `/editions/{id}/pilotage/{soumission}` : président.
+
+**Vérifications** :
+
+- 1 971 tests backend sous SQLite, 1 978 sous MariaDB ; la matrice compte 1 104 cas.
+- Schéma régénéré sur MariaDB ; client régénéré ; traductions à jour ; front 274 tests.

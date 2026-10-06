@@ -61,6 +61,20 @@ REVIEWER_ROLES: frozenset[str] = frozenset(
 ASSIGNABLE = (S.SCREENING, S.UNDER_REVIEW, S.REVIEWED)
 NOTIFIED = (S.UNDER_REVIEW, S.REVIEWED)
 REVIEWABLE = (S.UNDER_REVIEW, S.REVIEWED)
+# Le relecteur relit son évaluation après la décision (lecture seule).
+VISIBLE = (
+    *REVIEWABLE,
+    S.ACCEPTED,
+    S.ACCEPTED_MINOR,
+    S.WAITLIST,
+    S.REJECTED,
+    S.CAMERA_READY_RECEIVED,
+    S.CONFIRMED,
+    S.SCHEDULED,
+    S.PRESENTED,
+    S.PUBLISHED,
+    S.WITHDRAWN,
+)
 
 CONFLICT_LABELS = {
     ConflictKind.AUTHOR: gettext_lazy("Le relecteur est auteur de la soumission."),
@@ -314,19 +328,32 @@ def screen(submission: Submission, *, admissible: bool, reason: str, actor: Acto
     return workflow.transition(submission, target, actor, reason=reason)
 
 
-def guard_reviewers_assigned(submission: Submission, to_state: str, now: datetime) -> None:
-    """Garde du workflow (H10) : l'évaluation ne s'ouvre qu'avec les relecteurs requis."""
-    if to_state != S.UNDER_REVIEW:
-        return
-    required = submission.edition.reviewers_per_submission
-    count = ReviewAssignment.objects.filter(
-        submission=submission, status=AssignmentStatus.ACTIVE
+def submitted_count(submission: Submission) -> int:
+    """Évaluations envoyées des affectations actives (RG-07)."""
+    return ReviewAssignment.objects.filter(
+        submission=submission,
+        status=AssignmentStatus.ACTIVE,
+        review__status=ReviewStatus.SUBMITTED,
     ).count()
-    if count < required:
+
+
+def guard_review_steps(submission: Submission, to_state: str, now: datetime) -> None:
+    """Gardes du workflow : l'évaluation ne s'ouvre qu'avec les relecteurs requis (H10) ; la
+    soumission n'est évaluée qu'avec le nombre requis d'évaluations envoyées (RG-07)."""
+    required = submission.edition.reviewers_per_submission
+    if to_state == S.UNDER_REVIEW:
+        count = ReviewAssignment.objects.filter(
+            submission=submission, status=AssignmentStatus.ACTIVE
+        ).count()
+        if count < required:
+            raise RuleViolation(
+                _("%(count)s relecteur(s) affecté(s) sur %(required)s requis.")
+                % {"count": count, "required": required},
+                code=ErrorCode.REVIEWERS_MISSING,
+            )
+    elif to_state == S.REVIEWED and submitted_count(submission) < required:
         raise RuleViolation(
-            _("%(count)s relecteur(s) affecté(s) sur %(required)s requis.")
-            % {"count": count, "required": required},
-            code=ErrorCode.REVIEWERS_MISSING,
+            _("Évaluations envoyées insuffisantes (RG-07)."), code=ErrorCode.INVALID_TRANSITION
         )
 
 
@@ -358,9 +385,11 @@ def on_transition(submission: Submission, from_state: str, to_state: str, actor:
 # --- RG-03 ------------------------------------------------------------------------------------
 
 
-def reviewable_assignments(user: User, edition: Edition) -> QuerySet[ReviewAssignment]:
-    """RG-03 : affectations où ``user`` évalue — actives, soumission en évaluation, aucun
-    conflit déclaré non levé, jamais une soumission dont il est auteur (défense en profondeur :
+def reviewer_assignments(
+    user: User, edition: Edition, statuses: tuple[str, ...] = REVIEWABLE
+) -> QuerySet[ReviewAssignment]:
+    """Affectations actives de ``user`` dont la soumission est dans ``statuses``, sans conflit
+    déclaré non levé, jamais sur une soumission dont il est auteur (défense en profondeur :
     l'affectation et la déclaration l'empêchent déjà)."""
     declared = ConflictOfInterest.objects.filter(
         submission=OuterRef("submission"),
@@ -373,12 +402,18 @@ def reviewable_assignments(user: User, edition: Edition) -> QuerySet[ReviewAssig
             reviewer=user,
             status=AssignmentStatus.ACTIVE,
             submission__edition=edition,
-            submission__status__in=REVIEWABLE,
+            submission__status__in=statuses,
         )
         .exclude(Exists(declared))
         .exclude(submission__submitter=user)
         .exclude(submission__authors__user=user)
     )
+
+
+def reviewable_assignments(user: User, edition: Edition) -> QuerySet[ReviewAssignment]:
+    """RG-03 : affectations où ``user`` évalue — actives, soumission en évaluation, aucun
+    conflit déclaré non levé."""
+    return reviewer_assignments(user, edition, REVIEWABLE)
 
 
 # --- Candidats et expertises (H6, H7) ---------------------------------------------------------

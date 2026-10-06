@@ -3,7 +3,8 @@
 ``ManageViewSet`` : 401 → 404 → 403, 2FA. Grilles : lecture ``edition.read``, écriture
 ``grids.write`` (``ADMIN``, ``CHAIR``, ``SC_CHAIR``). Recevabilité, affectations et conflits :
 ``reviews.manage`` (``ADMIN``, ``CHAIR``, ``SC_CHAIR``) ; la levée d'un conflit exige une
-réauthentification récente (plan L4 §6).
+réauthentification récente (plan L4 §6). Évaluations de tous les relecteurs, avec leurs noms :
+``reviews.read_all`` (H11, H19).
 """
 
 from __future__ import annotations
@@ -31,6 +32,8 @@ from apps.core.errors import ErrorCode, Invalid
 from apps.reviews.models import (
     AssignmentStatus,
     ConflictOfInterest,
+    Discussion,
+    DiscussionMessage,
     EvaluationGrid,
     ReviewAssignment,
     ReviewStatus,
@@ -46,11 +49,15 @@ from apps.reviews.serializers import (
     GridCreateSerializer,
     GridSerializer,
     GridUpdateSerializer,
+    MessageCreateSerializer,
+    ReviewProgressSerializer,
     ReviewSubmissionDetailSerializer,
     ReviewSubmissionSerializer,
     ScreeningSerializer,
+    SubmissionReviewsSerializer,
 )
 from apps.reviews.services import assignments, conflicts, grids
+from apps.reviews.services import reviews as review_services
 from apps.submissions.models import Submission, SubmissionStatus
 
 C = Capability
@@ -198,6 +205,9 @@ class ReviewSubmissionViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, 
         "retrieve": C.REVIEWS_MANAGE,
         "screening": C.REVIEWS_MANAGE,
         "candidates": C.REVIEWS_MANAGE,
+        "reviews": C.REVIEWS_READ_ALL,
+        "open_discussion": C.REVIEWS_MANAGE,
+        "post_message": C.REVIEWS_MANAGE,
     }
 
     def get_queryset(self):
@@ -289,6 +299,79 @@ class ReviewSubmissionViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, 
             "candidates": assignments.candidates(submission),
         }
         return Response(CandidateListSerializer(payload).data)
+
+    def _reviews_payload(self, submission: Submission) -> Response:
+        state = review_services.summary(submission)
+        discussion = Discussion.objects.filter(submission=submission).first()
+        messages = (
+            DiscussionMessage.objects.filter(discussion=discussion)
+            .select_related("author__profile")
+            .order_by("at", "id")
+            if discussion is not None
+            else DiscussionMessage.objects.none()
+        )
+        payload = {
+            "final_score": state.final,
+            "spread": state.spread,
+            "threshold": submission.edition.divergence_threshold,
+            "divergent": state.divergent,
+            "reviews": state.reviews,
+            "discussion_opened_at": discussion.opened_at if discussion else None,
+            "messages": list(messages),
+        }
+        context = {"ranks": review_services.pseudonyms(submission)}
+        return Response(SubmissionReviewsSerializer(payload, context=context).data)
+
+    def _in_review(self, submission_id: int) -> Submission:
+        return get_object_or_404(self.get_queryset(), pk=submission_id)
+
+    @extend_schema(
+        operation_id="manage_review_submission_reviews",
+        responses={200: SubmissionReviewsSerializer},
+    )
+    def reviews(self, request: Request, edition_id: int, submission_id: int) -> Response:
+        """Évaluations envoyées, noms des relecteurs, note finale, divergence, discussion."""
+        return self._reviews_payload(self._in_review(submission_id))
+
+    @extend_schema(
+        operation_id="manage_review_submission_discussion_open",
+        request=None,
+        responses={200: SubmissionReviewsSerializer},
+    )
+    def open_discussion(self, request: Request, edition_id: int, submission_id: int) -> Response:
+        """RG-08 : ouverture par le président (sinon automatique au dernier envoi)."""
+        submission = self._in_review(submission_id)
+        review_services.open_discussion_by_chair(submission, actor=Actor.from_request(request))
+        return self._reviews_payload(submission)
+
+    @extend_schema(
+        operation_id="manage_review_submission_discussion_message",
+        request=MessageCreateSerializer,
+        responses={201: SubmissionReviewsSerializer},
+    )
+    def post_message(self, request: Request, edition_id: int, submission_id: int) -> Response:
+        submission = self._in_review(submission_id)
+        serializer = MessageCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        review_services.post_message(
+            submission, serializer.validated_data["body"], actor=Actor.from_request(request)
+        )
+        response = self._reviews_payload(submission)
+        response.status_code = status.HTTP_201_CREATED
+        return response
+
+
+class ReviewProgressViewSet(ManageViewSet):
+    """Suivi de l'évaluation (plan L4 §4) : par relecteur, par thématique, divergences."""
+
+    queryset = Submission.objects.all()
+    pagination_class = None
+    filter_backends = ()
+    required_capabilities = {"progress": C.REVIEWS_MANAGE}
+
+    @extend_schema(operation_id="manage_review_progress", responses={200: ReviewProgressSerializer})
+    def progress(self, request: Request, edition_id: int) -> Response:
+        return Response(ReviewProgressSerializer(review_services.progress(self.edition)).data)
 
 
 class AssignmentViewSet(ManageViewSet):

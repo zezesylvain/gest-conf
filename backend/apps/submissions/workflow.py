@@ -69,7 +69,8 @@ TRANSITIONS: dict[tuple[str, str], Rule] = {
     (S.SCREENING, S.REJECTED): Rule(
         Who.SC, "L4", available=True, capability=Capability.REVIEWS_MANAGE
     ),
-    (S.UNDER_REVIEW, S.REVIEWED): Rule(Who.SYSTEM, "L4"),
+    # RG-07 : automatique, au dernier envoi requis (garde inscrite par l'application reviews).
+    (S.UNDER_REVIEW, S.REVIEWED): Rule(Who.SYSTEM, "L4", available=True),
     (S.REVIEWED, S.ACCEPTED): Rule(Who.SC, "L4"),
     (S.REVIEWED, S.ACCEPTED_MINOR): Rule(Who.SC, "L4"),
     (S.REVIEWED, S.WAITLIST): Rule(Who.SC, "L4"),

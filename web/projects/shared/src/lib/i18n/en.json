@@ -72,7 +72,8 @@
       "conflict_of_interest": "Conflict of interest: this reviewer cannot review this submission.",
       "reviewer_overloaded": "This reviewer has reached their maximum number of reviews.",
       "reviewers_missing": "First assign the required number of reviewers.",
-      "review_not_open": "Reviewing is not open for this submission."
+      "review_not_open": "Reviewing is not open for this submission.",
+      "discussion_closed": "The discussion opens once your review is submitted and the discussion has started."
     },
     "form": {
       "errorSummary": "The form contains errors:",

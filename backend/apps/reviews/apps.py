@@ -18,5 +18,5 @@ class ReviewsConfig(AppConfig):
         register_integrity_check("reviews.grid_weights", integrity.check_grid_weights)
         register_integrity_check("reviews.review_scores", integrity.check_review_scores)
         register_integrity_check("reviews.assignments", integrity.check_assignments)
-        workflow.register_guard(assignments.guard_reviewers_assigned)
+        workflow.register_guard(assignments.guard_review_steps)
         workflow.register_effect(assignments.on_transition)

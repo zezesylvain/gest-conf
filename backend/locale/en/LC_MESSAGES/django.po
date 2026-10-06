@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gestconf-backend\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-06 00:32+0000\n"
+"POT-Creation-Date: 2026-10-06 00:53+0000\n"
 "PO-Revision-Date: 2026-10-05 11:00+0000\n"
 "Last-Translator: GEST-CONF\n"
 "Language-Team: GEST-CONF\n"
@@ -413,9 +413,10 @@ msgstr "Acknowledging the notice cannot be withdrawn."
 #: apps/accounts/services/account.py:169 apps/accounts/services/account.py:191
 #: apps/accounts/services/mfa.py:84 apps/accounts/services/personal_data.py:205
 #: apps/accounts/services/roles.py:196 apps/conferences/services.py:301
-#: apps/reviews/services/assignments.py:273
-#: apps/reviews/services/conflicts.py:178 apps/submissions/services.py:611
-#: apps/submissions/workflow.py:157 apps/submissions/workflow.py:160
+#: apps/reviews/services/assignments.py:287
+#: apps/reviews/services/conflicts.py:178 apps/reviews/services/reviews.py:420
+#: apps/submissions/services.py:611 apps/submissions/workflow.py:158
+#: apps/submissions/workflow.py:161
 msgid "Motif obligatoire."
 msgstr "A reason is required."
 
@@ -1436,27 +1437,27 @@ msgstr "Unknown time zone."
 msgid "Échec de la vérification CSRF : rechargez la page puis réessayez."
 msgstr "CSRF verification failed: reload the page and try again."
 
-#: apps/core/errors.py:103
+#: apps/core/errors.py:105
 msgid "Opération refusée."
 msgstr "Operation refused."
 
-#: apps/core/errors.py:132
+#: apps/core/errors.py:134
 msgid "Opération impossible dans l'état actuel."
 msgstr "This operation is not possible in the current state."
 
-#: apps/core/errors.py:139
+#: apps/core/errors.py:141
 msgid "Action non autorisée."
 msgstr "Action not allowed."
 
-#: apps/core/errors.py:146 apps/core/exceptions.py:110
+#: apps/core/errors.py:148 apps/core/exceptions.py:110
 msgid "Données invalides."
 msgstr "Invalid data."
 
-#: apps/core/errors.py:153
+#: apps/core/errors.py:155
 msgid "Modifié entre-temps (autre onglet ?) : rechargez avant d'enregistrer."
 msgstr "Changed in the meantime (another tab?): reload before saving."
 
-#: apps/core/errors.py:164
+#: apps/core/errors.py:166
 msgid "Quota atteint."
 msgstr "Quota reached."
 
@@ -2343,70 +2344,75 @@ msgstr "camera-ready version"
 msgid "versions finales"
 msgstr "final versions"
 
-#: apps/reviews/notifications.py:39 apps/submissions/notifications.py:67
+#: apps/reviews/notifications.py:50 apps/reviews/notifications.py:93
+#: apps/submissions/notifications.py:67
 msgid "(sans titre)"
 msgstr "(untitled)"
 
-#: apps/reviews/services/assignments.py:66
+#: apps/reviews/services/assignments.py:80
 msgid "Le relecteur est auteur de la soumission."
 msgstr "The reviewer is an author of the submission."
 
-#: apps/reviews/services/assignments.py:67
+#: apps/reviews/services/assignments.py:81
 msgid "Le relecteur est de la même institution qu'un auteur."
 msgstr "The reviewer is from the same institution as an author."
 
-#: apps/reviews/services/assignments.py:68
+#: apps/reviews/services/assignments.py:82
 msgid "Un conflit d'intérêts a été déclaré."
 msgstr "A conflict of interest has been declared."
 
-#: apps/reviews/services/assignments.py:103
+#: apps/reviews/services/assignments.py:117
 msgid "La date de fin des évaluations est passée : indiquez une échéance."
 msgstr "The review deadline has passed: enter a due date."
 
-#: apps/reviews/services/assignments.py:113 apps/submissions/services.py:617
+#: apps/reviews/services/assignments.py:127 apps/submissions/services.py:617
 msgid "Échéance dans le futur attendue."
 msgstr "A deadline in the future is expected."
 
-#: apps/reviews/services/assignments.py:130
+#: apps/reviews/services/assignments.py:144
 msgid "Conflit d'intérêts."
 msgstr "Conflict of interest."
 
-#: apps/reviews/services/assignments.py:155
+#: apps/reviews/services/assignments.py:169
 msgid "Affectation impossible à ce stade de la soumission."
 msgstr "The submission cannot be assigned at this stage."
 
-#: apps/reviews/services/assignments.py:168
+#: apps/reviews/services/assignments.py:182
 #: apps/reviews/services/conflicts.py:174
 msgid "Ce compte n'est pas membre du comité scientifique."
 msgstr "This account is not a member of the scientific committee."
 
-#: apps/reviews/services/assignments.py:173
+#: apps/reviews/services/assignments.py:187
 msgid "Ce relecteur est déjà affecté."
 msgstr "This reviewer is already assigned."
 
-#: apps/reviews/services/assignments.py:183
+#: apps/reviews/services/assignments.py:197
 #, python-format
 msgid "Charge maximale atteinte (%(max)s évaluations)."
 msgstr "Maximum load reached (%(max)s reviews)."
 
-#: apps/reviews/services/assignments.py:257
+#: apps/reviews/services/assignments.py:271
 msgid "Cette affectation est terminée."
 msgstr "This assignment has ended."
 
-#: apps/reviews/services/assignments.py:277
+#: apps/reviews/services/assignments.py:291
 msgid "Évaluation déjà envoyée : déclarez un conflit pour l'écarter."
 msgstr "Review already submitted: declare a conflict to set it aside."
 
-#: apps/reviews/services/assignments.py:327
+#: apps/reviews/services/assignments.py:350
 #, python-format
 msgid "%(count)s relecteur(s) affecté(s) sur %(required)s requis."
 msgstr "%(count)s reviewer(s) assigned out of %(required)s required."
 
-#: apps/reviews/services/assignments.py:353
+#: apps/reviews/services/assignments.py:356
+msgid "Évaluations envoyées insuffisantes (RG-07)."
+msgstr "Not enough submitted reviews (RG-07)."
+
+#: apps/reviews/services/assignments.py:380
 msgid "Soumission non recevable."
 msgstr "Inadmissible submission."
 
-#: apps/reviews/services/assignments.py:447
+#: apps/reviews/services/assignments.py:482
 msgid "Thématique d'une autre édition."
 msgstr "Track from another edition."
 
@@ -2456,6 +2462,89 @@ msgstr "Type from another edition."
 msgid "Nom obligatoire."
 msgstr "Name required."
 
+#: apps/reviews/services/reviews.py:168
+msgid "Cette évaluation n'est plus modifiable."
+msgstr "This review can no longer be changed."
+
+#: apps/reviews/services/reviews.py:189
+msgid "Notes attendues par code de critère."
+msgstr "Scores expected by criterion code."
+
+#: apps/reviews/services/reviews.py:193
+#, python-format
+msgid "Critère inconnu : %(code)s."
+msgstr "Unknown criterion: %(code)s."
+
+#: apps/reviews/services/reviews.py:201
+#, python-format
+msgid "Note invalide : %(code)s."
+msgstr "Invalid score: %(code)s."
+
+#: apps/reviews/services/reviews.py:208
+#, python-format
+msgid "Note de %(code)s entre %(min)s et %(max)s, une décimale au plus."
+msgstr "Score for %(code)s between %(min)s and %(max)s, at most one decimal."
+
+#: apps/reviews/services/reviews.py:216
+msgid "Recommandation inconnue."
+msgstr "Unknown recommendation."
+
+#: apps/reviews/services/reviews.py:224
+msgid "Confiance de 1 à 5."
+msgstr "Confidence from 1 to 5."
+
+#: apps/reviews/services/reviews.py:230
+#, python-format
+msgid "Texte de %(max)s caractères au plus."
+msgstr "Text of at most %(max)s characters."
+
+#: apps/reviews/services/reviews.py:240
+msgid "Type de communication inconnu."
+msgstr "Unknown presentation type."
+
+#: apps/reviews/services/reviews.py:252
+#, python-format
+msgid "Critères à noter : %(codes)s."
+msgstr "Criteria to score: %(codes)s."
+
+#: apps/reviews/services/reviews.py:254
+msgid "Recommandation obligatoire."
+msgstr "Recommendation required."
+
+#: apps/reviews/services/reviews.py:256
+msgid "Confiance obligatoire."
+msgstr "Confidence required."
+
+#: apps/reviews/services/reviews.py:258
+msgid "Commentaire aux auteurs obligatoire."
+msgstr "Comment to the authors required."
+
+#: apps/reviews/services/reviews.py:269
+msgid ""
+"Aucune grille d'évaluation : prévenez le président du comité scientifique."
+msgstr "No evaluation grid: notify the scientific committee chair."
+
+#: apps/reviews/services/reviews.py:310
+msgid "Évaluation envoyée : renvoyez-la pour la modifier."
+msgstr "Review submitted: submit it again to change it."
+
+#: apps/reviews/services/reviews.py:345
+msgid "Évaluation vide."
+msgstr "Empty review."
+
+#: apps/reviews/services/reviews.py:349
+msgid "Évaluation incomplète."
+msgstr "Incomplete review."
+
+#: apps/reviews/services/reviews.py:424
+msgid "Évaluation déjà envoyée : demandez au président de l'écarter."
+msgstr "Review already submitted: ask the chair to set it aside."
+
+#: apps/reviews/services/reviews.py:501
+#, python-format
+msgid "Message de 1 à %(max)s caractères."
+msgstr "Message of 1 to %(max)s characters."
+
 #: apps/reviews/templates/review/email/assigned_message.txt:1
 #, python-format
 msgid ""
@@ -2499,6 +2588,46 @@ msgstr ""
 #, python-format
 msgid "[%(site_name)s] Évaluation annulée"
 msgstr "[%(site_name)s] Review cancelled"
+
+#: apps/reviews/templates/review/email/declined_message.txt:1
+#, python-format
+msgid ""
+"Bonjour,\n"
+"\n"
+"Un relecteur a décliné l'évaluation de la soumission %(reference)s « %(title)s » (%(edition_title)s). Désignez un remplaçant si le nombre de relecteurs requis n'est plus atteint.\n"
+"\n"
+"Pilotage de l'évaluation : %(link)s"
+msgstr ""
+"Hello,\n"
+"\n"
+"A reviewer has declined to review submission %(reference)s “%(title)s” (%(edition_title)s). Appoint a replacement if the required number of reviewers is no longer met.\n"
+"\n"
+"Review follow-up: %(link)s"
+
+#: apps/reviews/templates/review/email/declined_subject.txt:1
+#, python-format
+msgid "[%(site_name)s] Un relecteur a décliné une évaluation"
+msgstr "[%(site_name)s] A reviewer declined a review"
+
+#: apps/reviews/templates/review/email/divergence_message.txt:1
+#, python-format
+msgid ""
+"Bonjour,\n"
+"\n"
+"Les évaluations de la soumission %(reference)s « %(title)s » (%(edition_title)s) divergent : %(spread)s points d'écart sur 100, au-delà du seuil de %(threshold)s points. Vous pouvez ouvrir la discussion ou désigner un relecteur supplémentaire.\n"
+"\n"
+"Pilotage de l'évaluation : %(link)s"
+msgstr ""
+"Hello,\n"
+"\n"
+"The reviews of submission %(reference)s “%(title)s” (%(edition_title)s) diverge: a %(spread)s-point gap out of 100, beyond the %(threshold)s-point threshold. You can open the discussion or appoint an additional reviewer.\n"
+"\n"
+"Review follow-up: %(link)s"
+
+#: apps/reviews/templates/review/email/divergence_subject.txt:1
+#, python-format
+msgid "[%(site_name)s] Évaluations divergentes"
+msgstr "[%(site_name)s] Diverging reviews"
 
 #: apps/reviews/templates/review/email/reminder_message.txt:1
 msgid "Bonjour,"
@@ -2821,7 +2950,7 @@ msgid "Cette soumission n'est plus modifiable."
 msgstr "This submission can no longer be changed."
 
 #: apps/submissions/services.py:199 apps/submissions/services.py:274
-#: apps/submissions/workflow.py:141
+#: apps/submissions/workflow.py:142
 msgid "L'appel à communications est clos."
 msgstr "The call for papers is closed."
 
@@ -3074,14 +3203,14 @@ msgstr ""
 msgid "[%(site_name)s] Soumission retirée"
 msgstr "[%(site_name)s] Submission withdrawn"
 
-#: apps/submissions/workflow.py:145
+#: apps/submissions/workflow.py:146
 msgid "La soumission est incomplète."
 msgstr "The submission is incomplete."
 
-#: apps/submissions/workflow.py:153
+#: apps/submissions/workflow.py:154
 msgid "La recevabilité commence à la clôture de l'appel (et des dérogations)."
 msgstr "Screening starts when the call (and any extensions) closes."
 
-#: apps/submissions/workflow.py:187
+#: apps/submissions/workflow.py:188
 msgid "Changement de statut non autorisé."
 msgstr "Status change not allowed."
