@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gestconf-backend\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-06 05:40+0000\n"
+"POT-Creation-Date: 2026-10-06 05:48+0000\n"
 "PO-Revision-Date: 2026-10-05 11:00+0000\n"
 "Last-Translator: GEST-CONF\n"
 "Language-Team: GEST-CONF\n"
@@ -402,7 +402,9 @@ msgid "secrétariat"
 msgstr "secretariat"
 
 #: apps/accounts/services/account.py:66 apps/conferences/services.py:111
-#: apps/conferences/services.py:495 apps/program/services/settings.py:32
+#: apps/conferences/services.py:495 apps/program/services/planning.py:131
+#: apps/program/services/planning.py:233 apps/program/services/planning.py:514
+#: apps/program/services/settings.py:32
 msgid "Champ non modifiable."
 msgstr "This field cannot be changed."
 
@@ -2271,6 +2273,101 @@ msgstr "presentation confirmation"
 msgid "confirmations de présentation"
 msgstr "presentation confirmations"
 
+#: apps/program/services/planning.py:136 apps/program/services/planning.py:159
+#: apps/reviews/services/grids.py:179 apps/reviews/services/grids.py:226
+msgid "Nom obligatoire."
+msgstr "Name required."
+
+#: apps/program/services/planning.py:141
+msgid "Une salle porte déjà ce nom."
+msgstr "A room already has this name."
+
+#: apps/program/services/planning.py:147
+msgid "Équipement inconnu."
+msgstr "Unknown equipment."
+
+#: apps/program/services/planning.py:193
+msgid "Salle utilisée par une session : désactivez-la plutôt."
+msgstr "Room used by a session: deactivate it instead."
+
+#: apps/program/services/planning.py:206
+msgid "Date et heure locales attendues."
+msgstr "A local date and time is expected."
+
+#: apps/program/services/planning.py:216
+msgid "La fin doit suivre le début."
+msgstr "The end must come after the start."
+
+#: apps/program/services/planning.py:218
+msgid "Une session dure au plus 24 heures."
+msgstr "A session lasts at most 24 hours."
+
+#: apps/program/services/planning.py:224
+msgid "La session doit se tenir pendant l'édition."
+msgstr "The session must take place during the edition."
+
+#: apps/program/services/planning.py:238
+msgid "Type de session inconnu."
+msgstr "Unknown session type."
+
+#: apps/program/services/planning.py:240 apps/program/services/planning.py:435
+#: apps/program/services/planning.py:520
+msgid "Titre français obligatoire."
+msgstr "French title required."
+
+#: apps/program/services/planning.py:243 apps/program/services/planning.py:246
+msgid "Salle d'une autre édition."
+msgstr "Room from another edition."
+
+#: apps/program/services/planning.py:248
+msgid "Salle désactivée."
+msgstr "Room deactivated."
+
+#: apps/program/services/planning.py:252
+#: apps/reviews/services/assignments.py:482
+msgid "Thématique d'une autre édition."
+msgstr "Track from another edition."
+
+#: apps/program/services/planning.py:267
+msgid "Champ obligatoire."
+msgstr "Required field."
+
+#: apps/program/services/planning.py:356
+msgid "Durée de 1 à 600 minutes."
+msgstr "Duration from 1 to 600 minutes."
+
+#: apps/program/services/planning.py:381
+msgid "Communication d'une autre édition."
+msgstr "Paper from another edition."
+
+#: apps/program/services/planning.py:384
+msgid "Seule une communication confirmée se programme."
+msgstr "Only a confirmed paper can be scheduled."
+
+#: apps/program/services/planning.py:388
+msgid "Communication déjà programmée : déplacez-la."
+msgstr "Paper already scheduled: move it instead."
+
+#: apps/program/services/planning.py:413
+msgid "Intervenant inconnu."
+msgstr "Unknown speaker."
+
+#: apps/program/services/planning.py:472
+msgid "Session d'une autre édition."
+msgstr "Session from another edition."
+
+#: apps/program/services/planning.py:565
+msgid "Rôle de séance inconnu."
+msgstr "Unknown session role."
+
+#: apps/program/services/planning.py:567
+msgid "Personne inconnue."
+msgstr "Unknown person."
+
+#: apps/program/services/planning.py:569
+msgid "Cette personne a déjà ce rôle dans la session."
+msgstr "This person already has this role in the session."
+
 #: apps/reviews/models.py:46
 msgid "note minimale"
 msgstr "minimum score"
@@ -2674,10 +2771,6 @@ msgstr "Not enough submitted reviews (RG-07)."
 msgid "Soumission non recevable."
 msgstr "Inadmissible submission."
 
-#: apps/reviews/services/assignments.py:482
-msgid "Thématique d'une autre édition."
-msgstr "Track from another edition."
-
 #: apps/reviews/services/decisions.py:77 apps/reviews/services/reviews.py:250
 msgid "Type de communication inconnu."
 msgstr "Unknown presentation type."
@@ -2853,10 +2946,6 @@ msgstr "The weights must add up to 100 (currently %(total)s)."
 #: apps/reviews/services/grids.py:177
 msgid "Type d'une autre édition."
 msgstr "Type from another edition."
-
-#: apps/reviews/services/grids.py:179 apps/reviews/services/grids.py:226
-msgid "Nom obligatoire."
-msgstr "Name required."
 
 #: apps/reviews/services/reviews.py:178
 msgid "Cette évaluation n'est plus modifiable."

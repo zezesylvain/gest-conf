@@ -321,3 +321,66 @@ compte 1 328 tests.
 - schéma régénéré sur MariaDB ; client TypeScript régénéré ;
 - traductions du backend à jour ;
 - front : 302 tests, lint et format.
+
+## 13. Bilan de L5.2 (6 octobre 2026)
+
+**Service de planification** (`apps/program/services/planning.py`), seul à écrire le
+brouillon. Chaque écriture :
+
+1. refuse une édition archivée (409) ;
+2. verrouille la ligne `program_state` de l'édition, ce qui met les écritures en série ;
+3. compare la révision attendue (412 `stale_revision` si elle a changé, I14) ;
+4. recalcule les créneaux touchés ;
+5. journalise (`program.*`, avant et après) et incrémente la révision.
+
+**Créneaux (I3, RG-13)** :
+
+- à la suite depuis le début de la session, séparés par le tampon de l'édition ;
+- en temps réel, en UTC (I12) ;
+- durée par défaut : celle du type de communication, sinon 20 minutes ;
+- insertion à une position, déplacement dans la session ou vers une autre, changement de
+  durée, retrait : les positions restent contiguës, et les deux sessions d'un déplacement
+  sont recalculées ;
+- le **dépassement** (RG-13) est signalé avec ses minutes, pas refusé : le brouillon peut
+  contenir des conflits (I6).
+
+**Sessions (I2, I12)** :
+
+- saisies à l'heure de l'édition, avec les erreurs de conversion renvoyées sur
+  `starts_local` ou `ends_local` ;
+- fin après le début, 24 heures au plus, début pendant les dates de l'édition ;
+- salle et thématique de l'édition ; salle active ;
+- un changement d'horaire déplace les créneaux ;
+- la suppression retire les créneaux et les rôles : les communications retournent dans la
+  liste « à programmer ».
+
+**Communications programmables (I5)** : `CONFIRMED` (ou `SCHEDULED`, pour un
+déplacement), de la même édition, une seule fois.
+
+**Salles (I9)** : nom unique dans l'édition (sans tenir compte de la casse), équipements en
+liste fermée ; une salle utilisée ne se supprime pas (409 `in_use`) et se désactive.
+
+**Conflits (RG-12, RG-13)** : `detect_conflicts` analyse tout le brouillon en un nombre
+constant de requêtes.
+
+- Salle : deux sessions qui se chevauchent dans la même salle. Deux sessions contiguës ne
+  sont pas en conflit.
+- Personne : présentateurs, intervenants invités et rôles de séance, à deux endroits au
+  même moment.
+  - Une personne s'identifie par son compte ou, pour un auteur sans compte, par son adresse
+    sans tenir compte de la casse.
+  - Le conflit ne cite que le **nom**, jamais l'adresse.
+  - Deux présences dans la même session ne sont pas un conflit (président qui présente dans
+    sa séance).
+  - Les présentateurs sont ceux de la confirmation (I5), sinon les auteurs marqués
+    présentateurs, sinon l'auteur qui a soumis.
+- Dépassement (RG-13).
+
+**Intégrité** : contrôle `program.slots` (créneaux contigus et cohérents avec la session et
+le tampon ; communications placées confirmées ou programmées).
+
+**Tests** : 22 tests de planification, dont un test de concurrence sur MariaDB (quatre
+placements simultanés, mis en série sans perte : créneaux contigus, révision incrémentée
+quatre fois).
+2 229 tests backend sous SQLite ; les 32 tests du programme passent sous MariaDB. Le service
+n'a pas encore de route : l'API de gestion arrive en L5.3.
