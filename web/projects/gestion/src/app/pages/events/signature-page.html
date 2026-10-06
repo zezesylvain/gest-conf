@@ -1,0 +1,85 @@
+<gc-page-header
+  [heading]="'gestion.signature.title' | translate"
+  [lead]="'gestion.signature.lead' | translate"
+/>
+<div aria-live="polite">
+  @if (status()) {
+    <p class="notice" role="status">{{ status() }}</p>
+  }
+</div>
+<gc-error-summary [messages]="errors()" />
+
+@if (signature(); as current) {
+  <p class="card">
+    <span class="badge">{{
+      (current.complete ? 'gestion.signature.complete' : 'gestion.signature.incomplete') | translate
+    }}</span>
+    @if (current.updated_at) {
+      <span class="muted">
+        {{ 'gestion.signature.updatedAt' | translate: { date: date(current.updated_at) } }}
+      </span>
+    }
+  </p>
+
+  <form [formGroup]="form" (ngSubmit)="save()" novalidate class="card">
+    <h2>{{ 'gestion.signature.identity' | translate }}</h2>
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'gestion.signature.fields.displayName' | translate }}</mat-label>
+      <input matInput formControlName="display_name" required />
+      <mat-hint>{{ 'gestion.signature.displayNameHint' | translate }}</mat-hint>
+      <mat-error>{{ 'shared.form.required' | translate }}</mat-error>
+    </mat-form-field>
+    <div class="grid-2">
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'gestion.signature.fields.titleFr' | translate }}</mat-label>
+        <input matInput formControlName="title_fr" required />
+        <mat-error>{{ 'shared.form.required' | translate }}</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'gestion.signature.fields.titleEn' | translate }}</mat-label>
+        <input matInput formControlName="title_en" required />
+        <mat-error>{{ 'shared.form.required' | translate }}</mat-error>
+      </mat-form-field>
+    </div>
+    <div class="actions">
+      <button mat-flat-button type="submit" [disabled]="busy()">
+        {{ 'gestion.signature.save' | translate }}
+      </button>
+    </div>
+  </form>
+
+  <section class="card" aria-labelledby="image-title">
+    <h2 id="image-title">{{ 'gestion.signature.image.title' | translate }}</h2>
+    <p class="muted">{{ 'gestion.signature.image.lead' | translate }}</p>
+    @if (current.has_image) {
+      <img
+        class="signature-preview"
+        [src]="imageUrl()"
+        [alt]="'gestion.signature.image.alt' | translate"
+      />
+      <p class="muted">
+        {{
+          'gestion.signature.image.size'
+            | translate
+              : {
+                  width: current.image_width,
+                  height: current.image_height,
+                  date: date(current.image_uploaded_at),
+                }
+        }}
+      </p>
+    }
+    <div class="actions">
+      <label>
+        {{ 'gestion.signature.image.file' | translate }}
+        <input type="file" accept="image/png,image/jpeg" (change)="choose($event)" />
+      </label>
+      <button mat-stroked-button type="button" (click)="upload()" [disabled]="busy()">
+        {{
+          (current.has_image ? 'gestion.signature.image.replace' : 'gestion.signature.image.upload')
+            | translate
+        }}
+      </button>
+    </div>
+  </section>
+}

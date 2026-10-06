@@ -30,7 +30,9 @@
         "submissions": "Submissions",
         "reviewing": "Reviewing",
         "program": "Programme",
-        "registrations": "Registration"
+        "registrations": "Registration",
+        "dayof": "Event day",
+        "documents": "Certificates and letters"
       },
       "keywords": {
         "dashboard": "home, status, publish, publication, archive, state, summary",
@@ -63,7 +65,16 @@
         "billingDocuments": "invoice, credit note, pro forma, number, pdf, accounting, export, csv",
         "finance": "dashboard, revenue, collected, refunded, unpaid, net, breakdown",
         "pricing": "fees, categories, grid, period, early bird, on site, zone, options, quotas, promo codes, discount, currency, cancellation",
-        "billingProfile": "legal notices, company name, address, VAT, bank details, prefixes, numbering"
+        "billingProfile": "legal notices, company name, address, VAT, bank details, prefixes, numbering",
+        "reception": "reception, scan, qr, badge, check-in, camera, offline, phone, volunteer",
+        "daySessions": "sessions, attendance, presented, session chair, published programme",
+        "attendance": "attendance, check-ins, cancellation, export, csv, attendee list",
+        "badges": "badges, printing, sheet, a4, a6, qr, category, colour",
+        "counter": "counter, on site, registration, without account, payment, badge",
+        "certificates": "certificates, issuance, revocation, attendance, presentation, reviewing",
+        "certificateSettings": "template, header, signatory, signature, pades, certificate, preview, texts",
+        "letters": "invitation letters, visa, passport, embassy, consulate, request",
+        "signature": "signature, signatory, name, position, image"
       },
       "portalSections": "Sections",
       "portalPages": "Pages",
@@ -85,7 +96,16 @@
       "billingDocuments": "Invoices and credit notes",
       "finance": "Finance",
       "pricing": "Fees",
-      "billingProfile": "Billing"
+      "billingProfile": "Billing",
+      "reception": "Reception (scan)",
+      "daySessions": "Today's sessions",
+      "attendance": "Attendance",
+      "badges": "Badges",
+      "counter": "Counter",
+      "certificates": "Certificates",
+      "certificateSettings": "Certificate template",
+      "letters": "Invitation letters",
+      "signature": "My signature"
     },
     "status": {
       "draft": "draft",
@@ -202,6 +222,11 @@
         "counts": "{{confirmed}} confirmed registration(s), {{pending}} awaiting payment.",
         "money": "Collected: {{collected}}; unpaid: {{outstanding}}.",
         "todo": "To do: {{invoices}} pending invoice(s), {{orphans}} payment(s) without a confirmed registration."
+      },
+      "dayof": {
+        "title": "Event day and certificates",
+        "certificates": "{{count}} certificate(s) issued.",
+        "letters": "{{count}} invitation letter request(s) to review."
       }
     },
     "fields": {
@@ -373,7 +398,10 @@
         "scopeLabel": "Applies to",
         "maxUses": "Maximum uses",
         "maxUsesHint": "Empty: no limit.",
-        "refundHint": "Share of the amount paid refunded on cancellation, before or after the deadline."
+        "refundHint": "Share of the amount paid refunded on cancellation, before or after the deadline.",
+        "badgeColor": "Badge colour",
+        "badgeColorHint": "Category banner, “#RRGGBB”; empty: default colour.",
+        "badgeColorError": "Colour in the #RRGGBB format."
       },
       "billing": {
         "title": "Billing details",
@@ -549,7 +577,10 @@
           "grantorsTitle": "Who grants what",
           "grantorsText": "Administrator and conference chair: by an administrator. Scientific committee chair and organising committee members: by an administrator or the conference chair. Scientific committee members: also by that committee's chair.",
           "lastAdminTitle": "Last administrator",
-          "lastAdminText": "The last active administrator of an edition cannot be removed from the management area: only the platform operator can, through a logged command."
+          "lastAdminText": "The last active administrator of an edition cannot be removed from the management area: only the platform operator can, through a logged command.",
+          "volunteer": "Volunteer: checks people in at reception and at session entrances, with no other right (two-factor authentication).",
+          "sessionChair": "Session chair: attendance and presented papers of their own sessions only.",
+          "signatory": "Signatory: fills in their own signature, applied to certificates and letters (two-factor authentication)."
         },
         "dashboard": {
           "title": "Dashboard",
@@ -1027,6 +1058,159 @@
           "incompleteText": "Without a company name and address, no invoice is issued (billing entity to be confirmed, Q8).",
           "whoTitle": "Who edits?",
           "whoText": "The OC “finance” members and the administrator, with a recent authentication."
+        },
+        "reception": {
+          "title": "Reception (badge scanning)",
+          "summary": "Check attendees in at reception or at a session entrance, even without network.",
+          "path": "Event day › Reception (scan)",
+          "intro": "The phone's camera reads the badge's QR code; the server answers for each badge. Without network, the device decides on the downloaded list and keeps the check-ins until the network is back.",
+          "installTitle": "Install the reception",
+          "installBody": "Open this screen on the phone, then “Add to home screen”: it then opens like an app, even without network.",
+          "downloadTitle": "Download the list",
+          "downloadBody": "Before opening, “Download the offline list”: name, category and badge fingerprint of confirmed attendees. It is valid for 48 hours.",
+          "scanTitle": "Scan",
+          "scanBody": "Turn the camera on and show the badge: the result is displayed and announced (checked in, already checked in, refused).",
+          "offlineTitle": "Without network",
+          "offlineBody": "The badge is checked against the device's list; the check-in is queued. A person missing from the list is sent to the counter.",
+          "syncTitle": "Synchronise",
+          "syncBody": "When the network is back, the queue is sent automatically (or with “Synchronise”). The server re-checks each check-in and reports those it refuses.",
+          "refusalsTitle": "Refusals",
+          "refusalsText": "Cancelled or expired registration, payment pending, replaced badge or another edition's badge: the person does not enter without going to the counter.",
+          "logoutTitle": "Signing out",
+          "logoutText": "Signing out erases the list and the unsent check-ins from the device: synchronise before signing out.",
+          "cameraTitle": "Camera",
+          "cameraText": "The image stays on the device: only the QR text is sent. Without a camera, enter the reference printed under the QR code (committee members allowed to manage attendance)."
+        },
+        "day-sessions": {
+          "title": "Today's sessions",
+          "summary": "Check session entrances and mark papers as presented.",
+          "path": "Event day › Today's sessions",
+          "intro": "Sessions of the published programme, with their attendees and papers.",
+          "scan": "“Check the entrance” opens the reception in session mode: each badge read at the entrance counts as attendance, even without a reception check-in.",
+          "presented": "“Mark as presented”: the paper moves from scheduled to presented; its presenter can receive a presentation certificate.",
+          "attendance": "“Attendees” lists the people checked in at the entrance; the CSV export contains them all.",
+          "chairTitle": "Session chair",
+          "chairText": "They only see and handle their own sessions, without two-factor authentication and without any other right.",
+          "correctionTitle": "Correction",
+          "correctionText": "A paper wrongly marked as presented can only be corrected by the “programme” committee member or the administrator, with a logged reason."
+        },
+        "attendance": {
+          "title": "Attendance",
+          "summary": "Follow, correct and export reception check-ins.",
+          "path": "Event day › Attendance",
+          "intro": "All reception check-ins, made online or synchronised.",
+          "search": "Search by name or reference; filter valid or cancelled check-ins.",
+          "cancel": "A wrong check-in is cancelled with a reason; the person can be checked in again.",
+          "export": "The CSV export is logged and requires a recent authentication.",
+          "keptTitle": "Nothing is deleted",
+          "keptText": "A cancelled check-in remains visible, with its author and reason. A recorded attendance entitles to the attendance certificate (RG-16)."
+        },
+        "badges": {
+          "title": "Badges",
+          "summary": "Print the badges of confirmed attendees.",
+          "path": "Event day › Badges",
+          "intro": "A4 sheets of four A6 badges: name, institution, country, coloured category, edition and QR code.",
+          "filterTitle": "Choose",
+          "filterBody": "One category or all; “Prepare the files” counts the badges.",
+          "downloadTitle": "Download",
+          "downloadBody": "One PDF file per batch of at most 200 badges; each download is logged.",
+          "printTitle": "Print",
+          "printBody": "Print at 100%, without fit to page, then cut the sheet in four.",
+          "tokenTitle": "The QR code is an access pass",
+          "tokenText": "Badges are never stored; do not leave the files or printed sheets lying around.",
+          "lostTitle": "Lost badge",
+          "lostText": "From the registration record, “Replace the badge”: the old one is refused at reception; print the new one."
+        },
+        "counter": {
+          "title": "Counter",
+          "summary": "Register a person on site, with or without an account.",
+          "path": "Event day › Counter",
+          "intro": "The counter registers a walk-in person at the on-site rate and prints their badge.",
+          "personTitle": "The person",
+          "personBody": "E-mail address, first and last name; institution and country optional.",
+          "categoryTitle": "The category",
+          "categoryBody": "Category and options, at the on-site rate of the price grid.",
+          "paidTitle": "The payment",
+          "paidBody": "Tick “Payment received” to confirm at once; otherwise the registration awaits its payment.",
+          "badgeTitle": "The badge",
+          "badgeBody": "Once confirmed, “Print the badge” opens the PDF.",
+          "accountTitle": "Account created without a password",
+          "accountText": "The person receives an e-mail to set their password; they cannot sign in before.",
+          "existingTitle": "Known address",
+          "existingText": "The registration is attached to the existing account; the name and institution entered do not change it."
+        },
+        "certificates": {
+          "title": "Certificates",
+          "summary": "Issue, follow up and revoke certificates.",
+          "path": "Certificates and letters › Certificates",
+          "intro": "Three kinds of certificate, issued by the committee after the conference.",
+          "participation": "Attendance: confirmed registration and recorded attendance (reception or session).",
+          "presentation": "Presentation: presenter of a paper marked as presented.",
+          "review": "Reviewing (if enabled): reviewer who sent at least one review; only the number appears, never the titles.",
+          "checkTitle": "Check",
+          "checkBody": "The table shows, for each kind, the eligible, the issued and what is missing (signatory, certificate).",
+          "issueTitle": "Issue",
+          "issueBody": "“Issue” hands the issuance over to the job queue; each person receives an e-mail and downloads their certificate from their account.",
+          "followTitle": "Complete",
+          "followBody": "After a late check-in, “Issue the missing ones” only issues the new ones: nothing is issued twice.",
+          "rg16Title": "Attendance required (RG-16)",
+          "rg16Text": "The server re-checks each kind's condition on issuance; no attendance certificate without recorded attendance.",
+          "revokeTitle": "Revocation",
+          "revokeText": "A revoked certificate stays in the list and the public verification reports it as revoked; the reason is logged."
+        },
+        "certificate-settings": {
+          "title": "Certificate template",
+          "summary": "Set the signature, header, signatory and texts.",
+          "path": "Certificates and letters › Certificate template",
+          "intro": "The template applies to the edition's certificates and invitation letters.",
+          "modeTitle": "Signing mode",
+          "modeBody": "Signature image (default), or PAdES electronic signature with the institution's certificate.",
+          "headerTitle": "Official header",
+          "headerBody": "Logo or banner of the institution, in PNG or JPEG.",
+          "keyTitle": "Certificate",
+          "keyBody": "For PAdES: the .p12 file and its password, only used on upload.",
+          "templatesTitle": "Texts",
+          "templatesBody": "Title, text and footer in French and English, for each kind.",
+          "signatoryTitle": "Signatory",
+          "signatoryBody": "Each kind designates a signatory whose signature is complete; without one, nothing is issued.",
+          "previewTitle": "Preview",
+          "previewBody": "“Preview” produces a PDF on fictitious data, neither signed nor kept.",
+          "placeholdersTitle": "Variables",
+          "placeholdersText": "Only the variables shown are allowed, between braces ({name}); any other brace is refused.",
+          "padesTitle": "PAdES",
+          "padesText": "A PAdES signature proves the PDF's integrity; a certificate in a file is not a qualified signature under eIDAS.",
+          "qualifiedTitle": "Qualified signature",
+          "qualifiedText": "It requires a qualified trust service provider, still to be chosen (question Q17); none is connected yet."
+        },
+        "letters": {
+          "title": "Invitation letters",
+          "summary": "Review invitation letter requests for visas.",
+          "path": "Certificates and letters › Invitation letters",
+          "intro": "A registered attendee requests their letter from their account; the committee reviews it.",
+          "reviewTitle": "Review",
+          "reviewBody": "The record shows the passport (number in clear), the stay, the embassy and the registration's state.",
+          "issueTitle": "Issue",
+          "issueBody": "The PDF letter is signed by the designated signatory and publicly verifiable through its QR code.",
+          "refuseTitle": "Refuse",
+          "refuseBody": "The reason for refusal is shared with the attendee.",
+          "passportTitle": "Passport number",
+          "passportText": "It only appears in clear in the record and is erased 30 days after the edition.",
+          "disclaimerTitle": "Scope of the letter",
+          "disclaimerText": "The letter does not commit the organisers to covering any costs."
+        },
+        "signature": {
+          "title": "My signature",
+          "summary": "Fill in your signatory signature.",
+          "path": "Certificates and letters › My signature",
+          "intro": "The signatory fills in what will be applied to the documents for which they are the designated signatory.",
+          "identityTitle": "Name and position",
+          "identityBody": "Displayed name and position in French and English.",
+          "imageTitle": "Image",
+          "imageBody": "PNG or JPEG of the handwritten signature, on a light background.",
+          "onlyTitle": "The signatory only",
+          "onlyText": "Nobody else, not even the administrator, can upload or replace your signature.",
+          "frozenTitle": "Issued documents",
+          "frozenText": "An issued document keeps the name, position and image of the time; a change only applies to the next ones."
         }
       }
     },
@@ -1986,6 +2170,17 @@
         "proforma": {
           "action": "Issue a pro forma invoice",
           "done": "Pro forma invoice issued."
+        },
+        "badge": {
+          "download": "Badge (PDF)",
+          "replace": {
+            "action": "Replace the badge",
+            "title": "Replace the badge",
+            "message": "A new QR code will be created: the old badge will be refused at reception. Use it for a lost or stolen badge.",
+            "confirm": "Replace",
+            "reason": "Reason",
+            "done": "Badge replaced: print the new one."
+          }
         }
       }
     },
@@ -2065,6 +2260,384 @@
       "amount": "Amount",
       "count": "Count",
       "none": "Nothing yet."
+    },
+    "logoutPending": {
+      "title": "Unsynchronised check-ins",
+      "message": "{{count}} reception check-in(s) have not been sent to the server yet. Signing out erases them from this device: synchronise first if the network allows. Sign out anyway?",
+      "confirm": "Sign out"
+    },
+    "reception": {
+      "title": "Reception",
+      "lead": "Scan the badges' QR codes; without network, the device decides on the downloaded list and synchronises later.",
+      "scan": {
+        "reception": "Reception check-in",
+        "session": "Session entrance: {{session}}"
+      },
+      "camera": {
+        "start": "Turn the camera on",
+        "stop": "Turn the camera off",
+        "denied": "Camera access denied: allow it in the browser settings, or enter the reference.",
+        "unavailable": "No camera available on this device: enter the badge reference."
+      },
+      "outcome": {
+        "checked_in": "Checked in",
+        "already_checked_in": "Already checked in",
+        "unknown": "Unknown badge",
+        "other_edition": "Badge from another edition",
+        "cancelled": "Registration cancelled",
+        "expired": "Registration expired",
+        "replaced": "Badge replaced: old badge refused",
+        "pending_payment": "Payment pending: send to the counter",
+        "not_allowed": "Manual entry not allowed",
+        "unknown_session": "Session not in the published programme",
+        "offline_absent": "Not in the offline list: send to the counter",
+        "no_bundle": "No network and no offline list: cannot verify",
+        "bad_reference": "Malformed reference (example: GC27-I00042)"
+      },
+      "offlineDecision": "Decided without network: confirmed by the server on synchronisation.",
+      "manual": {
+        "reference": "Registration reference",
+        "hint": "Printed under the badge's QR code, for example GC27-I00042.",
+        "submit": "Check in"
+      },
+      "status": {
+        "title": "Network and offline list",
+        "online": "Online",
+        "offline": "Offline"
+      },
+      "summary": "{{checkedIn}} checked in at reception out of {{confirmed}} confirmed registration(s); {{pending}} awaiting payment.",
+      "bundle": {
+        "ready": "List of {{count}} attendee(s), downloaded on {{date}}, valid until {{expires}}.",
+        "none": "No offline list on this device.",
+        "download": "Download the offline list",
+        "refresh": "Update the list",
+        "forget": "Erase the list",
+        "downloaded": "List of {{count}} attendee(s) stored on the device.",
+        "forgotten": "List erased from the device.",
+        "chairOnly": "Session chair: online check-in for your sessions; no offline list."
+      },
+      "queue": {
+        "count": "{{count}} check-in(s) waiting to be sent.",
+        "sync": "Synchronise",
+        "details": "Pending check-ins",
+        "synced": "{{sent}} check-in(s) sent, {{rejected}} of them refused by the server."
+      },
+      "rejected": {
+        "title": "Refused on synchronisation",
+        "lead": "The server re-checked these check-ins made without network: the person is not checked in.",
+        "clear": "Hide"
+      },
+      "settings": {
+        "title": "Device settings",
+        "mode": "Mode",
+        "reception": "Conference reception",
+        "modeHint": "A session of the published programme to check its entrance.",
+        "device": "Device name",
+        "deviceHint": "Recorded with each check-in (example: main entrance)."
+      }
+    },
+    "daySessions": {
+      "title": "Today's sessions",
+      "lead": "Published programme: entrance check-in and presented papers.",
+      "chairs": "Chair: {{names}}",
+      "youChair": "you chair",
+      "attendanceCount": "{{count}} attendee(s) checked in at the entrance.",
+      "scan": "Check the entrance",
+      "attendance": "Attendees",
+      "export": "Export attendees (CSV)",
+      "attendanceOf": "Attendees of session {{title}}",
+      "more": "{{shown}} attendees shown out of {{count}}: the export contains them all.",
+      "slots": "Papers",
+      "presented": {
+        "action": "Mark as presented",
+        "done": "“{{title}}” marked as presented."
+      },
+      "unpresent": {
+        "action": "Correct: not presented",
+        "title": "Correct “presented”",
+        "message": "“{{title}}” will be scheduled again. The correction is logged.",
+        "confirm": "Correct",
+        "reason": "Reason",
+        "done": "“{{title}}” is scheduled again."
+      },
+      "empty": "No session in the published programme."
+    },
+    "attendance": {
+      "title": "Attendance",
+      "lead": "Reception check-ins: search, cancel a wrong check-in, export.",
+      "search": "Search",
+      "searchHint": "Name or reference (GC27-I00012).",
+      "fields": {
+        "state": "State",
+        "person": "Attendee",
+        "category": "Category",
+        "scannedAt": "Checked in on",
+        "recordedBy": "By",
+        "actions": "Actions"
+      },
+      "active": "Valid",
+      "cancelled": "Cancelled",
+      "count": "{{count}} check-in(s)",
+      "export": "Export (CSV)",
+      "empty": "No check-in.",
+      "method": {
+        "scan": "badge scan",
+        "manual": "reference entry"
+      },
+      "cancelledOn": "cancelled on {{date}}",
+      "cancel": {
+        "action": "Cancel the check-in",
+        "title": "Cancel the check-in",
+        "message": "{{name}}'s check-in will be cancelled (nothing is deleted); the person can be checked in again.",
+        "confirm": "Cancel the check-in",
+        "reason": "Reason",
+        "done": "{{name}}'s check-in cancelled."
+      }
+    },
+    "badges": {
+      "title": "Badges",
+      "lead": "A4 sheets of four A6 badges, for confirmed registrations.",
+      "hint": "One category, or all.",
+      "compute": "Prepare the files",
+      "files": "Files to print",
+      "count": "{{count}} badge(s) to print.",
+      "batch": "File {{number}}: badges {{from}} to {{to}} (PDF)",
+      "single": "A single badge is printed from the registration record."
+    },
+    "counter": {
+      "title": "Counter",
+      "lead": "Register a person on site, with or without an account, at the on-site rate.",
+      "created": "Registration {{reference}} recorded",
+      "accountCreated": "Account created without a password: an e-mail invites the person to set one.",
+      "accountExisting": "Registration attached to the existing account of this address.",
+      "printBadge": "Print the badge",
+      "open": "Open the registration",
+      "another": "New registration",
+      "fields": {
+        "email": "E-mail address",
+        "firstName": "First name",
+        "lastName": "Last name",
+        "institution": "Institution",
+        "paid": "Payment received at the counter"
+      },
+      "emailHint": "Known address: the registration is attached to that account.",
+      "emailError": "A valid e-mail address is required.",
+      "paidHint": "When ticked, the on-site payment is recorded and the registration confirmed; otherwise it awaits payment.",
+      "submit": "Register"
+    },
+    "certificates": {
+      "title": "Certificates",
+      "lead": "Issue certificates after the conference, follow them up and revoke them.",
+      "overview": "By kind",
+      "fields": {
+        "nature": "Kind",
+        "eligible": "Eligible",
+        "issued": "Issued",
+        "revoked": "Revoked",
+        "state": "State",
+        "reference": "Reference",
+        "person": "Holder",
+        "issuedAt": "Issued on"
+      },
+      "nature": {
+        "participation": "Attendance",
+        "presentation": "Presentation",
+        "review": "Reviewing",
+        "letter": "Invitation letter"
+      },
+      "unreachable": "{{count}} presenter(s) without an account, not reachable",
+      "disabled": "Disabled for the edition",
+      "pending": "Issuance in progress",
+      "configure": "Complete the template",
+      "issueMore": "Issue the missing ones",
+      "issueFirst": "Issue",
+      "queueHint": "Issuance goes through the job queue: certificates arrive within minutes. Nothing is issued twice.",
+      "refresh": "Refresh",
+      "searchHint": "Name or reference.",
+      "valid": "Valid",
+      "revokedState": "Revoked",
+      "count": "{{count}} certificate(s)",
+      "pdf": "PDF",
+      "revokedOn": "revoked on {{date}}",
+      "empty": "No certificate.",
+      "issue": {
+        "title": "Issue certificates",
+        "message": "{{nature}} certificates: {{count}} eligible person(s). Each will receive an e-mail.",
+        "confirm": "Issue",
+        "done": "Issuance of {{nature}} certificates requested."
+      },
+      "revoke": {
+        "action": "Revoke",
+        "title": "Revoke the certificate",
+        "message": "Certificate {{reference}} of {{name}} will be reported as revoked by the public verification. It is not deleted.",
+        "confirm": "Revoke",
+        "reason": "Reason",
+        "done": "Certificate {{reference}} revoked."
+      }
+    },
+    "certificateSettings": {
+      "title": "Certificate template",
+      "lead": "Signature, official header, signatory and texts of each kind.",
+      "general": "Signature and layout",
+      "fields": {
+        "mode": "Signing mode",
+        "layout": "Layout",
+        "reviewEnabled": "Reviewing certificate for reviewers",
+        "signatory": "Signatory",
+        "title_fr": "Title (French)",
+        "title_en": "Title (English)",
+        "body_fr": "Text (French)",
+        "body_en": "Text (English)",
+        "footer_fr": "Footer (French)",
+        "footer_en": "Footer (English)"
+      },
+      "mode": {
+        "image": "Signature image",
+        "pades": "PAdES electronic signature",
+        "provider": "Qualified signature (provider)"
+      },
+      "modeHint": "PAdES requires the institution's certificate; no qualified provider is connected yet.",
+      "layout": {
+        "signature_right": "Signature on the right, QR on the left",
+        "signature_left": "Signature on the left, QR on the right"
+      },
+      "signingUnavailable": "PAdES signing unavailable: the server's encryption keys are not configured.",
+      "save": "Save",
+      "saved": "Settings saved.",
+      "header": {
+        "title": "Official header",
+        "lead": "Logo or banner at the top of certificates and letters (PNG or JPEG).",
+        "alt": "Current certificate header",
+        "size": "{{width}} × {{height}} pixels.",
+        "file": "File",
+        "upload": "Upload the header",
+        "uploaded": "Header saved.",
+        "missing": "Choose a PNG or JPEG file.",
+        "deleted": "Header removed.",
+        "delete": {
+          "action": "Remove the header",
+          "title": "Remove the header",
+          "message": "The next documents will be issued without a header; issued documents do not change.",
+          "confirm": "Remove"
+        }
+      },
+      "key": {
+        "title": "Institution's certificate (PAdES)",
+        "lead": "PKCS#12 file (.p12): the server re-encrypts it and never serves it.",
+        "current": "Certificate of “{{subject}}”, valid until {{until}}, uploaded on {{at}}.",
+        "none": "No certificate uploaded.",
+        "file": ".p12 file",
+        "password": "File password",
+        "passwordHint": "Used to open it on upload; it is not kept.",
+        "upload": "Upload the certificate",
+        "uploaded": "Certificate saved.",
+        "missing": "Choose the certificate's .p12 file.",
+        "deleted": "Certificate removed.",
+        "delete": {
+          "action": "Remove the certificate",
+          "title": "Remove the certificate",
+          "message": "Without a certificate, PAdES signing is no longer possible; issued documents remain signed.",
+          "confirm": "Remove"
+        }
+      },
+      "noSignatory": "No signatory has a complete signature: invite a signatory (Committees › Invitations), who fills in their own signature.",
+      "signatoryHint": "Among the edition's signatories with a complete signature.",
+      "placeholders": "Allowed variables: {{list}}",
+      "default": "Default text",
+      "tooLong": "Text too long.",
+      "emptyMeansDefault": "An emptied text goes back to the default text.",
+      "template": {
+        "save": "Save",
+        "saved": "“{{nature}}” template saved.",
+        "preview": "Preview (PDF)"
+      }
+    },
+    "letters": {
+      "title": "Invitation letters",
+      "lead": "Attendees' requests for their visa: review, issue or refuse.",
+      "searchHint": "Name, passport name or reference.",
+      "fields": {
+        "status": "Status",
+        "person": "Attendee",
+        "passport": "Passport",
+        "stay": "Stay",
+        "requestedAt": "Requested on",
+        "registration": "Registration",
+        "passportName": "Name on the passport",
+        "nationality": "Nationality",
+        "passportNumber": "Passport number",
+        "embassy": "Embassy or consulate",
+        "decidedBy": "Reviewed by",
+        "issuedAt": "Issued on",
+        "refuseReason": "Reason for refusal",
+        "revokedAt": "Revoked on",
+        "verification": "Verification address"
+      },
+      "status": {
+        "requested": "To review",
+        "issued": "Issued",
+        "refused": "Refused",
+        "revoked": "Revoked"
+      },
+      "count": "{{count}} request(s)",
+      "empty": "No request.",
+      "back": "Back to letters",
+      "erased": "erased (end of the edition)",
+      "pdf": "Letter (PDF)",
+      "disclaimer": "The letter supports the visa application; it does not commit the organisers to covering any costs.",
+      "detail": {
+        "title": "Invitation letter request"
+      },
+      "issue": {
+        "action": "Issue the letter",
+        "title": "Issue the letter",
+        "message": "A signed letter will be issued in the name of {{name}}; the person downloads it from their account.",
+        "confirm": "Issue",
+        "done": "Letter issued."
+      },
+      "refuse": {
+        "action": "Refuse",
+        "title": "Refuse the request",
+        "message": "{{name}}'s request will be refused; the reason is shared with them.",
+        "confirm": "Refuse",
+        "reason": "Reason",
+        "done": "Request refused."
+      },
+      "revoke": {
+        "action": "Revoke",
+        "title": "Revoke the letter",
+        "message": "{{name}}'s letter will be reported as revoked by the public verification.",
+        "confirm": "Revoke",
+        "reason": "Reason",
+        "done": "Letter revoked."
+      }
+    },
+    "signature": {
+      "title": "My signature",
+      "lead": "Your name, your position and the image of your signature, applied to the documents for which you are the designated signatory.",
+      "complete": "Signature complete",
+      "incomplete": "Signature incomplete",
+      "updatedAt": "Changed on {{date}}",
+      "identity": "Name and position",
+      "fields": {
+        "displayName": "Displayed name",
+        "titleFr": "Position (French)",
+        "titleEn": "Position (English)"
+      },
+      "displayNameHint": "As printed under the signature (example: Prof. Awa Koné).",
+      "save": "Save",
+      "saved": "Signature saved.",
+      "image": {
+        "title": "Signature image",
+        "lead": "PNG or JPEG, on a white or transparent background; the server crops and resizes it.",
+        "alt": "Current image of your signature",
+        "size": "{{width}} × {{height}} pixels, uploaded on {{date}}.",
+        "file": "File",
+        "upload": "Upload the image",
+        "replace": "Replace the image",
+        "uploaded": "Image saved.",
+        "missing": "Choose a PNG or JPEG file."
+      }
     }
   }
 }

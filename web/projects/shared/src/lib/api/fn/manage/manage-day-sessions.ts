@@ -7,7 +7,7 @@ import { filter, map } from 'rxjs/operators';
 import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
-import { PaginatedDaySessionList } from '../../models/paginated-day-session-list';
+import { DaySession } from '../../models/day-session';
 
 export interface ManageDaySessions$Params {
   edition_id: number;
@@ -16,25 +16,13 @@ export interface ManageDaySessions$Params {
  * Quel champ utiliser pour classer les résultats.
  */
   ordering?: string;
-
-/**
- * Un numéro de page de l'ensemble des résultats.
- */
-  page?: number;
-
-/**
- * Nombre de résultats à retourner par page.
- */
-  page_size?: number;
 }
 
-export function manageDaySessions(http: HttpClient, rootUrl: string, params: ManageDaySessions$Params, context?: HttpContext): Observable<StrictHttpResponse<PaginatedDaySessionList>> {
+export function manageDaySessions(http: HttpClient, rootUrl: string, params: ManageDaySessions$Params, context?: HttpContext): Observable<StrictHttpResponse<Array<DaySession>>> {
   const rb = new RequestBuilder(rootUrl, manageDaySessions.PATH, 'get');
   if (params) {
     rb.path('edition_id', params.edition_id, {});
     rb.query('ordering', params.ordering, {});
-    rb.query('page', params.page, {});
-    rb.query('page_size', params.page_size, {});
   }
 
   return http.request(
@@ -42,7 +30,7 @@ export function manageDaySessions(http: HttpClient, rootUrl: string, params: Man
   ).pipe(
     filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
     map((r: HttpResponse<any>) => {
-      return r as StrictHttpResponse<PaginatedDaySessionList>;
+      return r as StrictHttpResponse<Array<DaySession>>;
     })
   );
 }

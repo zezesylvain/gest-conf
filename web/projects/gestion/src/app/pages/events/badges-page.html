@@ -1,0 +1,54 @@
+<gc-page-header
+  [heading]="'gestion.badges.title' | translate"
+  [lead]="'gestion.badges.lead' | translate"
+/>
+<gc-error-summary [messages]="errors()" />
+
+<form [formGroup]="form" (ngSubmit)="compute()" novalidate class="card">
+  <mat-form-field appearance="outline">
+    <mat-label>{{ 'gestion.registrations.fields.category' | translate }}</mat-label>
+    <mat-select formControlName="category">
+      <mat-option value="">{{ 'gestion.registrations.all' | translate }}</mat-option>
+      @for (category of categories(); track category.id) {
+        <mat-option [value]="category.code">
+          @if (category.badge_color) {
+            <span
+              class="swatch"
+              aria-hidden="true"
+              [style.background]="category.badge_color"
+            ></span>
+          }
+          {{ label(category) }}
+        </mat-option>
+      }
+    </mat-select>
+    <mat-hint>{{ 'gestion.badges.hint' | translate }}</mat-hint>
+  </mat-form-field>
+  <div class="actions">
+    <button mat-flat-button type="submit" [disabled]="busy()">
+      {{ 'gestion.badges.compute' | translate }}
+    </button>
+  </div>
+</form>
+
+@if (batches(); as current) {
+  <section class="card" aria-labelledby="batches-title">
+    <h2 id="batches-title">{{ 'gestion.badges.files' | translate }}</h2>
+    <p role="status">{{ 'gestion.badges.count' | translate: { count: current.count } }}</p>
+    @if (links().length) {
+      <ul>
+        @for (link of links(); track link.number) {
+          <li>
+            <a [href]="link.url" target="_blank" rel="noopener">
+              {{
+                'gestion.badges.batch'
+                  | translate: { number: link.number, from: link.from, to: link.to }
+              }}
+            </a>
+          </li>
+        }
+      </ul>
+    }
+    <p class="muted">{{ 'gestion.badges.single' | translate }}</p>
+  </section>
+}

@@ -66,7 +66,11 @@ urlpatterns = [
         views.MyBadgeView.as_view(),
         name="registrations-badge",
     ),
-    path(f"{E}/day/sessions", DAY.as_view({"get": "sessions"}), name="manage-day-sessions"),
+    path(
+        f"{E}/day/sessions",
+        views.DaySessionListViewSet.as_view({"get": "sessions"}),
+        name="manage-day-sessions",
+    ),
     path(f"{S}/attendance", DAY.as_view({"get": "attendance"}), name="manage-day-attendance"),
     path(
         f"{S}/attendance/scan",
@@ -127,7 +131,7 @@ urlpatterns = [
     ),
     path(
         f"{CERT}/overview",
-        views.CertificateViewSet.as_view({"get": "overview"}),
+        views.CertificateOverviewViewSet.as_view({"get": "overview"}),
         name="manage-certificates-overview",
     ),
     path(

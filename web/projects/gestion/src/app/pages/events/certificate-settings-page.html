@@ -1,0 +1,178 @@
+<gc-page-header
+  [heading]="'gestion.certificateSettings.title' | translate"
+  [lead]="'gestion.certificateSettings.lead' | translate"
+/>
+<div aria-live="polite">
+  @if (status()) {
+    <p class="notice" role="status">{{ status() }}</p>
+  }
+</div>
+<gc-error-summary [messages]="errors()" />
+
+@if (settings(); as current) {
+  <form [formGroup]="settingsForm" (ngSubmit)="saveSettings()" novalidate class="card">
+    <h2>{{ 'gestion.certificateSettings.general' | translate }}</h2>
+    <div class="grid-2">
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'gestion.certificateSettings.fields.mode' | translate }}</mat-label>
+        <mat-select formControlName="signing_mode">
+          @for (mode of modes; track mode) {
+            <mat-option [value]="mode">{{
+              'gestion.certificateSettings.mode.' + mode | translate
+            }}</mat-option>
+          }
+        </mat-select>
+        <mat-hint>{{ 'gestion.certificateSettings.modeHint' | translate }}</mat-hint>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'gestion.certificateSettings.fields.layout' | translate }}</mat-label>
+        <mat-select formControlName="layout">
+          @for (layout of layouts; track layout) {
+            <mat-option [value]="layout">{{
+              'gestion.certificateSettings.layout.' + layout | translate
+            }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <mat-checkbox formControlName="review_enabled">{{
+      'gestion.certificateSettings.fields.reviewEnabled' | translate
+    }}</mat-checkbox>
+    @if (!current.signing_available) {
+      <p class="notice">{{ 'gestion.certificateSettings.signingUnavailable' | translate }}</p>
+    }
+    <div class="actions">
+      <button mat-flat-button type="submit" [disabled]="busy()">
+        {{ 'gestion.certificateSettings.save' | translate }}
+      </button>
+    </div>
+  </form>
+
+  <section class="card" aria-labelledby="header-title">
+    <h2 id="header-title">{{ 'gestion.certificateSettings.header.title' | translate }}</h2>
+    <p class="muted">{{ 'gestion.certificateSettings.header.lead' | translate }}</p>
+    @if (current.has_header) {
+      <img
+        class="header-preview"
+        [src]="headerUrl()"
+        [alt]="'gestion.certificateSettings.header.alt' | translate"
+      />
+      <p class="muted">
+        {{
+          'gestion.certificateSettings.header.size'
+            | translate: { width: current.header_width, height: current.header_height }
+        }}
+      </p>
+    }
+    <div class="actions">
+      <label>
+        {{ 'gestion.certificateSettings.header.file' | translate }}
+        <input type="file" accept="image/png,image/jpeg" (change)="chooseHeader($event)" />
+      </label>
+      <button mat-stroked-button type="button" (click)="uploadHeader()" [disabled]="busy()">
+        {{ 'gestion.certificateSettings.header.upload' | translate }}
+      </button>
+      @if (current.has_header) {
+        <button mat-button type="button" (click)="deleteHeader()" [disabled]="busy()">
+          {{ 'gestion.certificateSettings.header.delete.action' | translate }}
+        </button>
+      }
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="key-title">
+    <h2 id="key-title">{{ 'gestion.certificateSettings.key.title' | translate }}</h2>
+    <p class="muted">{{ 'gestion.certificateSettings.key.lead' | translate }}</p>
+    @if (current.signing_key; as key) {
+      <p>
+        {{
+          'gestion.certificateSettings.key.current'
+            | translate
+              : { subject: key.subject, until: date(key.not_after), at: date(key.uploaded_at) }
+        }}
+      </p>
+    } @else {
+      <p class="muted">{{ 'gestion.certificateSettings.key.none' | translate }}</p>
+    }
+    <form [formGroup]="keyForm" (ngSubmit)="uploadKey()" novalidate>
+      <label>
+        {{ 'gestion.certificateSettings.key.file' | translate }}
+        <input type="file" accept=".p12,.pfx,application/x-pkcs12" (change)="chooseKey($event)" />
+      </label>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'gestion.certificateSettings.key.password' | translate }}</mat-label>
+        <input matInput type="password" formControlName="password" autocomplete="off" />
+        <mat-hint>{{ 'gestion.certificateSettings.key.passwordHint' | translate }}</mat-hint>
+        <mat-error>{{ 'shared.form.required' | translate }}</mat-error>
+      </mat-form-field>
+      <div class="actions">
+        <button mat-stroked-button type="submit" [disabled]="busy()">
+          {{ 'gestion.certificateSettings.key.upload' | translate }}
+        </button>
+        @if (current.signing_key) {
+          <button mat-button type="button" (click)="deleteKey()" [disabled]="busy()">
+            {{ 'gestion.certificateSettings.key.delete.action' | translate }}
+          </button>
+        }
+      </div>
+    </form>
+  </section>
+
+  @if (!signatories().length) {
+    <p class="notice">{{ 'gestion.certificateSettings.noSignatory' | translate }}</p>
+  }
+
+  @for (template of templates(); track template.nature) {
+    <form
+      [formGroup]="form(template.nature)"
+      (ngSubmit)="saveTemplate(template)"
+      novalidate
+      class="card"
+      [attr.aria-labelledby]="'template-' + template.nature"
+    >
+      <h2 [id]="'template-' + template.nature">
+        {{ 'gestion.certificates.nature.' + template.nature | translate }}
+      </h2>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'gestion.certificateSettings.fields.signatory' | translate }}</mat-label>
+        <mat-select formControlName="signatory">
+          <mat-option [value]="null">—</mat-option>
+          @for (item of signatories(); track item.id) {
+            <mat-option [value]="item.id">{{ signatoryLabel(item) }}</mat-option>
+          }
+        </mat-select>
+        <mat-hint>{{ 'gestion.certificateSettings.signatoryHint' | translate }}</mat-hint>
+      </mat-form-field>
+      <p class="muted">
+        {{
+          'gestion.certificateSettings.placeholders' | translate: { list: placeholders(template) }
+        }}
+      </p>
+      <div class="grid-2">
+        @for (field of textFields; track field) {
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'gestion.certificateSettings.fields.' + field | translate }}</mat-label>
+            @if (field.startsWith('body')) {
+              <textarea matInput [formControlName]="field" rows="4"></textarea>
+            } @else {
+              <input matInput [formControlName]="field" />
+            }
+            @if (!template.customized[field]) {
+              <mat-hint>{{ 'gestion.certificateSettings.default' | translate }}</mat-hint>
+            }
+            <mat-error>{{ 'gestion.certificateSettings.tooLong' | translate }}</mat-error>
+          </mat-form-field>
+        }
+      </div>
+      <p class="muted">{{ 'gestion.certificateSettings.emptyMeansDefault' | translate }}</p>
+      <div class="actions">
+        <button mat-flat-button type="submit" [disabled]="busy()">
+          {{ 'gestion.certificateSettings.template.save' | translate }}
+        </button>
+        <a mat-button [href]="previewUrl(template.nature)" target="_blank" rel="noopener">
+          {{ 'gestion.certificateSettings.template.preview' | translate }}
+        </a>
+      </div>
+    </form>
+  }
+}

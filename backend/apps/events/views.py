@@ -615,6 +615,13 @@ class DaySessionViewSet(ManageViewSet):
         return Response(DaySessionSerializer({**row, "chaired": session_id in chaired}).data)
 
 
+class DaySessionListViewSet(DaySessionViewSet):
+    """``…/day/sessions`` : liste simple (quelques dizaines de sessions), sans pagination,
+    à la différence des présents d'une session."""
+
+    pagination_class = None
+
+
 # --- Attestations (K9 à K11, K18, K19) --------------------------------------------------------
 
 
@@ -746,6 +753,8 @@ class DocumentTemplateViewSet(_CertificatesBase):
 
     queryset = DocumentTemplate.objects.none()  # pour le schéma
     serializer_class = DocumentTemplateSerializer
+    # Listes courtes, lues en entier (une ligne par nature, quelques signataires).
+    pagination_class = None
     required_capabilities = {
         "list": C.CERTIFICATES_MANAGE,
         "partial_update": C.CERTIFICATES_MANAGE,
@@ -899,6 +908,13 @@ class CertificateViewSet(_CertificatesBase):
             actor=self.actor(),
         )
         return Response(CertificateSerializer(certificate_data(certificate)).data)
+
+
+class CertificateOverviewViewSet(CertificateViewSet):
+    """``…/certificates/overview`` : une ligne par nature, sans pagination, à la différence
+    de la liste des attestations."""
+
+    pagination_class = None
 
 
 class MyCertificatesView(APIView):

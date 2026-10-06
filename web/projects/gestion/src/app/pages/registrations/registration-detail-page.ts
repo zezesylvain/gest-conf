@@ -32,6 +32,7 @@ import {
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 
+import { EventsApi, eventsUrls } from '../../core/events-api';
 import { editionCapabilities, errorMessages } from '../../core/page-support';
 import { documentUrl, money, proofUrl, RegistrationsApi } from '../../core/registrations-api';
 import { categoryLabel, label, today } from './registrations-support';
@@ -104,6 +105,7 @@ export class RegistrationDetailPage implements OnInit {
   readonly registrationId = input.required<string>();
 
   private readonly api = inject(RegistrationsApi);
+  private readonly events = inject(EventsApi);
   private readonly meStore = inject(MeStore);
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
@@ -120,6 +122,13 @@ export class RegistrationDetailPage implements OnInit {
 
   protected readonly canManage = computed(() =>
     editionCapabilities(this.meStore, this.editionId()).includes('registrations.manage'),
+  );
+  /** Badge perdu : nouveau jeton, l'ancien badge refusé à l'accueil (plan L7, K2). */
+  protected readonly canReplaceBadge = computed(() =>
+    editionCapabilities(this.meStore, this.editionId()).includes('checkin.manage'),
+  );
+  protected readonly badgeUrl = computed(() =>
+    eventsUrls.badge(this.editionId(), Number(this.registrationId())),
   );
   protected readonly pending = computed(() => this.detail()?.status === 'pending');
   protected readonly payable = computed(
@@ -312,6 +321,27 @@ export class RegistrationDetailPage implements OnInit {
     await this.run('gestion.registrations.detail.proforma.done', undefined, () =>
       this.api.issueProforma(this.edition(), this.registration()),
     );
+  }
+
+  protected async replaceBadge(): Promise<void> {
+    const data: ConfirmDialogData = {
+      title: this.translate.instant('gestion.registrations.detail.badge.replace.title'),
+      message: this.translate.instant('gestion.registrations.detail.badge.replace.message'),
+      confirmLabel: this.translate.instant('gestion.registrations.detail.badge.replace.confirm'),
+      reasonLabel: this.translate.instant('gestion.registrations.detail.badge.replace.reason'),
+    };
+    const ref = this.dialog.open<ConfirmDialog, ConfirmDialogData, ConfirmDialogResult>(
+      ConfirmDialog,
+      { data, width: '30rem' },
+    );
+    const answer = await firstValueFrom(ref.afterClosed());
+    if (!answer) {
+      return;
+    }
+    await this.run('gestion.registrations.detail.badge.replace.done', undefined, async () => {
+      await this.events.regenerateBadge(this.edition(), this.registration(), answer.reason.trim());
+      return this.api.get(this.edition(), this.registration());
+    });
   }
 
   private valid(form: FormGroup): boolean {

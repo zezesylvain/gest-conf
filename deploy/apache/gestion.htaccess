@@ -3,6 +3,9 @@
 
 DirectoryIndex index.html
 
+# Manifeste de l'accueil installable (plan L7, K5) : type reconnu par les navigateurs.
+AddType application/manifest+json .webmanifest
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteCond %{REQUEST_FILENAME} -f [OR]
@@ -14,4 +17,12 @@ DirectoryIndex index.html
 <IfModule mod_headers.c>
   # Back-office : pas d'indexation par les moteurs de recherche.
   Header always set X-Robots-Tag "noindex, nofollow"
+  # Caméra permise sous /gestion/ seulement (plan L7, K6 : lecture des badges à l'accueil) ;
+  # remplace l'en-tête de public_html, qui la refuse partout ailleurs (bilan de L7.0).
+  Header always set Permissions-Policy "camera=(self), microphone=(), geolocation=(), payment=()"
+  # Service worker de l'accueil : son script et son manifeste ne sont jamais figés (le
+  # service worker vérifie lui-même les nouvelles versions).
+  <FilesMatch "^(ngsw-worker\.js|ngsw\.json|safety-worker\.js|worker-basic\.min\.js|manifest\.webmanifest)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
 </IfModule>

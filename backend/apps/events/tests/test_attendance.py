@@ -182,6 +182,9 @@ def test_k7_k8_session_chair_api(world):
     current, morning, afternoon, (first, *_rest), session_chair = world
     registration = confirmed_registration(current)
     client = client_for(session_chair, mfa=False)  # SESSION_CHAIR : sans 2FA (K1)
+    # « sessions.chair » : l'édition figure au sélecteur de la gestion.
+    listed = [item["id"] for item in client.get("/v1/manage/editions").json()]
+    assert listed == [current.pk]
     sessions = client.get(base(current)).json()
     assert [(item["id"], item["chaired"]) for item in sessions] == [(morning.pk, True)]
     slots = sessions[0]["slots"]

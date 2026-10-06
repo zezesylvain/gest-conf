@@ -1,9 +1,10 @@
 import { ApplicationRef } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { MeEdition } from '@gestconf/shared';
+import { MeEdition, MeStore } from '@gestconf/shared';
 import { useTestLanguage } from '@gestconf/shared/testing';
 
 import { CHAIR_EDITION, provideGestionTesting } from '../../testing/gestion-testing';
+import { Connectivity } from '../core/reception';
 import { EditionLayout } from './edition-layout';
 
 async function render(editions: MeEdition[], editionId = '3') {
@@ -47,6 +48,10 @@ describe('EditionLayout', () => {
       'Paiements',
       'Factures et avoirs',
       'Finances',
+      // Jour J et attestations (plan L7) : badges en lecture des inscriptions, attestations.
+      'Badges',
+      'Attestations',
+      'Modèle des attestations',
       'Informations générales',
       'Thématiques',
       'Types de communication',
@@ -71,7 +76,7 @@ describe('EditionLayout', () => {
     const root = await render([CHAIR_EDITION]);
     expect(openGroups(root)).toEqual(['Pilotage']);
     expect(links(root, '.rail ul:not([hidden]) a')).toEqual(['Tableau de bord']);
-    expect(root.querySelectorAll('.rail ul[hidden]').length).toBe(9);
+    expect(root.querySelectorAll('.rail ul[hidden]').length).toBe(11);
   });
 
   it('un clic ouvre une autre catégorie et referme la précédente', async () => {
@@ -100,5 +105,22 @@ describe('EditionLayout', () => {
     const root = await render([CHAIR_EDITION], '99');
     expect(links(root)).toEqual([]);
     expect(root.querySelector('[role=alert]')?.textContent).toContain('ne donnent pas accès');
+  });
+
+  it('démarrée hors ligne (plan L7, K5) : l’écran est affiché, /me étant inconnu', async () => {
+    TestBed.configureTestingModule({
+      imports: [EditionLayout],
+      providers: provideGestionTesting([]),
+    });
+    TestBed.inject(MeStore).clear();
+    TestBed.inject(Connectivity).startedOffline.set(true);
+    await useTestLanguage('fr');
+    const fixture = TestBed.createComponent(EditionLayout);
+    fixture.componentRef.setInput('editionId', '3');
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    expect(root.querySelector('router-outlet')).not.toBeNull();
+    expect(root.querySelector('[role=alert]')).toBeNull();
   });
 });

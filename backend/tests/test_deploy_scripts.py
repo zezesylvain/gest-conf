@@ -32,12 +32,21 @@ def test_deploy_builds_angular_with_the_csp_script():
 
 
 def test_npm_build_injects_the_csp():
-    """Second maillon : « npm run build » lance web/scripts/inject-csp.mjs après les builds."""
+    """Second maillon : « npm run build » lance web/scripts/inject-csp.mjs après les builds.
+
+    Seules suivent les étapes du service worker de l'accueil (plan L7, K5), qui ne
+    modifient aucune page : régénérer ``ngsw.json``, dont les empreintes couvrent
+    ``index.html`` réécrit par la CSP, puis les contrôler."""
     package = json.loads((REPO_DIR / "web" / "package.json").read_text(encoding="utf-8"))
-    build = package["scripts"]["build"]
-    assert "ng build portail" in build
-    assert "ng build gestion" in build
-    assert build.rstrip().split("&&")[-1].strip().startswith("node scripts/inject-csp.mjs")
+    steps = [step.strip() for step in package["scripts"]["build"].split("&&")]
+    csp = next(i for i, step in enumerate(steps) if step.startswith("node scripts/inject-csp.mjs"))
+    assert any(step.startswith("ng build portail") for step in steps[:csp])
+    assert any(step.startswith("ng build gestion") for step in steps[:csp])
+    after = steps[csp + 1 :]
+    assert [step.split()[0:2] for step in after] == [
+        ["ngsw-config", "dist/gestion/browser"],
+        ["node", "scripts/check-ngsw.mjs"],
+    ]
 
 
 def test_deploy_creates_the_cache_table_after_migrate():
@@ -205,7 +214,17 @@ def test_npm_build_portail_checks_the_prerender_then_injects_the_csp():
         steps = [step.strip() for step in package["scripts"][name].split("&&")]
         check = steps.index("node scripts/check-prerender.mjs dist/portail/browser")
         assert steps[check - 1] == "ng build portail"
-        assert steps[-1].startswith("node scripts/inject-csp.mjs dist/portail/browser")
+        csp = next(i for i, step in enumerate(steps) if step.startswith("node scripts/inject-csp"))
+        assert steps[csp].startswith("node scripts/inject-csp.mjs dist/portail/browser")
+        # Après la CSP, plus aucune page n'est réécrite : seules suivent, dans « build », les
+        # étapes du service worker de la gestion (plan L7).
+        assert all("portail" not in step for step in steps[csp + 1 :])
+    assert (
+        package["scripts"]["build:portail"]
+        .split("&&")[-1]
+        .strip()
+        .startswith("node scripts/inject-csp.mjs")
+    )
 
 
 def test_portal_only_publication_spares_gestion_and_api_then_marks_published():

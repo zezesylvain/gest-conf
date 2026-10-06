@@ -36,6 +36,9 @@ export const HELP_PROFILES: readonly Role[] = [
   'SC_CHAIR',
   'OC_MEMBER',
   'SC_MEMBER',
+  'VOLUNTEER',
+  'SESSION_CHAIR',
+  'SIGNATORY',
 ];
 
 /** Fiches qui ne correspondent à aucun écran et ne sont pas orphelines pour autant. */
@@ -59,6 +62,16 @@ const PROGRAM_WRITERS: readonly Role[] = ['OC_MEMBER', 'ADMIN', 'CHAIR'];
 // Inscriptions (plan L6, J1) : lecture pour l'administrateur, le Chair et le CO ; gestion
 // par le CO « finances » ou « secrétariat » et l'administrateur ; finances : le Chair suit.
 const REGISTRATION_READERS: readonly Role[] = ['OC_MEMBER', 'ADMIN', 'CHAIR'];
+// Jour J (plan L7, K1) : le bénévole et le CO pointent ; le président de séance émarge ses
+// sessions ; le CO selon sa fonction et l'administrateur suivent les présences et le comptoir.
+const RECEPTION: readonly Role[] = ['VOLUNTEER', 'OC_MEMBER', 'ADMIN'];
+const DAY_SESSIONS: readonly Role[] = ['SESSION_CHAIR', 'VOLUNTEER', 'OC_MEMBER', 'ADMIN'];
+const DAY_MANAGERS: readonly Role[] = ['OC_MEMBER', 'ADMIN'];
+// Attestations : CO « secrétariat », administrateur, Chair ; lettres : CO « secrétariat » et
+// « relations extérieures », administrateur ; signature : le signataire seul (K18).
+const DOCUMENT_MANAGERS: readonly Role[] = ['OC_MEMBER', 'ADMIN', 'CHAIR'];
+const LETTER_MANAGERS: readonly Role[] = ['OC_MEMBER', 'ADMIN'];
+const SIGNATORIES: readonly Role[] = ['SIGNATORY'];
 
 /** Constructeur : les clés d'une fiche sont toutes sous `gestion.help.sheets.<id>`. */
 function sheet(
@@ -91,13 +104,13 @@ const callout = (tone: CalloutTone, key: (name: string) => string, name: string)
 });
 
 export const HELP_SHEETS: readonly HelpSheet[] = [
-  sheet('first-steps', ALL, (k) => [
+  sheet('first-steps', [...ALL, 'VOLUNTEER', 'SESSION_CHAIR', 'SIGNATORY'], (k) => [
     text(k('intro')),
     steps(k, 'choose', 'rail', 'search', 'help'),
     callout('info', k, 'activeRole'),
     callout('tip', k, 'versioned'),
   ]),
-  sheet('security', ALL, (k) => [
+  sheet('security', [...ALL, 'VOLUNTEER', 'SIGNATORY'], (k) => [
     text(k('intro')),
     steps(k, 'enable', 'stepUp'),
     callout('warning', k, 'reauth'),
@@ -105,7 +118,15 @@ export const HELP_SHEETS: readonly HelpSheet[] = [
   ]),
   sheet('roles', ALL, (k) => [
     text(k('intro')),
-    list(k('admin'), k('chair'), k('scChair'), k('ocMember')),
+    list(
+      k('admin'),
+      k('chair'),
+      k('scChair'),
+      k('ocMember'),
+      k('volunteer'),
+      k('sessionChair'),
+      k('signatory'),
+    ),
     callout('info', k, 'grantors'),
     callout('warning', k, 'lastAdmin'),
   ]),
@@ -292,6 +313,64 @@ export const HELP_SHEETS: readonly HelpSheet[] = [
     list(k('issuer'), k('vat'), k('bank'), k('prefixes')),
     callout('warning', k, 'incomplete'),
     callout('info', k, 'who'),
+  ]),
+  // Jour J (plan L7, K15).
+  sheet('reception', RECEPTION, (k) => [
+    text(k('intro')),
+    steps(k, 'install', 'download', 'scan', 'offline', 'sync'),
+    callout('warning', k, 'refusals'),
+    callout('danger', k, 'logout'),
+    callout('info', k, 'camera'),
+  ]),
+  sheet('day-sessions', DAY_SESSIONS, (k) => [
+    text(k('intro')),
+    list(k('scan'), k('presented'), k('attendance')),
+    callout('info', k, 'chair'),
+    callout('warning', k, 'correction'),
+  ]),
+  sheet('attendance', DAY_MANAGERS, (k) => [
+    text(k('intro')),
+    list(k('search'), k('cancel'), k('export')),
+    callout('info', k, 'kept'),
+  ]),
+  sheet('badges', REGISTRATION_READERS, (k) => [
+    text(k('intro')),
+    steps(k, 'filter', 'download', 'print'),
+    callout('warning', k, 'token'),
+    callout('tip', k, 'lost'),
+  ]),
+  sheet('counter', DAY_MANAGERS, (k) => [
+    text(k('intro')),
+    steps(k, 'person', 'category', 'paid', 'badge'),
+    callout('info', k, 'account'),
+    callout('warning', k, 'existing'),
+  ]),
+  // Attestations, lettres et signature (plan L7, K9 à K12, K18, K19).
+  sheet('certificates', DOCUMENT_MANAGERS, (k) => [
+    text(k('intro')),
+    list(k('participation'), k('presentation'), k('review')),
+    steps(k, 'check', 'issue', 'follow'),
+    callout('info', k, 'rg16'),
+    callout('warning', k, 'revoke'),
+  ]),
+  sheet('certificate-settings', DOCUMENT_MANAGERS, (k) => [
+    text(k('intro')),
+    steps(k, 'mode', 'header', 'key', 'templates', 'signatory', 'preview'),
+    callout('info', k, 'placeholders'),
+    callout('warning', k, 'pades'),
+    callout('info', k, 'qualified'),
+  ]),
+  sheet('letters', LETTER_MANAGERS, (k) => [
+    text(k('intro')),
+    steps(k, 'review', 'issue', 'refuse'),
+    callout('warning', k, 'passport'),
+    callout('info', k, 'disclaimer'),
+  ]),
+  sheet('signature', SIGNATORIES, (k) => [
+    text(k('intro')),
+    steps(k, 'identity', 'image'),
+    callout('info', k, 'only'),
+    callout('warning', k, 'frozen'),
   ]),
   sheet('audit', SETTINGS_WRITERS, (k) => [
     text(k('intro')),

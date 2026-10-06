@@ -182,6 +182,8 @@ export class PricingPage implements OnInit {
     requires_proof: [false],
     is_active: [true],
     position: [0, [Validators.min(0), Validators.max(32767)]],
+    // Bandeau du badge (plan L7, K3) : « #RRGGBB » ; vide, couleur par défaut selon l'ordre.
+    badge_color: ['', Validators.pattern(/^#[0-9A-Fa-f]{6}$/)],
   });
   protected readonly feesForm: FormGroup = this.fb.group(
     Object.fromEntries(
@@ -331,6 +333,7 @@ export class PricingPage implements OnInit {
       requires_proof: category?.requires_proof ?? false,
       is_active: category?.is_active ?? true,
       position: category?.position ?? this.categories().length,
+      badge_color: category?.badge_color ?? '',
     });
     if (category) {
       this.categoryForm.controls.code.disable();

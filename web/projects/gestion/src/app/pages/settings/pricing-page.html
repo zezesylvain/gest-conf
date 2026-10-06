@@ -222,6 +222,12 @@
             <mat-label>{{ 'gestion.fields.descriptionEn' | translate }}</mat-label>
             <textarea matInput rows="2" formControlName="description_en"></textarea>
           </mat-form-field>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>{{ 'gestion.settings.pricing.badgeColor' | translate }}</mat-label>
+            <input matInput formControlName="badge_color" maxlength="7" placeholder="#1d3a6e" />
+            <mat-hint>{{ 'gestion.settings.pricing.badgeColorHint' | translate }}</mat-hint>
+            <mat-error>{{ 'gestion.settings.pricing.badgeColorError' | translate }}</mat-error>
+          </mat-form-field>
         </div>
         <div class="checks">
           <mat-checkbox formControlName="requires_proof">{{

@@ -35,5 +35,6 @@ export const CAPABILITY: Capability[] = [
   'checkin.manage',
   'certificates.manage',
   'letters.manage',
-  'signature.manage'
+  'signature.manage',
+  'sessions.chair'
 ];

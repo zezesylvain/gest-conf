@@ -18,6 +18,7 @@ import { filter, map } from 'rxjs';
 import { editionTitle, managedEditions } from '../core/managed-editions';
 import { activeGroup, NavGroup, NavGroupKey } from '../core/navigation';
 import { NavigationStore } from '../core/navigation-store';
+import { Connectivity } from '../core/reception';
 
 /**
  * Mise en page d'une édition : sélecteurs d'édition et de rôle actif, rail en catégories
@@ -46,6 +47,14 @@ export class EditionLayout implements OnDestroy {
   protected readonly managementRoles = this.navigation.managementRoles;
   protected readonly activeRole = this.navigation.activeRole;
   protected readonly groups = this.navigation.groups;
+  /**
+   * Démarrée sans réseau (plan L7, K5), la gestion ignore `/me` : seul l'écran d'accueil,
+   * dont la garde laisse passer, s'affiche ; le serveur revérifiera chaque pointage.
+   */
+  private readonly connectivity = inject(Connectivity);
+  protected readonly offline = computed(
+    () => this.connectivity.startedOffline() && !this.meStore.loaded(),
+  );
   /** Catégorie ouverte du rail : une seule à la fois. */
   protected readonly open = signal<NavGroupKey | null>(null);
 

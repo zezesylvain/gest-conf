@@ -1,0 +1,150 @@
+<gc-page-header
+  [heading]="'gestion.daySessions.title' | translate"
+  [lead]="'gestion.daySessions.lead' | translate"
+/>
+<div aria-live="polite">
+  @if (status()) {
+    <p class="notice" role="status">{{ status() }}</p>
+  }
+</div>
+<gc-error-summary [messages]="errors()" />
+
+@if (!loading()) {
+  @for (session of sessions(); track session.id) {
+    <section class="card" [attr.aria-labelledby]="'session-' + session.id">
+      <h2 [id]="'session-' + session.id">{{ title(session) }}</h2>
+      <p class="muted">
+        {{ time(session.starts_at) }} → {{ time(session.ends_at) }}
+        @if (session.room) {
+          · {{ session.room }}
+        }
+      </p>
+      @if (session.chairs.length) {
+        <p>
+          {{ 'gestion.daySessions.chairs' | translate: { names: session.chairs.join(', ') } }}
+          @if (session.chaired) {
+            <span class="badge">{{ 'gestion.daySessions.youChair' | translate }}</span>
+          }
+        </p>
+      }
+      <p>{{ 'gestion.daySessions.attendanceCount' | translate: { count: session.attendance } }}</p>
+      <div class="actions">
+        <a
+          mat-stroked-button
+          [routerLink]="['/editions', editionId(), 'accueil']"
+          [queryParams]="{ session: session.id }"
+        >
+          {{ 'gestion.daySessions.scan' | translate }}
+        </a>
+        @if (canSeeAttendance(session)) {
+          <button
+            mat-button
+            type="button"
+            (click)="toggleAttendance(session)"
+            [attr.aria-expanded]="!!attendance()[session.id]"
+            [disabled]="busy()"
+          >
+            {{ 'gestion.daySessions.attendance' | translate }}
+          </button>
+        }
+        @if (canManage()) {
+          <button mat-button type="button" (click)="exportAttendance(session)" [disabled]="busy()">
+            {{ 'gestion.daySessions.export' | translate }}
+          </button>
+        }
+      </div>
+      @if (attendance()[session.id]; as panel) {
+        <div class="table-wrap">
+          <table>
+            <caption class="visually-hidden">
+              {{
+                'gestion.daySessions.attendanceOf' | translate: { title: title(session) }
+              }}
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">{{ 'gestion.attendance.fields.person' | translate }}</th>
+                <th scope="col">{{ 'gestion.attendance.fields.category' | translate }}</th>
+                <th scope="col">{{ 'gestion.attendance.fields.scannedAt' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of panel.rows; track row.id) {
+                <tr>
+                  <td>
+                    {{ row.registration.name }}
+                    <br /><span class="muted">{{ row.registration.reference }}</span>
+                  </td>
+                  <td>
+                    {{
+                      language.current() === 'en'
+                        ? row.registration.category_label_en
+                        : row.registration.category_label_fr
+                    }}
+                  </td>
+                  <td>{{ time(row.scanned_at) }}</td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="3" class="muted">{{ 'gestion.attendance.empty' | translate }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        @if (panel.count > panel.rows.length) {
+          <p class="muted">
+            {{
+              'gestion.daySessions.more'
+                | translate: { shown: panel.rows.length, count: panel.count }
+            }}
+          </p>
+        }
+      }
+
+      <h3>{{ 'gestion.daySessions.slots' | translate }}</h3>
+      <ul class="slots">
+        @for (slot of session.slots; track slot.id) {
+          <li>
+            <strong>{{ time(slot.starts_at) }}</strong> —
+            {{ slot.title }}
+            @if (slot.reference) {
+              <span class="muted">({{ slot.reference }})</span>
+            }
+            @if (slot.presenters.length) {
+              <br /><span class="muted">{{ slot.presenters.join(', ') }}</span>
+            }
+            @if (slot.submission_id) {
+              <br />
+              <span class="badge">{{
+                'gestion.submissions.status.' + slot.status | translate
+              }}</span>
+              @if (slot.status === 'scheduled' && canMark(session)) {
+                <button
+                  mat-stroked-button
+                  type="button"
+                  (click)="markPresented(session, slot)"
+                  [disabled]="busy()"
+                >
+                  {{ 'gestion.daySessions.presented.action' | translate }}
+                </button>
+              }
+              @if (slot.status === 'presented' && canCorrect()) {
+                <button
+                  mat-button
+                  type="button"
+                  (click)="unmarkPresented(session, slot)"
+                  [disabled]="busy()"
+                >
+                  {{ 'gestion.daySessions.unpresent.action' | translate }}
+                </button>
+              }
+            }
+          </li>
+        }
+      </ul>
+    </section>
+  } @empty {
+    <p class="muted">{{ 'gestion.daySessions.empty' | translate }}</p>
+  }
+}

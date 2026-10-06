@@ -218,6 +218,55 @@
     </section>
   }
 
+  @if (checkin() || certificates() || lettersToReview() !== null) {
+    <section class="card" aria-labelledby="dayof-title">
+      <h2 id="dayof-title">{{ 'gestion.dashboard.dayof.title' | translate }}</h2>
+      @if (checkin(); as counts) {
+        <p>
+          {{
+            'gestion.reception.summary'
+              | translate
+                : {
+                    checkedIn: counts.checked_in,
+                    confirmed: counts.confirmed,
+                    pending: counts.pending,
+                  }
+          }}
+        </p>
+      }
+      @if (certificates()) {
+        <p>
+          {{ 'gestion.dashboard.dayof.certificates' | translate: { count: certificatesIssued() } }}
+        </p>
+      }
+      @if (lettersToReview(); as count) {
+        <p class="notice">{{ 'gestion.dashboard.dayof.letters' | translate: { count: count } }}</p>
+      }
+      <p class="actions">
+        @if (checkin()) {
+          <a [routerLink]="['/editions', current.id, 'accueil']">{{
+            'gestion.nav.reception' | translate
+          }}</a>
+        }
+        @if (can('checkin.manage')) {
+          <a [routerLink]="['/editions', current.id, 'jour-j', 'presences']">{{
+            'gestion.nav.attendance' | translate
+          }}</a>
+        }
+        @if (certificates()) {
+          <a [routerLink]="['/editions', current.id, 'attestations']">{{
+            'gestion.nav.certificates' | translate
+          }}</a>
+        }
+        @if (lettersToReview() !== null) {
+          <a [routerLink]="['/editions', current.id, 'lettres']">{{
+            'gestion.nav.letters' | translate
+          }}</a>
+        }
+      </p>
+    </section>
+  }
+
   @if (pendingInvitations() !== null) {
     <section class="card" aria-labelledby="invitations-title">
       <h2 id="invitations-title">{{ 'gestion.nav.invitations' | translate }}</h2>
