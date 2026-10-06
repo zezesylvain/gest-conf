@@ -17,5 +17,11 @@ export const CAPABILITY: Capability[] = [
   'portal.write',
   'submissions.read',
   'submissions.extend',
-  'submissions.export'
+  'submissions.export',
+  'reviews.write',
+  'reviews.manage',
+  'reviews.read_all',
+  'decisions.decide',
+  'decisions.publish',
+  'grids.write'
 ];

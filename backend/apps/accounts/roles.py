@@ -67,6 +67,13 @@ class Capability(StrEnum):
     SUBMISSIONS_READ = "submissions.read"
     SUBMISSIONS_EXTEND = "submissions.extend"
     SUBMISSIONS_EXPORT = "submissions.export"
+    # Lot L4 (H19) : évaluation et décision.
+    REVIEWS_WRITE = "reviews.write"  # évaluer ses affectations (relecteur)
+    REVIEWS_MANAGE = "reviews.manage"  # recevabilité, affectations, conflits, suivi
+    REVIEWS_READ_ALL = "reviews.read_all"  # évaluations de tous les relecteurs
+    DECISIONS_DECIDE = "decisions.decide"
+    DECISIONS_PUBLISH = "decisions.publish"
+    GRIDS_WRITE = "grids.write"
 
 
 C = Capability
@@ -77,7 +84,8 @@ CAPABILITY_CHOICES: list[tuple[str, str]] = [(item.value, item.value) for item i
 # Table rôles → capacités (§5.2). SC_CHAIR : lecture du paramétrage (D8, validée) et
 # gestion des membres limitée au comité scientifique (voir MANAGEABLE_ROLES).
 CAPABILITIES: Mapping[str, frozenset[Capability]] = {
-    Role.ADMIN: frozenset(C),
+    # ADMIN administre l'édition ; il n'évalue pas et ne décide pas (H19).
+    Role.ADMIN: frozenset(C) - {C.REVIEWS_WRITE, C.DECISIONS_DECIDE, C.DECISIONS_PUBLISH},
     Role.CHAIR: frozenset(
         {
             C.EDITION_READ,
@@ -90,8 +98,14 @@ CAPABILITIES: Mapping[str, frozenset[Capability]] = {
             C.SUBMISSIONS_READ,
             C.SUBMISSIONS_EXTEND,
             C.SUBMISSIONS_EXPORT,
+            C.REVIEWS_MANAGE,
+            C.REVIEWS_READ_ALL,
+            C.DECISIONS_DECIDE,
+            C.DECISIONS_PUBLISH,
+            C.GRIDS_WRITE,
         }
     ),
+    # Président du CS : il peut aussi évaluer (H19).
     Role.SC_CHAIR: frozenset(
         {
             C.EDITION_READ,
@@ -100,13 +114,20 @@ CAPABILITIES: Mapping[str, frozenset[Capability]] = {
             C.SUBMISSIONS_READ,
             C.SUBMISSIONS_EXTEND,
             C.SUBMISSIONS_EXPORT,
+            C.REVIEWS_WRITE,
+            C.REVIEWS_MANAGE,
+            C.REVIEWS_READ_ALL,
+            C.DECISIONS_DECIDE,
+            C.DECISIONS_PUBLISH,
+            C.GRIDS_WRITE,
         }
     ),
     # CO en lecture seule en L1, quelle que soit sa fonction (D8) ; écritures partielles
     # attribuées fonction par fonction dans leur lot (programme L5, finances L6). Lecture
     # des soumissions, identité des auteurs comprise (F10, matrice §3.3 de l'étude).
     Role.OC_MEMBER: frozenset({C.EDITION_READ, C.SUBMISSIONS_READ}),
-    Role.SC_MEMBER: frozenset(),
+    # Relecteur : ses affectations seulement, sans identité des auteurs (RG-04, H9).
+    Role.SC_MEMBER: frozenset({C.REVIEWS_WRITE}),
     Role.AUTHOR: frozenset(),
     Role.SPEAKER: frozenset(),
     Role.SESSION_CHAIR: frozenset(),
@@ -115,10 +136,10 @@ CAPABILITIES: Mapping[str, frozenset[Capability]] = {
     Role.VOLUNTEER: frozenset(),
 }
 
-# 2FA imposée côté serveur à l'accès aux routes de gestion d'une édition (D3).
-# SC_MEMBER : à trancher avant L4 (une ligne à ajouter).
+# 2FA imposée côté serveur à l'accès aux routes de gestion d'une édition (D3). SC_MEMBER
+# depuis L4 (H2) : un relecteur lit des travaux inédits.
 MFA_REQUIRED_ROLES: frozenset[str] = frozenset(
-    {Role.ADMIN, Role.CHAIR, Role.SC_CHAIR, Role.OC_MEMBER}
+    {Role.ADMIN, Role.CHAIR, Role.SC_CHAIR, Role.OC_MEMBER, Role.SC_MEMBER}
 )
 
 # Matrice d'attribution (§5.5) : rôle visé → rôles qui peuvent l'attribuer (et révoquer).

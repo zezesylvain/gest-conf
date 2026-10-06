@@ -2861,6 +2861,12 @@ components:
       - submissions.read
       - submissions.extend
       - submissions.export
+      - reviews.write
+      - reviews.manage
+      - reviews.read_all
+      - decisions.decide
+      - decisions.publish
+      - grids.write
       type: string
       description: |-
         * `edition.read` - edition.read
@@ -2874,6 +2880,12 @@ components:
         * `submissions.read` - submissions.read
         * `submissions.extend` - submissions.extend
         * `submissions.export` - submissions.export
+        * `reviews.write` - reviews.write
+        * `reviews.manage` - reviews.manage
+        * `reviews.read_all` - reviews.read_all
+        * `decisions.decide` - decisions.decide
+        * `decisions.publish` - decisions.publish
+        * `grids.write` - grids.write
     Confidentiality:
       type: object
       description: Double aveugle et nombre de relecteurs (gestion, §6.1).

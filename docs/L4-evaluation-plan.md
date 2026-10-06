@@ -1,11 +1,8 @@
 # Lot L4 — Évaluation et décision : plan d'implémentation
 
-> **Statut : proposition à valider** (5 octobre 2026). Ce lot touche le modèle de données, les
-> droits et le workflow des statuts : rien n'est codé avant validation (`CLAUDE.md`).
->
-> **Ordre des lots** : L4 démarre à la demande du commanditaire alors que L3 n'est pas clos.
-> Le serveur de L3 est livré (modèle, workflow, API auteur). Restent L3.3 à L3.6 : espace auteur
-> du portail, écrans de gestion des soumissions, rappels, E2E. Voir H17 pour l'articulation.
+> **Statut : validé le 5 octobre 2026** (décisions H1 à H19 telles que proposées, sans
+> correction). L3 est clos (bilan : `docs/L3-soumission.md`) : H17 se réduit à l'ordre
+> serveur (L4.0 à L4.4), puis écrans (L4.5, L4.6), puis E2E (L4.7).
 >
 > Sources :
 > - étude §3.3 (matrice), §4 M5 et M6, §5.1 et §5.2, §6 (RG-03 à RG-10, RG-17), §8.2
@@ -186,3 +183,45 @@ La matrice des droits est étendue (un test par case), et le **test de fuite RG-
 2. Q3 (niveau de double aveugle) et Q4 (relecteurs par soumission, échelle, pondérations
    définitives) : les valeurs par défaut proposées s'appliquent en attendant.
 3. Charge de 24 à 30,5 j-h, contre 18 à 24 dans l'étude.
+
+## 11. Bilan de L4.0 (6 octobre 2026)
+
+**Capacités (H19)** :
+
+- `reviews.write` : `SC_MEMBER`, `SC_CHAIR` ;
+- `reviews.manage`, `reviews.read_all` et `grids.write` : `SC_CHAIR`, `CHAIR`, `ADMIN` ;
+- `decisions.decide` et `decisions.publish` : `SC_CHAIR`, `CHAIR`.
+
+L'administrateur détient toutes les capacités **sauf** évaluer et décider. Le relecteur
+(`SC_MEMBER`) voit désormais l'édition dans la gestion ; son rail reste vide jusqu'aux écrans
+de L4.5. La matrice des droits recopie la nouvelle spécification.
+
+**2FA des relecteurs (H2)** : `SC_MEMBER` rejoint `MFA_REQUIRED_ROLES`. Elle s'appliquera à la
+première route relecteur, dont la matrice testera le refus `mfa_*`.
+
+**RG-04, avant tout endpoint relecteur (H9)** : module `apps/reviews/anonymity.py`.
+
+- **Registre** `IDENTITY_FIELDS` :
+  - modèles entiers : compte, profil, adresses, auteurs, révisions, historique, dérogations ;
+  - champs de la soumission : soumissionnaire, auteurs, motif de retrait, déclarations, titre
+    normalisé ;
+  - champs du fichier : nom d'origine, nom de stockage, taille, empreinte, déposant.
+- **Liste blanche** : tout sérialiseur relecteur dérive de `ReviewerSerializer` ou
+  `ReviewerModelSerializer`, ce qui l'enregistre. Le méta-test refuse :
+  - un champ, même imbriqué ou atteint par `source`, qui mène au registre ;
+  - un sérialiseur imbriqué hors liste blanche ;
+  - un champ calculé sans justification (`reviewer_computed`) ;
+  - `exclude`, et des champs non énumérés.
+- **Test de fuite** : `find_identity_leaks` parcourt une réponse JSON et signale les valeurs
+  traceuses et les clés d'identité (`email`, `institution`, `authors`, `original_name`…).
+  Toute route nommée `reviewer-…` doit figurer dans la table des routes testées, sinon le test
+  échoue.
+- **Vérifications** : le méta-test et le détecteur de fuite sont éprouvés sur des sérialiseurs
+  fautifs (source vers l'adresse du soumissionnaire, auteurs imbriqués, champ calculé non
+  justifié, `exclude`). Le registre est contrôlé contre les modèles : aucun champ disparu.
+
+**Vérifications** :
+
+- 1 530 tests backend sous SQLite (6 nouveaux) ;
+- schéma régénéré sur MariaDB (énumération `Capability`), client TypeScript régénéré ;
+- front 274 tests.

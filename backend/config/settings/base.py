@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "apps.conferences",
     "apps.portal",
     "apps.submissions",
+    "apps.reviews",
     # Après les applications du projet : leurs gabarits d'e-mails (account/email/*) priment.
     "allauth",
     "allauth.account",

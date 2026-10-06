@@ -42,16 +42,21 @@ R, W, PUB, ARC = "edition.read", "edition.write", "edition.publish", "edition.ar
 MR, MM, AR = "members.read", "members.manage", "audit.read"
 PW = "portal.write"
 SR, SE, SX = "submissions.read", "submissions.extend", "submissions.export"
+# Plan L4 (H19) : évaluer, piloter l'évaluation, lire toutes les évaluations, décider, publier,
+# écrire les grilles.
+RW, RM, RA = "reviews.write", "reviews.manage", "reviews.read_all"
+DD, DP, GW = "decisions.decide", "decisions.publish", "grids.write"
 
 SPEC: dict[str, set[str]] = {
-    "ADMIN": {R, W, PUB, ARC, MR, MM, AR, PW, SR, SE, SX},
-    "CHAIR": {R, W, PUB, MR, MM, AR, PW, SR, SE, SX},
+    # H19 : l'administrateur n'évalue pas et ne décide pas.
+    "ADMIN": {R, W, PUB, ARC, MR, MM, AR, PW, SR, SE, SX, RM, RA, GW},
+    "CHAIR": {R, W, PUB, MR, MM, AR, PW, SR, SE, SX, RM, RA, DD, DP, GW},
     # D8 validée : lecture du paramétrage ; membres du CS seulement. F10, F8 (plan L3) :
-    # soumissions (lecture, dérogations, export).
-    "SC_CHAIR": {R, MR, MM, SR, SE, SX},
+    # soumissions (lecture, dérogations, export). H19 : évalue, pilote, décide, publie.
+    "SC_CHAIR": {R, MR, MM, SR, SE, SX, RW, RM, RA, DD, DP, GW},
     "OC_MEMBER": {R, SR},  # D8 : lecture seule (fonction « finances ») ; F10 : soumissions
     "OC_COMMUNICATION": {R, PW, SR},  # E11 (plan L2) : le CO « communication » écrit le portail
-    "SC_MEMBER": set(),  # F10 : aucun accès aux soumissions avant L4
+    "SC_MEMBER": {RW},  # F10 : pas les soumissions ; H19 : ses affectations seulement
     "AUTHOR": set(),
 }
 # Profils qui ne sont pas un rôle seul : (rôle, fonction au CO).

@@ -44,8 +44,15 @@ def test_capabilities_table_covers_every_role():
     assert set(GRANTORS) == set(Role.values)
 
 
-def test_mfa_required_roles_match_d3():
-    assert {Role.ADMIN, Role.CHAIR, Role.SC_CHAIR, Role.OC_MEMBER} == MFA_REQUIRED_ROLES
+def test_mfa_required_roles_match_d3_and_h2():
+    """D3, et H2 (plan L4) : la 2FA s'impose aussi aux relecteurs (SC_MEMBER)."""
+    assert {
+        Role.ADMIN,
+        Role.CHAIR,
+        Role.SC_CHAIR,
+        Role.OC_MEMBER,
+        Role.SC_MEMBER,
+    } == MFA_REQUIRED_ROLES
 
 
 @pytest.mark.parametrize(
