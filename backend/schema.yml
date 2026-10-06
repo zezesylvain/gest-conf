@@ -1720,24 +1720,6 @@ paths:
         schema:
           type: integer
         required: true
-      - name: ordering
-        required: false
-        in: query
-        description: Quel champ utiliser pour classer les résultats.
-        schema:
-          type: string
-      - name: page
-        required: false
-        in: query
-        description: Un numéro de page de l'ensemble des résultats.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Nombre de résultats à retourner par page.
-        schema:
-          type: integer
       - in: query
         name: q
         schema:
@@ -1751,7 +1733,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedPersonSearchList'
+                type: array
+                items:
+                  $ref: '#/components/schemas/PersonSearch'
           description: ''
   /v1/manage/editions/{edition_id}/program/publications:
     get:
@@ -1763,24 +1747,6 @@ paths:
         schema:
           type: integer
         required: true
-      - name: ordering
-        required: false
-        in: query
-        description: Quel champ utiliser pour classer les résultats.
-        schema:
-          type: string
-      - name: page
-        required: false
-        in: query
-        description: Un numéro de page de l'ensemble des résultats.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Nombre de résultats à retourner par page.
-        schema:
-          type: integer
       tags:
       - manage
       security:
@@ -1790,7 +1756,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedPublicationList'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Publication'
           description: ''
   /v1/manage/editions/{edition_id}/program/publish:
     post:
@@ -7063,52 +7031,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/InvitationWithEmail'
-    PaginatedPersonSearchList:
-      type: object
-      required:
-      - count
-      - results
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/PersonSearch'
-    PaginatedPublicationList:
-      type: object
-      required:
-      - count
-      - results
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Publication'
     PaginatedReviewSubmissionList:
       type: object
       required:

@@ -104,6 +104,24 @@ def test_i6_paper_removed_from_published_programme_returns_to_confirmed(world):
     assert first.status == S.CONFIRMED
 
 
+def test_i13_publication_history_newest_first_with_author_and_summary(world):
+    """I13 : liste complète (sans pagination), version décroissante, auteur nommé."""
+    current, chair, _morning, first, *_rest = world
+    Profile.objects.update_or_create(
+        user=chair, defaults={"first_name": "Yao", "last_name": "Kouassi"}
+    )
+    publish(current, chair)
+    planning.remove_slot(first.program_slot, actor=COMMAND)
+    publish(current, chair)
+    response = client_for(chair).get(f"/v1/manage/editions/{current.pk}/program/publications")
+    assert response.status_code == 200
+    history = response.json()
+    assert [row["version"] for row in history] == [2, 1]
+    assert history[0]["published_by"] == "Yao Kouassi"
+    assert history[0]["summary"]["sessions"] == {"added": 0, "removed": 0, "changed": 1}
+    assert chair.email not in response.content.decode()
+
+
 # --- Notifications ciblées (I16) -------------------------------------------------------------
 
 

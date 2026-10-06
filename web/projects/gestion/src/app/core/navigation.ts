@@ -13,6 +13,7 @@ export type NavGroupKey =
   | 'steering'
   | 'submissions'
   | 'reviewing'
+  | 'program'
   | 'settings'
   | 'committees'
   | 'portal'
@@ -55,6 +56,7 @@ export const GROUP_ORDER: readonly NavGroupKey[] = [
   'steering',
   'submissions',
   'reviewing',
+  'program',
   'settings',
   'committees',
   'portal',
@@ -112,6 +114,39 @@ export const SCREENS: readonly ScreenDef[] = [
     group: 'reviewing',
     capability: 'reviews.read_all',
   },
+  // Programme (plan L5, I15) : lecture program.read ; écriture et publication revérifiées.
+  {
+    key: 'programPlanner',
+    path: 'programme',
+    label: 'gestion.nav.programPlanner',
+    help: 'program-planner',
+    group: 'program',
+    capability: 'program.read',
+  },
+  {
+    key: 'programSessions',
+    path: 'programme/sessions',
+    label: 'gestion.nav.programSessions',
+    help: 'program-sessions',
+    group: 'program',
+    capability: 'program.read',
+  },
+  {
+    key: 'programRooms',
+    path: 'programme/salles',
+    label: 'gestion.nav.programRooms',
+    help: 'program-rooms',
+    group: 'program',
+    capability: 'program.read',
+  },
+  {
+    key: 'programPublication',
+    path: 'programme/publication',
+    label: 'gestion.nav.programPublication',
+    help: 'program-publication',
+    group: 'program',
+    capability: 'program.read',
+  },
   {
     key: 'general',
     path: 'parametrage/general',
@@ -151,6 +186,14 @@ export const SCREENS: readonly ScreenDef[] = [
     help: 'settings-confidentiality',
     group: 'settings',
     capability: 'edition.read',
+  },
+  {
+    key: 'programSettings',
+    path: 'parametrage/programme',
+    label: 'gestion.nav.programSettings',
+    help: 'settings-program',
+    group: 'settings',
+    capability: 'program.read',
   },
   {
     key: 'grids',
@@ -240,11 +283,29 @@ export const EXTRA_HELP_ROUTES: readonly { url: string; help: string }[] = [
  * L'aide est toujours présente.
  */
 export const ROLE_GROUPS: Partial<Record<Role, readonly NavGroupKey[]>> = {
-  ADMIN: ['steering', 'submissions', 'reviewing', 'settings', 'committees', 'portal', 'control'],
-  CHAIR: ['steering', 'submissions', 'reviewing', 'settings', 'committees', 'portal', 'control'],
-  // Paramétrage pour les grilles d'évaluation (plan L4, H3).
-  SC_CHAIR: ['steering', 'submissions', 'reviewing', 'settings', 'committees'],
-  OC_MEMBER: ['steering', 'submissions', 'settings', 'portal'],
+  ADMIN: [
+    'steering',
+    'submissions',
+    'reviewing',
+    'program',
+    'settings',
+    'committees',
+    'portal',
+    'control',
+  ],
+  CHAIR: [
+    'steering',
+    'submissions',
+    'reviewing',
+    'program',
+    'settings',
+    'committees',
+    'portal',
+    'control',
+  ],
+  // Paramétrage pour les grilles d'évaluation (plan L4, H3) ; programme en lecture (L5, I1).
+  SC_CHAIR: ['steering', 'submissions', 'reviewing', 'program', 'settings', 'committees'],
+  OC_MEMBER: ['steering', 'submissions', 'program', 'settings', 'portal'],
   // Relecteur (plan L4, H1) : ses évaluations seulement.
   SC_MEMBER: ['reviewing'],
 };

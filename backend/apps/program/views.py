@@ -81,7 +81,14 @@ def expected_revision(request: Request) -> int | None:
 
 class _ProgramViewSet(ManageViewSet):
     """Base : objets de l'édition visée seulement (404 sinon), réponse « brouillon ». Table
-    des capacités explicite dans chaque vue (échec fermé)."""
+    des capacités explicite dans chaque vue (échec fermé).
+
+    Ni pagination ni tri générique : les listes (personnes, au plus 20 ; publications) sont
+    courtes, ordonnées par la vue et lues en entier ; sans cela, le schéma les décrirait
+    paginées et triables, à tort."""
+
+    pagination_class = None
+    filter_backends = ()
 
     def board(self, code: int = status.HTTP_200_OK) -> Response:
         return Response(ProgramBoardSerializer(board_data(self.edition)).data, status=code)

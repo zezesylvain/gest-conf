@@ -1,0 +1,160 @@
+<gc-page-header
+  [heading]="'gestion.program.rooms.title' | translate"
+  [lead]="'gestion.program.rooms.lead' | translate"
+/>
+@if (!canWrite()) {
+  <p class="notice">{{ 'gestion.program.readOnly' | translate }}</p>
+}
+<div aria-live="polite">
+  @if (status()) {
+    <p class="notice" role="status">{{ status() }}</p>
+  }
+</div>
+<gc-error-summary [messages]="errors()" />
+
+@if (!loading()) {
+  <div class="table-wrap">
+    <table>
+      <caption class="visually-hidden">
+        {{
+          'gestion.program.rooms.title' | translate
+        }}
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">{{ 'gestion.program.rooms.name' | translate }}</th>
+          <th scope="col">{{ 'gestion.program.rooms.capacity' | translate }}</th>
+          <th scope="col">{{ 'gestion.program.rooms.equipment' | translate }}</th>
+          <th scope="col">{{ 'gestion.program.rooms.accessible' | translate }}</th>
+          @if (canWrite()) {
+            <th scope="col">
+              <span class="visually-hidden">{{ 'gestion.settings.actions' | translate }}</span>
+            </th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (room of rooms(); track room.id) {
+          <tr>
+            <td>
+              {{ room.name }}
+              @if (room.is_active === false) {
+                <span class="badge">{{ 'gestion.program.rooms.inactive' | translate }}</span>
+              }
+            </td>
+            <td>{{ room.capacity ?? '—' }}</td>
+            <td>{{ equipmentLabels(room) || '—' }}</td>
+            <td>
+              {{
+                (room.is_accessible ? 'gestion.settings.yes' : 'gestion.settings.no') | translate
+              }}
+              @if (room.access_note) {
+                <br /><span class="muted">{{ room.access_note }}</span>
+              }
+            </td>
+            @if (canWrite()) {
+              <td class="actions">
+                <button mat-button type="button" (click)="startEdit(room)" [disabled]="busy()">
+                  {{ 'gestion.settings.edit' | translate
+                  }}<span class="visually-hidden"> {{ room.name }}</span>
+                </button>
+                <button mat-button type="button" (click)="toggleActive(room)" [disabled]="busy()">
+                  {{
+                    (room.is_active === false
+                      ? 'gestion.program.rooms.activate'
+                      : 'gestion.program.rooms.deactivate'
+                    ) | translate
+                  }}<span class="visually-hidden"> {{ room.name }}</span>
+                </button>
+                <button mat-button type="button" (click)="remove(room)" [disabled]="busy()">
+                  {{ 'gestion.settings.delete' | translate
+                  }}<span class="visually-hidden"> {{ room.name }}</span>
+                </button>
+              </td>
+            }
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="5" class="muted">{{ 'gestion.program.rooms.empty' | translate }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (canWrite()) {
+    @if (editing() === null) {
+      <div class="actions">
+        <button mat-flat-button type="button" (click)="startCreate()">
+          {{ 'gestion.program.rooms.add' | translate }}
+        </button>
+      </div>
+    } @else {
+      <form [formGroup]="form" (ngSubmit)="save()" novalidate class="card">
+        <h2>
+          {{
+            (editing() ? 'gestion.program.rooms.editTitle' : 'gestion.program.rooms.add')
+              | translate
+          }}
+        </h2>
+        <div class="grid-2">
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'gestion.program.rooms.name' | translate }}</mat-label>
+            <input matInput formControlName="name" required maxlength="150" />
+            <mat-error>{{ error('name') }}</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'gestion.program.rooms.capacity' | translate }}</mat-label>
+            <input matInput type="number" min="0" formControlName="capacity" />
+            <mat-error>{{ error('capacity') }}</mat-error>
+          </mat-form-field>
+        </div>
+        <fieldset>
+          <legend>{{ 'gestion.program.rooms.equipment' | translate }}</legend>
+          <div class="equipment">
+            @for (item of equipmentList; track item) {
+              <mat-checkbox
+                [checked]="hasEquipment(item)"
+                (change)="toggleEquipment(item, $event.checked)"
+              >
+                {{ 'gestion.program.equipment.' + item | translate }}
+              </mat-checkbox>
+            }
+          </div>
+        </fieldset>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'gestion.program.rooms.note' | translate }}</mat-label>
+          <textarea matInput rows="2" formControlName="note" maxlength="2000"></textarea>
+          <mat-error>{{ error('note') }}</mat-error>
+        </mat-form-field>
+        <mat-checkbox formControlName="is_accessible">
+          {{ 'gestion.program.rooms.accessible' | translate }}
+        </mat-checkbox>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'gestion.program.rooms.accessNote' | translate }}</mat-label>
+          <input matInput formControlName="access_note" maxlength="255" />
+          <mat-hint>{{ 'gestion.program.rooms.accessNoteHint' | translate }}</mat-hint>
+          <mat-error>{{ error('access_note') }}</mat-error>
+        </mat-form-field>
+        <div class="grid-2">
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'gestion.fields.position' | translate }}</mat-label>
+            <input matInput type="number" min="0" formControlName="position" />
+            <mat-error>{{ error('position') }}</mat-error>
+          </mat-form-field>
+          <mat-checkbox formControlName="is_active">
+            {{ 'gestion.program.rooms.active' | translate }}
+          </mat-checkbox>
+        </div>
+        <div class="actions">
+          <button mat-flat-button type="submit" [disabled]="busy()">
+            {{ 'gestion.settings.save' | translate }}
+          </button>
+          <button mat-button type="button" (click)="cancel()">
+            {{ 'gestion.program.cancel' | translate }}
+          </button>
+        </div>
+      </form>
+    }
+  }
+}

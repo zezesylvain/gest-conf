@@ -324,6 +324,19 @@ def test_changes_of_other_editions_or_unrelated_actions_are_not_counted():
     assert services.publication_status(edition)["pending_changes"] == 0
 
 
+def test_program_publication_counts_but_program_draft_does_not():
+    """Plan L5, I7 : le programme public est pré-rendu ; sa publication rend le portail à
+    republier, pas les modifications du brouillon."""
+    from apps.core.audit import record
+
+    edition = EditionFactory()
+    record("program.session_created", actor=ACTOR, edition=edition)
+    record("program.settings_changed", actor=ACTOR, edition=edition)
+    assert services.publication_status(edition)["pending_changes"] == 0
+    record("program.published", actor=ACTOR, edition=edition)
+    assert services.publication_status(edition)["pending_changes"] == 1
+
+
 def test_pending_since_is_the_oldest_pending_change():
     edition = EditionFactory()
     rich(edition)

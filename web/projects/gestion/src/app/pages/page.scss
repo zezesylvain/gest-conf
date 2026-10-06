@@ -60,6 +60,9 @@ mat-form-field {
 
 .table-wrap {
   overflow-x: auto;
+  // Conteneur des libellés masqués (position absolue) : sans lui, ils échappent au défilement
+  // horizontal et font déborder la page sur mobile.
+  position: relative;
 }
 
 table {

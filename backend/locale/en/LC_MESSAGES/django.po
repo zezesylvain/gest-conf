@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gestconf-backend\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-06 06:18+0000\n"
+"POT-Creation-Date: 2026-10-06 06:43+0000\n"
 "PO-Revision-Date: 2026-10-05 11:00+0000\n"
 "Last-Translator: GEST-CONF\n"
 "Language-Team: GEST-CONF\n"
@@ -404,7 +404,7 @@ msgstr "secretariat"
 #: apps/accounts/services/account.py:66 apps/conferences/services.py:111
 #: apps/conferences/services.py:495 apps/program/services/planning.py:137
 #: apps/program/services/planning.py:239 apps/program/services/planning.py:520
-#: apps/program/services/settings.py:32
+#: apps/program/services/settings.py:38
 msgid "Champ non modifiable."
 msgstr "This field cannot be changed."
 
@@ -1931,112 +1931,112 @@ msgstr "portal release"
 msgid "mises en ligne du portail"
 msgstr "portal releases"
 
-#: apps/portal/services.py:162
+#: apps/portal/services.py:165
 msgid "Cette valeur est déjà utilisée."
 msgstr "This value is already in use."
 
-#: apps/portal/services.py:188
+#: apps/portal/services.py:191
 msgid "Adresse refusée : https:, mailto:, tel: ou chemin interne (/…)."
 msgstr "Address refused: https:, mailto:, tel: or internal path (/…)."
 
-#: apps/portal/services.py:204
+#: apps/portal/services.py:207
 #, python-format
 msgid "Texte trop long (%(max)s caractères au plus)."
 msgstr "Text too long (%(max)s characters at most)."
 
-#: apps/portal/services.py:215
+#: apps/portal/services.py:218
 msgid "Configuration invalide."
 msgstr "Invalid configuration."
 
-#: apps/portal/services.py:226
+#: apps/portal/services.py:229
 #, python-format
 msgid "Configuration invalide : %(names)s."
 msgstr "Invalid configuration: %(names)s."
 
-#: apps/portal/services.py:232
+#: apps/portal/services.py:235
 msgid "Seule une section « image et texte » porte une image."
 msgstr "Only an “image and text” section carries an image."
 
-#: apps/portal/services.py:234 apps/portal/services.py:664
+#: apps/portal/services.py:237 apps/portal/services.py:667
 msgid "Choisissez une image publique de l'édition."
 msgstr "Choose a public image of the edition."
 
-#: apps/portal/services.py:237
+#: apps/portal/services.py:240
 msgid ""
 "Une section de données n'a pas de corps : son contenu vient de l'édition."
 msgstr "A data section has no body: its content comes from the edition."
 
-#: apps/portal/services.py:261
+#: apps/portal/services.py:264
 msgid "Le type d'une section ne change pas."
 msgstr "The type of a section cannot change."
 
-#: apps/portal/services.py:296
+#: apps/portal/services.py:299
 #, python-format
 msgid "Section posée sur : %(pages)s. Retirez-la de ces pages d'abord."
 msgstr "Section placed on: %(pages)s. Remove it from these pages first."
 
-#: apps/portal/services.py:323
+#: apps/portal/services.py:326
 msgid "Identifiant réservé à une page du site."
 msgstr "Identifier reserved for a site page."
 
-#: apps/portal/services.py:345
+#: apps/portal/services.py:348
 msgid "Figé pour une page du site."
 msgstr "Fixed for a site page."
 
-#: apps/portal/services.py:372
+#: apps/portal/services.py:375
 msgid "Une page du site ne se supprime pas."
 msgstr "A site page cannot be deleted."
 
-#: apps/portal/services.py:375
+#: apps/portal/services.py:378
 msgid "Page présente dans un menu : retirez-la du menu d'abord."
 msgstr "Page used in a menu: remove it from the menu first."
 
-#: apps/portal/services.py:438
+#: apps/portal/services.py:441
 msgid "Section inconnue."
 msgstr "Unknown section."
 
-#: apps/portal/services.py:441
+#: apps/portal/services.py:444
 msgid "Section déjà posée sur cette page."
 msgstr "Section already placed on this page."
 
-#: apps/portal/services.py:455
+#: apps/portal/services.py:458
 msgid "Section absente de cette page."
 msgstr "Section not placed on this page."
 
-#: apps/portal/services.py:469
+#: apps/portal/services.py:472
 msgid "La liste doit contenir exactement les sections posées."
 msgstr "The list must contain exactly the placed sections."
 
-#: apps/portal/services.py:482
+#: apps/portal/services.py:485
 msgid "Choisissez une page ou une adresse, pas les deux."
 msgstr "Choose a page or an address, not both."
 
-#: apps/portal/services.py:484
+#: apps/portal/services.py:487
 msgid "Page inconnue."
 msgstr "Unknown page."
 
-#: apps/portal/services.py:545
+#: apps/portal/services.py:548
 msgid "Emplacement inconnu."
 msgstr "Unknown location."
 
-#: apps/portal/services.py:550
+#: apps/portal/services.py:553
 msgid "La liste doit contenir exactement les entrées de ce menu."
 msgstr "The list must contain exactly the items of this menu."
 
-#: apps/portal/services.py:592
+#: apps/portal/services.py:595
 msgid "Nature inconnue."
 msgstr "Unknown kind."
 
-#: apps/portal/services.py:631
+#: apps/portal/services.py:634
 msgid "affiche de l'édition"
 msgstr "edition poster"
 
-#: apps/portal/services.py:643
+#: apps/portal/services.py:646
 #, python-format
 msgid "Fichier utilisé (%(uses)s) : retirez-le d'abord."
 msgstr "File in use (%(uses)s): remove it first."
 
-#: apps/portal/services.py:912
+#: apps/portal/services.py:915
 msgid "Date de build invalide (avec fuseau, et pas dans le futur)."
 msgstr "Invalid build date (with time zone, and not in the future)."
 
@@ -2303,6 +2303,10 @@ msgstr "moderation"
 #, python-brace-format
 msgid "- {start} · {room} · {role} : {title}"
 msgstr "- {start} · {room} · {role}: {title}"
+
+#: apps/program/serializers.py:250
+msgid "Une communication ou un titre libre, l'un ou l'autre."
+msgstr "Either a paper or a free title, not both."
 
 #: apps/program/services/planning.py:142 apps/program/services/planning.py:165
 #: apps/reviews/services/grids.py:179 apps/reviews/services/grids.py:226

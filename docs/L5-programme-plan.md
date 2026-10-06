@@ -507,3 +507,72 @@ programme publié, et une communication publiée n'est pas restée confirmée.
 **Tests** : 13 tests de publication ; matrice avec la publication (réauthentification
 comprise) et l'historique. 2 462 tests backend sous SQLite ; 1 948 sous MariaDB pour les suites
 touchées.
+
+## 16. Bilan de L5.5 (6 octobre 2026)
+
+**Rubrique « Programme » de la gestion**, inscrite dans le rail (catégorie entre Évaluation et
+Paramétrage, `program.read`), dans la recherche et dans l'aide (une fiche par écran). Le rôle
+actif l'affiche pour l'administrateur, le Chair, le président du CS et le CO.
+
+- **Planificateur** (`/editions/{id}/programme`, I15) :
+  - un jour à la fois, une colonne par salle active (plus les salles inactives encore
+    utilisées et une colonne « hors salle ») ;
+  - liste « à programmer » filtrable par thématique, type et texte ;
+  - glisser-déposer du CDK : placer, réordonner, changer de session, rendre à la liste ;
+  - **équivalent au clavier** : « Placer dans… » (choix de la session, groupé par jour),
+    flèches monter et descendre, « Actions… » (déplacer, durée, retirer). Le focus suit le
+    créneau ; chaque résultat est annoncé dans une région `aria-live` ;
+  - heures des créneaux dans le fuseau de l'édition, jamais celui du navigateur ; occupation
+    de chaque session (« 60 / 90 min ») ;
+  - conflits renvoyés par le serveur à chaque écriture, sur la session, sur le créneau et
+    dans une liste avec « Voir ». Une personne est citée par son nom, jamais par son
+    adresse ;
+  - sous 768 px, la grille devient une liste.
+- **Sessions** : formulaire (type, titres, salle, thématique, horaires saisis à l'heure de
+  l'édition, consignes), erreurs de conversion sur le champ concerné. Après la création, la
+  session reste ouverte pour ses **rôles de séance** et ses **éléments libres** (intervenant
+  invité facultatif). Le choix d'une personne cherche dans l'édition par le nom, sans
+  adresse.
+- **Salles** : équipements en liste fermée, accessibilité, désactivation ; une salle utilisée
+  ne se supprime pas (message du serveur).
+- **Publication** : état (version publiée, modifications non publiées, conflits, communications
+  à programmer), publication confirmée réservée au Chair (réauthentification par
+  l'intercepteur), effets annoncés, historique (version, date, auteur, différences). Rappel :
+  le programme public paraît à la prochaine mise en ligne du portail.
+- **Paramétrage › Programme** : tampon (RG-13) et RG-11.
+- **Tableau de bord** : carte « Programme » (sessions, à programmer, conflits, état publié).
+- Toutes les écritures envoient la révision lue (`If-Match`) et remplacent l'état de l'écran
+  par le brouillon renvoyé. Une révision périmée (412) recharge le brouillon et le dit.
+
+**Corrections du serveur, trouvées en construisant les écrans** :
+
+- **Tampon (RG-13)** : le changer ne recalculait pas les créneaux existants et ne changeait
+  pas la révision. Les horaires restaient faux jusqu'à la prochaine écriture de chaque
+  session, et le contrôle d'intégrité les aurait signalés. Désormais, le changement verrouille
+  l'état du programme, recalcule toutes les sessions et incrémente la révision (test dédié).
+- **Schéma OpenAPI** : les listes `program/people` et `program/publications` étaient décrites
+  paginées et triables, alors que les vues renvoient une liste simple. Le client généré
+  lisait `results` et ne trouvait personne. Les vues du programme n'ont plus ni pagination ni
+  tri générique ; schéma et client régénérés ; test de l'historique ajouté.
+- **Portail à republier (I7)** : `program.published` compte désormais parmi les
+  modifications non publiées du portail (bandeau de L2) ; les écritures du brouillon, non.
+- Message de validation d'un créneau traduit.
+
+**Correctif commun de la gestion** : `.table-wrap` est positionné. Les libellés masqués des
+tableaux (position absolue) ne font plus déborder la page sur mobile.
+
+**Vérifications** :
+
+- parcours dans Chromium, sur une base de démonstration (3 salles, 7 sessions sur deux jours,
+  12 communications) : placement au clavier et à la souris, montée avec focus conservé,
+  correction d'un dépassement et d'un président de séance à deux endroits, rôle ajouté par
+  la recherche, refus de suppression d'une salle utilisée, publication par le Chair
+  (version 1, 11 personnes prévenues), tableau de bord, bandeau du portail ; aucun
+  débordement à 375 px sur les six écrans ;
+- front : 330 tests (shared 76, portail 116, gestion 138) ; lint, format, build ;
+- backend : 2 465 tests sous SQLite ; 1 763 sous MariaDB pour le programme, le portail et les
+  tests transverses ; schéma régénéré sur MariaDB.
+
+**Point connu, antérieur à L5** : le bundle initial du portail (367,7 ko) dépasse le seuil
+d'avertissement (365 ko), sans atteindre celui d'erreur (380 ko). Le bilan de L4 le
+signalait déjà. À traiter en L5.6, qui touche le portail.

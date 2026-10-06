@@ -1,0 +1,296 @@
+<gc-page-header
+  [heading]="'gestion.program.sessions.title' | translate"
+  [lead]="'gestion.program.sessions.lead' | translate: { zone: board()?.timezone ?? '' }"
+/>
+@if (!canWrite()) {
+  <p class="notice">{{ 'gestion.program.readOnly' | translate }}</p>
+}
+<div aria-live="polite">
+  @if (status()) {
+    <p class="notice" role="status">{{ status() }}</p>
+  }
+</div>
+<gc-error-summary [messages]="errors()" />
+
+@if (!loading()) {
+  @if (canWrite() && editing() === null) {
+    <div class="actions">
+      <button mat-flat-button type="button" (click)="startCreate()">
+        {{ 'gestion.program.sessions.add' | translate }}
+      </button>
+      <a mat-button [routerLink]="['/editions', editionId(), 'programme', 'salles']">
+        {{ 'gestion.nav.programRooms' | translate }}
+      </a>
+    </div>
+  }
+
+  @if (canWrite() && editing() !== null) {
+    <form [formGroup]="form" (ngSubmit)="save()" novalidate class="card">
+      <h2>
+        {{
+          (editing() ? 'gestion.program.sessions.editTitle' : 'gestion.program.sessions.add')
+            | translate
+        }}
+      </h2>
+      <div class="grid-2">
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'gestion.program.sessions.kind' | translate }}</mat-label>
+          <mat-select formControlName="kind" required>
+            @for (kind of kinds; track kind) {
+              <mat-option [value]="kind">{{
+                'gestion.program.kinds.' + kind | translate
+              }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'gestion.program.sessions.room' | translate }}</mat-label>
+          <mat-select formControlName="room">
+            <mat-option [value]="null">{{ 'gestion.program.noRoom' | translate }}</mat-option>
+            @for (room of activeRooms(); track room.id) {
+              <mat-option [value]="room.id">{{ room.name }}</mat-option>
+            }
+          </mat-select>
+          <mat-error>{{ error('room') }}</mat-error>
+        </mat-form-field>
+      </div>
+      <div class="grid-2">
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'gestion.fields.titleFr' | translate }}</mat-label>
+          <input matInput formControlName="title_fr" required maxlength="255" />
+          <mat-error>{{ error('title_fr') }}</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'gestion.fields.titleEn' | translate }}</mat-label>
+          <input matInput formControlName="title_en" maxlength="255" />
+          <mat-error>{{ error('title_en') }}</mat-error>
+        </mat-form-field>
+      </div>
+      <div class="grid-2">
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'gestion.program.sessions.start' | translate }}</mat-label>
+          <input matInput type="datetime-local" formControlName="starts_local" required />
+          <mat-hint>{{ board()?.timezone }}</mat-hint>
+          <mat-error>{{ error('starts_local') }}</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'gestion.program.sessions.end' | translate }}</mat-label>
+          <input matInput type="datetime-local" formControlName="ends_local" required />
+          <mat-hint>{{ board()?.timezone }}</mat-hint>
+          <mat-error>{{ error('ends_local') }}</mat-error>
+        </mat-form-field>
+      </div>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'gestion.program.sessions.track' | translate }}</mat-label>
+        <mat-select formControlName="track">
+          <mat-option [value]="null">{{
+            'gestion.program.sessions.noTrack' | translate
+          }}</mat-option>
+          @for (track of tracks(); track track.code) {
+            <mat-option [value]="track.code">{{ trackName(track.code) }}</mat-option>
+          }
+        </mat-select>
+        <mat-error>{{ error('track') }}</mat-error>
+      </mat-form-field>
+      <div class="grid-2">
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'gestion.fields.descriptionFr' | translate }}</mat-label>
+          <textarea matInput rows="3" formControlName="description_fr"></textarea>
+          <mat-error>{{ error('description_fr') }}</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'gestion.fields.descriptionEn' | translate }}</mat-label>
+          <textarea matInput rows="3" formControlName="description_en"></textarea>
+          <mat-error>{{ error('description_en') }}</mat-error>
+        </mat-form-field>
+      </div>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'gestion.program.sessions.instructions' | translate }}</mat-label>
+        <textarea matInput rows="2" formControlName="instructions"></textarea>
+        <mat-hint>{{ 'gestion.program.sessions.instructionsHint' | translate }}</mat-hint>
+        <mat-error>{{ error('instructions') }}</mat-error>
+      </mat-form-field>
+      <div class="actions">
+        <button mat-flat-button type="submit" [disabled]="busy()">
+          {{ 'gestion.settings.save' | translate }}
+        </button>
+        <button mat-button type="button" (click)="cancel()">
+          {{ 'gestion.program.close' | translate }}
+        </button>
+      </div>
+    </form>
+  }
+
+  @if (canWrite() && current(); as session) {
+    <section class="card" aria-labelledby="session-people">
+      <h2 id="session-people">{{ 'gestion.program.sessions.peopleTitle' | translate }}</h2>
+      <h3>{{ 'gestion.program.roles.title' | translate }}</h3>
+      <ul class="people">
+        @for (role of session.roles; track role.id) {
+          <li>
+            <span class="badge">{{ 'gestion.program.roleKinds.' + role.role | translate }}</span>
+            {{ role.person.name }}
+            @if (role.person.institution) {
+              <span class="muted">— {{ role.person.institution }}</span>
+            }
+            <button mat-button type="button" (click)="removeRole(role)" [disabled]="busy()">
+              {{ 'gestion.settings.delete' | translate
+              }}<span class="visually-hidden"> {{ role.person.name }}</span>
+            </button>
+          </li>
+        } @empty {
+          <li class="muted">{{ 'gestion.program.roles.empty' | translate }}</li>
+        }
+      </ul>
+      <form [formGroup]="roleForm" (ngSubmit)="addRole(session)" novalidate>
+        <div class="grid-2">
+          <gestion-person-picker [editionId]="edition()" (picked)="rolePerson.set($event)" />
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'gestion.program.roles.role' | translate }}</mat-label>
+            <mat-select formControlName="role">
+              @for (kind of roleKinds; track kind) {
+                <mat-option [value]="kind">{{
+                  'gestion.program.roleKinds.' + kind | translate
+                }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="actions">
+          <button mat-stroked-button type="submit" [disabled]="busy() || !rolePerson()">
+            {{ 'gestion.program.roles.add' | translate }}
+          </button>
+        </div>
+        <p class="muted">{{ 'gestion.program.roles.inviteHint' | translate }}</p>
+      </form>
+
+      <h3>{{ 'gestion.program.free.title' | translate }}</h3>
+      <ul class="people">
+        @for (slot of freeSlots(session); track slot.id) {
+          <li>
+            {{ slot.title_fr }}
+            @if (slot.speaker) {
+              <span class="muted">— {{ slot.speaker.name }}</span>
+            }
+            <span class="badge">{{
+              'gestion.program.minutes' | translate: { count: slot.duration_min }
+            }}</span>
+            <button mat-button type="button" (click)="removeFree(slot)" [disabled]="busy()">
+              {{ 'gestion.settings.delete' | translate
+              }}<span class="visually-hidden"> {{ slot.title_fr }}</span>
+            </button>
+          </li>
+        } @empty {
+          <li class="muted">{{ 'gestion.program.free.empty' | translate }}</li>
+        }
+      </ul>
+      <form [formGroup]="freeForm" (ngSubmit)="addFree(session)" novalidate>
+        <div class="grid-2">
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'gestion.fields.titleFr' | translate }}</mat-label>
+            <input matInput formControlName="title_fr" maxlength="300" />
+            <mat-error>{{ freeError('title_fr') }}</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'gestion.fields.titleEn' | translate }}</mat-label>
+            <input matInput formControlName="title_en" maxlength="300" />
+            <mat-error>{{ freeError('title_en') }}</mat-error>
+          </mat-form-field>
+        </div>
+        <div class="grid-2">
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'gestion.program.duration' | translate }}</mat-label>
+            <input matInput type="number" min="1" max="600" formControlName="duration_min" />
+            <mat-error>{{ freeError('duration_min') }}</mat-error>
+          </mat-form-field>
+          <gestion-person-picker
+            [editionId]="edition()"
+            label="gestion.program.free.speaker"
+            (picked)="speaker.set($event)"
+          />
+        </div>
+        <div class="actions">
+          <button mat-stroked-button type="submit" [disabled]="busy()">
+            {{ 'gestion.program.free.add' | translate }}
+          </button>
+        </div>
+      </form>
+    </section>
+  }
+
+  @for (group of days(); track group.day) {
+    <section class="card" [attr.aria-labelledby]="'day-' + group.day">
+      <h2 [id]="'day-' + group.day">{{ day(group.day) }}</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">{{ 'gestion.program.sessions.hours' | translate }}</th>
+              <th scope="col">{{ 'gestion.program.sessions.session' | translate }}</th>
+              <th scope="col">{{ 'gestion.program.sessions.room' | translate }}</th>
+              <th scope="col">{{ 'gestion.program.sessions.content' | translate }}</th>
+              @if (canWrite()) {
+                <th scope="col">
+                  <span class="visually-hidden">{{ 'gestion.settings.actions' | translate }}</span>
+                </th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (session of group.sessions; track session.id) {
+              <tr>
+                <td>{{ hours(session) }}</td>
+                <td>
+                  {{ title(session) }}
+                  <br />
+                  <span class="muted">{{
+                    'gestion.program.kinds.' + session.kind | translate
+                  }}</span>
+                  @if (session.track) {
+                    <span class="muted"> · {{ trackName(session.track) }}</span>
+                  }
+                  @if (conflictCount(session); as count) {
+                    <span class="badge conflict">{{
+                      'gestion.program.conflicts.count' | translate: { count }
+                    }}</span>
+                  }
+                </td>
+                <td>{{ roomName(session.room) }}</td>
+                <td>
+                  {{
+                    'gestion.program.sessions.slots' | translate: { count: session.slots.length }
+                  }}
+                  @for (role of session.roles; track role.id) {
+                    <br /><span class="muted"
+                      >{{ 'gestion.program.roleKinds.' + role.role | translate }} :
+                      {{ role.person.name }}</span
+                    >
+                  }
+                </td>
+                @if (canWrite()) {
+                  <td class="actions">
+                    <button
+                      mat-button
+                      type="button"
+                      (click)="startEdit(session)"
+                      [disabled]="busy()"
+                    >
+                      {{ 'gestion.settings.edit' | translate
+                      }}<span class="visually-hidden"> {{ title(session) }}</span>
+                    </button>
+                    <button mat-button type="button" (click)="remove(session)" [disabled]="busy()">
+                      {{ 'gestion.settings.delete' | translate
+                      }}<span class="visually-hidden"> {{ title(session) }}</span>
+                    </button>
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  } @empty {
+    <p class="muted">{{ 'gestion.program.sessions.empty' | translate }}</p>
+  }
+}

@@ -101,6 +101,9 @@ PORTAL_AFFECTING_ACTIONS = (
     "track.",
     "submission_type.",
     "key_date.",
+    # Programme public (plan L5, I7) : pré-rendu au build, à partir de la dernière publication
+    # du programme ; les écritures du brouillon ne changent pas le portail.
+    "program.published",
 )
 
 # Actions sur un compte (sans édition) qui changent la fiche publique d'un membre de comité.

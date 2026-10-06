@@ -7,34 +7,16 @@ import { filter, map } from 'rxjs/operators';
 import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
-import { PaginatedPublicationList } from '../../models/paginated-publication-list';
+import { Publication } from '../../models/publication';
 
 export interface ManageProgramPublications$Params {
   edition_id: number;
-
-/**
- * Quel champ utiliser pour classer les résultats.
- */
-  ordering?: string;
-
-/**
- * Un numéro de page de l'ensemble des résultats.
- */
-  page?: number;
-
-/**
- * Nombre de résultats à retourner par page.
- */
-  page_size?: number;
 }
 
-export function manageProgramPublications(http: HttpClient, rootUrl: string, params: ManageProgramPublications$Params, context?: HttpContext): Observable<StrictHttpResponse<PaginatedPublicationList>> {
+export function manageProgramPublications(http: HttpClient, rootUrl: string, params: ManageProgramPublications$Params, context?: HttpContext): Observable<StrictHttpResponse<Array<Publication>>> {
   const rb = new RequestBuilder(rootUrl, manageProgramPublications.PATH, 'get');
   if (params) {
     rb.path('edition_id', params.edition_id, {});
-    rb.query('ordering', params.ordering, {});
-    rb.query('page', params.page, {});
-    rb.query('page_size', params.page_size, {});
   }
 
   return http.request(
@@ -42,7 +24,7 @@ export function manageProgramPublications(http: HttpClient, rootUrl: string, par
   ).pipe(
     filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
     map((r: HttpResponse<any>) => {
-      return r as StrictHttpResponse<PaginatedPublicationList>;
+      return r as StrictHttpResponse<Array<Publication>>;
     })
   );
 }

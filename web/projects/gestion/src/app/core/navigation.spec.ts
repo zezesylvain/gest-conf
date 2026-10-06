@@ -23,9 +23,11 @@ const CHAIR = [
   'decisions.decide',
   'decisions.publish',
   'grids.write',
+  'program.read',
+  'program.publish',
 ];
-/** Président du CS qui évalue aussi (H19) : tous les écrans du rail lui sont ouverts. */
-const EVERYTHING = [...CHAIR, 'reviews.write'];
+/** Président qui évalue aussi (H19) et écrit le programme : tous les écrans lui sont ouverts. */
+const EVERYTHING = [...CHAIR, 'reviews.write', 'program.write'];
 
 /** Catalogue « traduit » minimal : la clé tient lieu de libellé. */
 function items(capabilities: string[], role: Parameters<typeof buildNavigation>[2] = null) {
@@ -38,12 +40,13 @@ function items(capabilities: string[], role: Parameters<typeof buildNavigation>[
 }
 
 describe('Table de navigation de la gestion (plan L2 §2.3)', () => {
-  it('président : huit catégories, ordre du rail numéroté', () => {
+  it('président : neuf catégories, ordre du rail numéroté', () => {
     const groups = buildNavigation(3, CHAIR);
     expect(groups.map((group) => group.key)).toEqual([
       'steering',
       'submissions',
       'reviewing',
+      'program',
       'settings',
       'committees',
       'portal',
@@ -98,6 +101,7 @@ describe('Table de navigation de la gestion (plan L2 §2.3)', () => {
       'steering',
       'submissions',
       'reviewing',
+      'program',
       'settings',
       'committees',
       'help',
@@ -119,6 +123,31 @@ describe('Table de navigation de la gestion (plan L2 §2.3)', () => {
     expect(helpForUrl('/editions/3/evaluations/12')).toBe('my-reviews');
     expect(helpForUrl('/editions/3/pilotage/7')).toBe('review-follow-up');
     expect(helpForUrl('/editions/3/parametrage/grilles')).toBe('grids');
+  });
+
+  it('programme (plan L5) : catégorie dédiée avec program.read, réglage dans le paramétrage', () => {
+    const oc = buildNavigation(
+      3,
+      ['edition.read', 'submissions.read', 'program.read', 'program.write'],
+      'OC_MEMBER',
+    );
+    const keys = catalogue(oc).map((entry) => entry.key);
+    expect(keys).toContain('programPlanner');
+    expect(keys).toContain('programSettings');
+    expect(oc.find((group) => group.key === 'program')!.entries.map((e) => e.key)).toEqual([
+      'programPlanner',
+      'programSessions',
+      'programRooms',
+      'programPublication',
+    ]);
+    // Sans program.read (relecteur) : ni catégorie ni réglage.
+    const reviewer = catalogue(buildNavigation(3, ['reviews.write'])).map((entry) => entry.key);
+    expect(reviewer).not.toContain('programPlanner');
+    expect(reviewer).not.toContain('programSettings');
+    // Le plus long préfixe désigne l'écran : la fiche des sessions, pas celle du planificateur.
+    expect(helpForUrl('/editions/3/programme')).toBe('program-planner');
+    expect(helpForUrl('/editions/3/programme/sessions')).toBe('program-sessions');
+    expect(helpForUrl('/editions/3/parametrage/programme')).toBe('settings-program');
   });
 
   it('aucune capacité dans l’édition : rail vide (pas d’aide seule)', () => {

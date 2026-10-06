@@ -113,8 +113,6 @@ export * from './models/page-ref';
 export * from './models/page-request';
 export * from './models/paginated-audit-entry-list';
 export * from './models/paginated-invitation-with-email-list';
-export * from './models/paginated-person-search-list';
-export * from './models/paginated-publication-list';
 export * from './models/paginated-review-submission-list';
 export * from './models/paginated-submission-manage-list';
 export * from './models/passage-role';

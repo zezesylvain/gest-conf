@@ -28,7 +28,8 @@
         "control": "Contrôle",
         "help": "Aide",
         "submissions": "Soumissions",
-        "reviewing": "Évaluation"
+        "reviewing": "Évaluation",
+        "program": "Programme"
       },
       "keywords": {
         "dashboard": "accueil, statut, publier, publication, archiver, état, résumé",
@@ -50,7 +51,12 @@
         "expertise": "thématiques, compétences, domaines, spécialités, relecteur",
         "followUp": "recevabilité, affecter, affectation, relecteurs, conflits, retards, relances, divergence, discussion",
         "ranking": "classement, seuil, simulation, décision, publier, résultats, liste d'attente, export, csv",
-        "grids": "critères, pondération, poids, barème, échelle, notation, version"
+        "grids": "critères, pondération, poids, barème, échelle, notation, version",
+        "programPlanner": "programme, planning, placer, glisser, déposer, créneaux, communications, conflits, à programmer, grille",
+        "programSessions": "séances, plénière, atelier, pause, horaires, président de séance, discutant, modérateur, intervenant invité",
+        "programRooms": "amphithéâtre, capacité, équipements, accessibilité, lieu",
+        "programPublication": "publier, version, historique, conflits, portail, e-mails, programme public",
+        "programSettings": "tampon, battement, transition, durée, inscription des présentateurs"
       },
       "portalSections": "Sections",
       "portalPages": "Pages",
@@ -61,7 +67,12 @@
       "expertise": "Mes expertises",
       "followUp": "Pilotage de l'évaluation",
       "ranking": "Classement et décisions",
-      "grids": "Grilles d'évaluation"
+      "grids": "Grilles d'évaluation",
+      "programPlanner": "Planificateur",
+      "programSessions": "Sessions",
+      "programRooms": "Salles",
+      "programPublication": "Publication du programme",
+      "programSettings": "Programme"
     },
     "status": {
       "draft": "brouillon",
@@ -167,6 +178,10 @@
         "alerts": "{{divergent}} soumission(s) aux évaluations divergentes, {{late}} évaluation(s) en retard.",
         "followUp": "Pilotage de l'évaluation",
         "ranking": "Classement et décisions"
+      },
+      "program": {
+        "title": "Programme",
+        "counts": "{{sessions}} session(s), {{toSchedule}} communication(s) à programmer, {{conflicts}} conflit(s)."
       }
     },
     "fields": {
@@ -263,6 +278,14 @@
         "admin": "Des soumissions existent : ce réglage est gelé. En tant qu'administrateur, vous pouvez le changer en donnant un motif, journalisé.",
         "locked": "Des soumissions existent : ce réglage est gelé. Seul un administrateur de l'édition peut le changer, avec un motif.",
         "reason": "Motif du changement (obligatoire, journalisé)"
+      },
+      "program": {
+        "title": "Paramétrage du programme",
+        "lead": "Réglages de l'édition qui encadrent le programme.",
+        "buffer": "Tampon entre créneaux (min)",
+        "bufferHint": "De 0 à 30 minutes entre les créneaux d'une session (RG-13).",
+        "registration": "Exiger l'inscription d'un présentateur (RG-11)",
+        "registrationHint": "Sans effet tant que les inscriptions ne sont pas ouvertes (lot suivant)."
       }
     },
     "members": {
@@ -581,7 +604,7 @@
           "path": "Portail › bandeau d'état",
           "intro": "Le portail est généré à l'avance (pré-rendu) pour être rapide et bien référencé. Une modification enregistrée dans la gestion n'y apparaît qu'à la mise en ligne suivante.",
           "editTitle": "Modifier",
-          "editBody": "Rédigez et composez dans la rubrique Portail ; les modifications de l'édition (dates, thématiques, types) et des comités comptent aussi.",
+          "editBody": "Rédigez et composez dans la rubrique Portail ; les modifications de l'édition (dates, thématiques, types), des comités et chaque publication du programme comptent aussi.",
           "bannerTitle": "Suivre",
           "bannerBody": "Le bandeau des écrans du portail compte les modifications non publiées et indique la dernière mise en ligne.",
           "deployTitle": "Mettre en ligne",
@@ -718,6 +741,85 @@
           "lockedText": "Dès la première évaluation enregistrée, la grille ne se modifie ni ne se supprime : dupliquez-la.",
           "scopeTitle": "Quelle grille s'applique ?",
           "scopeText": "La dernière version de la grille du type de la soumission, sinon celle de la grille « tous types »."
+        },
+        "program-planner": {
+          "title": "Planificateur du programme",
+          "summary": "Placer les communications confirmées dans les sessions, à la souris ou au clavier.",
+          "path": "Programme › Planificateur",
+          "intro": "Le planificateur montre une journée à la fois : une colonne par salle, les sessions dans l'ordre des horaires. La liste « à programmer » réunit les communications que leurs auteurs ont confirmées et qui ne sont pas encore placées.",
+          "poolTitle": "Trouver une communication",
+          "poolBody": "Filtrez la liste par thématique ou par type, ou cherchez une référence ou un mot du titre.",
+          "placeTitle": "Placer",
+          "placeBody": "Glissez la communication dans une session, ou utilisez « Placer dans… » et choisissez la session. Elle s'ajoute à la fin, avec la durée de son type de communication.",
+          "orderTitle": "Ordonner et ajuster",
+          "orderBody": "Les flèches montent ou descendent un créneau. « Actions… » le déplace vers une autre session, change sa durée ou le retire. Les horaires se recalculent seuls, tampon compris.",
+          "conflictsTitle": "Corriger les conflits",
+          "conflictsBody": "Après chaque action, le serveur signale deux sessions dans la même salle au même moment, une personne à deux endroits, ou une session qui déborde. « Voir » ouvre la session concernée.",
+          "keyboardTitle": "Au clavier",
+          "keyboardText": "Tout ce que permet la souris se fait aussi au clavier : « Placer dans… », les flèches et « Actions… ». Chaque résultat est annoncé aux lecteurs d'écran.",
+          "draftTitle": "Un brouillon",
+          "draftText": "Rien n'est visible des auteurs ni du public avant la publication. Si un autre membre modifie le programme en même temps, l'écran se recharge et vous demande de refaire votre action.",
+          "whoTitle": "Qui fait quoi ?",
+          "whoText": "Le comité d'organisation, le Chair et le président du comité scientifique consultent. L'administrateur et le CO « programme » modifient. Le Chair publie."
+        },
+        "program-sessions": {
+          "title": "Sessions",
+          "summary": "Créer les sessions de chaque jour, leurs rôles de séance et leurs éléments libres.",
+          "path": "Programme › Sessions",
+          "intro": "Une session a un type (plénière, parallèle, pause…), un titre, une salle facultative et un horaire. Les communications s'y placent depuis le planificateur.",
+          "createTitle": "Créer",
+          "createBody": "« Ajouter une session », puis choisissez le type, la salle et l'horaire. Après l'enregistrement, la session reste ouverte pour ses rôles et ses éléments libres.",
+          "timesTitle": "Horaires",
+          "timesBody": "Saisissez le début et la fin à l'heure de l'édition. La session commence pendant les dates de l'édition et dure 24 heures au plus.",
+          "rolesTitle": "Rôles de séance",
+          "rolesBody": "Cherchez une personne de l'édition, choisissez son rôle (président de séance, discutant, modérateur, panéliste), puis ajoutez-la.",
+          "freeTitle": "Éléments libres",
+          "freeBody": "Conférence invitée, discours, remise de prix : un titre, une durée et, si besoin, un intervenant invité.",
+          "timezoneTitle": "Changement d'heure",
+          "timezoneText": "Une heure qui n'existe pas, ou qui existe deux fois, dans le fuseau de l'édition (changement d'heure) est refusée : choisissez une autre heure.",
+          "inviteTitle": "Personne absente de la liste",
+          "inviteText": "Seules les personnes qui ont un rôle dans l'édition apparaissent. Invitez d'abord une personne extérieure, avec le rôle « Président de session » ou « Intervenant ».",
+          "deleteTitle": "Supprimer une session",
+          "deleteText": "Ses créneaux et ses rôles disparaissent ; ses communications reviennent dans la liste « à programmer »."
+        },
+        "program-rooms": {
+          "title": "Salles",
+          "summary": "Déclarer les salles de l'édition, leur capacité et leurs équipements.",
+          "path": "Programme › Salles",
+          "intro": "Les sessions se tiennent dans ces salles. Le programme public les affiche, avec leurs indications d'accès.",
+          "capacity": "Capacité : nombre de places, facultatif.",
+          "equipment": "Équipements : liste fermée (vidéoprojecteur, micro…) et note libre.",
+          "access": "Accessibilité : case à cocher et indications d'accès, publiées.",
+          "inUseTitle": "Salle utilisée",
+          "inUseText": "Une salle utilisée par une session ne se supprime pas : désactivez-la. Elle disparaît des choix, sans changer les sessions existantes."
+        },
+        "program-publication": {
+          "title": "Publication du programme",
+          "summary": "Publier une version du programme et suivre l'historique.",
+          "path": "Programme › Publication",
+          "intro": "La publication fige le brouillon en une version numérotée. Le programme public et « Mon passage » lisent cette version, jamais le brouillon.",
+          "checkTitle": "Vérifier",
+          "checkBody": "L'écran indique les modifications non publiées, les conflits restants et les communications encore à programmer.",
+          "publishTitle": "Publier",
+          "publishBody": "Le Chair clique sur « Publier le programme » et confirme. Une nouvelle authentification peut être demandée.",
+          "portalTitle": "Mettre le portail à jour",
+          "portalBody": "Le programme public est pré-rendu : il paraît à la prochaine mise en ligne du portail. Le bandeau du Portail compte la publication parmi les modifications à mettre en ligne.",
+          "conflictsTitle": "Publication refusée",
+          "conflictsText": "La publication est refusée tant qu'il reste un conflit (salle, personne, débordement), ou si rien n'a changé depuis la dernière version.",
+          "emailsTitle": "E-mails",
+          "emailsText": "Chaque présentateur, intervenant invité ou président de séance dont le passage est nouveau, modifié ou supprimé reçoit un e-mail, une seule fois par version.",
+          "whoTitle": "Qui publie ?",
+          "whoText": "Le Chair seul. Les autres profils consultent l'état et l'historique."
+        },
+        "settings-program": {
+          "title": "Paramétrage du programme",
+          "summary": "Tampon entre les créneaux et inscription des présentateurs.",
+          "path": "Paramétrage › Programme",
+          "intro": "Deux réglages de l'édition encadrent le programme.",
+          "buffer": "Tampon : de 0 à 30 minutes entre deux créneaux d'une même session (RG-13).",
+          "registration": "Inscription des présentateurs (RG-11) : désactivée par défaut ; elle prendra effet avec les inscriptions.",
+          "reflowTitle": "Effet immédiat",
+          "reflowText": "Changer le tampon recalcule l'horaire de tous les créneaux. Un débordement éventuel apparaît dans le planificateur."
         }
       }
     },
@@ -1361,6 +1463,187 @@
         "title": "Supprimer la grille ?",
         "message": "La grille « {{name}} » sera supprimée.",
         "confirm": "Supprimer"
+      }
+    },
+    "program": {
+      "readOnly": "Lecture seule : vos rôles ne permettent pas de modifier le programme.",
+      "stale": "Le programme a été modifié entre-temps par un autre membre : il vient d'être rechargé. Refaites votre dernière action si besoin.",
+      "cancel": "Annuler",
+      "close": "Fermer",
+      "noRoom": "Hors salle",
+      "minutes": "{{count}} min",
+      "duration": "Durée (min)",
+      "quoted": "« {{title}} »",
+      "unpublished": "Modifications non publiées",
+      "publishedVersion": "Version {{version}} publiée",
+      "kinds": {
+        "opening": "Ouverture",
+        "keynote": "Conférence plénière",
+        "parallel": "Session parallèle",
+        "poster": "Session posters",
+        "workshop": "Atelier",
+        "tutorial": "Tutoriel",
+        "round_table": "Table ronde",
+        "assembly": "Assemblée ou réunion",
+        "break": "Pause",
+        "meal": "Repas",
+        "social": "Activité sociale",
+        "closing": "Clôture"
+      },
+      "equipment": {
+        "projector": "Vidéoprojecteur",
+        "microphone": "Micro",
+        "sound_system": "Sonorisation",
+        "computer": "Ordinateur",
+        "whiteboard": "Tableau",
+        "interpretation": "Interprétation",
+        "recording": "Enregistrement",
+        "wifi": "Wifi"
+      },
+      "roleKinds": {
+        "chair": "Président de séance",
+        "discussant": "Discutant",
+        "moderator": "Modérateur",
+        "panelist": "Panéliste"
+      },
+      "conflicts": {
+        "count": "{{count}} conflit(s)",
+        "title": "Conflits ({{count}})",
+        "none": "Aucun conflit.",
+        "show": "Voir",
+        "slot": "(en conflit)",
+        "room": "{{room}} : {{sessions}} se chevauchent (RG-12).",
+        "person": "{{person}} est attendu(e) à deux endroits en même temps : {{sessions}} (RG-12).",
+        "overflow": "{{sessions}} déborde de {{minutes}} min (RG-13)."
+      },
+      "people": {
+        "search": "Rechercher une personne de l'édition",
+        "hint": "Au moins deux lettres du nom.",
+        "none": "Aucune personne trouvée dans l'édition.",
+        "chosen": "Choix : {{name}}",
+        "change": "Changer"
+      },
+      "rooms": {
+        "title": "Salles",
+        "lead": "Salles de l'édition : capacité, équipements, accessibilité.",
+        "name": "Nom",
+        "capacity": "Capacité",
+        "equipment": "Équipements",
+        "accessible": "Accessible aux personnes à mobilité réduite",
+        "accessNote": "Indications d'accès",
+        "accessNoteHint": "Publiées au programme et dans « Mon passage ».",
+        "note": "Note sur l'équipement",
+        "active": "Active",
+        "inactive": "inactive",
+        "activate": "Réactiver",
+        "deactivate": "Désactiver",
+        "add": "Ajouter une salle",
+        "editTitle": "Modifier la salle",
+        "empty": "Aucune salle.",
+        "delete": {
+          "title": "Supprimer cette salle ?",
+          "message": "« {{name}} » sera supprimée. Une salle utilisée par une session ne peut pas l'être : désactivez-la plutôt.",
+          "confirm": "Supprimer"
+        }
+      },
+      "sessions": {
+        "title": "Sessions",
+        "lead": "Sessions de chaque jour, saisies à l'heure de l'édition ({{zone}}).",
+        "add": "Ajouter une session",
+        "editTitle": "Modifier la session",
+        "kind": "Type",
+        "room": "Salle",
+        "start": "Début",
+        "end": "Fin",
+        "track": "Thématique",
+        "noTrack": "Aucune",
+        "instructions": "Consignes techniques",
+        "instructionsHint": "Pour les intervenants (« Mon passage ») ; jamais au programme public.",
+        "hours": "Horaire",
+        "session": "Session",
+        "content": "Contenu",
+        "slots": "{{count}} créneau(x)",
+        "empty": "Aucune session pour l'instant.",
+        "created": "Session créée : ajoutez ses rôles et ses éléments libres.",
+        "peopleTitle": "Rôles et éléments libres",
+        "delete": {
+          "title": "Supprimer cette session ?",
+          "message": "« {{name}} » sera supprimée avec ses créneaux et ses rôles. {{count}} communication(s) retourneront dans la liste « à programmer ».",
+          "confirm": "Supprimer"
+        }
+      },
+      "roles": {
+        "title": "Rôles de séance",
+        "role": "Rôle",
+        "add": "Ajouter le rôle",
+        "empty": "Aucun rôle de séance.",
+        "added": "{{name}} ajouté(e) à la session.",
+        "removed": "{{name}} retiré(e) de la session.",
+        "inviteHint": "Seules les personnes qui ont un rôle dans l'édition apparaissent. Pour une personne extérieure, envoyez d'abord une invitation « Président de session » ou « Intervenant » (Comités › Invitations)."
+      },
+      "free": {
+        "title": "Éléments libres (conférence invitée, discours…)",
+        "empty": "Aucun élément libre.",
+        "speaker": "Intervenant invité (facultatif)",
+        "add": "Ajouter l'élément",
+        "added": "« {{title}} » ajouté.",
+        "removed": "« {{title}} » retiré."
+      },
+      "planner": {
+        "title": "Planificateur",
+        "lead": "Placez les communications confirmées dans les sessions. Heures de l'édition ({{zone}}).",
+        "pool": "À programmer ({{count}})",
+        "search": "Rechercher (référence, titre)",
+        "track": "Thématique",
+        "type": "Type",
+        "all": "Tous",
+        "placeIn": "Placer dans…",
+        "target": "Session",
+        "place": "Placer",
+        "poolEmpty": "Aucune communication à programmer.",
+        "grid": "Grille du jour",
+        "days": "Jours",
+        "occupancy": "{{used}} / {{total}} min",
+        "up": "Monter « {{title}} »",
+        "down": "Descendre « {{title}} »",
+        "more": "Actions…",
+        "moveTo": "Déplacer vers la session",
+        "move": "Déplacer",
+        "resize": "Appliquer la durée",
+        "unplace": "Retirer du programme",
+        "dropHere": "Déposez une communication ici.",
+        "noSessions": "Aucune session ce jour-là.",
+        "placed": "« {{title}} » placée dans « {{session}} ».",
+        "moved": "« {{title}} » déplacée dans « {{session}} », position {{position}}.",
+        "resized": "Durée de « {{title}} » : {{count}} min.",
+        "unplaced": "« {{title}} » retirée du programme : elle revient dans la liste « à programmer ».",
+        "badDuration": "Durée invalide : de 1 à 600 minutes."
+      },
+      "publication": {
+        "title": "Publication du programme",
+        "lead": "Publier fige le programme en une version numérotée : seule source du programme public et de « Mon passage ».",
+        "state": "État",
+        "never": "Programme jamais publié.",
+        "upToDate": "Aucune modification depuis la dernière publication.",
+        "fix": "Corriger dans le planificateur",
+        "toSchedule": "{{count}} communication(s) confirmée(s) encore à programmer.",
+        "publish": "Publier le programme",
+        "effects": "Les communications placées passent au statut « programmée » ; chaque présentateur, intervenant ou président de séance dont le passage change reçoit un e-mail.",
+        "chairOnly": "Seul le président de la conférence publie le programme.",
+        "portal": "Le programme public est pré-rendu : il n'apparaît sur le portail qu'à sa prochaine mise en ligne.",
+        "history": "Historique des publications",
+        "version": "Version",
+        "at": "Publiée le",
+        "by": "Par",
+        "changes": "Différences",
+        "empty": "Aucune publication.",
+        "diff": "Sessions : {{sessionsAdded}} ajoutée(s), {{sessionsChanged}} modifiée(s), {{sessionsRemoved}} supprimée(s) ; {{peopleNotified}} personne(s) prévenue(s).",
+        "done": "Programme publié (version {{version}}).",
+        "confirm": {
+          "title": "Publier le programme ?",
+          "message": "La version {{version}} sera publiée. Chaque personne dont le passage change recevra un e-mail. Cette action est journalisée.",
+          "confirm": "Publier"
+        }
       }
     }
   }

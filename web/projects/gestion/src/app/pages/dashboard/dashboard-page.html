@@ -142,6 +142,40 @@
     </section>
   }
 
+  @if (program(); as board) {
+    <section class="card" aria-labelledby="program-title">
+      <h2 id="program-title">{{ 'gestion.dashboard.program.title' | translate }}</h2>
+      <p>
+        {{
+          'gestion.dashboard.program.counts'
+            | translate
+              : {
+                  sessions: board.sessions.length,
+                  toSchedule: board.to_schedule.length,
+                  conflicts: board.conflicts.length,
+                }
+        }}
+      </p>
+      <p>
+        @if (board.unpublished_changes) {
+          {{ 'gestion.program.unpublished' | translate }}
+        } @else if (board.published_version) {
+          {{ 'gestion.program.publishedVersion' | translate: { version: board.published_version } }}
+        } @else {
+          {{ 'gestion.program.publication.never' | translate }}
+        }
+      </p>
+      <p class="actions">
+        <a [routerLink]="['/editions', current.id, 'programme']">{{
+          'gestion.nav.programPlanner' | translate
+        }}</a>
+        <a [routerLink]="['/editions', current.id, 'programme', 'publication']">{{
+          'gestion.nav.programPublication' | translate
+        }}</a>
+      </p>
+    </section>
+  }
+
   @if (pendingInvitations() !== null) {
     <section class="card" aria-labelledby="invitations-title">
       <h2 id="invitations-title">{{ 'gestion.nav.invitations' | translate }}</h2>

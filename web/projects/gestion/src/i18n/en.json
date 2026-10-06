@@ -28,7 +28,8 @@
         "control": "Oversight",
         "help": "Help",
         "submissions": "Submissions",
-        "reviewing": "Reviewing"
+        "reviewing": "Reviewing",
+        "program": "Programme"
       },
       "keywords": {
         "dashboard": "home, status, publish, publication, archive, state, summary",
@@ -50,7 +51,12 @@
         "expertise": "tracks, skills, fields, specialities, reviewer",
         "followUp": "screening, assign, assignment, reviewers, conflicts, late, reminders, divergence, discussion",
         "ranking": "ranking, threshold, simulation, decision, publish, results, waiting list, export, csv",
-        "grids": "criteria, weighting, weights, scale, scoring, version"
+        "grids": "criteria, weighting, weights, scale, scoring, version",
+        "programPlanner": "programme, schedule, place, drag, drop, slots, papers, conflicts, to schedule, grid",
+        "programSessions": "plenary, workshop, break, times, session chair, discussant, moderator, invited speaker",
+        "programRooms": "lecture hall, capacity, equipment, accessibility, venue",
+        "programPublication": "publish, version, history, conflicts, portal, emails, public programme",
+        "programSettings": "buffer, changeover, transition, duration, presenter registration"
       },
       "portalSections": "Sections",
       "portalPages": "Pages",
@@ -61,7 +67,12 @@
       "expertise": "My expertise",
       "followUp": "Review follow-up",
       "ranking": "Ranking and decisions",
-      "grids": "Evaluation grids"
+      "grids": "Evaluation grids",
+      "programPlanner": "Planner",
+      "programSessions": "Sessions",
+      "programRooms": "Rooms",
+      "programPublication": "Programme publication",
+      "programSettings": "Programme"
     },
     "status": {
       "draft": "draft",
@@ -167,6 +178,10 @@
         "alerts": "{{divergent}} submission(s) with diverging reviews, {{late}} late review(s).",
         "followUp": "Review follow-up",
         "ranking": "Ranking and decisions"
+      },
+      "program": {
+        "title": "Programme",
+        "counts": "{{sessions}} session(s), {{toSchedule}} paper(s) to schedule, {{conflicts}} conflict(s)."
       }
     },
     "fields": {
@@ -263,6 +278,14 @@
         "admin": "Submissions exist: this setting is frozen. As an administrator, you can change it by giving a reason, which is logged.",
         "locked": "Submissions exist: this setting is frozen. Only an administrator of the edition can change it, with a reason.",
         "reason": "Reason for the change (required, logged)"
+      },
+      "program": {
+        "title": "Programme settings",
+        "lead": "Edition settings that frame the programme.",
+        "buffer": "Buffer between slots (min)",
+        "bufferHint": "From 0 to 30 minutes between the slots of a session (RG-13).",
+        "registration": "Require a registered presenter (RG-11)",
+        "registrationHint": "No effect until registration opens (next stage)."
       }
     },
     "members": {
@@ -581,7 +604,7 @@
           "path": "Portal › status banner",
           "intro": "The portal is generated in advance (prerendered) to be fast and well indexed. A change saved in the management area only appears at the next release.",
           "editTitle": "Change",
-          "editBody": "Write and compose in the Portal category; changes to the edition (dates, tracks, types) and to the committees count too.",
+          "editBody": "Write and compose in the Portal category; changes to the edition (dates, tracks, types), to the committees and each programme publication count too.",
           "bannerTitle": "Follow",
           "bannerBody": "The banner of the portal screens counts unpublished changes and shows the last release.",
           "deployTitle": "Release",
@@ -718,6 +741,85 @@
           "lockedText": "From the first saved review, the grid can no longer be changed or deleted: duplicate it.",
           "scopeTitle": "Which grid applies?",
           "scopeText": "The latest version of the grid of the submission's type, otherwise that of the “all types” grid."
+        },
+        "program-planner": {
+          "title": "Programme planner",
+          "summary": "Place confirmed papers in sessions, with the mouse or the keyboard.",
+          "path": "Programme › Planner",
+          "intro": "The planner shows one day at a time: one column per room, sessions in time order. The “to schedule” list gathers the papers their authors have confirmed and that are not placed yet.",
+          "poolTitle": "Find a paper",
+          "poolBody": "Filter the list by track or type, or search for a reference or a word of the title.",
+          "placeTitle": "Place",
+          "placeBody": "Drag the paper into a session, or use “Place in…” and choose the session. It is added at the end, with the duration of its paper type.",
+          "orderTitle": "Order and adjust",
+          "orderBody": "The arrows move a slot up or down. “Actions…” moves it to another session, changes its duration or removes it. Times are recalculated automatically, buffer included.",
+          "conflictsTitle": "Fix conflicts",
+          "conflictsBody": "After each action, the server reports two sessions in the same room at the same time, a person in two places, or a session that overruns. “Show” opens the session concerned.",
+          "keyboardTitle": "With the keyboard",
+          "keyboardText": "Everything the mouse does can be done with the keyboard: “Place in…”, the arrows and “Actions…”. Each result is announced to screen readers.",
+          "draftTitle": "A draft",
+          "draftText": "Nothing is visible to authors or the public before publication. If another member changes the programme at the same time, the screen reloads and asks you to repeat your action.",
+          "whoTitle": "Who does what?",
+          "whoText": "The organising committee, the chair and the scientific committee chair consult. The administrator and the “programme” OC member edit. The chair publishes."
+        },
+        "program-sessions": {
+          "title": "Sessions",
+          "summary": "Create each day's sessions, their session roles and their free items.",
+          "path": "Programme › Sessions",
+          "intro": "A session has a type (plenary, parallel, break…), a title, an optional room and a time. Papers are placed in it from the planner.",
+          "createTitle": "Create",
+          "createBody": "“Add a session”, then choose the type, the room and the time. Once saved, the session stays open for its roles and free items.",
+          "timesTitle": "Times",
+          "timesBody": "Enter the start and end in the edition's time. The session starts during the edition's dates and lasts 24 hours at most.",
+          "rolesTitle": "Session roles",
+          "rolesBody": "Search for a person of the edition, choose their role (session chair, discussant, moderator, panellist), then add them.",
+          "freeTitle": "Free items",
+          "freeBody": "Invited talk, speech, award ceremony: a title, a duration and, if needed, an invited speaker.",
+          "timezoneTitle": "Daylight saving time",
+          "timezoneText": "A time that does not exist, or exists twice, in the edition's time zone (clock change) is refused: choose another time.",
+          "inviteTitle": "Person missing from the list",
+          "inviteText": "Only people with a role in the edition are listed. First invite an outside person with the “Session chair” or “Speaker” role.",
+          "deleteTitle": "Delete a session",
+          "deleteText": "Its slots and roles disappear; its papers go back to the “to schedule” list."
+        },
+        "program-rooms": {
+          "title": "Rooms",
+          "summary": "Declare the edition's rooms, their capacity and their equipment.",
+          "path": "Programme › Rooms",
+          "intro": "Sessions take place in these rooms. The public programme shows them, with their access information.",
+          "capacity": "Capacity: number of seats, optional.",
+          "equipment": "Equipment: closed list (projector, microphone…) and a free note.",
+          "access": "Accessibility: checkbox and access information, published.",
+          "inUseTitle": "Room in use",
+          "inUseText": "A room used by a session cannot be deleted: deactivate it. It disappears from the choices without changing existing sessions."
+        },
+        "program-publication": {
+          "title": "Programme publication",
+          "summary": "Publish a version of the programme and follow its history.",
+          "path": "Programme › Publication",
+          "intro": "Publication freezes the draft as a numbered version. The public programme and “My schedule” read this version, never the draft.",
+          "checkTitle": "Check",
+          "checkBody": "The screen shows unpublished changes, remaining conflicts and papers still to schedule.",
+          "publishTitle": "Publish",
+          "publishBody": "The chair clicks “Publish the programme” and confirms. A new authentication may be requested.",
+          "portalTitle": "Update the portal",
+          "portalBody": "The public programme is prerendered: it appears at the portal's next release. The Portal banner counts the publication among the changes to release.",
+          "conflictsTitle": "Publication refused",
+          "conflictsText": "Publication is refused while a conflict remains (room, person, overrun), or if nothing changed since the last version.",
+          "emailsTitle": "Emails",
+          "emailsText": "Every presenter, invited speaker or session chair whose schedule is new, changed or removed receives an email, once per version.",
+          "whoTitle": "Who publishes?",
+          "whoText": "The chair only. Other profiles consult the status and the history."
+        },
+        "settings-program": {
+          "title": "Programme settings",
+          "summary": "Buffer between slots and presenter registration.",
+          "path": "Settings › Programme",
+          "intro": "Two edition settings frame the programme.",
+          "buffer": "Buffer: from 0 to 30 minutes between two slots of a session (RG-13).",
+          "registration": "Presenter registration (RG-11): disabled by default; it will take effect with registration.",
+          "reflowTitle": "Immediate effect",
+          "reflowText": "Changing the buffer recalculates the time of every slot. Any overrun appears in the planner."
         }
       }
     },
@@ -1361,6 +1463,187 @@
         "title": "Delete the grid?",
         "message": "The grid “{{name}}” will be deleted.",
         "confirm": "Delete"
+      }
+    },
+    "program": {
+      "readOnly": "Read only: your roles do not allow you to change the programme.",
+      "stale": "Another member changed the programme in the meantime: it has just been reloaded. Repeat your last action if needed.",
+      "cancel": "Cancel",
+      "close": "Close",
+      "noRoom": "No room",
+      "minutes": "{{count}} min",
+      "duration": "Duration (min)",
+      "quoted": "“{{title}}”",
+      "unpublished": "Unpublished changes",
+      "publishedVersion": "Version {{version}} published",
+      "kinds": {
+        "opening": "Opening",
+        "keynote": "Keynote",
+        "parallel": "Parallel session",
+        "poster": "Poster session",
+        "workshop": "Workshop",
+        "tutorial": "Tutorial",
+        "round_table": "Round table",
+        "assembly": "Assembly or meeting",
+        "break": "Break",
+        "meal": "Meal",
+        "social": "Social event",
+        "closing": "Closing"
+      },
+      "equipment": {
+        "projector": "Projector",
+        "microphone": "Microphone",
+        "sound_system": "Sound system",
+        "computer": "Computer",
+        "whiteboard": "Whiteboard",
+        "interpretation": "Interpretation",
+        "recording": "Recording",
+        "wifi": "Wi-Fi"
+      },
+      "roleKinds": {
+        "chair": "Session chair",
+        "discussant": "Discussant",
+        "moderator": "Moderator",
+        "panelist": "Panellist"
+      },
+      "conflicts": {
+        "count": "{{count}} conflict(s)",
+        "title": "Conflicts ({{count}})",
+        "none": "No conflicts.",
+        "show": "Show",
+        "slot": "(in conflict)",
+        "room": "{{room}}: {{sessions}} overlap (RG-12).",
+        "person": "{{person}} is expected in two places at the same time: {{sessions}} (RG-12).",
+        "overflow": "{{sessions}} overruns by {{minutes}} min (RG-13)."
+      },
+      "people": {
+        "search": "Search for a person in the edition",
+        "hint": "At least two letters of the name.",
+        "none": "Nobody found in the edition.",
+        "chosen": "Selected: {{name}}",
+        "change": "Change"
+      },
+      "rooms": {
+        "title": "Rooms",
+        "lead": "Rooms of the edition: capacity, equipment, accessibility.",
+        "name": "Name",
+        "capacity": "Capacity",
+        "equipment": "Equipment",
+        "accessible": "Accessible to people with reduced mobility",
+        "accessNote": "Access information",
+        "accessNoteHint": "Published in the programme and in “My schedule”.",
+        "note": "Equipment note",
+        "active": "Active",
+        "inactive": "inactive",
+        "activate": "Reactivate",
+        "deactivate": "Deactivate",
+        "add": "Add a room",
+        "editTitle": "Edit the room",
+        "empty": "No rooms.",
+        "delete": {
+          "title": "Delete this room?",
+          "message": "“{{name}}” will be deleted. A room used by a session cannot be deleted: deactivate it instead.",
+          "confirm": "Delete"
+        }
+      },
+      "sessions": {
+        "title": "Sessions",
+        "lead": "Sessions of each day, entered in the edition's time ({{zone}}).",
+        "add": "Add a session",
+        "editTitle": "Edit the session",
+        "kind": "Type",
+        "room": "Room",
+        "start": "Start",
+        "end": "End",
+        "track": "Track",
+        "noTrack": "None",
+        "instructions": "Technical instructions",
+        "instructionsHint": "For speakers (“My schedule”); never in the public programme.",
+        "hours": "Time",
+        "session": "Session",
+        "content": "Content",
+        "slots": "{{count}} slot(s)",
+        "empty": "No sessions yet.",
+        "created": "Session created: add its roles and free items.",
+        "peopleTitle": "Roles and free items",
+        "delete": {
+          "title": "Delete this session?",
+          "message": "“{{name}}” will be deleted with its slots and roles. {{count}} paper(s) will go back to the “to schedule” list.",
+          "confirm": "Delete"
+        }
+      },
+      "roles": {
+        "title": "Session roles",
+        "role": "Role",
+        "add": "Add the role",
+        "empty": "No session roles.",
+        "added": "{{name}} added to the session.",
+        "removed": "{{name}} removed from the session.",
+        "inviteHint": "Only people with a role in the edition are listed. For an outside person, first send a “Session chair” or “Speaker” invitation (Committees › Invitations)."
+      },
+      "free": {
+        "title": "Free items (invited talk, speech…)",
+        "empty": "No free items.",
+        "speaker": "Invited speaker (optional)",
+        "add": "Add the item",
+        "added": "“{{title}}” added.",
+        "removed": "“{{title}}” removed."
+      },
+      "planner": {
+        "title": "Planner",
+        "lead": "Place confirmed papers in sessions. Times of the edition ({{zone}}).",
+        "pool": "To schedule ({{count}})",
+        "search": "Search (reference, title)",
+        "track": "Track",
+        "type": "Type",
+        "all": "All",
+        "placeIn": "Place in…",
+        "target": "Session",
+        "place": "Place",
+        "poolEmpty": "No papers to schedule.",
+        "grid": "Day grid",
+        "days": "Days",
+        "occupancy": "{{used}} / {{total}} min",
+        "up": "Move “{{title}}” up",
+        "down": "Move “{{title}}” down",
+        "more": "Actions…",
+        "moveTo": "Move to session",
+        "move": "Move",
+        "resize": "Apply duration",
+        "unplace": "Remove from the programme",
+        "dropHere": "Drop a paper here.",
+        "noSessions": "No sessions on this day.",
+        "placed": "“{{title}}” placed in “{{session}}”.",
+        "moved": "“{{title}}” moved to “{{session}}”, position {{position}}.",
+        "resized": "Duration of “{{title}}”: {{count}} min.",
+        "unplaced": "“{{title}}” removed from the programme: it is back in the “to schedule” list.",
+        "badDuration": "Invalid duration: from 1 to 600 minutes."
+      },
+      "publication": {
+        "title": "Programme publication",
+        "lead": "Publishing freezes the programme as a numbered version: the only source of the public programme and of “My schedule”.",
+        "state": "Status",
+        "never": "Programme never published.",
+        "upToDate": "No changes since the last publication.",
+        "fix": "Fix in the planner",
+        "toSchedule": "{{count}} confirmed paper(s) still to schedule.",
+        "publish": "Publish the programme",
+        "effects": "Placed papers become “scheduled”; every presenter, speaker or session chair whose schedule changes receives an email.",
+        "chairOnly": "Only the conference chair publishes the programme.",
+        "portal": "The public programme is prerendered: it appears on the portal at its next release.",
+        "history": "Publication history",
+        "version": "Version",
+        "at": "Published on",
+        "by": "By",
+        "changes": "Differences",
+        "empty": "No publications.",
+        "diff": "Sessions: {{sessionsAdded}} added, {{sessionsChanged}} changed, {{sessionsRemoved}} removed; {{peopleNotified}} person(s) notified.",
+        "done": "Programme published (version {{version}}).",
+        "confirm": {
+          "title": "Publish the programme?",
+          "message": "Version {{version}} will be published. Everyone whose schedule changes will receive an email. This action is logged.",
+          "confirm": "Publish"
+        }
       }
     }
   }

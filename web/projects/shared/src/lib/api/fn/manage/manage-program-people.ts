@@ -7,35 +7,17 @@ import { filter, map } from 'rxjs/operators';
 import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
-import { PaginatedPersonSearchList } from '../../models/paginated-person-search-list';
+import { PersonSearch } from '../../models/person-search';
 
 export interface ManageProgramPeople$Params {
   edition_id: number;
-
-/**
- * Quel champ utiliser pour classer les résultats.
- */
-  ordering?: string;
-
-/**
- * Un numéro de page de l'ensemble des résultats.
- */
-  page?: number;
-
-/**
- * Nombre de résultats à retourner par page.
- */
-  page_size?: number;
   q?: string;
 }
 
-export function manageProgramPeople(http: HttpClient, rootUrl: string, params: ManageProgramPeople$Params, context?: HttpContext): Observable<StrictHttpResponse<PaginatedPersonSearchList>> {
+export function manageProgramPeople(http: HttpClient, rootUrl: string, params: ManageProgramPeople$Params, context?: HttpContext): Observable<StrictHttpResponse<Array<PersonSearch>>> {
   const rb = new RequestBuilder(rootUrl, manageProgramPeople.PATH, 'get');
   if (params) {
     rb.path('edition_id', params.edition_id, {});
-    rb.query('ordering', params.ordering, {});
-    rb.query('page', params.page, {});
-    rb.query('page_size', params.page_size, {});
     rb.query('q', params.q, {});
   }
 
@@ -44,7 +26,7 @@ export function manageProgramPeople(http: HttpClient, rootUrl: string, params: M
   ).pipe(
     filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
     map((r: HttpResponse<any>) => {
-      return r as StrictHttpResponse<PaginatedPersonSearchList>;
+      return r as StrictHttpResponse<Array<PersonSearch>>;
     })
   );
 }

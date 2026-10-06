@@ -53,6 +53,9 @@ const MEMBER_MANAGERS: readonly Role[] = ['ADMIN', 'CHAIR', 'SC_CHAIR'];
 const PORTAL_EDITORS: readonly Role[] = ['ADMIN', 'CHAIR', 'OC_MEMBER'];
 const REVIEWERS: readonly Role[] = ['SC_MEMBER', 'SC_CHAIR'];
 const REVIEW_MANAGERS: readonly Role[] = ['SC_CHAIR', 'CHAIR', 'ADMIN'];
+// Programme (plan L5, I1) : lecture pour tous les profils de gestion ; écriture par
+// l'administrateur et le CO « programme » ; publication par le Chair.
+const PROGRAM_WRITERS: readonly Role[] = ['OC_MEMBER', 'ADMIN', 'CHAIR'];
 
 /** Constructeur : les clés d'une fiche sont toutes sous `gestion.help.sheets.<id>`. */
 function sheet(
@@ -217,6 +220,37 @@ export const HELP_SHEETS: readonly HelpSheet[] = [
     callout('warning', k, 'delay'),
     callout('info', k, 'committees'),
     callout('info', k, 'who'),
+  ]),
+  sheet('program-planner', ALL, (k) => [
+    text(k('intro')),
+    steps(k, 'pool', 'place', 'order', 'conflicts'),
+    callout('info', k, 'keyboard'),
+    callout('warning', k, 'draft'),
+    callout('info', k, 'who'),
+  ]),
+  sheet('program-sessions', PROGRAM_WRITERS, (k) => [
+    text(k('intro')),
+    steps(k, 'create', 'times', 'roles', 'free'),
+    callout('warning', k, 'timezone'),
+    callout('info', k, 'invite'),
+    callout('warning', k, 'delete'),
+  ]),
+  sheet('program-rooms', PROGRAM_WRITERS, (k) => [
+    text(k('intro')),
+    list(k('capacity'), k('equipment'), k('access')),
+    callout('warning', k, 'inUse'),
+  ]),
+  sheet('program-publication', ALL, (k) => [
+    text(k('intro')),
+    steps(k, 'check', 'publish', 'portal'),
+    callout('warning', k, 'conflicts'),
+    callout('info', k, 'emails'),
+    callout('info', k, 'who'),
+  ]),
+  sheet('settings-program', PROGRAM_WRITERS, (k) => [
+    text(k('intro')),
+    list(k('buffer'), k('registration')),
+    callout('info', k, 'reflow'),
   ]),
   sheet('audit', SETTINGS_WRITERS, (k) => [
     text(k('intro')),

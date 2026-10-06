@@ -3,6 +3,7 @@ sont construites par liste blanche depuis l'instantané publié, jamais depuis l
 
 from __future__ import annotations
 
+from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
 from apps.accounts.services.invitations import display_name
@@ -246,7 +247,7 @@ class SlotCreateSerializer(serializers.Serializer):
     def validate(self, attrs):
         if ("submission" in attrs) == ("title_fr" in attrs):
             raise serializers.ValidationError(
-                {"submission": "Une communication ou un titre libre, l'un ou l'autre."}
+                {"submission": _("Une communication ou un titre libre, l'un ou l'autre.")}
             )
         return attrs
 

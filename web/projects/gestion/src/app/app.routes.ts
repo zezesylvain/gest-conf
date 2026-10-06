@@ -77,6 +77,39 @@ export const routes: Routes = [
         canActivate: [capabilityGuard('reviews.read_all')],
         loadComponent: () => import('./pages/ranking/ranking-page').then((m) => m.RankingPage),
       },
+      // Programme (plan L5, I15) : planificateur, sessions, salles, publication.
+      {
+        path: 'programme',
+        title: 'gestion.program.planner.title',
+        canActivate: [capabilityGuard('program.read')],
+        loadComponent: () => import('./pages/program/planner-page').then((m) => m.PlannerPage),
+      },
+      {
+        path: 'programme/sessions',
+        title: 'gestion.program.sessions.title',
+        canActivate: [capabilityGuard('program.read')],
+        loadComponent: () => import('./pages/program/sessions-page').then((m) => m.SessionsPage),
+      },
+      {
+        path: 'programme/salles',
+        title: 'gestion.program.rooms.title',
+        canActivate: [capabilityGuard('program.read')],
+        loadComponent: () => import('./pages/program/rooms-page').then((m) => m.RoomsPage),
+      },
+      {
+        path: 'programme/publication',
+        title: 'gestion.program.publication.title',
+        canActivate: [capabilityGuard('program.read')],
+        loadComponent: () =>
+          import('./pages/program/publication-page').then((m) => m.PublicationPage),
+      },
+      {
+        path: 'parametrage/programme',
+        title: 'gestion.settings.program.title',
+        canActivate: [capabilityGuard('program.read')],
+        loadComponent: () =>
+          import('./pages/settings/program-settings-page').then((m) => m.ProgramSettingsPage),
+      },
       {
         path: 'parametrage/grilles',
         title: 'gestion.grids.title',

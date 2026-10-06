@@ -72,3 +72,28 @@ def test_archived_edition_is_read_only(edition):
     edition.save(update_fields=["status"])
     response = client_for(admin).patch(url(edition), {"session_buffer_minutes": 5})
     assert response.status_code == 409
+
+
+def test_rg13_buffer_change_reflows_slots_and_bumps_revision():
+    """RG-13 : un nouveau tampon recalcule les créneaux existants et change la révision (I14) ;
+    sinon les heures seraient fausses et le contrôle d'intégrité les signalerait."""
+    from apps.program.integrity import check_slots
+    from apps.program.models import Slot
+    from apps.program.services import planning
+    from apps.program.tests.helpers import COMMAND, confirmed, local, session, utc
+    from apps.program.tests.helpers import edition as program_edition
+
+    current = program_edition()
+    item = session(current, local(1, 9), local(1, 10, 30))
+    for _index in range(2):
+        planning.place_submission(item, confirmed(current, duration=20), actor=COMMAND)
+    revision = planning.program_state(current).revision
+
+    response = client_for(make_member(current, Role.ADMIN)).patch(
+        url(current), {"session_buffer_minutes": 5}
+    )
+
+    assert response.status_code == 200
+    assert Slot.objects.get(session=item, position=1).starts_at == utc(1, 9, 25)
+    assert planning.program_state(current).revision == revision + 1
+    assert check_slots() == []

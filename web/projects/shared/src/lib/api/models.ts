@@ -108,8 +108,6 @@ export type { PageRef } from './models/page-ref';
 export type { PageRequest } from './models/page-request';
 export type { PaginatedAuditEntryList } from './models/paginated-audit-entry-list';
 export type { PaginatedInvitationWithEmailList } from './models/paginated-invitation-with-email-list';
-export type { PaginatedPersonSearchList } from './models/paginated-person-search-list';
-export type { PaginatedPublicationList } from './models/paginated-publication-list';
 export type { PaginatedReviewSubmissionList } from './models/paginated-review-submission-list';
 export type { PaginatedSubmissionManageList } from './models/paginated-submission-manage-list';
 export type { PassageRole } from './models/passage-role';
