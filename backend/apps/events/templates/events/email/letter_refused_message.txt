@@ -1,0 +1,9 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate %}Bonjour,
+
+Votre demande de lettre d'invitation pour {{ edition_title }} n'a pas pu être acceptée.{% endblocktranslate %}
+
+{% blocktranslate %}Motif : {{ reason }}{% endblocktranslate %}
+
+{% blocktranslate %}Vous pouvez la corriger et la renouveler depuis votre espace : {{ link }}{% endblocktranslate %}
+
+{% include "account/email/_signature.txt" %}{% endautoescape %}

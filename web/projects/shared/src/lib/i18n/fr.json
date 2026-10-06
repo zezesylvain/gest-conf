@@ -81,7 +81,9 @@
       "already_registered": "Vous avez déjà une inscription à cette édition.",
       "payment_unavailable": "Le paiement en ligne est indisponible : réessayez plus tard ou choisissez un autre moyen.",
       "program_conflicts": "Le programme contient des conflits : corrigez-les avant de publier.",
-      "program_unchanged": "Aucune modification depuis la dernière publication."
+      "program_unchanged": "Aucune modification depuis la dernière publication.",
+      "signing_unavailable": "La signature électronique est indisponible : vérifiez le certificat de signature et sa configuration.",
+      "signatory_missing": "Aucun signataire n'est désigné (ou sa signature est incomplète) : rien ne peut être émis."
     },
     "form": {
       "errorSummary": "Le formulaire contient des erreurs :",

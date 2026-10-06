@@ -18,6 +18,17 @@ if not GESTCONF_MFA_ENCRYPTION_KEYS:
         base64.urlsafe_b64encode(hashlib.sha256(SECRET_KEY.encode()).digest()).decode()
     ]
 
+# Idem pour le certificat de signature PAdES (plan L7, K19), clé distincte.
+if not GESTCONF_SIGNING_ENCRYPTION_KEYS:
+    import base64
+    import hashlib
+
+    GESTCONF_SIGNING_ENCRYPTION_KEYS = [
+        base64.urlsafe_b64encode(
+            hashlib.sha256(b"signing:" + SECRET_KEY.encode()).digest()
+        ).decode()
+    ]
+
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "[::1]"]
 
 # MariaDB recommandée (DATABASE_URL dans .env) ; SQLite en repli pour démarrer vite.

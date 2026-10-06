@@ -93,8 +93,15 @@ def update_details(
     return signature
 
 
-def normalize_image(data: bytes) -> tuple[bytes, int, int]:
-    """PNG ou JPEG (d'après le contenu) → PNG réencodé, sans métadonnées, borné en taille."""
+def normalize_image(
+    data: bytes,
+    *,
+    max_side: int = IMAGE_MAX_SIDE,
+    min_width: int = IMAGE_MIN_WIDTH,
+    min_height: int = IMAGE_MIN_HEIGHT,
+) -> tuple[bytes, int, int]:
+    """PNG ou JPEG (d'après le contenu) → PNG réencodé, sans métadonnées, borné en taille.
+    Sert aussi à l'en-tête des attestations (bornes propres)."""
     from PIL import Image, UnidentifiedImageError
 
     if len(data) > IMAGE_MAX_BYTES:
@@ -110,9 +117,9 @@ def normalize_image(data: bytes) -> tuple[bytes, int, int]:
             image = source.copy()
     except (UnidentifiedImageError, OSError, Image.DecompressionBombError) as exc:
         raise Invalid(fields={"file": [_("Image illisible.")]}) from exc
-    image.thumbnail((IMAGE_MAX_SIDE, IMAGE_MAX_SIDE))
-    if image.width < IMAGE_MIN_WIDTH or image.height < IMAGE_MIN_HEIGHT:
-        raise Invalid(fields={"file": [_("Image trop petite pour une signature lisible.")]})
+    image.thumbnail((max_side, max_side))
+    if image.width < min_width or image.height < min_height:
+        raise Invalid(fields={"file": [_("Image trop petite pour être lisible.")]})
     if image.mode not in ("RGB", "RGBA", "L", "LA"):
         image = image.convert("RGBA")
     output = io.BytesIO()

@@ -105,6 +105,9 @@ class ErrorCode(models.TextChoices):
     ALREADY_REGISTERED = "already_registered"
     # Paiement en ligne non proposé, impossible (devise, montant) ou fournisseur injoignable.
     PAYMENT_UNAVAILABLE = "payment_unavailable"
+    # Lot L7 : jour J et attestations.
+    SIGNING_UNAVAILABLE = "signing_unavailable"
+    SIGNATORY_MISSING = "signatory_missing"
 
 
 class DomainError(Exception):

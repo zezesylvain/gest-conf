@@ -556,3 +556,198 @@ leur clé de lieu).
 - `ruff`, lint, `format:check`, `locale/check.sh`, schéma validé sous MariaDB.
 
 **Critère de fin** (« Tests au vert ») : atteint.
+
+## 15. Bilan de L7.4 (6 octobre 2026)
+
+**Modèle** (migration `events/0002`) :
+
+- `CertificateSettings`, une ligne par édition :
+  - mode de signature : image (défaut), PAdES ou prestataire ;
+  - attestation d'évaluation, **désactivée par défaut** (réponse du commanditaire) ;
+  - disposition : signature à droite et QR à gauche, ou l'inverse ;
+  - en-tête du modèle officiel, certificat PAdES ;
+- `DocumentTemplate`, par nature (participation, communication, évaluation, et lettre
+  d'invitation pour L7.5) : titre, texte et pied de page FR et EN, signataire désigné ;
+- `Certificate` : pièce **figée** en ajout seul, unique tant qu'elle n'est pas révoquée par
+  (édition, personne, nature, communication).
+
+**RG-16, vérifiée à l'émission** (`apps/events/services/certificates.py`) :
+
+- **participation** : inscription confirmée **et** pointage actif, à l'accueil ou en session ;
+- **communication** : présentateurs d'une communication `PRESENTED`, rattachés à un compte (le
+  leur, ou celui qui a vérifié leur adresse) ;
+  - les présentateurs sans compte sont comptés à part (« impossibles à remettre ») ;
+- **évaluation** : relecteurs ayant envoyé au moins une évaluation, avec leur **nombre**
+  seulement, jamais les titres (RG-04).
+
+**Signataire (K18)** :
+
+- rien ne s'émet sans signataire désigné, dont la signature est complète et le rôle actif
+  (`signatory_missing`) ;
+- seule une signature de l'édition, complète et de rôle actif, se désigne ;
+- l'attestation fige le nom, la fonction FR et EN et l'empreinte de l'image.
+
+**Modèle officiel (K19)** :
+
+- textes à **variables fermées** par nature (`{name}`, `{edition}`, `{dates}`, `{venue}`, plus
+  `{title}` et `{reference}`, ou `{count}`) ;
+  - toute autre accolade, tout attribut, indice ou format est refusé à l'enregistrement ;
+  - le remplissage n'est qu'un `format_map` sur des valeurs déjà calculées ;
+- texte vide : texte par défaut ;
+- dates écrites dans chaque langue (« du 1er au 3 juin 2027 », « from June 1 to 3, 2027 ») ;
+- PDF `fpdf2`, A4 paysage :
+  - en-tête de l'institution (image privée réencodée en PNG) ou bandeau du titre ;
+  - titre et texte en français puis en anglais ;
+  - date d'émission ;
+  - bloc de signature et QR de vérification ;
+  - pied de page ;
+- aperçu du gabarit sur données fictives, ni signé ni stocké.
+
+**PAdES (K19)** :
+
+- `pyHanko` 0.37.0 ajouté aux verrous (`requirements/*.txt`, empreintes) ;
+  - quatorze paquets, tous en roues ; `oscrypto` n'intervient pas dans la signature
+    (essai) ;
+- le PKCS#12 déposé est ouvert avec son mot de passe ;
+  - refusé si illisible, s'il n'a ni clé ni certificat, si le certificat est hors période
+    de validité, ou sans usage de signature ;
+  - puis réexporté **sans** mot de passe et chiffré par `GESTCONF_SIGNING_ENCRYPTION_KEYS`
+    (`MultiFernet`, hors racine web) ;
+  - le mot de passe n'est jamais gardé, la clé jamais servie ;
+- la clé est **facultative** et distincte de celle de la 2FA : sans elle, PAdES est refusé
+  (`signing_unavailable`) ; documentée dans `.env.example` et `deploy/README.md` ;
+- signature PAdES-B-B validée par `pyHanko` dans les tests : intègre, valide, de confiance ;
+- mode « prestataire » refusé tant qu'aucun n'est branché (Q17).
+
+**Émission (K11)** :
+
+- par le CO (`certificates.manage`, réauthentification) : les conditions sont vérifiées tout
+  de suite, puis la tâche `events.issue_certificates` part en file (`run_jobs`) ;
+- traitement par **lots de 100** ; la tâche se relance tant qu'il reste des personnes ;
+- idempotente : une demande en attente est réutilisée ; une émission complémentaire n'émet
+  que les manquants ;
+- conditions perdues entre la demande et l'exécution (signataire retiré…) : journal
+  `certificates.issue_failed`, sans nouvelle tentative ;
+- e-mail « Attestation disponible » (annexe A2) : lien vers « Mes documents »
+  (`/compte/mes-documents`, L7.7), sans PDF ni code ;
+- suivi par nature : activée, prête (ou code du problème), éligibles, émises, révoquées,
+  présentateurs sans compte, émission en cours.
+
+**Révocation** : motif obligatoire, journal ; la vérification répond « révoquée » ; une
+nouvelle attestation peut ensuite être émise.
+
+**Vérification publique (K10)** :
+
+- `GET /v1/public/certificates/{code}`, code de 128 bits en base32 (26 caractères ; casse,
+  tirets et espaces tolérés) ;
+- répond : nature, nom, édition et ses dates, émission, statut ;
+- ni institution, ni empreinte ;
+- après anonymisation du titulaire : sans nom (K14) ;
+- même 404 pour un code inconnu ou mal formé ;
+- limitée à 30 requêtes par minute ; `noindex` (toute l'API) et `no-store`.
+
+**Participant** : `GET /v1/me/certificates` et `…/{id}/pdf` (attestation valide seulement).
+
+**Données personnelles, intégrité, conservation** :
+
+- attestations exportées, **conservées** à l'anonymisation (K14) ;
+- contrôle `events.certificate_files` : PDF présent et empreinte intacte ;
+- purge des fichiers orphelins : PDF, en-têtes, certificats.
+
+**Autres** :
+
+- codes d'erreur `signing_unavailable` et `signatory_missing` (traduits dans la bibliothèque
+  partagée) ;
+- énumérations du schéma nommées ;
+- treize routes de gestion ajoutées à la matrice (troisième chargeur paresseux du monde ;
+  le test d'archivage charge tous les objets avant d'archiver).
+
+**Tests** :
+
+- backend : **4 825 réussis**, 10 ignorés (SQLite) ; la seule vue publique nouvelle
+  (vérification) est inscrite dans la liste blanche des vues anonymes ;
+- sous MariaDB : `events`, `registrations`, `submissions`, `program`, le registre, le schéma et
+  les règles de plateforme (411), plus les cas d'attestation de la matrice (332) ;
+- matrice des droits : **3 611 cas** ;
+- `events` : 82 tests, dont 24 pour les attestations ;
+- front : 388 tests ; client régénéré ;
+- `ruff`, lint, `format:check`, `locale/check.sh`, schéma validé sous MariaDB, sans
+  avertissement.
+
+**Critère de fin** (« Tests RG-16 au vert ») : atteint.
+
+## 16. Bilan de L7.5 (6 octobre 2026)
+
+**Lettres d'invitation** (K12 ; modèle `InvitationLetter`, migration `events/0003` ;
+`apps/events/services/letters.py`) :
+
+- **demande** par le participant (`POST /v1/registrations/{id}/invitation-letter`) :
+  - pour une inscription en attente ou confirmée ;
+  - données : nom tel que sur le passeport, nationalité, numéro de passeport, dates de
+    séjour (90 jours au plus), ambassade ou consulat ;
+  - une demande en cours, ou une lettre émise, à la fois ;
+  - le participant ne revoit que les trois derniers caractères du numéro ;
+- **instruction** par le CO (`letters.manage`) :
+  - émission sous réauthentification : signataire désigné **pour les lettres** (K18) ;
+    gabarit officiel en A4 portrait, à variables fermées (`{embassy}`, `{passport}`,
+    `{stay}`… ajoutées) ; signature PAdES si elle est choisie ; code de vérification ;
+    e-mail au participant ;
+  - refus motivé (e-mail avec le motif) : le participant peut redemander ;
+  - révocation motivée d'une lettre émise ;
+  - le numéro entier n'apparaît que dans le détail de l'instruction ;
+- la lettre rappelle qu'elle n'engage pas la prise en charge des frais (texte par défaut) ;
+- inscription annulée ou expirée : aucune lettre ne peut plus être émise ;
+- **vérification publique** : même adresse que les attestations
+  (`GET /v1/public/certificates/{code}`) ;
+  - réponse de type « lettre » : nom du passeport, ou aucun nom si le titulaire est
+    anonymisé ;
+  - statut valide ou révoquée.
+
+**Numéro de passeport (K14)** :
+
+- jamais journalisé ;
+- effacé à l'anonymisation du compte ;
+- effacé par la tâche de conservation `events.passport_numbers`, 30 jours après la fin de
+  l'édition ou à son archivage ;
+  - **précision de K14** : « la clôture de l'édition » est lue comme ces deux échéances ;
+  - tâche de sécurité, appliquée même en simulation des durées D15, la règle étant validée.
+
+**Comptoir** (K13 ; `apps/events/services/counter.py`, `POST …/registrations/counter`,
+`registrations.manage`) :
+
+- adresse inconnue : compte **sans mot de passe** (inutilisable), adresse non vérifiée,
+  profil minimal (nom, institution, pays) ; journal `registrations.counter_created` ;
+- lien de définition du mot de passe envoyé par la réinitialisation d'allauth, en file ;
+  - **précision de K13** : la réinitialisation ne vérifie pas l'adresse. À la première
+    connexion, allauth demande donc la vérification (vérification obligatoire), soit un
+    second e-mail ; aucune connexion n'est possible avant ;
+- adresse connue d'un compte actif : inscription rattachée, profil inchangé, aucun lien ;
+- compte désactivé ou anonymisé : refus ;
+- inscription par le CO au tarif de la période (« sur place » après la clôture, J2) ;
+- « réglé au comptoir » : paiement manuel « sur place » enregistré dans la même requête ;
+  l'inscription est alors confirmée et son badge imprimable aussitôt ;
+- **placé dans `events`** et non dans `registrations`, qui ne dépend pas de `payments`
+  (L6).
+
+**Autres** :
+
+- l'émission partage avec les attestations le contexte de pièce (`document_context` :
+  signataire, en-tête, PAdES) et l'écriture des intervalles de dates FR et EN
+  (`date_range`) ;
+- registre des données personnelles (lettres, passeport compris, à l'export) ;
+- contrôle `events.letter_files` ; purge des PDF orphelins ;
+- e-mails « lettre disponible » et « demande refusée » ;
+- sept routes de gestion ajoutées à la matrice (quatrième chargeur paresseux du monde).
+
+**Tests** :
+
+- backend : **4 971 réussis**, 10 ignorés (SQLite) ;
+- sous MariaDB : `events`, `registrations`, `payments`, le registre, le schéma et les règles
+  de plateforme (297), plus les cas nouveaux de la matrice (162) ;
+- matrice des droits : **3 746 cas** ;
+- `events` : 93 tests, dont 11 pour les lettres et le comptoir ;
+- front : 388 tests ; client régénéré ;
+- `ruff`, lint, `format:check`, `locale/check.sh`, schéma validé sous MariaDB, sans
+  avertissement.
+
+**Critère de fin** (« Tests au vert ») : atteint.

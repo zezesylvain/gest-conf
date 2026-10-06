@@ -26,3 +26,43 @@ def check_checkins() -> list[str]:
     for pk in mismatched:
         problems.append(f"pointage {pk} : édition différente de celle de l'inscription")
     return problems
+
+
+def check_certificate_files() -> list[str]:
+    """PDF des attestations présents et intacts (empreinte SHA-256 figée à l'émission)."""
+    import hashlib
+
+    from apps.events.models import Certificate
+    from apps.events.services.certificates import PDFS
+
+    problems = []
+    rows = Certificate.objects.only("pk", "storage_name", "sha256")
+    for row in rows.iterator(chunk_size=200):
+        try:
+            data = PDFS.read(row.storage_name)
+        except FileNotFoundError:
+            problems.append(f"attestation {row.pk} : PDF absent")
+            continue
+        if hashlib.sha256(data).hexdigest() != row.sha256:
+            problems.append(f"attestation {row.pk} : PDF modifié (empreinte différente)")
+    return problems
+
+
+def check_letter_files() -> list[str]:
+    """PDF des lettres émises présents et intacts."""
+    import hashlib
+
+    from apps.events.models import InvitationLetter
+    from apps.events.services.letters import PDFS
+
+    problems = []
+    rows = InvitationLetter.objects.exclude(storage_name="").only("pk", "storage_name", "sha256")
+    for row in rows.iterator(chunk_size=200):
+        try:
+            data = PDFS.read(row.storage_name)
+        except FileNotFoundError:
+            problems.append(f"lettre {row.pk} : PDF absent")
+            continue
+        if hashlib.sha256(data).hexdigest() != row.sha256:
+            problems.append(f"lettre {row.pk} : PDF modifié (empreinte différente)")
+    return problems

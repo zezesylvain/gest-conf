@@ -248,6 +248,7 @@ ANONYMOUS_VIEWS = {
     "apps.registrations.views.PublicRegistrationView": "tarifs et dates d'inscription (L6, J13)",
     "apps.payments.views.PaymentWebhookView": "notification signée du fournisseur (L6, J6, RG-15)",
     "apps.payments.views.FakeCheckoutView": "page du fournisseur factice, hors production (L6)",
+    "apps.events.views.PublicCertificateView": "vérification publique d'une attestation (L7, K10)",
 }
 
 # Seule vue de ``v1/manage/`` hors ``ManageViewSet`` : sélecteur d'édition.
