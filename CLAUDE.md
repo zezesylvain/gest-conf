@@ -120,7 +120,7 @@ Les URL Django sont déclarées **sans** le préfixe `/api` (`v1/...`) : `config
 |---|---|
 | L0 à L4 (MVP : squelette, socle, portail, soumission, évaluation et décision) | Livrés en code, testés en local et en CI ; bilans dans `docs/`. **Aucune démo sur o2switch** encore faite |
 | L5 — Programme | **Livré en code, testé en local et en CI** (L5.0 à L5.7, E2E compris ; PR #8 et #9, fusionnées) ; bilan [`docs/L5-programme.md`](docs/L5-programme.md). Ouverts : Q14, `ACCEPTED_MINOR → WITHDRAWN`, seuil d'avertissement du bundle du portail |
-| L6 — Inscriptions et paiements | **En cours** : plan [`docs/L6-inscriptions-plan.md`](docs/L6-inscriptions-plan.md) validé le 6 octobre 2026 (décisions J1 à J16 ; J15 reportée). Q7 (agrégateur, tarifs) et Q8 (entité de facturation) toujours ouvertes : fournisseur factice et aucune facture sans mentions de facturation en attendant |
+| L6 — Inscriptions et paiements | **Livré en code et testé en local** (L6.0 à L6.7, E2E compris) ; bilan [`docs/L6-inscriptions.md`](docs/L6-inscriptions.md). Passage en CI : nouvelle PR, sur demande. Ouverts : Q7 (tarifs ; carte bancaire absente de l'API v1 de CinetPay), Q8 (entité de facturation, conservation, format du numéro), J15 reportée |
 | L7 et suivants | Non commencés |
 
 ## Décisions du lot L1
@@ -179,6 +179,22 @@ Les décisions I1 à I18 du plan [`docs/L5-programme-plan.md`](docs/L5-programme
 - E2E : le parcours en série se prolonge jusqu'à la publication du programme, « Mon passage » et l'iCal ; le seed crée un CO « programme » et un Chair (2FA).
 
 Bilan du lot : [`docs/L5-programme.md`](docs/L5-programme.md).
+
+## Décisions du lot L6
+
+Les décisions J1 à J16 du plan [`docs/L6-inscriptions-plan.md`](docs/L6-inscriptions-plan.md) ont été validées le 6 octobre 2026 (J15 reportée). Elles sont reportées dans l'étude, **§22 « Mises à jour issues du lot L6 »**, qui prévaut sur les sections antérieures (§17 à §21 compris). Points à retenir :
+
+- applications `registrations` (tarifs, inscriptions) et `payments` (paiements, pièces) ; `registrations` ne dépend pas de `payments` (effets déclarés), ni `program` de `registrations` ;
+- capacités `registrations.read`, `registrations.manage` (CO « finances » et « secrétariat »), `pricing.write` (CO « finances »), `finance.read` (Chair, CO « finances ») ; réauthentification pour le paiement manuel, le remboursement, les exports et les mentions de facturation ;
+- statut d'une inscription écrit par `apps/registrations/workflow.py` seul (méta-test) ; montants en `Decimal`, exacts dans la devise de l'édition (`apps/core/money.py`), calculés par le serveur seul ;
+- **RG-15** : une notification n'est qu'un signal (jeton comparé à temps constant, empreinte seulement) ; seule l'interrogation du statut chez le prestataire confirme ; le navigateur est **dirigé** vers la page hébergée (`location.assign`), jamais par formulaire ; fournisseur factice refusé en production sauf recette déclarée ;
+- pièces (RG-14) : facture au paiement, avoir au remboursement, pro forma non comptable ; numéros `<préfixe>-<édition>-<année>-<rang>` sans trou ; ajout seul ; PDF `fpdf2` identiques pour des données identiques, empreinte vérifiée ; aucune facture sans mentions de facturation ;
+- RG-11 : conflit `registration` au planificateur quand le paramètre est actif, bloquant à la publication ;
+- espace participant **`/compte/mon-inscription`** (`/compte/inscription` reste la création de compte) ; page publique « Inscription » pré-rendue ;
+- cron : `expire_registrations` et `sync_payments`, toutes les heures ;
+- E2E : le parcours en série se prolonge jusqu'à l'inscription payée par le fournisseur factice, puis au virement, à l'annulation et à l'avoir ; le seed crée un CO « finances » et un second participant.
+
+Bilan du lot : [`docs/L6-inscriptions.md`](docs/L6-inscriptions.md).
 
 ## Questions ouvertes (étude §15, à ne pas trancher seul)
 

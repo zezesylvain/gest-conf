@@ -1,6 +1,7 @@
 # Lot L6 — Inscriptions et paiements : plan d'implémentation
 
-> **Statut : validé le 6 octobre 2026, en cours** (décisions J1 à J16 telles que proposées,
+> **Statut : validé le 6 octobre 2026, livré en code et testé en local** (bilan :
+> `docs/L6-inscriptions.md` ; décisions J1 à J16 telles que proposées,
 > au §2). J15 (« Mon programme » et notification des inscrits) n'a pas été demandée : elle est
 > **reportée**. Restent ouvertes, avec les hypothèses du plan : **Q7** (tarifs, agrégateur :
 > interface de fournisseur et fournisseur factice, CinetPay candidat), **Q8** (entité de
@@ -886,3 +887,82 @@ et sur l'accueil du compte) :
 
 **Budget** : bundle initial du portail à 368,6 ko pour un avertissement à 365 ko, contre
 367,8 ko avant L6 (point ouvert depuis L5) ; seuil d'erreur à 380 ko.
+
+## 18. Bilan de L6.7 (6 octobre 2026)
+
+**Parcours de bout en bout** (Playwright) : la série de L5 se prolonge de trois étapes. Les
+données sont préparées par `web/e2e/seed.py`, comme un opérateur :
+
+- dates d'inscription : ouverture la veille, fin du tarif préférentiel dans cinq jours,
+  clôture dans trente ;
+- paramètres : paiement en ligne par le fournisseur factice, virement, pays local CI ;
+- une catégorie, sa grille et une option à quota ;
+- un CO « finances » (2FA) et un second participant sans rôle (Sénégal).
+
+Les trois étapes :
+
+1. **Comité** :
+   - le CO « programme » exige RG-11 : le planificateur signale la présentatrice non
+     inscrite (conflit et badge) ;
+   - le CO « finances » complète les mentions de facturation et retrouve la grille dans
+     « Paramétrage › Tarifs ».
+2. **Auteure** :
+   - page publique « Inscription », puis « Mon inscription » ;
+   - devis du serveur (préférentiel, tarif local, option comprise), commande en ligne ;
+   - page du fournisseur factice, « Payer » ;
+   - retour : « Paiement reçu », inscription confirmée par la notification vérifiée (RG-15),
+     e-mail de confirmation ;
+   - facture téléchargée (PDF) et code QR affiché ;
+   - le planificateur ne signale plus de conflit.
+3. **CO « finances »** :
+   - saisie de l'inscription du second participant par virement (tarif international
+     préférentiel), puis paiement reçu : facture n° 2 ;
+   - annulation avec remboursement intégral, puis remboursement enregistré : avoir ;
+   - pièces et tableau de bord (encaissé 150 000 F CFA).
+
+**Défauts trouvés et corrigés** :
+
+- **Outil de test** : deux connexions du même membre du comité dans la même fenêtre de
+  30 secondes réemployaient le même code TOTP, ce qu'allauth refuse, à juste titre (rejeu).
+  `freshTotpCode` attend désormais la fenêtre suivante quand le compte a déjà employé le
+  code en cours.
+- **Aide périmée** : « Exiger l'inscription d'un présentateur » annonçait « sans effet
+  (lot suivant) » ; elle décrit maintenant le conflit bloquant (FR et EN).
+
+**Recette locale dans Chromium** (base laissée par le parcours, captures à 1366 et 375 px,
+débordement horizontal mesuré, console surveillée) :
+
+- **Gestion** : les huit écrans d'inscriptions, de finances et de paramétrage, plus les
+  formulaires ouverts (saisie d'une inscription, remboursement, catégorie, grille, option,
+  code promo).
+- **Portail** : page publique, « Mon inscription » d'une inscription confirmée (facture et
+  QR) et formulaire de commande.
+- **Défauts corrigés** :
+  - **Fiche d'une inscription à 375 px** : la colonne des libellés (`max-content`)
+    poussait les valeurs hors de l'écran (102 px). La liste passe sur une colonne sous
+    40 rem, et les mots longs (adresses) se coupent.
+  - **« Paramétrage › Tarifs » à 375 px** : deux libellés trop longs (« Part remboursée
+    avant/après la date limite (%) »), une fois flottants, débordaient de 19 px. Ils
+    deviennent « Remboursé avant (%) » et « Remboursé après (%) », avec une aide.
+  - **Aides longues** : elles chevauchaient le champ suivant ; elles le poussent désormais
+    (`subscriptSizing="dynamic"`).
+- **Résultat** : aucun débordement, aucune erreur dans la console.
+
+**Documentation** :
+
+- bilan du lot : `docs/L6-inscriptions.md` ;
+- étude : §22 « Mises à jour issues du lot L6 », en Markdown et en HTML (version 1.6). Dans
+  l'HTML, deux emphases mal fermées du §17 (`/api/v1/me/*`, `invitation_*`) sont corrigées :
+  le document est de nouveau bien formé ;
+- `CLAUDE.md` : état d'avancement et « Décisions du lot L6 ».
+
+**Tests** :
+
+- E2E : 11 tests (9 étapes du parcours en série, 2 de fumée), 2,4 minutes ;
+- backend : 3 395 tests sous SQLite et 3 404 sous MariaDB, dont la matrice des droits
+  (2 273 cas) ;
+- front : 385 tests Vitest (shared 78, portail 144, gestion 163) et 11 tests des scripts ;
+- lint, format et `ruff` au vert.
+
+**Écart avec le plan** : la démo G sur o2switch (critère de fin de L6.7) reste à faire. Aucune
+démo n'a encore eu lieu sur l'hébergement, et le compte marchand CinetPay manque (Q7).

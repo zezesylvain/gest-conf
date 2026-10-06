@@ -304,7 +304,7 @@
         "buffer": "Buffer between slots (min)",
         "bufferHint": "From 0 to 30 minutes between the slots of a session (RG-13).",
         "registration": "Require a registered presenter (RG-11)",
-        "registrationHint": "No effect until registration opens (next stage)."
+        "registrationHint": "When enabled, a scheduled paper with no registered presenter (confirmed registration) is a conflict, which blocks programme publication."
       },
       "pricing": {
         "title": "Fees",
@@ -321,8 +321,8 @@
         "transferDeadline": "Bank transfer deadline (days)",
         "cancellationDeadline": "Cancellation deadline",
         "localTimeHint": "Edition time ({{zone}}).",
-        "refundBefore": "Refunded share before the deadline (%)",
-        "refundAfter": "Refunded share after the deadline (%)",
+        "refundBefore": "Refunded before (%)",
+        "refundAfter": "Refunded after (%)",
         "categories": "Categories and fee grid",
         "categoriesLead": "An empty cell: combination not offered. Existing orders keep their price.",
         "category": "Category",
@@ -371,7 +371,8 @@
         "value": "Value",
         "scopeLabel": "Applies to",
         "maxUses": "Maximum uses",
-        "maxUsesHint": "Empty: no limit."
+        "maxUsesHint": "Empty: no limit.",
+        "refundHint": "Share of the amount paid refunded on cancellation, before or after the deadline."
       },
       "billing": {
         "title": "Billing details",

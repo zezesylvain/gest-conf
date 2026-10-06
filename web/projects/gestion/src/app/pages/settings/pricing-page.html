@@ -17,7 +17,7 @@
   <form [formGroup]="settingsForm" (ngSubmit)="saveSettings()" novalidate class="card">
     <h2>{{ 'gestion.settings.pricing.settings' | translate }}</h2>
     <div class="grid-2">
-      <mat-form-field appearance="outline">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
         <mat-label>{{ 'gestion.settings.pricing.currency' | translate }}</mat-label>
         <mat-select formControlName="currency">
           @for (code of currencies; track code) {
@@ -27,7 +27,7 @@
         <mat-hint>{{ 'gestion.settings.pricing.currencyHint' | translate }}</mat-hint>
         <mat-error>{{ error(settingsForm, 'currency') }}</mat-error>
       </mat-form-field>
-      <mat-form-field appearance="outline">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
         <mat-label>{{ 'gestion.settings.pricing.localCountries' | translate }}</mat-label>
         <input matInput formControlName="local_countries" />
         <mat-hint>{{ 'gestion.settings.pricing.localCountriesHint' | translate }}</mat-hint>
@@ -60,7 +60,7 @@
         <input matInput type="number" min="1" max="180" formControlName="transfer_deadline_days" />
         <mat-error>{{ error(settingsForm, 'transfer_deadline_days') }}</mat-error>
       </mat-form-field>
-      <mat-form-field appearance="outline">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
         <mat-label>{{ 'gestion.settings.pricing.cancellationDeadline' | translate }}</mat-label>
         <input matInput type="datetime-local" formControlName="cancellation_deadline_local" />
         <mat-hint>{{
@@ -69,9 +69,10 @@
         <mat-error>{{ error(settingsForm, 'cancellation_deadline_local') }}</mat-error>
       </mat-form-field>
       <div></div>
-      <mat-form-field appearance="outline">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
         <mat-label>{{ 'gestion.settings.pricing.refundBefore' | translate }}</mat-label>
         <input matInput type="number" min="0" max="100" formControlName="refund_percent_before" />
+        <mat-hint>{{ 'gestion.settings.pricing.refundHint' | translate }}</mat-hint>
         <mat-error>{{ error(settingsForm, 'refund_percent_before') }}</mat-error>
       </mat-form-field>
       <mat-form-field appearance="outline">
@@ -192,7 +193,7 @@
           }}
         </h3>
         <div class="grid-2">
-          <mat-form-field appearance="outline">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
             <mat-label>{{ 'gestion.fields.code' | translate }}</mat-label>
             <input matInput formControlName="code" required maxlength="32" />
             <mat-hint>{{ 'gestion.settings.pricing.codeHint' | translate }}</mat-hint>
@@ -405,13 +406,13 @@
               <input matInput inputmode="decimal" formControlName="price_international" required />
               <mat-error>{{ error(optionForm, 'price_international') }}</mat-error>
             </mat-form-field>
-            <mat-form-field appearance="outline">
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
               <mat-label>{{ 'gestion.settings.pricing.quota' | translate }}</mat-label>
               <input matInput type="number" min="0" formControlName="quota" />
               <mat-hint>{{ 'gestion.settings.pricing.quotaHint' | translate }}</mat-hint>
               <mat-error>{{ error(optionForm, 'quota') }}</mat-error>
             </mat-form-field>
-            <mat-form-field appearance="outline">
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
               <mat-label>{{ 'gestion.settings.pricing.allowedCategories' | translate }}</mat-label>
               <mat-select formControlName="categories" multiple>
                 @for (category of categories(); track category.id) {
@@ -535,7 +536,7 @@
             }}
           </h3>
           <div class="grid-2">
-            <mat-form-field appearance="outline">
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
               <mat-label>{{ 'gestion.fields.code' | translate }}</mat-label>
               <input matInput formControlName="code" required maxlength="32" />
               <mat-hint>{{ 'gestion.settings.pricing.promoCodeHint' | translate }}</mat-hint>
@@ -568,7 +569,7 @@
                 }}</mat-option>
               </mat-select>
             </mat-form-field>
-            <mat-form-field appearance="outline">
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
               <mat-label>{{ 'gestion.settings.pricing.allowedCategories' | translate }}</mat-label>
               <mat-select formControlName="categories" multiple>
                 @for (category of categories(); track category.id) {
@@ -578,13 +579,13 @@
               <mat-hint>{{ 'gestion.settings.pricing.allCategoriesHint' | translate }}</mat-hint>
               <mat-error>{{ error(promoForm, 'categories') }}</mat-error>
             </mat-form-field>
-            <mat-form-field appearance="outline">
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
               <mat-label>{{ 'gestion.settings.pricing.maxUses' | translate }}</mat-label>
               <input matInput type="number" min="1" formControlName="max_uses" />
               <mat-hint>{{ 'gestion.settings.pricing.maxUsesHint' | translate }}</mat-hint>
               <mat-error>{{ error(promoForm, 'max_uses') }}</mat-error>
             </mat-form-field>
-            <mat-form-field appearance="outline">
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
               <mat-label>{{ 'gestion.settings.pricing.validUntil' | translate }}</mat-label>
               <input matInput type="datetime-local" formControlName="valid_until_local" />
               <mat-hint>{{

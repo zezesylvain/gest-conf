@@ -73,7 +73,7 @@ const AMOUNT = /^\d{1,10}(\.\d{1,2})?$/;
     }
     dl {
       display: grid;
-      grid-template-columns: max-content 1fr;
+      grid-template-columns: minmax(0, max-content) minmax(0, 1fr);
       gap: 0.25rem 1rem;
       margin: 0;
     }
@@ -82,6 +82,17 @@ const AMOUNT = /^\d{1,10}(\.\d{1,2})?$/;
     }
     dd {
       margin: 0;
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+    /* Écran étroit (375 px) : libellé au-dessus de la valeur. */
+    @media (max-width: 40rem) {
+      dl {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      dd {
+        margin-bottom: 0.5rem;
+      }
     }
     .address {
       white-space: pre-wrap;

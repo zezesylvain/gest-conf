@@ -24,11 +24,20 @@ export function totpCode(secret: string, at = Date.now()): string {
   return String((digest.readUInt32BE(offset) & 0x7fffffff) % 1_000_000).padStart(6, '0');
 }
 
-/** Code encore valable quelques secondes : attend la fenêtre suivante s'il expire bientôt. */
-export async function freshTotpCode(secret: string): Promise<string> {
-  const left = 30_000 - (Date.now() % 30_000);
-  if (left < 5_000) {
+/** Dernière fenêtre de 30 s dont un code a servi, par compte (un code ne sert qu'une fois). */
+const usedWindows = new Map<string, number>();
+
+/**
+ * Code encore valable quelques secondes : attend la fenêtre suivante s'il expire bientôt, ou
+ * si ce compte a déjà employé le code de la fenêtre en cours (allauth refuse le rejeu d'un
+ * code, à juste titre ; tous les membres de test partagent le même secret).
+ */
+export async function freshTotpCode(secret: string, account = ''): Promise<string> {
+  const now = Date.now();
+  const left = 30_000 - (now % 30_000);
+  if (left < 5_000 || usedWindows.get(account) === Math.floor(now / 30_000)) {
     await new Promise((resolve) => setTimeout(resolve, left + 250));
   }
+  usedWindows.set(account, Math.floor(Date.now() / 30_000));
   return totpCode(secret);
 }

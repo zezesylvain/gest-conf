@@ -267,7 +267,7 @@
                 </mat-select>
                 <mat-error>{{ error(paymentForm, 'method') }}</mat-error>
               </mat-form-field>
-              <mat-form-field appearance="outline">
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
                 <mat-label>{{ 'gestion.registrations.fields.amount' | translate }}</mat-label>
                 <input matInput formControlName="amount" inputmode="decimal" required />
                 <mat-hint>{{
@@ -345,7 +345,7 @@
               <mat-error>{{ error(cancelForm, 'reason') }}</mat-error>
             </mat-form-field>
             @if (current.status === 'confirmed') {
-              <mat-form-field appearance="outline">
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
                 <mat-label>{{
                   'gestion.registrations.fields.refundPercent' | translate
                 }}</mat-label>
@@ -376,7 +376,7 @@
                 <input matInput formControlName="amount" inputmode="decimal" required />
                 <mat-error>{{ error(refundForm, 'amount') }}</mat-error>
               </mat-form-field>
-              <mat-form-field appearance="outline">
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
                 <mat-label>{{ 'gestion.registrations.fields.refundMethod' | translate }}</mat-label>
                 <input matInput formControlName="method" required maxlength="64" />
                 <mat-hint>{{

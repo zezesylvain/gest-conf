@@ -36,13 +36,13 @@
         <textarea matInput rows="3" formControlName="address"></textarea>
         <mat-error>{{ error('address') }}</mat-error>
       </mat-form-field>
-      <mat-form-field appearance="outline">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
         <mat-label>{{ 'gestion.settings.billing.taxIdentifiers' | translate }}</mat-label>
         <textarea matInput rows="2" formControlName="tax_identifiers"></textarea>
         <mat-hint>{{ 'gestion.settings.billing.taxIdentifiersHint' | translate }}</mat-hint>
         <mat-error>{{ error('tax_identifiers') }}</mat-error>
       </mat-form-field>
-      <mat-form-field appearance="outline">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
         <mat-label>{{ 'gestion.settings.billing.bankDetails' | translate }}</mat-label>
         <textarea matInput rows="3" formControlName="bank_details"></textarea>
         <mat-hint>{{ 'gestion.settings.billing.bankDetailsHint' | translate }}</mat-hint>
@@ -52,13 +52,13 @@
 
     <h2>{{ 'gestion.settings.billing.vat' | translate }}</h2>
     <div class="grid-2">
-      <mat-form-field appearance="outline">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
         <mat-label>{{ 'gestion.settings.billing.vatRate' | translate }}</mat-label>
         <input matInput inputmode="decimal" formControlName="vat_rate" />
         <mat-hint>{{ 'gestion.settings.billing.vatRateHint' | translate }}</mat-hint>
         <mat-error>{{ error('vat_rate') }}</mat-error>
       </mat-form-field>
-      <mat-form-field appearance="outline">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
         <mat-label>{{ 'gestion.settings.billing.vatNote' | translate }}</mat-label>
         <input matInput formControlName="vat_note" maxlength="255" />
         <mat-hint>{{ 'gestion.settings.billing.vatNoteHint' | translate }}</mat-hint>

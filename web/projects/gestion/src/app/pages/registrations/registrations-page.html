@@ -6,7 +6,7 @@
 
 <form [formGroup]="form" (ngSubmit)="search()" novalidate class="card">
   <div class="grid-2">
-    <mat-form-field appearance="outline">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
       <mat-label>{{ 'gestion.registrations.search' | translate }}</mat-label>
       <input matInput formControlName="q" maxlength="100" />
       <mat-hint>{{ 'gestion.registrations.searchHint' | translate }}</mat-hint>
@@ -73,7 +73,7 @@
       <h2>{{ 'gestion.registrations.create.title' | translate }}</h2>
       <p class="muted">{{ 'gestion.registrations.create.lead' | translate }}</p>
       <div class="grid-2">
-        <mat-form-field appearance="outline">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>{{ 'gestion.registrations.fields.email' | translate }}</mat-label>
           <input matInput type="email" formControlName="email" required maxlength="254" />
           <mat-hint>{{ 'gestion.registrations.create.emailHint' | translate }}</mat-hint>
@@ -117,7 +117,7 @@
           <input matInput formControlName="promo_code" maxlength="32" />
           <mat-error>{{ error('promo_code') }}</mat-error>
         </mat-form-field>
-        <mat-form-field appearance="outline">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>{{ 'gestion.registrations.fields.billingName' | translate }}</mat-label>
           <input matInput formControlName="billing_name" maxlength="255" />
           <mat-hint>{{ 'gestion.registrations.create.billingHint' | translate }}</mat-hint>

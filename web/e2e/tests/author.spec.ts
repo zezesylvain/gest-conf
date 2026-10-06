@@ -21,7 +21,14 @@ import { freshTotpCode } from '../totp';
  * 5. programme, dans la gestion (plan L5 §7 ; démo F) : salle et session (CO « programme »),
  *    placement au clavier, dépassement signalé puis corrigé (RG-13), publication par le Chair
  *    (I6) et e-mail de passage (I16) ;
- * 6. auteure : « Mon passage », fichier iCal (I8), programme public (I7).
+ * 6. auteure : « Mon passage », fichier iCal (I8), programme public (I7) ;
+ * 7. inscriptions, côté comité (plan L6 §7 ; démo G) : RG-11 exigée, présentatrice non
+ *    inscrite signalée ; mentions de facturation (CO « finances ») ;
+ * 8. auteure : page publique « Inscription », devis, commande, paiement en ligne par le
+ *    fournisseur factice, confirmation par la notification vérifiée (RG-15), facture et QR ;
+ *    RG-11 levée ;
+ * 9. CO « finances » : inscription saisie par virement, paiement reçu, annulation,
+ *    remboursement et avoir (J7, J9).
  */
 test.describe.configure({ mode: 'serial' });
 
@@ -41,6 +48,8 @@ let seed: {
   reviewer2: string;
   program: string;
   conference_chair: string;
+  finance: string;
+  participant: string;
 };
 let reference = '';
 
@@ -77,7 +86,7 @@ async function committeeLogin(browser: Browser, email: string): Promise<Page> {
   await page.getByLabel('Mot de passe').fill(seed.password);
   await page.getByRole('button', { name: 'Se connecter' }).click();
   await expect(page).toHaveURL(/double-authentification/);
-  await page.getByLabel('Code').fill(await freshTotpCode(seed.totp));
+  await page.getByLabel('Code').fill(await freshTotpCode(seed.totp, email));
   await page.getByRole('button', { name: 'Vérifier' }).click();
   await expect(page).toHaveURL(/\/compte$/);
   return page;
@@ -429,4 +438,142 @@ test('auteure : « Mon passage », fichier iCal (I8) et programme public (I7)', 
   await expect(page.locator('h1')).toHaveText('Santé et IA');
   await expect(page.locator('main')).toContainText('Awa Koné');
   await expect(page.locator('main')).not.toContainText(EMAIL);
+});
+
+function registrationStatus(email: string): string {
+  return python(
+    'from apps.registrations.models import Registration\n' +
+      `print(Registration.objects.get(user__email=${literal(email)}).status)`,
+  );
+}
+
+test('inscriptions, côté comité : RG-11 exigée, mentions de facturation', async ({ browser }) => {
+  test.setTimeout(120_000);
+  const planner = await committeeLogin(browser, seed.program);
+  const finance = await committeeLogin(browser, seed.finance);
+  const base = `${GESTION}/editions/${seed.edition}`;
+
+  // RG-11 : la présentatrice placée n'est pas inscrite, le planificateur le signale.
+  await planner.goto(`${base}/parametrage/programme`);
+  await planner.getByRole('checkbox', { name: /Exiger l'inscription d'un présentateur/ }).check();
+  await planner.getByRole('button', { name: 'Enregistrer' }).click();
+  await expect(planner.getByText('Modifications enregistrées.')).toBeVisible();
+  await planner.goto(`${base}/programme`);
+  await expect(planner.locator('#conflicts')).toContainText('aucun présentateur inscrit');
+  await expect(planner.locator('li.slot', { hasText: reference })).toContainText(
+    'Présentateur non inscrit',
+  );
+
+  // Mentions de facturation (Q8) : sans elles, aucune facture ne s'émet.
+  await finance.goto(`${base}/parametrage/facturation`);
+  await expect(finance.locator('main')).toContainText('aucune facture ne s');
+  await finance.getByLabel('Raison sociale').fill('Association Colloque E2E');
+  await finance.getByLabel('Adresse', { exact: true }).fill('BP 1234, Abidjan, Côte d’Ivoire');
+  await finance.getByLabel('Mention sans TVA').fill('TVA non applicable');
+  await finance.getByRole('button', { name: 'Enregistrer' }).click();
+  await expect(finance.getByText('Mentions complètes')).toBeVisible();
+
+  // Tarifs préparés par le CO : grille visible dans le paramétrage.
+  await finance.goto(`${base}/parametrage/tarifs`);
+  await expect(finance.locator('tbody tr', { hasText: 'Chercheur' })).toContainText(/40\s000/);
+});
+
+test('auteure : inscription, paiement en ligne factice (RG-15), facture et QR', async ({
+  page,
+  browser,
+}) => {
+  test.setTimeout(120_000);
+  await authorLogin(page);
+
+  // Page publique « Inscription » (rendue dans le navigateur en E2E, pré-rendue en production).
+  await page.goto('/fr/inscription/');
+  await expect(page.locator('tbody tr', { hasText: 'Chercheur' })).toContainText(/40\s000/);
+  await expect(page.locator('main')).toContainText('Dîner de gala');
+  await page.getByRole('link', { name: "S'inscrire" }).click();
+  await expect(page).toHaveURL(/\/compte\/mon-inscription$/);
+
+  // Commande : devis du serveur (préférentiel, Côte d'Ivoire : tarif local), puis paiement.
+  await page.getByLabel('Catégorie').click();
+  await page.getByRole('option', { name: 'Chercheur' }).click();
+  await page.getByRole('checkbox', { name: /Dîner de gala/ }).check();
+  await page.getByRole('button', { name: 'Calculer le prix' }).click();
+  const quote = page.locator('table.lines');
+  await expect(quote).toContainText('Prix (Préférentiel, tarif local)');
+  await expect(quote).toContainText(/50\s000/);
+  await page.getByLabel('Moyen de paiement').click();
+  await page.getByRole('option', { name: 'Paiement en ligne' }).click();
+  await page.getByRole('button', { name: 'Confirmer la commande' }).click();
+
+  // Page hébergée du fournisseur factice : le retour du navigateur ne prouve rien (RG-15),
+  // la confirmation vient de la notification vérifiée puis de l'interrogation du statut.
+  await expect(page.getByRole('heading', { name: 'Paiement de démonstration' })).toBeVisible();
+  await page.getByRole('button', { name: 'Payer', exact: true }).click();
+  await expect(page).toHaveURL(/\/compte\/mon-inscription$/);
+  await expect(page.getByText('Paiement reçu : votre inscription est confirmée.')).toBeVisible();
+  await expect(page.locator('.badge')).toHaveText('Confirmée');
+  expect(registrationStatus(EMAIL)).toBe('confirmed');
+  expect(outbox(EMAIL)).toContain('registrations/email/confirmed');
+
+  // Facture (PDF, endpoint authentifié) et code d'accès.
+  const invoice = page.getByRole('link', { name: /Facture F-E2E27-\d{4}-00001/ });
+  await expect(invoice).toBeVisible();
+  const pdf = await page.request.get((await invoice.getAttribute('href'))!);
+  expect(pdf.status()).toBe(200);
+  expect(pdf.headers()['content-type']).toBe('application/pdf');
+  await expect(page.locator('img.qr')).toBeVisible();
+
+  // RG-11 levée : la présentatrice est inscrite.
+  const planner = await committeeLogin(browser, seed.program);
+  await planner.goto(`${GESTION}/editions/${seed.edition}/programme`);
+  await expect(planner.locator('#conflicts')).toContainText('Aucun conflit.');
+});
+
+test('CO « finances » : virement reçu, annulation, remboursement et avoir (J7, J9)', async ({
+  browser,
+}) => {
+  test.setTimeout(120_000);
+  const finance = await committeeLogin(browser, seed.finance);
+  const base = `${GESTION}/editions/${seed.edition}`;
+
+  // Saisie pour un compte existant (J1) : Sénégal, tarif international préférentiel.
+  await finance.goto(`${base}/inscriptions`);
+  await expect(finance.locator('tbody')).toContainText('Awa Koné');
+  await finance.getByRole('button', { name: 'Saisir une inscription' }).click();
+  const order = finance.locator('form', { hasText: 'Enregistrer la commande' });
+  await order.getByLabel('Adresse e-mail du compte').fill(seed.participant);
+  await order.getByLabel('Catégorie').click();
+  await finance.getByRole('option', { name: /Chercheur/ }).click();
+  await order.getByRole('button', { name: 'Enregistrer la commande' }).click();
+  await expect(finance.locator('h1')).toContainText('Ousmane Ndiaye');
+  await expect(finance.locator('main')).toContainText('en attente de paiement');
+  await expect(finance.locator('main')).toContainText(/100\s000/);
+
+  // Virement reçu (J7) : montant total proposé ; facture émise.
+  await finance.getByRole('button', { name: 'Enregistrer un paiement reçu' }).click();
+  await finance.getByLabel('Référence (virement, reçu…)').fill('VIR-E2E-1');
+  await finance.getByRole('button', { name: 'Enregistrer le paiement' }).click();
+  await expect(finance.getByText('Paiement enregistré : inscription confirmée.')).toBeVisible();
+  await expect(finance.getByRole('link', { name: /Facture F-E2E27-\d{4}-00002/ })).toBeVisible();
+  expect(registrationStatus(seed.participant)).toBe('confirmed');
+
+  // Annulation par le CO (J9), remboursement intégral, puis remboursement fait : avoir.
+  await finance.getByRole('button', { name: "Annuler l'inscription" }).click();
+  await finance.getByLabel('Motif').fill('Désistement (visa refusé)');
+  await finance.getByLabel('Part remboursée (%)').fill('100');
+  await finance.locator('form').getByRole('button', { name: "Annuler l'inscription" }).click();
+  await finance.getByRole('dialog').getByRole('button', { name: "Annuler l'inscription" }).click();
+  await expect(finance.getByText('Inscription annulée.')).toBeVisible();
+  expect(registrationStatus(seed.participant)).toBe('cancelled');
+  await finance.getByRole('button', { name: 'Enregistrer un remboursement' }).click();
+  await finance.getByLabel('Moyen du remboursement').fill('Virement');
+  await finance.getByRole('button', { name: 'Enregistrer le remboursement' }).click();
+  await expect(finance.getByText('Remboursement enregistré, avoir émis.')).toBeVisible();
+  await expect(finance.getByRole('link', { name: /Avoir AV-E2E27-\d{4}-00001/ })).toBeVisible();
+
+  // Pièces et tableau de bord financier.
+  await finance.goto(`${base}/inscriptions/factures`);
+  await expect(finance.locator('tbody')).toContainText(/sur la facture F-E2E27-\d{4}-00002/);
+  await finance.goto(`${base}/inscriptions/finances`);
+  await expect(finance.locator('main')).toContainText('Remboursé');
+  await expect(finance.locator('main')).toContainText(/150\s000/); // 50 000 + 100 000 encaissés
 });

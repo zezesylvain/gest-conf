@@ -304,7 +304,7 @@
         "buffer": "Tampon entre créneaux (min)",
         "bufferHint": "De 0 à 30 minutes entre les créneaux d'une session (RG-13).",
         "registration": "Exiger l'inscription d'un présentateur (RG-11)",
-        "registrationHint": "Sans effet tant que les inscriptions ne sont pas ouvertes (lot suivant)."
+        "registrationHint": "Activé : une communication placée sans présentateur inscrit (inscription confirmée) est un conflit, qui bloque la publication du programme."
       },
       "pricing": {
         "title": "Tarifs",
@@ -321,8 +321,8 @@
         "transferDeadline": "Délai du virement (jours)",
         "cancellationDeadline": "Date limite d'annulation",
         "localTimeHint": "Heure de l'édition ({{zone}}).",
-        "refundBefore": "Part remboursée avant la date limite (%)",
-        "refundAfter": "Part remboursée après la date limite (%)",
+        "refundBefore": "Remboursé avant (%)",
+        "refundAfter": "Remboursé après (%)",
         "categories": "Catégories et grille des tarifs",
         "categoriesLead": "Une cellule vide : combinaison non proposée. Les inscriptions déjà passées gardent leur prix.",
         "category": "Catégorie",
@@ -371,7 +371,8 @@
         "value": "Valeur",
         "scopeLabel": "S'applique à",
         "maxUses": "Utilisations maximales",
-        "maxUsesHint": "Vide : sans limite."
+        "maxUsesHint": "Vide : sans limite.",
+        "refundHint": "Part du payé remboursée en cas d'annulation, avant ou après la date limite."
       },
       "billing": {
         "title": "Mentions de facturation",
