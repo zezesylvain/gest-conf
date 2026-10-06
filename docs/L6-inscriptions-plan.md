@@ -450,3 +450,69 @@ données personnelles, matrice.
 **Reporté à L6.4** : refuser `online_enabled` tant qu'aucun fournisseur de paiement n'est
 configuré. Le service de commande n'existe pas encore, donc ce réglage est aujourd'hui sans
 effet.
+
+## 13. Bilan de L6.2 (6 octobre 2026)
+
+**Service `apps/registrations/services/pricing.py`** :
+
+- **Périodes (J2)** : `period_at`.
+  - Avant `registration_open` (ou sans cette date) : inscriptions fermées.
+  - Puis préférentiel jusqu'à `early_bird_end` (exclu), normal jusqu'à `registration_close`
+    (exclu), ensuite « sur place ».
+  - `is_open_online` : édition publiée et période préférentielle ou normale. Après la
+    clôture, seul le CO inscrira (sur place, L6.3).
+- **Prix** : `quote(edition, category=…, options=…, promo_code=…, country=…)`.
+  - Le navigateur n'envoie que des **codes**.
+  - Tarif selon la période et la zone (pays du profil) ; combinaison absente : catégorie non
+    proposée.
+  - Options au prix de la zone, limitées aux catégories autorisées.
+  - Lignes figées : nature, code, libellés FR et EN, montant.
+- **Remises (J4)** :
+  - pourcentage arrondi **une fois**, au demi supérieur, à la décimale de la devise (10 % de
+    25 005 F CFA = 2 501) ;
+  - montant plafonné à la base ;
+  - base : inscription seule, ou inscription et options ;
+  - libellé figé dans les deux langues, indépendant de la langue de la requête ;
+  - code inconnu, inactif, expiré ou hors catégorie : 400 sur `promo_code` ; épuisé : 409
+    `promo_code_exhausted`.
+- **Réservations (J3, J4)**, à appeler dans la transaction de la commande (sinon
+  `RuntimeError`) :
+  - places d'options sous verrou de ligne, dans l'ordre des clés ; option complète : 409
+    `option_full` ;
+  - utilisations de codes réservées, consommées à la confirmation, rendues à
+    l'expiration.
+  - Test de concurrence sur MariaDB : deux commandes pour la dernière place, une seule
+    l'obtient.
+- **Catalogue (`pricing.write`)**, chaque écriture journalisée :
+  - catégories ; grille de tarifs remplacée d'un bloc (`registrations.fees_changed`, avant
+    et après par cellule) ; options ; codes promo, en majuscules et uniques sans tenir
+    compte de la casse ;
+  - montants positifs et **exacts dans la devise** (pas de 25 000,50 F CFA) ;
+  - **codes non modifiables après création**, puisqu'ils sont recopiés dans les lignes ;
+  - élément utilisé : suppression refusée (409 `in_use`), désactivation possible ;
+  - quota jamais sous les places réservées, maximum d'utilisations jamais sous les
+    utilisations.
+
+**Routes** :
+
+- gestion : `…/registrations/categories` (et `…/{id}`, `…/{id}/fees`),
+  `…/registrations/options`, `…/registrations/promo-codes`. Lecture `registrations.read`,
+  écriture `pricing.write` ; listes sans pagination. Ajoutées à la matrice (2 012 cas).
+- public : `GET /v1/public/registration`, pour l'édition courante publiée, cache de
+  5 minutes, lu au build du portail (J13). Il donne :
+  - catégories actives et leurs tarifs, options actives ;
+  - dates clés, moyens proposés, pays locaux ;
+  - **ni quota restant ni place réservée** : `limited` dit seulement qu'une option a des
+    places limitées, puisque la page pré-rendue serait vite périmée.
+- participant : `POST /v1/registrations/quote`, prix sans engagement (rien n'est réservé).
+  - Pays du profil obligatoire (409 `profile_incomplete`).
+  - Inscriptions en ligne fermées : 409 `registration_closed`.
+  - Limité à 300 appels par heure et par compte.
+  - **Écart avec le plan (§4)** : `POST /v1/registrations/{id}/quote` y figurait, mais le
+    devis précède la commande et n'a donc pas d'identifiant.
+
+**Nouveaux codes d'erreur** : `registration_closed`, `option_full`, `promo_code_exhausted`
+et `already_registered` (utilisé en L6.3), traduits côté serveur et dans le front.
+
+**Énumérations nommées du schéma** : `Currency`, `Period`, `Zone`, `PaymentMethod`,
+`DiscountKind`, `DiscountScope`, `LineKind`.

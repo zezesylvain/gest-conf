@@ -3,9 +3,22 @@ jamais des flottants ; ils sont calculés par le serveur seul."""
 
 from __future__ import annotations
 
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
-from apps.registrations.models import RegistrationSettings
+from apps.core.money import DECIMAL_PLACES, MAX_DIGITS, Currency
+from apps.registrations.models import (
+    LineKind,
+    PaymentMethod,
+    Period,
+    PromoCode,
+    RegistrationCategory,
+    RegistrationOption,
+    RegistrationSettings,
+    Zone,
+)
+
+PERIODS = [Period.EARLY, Period.REGULAR, Period.ONSITE]
 
 # --- Gestion (plan L6 §4) ---------------------------------------------------------------------
 
@@ -32,3 +45,207 @@ class RegistrationSettingsSerializer(serializers.ModelSerializer):
             "refund_percent_before",
             "refund_percent_after",
         )
+
+
+class FeeSerializer(serializers.Serializer):
+    period = serializers.ChoiceField(choices=Period.choices)
+    zone = serializers.ChoiceField(choices=Zone.choices)
+    amount = serializers.DecimalField(max_digits=MAX_DIGITS, decimal_places=DECIMAL_PLACES)
+
+
+class FeeGridSerializer(serializers.Serializer):
+    """Grille complète d'une catégorie (une cellule par période et zone proposées)."""
+
+    fees = FeeSerializer(many=True)
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    """Catégorie et sa grille de tarifs (gestion). ``code`` : fixé à la création."""
+
+    fees = serializers.SerializerMethodField()
+    in_use = serializers.SerializerMethodField()
+
+    class Meta:
+        model = RegistrationCategory
+        fields = (
+            "id",
+            "code",
+            "label_fr",
+            "label_en",
+            "description_fr",
+            "description_en",
+            "requires_proof",
+            "is_active",
+            "position",
+            "fees",
+            "in_use",
+        )
+        read_only_fields = ("id",)
+
+    @extend_schema_field(FeeSerializer(many=True))
+    def get_fees(self, category: RegistrationCategory) -> list[dict]:
+        return FeeSerializer(
+            sorted(category.fees.all(), key=lambda fee: (PERIODS.index(fee.period), fee.zone)),
+            many=True,
+        ).data
+
+    def get_in_use(self, category: RegistrationCategory) -> bool:
+        return bool(getattr(category, "registration_count", 0))
+
+
+class OptionSerializer(serializers.ModelSerializer):
+    """Option à quota (gestion) : ``reserved`` places tenues par les inscriptions en attente
+    ou confirmées ; ``categories`` : codes des catégories autorisées (vide : toutes)."""
+
+    categories = serializers.SlugRelatedField(
+        slug_field="code", many=True, required=False, queryset=RegistrationCategory.objects.all()
+    )
+
+    class Meta:
+        model = RegistrationOption
+        fields = (
+            "id",
+            "code",
+            "label_fr",
+            "label_en",
+            "description_fr",
+            "description_en",
+            "price_local",
+            "price_international",
+            "quota",
+            "reserved",
+            "categories",
+            "is_active",
+            "position",
+        )
+        read_only_fields = ("id", "reserved")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        edition = self.context.get("edition")
+        if edition is not None:
+            self.fields["categories"].child_relation.queryset = RegistrationCategory.objects.filter(
+                edition=edition
+            )
+
+    def to_internal_value(self, data):
+        values = super().to_internal_value(data)
+        if "categories" in values:
+            values["categories"] = [category.code for category in values["categories"]]
+        return values
+
+
+class PromoCodeSerializer(serializers.ModelSerializer):
+    """Code promo (gestion) : utilisations réservées (commandes en attente) et consommées
+    (inscriptions confirmées)."""
+
+    categories = serializers.SlugRelatedField(
+        slug_field="code", many=True, required=False, queryset=RegistrationCategory.objects.all()
+    )
+
+    class Meta:
+        model = PromoCode
+        fields = (
+            "id",
+            "code",
+            "kind",
+            "value",
+            "scope",
+            "categories",
+            "max_uses",
+            "reserved_uses",
+            "consumed_uses",
+            "valid_until",
+            "is_active",
+        )
+        read_only_fields = ("id", "reserved_uses", "consumed_uses")
+        # Unicité contrôlée par le service, après normalisation en majuscules.
+        validators = ()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        edition = self.context.get("edition")
+        if edition is not None:
+            self.fields["categories"].child_relation.queryset = RegistrationCategory.objects.filter(
+                edition=edition
+            )
+
+    def to_internal_value(self, data):
+        values = super().to_internal_value(data)
+        if "categories" in values:
+            values["categories"] = [category.code for category in values["categories"]]
+        return values
+
+
+# --- Public et participant (plan L6 §4) -------------------------------------------------------
+
+
+class PublicFeeSerializer(FeeSerializer):
+    pass
+
+
+class PublicCategorySerializer(serializers.Serializer):
+    code = serializers.CharField()
+    label_fr = serializers.CharField()
+    label_en = serializers.CharField()
+    description_fr = serializers.CharField()
+    description_en = serializers.CharField()
+    requires_proof = serializers.BooleanField()
+    fees = PublicFeeSerializer(many=True)
+
+
+class PublicOptionSerializer(serializers.Serializer):
+    code = serializers.CharField()
+    label_fr = serializers.CharField()
+    label_en = serializers.CharField()
+    description_fr = serializers.CharField()
+    description_en = serializers.CharField()
+    price_local = serializers.DecimalField(max_digits=MAX_DIGITS, decimal_places=DECIMAL_PLACES)
+    price_international = serializers.DecimalField(
+        max_digits=MAX_DIGITS, decimal_places=DECIMAL_PLACES
+    )
+    limited = serializers.BooleanField(help_text="Places limitées (quota).")
+    categories = serializers.ListField(child=serializers.CharField())
+
+
+class PublicRegistrationSerializer(serializers.Serializer):
+    """Page publique « Inscription » (J13), lue au build du portail : catégories et tarifs,
+    options, dates clés (UTC), moyens de paiement proposés, pays « locaux ». Ni quota
+    restant ni donnée personnelle."""
+
+    currency = serializers.ChoiceField(choices=Currency.choices)
+    timezone = serializers.CharField()
+    opens_at = serializers.DateTimeField(allow_null=True)
+    early_bird_end = serializers.DateTimeField(allow_null=True)
+    closes_at = serializers.DateTimeField(allow_null=True)
+    methods = serializers.ListField(child=serializers.ChoiceField(choices=PaymentMethod.choices))
+    local_countries = serializers.ListField(child=serializers.CharField())
+    categories = PublicCategorySerializer(many=True)
+    options = PublicOptionSerializer(many=True)
+
+
+class QuoteRequestSerializer(serializers.Serializer):
+    category = serializers.CharField(max_length=32)
+    options = serializers.ListField(
+        child=serializers.CharField(max_length=32), required=False, default=list, max_length=20
+    )
+    promo_code = serializers.CharField(max_length=32, required=False, allow_blank=True, default="")
+
+
+class LineSerializer(serializers.Serializer):
+    kind = serializers.ChoiceField(choices=LineKind.choices)
+    code = serializers.CharField()
+    label_fr = serializers.CharField()
+    label_en = serializers.CharField()
+    amount = serializers.DecimalField(max_digits=MAX_DIGITS, decimal_places=DECIMAL_PLACES)
+
+
+class QuoteSerializer(serializers.Serializer):
+    """Prix calculé par le serveur, sans engagement (aucune place ni code réservés)."""
+
+    category = serializers.CharField()
+    period = serializers.ChoiceField(choices=Period.choices)
+    zone = serializers.ChoiceField(choices=Zone.choices)
+    currency = serializers.ChoiceField(choices=Currency.choices)
+    lines = LineSerializer(many=True)
+    total = serializers.DecimalField(max_digits=MAX_DIGITS, decimal_places=DECIMAL_PLACES)

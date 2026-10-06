@@ -242,6 +242,7 @@ ANONYMOUS_VIEWS = {
     "apps.program.views.PublicProgramView": "programme public publié (L5, I7)",
     "apps.program.views.PublicProgramDayView": "programme public publié, par jour (L5, I7)",
     "apps.program.views.PublicProgramSessionView": "programme public publié, session (L5, I7)",
+    "apps.registrations.views.PublicRegistrationView": "tarifs et dates d'inscription (L6, J13)",
 }
 
 # Seule vue de ``v1/manage/`` hors ``ManageViewSet`` : sélecteur d'édition.

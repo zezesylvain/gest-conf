@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gestconf-backend\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-06 16:51+0000\n"
+"POT-Creation-Date: 2026-10-06 17:06+0000\n"
 "PO-Revision-Date: 2026-10-05 11:00+0000\n"
 "Last-Translator: GEST-CONF\n"
 "Language-Team: GEST-CONF\n"
@@ -20,7 +20,7 @@ msgid "adresse e-mail"
 msgstr "email address"
 
 #: apps/accounts/models.py:30 apps/accounts/models.py:226
-#: apps/conferences/models.py:278 apps/registrations/models.py:308
+#: apps/conferences/models.py:278 apps/registrations/models.py:316
 msgid "actif"
 msgstr "active"
 
@@ -202,9 +202,9 @@ msgstr "system"
 #: apps/portal/models.py:132 apps/portal/models.py:213
 #: apps/portal/models.py:268 apps/program/models.py:46
 #: apps/program/models.py:108 apps/program/models.py:275
-#: apps/program/models.py:298 apps/registrations/models.py:73
-#: apps/registrations/models.py:144 apps/registrations/models.py:215
-#: apps/registrations/models.py:288 apps/registrations/models.py:371
+#: apps/program/models.py:298 apps/registrations/models.py:81
+#: apps/registrations/models.py:152 apps/registrations/models.py:223
+#: apps/registrations/models.py:296 apps/registrations/models.py:379
 #: apps/reviews/models.py:32 apps/reviews/models.py:126
 #: apps/submissions/models.py:51
 msgid "édition"
@@ -222,7 +222,7 @@ msgstr "organising committee function"
 #: apps/accounts/models.py:265 apps/accounts/models.py:356
 #: apps/communications/models.py:58 apps/conferences/models.py:133
 #: apps/core/models.py:208 apps/payments/models.py:130
-#: apps/registrations/models.py:388 apps/reviews/models.py:178
+#: apps/registrations/models.py:396 apps/reviews/models.py:178
 #: apps/reviews/models.py:300 apps/submissions/models.py:89
 msgid "statut"
 msgstr "status"
@@ -265,11 +265,11 @@ msgid "refusée"
 msgstr "declined"
 
 #: apps/accounts/models.py:327 apps/core/models.py:187
-#: apps/registrations/models.py:347 apps/reviews/models.py:146
+#: apps/registrations/models.py:355 apps/reviews/models.py:146
 msgid "annulée"
 msgstr "cancelled"
 
-#: apps/accounts/models.py:328 apps/registrations/models.py:348
+#: apps/accounts/models.py:328 apps/registrations/models.py:356
 msgid "expirée"
 msgstr "expired"
 
@@ -361,7 +361,7 @@ msgstr "speaker"
 msgid "président de session"
 msgstr "session chair"
 
-#: apps/accounts/roles.py:28 apps/registrations/models.py:377
+#: apps/accounts/roles.py:28 apps/registrations/models.py:385
 msgid "participant"
 msgstr "attendee"
 
@@ -410,6 +410,7 @@ msgstr "secretariat"
 #: apps/conferences/services.py:495 apps/payments/services/billing.py:77
 #: apps/program/services/planning.py:137 apps/program/services/planning.py:239
 #: apps/program/services/planning.py:520 apps/program/services/settings.py:38
+#: apps/registrations/services/pricing.py:388
 #: apps/registrations/services/settings.py:106
 msgid "Champ non modifiable."
 msgstr "This field cannot be changed."
@@ -1118,15 +1119,15 @@ msgstr "name (EN)"
 
 #: apps/conferences/models.py:31 apps/conferences/models.py:212
 #: apps/conferences/models.py:258 apps/portal/models.py:140
-#: apps/program/models.py:115 apps/registrations/models.py:151
-#: apps/registrations/models.py:222
+#: apps/program/models.py:115 apps/registrations/models.py:159
+#: apps/registrations/models.py:230
 msgid "description (FR)"
 msgstr "description (FR)"
 
 #: apps/conferences/models.py:32 apps/conferences/models.py:213
 #: apps/conferences/models.py:259 apps/portal/models.py:141
-#: apps/program/models.py:116 apps/registrations/models.py:152
-#: apps/registrations/models.py:223
+#: apps/program/models.py:116 apps/registrations/models.py:160
+#: apps/registrations/models.py:231
 msgid "description (EN)"
 msgstr "description (EN)"
 
@@ -1158,8 +1159,8 @@ msgstr "archived"
 
 #: apps/conferences/models.py:73 apps/conferences/models.py:209
 #: apps/conferences/models.py:255 apps/conferences/models.py:340
-#: apps/portal/models.py:57 apps/registrations/models.py:148
-#: apps/registrations/models.py:219 apps/registrations/models.py:292
+#: apps/portal/models.py:57 apps/registrations/models.py:156
+#: apps/registrations/models.py:227 apps/registrations/models.py:300
 #: apps/reviews/models.py:86
 msgid "code"
 msgstr "code"
@@ -1262,14 +1263,14 @@ msgstr "editions"
 #: apps/conferences/models.py:214 apps/conferences/models.py:277
 #: apps/conferences/models.py:346 apps/core/models.py:296
 #: apps/portal/models.py:228 apps/program/models.py:59
-#: apps/program/models.py:174 apps/registrations/models.py:155
-#: apps/registrations/models.py:235 apps/reviews/models.py:97
+#: apps/program/models.py:174 apps/registrations/models.py:163
+#: apps/registrations/models.py:243 apps/reviews/models.py:97
 #: apps/submissions/models.py:134
 msgid "ordre"
 msgstr "order"
 
 #: apps/conferences/models.py:215 apps/program/models.py:58
-#: apps/registrations/models.py:154 apps/registrations/models.py:234
+#: apps/registrations/models.py:162 apps/registrations/models.py:242
 #: apps/reviews/models.py:144
 msgid "active"
 msgstr "active"
@@ -1296,14 +1297,14 @@ msgid "obligatoire"
 msgstr "required"
 
 #: apps/conferences/models.py:256 apps/conferences/models.py:343
-#: apps/portal/models.py:216 apps/registrations/models.py:149
-#: apps/registrations/models.py:220 apps/reviews/models.py:87
+#: apps/portal/models.py:216 apps/registrations/models.py:157
+#: apps/registrations/models.py:228 apps/reviews/models.py:87
 msgid "libellé (FR)"
 msgstr "label (FR)"
 
 #: apps/conferences/models.py:257 apps/conferences/models.py:344
-#: apps/portal/models.py:217 apps/registrations/models.py:150
-#: apps/registrations/models.py:221 apps/reviews/models.py:88
+#: apps/portal/models.py:217 apps/registrations/models.py:158
+#: apps/registrations/models.py:229 apps/reviews/models.py:88
 msgid "libellé (EN)"
 msgstr "label (EN)"
 
@@ -1483,27 +1484,27 @@ msgstr "Unknown time zone."
 msgid "Échec de la vérification CSRF : rechargez la page puis réessayez."
 msgstr "CSRF verification failed: reload the page and try again."
 
-#: apps/core/errors.py:111
+#: apps/core/errors.py:117
 msgid "Opération refusée."
 msgstr "Operation refused."
 
-#: apps/core/errors.py:140
+#: apps/core/errors.py:146
 msgid "Opération impossible dans l'état actuel."
 msgstr "This operation is not possible in the current state."
 
-#: apps/core/errors.py:147
+#: apps/core/errors.py:153
 msgid "Action non autorisée."
 msgstr "Action not allowed."
 
-#: apps/core/errors.py:154 apps/core/exceptions.py:110
+#: apps/core/errors.py:160 apps/core/exceptions.py:110
 msgid "Données invalides."
 msgstr "Invalid data."
 
-#: apps/core/errors.py:161
+#: apps/core/errors.py:167
 msgid "Modifié entre-temps (autre onglet ?) : rechargez avant d'enregistrer."
 msgstr "Changed in the meantime (another tab?): reload before saving."
 
-#: apps/core/errors.py:172
+#: apps/core/errors.py:178
 msgid "Quota atteint."
 msgstr "Quota reached."
 
@@ -1545,7 +1546,7 @@ msgstr "before"
 msgid "après"
 msgstr "after"
 
-#: apps/core/models.py:112 apps/registrations/models.py:494
+#: apps/core/models.py:112 apps/registrations/models.py:502
 #: apps/reviews/models.py:236 apps/submissions/models.py:273
 #: apps/submissions/models.py:303
 msgid "motif"
@@ -1720,7 +1721,7 @@ msgstr "public file"
 msgid "fichiers publics"
 msgstr "public files"
 
-#: apps/core/models.py:331 apps/registrations/models.py:296
+#: apps/core/models.py:331 apps/registrations/models.py:304
 msgid "portée"
 msgstr "scope"
 
@@ -1890,8 +1891,8 @@ msgid "abandonné"
 msgstr "abandoned"
 
 #: apps/payments/models.py:117 apps/payments/models.py:241
-#: apps/payments/models.py:306 apps/registrations/models.py:439
-#: apps/registrations/models.py:474
+#: apps/payments/models.py:306 apps/registrations/models.py:61
+#: apps/registrations/models.py:447 apps/registrations/models.py:482
 msgid "inscription"
 msgstr "registration"
 
@@ -1913,14 +1914,14 @@ msgid "référence du fournisseur"
 msgstr "provider reference"
 
 #: apps/payments/models.py:127 apps/payments/models.py:261
-#: apps/payments/models.py:318 apps/registrations/models.py:190
-#: apps/registrations/models.py:270
+#: apps/payments/models.py:318 apps/registrations/models.py:198
+#: apps/registrations/models.py:278
 msgid "montant"
 msgstr "amount"
 
 #: apps/payments/models.py:128 apps/payments/models.py:262
-#: apps/payments/models.py:319 apps/registrations/models.py:78
-#: apps/registrations/models.py:398
+#: apps/payments/models.py:319 apps/registrations/models.py:86
+#: apps/registrations/models.py:406
 msgid "devise"
 msgstr "currency"
 
@@ -2013,7 +2014,7 @@ msgstr "number"
 msgid "facture d'origine"
 msgstr "original invoice"
 
-#: apps/payments/models.py:263 apps/registrations/models.py:396
+#: apps/payments/models.py:263 apps/registrations/models.py:404
 msgid "lignes"
 msgstr "lines"
 
@@ -2550,7 +2551,7 @@ msgstr "programme publications"
 msgid "présentateurs (positions des auteurs)"
 msgstr "presenters (author positions)"
 
-#: apps/program/models.py:355 apps/registrations/models.py:411
+#: apps/program/models.py:355 apps/registrations/models.py:419
 msgid "confirmée le"
 msgstr "confirmed on"
 
@@ -2857,233 +2858,342 @@ msgstr "no payment (zero amount)"
 msgid "gratuité accordée"
 msgstr "fee waiver"
 
-#: apps/registrations/models.py:80
+#: apps/registrations/models.py:62
+msgid "option"
+msgstr "option"
+
+#: apps/registrations/models.py:63
+msgid "remise"
+msgstr "discount"
+
+#: apps/registrations/models.py:88
 msgid "pays locaux"
 msgstr "local countries"
 
-#: apps/registrations/models.py:81
+#: apps/registrations/models.py:89
 msgid "paiement en ligne proposé"
 msgstr "online payment offered"
 
-#: apps/registrations/models.py:82
+#: apps/registrations/models.py:90
 msgid "virement proposé"
 msgstr "bank transfer offered"
 
-#: apps/registrations/models.py:83
+#: apps/registrations/models.py:91
 msgid "paiement sur place proposé"
 msgstr "on-site payment offered"
 
-#: apps/registrations/models.py:85
+#: apps/registrations/models.py:93
 msgid "délai de paiement en ligne (heures)"
 msgstr "online payment deadline (hours)"
 
-#: apps/registrations/models.py:90
+#: apps/registrations/models.py:98
 msgid "délai de paiement par virement (jours)"
 msgstr "bank transfer deadline (days)"
 
-#: apps/registrations/models.py:95
+#: apps/registrations/models.py:103
 msgid "annulation par le participant jusqu'au (UTC)"
 msgstr "participant cancellation until (UTC)"
 
-#: apps/registrations/models.py:98
+#: apps/registrations/models.py:106
 msgid "part remboursée avant la date limite (%)"
 msgstr "refunded share before the deadline (%)"
 
-#: apps/registrations/models.py:103
+#: apps/registrations/models.py:111
 msgid "part remboursée après la date limite (%)"
 msgstr "refunded share after the deadline (%)"
 
-#: apps/registrations/models.py:122 apps/registrations/models.py:123
+#: apps/registrations/models.py:130 apps/registrations/models.py:131
 msgid "paramètres des inscriptions"
 msgstr "registration settings"
 
-#: apps/registrations/models.py:153
+#: apps/registrations/models.py:161
 msgid "justificatif demandé"
 msgstr "proof required"
 
-#: apps/registrations/models.py:167
+#: apps/registrations/models.py:175
 msgid "catégorie d'inscription"
 msgstr "registration category"
 
-#: apps/registrations/models.py:168
+#: apps/registrations/models.py:176
 msgid "catégories d'inscription"
 msgstr "registration categories"
 
-#: apps/registrations/models.py:184 apps/registrations/models.py:383
+#: apps/registrations/models.py:192 apps/registrations/models.py:391
 msgid "catégorie"
 msgstr "category"
 
-#: apps/registrations/models.py:188 apps/registrations/models.py:393
+#: apps/registrations/models.py:196 apps/registrations/models.py:401
 msgid "période"
 msgstr "period"
 
-#: apps/registrations/models.py:189 apps/registrations/models.py:394
+#: apps/registrations/models.py:197 apps/registrations/models.py:402
 msgid "zone"
 msgstr "zone"
 
-#: apps/registrations/models.py:195
+#: apps/registrations/models.py:203
 msgid "tarif"
 msgstr "fee"
 
-#: apps/registrations/models.py:196
+#: apps/registrations/models.py:204
 msgid "tarifs"
 msgstr "fees"
 
-#: apps/registrations/models.py:224
+#: apps/registrations/models.py:232
 msgid "prix (local)"
 msgstr "price (local)"
 
-#: apps/registrations/models.py:225
+#: apps/registrations/models.py:233
 msgid "prix (international)"
 msgstr "price (international)"
 
-#: apps/registrations/models.py:226
+#: apps/registrations/models.py:234
 msgid "places"
 msgstr "places"
 
-#: apps/registrations/models.py:227
+#: apps/registrations/models.py:235
 msgid "places réservées"
 msgstr "reserved places"
 
-#: apps/registrations/models.py:230
+#: apps/registrations/models.py:238
 msgid "catégories autorisées"
 msgstr "allowed categories"
 
-#: apps/registrations/models.py:249
+#: apps/registrations/models.py:257
 msgid "option d'inscription"
 msgstr "registration option"
 
-#: apps/registrations/models.py:250
+#: apps/registrations/models.py:258
 msgid "options d'inscription"
 msgstr "registration options"
 
-#: apps/registrations/models.py:269
+#: apps/registrations/models.py:277
 msgid "pourcentage"
 msgstr "percentage"
 
-#: apps/registrations/models.py:274
+#: apps/registrations/models.py:282
 msgid "inscription seule"
 msgstr "registration only"
 
-#: apps/registrations/models.py:275
+#: apps/registrations/models.py:283
 msgid "inscription et options"
 msgstr "registration and options"
 
-#: apps/registrations/models.py:293
+#: apps/registrations/models.py:301
 msgid "type de remise"
 msgstr "discount type"
 
-#: apps/registrations/models.py:294
+#: apps/registrations/models.py:302
 msgid "valeur"
 msgstr "value"
 
-#: apps/registrations/models.py:302
+#: apps/registrations/models.py:310
 msgid "catégories visées"
 msgstr "targeted categories"
 
-#: apps/registrations/models.py:304
+#: apps/registrations/models.py:312
 msgid "utilisations maximales"
 msgstr "maximum uses"
 
-#: apps/registrations/models.py:305
+#: apps/registrations/models.py:313
 msgid "utilisations réservées"
 msgstr "reserved uses"
 
-#: apps/registrations/models.py:306
+#: apps/registrations/models.py:314
 msgid "utilisations consommées"
 msgstr "consumed uses"
 
-#: apps/registrations/models.py:307
+#: apps/registrations/models.py:315
 msgid "valable jusqu'au (UTC)"
 msgstr "valid until (UTC)"
 
-#: apps/registrations/models.py:321 apps/registrations/models.py:404
+#: apps/registrations/models.py:329 apps/registrations/models.py:412
 msgid "code promo"
 msgstr "promo code"
 
-#: apps/registrations/models.py:322
+#: apps/registrations/models.py:330
 msgid "codes promo"
 msgstr "promo codes"
 
-#: apps/registrations/models.py:345
+#: apps/registrations/models.py:353
 msgid "en attente de paiement"
 msgstr "awaiting payment"
 
-#: apps/registrations/models.py:346
+#: apps/registrations/models.py:354
 msgid "confirmée"
 msgstr "confirmed"
 
-#: apps/registrations/models.py:395
+#: apps/registrations/models.py:403
 msgid "moyen de paiement"
 msgstr "payment method"
 
-#: apps/registrations/models.py:397
+#: apps/registrations/models.py:405
 msgid "total"
 msgstr "total"
 
-#: apps/registrations/models.py:400
+#: apps/registrations/models.py:408
 msgid "options"
 msgstr "options"
 
-#: apps/registrations/models.py:410
+#: apps/registrations/models.py:418
 msgid "échéance de paiement"
 msgstr "payment deadline"
 
-#: apps/registrations/models.py:412
+#: apps/registrations/models.py:420
 msgid "annulée ou expirée le"
 msgstr "cancelled or expired on"
 
-#: apps/registrations/models.py:413
+#: apps/registrations/models.py:421
 msgid "nom de facturation"
 msgstr "billing name"
 
-#: apps/registrations/models.py:415
+#: apps/registrations/models.py:423
 msgid "organisme de facturation"
 msgstr "billing organisation"
 
-#: apps/registrations/models.py:417
+#: apps/registrations/models.py:425
 msgid "adresse de facturation"
 msgstr "billing address"
 
-#: apps/registrations/models.py:418
+#: apps/registrations/models.py:426
 msgid "jeton QR"
 msgstr "QR token"
 
-#: apps/registrations/models.py:420 apps/reviews/models.py:191
+#: apps/registrations/models.py:428 apps/reviews/models.py:191
 msgid "clé d'unicité active"
 msgstr "active uniqueness key"
 
-#: apps/registrations/models.py:440
+#: apps/registrations/models.py:448
 msgid "inscriptions"
 msgstr "registrations"
 
-#: apps/registrations/models.py:479
+#: apps/registrations/models.py:487
 msgid "statut de départ"
 msgstr "from status"
 
-#: apps/registrations/models.py:482
+#: apps/registrations/models.py:490
 msgid "statut d'arrivée"
 msgstr "to status"
 
-#: apps/registrations/models.py:484
+#: apps/registrations/models.py:492
 msgid "date du changement"
 msgstr "change date"
 
-#: apps/registrations/models.py:487
+#: apps/registrations/models.py:495
 msgid "auteur du changement"
 msgstr "changed by"
 
-#: apps/registrations/models.py:493
+#: apps/registrations/models.py:501
 msgid "acteur (commande ou tâche)"
 msgstr "actor (command or task)"
 
-#: apps/registrations/models.py:497
+#: apps/registrations/models.py:505
 msgid "historique d'une inscription"
 msgstr "registration history"
 
-#: apps/registrations/models.py:498
+#: apps/registrations/models.py:506
 msgid "historiques des inscriptions"
 msgstr "registration histories"
+
+#: apps/registrations/services/pricing.py:164
+#: apps/registrations/services/pricing.py:417
+msgid "Catégorie inconnue."
+msgstr "Unknown category."
+
+#: apps/registrations/services/pricing.py:172
+msgid "Option choisie deux fois."
+msgstr "Option chosen twice."
+
+#: apps/registrations/services/pricing.py:183
+#, python-format
+msgid "Option inconnue : %(code)s."
+msgstr "Unknown option: %(code)s."
+
+#: apps/registrations/services/pricing.py:189
+#, python-format
+msgid "Option non proposée à cette catégorie : %(code)s."
+msgstr "Option not offered to this category: %(code)s."
+
+#: apps/registrations/services/pricing.py:213
+msgid "Code promo inconnu ou expiré."
+msgstr "Unknown or expired promo code."
+
+#: apps/registrations/services/pricing.py:216
+msgid "Code promo non valable pour cette catégorie."
+msgstr "Promo code not valid for this category."
+
+#: apps/registrations/services/pricing.py:219
+#: apps/registrations/services/pricing.py:349
+msgid "Ce code promo a atteint son nombre d'utilisations."
+msgstr "This promo code has reached its number of uses."
+
+#: apps/registrations/services/pricing.py:221
+#: apps/registrations/services/pricing.py:351
+msgid "Code promo épuisé."
+msgstr "Promo code used up."
+
+#: apps/registrations/services/pricing.py:257
+msgid "Les inscriptions ne sont pas encore ouvertes."
+msgstr "Registration is not open yet."
+
+#: apps/registrations/services/pricing.py:265
+msgid "Catégorie non proposée pour cette période et cette zone."
+msgstr "Category not offered for this period and zone."
+
+#: apps/registrations/services/pricing.py:328
+#, python-format
+msgid "Plus de place disponible pour cette option : %(code)s."
+msgstr "No place left for this option: %(code)s."
+
+#: apps/registrations/services/pricing.py:396
+msgid "Montant positif ou nul attendu."
+msgstr "A positive or zero amount is expected."
+
+#: apps/registrations/services/pricing.py:398
+#, python-format
+msgid "Trop de décimales pour la devise %(currency)s."
+msgstr "Too many decimals for the currency %(currency)s."
+
+#: apps/registrations/services/pricing.py:476
+msgid "Catégorie utilisée par des inscriptions : désactivez-la."
+msgstr "Category used by registrations: deactivate it."
+
+#: apps/registrations/services/pricing.py:496
+msgid "Période et zone en double."
+msgstr "Duplicate period and zone."
+
+#: apps/registrations/services/pricing.py:564
+#, python-format
+msgid "Au moins %(count)s places, déjà réservées."
+msgstr "At least %(count)s places, already reserved."
+
+#: apps/registrations/services/pricing.py:590
+msgid "Option choisie par des inscriptions : désactivez-la."
+msgstr "Option chosen by registrations: deactivate it."
+
+#: apps/registrations/services/pricing.py:603
+msgid "Code obligatoire."
+msgstr "Code required."
+
+#: apps/registrations/services/pricing.py:608
+msgid "Valeur strictement positive attendue."
+msgstr "A strictly positive value is expected."
+
+#: apps/registrations/services/pricing.py:610
+msgid "Pourcentage de 100 au plus."
+msgstr "Percentage of 100 at most."
+
+#: apps/registrations/services/pricing.py:622
+msgid "Code déjà utilisé dans cette édition."
+msgstr "Code already used in this edition."
+
+#: apps/registrations/services/pricing.py:648
+#, python-format
+msgid "Au moins %(count)s, déjà utilisées."
+msgstr "At least %(count)s, already used."
+
+#: apps/registrations/services/pricing.py:672
+msgid "Code promo déjà utilisé : désactivez-le."
+msgstr "Promo code already used: deactivate it."
 
 #: apps/registrations/services/settings.py:63
 msgid "Liste de codes pays attendue."
@@ -3099,6 +3209,18 @@ msgid ""
 "Des tarifs ont plus de décimales que cette devise : corrigez-les d'abord."
 msgstr ""
 "Some fees have more decimals than this currency allows: correct them first."
+
+#: apps/registrations/views.py:363
+msgid "Indiquez votre pays dans votre profil : il détermine le tarif."
+msgstr "Enter your country in your profile: it determines the fee."
+
+#: apps/registrations/views.py:365
+msgid "Pays obligatoire."
+msgstr "Country required."
+
+#: apps/registrations/views.py:369
+msgid "Les inscriptions en ligne sont fermées."
+msgstr "Online registration is closed."
 
 #: apps/reviews/models.py:46
 msgid "note minimale"

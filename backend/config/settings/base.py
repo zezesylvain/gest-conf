@@ -316,6 +316,8 @@ REST_FRAMEWORK = {
         "submission_write": "600/hour",
         "submission_upload": "30/hour",
         "submission_submit": "20/hour",
+        # Inscriptions (plan L6) : devis, par compte.
+        "registration_quote": "300/hour",
     },
     "NUM_PROXIES": GESTCONF_TRUSTED_PROXY_COUNT,
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
@@ -347,6 +349,13 @@ SPECTACULAR_SETTINGS = {
         "Role": "apps.accounts.roles.Role",
         "Capability": "apps.accounts.roles.CAPABILITY_CHOICES",
         "Currency": "apps.core.money.Currency",
+        # Plan L6 : inscriptions.
+        "Period": "apps.registrations.models.Period",
+        "Zone": "apps.registrations.models.Zone",
+        "PaymentMethod": "apps.registrations.models.PaymentMethod",
+        "DiscountKind": "apps.registrations.models.DiscountKind",
+        "DiscountScope": "apps.registrations.models.DiscountScope",
+        "LineKind": "apps.registrations.models.LineKind",
         "InvitableRole": "apps.accounts.roles.InvitableRole",
         "OcFunction": "apps.accounts.roles.OcFunction",
         "UserRoleStatus": "apps.accounts.models.UserRoleStatus",

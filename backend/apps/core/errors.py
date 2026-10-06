@@ -97,6 +97,12 @@ class ErrorCode(models.TextChoices):
     DISCUSSION_CLOSED = "discussion_closed"
     # Échéance passée (version finale après la date clé « camera_ready », H18).
     DEADLINE_PASSED = "deadline_passed"
+    # Inscriptions (plan L6) : inscriptions fermées (hors des dates clés), option complète
+    # (quota, J3), code promo épuisé (J4), inscription déjà active (J5).
+    REGISTRATION_CLOSED = "registration_closed"
+    OPTION_FULL = "option_full"
+    PROMO_CODE_EXHAUSTED = "promo_code_exhausted"
+    ALREADY_REGISTERED = "already_registered"
 
 
 class DomainError(Exception):

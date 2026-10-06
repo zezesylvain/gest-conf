@@ -2305,6 +2305,346 @@ paths:
               schema:
                 $ref: '#/components/schemas/Ranking'
           description: ''
+  /v1/manage/editions/{edition_id}/registrations/categories:
+    get:
+      operationId: manage_registration_categories_list
+      description: '``…/registrations/categories`` : catégories et grilles de tarifs
+        (J2).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+          description: ''
+    post:
+      operationId: manage_registration_categories_create
+      description: '``…/registrations/categories`` : catégories et grilles de tarifs
+        (J2).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+          description: ''
+  /v1/manage/editions/{edition_id}/registrations/categories/{item_id}:
+    patch:
+      operationId: manage_registration_categories_update
+      description: '``…/registrations/categories`` : catégories et grilles de tarifs
+        (J2).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCategoryRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+          description: ''
+    delete:
+      operationId: manage_registration_categories_delete
+      description: '``…/registrations/categories`` : catégories et grilles de tarifs
+        (J2).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /v1/manage/editions/{edition_id}/registrations/categories/{item_id}/fees:
+    put:
+      operationId: manage_registration_categories_fees
+      description: '``…/registrations/categories`` : catégories et grilles de tarifs
+        (J2).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FeeGridRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+          description: ''
+  /v1/manage/editions/{edition_id}/registrations/options:
+    get:
+      operationId: manage_registration_options_list
+      description: '``…/registrations/options`` : options à quota (J3).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Option'
+          description: ''
+    post:
+      operationId: manage_registration_options_create
+      description: '``…/registrations/options`` : options à quota (J3).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OptionRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Option'
+          description: ''
+  /v1/manage/editions/{edition_id}/registrations/options/{item_id}:
+    patch:
+      operationId: manage_registration_options_update
+      description: '``…/registrations/options`` : options à quota (J3).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedOptionRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Option'
+          description: ''
+    delete:
+      operationId: manage_registration_options_delete
+      description: '``…/registrations/options`` : options à quota (J3).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /v1/manage/editions/{edition_id}/registrations/promo-codes:
+    get:
+      operationId: manage_registration_promo_codes_list
+      description: '``…/registrations/promo-codes`` : codes promo (J4).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PromoCode'
+          description: ''
+    post:
+      operationId: manage_registration_promo_codes_create
+      description: '``…/registrations/promo-codes`` : codes promo (J4).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PromoCodeRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PromoCode'
+          description: ''
+  /v1/manage/editions/{edition_id}/registrations/promo-codes/{item_id}:
+    patch:
+      operationId: manage_registration_promo_codes_update
+      description: '``…/registrations/promo-codes`` : codes promo (J4).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPromoCodeRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PromoCode'
+          description: ''
+    delete:
+      operationId: manage_registration_promo_codes_delete
+      description: '``…/registrations/promo-codes`` : codes promo (J4).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
   /v1/manage/editions/{edition_id}/registrations/settings:
     get:
       operationId: manage_registration_settings_retrieve
@@ -4148,6 +4488,46 @@ paths:
               schema:
                 $ref: '#/components/schemas/PublicSession'
           description: ''
+  /v1/public/registration:
+    get:
+      operationId: public_registration
+      description: |-
+        ``GET /v1/public/registration`` : catégories, tarifs, options, dates et moyens de
+        paiement de l'édition courante (J13), lus au build du portail ; 404 sans édition
+        publiée.
+      tags:
+      - public
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicRegistration'
+          description: ''
+  /v1/registrations/quote:
+    post:
+      operationId: registration_quote
+      description: |-
+        ``POST /v1/registrations/quote`` : prix d'une inscription à l'édition courante,
+        calculé par le serveur sans engagement (J2 à J4). Zone d'après le pays du profil,
+        obligatoire (409 ``profile_incomplete``).
+      tags:
+      - registrations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuoteRequestRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quote'
+          description: ''
   /v1/submissions:
     get:
       operationId: submissions_list
@@ -5135,6 +5515,96 @@ components:
         * `registrations.manage` - registrations.manage
         * `pricing.write` - pricing.write
         * `finance.read` - finance.read
+    Category:
+      type: object
+      description: 'Catégorie et sa grille de tarifs (gestion). ``code`` : fixé à
+        la création.'
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        code:
+          type: string
+          maxLength: 32
+          pattern: ^[-a-zA-Z0-9_]+$
+        label_fr:
+          type: string
+          title: Libellé (FR)
+          maxLength: 150
+        label_en:
+          type: string
+          title: Libellé (EN)
+          maxLength: 150
+        description_fr:
+          type: string
+          title: Description (FR)
+        description_en:
+          type: string
+          title: Description (EN)
+        requires_proof:
+          type: boolean
+          title: Justificatif demandé
+        is_active:
+          type: boolean
+          title: Actif
+        position:
+          type: integer
+          maximum: 65535
+          minimum: 0
+          title: Ordre
+        fees:
+          type: array
+          items:
+            $ref: '#/components/schemas/Fee'
+          readOnly: true
+        in_use:
+          type: boolean
+          readOnly: true
+      required:
+      - code
+      - fees
+      - id
+      - in_use
+      - label_fr
+    CategoryRequest:
+      type: object
+      description: 'Catégorie et sa grille de tarifs (gestion). ``code`` : fixé à
+        la création.'
+      properties:
+        code:
+          type: string
+          minLength: 1
+          maxLength: 32
+          pattern: ^[-a-zA-Z0-9_]+$
+        label_fr:
+          type: string
+          minLength: 1
+          title: Libellé (FR)
+          maxLength: 150
+        label_en:
+          type: string
+          title: Libellé (EN)
+          maxLength: 150
+        description_fr:
+          type: string
+          title: Description (FR)
+        description_en:
+          type: string
+          title: Description (EN)
+        requires_proof:
+          type: boolean
+          title: Justificatif demandé
+        is_active:
+          type: boolean
+          title: Actif
+        position:
+          type: integer
+          maximum: 65535
+          minimum: 0
+          title: Ordre
+      required:
+      - code
+      - label_fr
     Confidentiality:
       type: object
       description: Paramètres de l'évaluation (gestion, §6.1 ; plan L4 H4, H6, H12).
@@ -5597,6 +6067,22 @@ components:
           description: Le relecteur déclare un conflit d'intérêts (H8).
       required:
       - reason
+    DiscountKind:
+      enum:
+      - percent
+      - amount
+      type: string
+      description: |-
+        * `percent` - pourcentage
+        * `amount` - montant
+    DiscountScope:
+      enum:
+      - registration
+      - all
+      type: string
+      description: |-
+        * `registration` - inscription seule
+        * `all` - inscription et options
     DiscussionMessageManage:
       type: object
       properties:
@@ -5932,6 +6418,10 @@ components:
       - review_not_open
       - discussion_closed
       - deadline_passed
+      - registration_closed
+      - option_full
+      - promo_code_exhausted
+      - already_registered
       type: string
       description: |-
         * `validation_error` - Validation Error
@@ -5978,6 +6468,10 @@ components:
         * `review_not_open` - Review Not Open
         * `discussion_closed` - Discussion Closed
         * `deadline_passed` - Deadline Passed
+        * `registration_closed` - Registration Closed
+        * `option_full` - Option Full
+        * `promo_code_exhausted` - Promo Code Exhausted
+        * `already_registered` - Already Registered
     Expertise:
       type: object
       description: Expertises du relecteur (H7) et thématiques proposées.
@@ -6070,6 +6564,47 @@ components:
       required:
       - reason
       - until_local
+    Fee:
+      type: object
+      properties:
+        period:
+          $ref: '#/components/schemas/Period'
+        zone:
+          $ref: '#/components/schemas/Zone'
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+      required:
+      - amount
+      - period
+      - zone
+    FeeGridRequest:
+      type: object
+      description: Grille complète d'une catégorie (une cellule par période et zone
+        proposées).
+      properties:
+        fees:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeeRequest'
+      required:
+      - fees
+    FeeRequest:
+      type: object
+      properties:
+        period:
+          $ref: '#/components/schemas/Period'
+        zone:
+          $ref: '#/components/schemas/Zone'
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+      required:
+      - amount
+      - period
+      - zone
     FilePolicy:
       enum:
       - none
@@ -6514,6 +7049,37 @@ components:
       required:
       - at_local
       - code
+    Line:
+      type: object
+      properties:
+        kind:
+          $ref: '#/components/schemas/LineKind'
+        code:
+          type: string
+        label_fr:
+          type: string
+        label_en:
+          type: string
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+      required:
+      - amount
+      - code
+      - kind
+      - label_en
+      - label_fr
+    LineKind:
+      enum:
+      - registration
+      - option
+      - discount
+      type: string
+      description: |-
+        * `registration` - inscription
+        * `option` - option
+        * `discount` - remise
     Locale:
       enum:
       - fr
@@ -7022,6 +7588,130 @@ components:
       - institution
       - last_name
       - position
+    Option:
+      type: object
+      description: |-
+        Option à quota (gestion) : ``reserved`` places tenues par les inscriptions en attente
+        ou confirmées ; ``categories`` : codes des catégories autorisées (vide : toutes).
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        code:
+          type: string
+          maxLength: 32
+          pattern: ^[-a-zA-Z0-9_]+$
+        label_fr:
+          type: string
+          title: Libellé (FR)
+          maxLength: 150
+        label_en:
+          type: string
+          title: Libellé (EN)
+          maxLength: 150
+        description_fr:
+          type: string
+          title: Description (FR)
+        description_en:
+          type: string
+          title: Description (EN)
+        price_local:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          title: Prix (local)
+        price_international:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          title: Prix (international)
+        quota:
+          type: integer
+          maximum: 4294967295
+          minimum: 0
+          format: int64
+          nullable: true
+          title: Places
+        reserved:
+          type: integer
+          readOnly: true
+          title: Places réservées
+        categories:
+          type: array
+          items:
+            type: string
+        is_active:
+          type: boolean
+          title: Actif
+        position:
+          type: integer
+          maximum: 65535
+          minimum: 0
+          title: Ordre
+      required:
+      - code
+      - id
+      - label_fr
+      - reserved
+    OptionRequest:
+      type: object
+      description: |-
+        Option à quota (gestion) : ``reserved`` places tenues par les inscriptions en attente
+        ou confirmées ; ``categories`` : codes des catégories autorisées (vide : toutes).
+      properties:
+        code:
+          type: string
+          minLength: 1
+          maxLength: 32
+          pattern: ^[-a-zA-Z0-9_]+$
+        label_fr:
+          type: string
+          minLength: 1
+          title: Libellé (FR)
+          maxLength: 150
+        label_en:
+          type: string
+          title: Libellé (EN)
+          maxLength: 150
+        description_fr:
+          type: string
+          title: Description (FR)
+        description_en:
+          type: string
+          title: Description (EN)
+        price_local:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          title: Prix (local)
+        price_international:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          title: Prix (international)
+        quota:
+          type: integer
+          maximum: 4294967295
+          minimum: 0
+          format: int64
+          nullable: true
+          title: Places
+        categories:
+          type: array
+          items:
+            type: string
+            minLength: 1
+        is_active:
+          type: boolean
+          title: Actif
+        position:
+          type: integer
+          maximum: 65535
+          minimum: 0
+          title: Ordre
+      required:
+      - code
+      - label_fr
     Page:
       type: object
       properties:
@@ -7318,6 +8008,42 @@ components:
           minLength: 1
           title: Préfixe des pro forma
           maxLength: 8
+    PatchedCategoryRequest:
+      type: object
+      description: 'Catégorie et sa grille de tarifs (gestion). ``code`` : fixé à
+        la création.'
+      properties:
+        code:
+          type: string
+          minLength: 1
+          maxLength: 32
+          pattern: ^[-a-zA-Z0-9_]+$
+        label_fr:
+          type: string
+          minLength: 1
+          title: Libellé (FR)
+          maxLength: 150
+        label_en:
+          type: string
+          title: Libellé (EN)
+          maxLength: 150
+        description_fr:
+          type: string
+          title: Description (FR)
+        description_en:
+          type: string
+          title: Description (EN)
+        requires_proof:
+          type: boolean
+          title: Justificatif demandé
+        is_active:
+          type: boolean
+          title: Actif
+        position:
+          type: integer
+          maximum: 65535
+          minimum: 0
+          title: Ordre
     PatchedConfidentialityRequest:
       type: object
       description: Paramètres de l'évaluation (gestion, §6.1 ; plan L4 H4, H6, H12).
@@ -7503,6 +8229,62 @@ components:
         published:
           type: boolean
           title: Publiée
+    PatchedOptionRequest:
+      type: object
+      description: |-
+        Option à quota (gestion) : ``reserved`` places tenues par les inscriptions en attente
+        ou confirmées ; ``categories`` : codes des catégories autorisées (vide : toutes).
+      properties:
+        code:
+          type: string
+          minLength: 1
+          maxLength: 32
+          pattern: ^[-a-zA-Z0-9_]+$
+        label_fr:
+          type: string
+          minLength: 1
+          title: Libellé (FR)
+          maxLength: 150
+        label_en:
+          type: string
+          title: Libellé (EN)
+          maxLength: 150
+        description_fr:
+          type: string
+          title: Description (FR)
+        description_en:
+          type: string
+          title: Description (EN)
+        price_local:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          title: Prix (local)
+        price_international:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          title: Prix (international)
+        quota:
+          type: integer
+          maximum: 4294967295
+          minimum: 0
+          format: int64
+          nullable: true
+          title: Places
+        categories:
+          type: array
+          items:
+            type: string
+            minLength: 1
+        is_active:
+          type: boolean
+          title: Actif
+        position:
+          type: integer
+          maximum: 65535
+          minimum: 0
+          title: Ordre
     PatchedPageRequest:
       type: object
       properties:
@@ -7592,6 +8374,49 @@ components:
         presenter_registration_required:
           type: boolean
           title: Présentateur inscrit exigé (RG-11)
+    PatchedPromoCodeRequest:
+      type: object
+      description: |-
+        Code promo (gestion) : utilisations réservées (commandes en attente) et consommées
+        (inscriptions confirmées).
+      properties:
+        code:
+          type: string
+          minLength: 1
+          maxLength: 32
+        kind:
+          allOf:
+          - $ref: '#/components/schemas/DiscountKind'
+          title: Type de remise
+        value:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          title: Valeur
+        scope:
+          allOf:
+          - $ref: '#/components/schemas/DiscountScope'
+          title: Portée
+        categories:
+          type: array
+          items:
+            type: string
+            minLength: 1
+        max_uses:
+          type: integer
+          maximum: 4294967295
+          minimum: 0
+          format: int64
+          nullable: true
+          title: Utilisations maximales
+        valid_until:
+          type: string
+          format: date-time
+          nullable: true
+          title: Valable jusqu'au (UTC)
+        is_active:
+          type: boolean
+          title: Actif
     PatchedPublicFileRequest:
       type: object
       description: Gestion des fichiers de l'édition (documents et images).
@@ -7937,6 +8762,20 @@ components:
         is_active:
           type: boolean
           title: Actif
+    PaymentMethod:
+      enum:
+      - online
+      - transfer
+      - onsite
+      - free
+      - waiver
+      type: string
+      description: |-
+        * `online` - paiement en ligne
+        * `transfer` - virement (bon de commande)
+        * `onsite` - sur place
+        * `free` - aucun paiement (montant nul)
+        * `waiver` - gratuité accordée
     PeerReview:
       type: object
       description: Évaluation d'un autre relecteur, sous pseudonyme (RG-08, H11).
@@ -8003,6 +8842,16 @@ components:
       - pseudonym_rank
       - scores
       - suggested_type
+    Period:
+      enum:
+      - early
+      - regular
+      - onsite
+      type: string
+      description: |-
+        * `early` - préférentiel
+        * `regular` - normal
+        * `onsite` - sur place
     Person:
       type: object
       properties:
@@ -8333,6 +9182,112 @@ components:
         presenter_registration_required:
           type: boolean
           title: Présentateur inscrit exigé (RG-11)
+    PromoCode:
+      type: object
+      description: |-
+        Code promo (gestion) : utilisations réservées (commandes en attente) et consommées
+        (inscriptions confirmées).
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        code:
+          type: string
+          maxLength: 32
+        kind:
+          allOf:
+          - $ref: '#/components/schemas/DiscountKind'
+          title: Type de remise
+        value:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          title: Valeur
+        scope:
+          allOf:
+          - $ref: '#/components/schemas/DiscountScope'
+          title: Portée
+        categories:
+          type: array
+          items:
+            type: string
+        max_uses:
+          type: integer
+          maximum: 4294967295
+          minimum: 0
+          format: int64
+          nullable: true
+          title: Utilisations maximales
+        reserved_uses:
+          type: integer
+          readOnly: true
+          title: Utilisations réservées
+        consumed_uses:
+          type: integer
+          readOnly: true
+          title: Utilisations consommées
+        valid_until:
+          type: string
+          format: date-time
+          nullable: true
+          title: Valable jusqu'au (UTC)
+        is_active:
+          type: boolean
+          title: Actif
+      required:
+      - code
+      - consumed_uses
+      - id
+      - kind
+      - reserved_uses
+      - value
+    PromoCodeRequest:
+      type: object
+      description: |-
+        Code promo (gestion) : utilisations réservées (commandes en attente) et consommées
+        (inscriptions confirmées).
+      properties:
+        code:
+          type: string
+          minLength: 1
+          maxLength: 32
+        kind:
+          allOf:
+          - $ref: '#/components/schemas/DiscountKind'
+          title: Type de remise
+        value:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          title: Valeur
+        scope:
+          allOf:
+          - $ref: '#/components/schemas/DiscountScope'
+          title: Portée
+        categories:
+          type: array
+          items:
+            type: string
+            minLength: 1
+        max_uses:
+          type: integer
+          maximum: 4294967295
+          minimum: 0
+          format: int64
+          nullable: true
+          title: Utilisations maximales
+        valid_until:
+          type: string
+          format: date-time
+          nullable: true
+          title: Valable jusqu'au (UTC)
+        is_active:
+          type: boolean
+          title: Actif
+      required:
+      - code
+      - kind
+      - value
     PublicAlternate:
       type: object
       description: |-
@@ -8343,6 +9298,33 @@ components:
           $ref: '#/components/schemas/PagePaths'
       required:
       - paths
+    PublicCategory:
+      type: object
+      properties:
+        code:
+          type: string
+        label_fr:
+          type: string
+        label_en:
+          type: string
+        description_fr:
+          type: string
+        description_en:
+          type: string
+        requires_proof:
+          type: boolean
+        fees:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicFee'
+      required:
+      - code
+      - description_en
+      - description_fr
+      - fees
+      - label_en
+      - label_fr
+      - requires_proof
     PublicCommittee:
       type: object
       properties:
@@ -8531,6 +9513,21 @@ components:
       - tracks
       - venue
       - year
+    PublicFee:
+      type: object
+      properties:
+        period:
+          $ref: '#/components/schemas/Period'
+        zone:
+          $ref: '#/components/schemas/Zone'
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+      required:
+      - amount
+      - period
+      - zone
     PublicFile:
       type: object
       description: Gestion des fichiers de l'édition (documents et images).
@@ -8736,6 +9733,44 @@ components:
       - label_fr
       - new_tab
       - page
+    PublicOption:
+      type: object
+      properties:
+        code:
+          type: string
+        label_fr:
+          type: string
+        label_en:
+          type: string
+        description_fr:
+          type: string
+        description_en:
+          type: string
+        price_local:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        price_international:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        limited:
+          type: boolean
+          description: Places limitées (quota).
+        categories:
+          type: array
+          items:
+            type: string
+      required:
+      - categories
+      - code
+      - description_en
+      - description_fr
+      - label_en
+      - label_fr
+      - limited
+      - price_international
+      - price_local
     PublicPage:
       type: object
       properties:
@@ -8988,6 +10023,55 @@ components:
       - code
       - label_en
       - label_fr
+    PublicRegistration:
+      type: object
+      description: |-
+        Page publique « Inscription » (J13), lue au build du portail : catégories et tarifs,
+        options, dates clés (UTC), moyens de paiement proposés, pays « locaux ». Ni quota
+        restant ni donnée personnelle.
+      properties:
+        currency:
+          $ref: '#/components/schemas/Currency'
+        timezone:
+          type: string
+        opens_at:
+          type: string
+          format: date-time
+          nullable: true
+        early_bird_end:
+          type: string
+          format: date-time
+          nullable: true
+        closes_at:
+          type: string
+          format: date-time
+          nullable: true
+        methods:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentMethod'
+        local_countries:
+          type: array
+          items:
+            type: string
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicCategory'
+        options:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicOption'
+      required:
+      - categories
+      - closes_at
+      - currency
+      - early_bird_end
+      - local_countries
+      - methods
+      - opens_at
+      - options
+      - timezone
     PublicRoutes:
       type: object
       properties:
@@ -9332,6 +10416,54 @@ components:
       - session_title_fr
       - starts_at
       - version
+    Quote:
+      type: object
+      description: Prix calculé par le serveur, sans engagement (aucune place ni code
+        réservés).
+      properties:
+        category:
+          type: string
+        period:
+          $ref: '#/components/schemas/Period'
+        zone:
+          $ref: '#/components/schemas/Zone'
+        currency:
+          $ref: '#/components/schemas/Currency'
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/Line'
+        total:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+      required:
+      - category
+      - currency
+      - lines
+      - period
+      - total
+      - zone
+    QuoteRequestRequest:
+      type: object
+      properties:
+        category:
+          type: string
+          minLength: 1
+          maxLength: 32
+        options:
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 32
+          maxItems: 20
+        promo_code:
+          type: string
+          default: ''
+          maxLength: 32
+      required:
+      - category
     Ranking:
       type: object
       properties:
@@ -11826,6 +12958,14 @@ components:
           type: string
           default: ''
           maxLength: 2000
+    Zone:
+      enum:
+      - local
+      - international
+      type: string
+      description: |-
+        * `local` - local
+        * `international` - international
   securitySchemes:
     cookieAuth:
       type: apiKey

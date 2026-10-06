@@ -55,6 +55,14 @@ class PaymentMethod(models.TextChoices):
     WAIVER = "waiver", _("gratuité accordée")
 
 
+class LineKind(models.TextChoices):
+    """Nature d'une ligne figée d'une inscription ou d'une pièce."""
+
+    REGISTRATION = "registration", _("inscription")
+    OPTION = "option", _("option")
+    DISCOUNT = "discount", _("remise")
+
+
 # --- Paramètres de l'édition (J2, J5, J9) -----------------------------------------------------
 
 

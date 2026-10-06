@@ -143,6 +143,106 @@ CASES = [
         "/v1/manage/editions/{e}/registrations/settings",
         {"online_deadline_hours": 48},
     ),
+    # Plan L6 (L6.2) : catalogue des inscriptions (J2 à J4), lu par registrations.read, écrit
+    # par pricing.write.
+    Case(
+        "manage-registration-categories",
+        "GET",
+        RGR,
+        200,
+        "/v1/manage/editions/{e}/registrations/categories",
+    ),
+    Case(
+        "manage-registration-categories",
+        "POST",
+        PRW,
+        201,
+        "/v1/manage/editions/{e}/registrations/categories",
+        {"code": "matrice", "label_fr": "Matrice"},
+    ),
+    Case(
+        "manage-registration-category",
+        "PATCH",
+        PRW,
+        200,
+        "/v1/manage/editions/{e}/registrations/categories/{reg_category}",
+        {"label_fr": "Étudiant"},
+    ),
+    Case(
+        "manage-registration-category",
+        "DELETE",
+        PRW,
+        204,
+        "/v1/manage/editions/{e}/registrations/categories/{reg_category}",
+    ),
+    Case(
+        "manage-registration-category-fees",
+        "PUT",
+        PRW,
+        200,
+        "/v1/manage/editions/{e}/registrations/categories/{reg_category}/fees",
+        {"fees": [{"period": "early", "zone": "local", "amount": "25000"}]},
+    ),
+    Case(
+        "manage-registration-options",
+        "GET",
+        RGR,
+        200,
+        "/v1/manage/editions/{e}/registrations/options",
+    ),
+    Case(
+        "manage-registration-options",
+        "POST",
+        PRW,
+        201,
+        "/v1/manage/editions/{e}/registrations/options",
+        {"code": "visite", "label_fr": "Visite"},
+    ),
+    Case(
+        "manage-registration-option",
+        "PATCH",
+        PRW,
+        200,
+        "/v1/manage/editions/{e}/registrations/options/{reg_option}",
+        {"quota": 50},
+    ),
+    Case(
+        "manage-registration-option",
+        "DELETE",
+        PRW,
+        204,
+        "/v1/manage/editions/{e}/registrations/options/{reg_option}",
+    ),
+    Case(
+        "manage-registration-promo-codes",
+        "GET",
+        RGR,
+        200,
+        "/v1/manage/editions/{e}/registrations/promo-codes",
+    ),
+    Case(
+        "manage-registration-promo-codes",
+        "POST",
+        PRW,
+        201,
+        "/v1/manage/editions/{e}/registrations/promo-codes",
+        {"code": "MATRICE", "kind": "percent", "value": "10"},
+    ),
+    Case(
+        "manage-registration-promo-code",
+        "PATCH",
+        PRW,
+        200,
+        "/v1/manage/editions/{e}/registrations/promo-codes/{reg_promo}",
+        {"is_active": False},
+    ),
+    Case(
+        "manage-registration-promo-code",
+        "DELETE",
+        PRW,
+        204,
+        "/v1/manage/editions/{e}/registrations/promo-codes/{reg_promo}",
+    ),
     Case("manage-billing-profile", "GET", FIR, 200, "/v1/manage/editions/{e}/billing/profile"),
     Case(
         "manage-billing-profile",
@@ -905,6 +1005,7 @@ def world():
     ids = {
         **reviewing,
         **_program_objects(edition, users),
+        **_registration_objects(edition),
         "track_code": track.code,
         "grid": grid.pk,
         "review_submission": review_submission.pk,
@@ -970,6 +1071,23 @@ def _program_objects(edition, users) -> dict:
         "confirmed_submission": paper.pk,
         "program_member": users["SC_MEMBER"].pk,
     }
+
+
+def _registration_objects(edition) -> dict:
+    """Plan L6 : catégorie avec un tarif, option et code promo inutilisés (supprimables)."""
+    from decimal import Decimal
+
+    from apps.registrations.models import Fee, PromoCode, RegistrationCategory, RegistrationOption
+
+    category = RegistrationCategory.objects.create(
+        edition=edition, code="etudiant", label_fr="Étudiant"
+    )
+    Fee.objects.create(category=category, period="early", zone="local", amount=Decimal("1000"))
+    option = RegistrationOption.objects.create(edition=edition, code="diner", label_fr="Dîner")
+    promo = PromoCode.objects.create(
+        edition=edition, code="ETU", kind="percent", value=Decimal("10")
+    )
+    return {"reg_category": category.pk, "reg_option": option.pk, "reg_promo": promo.pk}
 
 
 def _submission_with_extension(edition):
