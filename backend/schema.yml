@@ -731,8 +731,9 @@ paths:
   /v1/manage/editions/{edition_id}/certificates/overview:
     get:
       operationId: manage_certificates_overview
-      description: '``…/certificates`` : suivi par nature, émission (file), liste,
-        PDF, révocation.'
+      description: |-
+        ``…/certificates/overview`` : une ligne par nature, sans pagination, à la différence
+        de la liste des attestations.
       parameters:
       - in: path
         name: edition_id
@@ -745,18 +746,6 @@ paths:
         description: Quel champ utiliser pour classer les résultats.
         schema:
           type: string
-      - name: page
-        required: false
-        in: query
-        description: Un numéro de page de l'ensemble des résultats.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Nombre de résultats à retourner par page.
-        schema:
-          type: integer
       tags:
       - manage
       security:
@@ -766,7 +755,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedCertificateOverviewList'
+                type: array
+                items:
+                  $ref: '#/components/schemas/CertificateOverview'
           description: ''
   /v1/manage/editions/{edition_id}/certificates/settings:
     get:
@@ -958,18 +949,6 @@ paths:
         description: Quel champ utiliser pour classer les résultats.
         schema:
           type: string
-      - name: page
-        required: false
-        in: query
-        description: Un numéro de page de l'ensemble des résultats.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Nombre de résultats à retourner par page.
-        schema:
-          type: integer
       tags:
       - manage
       security:
@@ -979,7 +958,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedSignatoryList'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Signatory'
           description: ''
   /v1/manage/editions/{edition_id}/certificates/templates:
     get:
@@ -998,18 +979,6 @@ paths:
         description: Quel champ utiliser pour classer les résultats.
         schema:
           type: string
-      - name: page
-        required: false
-        in: query
-        description: Un numéro de page de l'ensemble des résultats.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Nombre de résultats à retourner par page.
-        schema:
-          type: integer
       tags:
       - manage
       security:
@@ -1019,7 +988,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedDocumentTemplateList'
+                type: array
+                items:
+                  $ref: '#/components/schemas/DocumentTemplate'
           description: ''
   /v1/manage/editions/{edition_id}/certificates/templates/{nature}:
     patch:
@@ -1405,18 +1376,6 @@ paths:
         description: Quel champ utiliser pour classer les résultats.
         schema:
           type: string
-      - name: page
-        required: false
-        in: query
-        description: Un numéro de page de l'ensemble des résultats.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Nombre de résultats à retourner par page.
-        schema:
-          type: integer
       tags:
       - manage
       security:
@@ -1426,7 +1385,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedDaySessionList'
+                type: array
+                items:
+                  $ref: '#/components/schemas/DaySession'
           description: ''
   /v1/manage/editions/{edition_id}/day/sessions/{session_id}/attendance:
     get:
@@ -8084,6 +8045,7 @@ components:
       - certificates.manage
       - letters.manage
       - signature.manage
+      - sessions.chair
       type: string
       description: |-
         * `edition.read` - edition.read
@@ -8115,6 +8077,7 @@ components:
         * `certificates.manage` - certificates.manage
         * `letters.manage` - letters.manage
         * `signature.manage` - signature.manage
+        * `sessions.chair` - sessions.chair
     Category:
       type: object
       description: 'Catégorie et sa grille de tarifs (gestion). ``code`` : fixé à
@@ -11985,29 +11948,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Certificate'
-    PaginatedCertificateOverviewList:
-      type: object
-      required:
-      - count
-      - results
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/CertificateOverview'
     PaginatedCheckinListItemList:
       type: object
       required:
@@ -12031,52 +11971,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CheckinListItem'
-    PaginatedDaySessionList:
-      type: object
-      required:
-      - count
-      - results
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/DaySession'
-    PaginatedDocumentTemplateList:
-      type: object
-      required:
-      - count
-      - results
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/DocumentTemplate'
     PaginatedInvitationWithEmailList:
       type: object
       required:
@@ -12192,29 +12086,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ReviewSubmission'
-    PaginatedSignatoryList:
-      type: object
-      required:
-      - count
-      - results
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Signatory'
     PaginatedSubmissionManageList:
       type: object
       required:

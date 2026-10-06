@@ -1,0 +1,93 @@
+<gc-page-header
+  [heading]="'gestion.letters.title' | translate"
+  [lead]="'gestion.letters.lead' | translate"
+/>
+<gc-error-summary [messages]="errors()" />
+
+<form [formGroup]="form" (ngSubmit)="search()" novalidate class="card">
+  <div class="grid-2">
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'gestion.attendance.search' | translate }}</mat-label>
+      <input matInput formControlName="q" type="search" />
+      <mat-hint>{{ 'gestion.letters.searchHint' | translate }}</mat-hint>
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'gestion.letters.fields.status' | translate }}</mat-label>
+      <mat-select formControlName="status">
+        <mat-option value="">{{ 'gestion.registrations.all' | translate }}</mat-option>
+        @for (status of statuses; track status) {
+          <mat-option [value]="status">{{
+            'gestion.letters.status.' + status | translate
+          }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+  <div class="actions">
+    <button mat-flat-button type="submit">{{ 'gestion.registrations.apply' | translate }}</button>
+    <button mat-button type="button" (click)="reset()">
+      {{ 'gestion.registrations.reset' | translate }}
+    </button>
+  </div>
+</form>
+
+@if (!loading()) {
+  <p class="muted" role="status">{{ 'gestion.letters.count' | translate: { count: count() } }}</p>
+  <div class="table-wrap">
+    <table>
+      <caption class="visually-hidden">
+        {{
+          'gestion.letters.title' | translate
+        }}
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">{{ 'gestion.letters.fields.person' | translate }}</th>
+          <th scope="col">{{ 'gestion.letters.fields.passport' | translate }}</th>
+          <th scope="col">{{ 'gestion.letters.fields.stay' | translate }}</th>
+          <th scope="col">{{ 'gestion.letters.fields.status' | translate }}</th>
+          <th scope="col">{{ 'gestion.letters.fields.requestedAt' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows(); track row.id) {
+          <tr>
+            <td>
+              <a [routerLink]="['/editions', editionId(), 'lettres', row.id]">{{ row.person }}</a>
+              <br /><span class="muted">{{ row.reference }}</span>
+            </td>
+            <td>
+              {{ row.passport_name }}
+              <br /><span class="muted"
+                >{{ row.nationality }} · {{ row.passport_number_masked }}</span
+              >
+            </td>
+            <td>{{ row.stay_from }} → {{ row.stay_to }}</td>
+            <td>
+              <span class="badge">{{ 'gestion.letters.status.' + row.status | translate }}</span>
+              <br /><span class="muted">{{
+                'gestion.registrations.status.' + row.registration_status | translate
+              }}</span>
+            </td>
+            <td>{{ date(row.requested_at) }}</td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="5" class="muted">{{ 'gestion.letters.empty' | translate }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  @if (pages() > 1) {
+    <nav class="actions" [attr.aria-label]="'gestion.pagination.label' | translate">
+      <button mat-button type="button" [disabled]="page() <= 1" (click)="goTo(page() - 1)">
+        {{ 'gestion.pagination.previous' | translate }}
+      </button>
+      <span>{{ 'gestion.pagination.status' | translate: { page: page(), pages: pages() } }}</span>
+      <button mat-button type="button" [disabled]="page() >= pages()" (click)="goTo(page() + 1)">
+        {{ 'gestion.pagination.next' | translate }}
+      </button>
+    </nav>
+  }
+}

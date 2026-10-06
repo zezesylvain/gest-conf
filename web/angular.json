@@ -125,7 +125,8 @@
               "projects/shared/src/lib/ui-kit/theme.scss",
               "projects/gestion/src/styles.scss"
             ],
-            "baseHref": "/gestion/"
+            "baseHref": "/gestion/",
+            "allowedCommonJsDependencies": ["jsqr"]
           },
           "configurations": {
             "production": {
@@ -141,7 +142,8 @@
                   "maximumError": "8kB"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "serviceWorker": "projects/gestion/ngsw-config.json"
             },
             "development": {
               "optimization": false,

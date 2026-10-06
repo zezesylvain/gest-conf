@@ -1,0 +1,83 @@
+<gc-page-header [heading]="'gestion.letters.detail.title' | translate" />
+<p>
+  <a [routerLink]="['/editions', editionId(), 'lettres']">{{
+    'gestion.letters.back' | translate
+  }}</a>
+</p>
+<div aria-live="polite">
+  @if (status()) {
+    <p class="notice" role="status">{{ status() }}</p>
+  }
+</div>
+<gc-error-summary [messages]="errors()" />
+
+@if (letter(); as current) {
+  <section class="card" aria-labelledby="request-title">
+    <h2 id="request-title">
+      {{ current.person }}
+      <span class="badge">{{ 'gestion.letters.status.' + current.status | translate }}</span>
+    </h2>
+    <dl>
+      <dt>{{ 'gestion.letters.fields.registration' | translate }}</dt>
+      <dd>
+        <a [routerLink]="['/editions', editionId(), 'inscriptions', current.registration_id]">{{
+          current.reference
+        }}</a>
+        ({{ 'gestion.registrations.status.' + current.registration_status | translate }})
+      </dd>
+      <dt>{{ 'gestion.letters.fields.passportName' | translate }}</dt>
+      <dd>{{ current.passport_name }}</dd>
+      <dt>{{ 'gestion.letters.fields.nationality' | translate }}</dt>
+      <dd>{{ current.nationality }}</dd>
+      <dt>{{ 'gestion.letters.fields.passportNumber' | translate }}</dt>
+      <dd>{{ current.passport_number || ('gestion.letters.erased' | translate) }}</dd>
+      <dt>{{ 'gestion.letters.fields.stay' | translate }}</dt>
+      <dd>{{ current.stay_from }} → {{ current.stay_to }}</dd>
+      <dt>{{ 'gestion.letters.fields.embassy' | translate }}</dt>
+      <dd>{{ current.embassy || '—' }}</dd>
+      <dt>{{ 'gestion.letters.fields.requestedAt' | translate }}</dt>
+      <dd>{{ date(current.requested_at) }}</dd>
+      @if (current.decided_by) {
+        <dt>{{ 'gestion.letters.fields.decidedBy' | translate }}</dt>
+        <dd>{{ current.decided_by }}</dd>
+      }
+      @if (current.issued_at) {
+        <dt>{{ 'gestion.letters.fields.issuedAt' | translate }}</dt>
+        <dd>{{ date(current.issued_at) }} — {{ current.signatory_name }}</dd>
+      }
+      @if (current.refuse_reason) {
+        <dt>{{ 'gestion.letters.fields.refuseReason' | translate }}</dt>
+        <dd>{{ current.refuse_reason }}</dd>
+      }
+      @if (current.revoked_at) {
+        <dt>{{ 'gestion.letters.fields.revokedAt' | translate }}</dt>
+        <dd>{{ date(current.revoked_at) }} — {{ current.revoke_reason }}</dd>
+      }
+      @if (current.verification_url) {
+        <dt>{{ 'gestion.letters.fields.verification' | translate }}</dt>
+        <dd>{{ current.verification_url }}</dd>
+      }
+    </dl>
+    <div class="actions">
+      @if (current.status === 'requested') {
+        <button mat-flat-button type="button" (click)="issue(current)" [disabled]="busy()">
+          {{ 'gestion.letters.issue.action' | translate }}
+        </button>
+        <button mat-stroked-button type="button" (click)="refuse(current)" [disabled]="busy()">
+          {{ 'gestion.letters.refuse.action' | translate }}
+        </button>
+      }
+      @if (current.status === 'issued' || current.status === 'revoked') {
+        <a mat-stroked-button [href]="pdfUrl(current)" target="_blank" rel="noopener">
+          {{ 'gestion.letters.pdf' | translate }}
+        </a>
+      }
+      @if (current.status === 'issued') {
+        <button mat-button type="button" (click)="revoke(current)" [disabled]="busy()">
+          {{ 'gestion.letters.revoke.action' | translate }}
+        </button>
+      }
+    </div>
+    <p class="muted">{{ 'gestion.letters.disclaimer' | translate }}</p>
+  </section>
+}

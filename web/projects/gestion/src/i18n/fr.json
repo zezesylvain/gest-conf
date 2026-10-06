@@ -30,7 +30,9 @@
         "submissions": "Soumissions",
         "reviewing": "Évaluation",
         "program": "Programme",
-        "registrations": "Inscriptions"
+        "registrations": "Inscriptions",
+        "dayof": "Jour J",
+        "documents": "Attestations et lettres"
       },
       "keywords": {
         "dashboard": "accueil, statut, publier, publication, archiver, état, résumé",
@@ -63,7 +65,16 @@
         "billingDocuments": "facture, avoir, pro forma, numéro, pdf, comptabilité, export, csv",
         "finance": "tableau de bord, recettes, encaissé, remboursé, impayés, net, répartition",
         "pricing": "tarifs, catégories, grille, période, préférentiel, sur place, zone, options, quotas, codes promo, remise, devise, annulation",
-        "billingProfile": "mentions légales, raison sociale, adresse, TVA, coordonnées bancaires, préfixes, numérotation"
+        "billingProfile": "mentions légales, raison sociale, adresse, TVA, coordonnées bancaires, préfixes, numérotation",
+        "reception": "accueil, scan, qr, badge, pointage, check-in, caméra, hors ligne, téléphone, bénévole",
+        "daySessions": "sessions, émargement, présents, présentée, président de séance, programme publié",
+        "attendance": "présences, pointages, annulation, export, csv, liste des présents",
+        "badges": "badges, impression, planche, a4, a6, qr, catégorie, couleur",
+        "counter": "comptoir, sur place, inscription, sans compte, paiement, badge",
+        "certificates": "attestations, certificats, émission, révocation, participation, communication, évaluation",
+        "certificateSettings": "modèle, gabarit, en-tête, signataire, signature, pades, certificat, aperçu, textes",
+        "letters": "lettres d'invitation, visa, passeport, ambassade, consulat, demande",
+        "signature": "signature, signataire, nom, fonction, image"
       },
       "portalSections": "Sections",
       "portalPages": "Pages",
@@ -85,7 +96,16 @@
       "billingDocuments": "Factures et avoirs",
       "finance": "Finances",
       "pricing": "Tarifs",
-      "billingProfile": "Facturation"
+      "billingProfile": "Facturation",
+      "reception": "Accueil (scan)",
+      "daySessions": "Sessions du jour",
+      "attendance": "Présences",
+      "badges": "Badges",
+      "counter": "Comptoir",
+      "certificates": "Attestations",
+      "certificateSettings": "Modèle des attestations",
+      "letters": "Lettres d'invitation",
+      "signature": "Ma signature"
     },
     "status": {
       "draft": "brouillon",
@@ -202,6 +222,11 @@
         "counts": "{{confirmed}} inscription(s) confirmée(s), {{pending}} en attente de paiement.",
         "money": "Encaissé : {{collected}} ; impayés : {{outstanding}}.",
         "todo": "À traiter : {{invoices}} facture(s) en attente, {{orphans}} paiement(s) sans inscription confirmée."
+      },
+      "dayof": {
+        "title": "Jour J et attestations",
+        "certificates": "{{count}} attestation(s) émise(s).",
+        "letters": "{{count}} demande(s) de lettre d'invitation à instruire."
       }
     },
     "fields": {
@@ -373,7 +398,10 @@
         "scopeLabel": "S'applique à",
         "maxUses": "Utilisations maximales",
         "maxUsesHint": "Vide : sans limite.",
-        "refundHint": "Part du payé remboursée en cas d'annulation, avant ou après la date limite."
+        "refundHint": "Part du payé remboursée en cas d'annulation, avant ou après la date limite.",
+        "badgeColor": "Couleur du badge",
+        "badgeColorHint": "Bandeau de la catégorie, « #RRGGBB » ; vide : couleur par défaut.",
+        "badgeColorError": "Couleur au format #RRGGBB."
       },
       "billing": {
         "title": "Mentions de facturation",
@@ -549,7 +577,10 @@
           "grantorsTitle": "Qui attribue quoi",
           "grantorsText": "Administrateur et président de la conférence : par un administrateur. Président du comité scientifique et membres du comité d'organisation : par un administrateur ou le président de la conférence. Membres du comité scientifique : aussi par le président de ce comité.",
           "lastAdminTitle": "Dernier administrateur",
-          "lastAdminText": "Le dernier administrateur actif d'une édition ne peut pas être retiré depuis la gestion : seul l'exploitant de la plateforme le peut, par une commande journalisée."
+          "lastAdminText": "Le dernier administrateur actif d'une édition ne peut pas être retiré depuis la gestion : seul l'exploitant de la plateforme le peut, par une commande journalisée.",
+          "volunteer": "Bénévole : pointage à l'accueil et à l'entrée des sessions, sans autre droit (double authentification).",
+          "sessionChair": "Président de séance : émargement et communications présentées de ses sessions seulement.",
+          "signatory": "Signataire : renseigne sa propre signature, apposée sur les attestations et les lettres (double authentification)."
         },
         "dashboard": {
           "title": "Tableau de bord",
@@ -1027,6 +1058,159 @@
           "incompleteText": "Sans raison sociale ni adresse, aucune facture ne s'émet (entité de facturation à confirmer, Q8).",
           "whoTitle": "Qui modifie ?",
           "whoText": "Le CO « finances » et l'administrateur, avec une authentification récente."
+        },
+        "reception": {
+          "title": "Accueil (scan des badges)",
+          "summary": "Pointer les participants à l'accueil ou à l'entrée d'une session, même sans réseau.",
+          "path": "Jour J › Accueil (scan)",
+          "intro": "Le QR du badge est lu par la caméra du téléphone ; le serveur répond pour chaque badge. Sans réseau, l'appareil décide sur la liste téléchargée et garde les pointages jusqu'au retour du réseau.",
+          "installTitle": "Installer l'accueil",
+          "installBody": "Ouvrez cet écran sur le téléphone, puis « Ajouter à l'écran d'accueil » : il s'ouvre ensuite comme une application, même sans réseau.",
+          "downloadTitle": "Télécharger la liste",
+          "downloadBody": "Avant l'ouverture, « Télécharger la liste hors ligne » : nom, catégorie et empreinte du badge des inscrits confirmés. Elle vaut 48 heures.",
+          "scanTitle": "Scanner",
+          "scanBody": "Allumez la caméra et présentez le badge : le résultat s'affiche et se lit (pointé, déjà pointé, refusé).",
+          "offlineTitle": "Sans réseau",
+          "offlineBody": "Le badge est vérifié sur la liste de l'appareil ; le pointage est mis en file. Une personne absente de la liste est dirigée vers le comptoir.",
+          "syncTitle": "Synchroniser",
+          "syncBody": "Au retour du réseau, la file part seule (ou par « Synchroniser »). Le serveur revérifie chaque pointage et signale ceux qu'il refuse.",
+          "refusalsTitle": "Refus",
+          "refusalsText": "Inscription annulée, expirée, en attente de paiement, badge remplacé ou d'une autre édition : la personne n'entre pas sans passer au comptoir.",
+          "logoutTitle": "Déconnexion",
+          "logoutText": "La déconnexion efface la liste et les pointages non envoyés de l'appareil : synchronisez avant de vous déconnecter.",
+          "cameraTitle": "Caméra",
+          "cameraText": "L'image reste sur l'appareil : seul le texte du QR est envoyé. Sans caméra, saisissez la référence imprimée sous le QR (CO avec le droit de gérer les présences)."
+        },
+        "day-sessions": {
+          "title": "Sessions du jour",
+          "summary": "Émarger l'entrée des sessions et marquer les communications présentées.",
+          "path": "Jour J › Sessions du jour",
+          "intro": "Les sessions du programme publié, avec leurs présents et leurs communications.",
+          "scan": "« Émarger l'entrée » ouvre l'accueil en mode session : chaque badge lu à l'entrée vaut présence, même sans pointage à l'accueil.",
+          "presented": "« Marquer présentée » : la communication passe de programmée à présentée ; son présentateur pourra recevoir une attestation de communication.",
+          "attendance": "« Présents » liste les personnes pointées à l'entrée ; l'export CSV les contient toutes.",
+          "chairTitle": "Président de séance",
+          "chairText": "Il ne voit et ne traite que ses sessions, sans double authentification et sans autre droit.",
+          "correctionTitle": "Correction",
+          "correctionText": "Une communication marquée présentée à tort ne se corrige que par le CO « programme » ou l'administrateur, avec un motif journalisé."
+        },
+        "attendance": {
+          "title": "Présences",
+          "summary": "Suivre, corriger et exporter les pointages de l'accueil.",
+          "path": "Jour J › Présences",
+          "intro": "Tous les pointages de l'accueil, faits en ligne ou synchronisés.",
+          "search": "Recherche par nom ou par référence ; filtre des pointages valides ou annulés.",
+          "cancel": "Un pointage erroné s'annule avec un motif ; la personne peut être pointée de nouveau.",
+          "export": "L'export CSV est journalisé et demande une authentification récente.",
+          "keptTitle": "Rien n'est supprimé",
+          "keptText": "Un pointage annulé reste visible, avec son auteur et son motif. Une présence enregistrée ouvre droit à l'attestation de participation (RG-16)."
+        },
+        "badges": {
+          "title": "Badges",
+          "summary": "Imprimer les badges des inscrits confirmés.",
+          "path": "Jour J › Badges",
+          "intro": "Planches A4 de quatre badges A6 : nom, institution, pays, catégorie en couleur, édition et QR.",
+          "filterTitle": "Choisir",
+          "filterBody": "Une catégorie ou toutes ; « Préparer les fichiers » compte les badges.",
+          "downloadTitle": "Télécharger",
+          "downloadBody": "Un fichier PDF par lot de 200 badges au plus ; chaque téléchargement est journalisé.",
+          "printTitle": "Imprimer",
+          "printBody": "Imprimez à 100 %, sans ajustement à la page, puis découpez la planche en quatre.",
+          "tokenTitle": "Le QR est un titre d'accès",
+          "tokenText": "Les badges ne sont jamais stockés ; ne laissez pas traîner les fichiers ni les planches imprimées.",
+          "lostTitle": "Badge perdu",
+          "lostText": "Depuis la fiche de l'inscription, « Remplacer le badge » : l'ancien est refusé à l'accueil, imprimez le nouveau."
+        },
+        "counter": {
+          "title": "Comptoir",
+          "summary": "Inscrire sur place une personne, avec ou sans compte.",
+          "path": "Jour J › Comptoir",
+          "intro": "Le comptoir inscrit au tarif « sur place » une personne qui se présente, et imprime son badge.",
+          "personTitle": "La personne",
+          "personBody": "Adresse e-mail, nom et prénom ; institution et pays facultatifs.",
+          "categoryTitle": "La catégorie",
+          "categoryBody": "Catégorie et options, au tarif sur place de la grille.",
+          "paidTitle": "Le paiement",
+          "paidBody": "Cochez « Paiement reçu » pour confirmer aussitôt ; sinon, l'inscription attend son paiement.",
+          "badgeTitle": "Le badge",
+          "badgeBody": "Une fois confirmée, « Imprimer le badge » ouvre le PDF.",
+          "accountTitle": "Compte créé sans mot de passe",
+          "accountText": "La personne reçoit un e-mail pour définir son mot de passe ; elle ne peut pas se connecter avant.",
+          "existingTitle": "Adresse déjà connue",
+          "existingText": "L'inscription est rattachée au compte existant ; les nom et institution saisis ne le modifient pas."
+        },
+        "certificates": {
+          "title": "Attestations",
+          "summary": "Émettre, suivre et révoquer les attestations.",
+          "path": "Attestations et lettres › Attestations",
+          "intro": "Trois natures d'attestation, émises par le comité après la conférence.",
+          "participation": "Participation : inscription confirmée et présence enregistrée (accueil ou session).",
+          "presentation": "Communication : présentateur d'une communication marquée présentée.",
+          "review": "Évaluation (si activée) : relecteur ayant envoyé au moins une évaluation ; seul le nombre figure, jamais les titres.",
+          "checkTitle": "Vérifier",
+          "checkBody": "Le tableau indique, par nature, les éligibles, les émises et ce qui manque (signataire, certificat).",
+          "issueTitle": "Émettre",
+          "issueBody": "« Émettre » confie l'émission à la file de tâches ; chaque personne reçoit un e-mail et télécharge son attestation depuis son compte.",
+          "followTitle": "Compléter",
+          "followBody": "Après un pointage tardif, « Émettre les manquantes » n'émet que les nouvelles : rien n'est émis deux fois.",
+          "rg16Title": "Présence obligatoire (RG-16)",
+          "rg16Text": "Le serveur revérifie la condition de chaque nature à l'émission ; aucune attestation de participation sans présence enregistrée.",
+          "revokeTitle": "Révocation",
+          "revokeText": "Une attestation révoquée reste dans la liste et la vérification publique la déclare révoquée ; le motif est journalisé."
+        },
+        "certificate-settings": {
+          "title": "Modèle des attestations",
+          "summary": "Régler la signature, l'en-tête, le signataire et les textes.",
+          "path": "Attestations et lettres › Modèle des attestations",
+          "intro": "Le modèle vaut pour les attestations et pour les lettres d'invitation de l'édition.",
+          "modeTitle": "Mode de signature",
+          "modeBody": "Image de la signature (par défaut), ou signature électronique PAdES avec le certificat de l'institution.",
+          "headerTitle": "En-tête officiel",
+          "headerBody": "Logo ou bandeau de l'institution, en PNG ou JPEG.",
+          "keyTitle": "Certificat",
+          "keyBody": "Pour PAdES : le fichier .p12 et son mot de passe, qui ne sert qu'au dépôt.",
+          "templatesTitle": "Textes",
+          "templatesBody": "Titre, texte et pied de page en français et en anglais, pour chaque nature.",
+          "signatoryTitle": "Signataire",
+          "signatoryBody": "Chaque nature désigne un signataire dont la signature est complète ; sans lui, rien ne s'émet.",
+          "previewTitle": "Aperçu",
+          "previewBody": "« Aperçu » produit un PDF sur des données fictives, ni signé ni conservé.",
+          "placeholdersTitle": "Variables",
+          "placeholdersText": "Seules les variables affichées sont permises, entre accolades ({name}) ; toute autre accolade est refusée.",
+          "padesTitle": "PAdES",
+          "padesText": "La signature PAdES prouve l'intégrité du PDF ; un certificat dans un fichier n'est pas une signature qualifiée au sens d'eIDAS.",
+          "qualifiedTitle": "Signature qualifiée",
+          "qualifiedText": "Elle exige un prestataire de confiance qualifié, à choisir (question Q17) ; aucun n'est encore branché."
+        },
+        "letters": {
+          "title": "Lettres d'invitation",
+          "summary": "Instruire les demandes de lettre d'invitation pour les visas.",
+          "path": "Attestations et lettres › Lettres d'invitation",
+          "intro": "Un participant inscrit demande sa lettre depuis son compte ; le comité l'instruit.",
+          "reviewTitle": "Examiner",
+          "reviewBody": "La fiche montre le passeport (numéro en clair), le séjour, l'ambassade et l'état de l'inscription.",
+          "issueTitle": "Émettre",
+          "issueBody": "La lettre PDF est signée par le signataire désigné et vérifiable publiquement par son QR.",
+          "refuseTitle": "Refuser",
+          "refuseBody": "Le motif du refus est communiqué au participant.",
+          "passportTitle": "Numéro de passeport",
+          "passportText": "Il n'apparaît en clair que dans la fiche et il est effacé 30 jours après l'édition.",
+          "disclaimerTitle": "Portée de la lettre",
+          "disclaimerText": "La lettre n'engage pas l'organisation à prendre en charge des frais."
+        },
+        "signature": {
+          "title": "Ma signature",
+          "summary": "Renseigner sa signature de signataire.",
+          "path": "Attestations et lettres › Ma signature",
+          "intro": "Le signataire renseigne lui-même ce qui sera apposé sur les pièces dont il est le signataire désigné.",
+          "identityTitle": "Nom et fonction",
+          "identityBody": "Nom affiché et fonction en français et en anglais.",
+          "imageTitle": "Image",
+          "imageBody": "PNG ou JPEG de la signature manuscrite, sur fond clair.",
+          "onlyTitle": "Le signataire seul",
+          "onlyText": "Personne d'autre, ni l'administrateur, ne peut déposer ou remplacer votre signature.",
+          "frozenTitle": "Pièces émises",
+          "frozenText": "Une pièce émise garde le nom, la fonction et l'image du moment ; une modification ne vaut que pour les suivantes."
         }
       }
     },
@@ -1986,6 +2170,17 @@
         "proforma": {
           "action": "Émettre une facture pro forma",
           "done": "Facture pro forma émise."
+        },
+        "badge": {
+          "download": "Badge (PDF)",
+          "replace": {
+            "action": "Remplacer le badge",
+            "title": "Remplacer le badge",
+            "message": "Un nouveau QR sera créé : l'ancien badge sera refusé à l'accueil. À faire pour un badge perdu ou volé.",
+            "confirm": "Remplacer",
+            "reason": "Motif",
+            "done": "Badge remplacé : imprimez le nouveau."
+          }
         }
       }
     },
@@ -2065,6 +2260,384 @@
       "amount": "Montant",
       "count": "Nombre",
       "none": "Rien pour l'instant."
+    },
+    "logoutPending": {
+      "title": "Pointages non synchronisés",
+      "message": "{{count}} pointage(s) de l'accueil n'ont pas encore été envoyés au serveur. La déconnexion les efface de cet appareil : synchronisez d'abord si le réseau le permet. Se déconnecter quand même ?",
+      "confirm": "Se déconnecter"
+    },
+    "reception": {
+      "title": "Accueil",
+      "lead": "Scannez le QR des badges ; sans réseau, l'appareil décide sur la liste téléchargée et synchronise ensuite.",
+      "scan": {
+        "reception": "Pointage à l'accueil",
+        "session": "Entrée de la session : {{session}}"
+      },
+      "camera": {
+        "start": "Allumer la caméra",
+        "stop": "Éteindre la caméra",
+        "denied": "Accès à la caméra refusé : autorisez-le dans les réglages du navigateur, ou saisissez la référence.",
+        "unavailable": "Caméra indisponible sur cet appareil : saisissez la référence du badge."
+      },
+      "outcome": {
+        "checked_in": "Pointé",
+        "already_checked_in": "Déjà pointé",
+        "unknown": "Badge inconnu",
+        "other_edition": "Badge d'une autre édition",
+        "cancelled": "Inscription annulée",
+        "expired": "Inscription expirée",
+        "replaced": "Badge remplacé : ancien badge refusé",
+        "pending_payment": "En attente de paiement : diriger vers le comptoir",
+        "not_allowed": "Saisie manuelle non permise",
+        "unknown_session": "Session absente du programme publié",
+        "offline_absent": "Absent de la liste hors ligne : diriger vers le comptoir",
+        "no_bundle": "Pas de réseau ni de liste hors ligne : impossible de vérifier",
+        "bad_reference": "Référence mal formée (exemple : GC27-I00042)"
+      },
+      "offlineDecision": "Décidé sans réseau : confirmé par le serveur à la synchronisation.",
+      "manual": {
+        "reference": "Référence de l'inscription",
+        "hint": "Imprimée sous le QR du badge, par exemple GC27-I00042.",
+        "submit": "Pointer"
+      },
+      "status": {
+        "title": "Réseau et liste hors ligne",
+        "online": "En ligne",
+        "offline": "Hors ligne"
+      },
+      "summary": "{{checkedIn}} pointé(s) à l'accueil sur {{confirmed}} inscription(s) confirmée(s) ; {{pending}} en attente de paiement.",
+      "bundle": {
+        "ready": "Liste de {{count}} participant(s), téléchargée le {{date}}, valable jusqu'au {{expires}}.",
+        "none": "Aucune liste hors ligne sur cet appareil.",
+        "download": "Télécharger la liste hors ligne",
+        "refresh": "Mettre à jour la liste",
+        "forget": "Effacer la liste",
+        "downloaded": "Liste de {{count}} participant(s) enregistrée sur l'appareil.",
+        "forgotten": "Liste effacée de l'appareil.",
+        "chairOnly": "Président de séance : émargement en ligne de vos sessions ; pas de liste hors ligne."
+      },
+      "queue": {
+        "count": "{{count}} pointage(s) en attente d'envoi.",
+        "sync": "Synchroniser",
+        "details": "Pointages en attente",
+        "synced": "{{sent}} pointage(s) envoyé(s), dont {{rejected}} refusé(s) par le serveur."
+      },
+      "rejected": {
+        "title": "Refusés à la synchronisation",
+        "lead": "Le serveur a revérifié ces pointages faits sans réseau : la personne n'est pas pointée.",
+        "clear": "Masquer"
+      },
+      "settings": {
+        "title": "Réglages du poste",
+        "mode": "Mode",
+        "reception": "Accueil de la conférence",
+        "modeHint": "Une session du programme publié pour émarger son entrée.",
+        "device": "Nom du poste",
+        "deviceHint": "Repris dans chaque pointage (exemple : entrée principale)."
+      }
+    },
+    "daySessions": {
+      "title": "Sessions du jour",
+      "lead": "Programme publié : émargement à l'entrée et communications présentées.",
+      "chairs": "Présidence : {{names}}",
+      "youChair": "vous présidez",
+      "attendanceCount": "{{count}} présent(s) pointé(s) à l'entrée.",
+      "scan": "Émarger l'entrée",
+      "attendance": "Présents",
+      "export": "Exporter les présents (CSV)",
+      "attendanceOf": "Présents de la session {{title}}",
+      "more": "{{shown}} présents affichés sur {{count}} : l'export les contient tous.",
+      "slots": "Communications",
+      "presented": {
+        "action": "Marquer présentée",
+        "done": "« {{title}} » marquée présentée."
+      },
+      "unpresent": {
+        "action": "Corriger : non présentée",
+        "title": "Corriger « présentée »",
+        "message": "« {{title}} » redeviendra programmée. La correction est journalisée.",
+        "confirm": "Corriger",
+        "reason": "Motif",
+        "done": "« {{title}} » redevenue programmée."
+      },
+      "empty": "Aucune session au programme publié."
+    },
+    "attendance": {
+      "title": "Présences",
+      "lead": "Pointages de l'accueil : recherche, annulation d'un pointage erroné, export.",
+      "search": "Rechercher",
+      "searchHint": "Nom ou référence (GC27-I00012).",
+      "fields": {
+        "state": "État",
+        "person": "Participant",
+        "category": "Catégorie",
+        "scannedAt": "Pointé le",
+        "recordedBy": "Par",
+        "actions": "Actions"
+      },
+      "active": "Valides",
+      "cancelled": "Annulés",
+      "count": "{{count}} pointage(s)",
+      "export": "Exporter (CSV)",
+      "empty": "Aucun pointage.",
+      "method": {
+        "scan": "scan du badge",
+        "manual": "saisie de la référence"
+      },
+      "cancelledOn": "annulé le {{date}}",
+      "cancel": {
+        "action": "Annuler le pointage",
+        "title": "Annuler le pointage",
+        "message": "Le pointage de {{name}} sera annulé (rien n'est supprimé) ; la personne pourra être pointée de nouveau.",
+        "confirm": "Annuler le pointage",
+        "reason": "Motif",
+        "done": "Pointage de {{name}} annulé."
+      }
+    },
+    "badges": {
+      "title": "Badges",
+      "lead": "Planches A4 de quatre badges A6, pour les inscriptions confirmées.",
+      "hint": "Une catégorie, ou toutes.",
+      "compute": "Préparer les fichiers",
+      "files": "Fichiers à imprimer",
+      "count": "{{count}} badge(s) à imprimer.",
+      "batch": "Fichier {{number}} : badges {{from}} à {{to}} (PDF)",
+      "single": "Un badge seul s'imprime depuis la fiche de l'inscription."
+    },
+    "counter": {
+      "title": "Comptoir",
+      "lead": "Inscrire sur place une personne, avec ou sans compte, au tarif « sur place ».",
+      "created": "Inscription {{reference}} enregistrée",
+      "accountCreated": "Compte créé sans mot de passe : un e-mail invite la personne à définir le sien.",
+      "accountExisting": "Inscription rattachée au compte existant de cette adresse.",
+      "printBadge": "Imprimer le badge",
+      "open": "Ouvrir l'inscription",
+      "another": "Nouvelle inscription",
+      "fields": {
+        "email": "Adresse e-mail",
+        "firstName": "Prénom",
+        "lastName": "Nom",
+        "institution": "Institution",
+        "paid": "Paiement reçu au comptoir"
+      },
+      "emailHint": "Adresse déjà connue : l'inscription est rattachée à ce compte.",
+      "emailError": "Adresse e-mail valide requise.",
+      "paidHint": "Coché, le paiement sur place est enregistré et l'inscription confirmée ; sinon, elle reste en attente de paiement.",
+      "submit": "Inscrire"
+    },
+    "certificates": {
+      "title": "Attestations",
+      "lead": "Émission après la conférence, suivi et révocation des attestations.",
+      "overview": "Par nature",
+      "fields": {
+        "nature": "Nature",
+        "eligible": "Éligibles",
+        "issued": "Émises",
+        "revoked": "Révoquées",
+        "state": "État",
+        "reference": "Référence",
+        "person": "Titulaire",
+        "issuedAt": "Émise le"
+      },
+      "nature": {
+        "participation": "Participation",
+        "presentation": "Communication",
+        "review": "Évaluation",
+        "letter": "Lettre d'invitation"
+      },
+      "unreachable": "{{count}} présentateur(s) sans compte, non joignable(s)",
+      "disabled": "Désactivée pour l'édition",
+      "pending": "Émission en cours",
+      "configure": "Compléter le modèle",
+      "issueMore": "Émettre les manquantes",
+      "issueFirst": "Émettre",
+      "queueHint": "L'émission passe par la file de tâches : les attestations arrivent dans les minutes qui suivent. Rien n'est émis deux fois.",
+      "refresh": "Actualiser",
+      "searchHint": "Nom ou référence.",
+      "valid": "Valides",
+      "revokedState": "Révoquées",
+      "count": "{{count}} attestation(s)",
+      "pdf": "PDF",
+      "revokedOn": "révoquée le {{date}}",
+      "empty": "Aucune attestation.",
+      "issue": {
+        "title": "Émettre les attestations",
+        "message": "Attestations de {{nature}} : {{count}} personne(s) éligible(s). Chacune recevra un e-mail.",
+        "confirm": "Émettre",
+        "done": "Émission des attestations de {{nature}} demandée."
+      },
+      "revoke": {
+        "action": "Révoquer",
+        "title": "Révoquer l'attestation",
+        "message": "L'attestation {{reference}} de {{name}} sera déclarée révoquée à la vérification publique. Elle n'est pas supprimée.",
+        "confirm": "Révoquer",
+        "reason": "Motif",
+        "done": "Attestation {{reference}} révoquée."
+      }
+    },
+    "certificateSettings": {
+      "title": "Modèle des attestations",
+      "lead": "Signature, en-tête officiel, signataire et textes de chaque nature.",
+      "general": "Signature et disposition",
+      "fields": {
+        "mode": "Mode de signature",
+        "layout": "Disposition",
+        "reviewEnabled": "Attestation d'évaluation pour les relecteurs",
+        "signatory": "Signataire",
+        "title_fr": "Titre (français)",
+        "title_en": "Titre (anglais)",
+        "body_fr": "Texte (français)",
+        "body_en": "Texte (anglais)",
+        "footer_fr": "Pied de page (français)",
+        "footer_en": "Pied de page (anglais)"
+      },
+      "mode": {
+        "image": "Image de la signature",
+        "pades": "Signature électronique PAdES",
+        "provider": "Signature qualifiée (prestataire)"
+      },
+      "modeHint": "PAdES exige le certificat de l'institution ; aucun prestataire qualifié n'est encore branché.",
+      "layout": {
+        "signature_right": "Signature à droite, QR à gauche",
+        "signature_left": "Signature à gauche, QR à droite"
+      },
+      "signingUnavailable": "Signature PAdES indisponible : les clés de chiffrement du serveur ne sont pas configurées.",
+      "save": "Enregistrer",
+      "saved": "Réglages enregistrés.",
+      "header": {
+        "title": "En-tête officiel",
+        "lead": "Logo ou bandeau en haut des attestations et des lettres (PNG ou JPEG).",
+        "alt": "En-tête actuel des attestations",
+        "size": "{{width}} × {{height}} pixels.",
+        "file": "Fichier",
+        "upload": "Déposer l'en-tête",
+        "uploaded": "En-tête enregistré.",
+        "missing": "Choisissez un fichier PNG ou JPEG.",
+        "deleted": "En-tête retiré.",
+        "delete": {
+          "action": "Retirer l'en-tête",
+          "title": "Retirer l'en-tête",
+          "message": "Les prochaines pièces seront émises sans en-tête ; les pièces émises ne changent pas.",
+          "confirm": "Retirer"
+        }
+      },
+      "key": {
+        "title": "Certificat de l'institution (PAdES)",
+        "lead": "Fichier PKCS#12 (.p12) : il est rechiffré par le serveur et n'est jamais servi.",
+        "current": "Certificat de « {{subject}} », valable jusqu'au {{until}}, déposé le {{at}}.",
+        "none": "Aucun certificat déposé.",
+        "file": "Fichier .p12",
+        "password": "Mot de passe du fichier",
+        "passwordHint": "Sert à l'ouvrir au dépôt ; il n'est pas conservé.",
+        "upload": "Déposer le certificat",
+        "uploaded": "Certificat enregistré.",
+        "missing": "Choisissez le fichier .p12 du certificat.",
+        "deleted": "Certificat retiré.",
+        "delete": {
+          "action": "Retirer le certificat",
+          "title": "Retirer le certificat",
+          "message": "Sans certificat, la signature PAdES n'est plus possible ; les pièces émises restent signées.",
+          "confirm": "Retirer"
+        }
+      },
+      "noSignatory": "Aucun signataire n'a de signature complète : invitez un signataire (Comités › Invitations), qui renseigne lui-même sa signature.",
+      "signatoryHint": "Parmi les signataires de l'édition dont la signature est complète.",
+      "placeholders": "Variables permises : {{list}}",
+      "default": "Texte par défaut",
+      "tooLong": "Texte trop long.",
+      "emptyMeansDefault": "Un texte vidé revient au texte par défaut.",
+      "template": {
+        "save": "Enregistrer",
+        "saved": "Modèle « {{nature}} » enregistré.",
+        "preview": "Aperçu (PDF)"
+      }
+    },
+    "letters": {
+      "title": "Lettres d'invitation",
+      "lead": "Demandes des participants pour leur visa : instruire, émettre ou refuser.",
+      "searchHint": "Nom, nom du passeport ou référence.",
+      "fields": {
+        "status": "Statut",
+        "person": "Participant",
+        "passport": "Passeport",
+        "stay": "Séjour",
+        "requestedAt": "Demandée le",
+        "registration": "Inscription",
+        "passportName": "Nom sur le passeport",
+        "nationality": "Nationalité",
+        "passportNumber": "Numéro de passeport",
+        "embassy": "Ambassade ou consulat",
+        "decidedBy": "Instruite par",
+        "issuedAt": "Émise le",
+        "refuseReason": "Motif du refus",
+        "revokedAt": "Révoquée le",
+        "verification": "Adresse de vérification"
+      },
+      "status": {
+        "requested": "À instruire",
+        "issued": "Émise",
+        "refused": "Refusée",
+        "revoked": "Révoquée"
+      },
+      "count": "{{count}} demande(s)",
+      "empty": "Aucune demande.",
+      "back": "Retour aux lettres",
+      "erased": "effacé (fin de l'édition)",
+      "pdf": "Lettre (PDF)",
+      "disclaimer": "La lettre facilite la demande de visa ; elle n'engage pas l'organisation à prendre en charge des frais.",
+      "detail": {
+        "title": "Demande de lettre d'invitation"
+      },
+      "issue": {
+        "action": "Émettre la lettre",
+        "title": "Émettre la lettre",
+        "message": "Une lettre signée sera émise au nom de {{name}} ; la personne la télécharge depuis son compte.",
+        "confirm": "Émettre",
+        "done": "Lettre émise."
+      },
+      "refuse": {
+        "action": "Refuser",
+        "title": "Refuser la demande",
+        "message": "La demande de {{name}} sera refusée ; le motif lui est communiqué.",
+        "confirm": "Refuser",
+        "reason": "Motif",
+        "done": "Demande refusée."
+      },
+      "revoke": {
+        "action": "Révoquer",
+        "title": "Révoquer la lettre",
+        "message": "La lettre de {{name}} sera déclarée révoquée à la vérification publique.",
+        "confirm": "Révoquer",
+        "reason": "Motif",
+        "done": "Lettre révoquée."
+      }
+    },
+    "signature": {
+      "title": "Ma signature",
+      "lead": "Votre nom, votre fonction et l'image de votre signature, apposés sur les pièces dont vous êtes le signataire désigné.",
+      "complete": "Signature complète",
+      "incomplete": "Signature incomplète",
+      "updatedAt": "Modifiée le {{date}}",
+      "identity": "Nom et fonction",
+      "fields": {
+        "displayName": "Nom affiché",
+        "titleFr": "Fonction (français)",
+        "titleEn": "Fonction (anglais)"
+      },
+      "displayNameHint": "Tel qu'imprimé sous la signature (exemple : Pr Awa Koné).",
+      "save": "Enregistrer",
+      "saved": "Signature enregistrée.",
+      "image": {
+        "title": "Image de la signature",
+        "lead": "PNG ou JPEG, sur fond blanc ou transparent ; elle est recadrée et réduite par le serveur.",
+        "alt": "Image actuelle de votre signature",
+        "size": "{{width}} × {{height}} pixels, déposée le {{date}}.",
+        "file": "Fichier",
+        "upload": "Déposer l'image",
+        "replace": "Remplacer l'image",
+        "uploaded": "Image enregistrée.",
+        "missing": "Choisissez un fichier PNG ou JPEG."
+      }
     }
   }
 }

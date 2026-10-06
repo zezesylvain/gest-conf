@@ -1,0 +1,50 @@
+:host {
+  display: block;
+}
+.card {
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 1px solid var(--gc-border);
+  border-radius: 0.5rem;
+  max-width: 48rem;
+}
+h2 {
+  margin-top: 0;
+}
+form {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+.dates {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 0.5rem 1rem;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+.documents {
+  padding-left: 1.25rem;
+}
+.documents li {
+  margin-bottom: 0.75rem;
+}
+.hint,
+.muted {
+  color: var(--gc-muted);
+}
+.notice {
+  padding: 0.75rem 1rem;
+  border-left: 0.35rem solid var(--gc-primary);
+  background: var(--gc-surface-muted);
+}
+.badge {
+  font-size: 0.85rem;
+  padding: 0.1rem 0.5rem;
+  border: 1px solid var(--gc-border);
+  border-radius: 1rem;
+  margin-inline-end: 0.5rem;
+}

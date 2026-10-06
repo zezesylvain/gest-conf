@@ -67,6 +67,18 @@
         {{ (current.has_qr ? 'gestion.settings.yes' : 'gestion.settings.no') | translate }}
       </dd>
     </dl>
+    @if (current.has_qr) {
+      <div class="actions">
+        <a mat-stroked-button [href]="badgeUrl()" target="_blank" rel="noopener">
+          {{ 'gestion.registrations.detail.badge.download' | translate }}
+        </a>
+        @if (canReplaceBadge()) {
+          <button mat-button type="button" (click)="replaceBadge()" [disabled]="busy()">
+            {{ 'gestion.registrations.detail.badge.replace.action' | translate }}
+          </button>
+        }
+      </div>
+    }
   </section>
 
   <section class="card" aria-labelledby="lines-title">

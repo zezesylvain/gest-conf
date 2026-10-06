@@ -34,6 +34,7 @@ export const CHAIR_EDITION: MeEdition = {
     'program.publish',
     'registrations.read',
     'finance.read',
+    'certificates.manage',
   ],
   mfa_required: true,
 };

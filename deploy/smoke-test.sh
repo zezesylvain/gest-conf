@@ -77,9 +77,14 @@ check "portail : CSP en <meta> sur le repli SPA (pages /compte/*)" "$(has_meta_c
 robots=$("${CURL[@]}" -D - "$BASE_URL/robots.txt")
 check "portail : /robots.txt servi tel quel (texte, pas le repli SPA)" \
   "$(has_header "$robots" content-type 'text/plain' && [[ "$robots" != *"<portail-root"* ]] && echo 1)"
-check "portail : robots.txt exclut /api/, /gestion/ et /compte/" \
+check "portail : robots.txt exclut /api/, /gestion/, /compte/ et /verification" \
   "$(grep -Eq '^Disallow:[[:space:]]*/api/' <<<"$robots" && grep -Eq '^Disallow:[[:space:]]*/gestion/' <<<"$robots" \
-    && grep -Eq '^Disallow:[[:space:]]*/compte/' <<<"$robots" && echo 1)"
+    && grep -Eq '^Disallow:[[:space:]]*/compte/' <<<"$robots" \
+    && grep -Eq '^Disallow:[[:space:]]*/verification' <<<"$robots" && echo 1)"
+# Vérification publique (plan L7, K10) : rendue dans le navigateur, servie par le repli SPA.
+body=$("${CURL[@]}" "$BASE_URL/verification/CODEINCONNU")
+check "portail : /verification/<code> servie par la coquille rendue dans le navigateur" \
+  "$([[ "$body" == *"<portail-root"* ]] && echo 1)"
 
 body=$("${CURL[@]}" "$BASE_URL/gestion/")
 check "gestion : /gestion/ servie avec base href /gestion/" "$([[ "$body" == *'<base href="/gestion/"'* ]] && echo 1)"
@@ -87,6 +92,18 @@ check "gestion : CSP à empreintes en <meta> sur /gestion/" "$(has_meta_csp "$bo
 
 headers=$("${CURL[@]}" -D - -o /dev/null "$BASE_URL/gestion/")
 check "gestion : en-tête X-Robots-Tag noindex" "$(has_header "$headers" x-robots-tag 'noindex' && echo 1)"
+# Caméra (plan L7, K6) : permise sous /gestion/ pour l'accueil, refusée au portail.
+check "gestion : Permissions-Policy camera=(self)" \
+  "$(has_header "$headers" permissions-policy 'camera=\(self\)' && echo 1)"
+portal_headers=$("${CURL[@]}" -D - -o /dev/null "$BASE_URL/fr/")
+check "portail : Permissions-Policy camera=()" \
+  "$(has_header "$portal_headers" permissions-policy 'camera=\(\)' && echo 1)"
+manifest=$("${CURL[@]}" -D - "$BASE_URL/gestion/manifest.webmanifest")
+check "gestion : manifeste de l'accueil servi (application/manifest+json)" \
+  "$(has_header "$manifest" content-type 'manifest\+json' && [[ "$manifest" == *'"start_url"'* ]] && echo 1)"
+ngsw=$("${CURL[@]}" -D - -o /dev/null -w '\n%{http_code}' "$BASE_URL/gestion/ngsw.json")
+check "gestion : ngsw.json du service worker servi, sans cache long" \
+  "$([[ "${ngsw##*$'\n'}" == "200" ]] && ! has_header "$ngsw" cache-control 'immutable' && echo 1)"
 
 body=$("${CURL[@]}" "$BASE_URL/gestion/une/route/profonde")
 check "gestion : repli SPA sous /gestion/" "$([[ "$body" == *"<gestion-root"* ]] && echo 1)"

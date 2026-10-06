@@ -54,4 +54,23 @@ describe('Redirections de la gestion', () => {
     });
     expect(run(editionHomeRedirect, '5')).toBe('/editions/5/evaluations');
   });
+
+  it('jour J (plan L7) : bénévole → accueil, président de séance → sessions, signataire → signature', () => {
+    const only = (id: number, capability: string): MeEdition => ({
+      ...CHAIR_EDITION,
+      id,
+      roles: [],
+      capabilities: [capability as never],
+    });
+    TestBed.configureTestingModule({
+      providers: provideGestionTesting([
+        only(6, 'checkin.scan'),
+        only(7, 'sessions.chair'),
+        only(8, 'signature.manage'),
+      ]),
+    });
+    expect(run(editionHomeRedirect, '6')).toBe('/editions/6/accueil');
+    expect(run(editionHomeRedirect, '7')).toBe('/editions/7/jour-j/sessions');
+    expect(run(editionHomeRedirect, '8')).toBe('/editions/8/signature');
+  });
 });

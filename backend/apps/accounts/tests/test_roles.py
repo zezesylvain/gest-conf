@@ -130,6 +130,17 @@ def test_visible_member_roles(assignments, expected):
     assert visible_member_roles(assignments) == expected
 
 
+def test_k7_session_chair_capability_belongs_to_the_session_chair_alone():
+    """K7 (plan L7) : le président de séance entre dans la gestion pour ses sessions, et
+    seulement par ce rôle ; aucune autre capacité, pas de 2FA (K1)."""
+    holders = {
+        role for role, capabilities in CAPABILITIES.items() if C.SESSIONS_CHAIR in capabilities
+    }
+    assert holders == {Role.SESSION_CHAIR}
+    assert CAPABILITIES[Role.SESSION_CHAIR] == {C.SESSIONS_CHAIR}
+    assert Role.SESSION_CHAIR not in MFA_REQUIRED_ROLES
+
+
 def test_k18_signature_capability_belongs_to_the_signatory_alone():
     """K18 (plan L7) : ni l'administrateur ni le CO ne renseignent la signature d'autrui."""
     holders = {

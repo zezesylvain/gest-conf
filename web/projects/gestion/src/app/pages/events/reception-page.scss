@@ -1,0 +1,55 @@
+.viewer video {
+  display: block;
+  width: 100%;
+  max-width: 28rem;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 0.5rem;
+  background: var(--gc-text);
+}
+
+.result-zone {
+  margin-top: 1rem;
+  min-height: 3rem;
+}
+
+// Couleur doublée d'un texte (le résultat est lu, pas seulement vu : WCAG 1.4.1).
+.result {
+  padding: 0.75rem 1rem;
+  border-left: 0.5rem solid var(--gc-border);
+  background: var(--gc-surface-muted);
+
+  p {
+    margin: 0.15rem 0;
+  }
+
+  &.ok {
+    border-left-color: var(--gc-success);
+  }
+
+  &.warn {
+    border-left-color: var(--gc-warning);
+  }
+
+  &.ko {
+    border-left-color: var(--gc-danger);
+  }
+}
+
+.outcome {
+  font-weight: 700;
+  font-size: 1.25rem;
+}
+
+.person {
+  font-size: 1.15rem;
+}
+
+.manual {
+  margin-top: 1rem;
+}
+
+.badge.offline {
+  border-color: var(--gc-warning);
+  color: var(--gc-warning);
+}

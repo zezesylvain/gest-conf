@@ -24,7 +24,8 @@
         "notifications": "Notifications",
         "notificationsLabel": "Notifications ({{count}} non lue(s))",
         "agenda": "Mon passage",
-        "registration": "Mon inscription"
+        "registration": "Mon inscription",
+        "documents": "Mes documents"
       },
       "fields": {
         "email": "Adresse e-mail",
@@ -716,8 +717,94 @@
           "failed": "Le paiement n'a pas abouti. Vous pouvez réessayer."
         },
         "past": "Inscriptions précédentes",
-        "refundDue": "remboursement de {{amount}}"
+        "refundDue": "remboursement de {{amount}}",
+        "documentsLink": "Mon badge, mes attestations et ma lettre d'invitation"
       }
+    },
+    "documents": {
+      "title": "Mes documents",
+      "lead": "Votre badge, vos attestations et votre lettre d'invitation.",
+      "badge": {
+        "title": "Badge",
+        "download": "Télécharger mon badge ({{reference}})",
+        "hint": "Imprimez-le ou gardez-le sur votre téléphone : son QR est votre accès à l'accueil. Ne le partagez pas.",
+        "none": "Votre badge sera disponible dès que votre inscription sera confirmée."
+      },
+      "certificates": {
+        "title": "Attestations",
+        "none": "Aucune attestation pour le moment : le comité les émet après la conférence."
+      },
+      "nature": {
+        "participation": "Attestation de participation",
+        "presentation": "Attestation de communication",
+        "review": "Attestation d'évaluation",
+        "letter": "Lettre d'invitation"
+      },
+      "issuedAt": "Émise le {{date}}",
+      "revoked": "Révoquée",
+      "pdf": "Télécharger (PDF)",
+      "verify": "Page de vérification",
+      "letter": {
+        "title": "Lettre d'invitation",
+        "lead": "Pour une demande de visa : le comité examine votre demande et émet une lettre signée.",
+        "status": {
+          "requested": "Demande en cours d'examen",
+          "issued": "Lettre émise",
+          "refused": "Demande refusée",
+          "revoked": "Lettre révoquée"
+        },
+        "requestedAt": "demandée le {{date}}",
+        "stay": "Séjour du {{from}} au {{to}}",
+        "pending": "Le comité examine votre demande ; vous recevrez un e-mail.",
+        "refused": "Motif du refus : {{reason}}",
+        "download": "Télécharger ma lettre (PDF)",
+        "disclaimer": "La lettre facilite votre demande de visa ; elle n'engage pas l'organisation à prendre en charge vos frais.",
+        "again": "Faire une nouvelle demande",
+        "request": "Demander une lettre d'invitation",
+        "fields": {
+          "passportName": "Nom tel qu'il figure sur le passeport",
+          "nationality": "Nationalité",
+          "passportNumber": "Numéro de passeport",
+          "stayFrom": "Arrivée",
+          "stayTo": "Départ",
+          "embassy": "Ambassade ou consulat"
+        },
+        "passportNameHint": "Exactement comme sur le passeport (exemple : KONE AWA).",
+        "passportNumberHint": "Transmis au comité seulement, effacé après la conférence.",
+        "stayHint": "Séjour de 90 jours au plus.",
+        "embassyHint": "Ambassade ou consulat et ville (exemple : Ambassade de France, Abidjan).",
+        "submit": "Envoyer la demande",
+        "cancel": "Annuler",
+        "noRegistration": "Une inscription en cours est nécessaire pour demander une lettre d'invitation.",
+        "requested": "Demande envoyée : le comité l'examine."
+      }
+    },
+    "verification": {
+      "title": "Vérification d'un document",
+      "lead": "Vérifiez l'authenticité d'une attestation ou d'une lettre d'invitation par son code.",
+      "loading": "Vérification…",
+      "status": {
+        "certificate": {
+          "valid": "Attestation authentique",
+          "revoked": "Attestation révoquée"
+        },
+        "letter": {
+          "valid": "Lettre d'invitation authentique",
+          "revoked": "Lettre d'invitation révoquée"
+        }
+      },
+      "fields": {
+        "nature": "Document",
+        "holder": "Titulaire",
+        "edition": "Conférence",
+        "issuedAt": "Émis le",
+        "revokedAt": "Révoqué le"
+      },
+      "anonymized": "Non communiqué",
+      "notFound": "Aucun document ne correspond à ce code. Vérifiez la saisie.",
+      "codeLabel": "Code de vérification",
+      "submit": "Vérifier",
+      "codeHint": "Fin de l'adresse imprimée sous le QR du document : lettres majuscules et chiffres."
     }
   }
 }

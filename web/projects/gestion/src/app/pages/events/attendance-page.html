@@ -1,0 +1,125 @@
+<gc-page-header
+  [heading]="'gestion.attendance.title' | translate"
+  [lead]="'gestion.attendance.lead' | translate"
+/>
+<div aria-live="polite">
+  @if (status()) {
+    <p class="notice" role="status">{{ status() }}</p>
+  }
+</div>
+<gc-error-summary [messages]="errors()" />
+
+@if (summary(); as counts) {
+  <p class="card">
+    {{
+      'gestion.reception.summary'
+        | translate
+          : { checkedIn: counts.checked_in, confirmed: counts.confirmed, pending: counts.pending }
+    }}
+  </p>
+}
+
+<form [formGroup]="form" (ngSubmit)="search()" novalidate class="card">
+  <div class="grid-2">
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'gestion.attendance.search' | translate }}</mat-label>
+      <input matInput formControlName="q" type="search" />
+      <mat-hint>{{ 'gestion.attendance.searchHint' | translate }}</mat-hint>
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'gestion.attendance.fields.state' | translate }}</mat-label>
+      <mat-select formControlName="cancelled">
+        <mat-option value="">{{ 'gestion.registrations.all' | translate }}</mat-option>
+        <mat-option value="false">{{ 'gestion.attendance.active' | translate }}</mat-option>
+        <mat-option value="true">{{ 'gestion.attendance.cancelled' | translate }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+  <div class="actions">
+    <button mat-flat-button type="submit">{{ 'gestion.registrations.apply' | translate }}</button>
+    <button mat-button type="button" (click)="reset()">
+      {{ 'gestion.registrations.reset' | translate }}
+    </button>
+  </div>
+</form>
+
+@if (!loading()) {
+  <div class="actions">
+    <p class="muted" role="status">
+      {{ 'gestion.attendance.count' | translate: { count: count() } }}
+    </p>
+    <button mat-stroked-button type="button" (click)="exportCsv()" [disabled]="busy()">
+      {{ 'gestion.attendance.export' | translate }}
+    </button>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <caption class="visually-hidden">
+        {{
+          'gestion.attendance.title' | translate
+        }}
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">{{ 'gestion.attendance.fields.person' | translate }}</th>
+          <th scope="col">{{ 'gestion.attendance.fields.category' | translate }}</th>
+          <th scope="col">{{ 'gestion.attendance.fields.scannedAt' | translate }}</th>
+          <th scope="col">{{ 'gestion.attendance.fields.recordedBy' | translate }}</th>
+          <th scope="col">{{ 'gestion.attendance.fields.actions' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows(); track row.id) {
+          <tr>
+            <td>
+              <a [routerLink]="['/editions', editionId(), 'inscriptions', row.registration.id]">{{
+                row.registration.name
+              }}</a>
+              <br /><span class="muted">{{ row.registration.reference }}</span>
+            </td>
+            <td>{{ category(row) }}</td>
+            <td>
+              {{ date(row.scanned_at) }}
+              <br /><span class="muted">{{
+                'gestion.attendance.method.' + row.method | translate
+              }}</span>
+            </td>
+            <td>
+              {{ row.recorded_by }}
+              @if (row.device) {
+                <br /><span class="muted">{{ row.device }}</span>
+              }
+            </td>
+            <td>
+              @if (row.cancelled_at) {
+                <span class="badge">{{
+                  'gestion.attendance.cancelledOn' | translate: { date: date(row.cancelled_at) }
+                }}</span>
+                <br /><span class="muted">{{ row.cancel_reason }} — {{ row.cancelled_by }}</span>
+              } @else {
+                <button mat-button type="button" (click)="cancel(row)" [disabled]="busy()">
+                  {{ 'gestion.attendance.cancel.action' | translate }}
+                </button>
+              }
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="5" class="muted">{{ 'gestion.attendance.empty' | translate }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  @if (pages() > 1) {
+    <nav class="actions" [attr.aria-label]="'gestion.pagination.label' | translate">
+      <button mat-button type="button" [disabled]="page() <= 1" (click)="goTo(page() - 1)">
+        {{ 'gestion.pagination.previous' | translate }}
+      </button>
+      <span>{{ 'gestion.pagination.status' | translate: { page: page(), pages: pages() } }}</span>
+      <button mat-button type="button" [disabled]="page() >= pages()" (click)="goTo(page() + 1)">
+        {{ 'gestion.pagination.next' | translate }}
+      </button>
+    </nav>
+  }
+}

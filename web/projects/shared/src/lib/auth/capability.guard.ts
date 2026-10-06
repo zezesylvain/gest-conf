@@ -27,6 +27,19 @@ export function editionFromRoute(
  * endpoint revérifie). Charge `/me` si besoin ; sinon renvoie vers « accès refusé ».
  */
 export function capabilityGuard(...capabilities: Capability[]): CanActivateFn {
+  return editionGuard((held) => capabilities.every((capability) => held.includes(capability)));
+}
+
+/**
+ * Variante « l'une des capacités » (plan L7) : un écran ouvert à plusieurs profils, par
+ * exemple les sessions du jour, pour qui pointe (`checkin.scan`) ou préside une séance
+ * (`sessions.chair`). Même rôle d'ergonomie seulement.
+ */
+export function anyCapabilityGuard(...capabilities: Capability[]): CanActivateFn {
+  return editionGuard((held) => capabilities.some((capability) => held.includes(capability)));
+}
+
+function editionGuard(allows: (held: readonly Capability[]) => boolean): CanActivateFn {
   return async (route) => {
     const meStore = inject(MeStore);
     const router = inject(Router);
@@ -38,9 +51,7 @@ export function capabilityGuard(...capabilities: Capability[]): CanActivateFn {
       }
     }
     const edition = editionFromRoute(meStore, route);
-    const allowed =
-      edition !== undefined &&
-      capabilities.every((capability) => edition.capabilities.includes(capability));
+    const allowed = edition !== undefined && allows(edition.capabilities);
     return allowed || router.parseUrl(FORBIDDEN_PATH);
   };
 }

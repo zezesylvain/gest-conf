@@ -27,9 +27,22 @@ const CHAIR = [
   'program.publish',
   'registrations.read',
   'finance.read',
+  'certificates.manage',
 ];
-/** Président qui évalue aussi (H19) et écrit le programme : tous les écrans lui sont ouverts. */
-const EVERYTHING = [...CHAIR, 'reviews.write', 'program.write'];
+/**
+ * Tous les écrans ouverts : président qui évalue aussi (H19), écrit le programme, et cumule
+ * les capacités du jour J, des lettres et de la signature (plan L7).
+ */
+const EVERYTHING = [
+  ...CHAIR,
+  'reviews.write',
+  'program.write',
+  'checkin.scan',
+  'checkin.manage',
+  'registrations.manage',
+  'letters.manage',
+  'signature.manage',
+];
 
 /** Catalogue « traduit » minimal : la clé tient lieu de libellé. */
 function items(capabilities: string[], role: Parameters<typeof buildNavigation>[2] = null) {
@@ -42,7 +55,7 @@ function items(capabilities: string[], role: Parameters<typeof buildNavigation>[
 }
 
 describe('Table de navigation de la gestion (plan L2 §2.3)', () => {
-  it('président : dix catégories, ordre du rail numéroté', () => {
+  it('président : douze catégories, ordre du rail numéroté', () => {
     const groups = buildNavigation(3, CHAIR);
     expect(groups.map((group) => group.key)).toEqual([
       'steering',
@@ -50,6 +63,8 @@ describe('Table de navigation de la gestion (plan L2 §2.3)', () => {
       'reviewing',
       'program',
       'registrations',
+      'dayof',
+      'documents',
       'settings',
       'committees',
       'portal',
@@ -182,6 +197,57 @@ describe('Table de navigation de la gestion (plan L2 §2.3)', () => {
     expect(helpForUrl('/editions/3/inscriptions/finances')).toBe('finance-dashboard');
     expect(helpForUrl('/editions/3/parametrage/tarifs')).toBe('settings-pricing');
     expect(helpForUrl('/editions/3/parametrage/facturation')).toBe('settings-billing');
+  });
+
+  it('jour J (plan L7, K15) : chaque écran selon sa capacité, l’une d’elles pour les sessions', () => {
+    // Bénévole : accueil et sessions du jour seulement.
+    const volunteer = buildNavigation(3, ['checkin.scan']);
+    expect(catalogue(volunteer).map((entry) => entry.key)).toEqual([
+      'reception',
+      'daySessions',
+      'guide',
+    ]);
+    expect(catalogue(volunteer)[0].url).toBe('/editions/3/accueil');
+    // Président de séance : ses sessions, sans l'accueil (capacité « l'une de »).
+    const chair = buildNavigation(3, ['sessions.chair'], 'SESSION_CHAIR');
+    expect(catalogue(chair).map((entry) => entry.key)).toEqual(['daySessions', 'guide']);
+    // Signataire : sa signature seulement (K18).
+    const signatory = buildNavigation(3, ['signature.manage'], 'SIGNATORY');
+    expect(catalogue(signatory).map((entry) => entry.key)).toEqual(['signature', 'guide']);
+    // CO « secrétariat » : tout le jour J, attestations et lettres ; pas la signature.
+    const secretariat = buildNavigation(
+      3,
+      [
+        'edition.read',
+        'registrations.read',
+        'registrations.manage',
+        'checkin.scan',
+        'checkin.manage',
+        'certificates.manage',
+        'letters.manage',
+      ],
+      'OC_MEMBER',
+    );
+    expect(secretariat.find((g) => g.key === 'dayof')!.entries.map((e) => e.key)).toEqual([
+      'reception',
+      'daySessions',
+      'attendance',
+      'badges',
+      'counter',
+    ]);
+    expect(secretariat.find((g) => g.key === 'documents')!.entries.map((e) => e.key)).toEqual([
+      'certificates',
+      'certificateSettings',
+      'letters',
+    ]);
+    // Président de la conférence : badges (lecture des inscriptions) et attestations.
+    const president = buildNavigation(3, CHAIR);
+    expect(president.find((g) => g.key === 'dayof')!.entries.map((e) => e.key)).toEqual(['badges']);
+    // Le plus long préfixe : le modèle a sa fiche ; le détail d'une lettre, celle des lettres.
+    expect(helpForUrl('/editions/3/attestations')).toBe('certificates');
+    expect(helpForUrl('/editions/3/attestations/modele')).toBe('certificate-settings');
+    expect(helpForUrl('/editions/3/lettres/12')).toBe('letters');
+    expect(helpForUrl('/editions/3/jour-j/presences')).toBe('attendance');
   });
 
   it('aucune capacité dans l’édition : rail vide (pas d’aide seule)', () => {

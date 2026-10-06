@@ -63,6 +63,9 @@ import { PrivacyNotice } from '../ui/privacy-notice';
       <p>
         <a routerLink="/compte/mon-passage">{{ 'portail.account.nav.agenda' | translate }}</a>
       </p>
+      <p>
+        <a routerLink="/compte/mes-documents">{{ 'portail.account.nav.documents' | translate }}</a>
+      </p>
 
       @if (me.pending_invitations.length) {
         <section class="card" aria-labelledby="pending-title">

@@ -24,7 +24,8 @@
         "notifications": "Notifications",
         "notificationsLabel": "Notifications ({{count}} unread)",
         "agenda": "My schedule",
-        "registration": "My registration"
+        "registration": "My registration",
+        "documents": "My documents"
       },
       "fields": {
         "email": "Email address",
@@ -716,8 +717,94 @@
           "failed": "The payment did not go through. You can try again."
         },
         "past": "Previous registrations",
-        "refundDue": "refund of {{amount}}"
+        "refundDue": "refund of {{amount}}",
+        "documentsLink": "My badge, certificates and invitation letter"
       }
+    },
+    "documents": {
+      "title": "My documents",
+      "lead": "Your badge, your certificates and your invitation letter.",
+      "badge": {
+        "title": "Badge",
+        "download": "Download my badge ({{reference}})",
+        "hint": "Print it or keep it on your phone: its QR code is your access at reception. Do not share it.",
+        "none": "Your badge will be available as soon as your registration is confirmed."
+      },
+      "certificates": {
+        "title": "Certificates",
+        "none": "No certificate yet: the committee issues them after the conference."
+      },
+      "nature": {
+        "participation": "Certificate of attendance",
+        "presentation": "Certificate of presentation",
+        "review": "Certificate of reviewing",
+        "letter": "Invitation letter"
+      },
+      "issuedAt": "Issued on {{date}}",
+      "revoked": "Revoked",
+      "pdf": "Download (PDF)",
+      "verify": "Verification page",
+      "letter": {
+        "title": "Invitation letter",
+        "lead": "For a visa application: the committee reviews your request and issues a signed letter.",
+        "status": {
+          "requested": "Request under review",
+          "issued": "Letter issued",
+          "refused": "Request refused",
+          "revoked": "Letter revoked"
+        },
+        "requestedAt": "requested on {{date}}",
+        "stay": "Stay from {{from}} to {{to}}",
+        "pending": "The committee is reviewing your request; you will receive an e-mail.",
+        "refused": "Reason for refusal: {{reason}}",
+        "download": "Download my letter (PDF)",
+        "disclaimer": "The letter supports your visa application; it does not commit the organisers to covering your costs.",
+        "again": "Make a new request",
+        "request": "Request an invitation letter",
+        "fields": {
+          "passportName": "Name as shown in the passport",
+          "nationality": "Nationality",
+          "passportNumber": "Passport number",
+          "stayFrom": "Arrival",
+          "stayTo": "Departure",
+          "embassy": "Embassy or consulate"
+        },
+        "passportNameHint": "Exactly as in the passport (example: KONE AWA).",
+        "passportNumberHint": "Shared with the committee only, erased after the conference.",
+        "stayHint": "Stay of at most 90 days.",
+        "embassyHint": "Embassy or consulate and city (example: French Embassy, Abidjan).",
+        "submit": "Send the request",
+        "cancel": "Cancel",
+        "noRegistration": "An active registration is required to request an invitation letter.",
+        "requested": "Request sent: the committee is reviewing it."
+      }
+    },
+    "verification": {
+      "title": "Document verification",
+      "lead": "Check the authenticity of a certificate or invitation letter with its code.",
+      "loading": "Checking…",
+      "status": {
+        "certificate": {
+          "valid": "Authentic certificate",
+          "revoked": "Revoked certificate"
+        },
+        "letter": {
+          "valid": "Authentic invitation letter",
+          "revoked": "Revoked invitation letter"
+        }
+      },
+      "fields": {
+        "nature": "Document",
+        "holder": "Holder",
+        "edition": "Conference",
+        "issuedAt": "Issued on",
+        "revokedAt": "Revoked on"
+      },
+      "anonymized": "Not disclosed",
+      "notFound": "No document matches this code. Check what you entered.",
+      "codeLabel": "Verification code",
+      "submit": "Verify",
+      "codeHint": "End of the address printed under the document's QR code: capital letters and digits."
     }
   }
 }

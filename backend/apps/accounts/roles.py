@@ -101,6 +101,9 @@ class Capability(StrEnum):
     CERTIFICATES_MANAGE = "certificates.manage"
     LETTERS_MANAGE = "letters.manage"
     SIGNATURE_MANAGE = "signature.manage"
+    # Président de séance (K1, K7, K8) : accès à la gestion pour ses sessions publiées ; le
+    # serveur vérifie la présidence session par session (``CapabilityOrSessionChair``).
+    SESSIONS_CHAIR = "sessions.chair"
 
 
 C = Capability
@@ -121,6 +124,7 @@ CAPABILITIES: Mapping[str, frozenset[Capability]] = {
         C.DECISIONS_PUBLISH,
         C.PROGRAM_PUBLISH,
         C.SIGNATURE_MANAGE,
+        C.SESSIONS_CHAIR,
     },
     Role.CHAIR: frozenset(
         {
@@ -185,7 +189,8 @@ CAPABILITIES: Mapping[str, frozenset[Capability]] = {
     Role.SC_MEMBER: frozenset({C.REVIEWS_WRITE}),
     Role.AUTHOR: frozenset(),
     Role.SPEAKER: frozenset(),
-    Role.SESSION_CHAIR: frozenset(),
+    # K1, K7 (plan L7) : il émarge ses sessions et marque « présentée », sans autre droit.
+    Role.SESSION_CHAIR: frozenset({C.SESSIONS_CHAIR}),
     Role.ATTENDEE: frozenset(),
     Role.SPONSOR: frozenset(),
     # K1 (plan L7) : le bénévole pointe à l'accueil et en session, sans autre droit.

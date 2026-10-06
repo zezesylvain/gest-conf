@@ -89,6 +89,13 @@ export const accountRoutes: Routes = [
           import('./registration/registration-page').then((m) => m.RegistrationPage),
       },
       {
+        // « Mes documents » (plan L7, K15) : badge, attestations, lettre d'invitation.
+        path: 'mes-documents',
+        title: 'portail.documents.title',
+        canMatch: [authGuard],
+        loadComponent: () => import('./documents/documents-page').then((m) => m.DocumentsPage),
+      },
+      {
         path: 'mon-passage',
         title: 'portail.agenda.title',
         canMatch: [authGuard],

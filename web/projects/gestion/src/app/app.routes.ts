@@ -1,12 +1,15 @@
 import { Routes } from '@angular/router';
-import { capabilityGuard } from '@gestconf/shared';
+import { anyCapabilityGuard, capabilityGuard } from '@gestconf/shared';
 
+import { receptionGuard, receptionRedirect } from './core/reception';
 import { editionHomeRedirect, lastEditionRedirect } from './core/redirects';
 
 // La propriété « title » contient une clé de traduction (voir TranslatedTitleStrategy).
 // Les gardes sont de l'ergonomie (règle n° 2) : chaque endpoint revérifie les droits.
 export const routes: Routes = [
   { path: '', pathMatch: 'full', canActivate: [lastEditionRedirect], children: [] },
+  // Démarrage de l'accueil installé (manifeste, plan L7 K5) : dernière édition, même hors ligne.
+  { path: 'accueil', canActivate: [receptionRedirect], children: [] },
   {
     path: 'editions',
     title: 'gestion.editions.title',
@@ -142,6 +145,72 @@ export const routes: Routes = [
           import('./pages/registrations/registration-detail-page').then(
             (m) => m.RegistrationDetailPage,
           ),
+      },
+      // Jour J (plan L7, K15) : accueil (PWA), sessions du jour, présences, badges, comptoir.
+      {
+        path: 'accueil',
+        title: 'gestion.reception.title',
+        canActivate: [receptionGuard],
+        loadComponent: () => import('./pages/events/reception-page').then((m) => m.ReceptionPage),
+      },
+      {
+        path: 'jour-j/sessions',
+        title: 'gestion.daySessions.title',
+        canActivate: [anyCapabilityGuard('checkin.scan', 'sessions.chair')],
+        loadComponent: () =>
+          import('./pages/events/day-sessions-page').then((m) => m.DaySessionsPage),
+      },
+      {
+        path: 'jour-j/presences',
+        title: 'gestion.attendance.title',
+        canActivate: [capabilityGuard('checkin.manage')],
+        loadComponent: () => import('./pages/events/attendance-page').then((m) => m.AttendancePage),
+      },
+      {
+        path: 'jour-j/badges',
+        title: 'gestion.badges.title',
+        canActivate: [capabilityGuard('registrations.read')],
+        loadComponent: () => import('./pages/events/badges-page').then((m) => m.BadgesPage),
+      },
+      {
+        path: 'jour-j/comptoir',
+        title: 'gestion.counter.title',
+        canActivate: [capabilityGuard('registrations.manage')],
+        loadComponent: () => import('./pages/events/counter-page').then((m) => m.CounterPage),
+      },
+      // Attestations, lettres d'invitation et signature (plan L7, K9 à K12, K18, K19).
+      {
+        path: 'attestations',
+        title: 'gestion.certificates.title',
+        canActivate: [capabilityGuard('certificates.manage')],
+        loadComponent: () =>
+          import('./pages/events/certificates-page').then((m) => m.CertificatesPage),
+      },
+      {
+        path: 'attestations/modele',
+        title: 'gestion.certificateSettings.title',
+        canActivate: [capabilityGuard('certificates.manage')],
+        loadComponent: () =>
+          import('./pages/events/certificate-settings-page').then((m) => m.CertificateSettingsPage),
+      },
+      {
+        path: 'lettres',
+        title: 'gestion.letters.title',
+        canActivate: [capabilityGuard('letters.manage')],
+        loadComponent: () => import('./pages/events/letters-page').then((m) => m.LettersPage),
+      },
+      {
+        path: 'lettres/:letterId',
+        title: 'gestion.letters.detail.title',
+        canActivate: [capabilityGuard('letters.manage')],
+        loadComponent: () =>
+          import('./pages/events/letter-detail-page').then((m) => m.LetterDetailPage),
+      },
+      {
+        path: 'signature',
+        title: 'gestion.signature.title',
+        canActivate: [capabilityGuard('signature.manage')],
+        loadComponent: () => import('./pages/events/signature-page').then((m) => m.SignaturePage),
       },
       {
         path: 'parametrage/tarifs',

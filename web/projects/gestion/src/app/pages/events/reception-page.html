@@ -1,0 +1,202 @@
+<gc-page-header
+  [heading]="'gestion.reception.title' | translate"
+  [lead]="'gestion.reception.lead' | translate"
+/>
+<div aria-live="polite">
+  @if (notice()) {
+    <p class="notice" role="status">{{ notice() }}</p>
+  }
+</div>
+<gc-error-summary [messages]="errors()" />
+
+<section class="card" aria-labelledby="scan-title">
+  <h2 id="scan-title">
+    @if (desk.session() === null) {
+      {{ 'gestion.reception.scan.reception' | translate }}
+    } @else {
+      {{ 'gestion.reception.scan.session' | translate: { session: sessionTitle() } }}
+    }
+  </h2>
+  <div class="viewer" [hidden]="!camera()">
+    <video #video aria-hidden="true"></video>
+    <canvas #canvas hidden></canvas>
+  </div>
+  <div class="actions">
+    <button mat-flat-button type="button" (click)="toggleCamera()">
+      {{
+        (camera() ? 'gestion.reception.camera.stop' : 'gestion.reception.camera.start') | translate
+      }}
+    </button>
+  </div>
+  @if (cameraError()) {
+    <p class="notice" role="alert">{{ cameraError() }}</p>
+  }
+
+  <div class="result-zone" aria-live="assertive" aria-atomic="true">
+    @if (result(); as current) {
+      <div [class]="'result ' + tone(current)" role="status">
+        <p class="outcome">
+          {{ 'gestion.reception.outcome.' + current.outcome | translate }}
+        </p>
+        @if (current.name) {
+          <p class="person">{{ current.name }}</p>
+        }
+        @if (current.category) {
+          <p>{{ label(current.category) }}</p>
+        }
+        @if (current.reference) {
+          <p class="muted">{{ current.reference }}</p>
+        }
+        @if (current.offline) {
+          <p class="muted">{{ 'gestion.reception.offlineDecision' | translate }}</p>
+        }
+      </div>
+    }
+  </div>
+
+  @if (canEnter()) {
+    <form [formGroup]="manualForm" (ngSubmit)="enter()" novalidate class="manual">
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'gestion.reception.manual.reference' | translate }}</mat-label>
+        <input
+          matInput
+          formControlName="reference"
+          autocomplete="off"
+          autocapitalize="characters"
+        />
+        <mat-hint>{{ 'gestion.reception.manual.hint' | translate }}</mat-hint>
+        <mat-error>{{ 'shared.form.required' | translate }}</mat-error>
+      </mat-form-field>
+      <div class="actions">
+        <button mat-stroked-button type="submit" [disabled]="busy()">
+          {{ 'gestion.reception.manual.submit' | translate }}
+        </button>
+      </div>
+    </form>
+  }
+</section>
+
+<section class="card" aria-labelledby="status-title">
+  <h2 id="status-title">{{ 'gestion.reception.status.title' | translate }}</h2>
+  <p>
+    <span class="badge" [class.offline]="!online()">
+      {{
+        (online() ? 'gestion.reception.status.online' : 'gestion.reception.status.offline')
+          | translate
+      }}
+    </span>
+  </p>
+  @if (summary(); as counts) {
+    <p>
+      {{
+        'gestion.reception.summary'
+          | translate
+            : { checkedIn: counts.checked_in, confirmed: counts.confirmed, pending: counts.pending }
+      }}
+    </p>
+  }
+  @if (!canScanReception()) {
+    <p class="muted">{{ 'gestion.reception.bundle.chairOnly' | translate }}</p>
+  } @else if (desk.bundle(); as bundle) {
+    <p>
+      {{
+        'gestion.reception.bundle.ready'
+          | translate
+            : {
+                count: bundle.entries.length,
+                date: date(bundle.generated_at),
+                expires: date(bundle.expires_at),
+              }
+      }}
+    </p>
+  } @else {
+    <p class="muted">{{ 'gestion.reception.bundle.none' | translate }}</p>
+  }
+  <div class="actions" [hidden]="!canScanReception()">
+    <button mat-stroked-button type="button" (click)="download()" [disabled]="busy() || !online()">
+      {{
+        (desk.bundle() ? 'gestion.reception.bundle.refresh' : 'gestion.reception.bundle.download')
+          | translate
+      }}
+    </button>
+    @if (desk.bundle()) {
+      <button mat-button type="button" (click)="forget()" [disabled]="busy()">
+        {{ 'gestion.reception.bundle.forget' | translate }}
+      </button>
+    }
+  </div>
+  <p>{{ 'gestion.reception.queue.count' | translate: { count: desk.queue().length } }}</p>
+  <div class="actions">
+    <button
+      mat-stroked-button
+      type="button"
+      (click)="synchronize()"
+      [disabled]="desk.syncing() || !desk.queue().length || !online()"
+    >
+      {{ 'gestion.reception.queue.sync' | translate }}
+    </button>
+  </div>
+  @if (desk.queue().length) {
+    <details>
+      <summary>{{ 'gestion.reception.queue.details' | translate }}</summary>
+      <ul>
+        @for (item of desk.queue(); track item.idempotency_key) {
+          <li>{{ item.name }} — {{ date(item.scanned_at) }}</li>
+        }
+      </ul>
+    </details>
+  }
+</section>
+
+@if (desk.rejected().length) {
+  <section class="card" aria-labelledby="rejected-title">
+    <h2 id="rejected-title">{{ 'gestion.reception.rejected.title' | translate }}</h2>
+    <p class="muted">{{ 'gestion.reception.rejected.lead' | translate }}</p>
+    <ul>
+      @for (item of desk.rejected(); track $index) {
+        <li>
+          <strong>{{ item.name }}</strong>
+          @if (item.reference) {
+            ({{ item.reference }})
+          }
+          — {{ 'gestion.reception.outcome.' + item.outcome | translate }}
+        </li>
+      }
+    </ul>
+    <div class="actions">
+      <button mat-button type="button" (click)="clearRejected()">
+        {{ 'gestion.reception.rejected.clear' | translate }}
+      </button>
+    </div>
+  </section>
+}
+
+<section class="card" aria-labelledby="settings-title">
+  <h2 id="settings-title">{{ 'gestion.reception.settings.title' | translate }}</h2>
+  <div class="grid-2">
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'gestion.reception.settings.mode' | translate }}</mat-label>
+      <mat-select [value]="desk.session() ?? 0" (valueChange)="selectSession($event || null)">
+        @if (canScanReception()) {
+          <mat-option [value]="0">{{
+            'gestion.reception.settings.reception' | translate
+          }}</mat-option>
+        }
+        @for (item of sessions(); track item.id) {
+          <mat-option [value]="item.id">{{ sessionLabel(item) }}</mat-option>
+        }
+      </mat-select>
+      <mat-hint>{{ 'gestion.reception.settings.modeHint' | translate }}</mat-hint>
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'gestion.reception.settings.device' | translate }}</mat-label>
+      <input
+        matInput
+        maxlength="64"
+        [value]="device()"
+        (change)="renameDevice($any($event.target).value)"
+      />
+      <mat-hint>{{ 'gestion.reception.settings.deviceHint' | translate }}</mat-hint>
+    </mat-form-field>
+  </div>
+</section>

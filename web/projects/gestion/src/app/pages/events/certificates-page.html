@@ -1,0 +1,195 @@
+<gc-page-header
+  [heading]="'gestion.certificates.title' | translate"
+  [lead]="'gestion.certificates.lead' | translate"
+/>
+<div aria-live="polite">
+  @if (status()) {
+    <p class="notice" role="status">{{ status() }}</p>
+  }
+</div>
+<gc-error-summary [messages]="errors()" />
+
+<section class="card" aria-labelledby="overview-title">
+  <h2 id="overview-title">{{ 'gestion.certificates.overview' | translate }}</h2>
+  <div class="table-wrap">
+    <table>
+      <caption class="visually-hidden">
+        {{
+          'gestion.certificates.overview' | translate
+        }}
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">{{ 'gestion.certificates.fields.nature' | translate }}</th>
+          <th scope="col">{{ 'gestion.certificates.fields.eligible' | translate }}</th>
+          <th scope="col">{{ 'gestion.certificates.fields.issued' | translate }}</th>
+          <th scope="col">{{ 'gestion.certificates.fields.revoked' | translate }}</th>
+          <th scope="col">{{ 'gestion.certificates.fields.state' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of overview(); track row.nature) {
+          <tr>
+            <th scope="row">{{ 'gestion.certificates.nature.' + row.nature | translate }}</th>
+            <td>
+              {{ row.eligible }}
+              @if (row.unreachable) {
+                <br /><span class="muted">{{
+                  'gestion.certificates.unreachable' | translate: { count: row.unreachable }
+                }}</span>
+              }
+            </td>
+            <td>{{ row.issued }}</td>
+            <td>{{ row.revoked }}</td>
+            <td>
+              @if (!row.enabled) {
+                <span class="muted">{{ 'gestion.certificates.disabled' | translate }}</span>
+              } @else if (row.pending) {
+                <span class="badge">{{ 'gestion.certificates.pending' | translate }}</span>
+              } @else if (!row.ready) {
+                <span class="muted">{{ problem(row) }}</span>
+                <br />
+                <a [routerLink]="['/editions', editionId(), 'attestations', 'modele']">{{
+                  'gestion.certificates.configure' | translate
+                }}</a>
+              } @else {
+                <button
+                  mat-stroked-button
+                  type="button"
+                  (click)="issue(row)"
+                  [disabled]="busy() || row.eligible === 0"
+                >
+                  {{
+                    (row.issued
+                      ? 'gestion.certificates.issueMore'
+                      : 'gestion.certificates.issueFirst'
+                    ) | translate
+                  }}
+                </button>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  <p class="muted">{{ 'gestion.certificates.queueHint' | translate }}</p>
+  <div class="actions">
+    <button mat-button type="button" (click)="refresh()" [disabled]="busy()">
+      {{ 'gestion.certificates.refresh' | translate }}
+    </button>
+  </div>
+</section>
+
+<form [formGroup]="form" (ngSubmit)="search()" novalidate class="card">
+  <div class="grid-2">
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'gestion.attendance.search' | translate }}</mat-label>
+      <input matInput formControlName="q" type="search" />
+      <mat-hint>{{ 'gestion.certificates.searchHint' | translate }}</mat-hint>
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'gestion.certificates.fields.nature' | translate }}</mat-label>
+      <mat-select formControlName="nature">
+        <mat-option value="">{{ 'gestion.registrations.all' | translate }}</mat-option>
+        @for (nature of natures; track nature) {
+          <mat-option [value]="nature">{{
+            'gestion.certificates.nature.' + nature | translate
+          }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'gestion.certificates.fields.state' | translate }}</mat-label>
+      <mat-select formControlName="revoked">
+        <mat-option value="">{{ 'gestion.registrations.all' | translate }}</mat-option>
+        <mat-option value="false">{{ 'gestion.certificates.valid' | translate }}</mat-option>
+        <mat-option value="true">{{ 'gestion.certificates.revokedState' | translate }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+  <div class="actions">
+    <button mat-flat-button type="submit">{{ 'gestion.registrations.apply' | translate }}</button>
+    <button mat-button type="button" (click)="reset()">
+      {{ 'gestion.registrations.reset' | translate }}
+    </button>
+  </div>
+</form>
+
+@if (!loading()) {
+  <p class="muted" role="status">
+    {{ 'gestion.certificates.count' | translate: { count: count() } }}
+  </p>
+  <div class="table-wrap">
+    <table>
+      <caption class="visually-hidden">
+        {{
+          'gestion.certificates.title' | translate
+        }}
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">{{ 'gestion.certificates.fields.reference' | translate }}</th>
+          <th scope="col">{{ 'gestion.certificates.fields.person' | translate }}</th>
+          <th scope="col">{{ 'gestion.certificates.fields.nature' | translate }}</th>
+          <th scope="col">{{ 'gestion.certificates.fields.issuedAt' | translate }}</th>
+          <th scope="col">{{ 'gestion.attendance.fields.actions' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows(); track row.id) {
+          <tr>
+            <td>{{ row.reference }}</td>
+            <td>
+              {{ row.name }}
+              @if (row.institution) {
+                <br /><span class="muted">{{ row.institution }}</span>
+              }
+            </td>
+            <td>
+              {{ 'gestion.certificates.nature.' + row.nature | translate }}
+              <br /><span class="muted">{{
+                'gestion.certificateSettings.mode.' + row.signing_mode | translate
+              }}</span>
+            </td>
+            <td>
+              {{ date(row.issued_at) }}
+              <br /><span class="muted">{{ row.signatory_name }}</span>
+            </td>
+            <td>
+              <a [href]="pdfUrl(row)" target="_blank" rel="noopener">{{
+                'gestion.certificates.pdf' | translate
+              }}</a>
+              @if (row.revoked_at) {
+                <br /><span class="badge">{{
+                  'gestion.certificates.revokedOn' | translate: { date: date(row.revoked_at) }
+                }}</span>
+                <br /><span class="muted">{{ row.revoke_reason }}</span>
+              } @else {
+                <br />
+                <button mat-button type="button" (click)="revoke(row)" [disabled]="busy()">
+                  {{ 'gestion.certificates.revoke.action' | translate }}
+                </button>
+              }
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="5" class="muted">{{ 'gestion.certificates.empty' | translate }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  @if (pages() > 1) {
+    <nav class="actions" [attr.aria-label]="'gestion.pagination.label' | translate">
+      <button mat-button type="button" [disabled]="page() <= 1" (click)="goTo(page() - 1)">
+        {{ 'gestion.pagination.previous' | translate }}
+      </button>
+      <span>{{ 'gestion.pagination.status' | translate: { page: page(), pages: pages() } }}</span>
+      <button mat-button type="button" [disabled]="page() >= pages()" (click)="goTo(page() + 1)">
+        {{ 'gestion.pagination.next' | translate }}
+      </button>
+    </nav>
+  }
+}

@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { ActivatedRouteSnapshot, convertToParamMap, provideRouter, UrlTree } from '@angular/router';
 
 import { TEST_ME } from '../../testing';
-import { capabilityGuard } from './capability.guard';
+import { anyCapabilityGuard, capabilityGuard } from './capability.guard';
 import { MeStore } from './me.store';
 
 function routeFor(editionId: string): ActivatedRouteSnapshot {
@@ -55,5 +55,15 @@ describe('capabilityGuard', () => {
     const denied = await run(capabilityGuard('edition.write'), '3');
     expect(String(denied)).toBe('/acces-refuse');
     expect(String(await run(capabilityGuard('members.read'), '4'))).toBe('/acces-refuse');
+  });
+
+  it('toutes les capacités exigées par capabilityGuard, une seule par anyCapabilityGuard', async () => {
+    expect(String(await run(capabilityGuard('members.read', 'checkin.scan'), '3'))).toBe(
+      '/acces-refuse',
+    );
+    expect(await run(anyCapabilityGuard('checkin.scan', 'members.read'), '3')).toBe(true);
+    expect(String(await run(anyCapabilityGuard('checkin.scan', 'sessions.chair'), '3'))).toBe(
+      '/acces-refuse',
+    );
   });
 });

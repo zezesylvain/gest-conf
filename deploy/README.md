@@ -50,7 +50,11 @@ deploy/deploy.sh
 Étapes (étude §11.4) :
 1. build Angular par `npm run build` : portail pré-rendu, gestion, puis **CSP à empreintes**
    ajoutée en `<meta>` dans chaque page HTML (`web/scripts/inject-csp.mjs`). Le script
-   refuse de publier une page sans cette CSP, y compris avec `SKIP_BUILD=1` ;
+   refuse de publier une page sans cette CSP, y compris avec `SKIP_BUILD=1`. Le manifeste
+   du service worker de l'accueil (`ngsw.json`, plan L7) est ensuite **régénéré**
+   (`ngsw-config`), puisque la CSP modifie `index.html`, et ses empreintes sont contrôlées
+   (`web/scripts/check-ngsw.mjs`) : une empreinte fausse empêcherait l'accueil de marcher
+   sans réseau ;
 2. envoi du code Django (dont les catalogues de traduction `.po` et `.mo` de `locale/`) :
    **contenu versionné du commit déployé uniquement** (`git archive`), jamais un fichier
    ignoré par git du poste local (`.coverage`, `htmlcov/`, `.env.local`…) ;

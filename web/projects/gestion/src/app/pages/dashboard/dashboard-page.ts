@@ -11,6 +11,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { RouterLink } from '@angular/router';
 import {
+  CertificateOverview,
+  CheckinSummary,
   ConfirmDialog,
   ConfirmDialogData,
   ConfirmDialogResult,
@@ -32,6 +34,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 
 import { EditionApi } from '../../core/edition-api';
+import { EventsApi } from '../../core/events-api';
 import { editionTitle } from '../../core/managed-editions';
 import { editionCapabilities, errorMessages } from '../../core/page-support';
 import { ProgramApi } from '../../core/program-api';
@@ -51,7 +54,9 @@ interface CheckItem {
  * de soumissions par statut avec `submissions.read` (plan L3) ; avancement de l'évaluation
  * avec `reviews.manage` (plan L4 : divergences, retards) ; programme avec `program.read`
  * (plan L5 : à programmer, conflits, modifications non publiées) ; inscriptions avec
- * `registrations.read` et finances avec `finance.read` (plan L6, J12). La liste de contrôle est
+ * `registrations.read` et finances avec `finance.read` (plan L6, J12) ; jour J avec
+ * `checkin.scan`, attestations avec `certificates.manage`, lettres à instruire avec
+ * `letters.manage` (plan L7, K15). La liste de contrôle est
  * indicative : le serveur revérifie les préconditions à la publication (`edition_incomplete`).
  */
 @Component({
@@ -69,6 +74,7 @@ export class DashboardPage implements OnInit {
   private readonly reviewsApi = inject(ReviewsApi);
   private readonly programApi = inject(ProgramApi);
   private readonly registrationsApi = inject(RegistrationsApi);
+  private readonly eventsApi = inject(EventsApi);
   private readonly meStore = inject(MeStore);
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
@@ -84,6 +90,13 @@ export class DashboardPage implements OnInit {
   /** Inscriptions confirmées et en attente (`registrations.read`). */
   protected readonly registrations = signal<{ confirmed: number; pending: number } | null>(null);
   protected readonly finance = signal<FinanceDashboard | null>(null);
+  /** Jour J (plan L7) : pointages, attestations par nature, lettres à instruire. */
+  protected readonly checkin = signal<CheckinSummary | null>(null);
+  protected readonly certificates = signal<CertificateOverview[] | null>(null);
+  protected readonly lettersToReview = signal<number | null>(null);
+  protected readonly certificatesIssued = computed(() =>
+    (this.certificates() ?? []).reduce((sum, row) => sum + row.issued, 0),
+  );
   /** Évaluations en retard, tous relecteurs confondus. */
   protected readonly lateReviews = computed(() =>
     (this.reviewProgress()?.reviewers ?? []).reduce((sum, reviewer) => sum + reviewer.late, 0),
@@ -226,6 +239,16 @@ export class DashboardPage implements OnInit {
           ),
         );
         this.registrations.set({ confirmed: confirmed.count, pending: pending.count });
+      }
+      if (this.can('checkin.scan')) {
+        this.checkin.set(await this.eventsApi.summary(id));
+      }
+      if (this.can('certificates.manage')) {
+        this.certificates.set(await this.eventsApi.overview(id));
+      }
+      if (this.can('letters.manage')) {
+        const letters = await this.eventsApi.letters(id, { status: 'requested', page_size: 1 });
+        this.lettersToReview.set(letters.count);
       }
     } catch (error) {
       this.errors.set(errorMessages(this.translate, error));

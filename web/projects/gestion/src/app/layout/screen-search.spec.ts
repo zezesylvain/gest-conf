@@ -20,7 +20,9 @@ const EVERY_SCREEN: MeEdition = {
   capabilities: [
     ...new Set([
       ...CHAIR_EDITION.capabilities,
-      ...SCREENS.flatMap((screen) => (screen.capability ? [screen.capability] : [])),
+      ...SCREENS.flatMap((screen) =>
+        screen.capability === null ? [] : [screen.capability].flat(),
+      ),
     ]),
   ],
 };

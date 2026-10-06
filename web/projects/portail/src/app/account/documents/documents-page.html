@@ -1,0 +1,174 @@
+<gc-page-header
+  [heading]="'portail.documents.title' | translate"
+  [lead]="'portail.documents.lead' | translate"
+/>
+<div aria-live="polite">
+  @if (notice()) {
+    <p class="notice" role="status">{{ notice() }}</p>
+  }
+</div>
+<gc-error-summary [messages]="errors()" />
+
+@if (!loading()) {
+  <section class="card" aria-labelledby="badge-title">
+    <h2 id="badge-title">{{ 'portail.documents.badge.title' | translate }}</h2>
+    @for (registration of badges(); track registration.id) {
+      <p>
+        <a mat-stroked-button [href]="badgeUrl(registration)" target="_blank" rel="noopener">
+          {{
+            'portail.documents.badge.download' | translate: { reference: registration.reference }
+          }}
+        </a>
+      </p>
+      <p class="hint">{{ 'portail.documents.badge.hint' | translate }}</p>
+    } @empty {
+      <p class="muted">
+        {{ 'portail.documents.badge.none' | translate }}
+        <a routerLink="/compte/mon-inscription">{{
+          'portail.account.nav.registration' | translate
+        }}</a>
+      </p>
+    }
+  </section>
+
+  <section class="card" aria-labelledby="certificates-title">
+    <h2 id="certificates-title">{{ 'portail.documents.certificates.title' | translate }}</h2>
+    @if (certificates().length) {
+      <ul class="documents">
+        @for (certificate of certificates(); track certificate.id) {
+          <li>
+            <strong>{{ 'portail.documents.nature.' + certificate.nature | translate }}</strong>
+            — {{ editionTitle(certificate) }}
+            @if (certificate.title) {
+              <br /><span class="muted">« {{ certificate.title }} »</span>
+            }
+            <br />
+            <span class="muted">{{
+              'portail.documents.issuedAt' | translate: { date: date(certificate.issued_at) }
+            }}</span>
+            <br />
+            @if (certificate.revoked) {
+              <span class="badge">{{ 'portail.documents.revoked' | translate }}</span>
+            } @else {
+              <a [href]="certificateUrl(certificate)" target="_blank" rel="noopener">{{
+                'portail.documents.pdf' | translate
+              }}</a>
+              ·
+              <a [href]="certificate.verification_url" target="_blank" rel="noopener">{{
+                'portail.documents.verify' | translate
+              }}</a>
+            }
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="muted">{{ 'portail.documents.certificates.none' | translate }}</p>
+    }
+  </section>
+
+  <section class="card" aria-labelledby="letter-title">
+    <h2 id="letter-title">{{ 'portail.documents.letter.title' | translate }}</h2>
+    <p class="hint">{{ 'portail.documents.letter.lead' | translate }}</p>
+    @if (active(); as registration) {
+      @if (letter(); as current) {
+        <p>
+          <span class="badge">{{
+            'portail.documents.letter.status.' + current.status | translate
+          }}</span>
+          <span class="muted">
+            {{
+              'portail.documents.letter.requestedAt'
+                | translate: { date: date(current.requested_at) }
+            }}
+          </span>
+        </p>
+        <p>
+          {{ current.passport_name }} · {{ current.nationality }} ·
+          {{ current.passport_number_masked }}
+          <br />
+          {{
+            'portail.documents.letter.stay'
+              | translate: { from: day(current.stay_from), to: day(current.stay_to) }
+          }}
+          · {{ current.embassy }}
+        </p>
+        @if (current.status === 'requested') {
+          <p class="muted">{{ 'portail.documents.letter.pending' | translate }}</p>
+        }
+        @if (current.status === 'refused') {
+          <p class="notice">
+            {{ 'portail.documents.letter.refused' | translate: { reason: current.refuse_reason } }}
+          </p>
+        }
+        @if (current.status === 'issued') {
+          <p>
+            <a mat-flat-button [href]="letterUrl(registration)" target="_blank" rel="noopener">
+              {{ 'portail.documents.letter.download' | translate }}
+            </a>
+          </p>
+          <p class="hint">{{ 'portail.documents.letter.disclaimer' | translate }}</p>
+        }
+      }
+      @if (canRequest() && !requesting()) {
+        <button mat-stroked-button type="button" (click)="startRequest()">
+          {{
+            (letter() ? 'portail.documents.letter.again' : 'portail.documents.letter.request')
+              | translate
+          }}
+        </button>
+      }
+      @if (requesting()) {
+        <form [formGroup]="letterForm" (ngSubmit)="submitRequest()" novalidate>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'portail.documents.letter.fields.passportName' | translate }}</mat-label>
+            <input matInput formControlName="passport_name" autocomplete="name" required />
+            <mat-hint>{{ 'portail.documents.letter.passportNameHint' | translate }}</mat-hint>
+            <mat-error>{{ error('passport_name') }}</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'portail.documents.letter.fields.nationality' | translate }}</mat-label>
+            <input matInput formControlName="nationality" required />
+            <mat-error>{{ error('nationality') }}</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>{{
+              'portail.documents.letter.fields.passportNumber' | translate
+            }}</mat-label>
+            <input matInput formControlName="passport_number" autocomplete="off" required />
+            <mat-hint>{{ 'portail.documents.letter.passportNumberHint' | translate }}</mat-hint>
+            <mat-error>{{ error('passport_number') }}</mat-error>
+          </mat-form-field>
+          <div class="dates">
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'portail.documents.letter.fields.stayFrom' | translate }}</mat-label>
+              <input matInput type="date" formControlName="stay_from" required />
+              <mat-error>{{ error('stay_from') }}</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'portail.documents.letter.fields.stayTo' | translate }}</mat-label>
+              <input matInput type="date" formControlName="stay_to" required />
+              <mat-hint>{{ 'portail.documents.letter.stayHint' | translate }}</mat-hint>
+              <mat-error>{{ error('stay_to') }}</mat-error>
+            </mat-form-field>
+          </div>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'portail.documents.letter.fields.embassy' | translate }}</mat-label>
+            <input matInput formControlName="embassy" required />
+            <mat-hint>{{ 'portail.documents.letter.embassyHint' | translate }}</mat-hint>
+            <mat-error>{{ error('embassy') }}</mat-error>
+          </mat-form-field>
+          <div class="actions">
+            <button mat-flat-button type="submit" [disabled]="busy()">
+              {{ 'portail.documents.letter.submit' | translate }}
+            </button>
+            <button mat-button type="button" (click)="requesting.set(false)">
+              {{ 'portail.documents.letter.cancel' | translate }}
+            </button>
+          </div>
+        </form>
+      }
+    } @else {
+      <p class="muted">{{ 'portail.documents.letter.noRegistration' | translate }}</p>
+    }
+  </section>
+}

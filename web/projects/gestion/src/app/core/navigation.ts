@@ -15,6 +15,8 @@ export type NavGroupKey =
   | 'reviewing'
   | 'program'
   | 'registrations'
+  | 'dayof'
+  | 'documents'
   | 'settings'
   | 'committees'
   | 'portal'
@@ -49,8 +51,22 @@ export interface ScreenDef {
   label: string;
   help: string;
   group: NavGroupKey;
-  /** Capacité exigée dans l'édition ; `null` : écran ouvert à tout rôle de gestion. */
-  capability: Capability | null;
+  /**
+   * Capacité exigée dans l'édition ; une liste : **l'une** d'elles suffit (les sessions du
+   * jour, pour qui pointe ou préside une séance, plan L7) ; `null` : écran ouvert à tout
+   * rôle de gestion.
+   */
+  capability: Capability | readonly Capability[] | null;
+}
+
+/** L'écran est-il permis par ces capacités (l'une d'elles, pour une liste) ? */
+export function screenAllowed(screen: ScreenDef, capabilities: readonly string[]): boolean {
+  if (screen.capability === null) {
+    return true;
+  }
+  const required: readonly string[] =
+    typeof screen.capability === 'string' ? [screen.capability] : screen.capability;
+  return required.some((capability) => capabilities.includes(capability));
 }
 
 export const GROUP_ORDER: readonly NavGroupKey[] = [
@@ -59,6 +75,8 @@ export const GROUP_ORDER: readonly NavGroupKey[] = [
   'reviewing',
   'program',
   'registrations',
+  'dayof',
+  'documents',
   'settings',
   'committees',
   'portal',
@@ -181,6 +199,80 @@ export const SCREENS: readonly ScreenDef[] = [
     help: 'finance-dashboard',
     group: 'registrations',
     capability: 'finance.read',
+  },
+  // Jour J (plan L7, K15) : accueil (PWA), sessions du jour, présences, badges, comptoir.
+  {
+    key: 'reception',
+    path: 'accueil',
+    label: 'gestion.nav.reception',
+    help: 'reception',
+    group: 'dayof',
+    capability: 'checkin.scan',
+  },
+  {
+    key: 'daySessions',
+    path: 'jour-j/sessions',
+    label: 'gestion.nav.daySessions',
+    help: 'day-sessions',
+    group: 'dayof',
+    capability: ['checkin.scan', 'sessions.chair'],
+  },
+  {
+    key: 'attendance',
+    path: 'jour-j/presences',
+    label: 'gestion.nav.attendance',
+    help: 'attendance',
+    group: 'dayof',
+    capability: 'checkin.manage',
+  },
+  {
+    key: 'badges',
+    path: 'jour-j/badges',
+    label: 'gestion.nav.badges',
+    help: 'badges',
+    group: 'dayof',
+    capability: 'registrations.read',
+  },
+  {
+    key: 'counter',
+    path: 'jour-j/comptoir',
+    label: 'gestion.nav.counter',
+    help: 'counter',
+    group: 'dayof',
+    capability: 'registrations.manage',
+  },
+  // Attestations et lettres (plan L7, K9 à K12, K18, K19).
+  {
+    key: 'certificates',
+    path: 'attestations',
+    label: 'gestion.nav.certificates',
+    help: 'certificates',
+    group: 'documents',
+    capability: 'certificates.manage',
+  },
+  {
+    key: 'certificateSettings',
+    path: 'attestations/modele',
+    label: 'gestion.nav.certificateSettings',
+    help: 'certificate-settings',
+    group: 'documents',
+    capability: 'certificates.manage',
+  },
+  {
+    key: 'letters',
+    path: 'lettres',
+    label: 'gestion.nav.letters',
+    help: 'letters',
+    group: 'documents',
+    capability: 'letters.manage',
+  },
+  {
+    key: 'signature',
+    path: 'signature',
+    label: 'gestion.nav.signature',
+    help: 'signature',
+    group: 'documents',
+    capability: 'signature.manage',
   },
   {
     key: 'general',
@@ -340,6 +432,8 @@ export const ROLE_GROUPS: Partial<Record<Role, readonly NavGroupKey[]>> = {
     'reviewing',
     'program',
     'registrations',
+    'dayof',
+    'documents',
     'settings',
     'committees',
     'portal',
@@ -351,6 +445,8 @@ export const ROLE_GROUPS: Partial<Record<Role, readonly NavGroupKey[]>> = {
     'reviewing',
     'program',
     'registrations',
+    'dayof',
+    'documents',
     'settings',
     'committees',
     'portal',
@@ -358,9 +454,25 @@ export const ROLE_GROUPS: Partial<Record<Role, readonly NavGroupKey[]>> = {
   ],
   // Paramétrage pour les grilles d'évaluation (plan L4, H3) ; programme en lecture (L5, I1).
   SC_CHAIR: ['steering', 'submissions', 'reviewing', 'program', 'settings', 'committees'],
-  OC_MEMBER: ['steering', 'submissions', 'program', 'registrations', 'settings', 'portal'],
+  // Comités : le CO « bénévoles » recrute les bénévoles (plan L7, K1).
+  OC_MEMBER: [
+    'steering',
+    'submissions',
+    'program',
+    'registrations',
+    'dayof',
+    'documents',
+    'settings',
+    'committees',
+    'portal',
+  ],
   // Relecteur (plan L4, H1) : ses évaluations seulement.
   SC_MEMBER: ['reviewing'],
+  // Plan L7 : le bénévole pointe, le président de séance émarge ses sessions (K1, K7), le
+  // signataire renseigne sa signature (K18).
+  VOLUNTEER: ['dayof'],
+  SESSION_CHAIR: ['dayof'],
+  SIGNATORY: ['documents'],
 };
 
 /** Rôles de gestion : ceux que le sélecteur « Rôle actif » propose. */
@@ -387,9 +499,7 @@ export function buildNavigation(
       continue;
     }
     const entries = SCREENS.filter(
-      (screen) =>
-        screen.group === key &&
-        (screen.capability === null || capabilities.includes(screen.capability)),
+      (screen) => screen.group === key && screenAllowed(screen, capabilities),
     ).map((screen): NavEntry => ({
       key: screen.key,
       url: screenUrl(screen, editionId),

@@ -53,7 +53,7 @@
     }
   </nav>
   <section class="edition-content">
-    @if (edition()) {
+    @if (edition() || offline()) {
       <router-outlet />
     } @else {
       <p role="alert">{{ 'gestion.forbidden.lead' | translate }}</p>

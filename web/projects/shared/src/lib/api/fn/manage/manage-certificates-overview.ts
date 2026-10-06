@@ -7,7 +7,7 @@ import { filter, map } from 'rxjs/operators';
 import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
-import { PaginatedCertificateOverviewList } from '../../models/paginated-certificate-overview-list';
+import { CertificateOverview } from '../../models/certificate-overview';
 
 export interface ManageCertificatesOverview$Params {
   edition_id: number;
@@ -16,25 +16,13 @@ export interface ManageCertificatesOverview$Params {
  * Quel champ utiliser pour classer les résultats.
  */
   ordering?: string;
-
-/**
- * Un numéro de page de l'ensemble des résultats.
- */
-  page?: number;
-
-/**
- * Nombre de résultats à retourner par page.
- */
-  page_size?: number;
 }
 
-export function manageCertificatesOverview(http: HttpClient, rootUrl: string, params: ManageCertificatesOverview$Params, context?: HttpContext): Observable<StrictHttpResponse<PaginatedCertificateOverviewList>> {
+export function manageCertificatesOverview(http: HttpClient, rootUrl: string, params: ManageCertificatesOverview$Params, context?: HttpContext): Observable<StrictHttpResponse<Array<CertificateOverview>>> {
   const rb = new RequestBuilder(rootUrl, manageCertificatesOverview.PATH, 'get');
   if (params) {
     rb.path('edition_id', params.edition_id, {});
     rb.query('ordering', params.ordering, {});
-    rb.query('page', params.page, {});
-    rb.query('page_size', params.page_size, {});
   }
 
   return http.request(
@@ -42,7 +30,7 @@ export function manageCertificatesOverview(http: HttpClient, rootUrl: string, pa
   ).pipe(
     filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
     map((r: HttpResponse<any>) => {
-      return r as StrictHttpResponse<PaginatedCertificateOverviewList>;
+      return r as StrictHttpResponse<Array<CertificateOverview>>;
     })
   );
 }

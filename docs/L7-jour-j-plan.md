@@ -751,3 +751,276 @@ nouvelle attestation peut ensuite être émise.
   avertissement.
 
 **Critère de fin** (« Tests au vert ») : atteint.
+
+## 17. Bilan de L7.6 (6 octobre 2026)
+
+**Navigation** (K15) : deux nouvelles catégories du rail.
+
+- **« Jour J »** :
+  - accueil (`accueil`, `checkin.scan`) ;
+  - sessions du jour (`jour-j/sessions`, `checkin.scan` **ou** `sessions.chair`) ;
+  - présences (`checkin.manage`) ;
+  - badges (`registrations.read`) ;
+  - comptoir (`registrations.manage`).
+- **« Attestations et lettres »** :
+  - suivi des attestations et modèle (`certificates.manage`) ;
+  - lettres d'invitation (`letters.manage`) ;
+  - « Ma signature » (`signature.manage`).
+- Une capacité d'écran peut être une liste, dont **l'une** suffit (`screenAllowed`,
+  `anyCapabilityGuard` dans `shared`).
+- Menus du rôle actif pour `VOLUNTEER`, `SESSION_CHAIR` et `SIGNATORY` ; le CO reçoit
+  aussi « Comités » (le CO « bénévoles » gère les bénévoles).
+- Accueil d'une édition sans `edition.read` :
+  - le bénévole arrive sur l'accueil ;
+  - le président de séance, sur les sessions du jour ;
+  - le signataire, sur sa signature.
+
+**Capacité `sessions.chair`** (backend) :
+
+- le président de séance n'avait aucune capacité ; ses éditions n'apparaissaient donc pas
+  dans la gestion ;
+- il reçoit `sessions.chair`, simple porte d'entrée : la présidence reste vérifiée session
+  par session par le serveur (`CapabilityOrSessionChair`, L7.3) ;
+- l'administrateur ne la reçoit pas ;
+- test `test_k7_session_chair_capability_belongs_to_the_session_chair_alone`.
+
+**Correctif du schéma** :
+
+- quatre listes courtes étaient décrites comme paginées :
+  - les sessions du jour ;
+  - le suivi des attestations ;
+  - les gabarits ;
+  - les signataires ;
+- elles sont servies par des vues sans pagination : `DaySessionListViewSet`,
+  `CertificateOverviewViewSet` et `pagination_class = None` des gabarits ;
+- le client généré type désormais des tableaux.
+
+**Accueil (PWA)** (K4 à K7 ; `core/checkin-desk.ts`, `core/checkin-offline.ts`,
+`core/qr-scanner.ts`, `pages/events/reception-page`) :
+
+- **en ligne d'abord** : chaque badge est soumis au serveur, qui répond ;
+- **sans réseau** (erreur réseau seulement, jamais un refus de droits) :
+  - décision sur la liste téléchargée, par l'empreinte SHA-256 du jeton (Web Crypto),
+    identique à celle du serveur ;
+  - pointage mis en **file IndexedDB** avec le jeton, seule preuve acceptée ;
+  - badge retiré (annulé, remplacé) : refusé ;
+  - absent de la liste : dirigé vers le comptoir, rien n'est mis en file ;
+  - « déjà pointé » connu de l'appareil (liste et pointages locaux) ;
+- **synchronisation** :
+  - automatique au retour du réseau, ou par le bouton ;
+  - lots de 200 ;
+  - chaque réponse sort de la file ;
+  - les refus du serveur sont affichés avec le nom ;
+- **liste** : effacée à 48 h (à la lecture) et à la déconnexion, comme la file ; la coque
+  avertit avant de se déconnecter s'il reste des pointages non envoyés ;
+- **mode session** : choix d'une session publiée (titres gardés pour le hors-ligne), ou
+  `?session=` depuis les sessions du jour ;
+  - le président de séance n'y a que ses sessions ;
+  - pas de liste hors ligne pour lui (la liste demande `checkin.scan`) ;
+- **caméra** : `getUserMedia` ; `BarcodeDetector` s'il lit les QR, sinon `jsQR`, chargé à
+  la demande dans le morceau de l'écran ;
+- **résultat** annoncé dans une zone `aria-live` ; couleur doublée d'un texte ;
+  vibration ;
+- **saisie de la référence** en secours (`checkin.manage`, revérifiée par le serveur) ;
+- **nom du poste** repris dans chaque pointage.
+
+**PWA** :
+
+- manifeste et service worker **ajoutés par l'écran d'accueil seul** (bilan de L7.0) ;
+  rien en développement ;
+- `ngsw-config.json` : coquille en cache ;
+- `start_url` `/gestion/accueil` mène à l'accueil de la dernière édition, même hors
+  ligne ;
+- démarrée sans réseau, la gestion ne renvoie plus vers la connexion du portail (qui ne
+  serait pas joignable) ; l'accueil s'ouvre sur la liste de l'appareil
+  (`Connectivity.startedOffline`, `receptionGuard`) ;
+- icônes 192 et 512 px ;
+- `.htaccess` de la gestion :
+  - `Permissions-Policy: camera=(self)` ;
+  - type du manifeste ;
+  - `no-cache` du service worker et de `ngsw.json` ;
+- `deploy/smoke-test.sh` contrôle :
+  - la caméra permise sous `/gestion/`, refusée au portail ;
+  - le manifeste ;
+  - `ngsw.json` sans cache long.
+
+**Autres écrans** :
+
+- **sessions du jour** :
+  - présents (première page, export complet) ;
+  - « Marquer présentée » (président de cette séance ou `program.write`) ;
+  - correction motivée (`program.write`) ;
+- **présences** : recherche, état, annulation motivée, export ;
+- **badges** :
+  - lots de 200 par catégorie, téléchargés par lien authentifié (rien n'est stocké) ;
+  - dans la fiche d'une inscription : badge, et « Remplacer le badge » (`checkin.manage`,
+    motif) ;
+- **comptoir** :
+  - compte créé ou rattaché ;
+  - paiement reçu ;
+  - badge à imprimer aussitôt ;
+- **attestations** :
+  - suivi par nature : éligibles, émises, révoquées, sans compte, condition manquante
+    traduite (`signatory_missing`, `signing_unavailable`) ;
+  - émission confirmée, puis passage en file ;
+  - émission complémentaire ;
+  - liste, PDF, révocation motivée ;
+- **modèle** :
+  - mode de signature, disposition, attestation d'évaluation ;
+  - en-tête officiel ;
+  - certificat PKCS#12 et mot de passe : le mot de passe n'est ni gardé ni réaffiché ;
+  - par nature : signataire désigné, textes FR et EN, variables permises, aperçu PDF ;
+  - un texte par défaut laissé tel quel part vide et suit le défaut au lieu d'être figé ;
+- **lettres** :
+  - liste des demandes à instruire, numéro masqué ;
+  - fiche avec le numéro en clair ;
+  - émettre, refuser ou révoquer, avec motif ;
+- **ma signature** : nom, fonction FR et EN, image (aperçu par l'endpoint authentifié) ;
+- **tableau de bord** : carte « Jour J et attestations » (pointés, attestations émises,
+  lettres à instruire) ;
+- **tarifs** : couleur du badge de chaque catégorie.
+
+**Aide** :
+
+- neuf fiches nouvelles ;
+- fiche « Rôles et droits » complétée ;
+- bénévole, président de séance et signataire dans l'index par profil.
+
+**Vérifié au navigateur** (build de production, Chromium, API coupée) :
+
+- un autre écran de la gestion n'enregistre aucun service worker ;
+- l'accueil ajoute le manifeste et enregistre le service worker (portée `/gestion/`, état
+  « NORMAL ») ;
+- réseau coupé puis rechargement : l'accueil s'affiche depuis le cache, « Hors ligne »,
+  sans erreur JavaScript.
+
+Cette vérification a révélé trois défauts, corrigés :
+
+- **empreinte de `index.html`** : `inject-csp.mjs` réécrit `index.html` après le build,
+  donc après le calcul des empreintes de `ngsw.json`. Le service worker aurait refusé la
+  version. Le script `build` régénère maintenant `ngsw.json` (`ngsw-config`) puis contrôle
+  toutes les empreintes (`web/scripts/check-ngsw.mjs`, testé ; `deploy/README.md`) ;
+- **réponse du service worker sans réseau** : une page contrôlée ne voit jamais le
+  statut 0 ; le service worker répond lui-même **504**. La gestion prenait ce 504 pour une
+  absence de session et renvoyait vers la connexion du portail. Désormais 0, 502, 503 et
+  504 valent « serveur injoignable » (`isUnreachable`), au démarrage comme à l'accueil ;
+- **mise en page de l'édition** : `/me` étant inconnu hors ligne, elle affichait « accès
+  refusé » au lieu de l'écran d'accueil.
+
+**Budget** :
+
+- l'avertissement à la déconnexion (fenêtre Material) est chargé à la demande, comme la
+  réauthentification ; sans cela, il ajoutait 290 ko au bundle initial ;
+- bundle initial de la gestion : **382 ko** (avertissement à 500 ko) ;
+- `jsQR` : morceau à la demande de 130 ko (27 ko compressés), déclaré en
+  `allowedCommonJsDependencies` ;
+- portail inchangé : 368,6 ko, avertissement déjà connu (L5, L6).
+
+**Écarts et précisions** :
+
+- **précision de K5** :
+  - la file de pointages garde le jeton jusqu'à l'envoi (bilan de L7.2) ;
+  - un pointage « déjà pointé » ou refusé sur l'appareil n'est pas mis en file ;
+  - un QR de plus de 128 caractères est « inconnu » sans appel au serveur ;
+- **portail et gestion partagent l'origine** (un seul domaine) : la liste et la file en
+  IndexedDB sont lisibles par tout script du domaine. La protection reste celle de K5 :
+  minimisation, 48 h, effacement à la déconnexion. Elle s'ajoute à la CSP à empreintes des
+  deux applications ;
+- le parcours complet (pointage hors ligne puis synchronisation, avec une vraie session)
+  relève de l'E2E de L7.8.
+
+**Tests** :
+
+- backend : **4 972 réussis**, 10 ignorés (SQLite) ;
+- sous MariaDB : `events`, rôles, schéma et règles de plateforme (153) ;
+- matrice des droits : 3 746 cas, inchangés ;
+- deux tests des scripts de déploiement adaptés : après la CSP, seules les étapes du
+  service worker ;
+- front : **453 tests** (scripts 13, `shared` 79, portail 144, gestion 217), dont 65
+  nouveaux :
+  - poste d'accueil : en ligne, hors ligne, 504 du service worker, refus, lots ;
+  - liste et file : empreinte identique à celle du serveur, expiration, effacement ;
+  - lecture du QR ;
+  - gardes et démarrage hors ligne ;
+  - navigation ;
+  - redirections ;
+  - les neuf écrans ;
+  - empreintes de `ngsw.json` ;
+- `ruff`, lint, `format:check`, `locale/check.sh`, schéma validé sous MariaDB, sans
+  avertissement ;
+- build de production vérifié au navigateur (voir plus haut).
+
+**Critère de fin** (« Démo H côté gestion ») : atteint pour la gestion. La démo complète,
+téléphone réel compris, relève de L7.8.
+
+## 18. Bilan de L7.7 (6 octobre 2026)
+
+**« Mes documents »** (K15 ; `/compte/mes-documents`, `account/documents/`) :
+
+- **badge** :
+  - pour l'inscription confirmée dont le QR existe : téléchargement du PDF par l'endpoint
+    authentifié (généré à la demande, jamais stocké) ;
+  - rappel que le QR est l'accès à l'accueil et ne se partage pas ;
+  - avant la confirmation : renvoi vers « Mon inscription » ;
+- **attestations** (`GET /v1/me/certificates`) :
+  - nature, édition et titre de la communication ;
+  - date d'émission, PDF et page de vérification ;
+  - une attestation révoquée est signalée, sans PDF (le serveur le refuse) ;
+- **lettre d'invitation** (K12), pour l'inscription en cours :
+  - demande : nom du passeport, nationalité, numéro, dates du séjour, ambassade ;
+  - suivi :
+    - en cours d'examen ;
+    - refusée avec son motif, puis nouvelle demande pré-remplie (sans le numéro de
+      passeport, jamais renvoyé en clair) ;
+    - émise : PDF et rappel de sa portée ;
+    - révoquée ;
+  - erreurs de champ posées sur le formulaire ; refus de règle (409), message du serveur ;
+- liens :
+  - menu de l'espace compte ;
+  - accueil du compte ;
+  - « Mon inscription », sous le QR ;
+- l'e-mail « attestation disponible » (L7.4) pointait déjà vers cette adresse.
+
+**Vérification publique** (K10 ; `/verification/<code>` et `/verification`) :
+
+- page hors des préfixes de langue, **rendue dans le navigateur** (`RenderMode.Client`,
+  jamais pré-rendue), servie par le repli SPA existant du `.htaccess` ;
+- résultat :
+  - nature ;
+  - titulaire, ou « non communiqué » si la personne est anonymisée ;
+  - conférence et ses dates ;
+  - date d'émission ;
+  - statut : authentique, ou révoquée avec sa date ;
+  - lettre d'invitation distinguée de l'attestation ;
+- code inconnu ou mal formé : un seul message, sans détail ; débit dépassé : message
+  d'erreur ;
+- saisie manuelle du code : majuscules, espaces et tirets de recopie retirés ;
+- `noindex` :
+  - balise meta posée par la page ;
+  - `Disallow: /verification` dans `robots.txt` ;
+  - **précision de K10** : pas d'en-tête `X-Robots-Tag` par chemin (`<If>` du
+    `.htaccess`), dont la prise en charge chez o2switch n'est pas vérifiée ;
+- `deploy/smoke-test.sh` contrôle :
+  - le `Disallow` ;
+  - le service de `/verification/<code>` par la coquille rendue dans le navigateur.
+
+**Vérifié au navigateur** (build de production du portail, API de vérification
+simulée) :
+
+- titre de la page ;
+- résultat « Attestation authentique » avec titulaire, conférence et dates ;
+- balise `noindex` ;
+- code inconnu : message unique ;
+- aucune erreur JavaScript.
+
+**Tests** :
+
+- portail : **158 tests**, dont 14 nouveaux :
+  - « Mes documents » : badge, attestations valides et révoquées ;
+  - lettre : demande, refus de règle, nouvelle demande, lettre émise ;
+  - vérification : valide, révoquée et anonymisée, lettre, inconnue, débit, saisie ;
+- lint, `format:check` ;
+- build complet ;
+- budget du portail : 368,9 ko (avertissement déjà connu, +0,3 ko pour les deux routes).
+
+**Critère de fin** (« Démo H côté portail ») : atteint, hors démo sur o2switch (L7.8).
