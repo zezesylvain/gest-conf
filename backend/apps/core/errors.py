@@ -81,6 +81,8 @@ class ErrorCode(models.TextChoices):
     # incomplet (prérequis de la soumission, plan L1 §3.3).
     SUBMISSION_LOCKED = "submission_locked"
     PROFILE_INCOMPLETE = "profile_incomplete"
+    # Évaluation (plan L4) : grille utilisée par une évaluation (RG-05 : on la duplique).
+    GRID_LOCKED = "grid_locked"
 
 
 class DomainError(Exception):

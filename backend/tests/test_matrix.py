@@ -400,6 +400,22 @@ CASES = [
         200,
         "/v1/manage/editions/{e}/submissions/{submission}/extensions/{extension}/revoke",
     ),
+    # --- Évaluation (lot L4, plan L4 §4) : grilles -----------------------------------------
+    Case("manage-grids-list", "GET", R, 200, "/v1/manage/editions/{e}/grids"),
+    Case("manage-grids-list", "POST", GW, 201, "/v1/manage/editions/{e}/grids", {"name": "Poster"}),
+    Case("manage-grids-detail", "GET", R, 200, "/v1/manage/editions/{e}/grids/{grid}"),
+    Case(
+        "manage-grids-detail",
+        "PATCH",
+        GW,
+        200,
+        "/v1/manage/editions/{e}/grids/{grid}",
+        {"name": "Grille révisée"},
+    ),
+    Case("manage-grids-detail", "DELETE", GW, 204, "/v1/manage/editions/{e}/grids/{grid}"),
+    Case(
+        "manage-grids-duplicate", "POST", GW, 201, "/v1/manage/editions/{e}/grids/{grid}/duplicate"
+    ),
     Case("manage-portal-poster", "GET", R, 200, "/v1/manage/editions/{e}/portal/poster"),
     Case(
         "manage-portal-poster",
@@ -496,7 +512,12 @@ def world():
         data=_png(), name="affiche.png", kind=PublicFileKind.IMAGE, edition=edition
     )
     submission, submission_file, extension = _submission_with_extension(edition)
+    from apps.core.actor import Actor
+    from apps.reviews.services.grids import create_grid
+
+    grid = create_grid(edition, name="Grille", actor=Actor.command("cli:matrice"))
     ids = {
+        "grid": grid.pk,
         "submission": submission.pk,
         "submission_file": submission_file.pk,
         "extension": extension.pk,

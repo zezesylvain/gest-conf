@@ -67,7 +67,8 @@
       "setting_frozen": "Setting frozen: submissions exist. Only an administrator can change it, with a reason.",
       "stale_revision": "Changed in the meantime (another tab?): reload before saving.",
       "submission_locked": "This submission can no longer be changed.",
-      "profile_incomplete": "Complete your profile before submitting."
+      "profile_incomplete": "Complete your profile before submitting.",
+      "grid_locked": "Grid already used by a review: duplicate it as a new version."
     },
     "form": {
       "errorSummary": "The form contains errors:",

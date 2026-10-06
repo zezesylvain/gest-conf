@@ -49,7 +49,14 @@ EDITION_INFO_FIELDS = (
     "timezone",
     "submission_languages",
 )
-CONFIDENTIALITY_FIELDS = ("double_blind", "reviewers_per_submission")
+# Évaluation (§6.1 ; plan L4 H4, H6, H12 : charge, divergence, pondération par la confiance).
+CONFIDENTIALITY_FIELDS = (
+    "double_blind",
+    "reviewers_per_submission",
+    "max_reviews_per_reviewer",
+    "divergence_threshold",
+    "confidence_weighted_score",
+)
 TRACK_FIELDS = (
     "code",
     "name_fr",
@@ -222,8 +229,9 @@ def update_edition(
 def update_confidentiality(
     edition: Edition, data: Mapping[str, Any], *, actor: Actor, reason: str = ""
 ) -> Edition:
-    """Double aveugle et nombre de relecteurs : changement classé critique (§6.1).
-    ``double_blind`` gelé dès la première soumission (RG-19)."""
+    """Paramètres de l'évaluation : double aveugle, relecteurs par soumission, charge
+    maximale, seuil de divergence, pondération par la confiance. Changement classé critique
+    (§6.1). ``double_blind`` gelé dès la première soumission (RG-19)."""
     edition = Edition.objects.select_for_update().get(pk=edition.pk)
     _writable(edition, actor)
     _check_frozen(edition, data, actor, reason)

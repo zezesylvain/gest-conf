@@ -67,7 +67,8 @@
       "setting_frozen": "Réglage gelé : des soumissions existent. Seul un administrateur peut le changer, avec un motif.",
       "stale_revision": "Modifié entre-temps (autre onglet ?) : rechargez avant d'enregistrer.",
       "submission_locked": "Cette soumission n'est plus modifiable.",
-      "profile_incomplete": "Complétez votre profil avant de soumettre."
+      "profile_incomplete": "Complétez votre profil avant de soumettre.",
+      "grid_locked": "Grille déjà utilisée par une évaluation : dupliquez-la en nouvelle version."
     },
     "form": {
       "errorSummary": "Le formulaire contient des erreurs :",

@@ -3,10 +3,13 @@
 
 
 /**
- * Double aveugle et nombre de relecteurs (gestion, §6.1).
+ * Paramètres de l'évaluation (gestion, §6.1 ; plan L4 H4, H6, H12).
  */
 export interface PatchedConfidentialityRequest {
+  confidence_weighted_score?: boolean;
+  divergence_threshold?: string;
   double_blind?: boolean;
+  max_reviews_per_reviewer?: number;
 
   /**
    * Motif, obligatoire pour qu'un ADMIN change un réglage gelé (RG-19).

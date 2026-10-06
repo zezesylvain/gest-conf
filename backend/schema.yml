@@ -292,6 +292,154 @@ paths:
               schema:
                 $ref: '#/components/schemas/Confidentiality'
           description: ''
+  /v1/manage/editions/{edition_id}/grids:
+    get:
+      operationId: manage_grids_list
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Grid'
+          description: ''
+    post:
+      operationId: manage_grid_create
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GridCreateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Grid'
+          description: ''
+  /v1/manage/editions/{edition_id}/grids/{grid_id}:
+    get:
+      operationId: manage_grid_retrieve
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: grid_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Grid'
+          description: ''
+    patch:
+      operationId: manage_grid_update
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: grid_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedGridUpdateRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Grid'
+          description: ''
+    delete:
+      operationId: manage_grid_delete
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: grid_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /v1/manage/editions/{edition_id}/grids/{grid_id}/duplicate:
+    post:
+      operationId: manage_grid_duplicate
+      description: 'RG-05 : nouvelle version modifiable d''une grille (verrouillée
+        ou non).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: grid_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Grid'
+          description: ''
   /v1/manage/editions/{edition_id}/invitations:
     get:
       operationId: manage_invitations_list
@@ -2888,7 +3036,7 @@ components:
         * `grids.write` - grids.write
     Confidentiality:
       type: object
-      description: Double aveugle et nombre de relecteurs (gestion, §6.1).
+      description: Paramètres de l'évaluation (gestion, §6.1 ; plan L4 H4, H6, H12).
       properties:
         double_blind:
           type: boolean
@@ -2898,6 +3046,19 @@ components:
           maximum: 10
           minimum: 1
           title: Relecteurs par soumission
+        max_reviews_per_reviewer:
+          type: integer
+          maximum: 100
+          minimum: 1
+          title: Évaluations au plus par relecteur
+        divergence_threshold:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          title: Seuil de divergence (points sur 100)
+        confidence_weighted_score:
+          type: boolean
+          title: Score final pondéré par la confiance
         frozen_fields:
           type: array
           items:
@@ -3003,6 +3164,74 @@ components:
       required:
       - history
       - states
+    Criterion:
+      type: object
+      properties:
+        code:
+          type: string
+          maxLength: 32
+          pattern: ^[-a-zA-Z0-9_]+$
+        label_fr:
+          type: string
+          title: Libellé (FR)
+          maxLength: 255
+        label_en:
+          type: string
+          title: Libellé (EN)
+          maxLength: 255
+        help_fr:
+          type: string
+          title: Aide à la notation (FR)
+        help_en:
+          type: string
+          title: Aide à la notation (EN)
+        weight:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          title: Poids (%)
+        is_required:
+          type: boolean
+          title: Obligatoire
+        position:
+          type: integer
+          readOnly: true
+          title: Ordre
+      required:
+      - code
+      - label_fr
+      - position
+      - weight
+    CriterionWriteRequest:
+      type: object
+      properties:
+        code:
+          type: string
+          minLength: 1
+          maxLength: 32
+          pattern: ^[-a-zA-Z0-9_]+$
+        label_fr:
+          type: string
+          minLength: 1
+          maxLength: 255
+        label_en:
+          type: string
+          maxLength: 255
+        help_fr:
+          type: string
+        help_en:
+          type: string
+        weight:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+        is_required:
+          type: boolean
+          default: true
+      required:
+      - code
+      - label_fr
+      - weight
     DeclarationState:
       type: object
       properties:
@@ -3246,6 +3475,7 @@ components:
       - stale_revision
       - submission_locked
       - profile_incomplete
+      - grid_locked
       type: string
       description: |-
         * `validation_error` - Validation Error
@@ -3283,6 +3513,7 @@ components:
         * `stale_revision` - Stale Revision
         * `submission_locked` - Submission Locked
         * `profile_incomplete` - Profile Incomplete
+        * `grid_locked` - Grid Locked
     Extension:
       type: object
       properties:
@@ -3369,6 +3600,87 @@ components:
       required:
       - file
       - kind
+    Grid:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        submission_type:
+          type: string
+          readOnly: true
+          nullable: true
+        version:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+          title: Nom
+        scale_min:
+          type: integer
+          readOnly: true
+          title: Note minimale
+        scale_max:
+          type: integer
+          readOnly: true
+          title: Note maximale
+        locked_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Verrouillée le
+        is_locked:
+          type: boolean
+          readOnly: true
+          description: 'Utilisée par une évaluation (RG-05) : on la duplique pour
+            la modifier.'
+        criteria:
+          type: array
+          items:
+            $ref: '#/components/schemas/Criterion'
+          readOnly: true
+      required:
+      - criteria
+      - id
+      - is_locked
+      - locked_at
+      - name
+      - scale_max
+      - scale_min
+      - submission_type
+      - version
+    GridCreateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        submission_type:
+          type: string
+          nullable: true
+          minLength: 1
+          description: 'Code du type ; absent ou nul : grille de tous les types.'
+          maxLength: 32
+        scale_min:
+          type: integer
+          maximum: 99
+          minimum: 0
+          default: 0
+        scale_max:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 5
+        criteria:
+          type: array
+          items:
+            $ref: '#/components/schemas/CriterionWriteRequest'
+          description: 'Liste complète ; absente : grille par défaut de l''étude (25/30/15/15/15).'
+      required:
+      - name
     Health:
       type: object
       properties:
@@ -4304,7 +4616,7 @@ components:
             $ref: '#/components/schemas/SubmissionManage'
     PatchedConfidentialityRequest:
       type: object
-      description: Double aveugle et nombre de relecteurs (gestion, §6.1).
+      description: Paramètres de l'évaluation (gestion, §6.1 ; plan L4 H4, H6, H12).
       properties:
         double_blind:
           type: boolean
@@ -4314,6 +4626,19 @@ components:
           maximum: 10
           minimum: 1
           title: Relecteurs par soumission
+        max_reviews_per_reviewer:
+          type: integer
+          maximum: 100
+          minimum: 1
+          title: Évaluations au plus par relecteur
+        divergence_threshold:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          title: Seuil de divergence (points sur 100)
+        confidence_weighted_score:
+          type: boolean
+          title: Score final pondéré par la confiance
         reason:
           type: string
           writeOnly: true
@@ -4395,6 +4720,26 @@ components:
           default: ''
           description: Motif, obligatoire pour qu'un ADMIN change un réglage gelé
             (RG-19).
+    PatchedGridUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        scale_min:
+          type: integer
+          maximum: 99
+          minimum: 0
+        scale_max:
+          type: integer
+          maximum: 100
+          minimum: 1
+        criteria:
+          type: array
+          items:
+            $ref: '#/components/schemas/CriterionWriteRequest'
+          description: 'Liste complète et ordonnée (RG-05 : somme 100).'
     PatchedKeyDateWriteRequest:
       type: object
       description: Saisie à l'heure de l'édition (D13), convertie en UTC par le serveur.

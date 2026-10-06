@@ -23,6 +23,18 @@ export type { ManageConfidentialityRetrieve$Params as ManageConfidentialityRetri
 export { manageConfidentialityRetrieve as manageConfidentialityRetrieve } from './fn/manage/manage-confidentiality-retrieve';
 export type { ManageConfidentialityUpdate$Params as ManageConfidentialityUpdate$Params } from './fn/manage/manage-confidentiality-update';
 export { manageConfidentialityUpdate as manageConfidentialityUpdate } from './fn/manage/manage-confidentiality-update';
+export type { ManageGridsList$Params as ManageGridsList$Params } from './fn/manage/manage-grids-list';
+export { manageGridsList as manageGridsList } from './fn/manage/manage-grids-list';
+export type { ManageGridCreate$Params as ManageGridCreate$Params } from './fn/manage/manage-grid-create';
+export { manageGridCreate as manageGridCreate } from './fn/manage/manage-grid-create';
+export type { ManageGridRetrieve$Params as ManageGridRetrieve$Params } from './fn/manage/manage-grid-retrieve';
+export { manageGridRetrieve as manageGridRetrieve } from './fn/manage/manage-grid-retrieve';
+export type { ManageGridDelete$Params as ManageGridDelete$Params } from './fn/manage/manage-grid-delete';
+export { manageGridDelete as manageGridDelete } from './fn/manage/manage-grid-delete';
+export type { ManageGridUpdate$Params as ManageGridUpdate$Params } from './fn/manage/manage-grid-update';
+export { manageGridUpdate as manageGridUpdate } from './fn/manage/manage-grid-update';
+export type { ManageGridDuplicate$Params as ManageGridDuplicate$Params } from './fn/manage/manage-grid-duplicate';
+export { manageGridDuplicate as manageGridDuplicate } from './fn/manage/manage-grid-duplicate';
 export type { ManageInvitationsList$Params as ManageInvitationsList$Params } from './fn/manage/manage-invitations-list';
 export { manageInvitationsList as manageInvitationsList } from './fn/manage/manage-invitations-list';
 export type { ManageInvitationsCreate$Params as ManageInvitationsCreate$Params } from './fn/manage/manage-invitations-create';

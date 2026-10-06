@@ -87,11 +87,19 @@ class EditionSerializer(_FreezeMixin, serializers.ModelSerializer):
 
 
 class ConfidentialitySerializer(_FreezeMixin, serializers.ModelSerializer):
-    """Double aveugle et nombre de relecteurs (gestion, §6.1)."""
+    """Paramètres de l'évaluation (gestion, §6.1 ; plan L4 H4, H6, H12)."""
 
     class Meta:
         model = Edition
-        fields = ("double_blind", "reviewers_per_submission", "frozen_fields", "reason")
+        fields = (
+            "double_blind",
+            "reviewers_per_submission",
+            "max_reviews_per_reviewer",
+            "divergence_threshold",
+            "confidence_weighted_score",
+            "frozen_fields",
+            "reason",
+        )
 
 
 class EditionStatusChangeSerializer(serializers.Serializer):

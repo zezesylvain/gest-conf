@@ -4,3 +4,12 @@ from django.apps import AppConfig
 class ReviewsConfig(AppConfig):
     name = "apps.reviews"
     verbose_name = "Évaluation"
+
+    def ready(self) -> None:
+        from apps.core.integrity import register_integrity_check
+        from apps.reviews import integrity
+        from apps.reviews.personal_data import register_reviews_personal_data
+
+        register_reviews_personal_data()
+        register_integrity_check("reviews.grid_weights", integrity.check_grid_weights)
+        register_integrity_check("reviews.review_scores", integrity.check_review_scores)

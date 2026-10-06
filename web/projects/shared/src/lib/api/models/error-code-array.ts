@@ -41,5 +41,6 @@ export const ERROR_CODE: ErrorCode[] = [
   'setting_frozen',
   'stale_revision',
   'submission_locked',
-  'profile_incomplete'
+  'profile_incomplete',
+  'grid_locked'
 ];

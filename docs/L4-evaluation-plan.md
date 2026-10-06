@@ -225,3 +225,58 @@ première route relecteur, dont la matrice testera le refus `mfa_*`.
 - 1 530 tests backend sous SQLite (6 nouveaux) ;
 - schéma régénéré sur MariaDB (énumération `Capability`), client TypeScript régénéré ;
 - front 274 tests.
+
+## 12. Bilan de L4.1 (6 octobre 2026)
+
+**Modèle de données complet** (application `reviews`, une migration), conforme au §3 :
+
+- grilles et critères ; expertises ; affectations (clé d'unicité active, rang de pseudonyme
+  tiré au hasard, relances) ; conflits ;
+- évaluations, notes, versions (ajout seul) ; discussions et messages ;
+- décisions (provisoires tant que non publiées) ; versions finales.
+
+Les services de ces tables arrivent en L4.2 à L4.4. L'édition gagne trois paramètres typés,
+exposés et journalisés avec la confidentialité :
+
+- `max_reviews_per_reviewer` (10) ;
+- `divergence_threshold` (30 points sur 100) ;
+- `confidence_weighted_score` (non).
+
+**Calcul (H4)** : `services/scoring.py`, en `Decimal`.
+
+- Note pondérée sur 100, minimum de l'échelle soustrait ; critères facultatifs non notés
+  exclus (poids renormalisés) ; critère obligatoire manquant : note indéfinie.
+- Arrondi à 2 décimales, demi supérieur.
+- Score final : moyenne, ou moyenne pondérée par la confiance (option de l'édition).
+- Divergence : écart maximal entre les notes.
+- L'exemple de l'étude (3,70 / 5) donne bien 74,00.
+
+**Grilles (RG-05, H3)** : `services/grids.py` et API de gestion `…/grids` (lecture
+`edition.read`, écriture `grids.write`).
+
+- Grille par édition, ou par type de communication, avec repli sur la grille « tous types ».
+- Création avec la grille par défaut de l'étude (25/30/15/15/15, échelle 0 à 5) ou des
+  critères fournis.
+- Critères en liste complète : codes uniques, poids à deux décimales au plus, **somme
+  exactement 100**.
+- Verrou à la première évaluation (`lock_grid`) : une grille verrouillée ne se modifie ni ne se
+  supprime (409 `grid_locked`) ; on la duplique en version suivante.
+- Écritures journalisées (`grid.*`, avec les critères).
+
+**Données personnelles et intégrité** :
+
+- **Registre étendu** aux relecteurs : export (expertises, affectations, évaluations, messages,
+  conflits) ; anonymisation refusée tant qu'une évaluation est en cours (`reviewer_duties`).
+  Ensuite, l'évaluation est conservée sans nom (commentaires, messages, versions et motifs
+  nettoyés) et les expertises sont supprimées.
+- **Contrôles d'intégrité** : poids des grilles égaux à 100, note stockée égale à la note
+  recalculée.
+
+**Vérifications** :
+
+- 1 622 tests backend sous SQLite, 1 629 sous MariaDB. La matrice compte 840 cas, dont les
+  6 routes des grilles.
+- Schéma régénéré sur MariaDB ; code d'erreur `grid_locked` traduit côté interface ;
+  traductions du backend à jour ; client régénéré ; front 274 tests.
+- **Défaut de test corrigé** : la somme des poids était rendue « 95 » par SQLite et « 95.00 »
+  par MariaDB ; le contrôle d'intégrité normalise maintenant à deux décimales.
