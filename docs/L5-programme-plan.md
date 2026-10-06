@@ -1,7 +1,10 @@
 # Lot L5 — Programme : plan d'implémentation
 
-> **Statut : proposition à valider** (6 octobre 2026). L4 est clos (bilan :
-> `docs/L4-evaluation.md`). Rien n'est implémenté avant la validation des décisions I1 à I18.
+> **Statut : validé le 6 octobre 2026** (décisions I1 à I18 telles que proposées, sans
+> correction ; propositions du §10 retenues, dont la lecture seule des autres fonctions du CO
+> et le rappel de la confirmation de présentation). Reste ouverte la question Q14 : la
+> déclaration « publication » couvre-t-elle les noms des auteurs au programme public ?
+> L4 est clos (bilan : `docs/L4-evaluation.md`).
 >
 > Sources :
 > - étude §3.3 (matrice), §4 M7 (et M10 pour les salles), §5.1, §5.4, §6 (RG-11, RG-12,

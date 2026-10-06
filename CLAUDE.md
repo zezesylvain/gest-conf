@@ -118,8 +118,8 @@ Les URL Django sont déclarées **sans** le préfixe `/api` (`v1/...`) : `config
 
 | Lot | État |
 |---|---|
-| L0 à L4 (MVP : squelette, socle, portail, soumission, évaluation et décision) | Livrés en code, testés en local et en CI (sauf L4.2 à L4.7, poussés après la fusion de la PR #7, jamais passés en CI) ; bilans dans `docs/`. **Aucune démo sur o2switch** encore faite |
-| L5 — Programme | **Plan proposé, en attente de validation** : [`docs/L5-programme-plan.md`](docs/L5-programme-plan.md) (décisions I1 à I18). Ne rien implémenter avant la validation |
+| L0 à L4 (MVP : squelette, socle, portail, soumission, évaluation et décision) | Livrés en code, testés en local et en CI (L4.2 à L4.7 : CI par une nouvelle PR après la fusion de la PR #7) ; bilans dans `docs/`. **Aucune démo sur o2switch** encore faite |
+| L5 — Programme | **En cours** : plan [`docs/L5-programme-plan.md`](docs/L5-programme-plan.md) validé le 6 octobre 2026 (décisions I1 à I18) ; Q14 (noms des auteurs au programme public) reste ouverte |
 | L6 et suivants | Non commencés |
 
 ## Décisions du lot L1
