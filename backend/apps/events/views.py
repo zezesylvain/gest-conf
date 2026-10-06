@@ -38,6 +38,8 @@ from apps.events.models import (
     CheckinMethod,
     DocumentNature,
     DocumentTemplate,
+    InvitationLetter,
+    LetterStatus,
 )
 from apps.events.permissions import CapabilityOrSessionChair
 from apps.events.serializers import (
@@ -50,14 +52,20 @@ from apps.events.serializers import (
     CheckinResultSerializer,
     CheckinSerializer,
     CheckinSummarySerializer,
+    CounterRequestSerializer,
+    CounterResponseSerializer,
     DaySessionSerializer,
     DocumentTemplateSerializer,
     DocumentTemplateUpdateSerializer,
     ImageUploadSerializer,
     IssueRequestSerializer,
     IssueResponseSerializer,
+    LetterRequestSerializer,
+    ManageLetterDetailSerializer,
+    ManageLetterSerializer,
     ManualRequestSerializer,
     MyCertificateSerializer,
+    MyLetterSerializer,
     PublicVerificationSerializer,
     ReasonSerializer,
     ScanRequestSerializer,
@@ -71,14 +79,16 @@ from apps.events.serializers import (
     certificate_data,
     certificate_settings_data,
     checkin_data,
+    manage_letter_data,
     my_certificate_data,
+    my_letter_data,
     person_data,
     result_data,
     signatory_data,
     signature_data,
     template_data,
 )
-from apps.events.services import attendance, certificates, signatures
+from apps.events.services import attendance, certificates, counter, letters, signatures
 from apps.events.services import badges as badge_services
 from apps.events.services import checkin as checkin_services
 from apps.registrations.models import Registration
@@ -942,3 +952,224 @@ class PublicCertificateView(APIView):
         # « noindex » : posé sur toute l'API par RobotsTagMiddleware.
         response["Cache-Control"] = "no-store"
         return response
+
+
+# --- Lettres d'invitation (K12) -----------------------------------------------------------------
+
+
+class _MyLetterBase(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def registration(self, request: Request, registration_id: int) -> Registration:
+        found = (
+            Registration.objects.filter(user=request.user, pk=registration_id)
+            .select_related("edition")
+            .first()
+        )
+        if found is None:
+            raise Http404
+        return found
+
+
+class MyLetterView(_MyLetterBase):
+    """``GET/POST /v1/registrations/{id}/invitation-letter`` : la demande du participant
+    (dernière en date)."""
+
+    def get_throttles(self):
+        if self.request.method == "POST":
+            self.throttle_scope = "registration_write"
+            return super().get_throttles()
+        return []
+
+    @extend_schema(operation_id="registrations_letter", responses={200: MyLetterSerializer})
+    def get(self, request: Request, registration_id: int) -> Response:
+        letter = letters.current_letter(self.registration(request, registration_id))
+        if letter is None:
+            raise Http404
+        return Response(MyLetterSerializer(my_letter_data(letter)).data)
+
+    @extend_schema(
+        operation_id="registrations_letter_request",
+        request=LetterRequestSerializer,
+        responses={201: MyLetterSerializer},
+    )
+    def post(self, request: Request, registration_id: int) -> Response:
+        serializer = LetterRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        letter = letters.request_letter(
+            self.registration(request, registration_id),
+            dict(serializer.validated_data),
+            actor=Actor.from_request(request),
+        )
+        return Response(MyLetterSerializer(my_letter_data(letter)).data, status=201)
+
+
+class MyLetterPdfView(_MyLetterBase):
+    """``GET /v1/registrations/{id}/invitation-letter/pdf`` : la lettre émise."""
+
+    @extend_schema(
+        operation_id="registrations_letter_pdf",
+        responses={(200, "application/pdf"): OpenApiTypes.BINARY},
+    )
+    def get(self, request: Request, registration_id: int) -> HttpResponse:
+        letter = letters.current_letter(self.registration(request, registration_id))
+        if letter is None or letter.status != LetterStatus.ISSUED:
+            raise Http404
+        return pdf_response(letters.pdf_bytes(letter), f"lettre-invitation-{letter.pk}.pdf")
+
+
+class LetterViewSet(ManageViewSet):
+    """``…/invitation-letters`` : demandes et lettres (``letters.manage``) ; émission et
+    révocation sous réauthentification récente."""
+
+    queryset = InvitationLetter.objects.none()
+    serializer_class = ManageLetterSerializer
+    required_capabilities = {
+        "list": C.LETTERS_MANAGE,
+        "retrieve": C.LETTERS_MANAGE,
+        "issue": C.LETTERS_MANAGE,
+        "refuse": C.LETTERS_MANAGE,
+        "revoke": C.LETTERS_MANAGE,
+        "pdf": C.LETTERS_MANAGE,
+    }
+
+    def get_permissions(self):
+        permissions = super().get_permissions()
+        if self.action in ("issue", "revoke"):
+            permissions.append(RecentAuthRequired())
+        return permissions
+
+    def rows(self):
+        return InvitationLetter.objects.filter(edition=self.edition).select_related(
+            "edition",
+            "registration__edition",
+            "registration__user__profile",
+            "decided_by__profile",
+        )
+
+    def letter(self, letter_id: int) -> InvitationLetter:
+        found = self.rows().filter(pk=letter_id).first()
+        if found is None:
+            raise Http404
+        return found
+
+    def detail_response(self, letter_id: int) -> Response:
+        data = manage_letter_data(self.letter(letter_id), detail=True)
+        return Response(ManageLetterDetailSerializer(data).data)
+
+    @extend_schema(
+        operation_id="manage_letters_list",
+        parameters=[
+            OpenApiParameter("status", str, description="Statut."),
+            OpenApiParameter("q", str, description="Nom ou référence."),
+        ],
+        responses={200: ManageLetterSerializer(many=True)},
+    )
+    def list(self, request: Request, edition_id: int) -> Response:
+        from django.db.models import Q
+
+        rows = self.rows().order_by("-created_at", "-id")
+        if request.query_params.get("status"):
+            rows = rows.filter(status=request.query_params["status"])
+        query = request.query_params.get("q", "").strip()
+        if query:
+            condition = Q(passport_name__icontains=query) | Q(
+                registration__user__profile__last_name__icontains=query
+            )
+            parsed = checkin_services.parse_reference(query)
+            if parsed is not None:
+                condition |= Q(registration_id=parsed[1])
+            rows = rows.filter(condition)
+        page = self.paginate_queryset(rows)
+        data = [manage_letter_data(row) for row in page]
+        return self.get_paginated_response(ManageLetterSerializer(data, many=True).data)
+
+    @extend_schema(
+        operation_id="manage_letter_retrieve", responses={200: ManageLetterDetailSerializer}
+    )
+    def retrieve(self, request: Request, edition_id: int, letter_id: int) -> Response:
+        return self.detail_response(letter_id)
+
+    @extend_schema(
+        operation_id="manage_letter_issue",
+        request=None,
+        responses={200: ManageLetterDetailSerializer},
+    )
+    def issue(self, request: Request, edition_id: int, letter_id: int) -> Response:
+        letters.issue_letter(self.letter(letter_id), actor=Actor.from_request(request))
+        return self.detail_response(letter_id)
+
+    @extend_schema(
+        operation_id="manage_letter_refuse",
+        request=ReasonSerializer,
+        responses={200: ManageLetterDetailSerializer},
+    )
+    def refuse(self, request: Request, edition_id: int, letter_id: int) -> Response:
+        serializer = ReasonSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        letters.refuse_letter(
+            self.letter(letter_id),
+            reason=serializer.validated_data["reason"],
+            actor=Actor.from_request(request),
+        )
+        return self.detail_response(letter_id)
+
+    @extend_schema(
+        operation_id="manage_letter_revoke",
+        request=ReasonSerializer,
+        responses={200: ManageLetterDetailSerializer},
+    )
+    def revoke(self, request: Request, edition_id: int, letter_id: int) -> Response:
+        serializer = ReasonSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        letters.revoke_letter(
+            self.letter(letter_id),
+            reason=serializer.validated_data["reason"],
+            actor=Actor.from_request(request),
+        )
+        return self.detail_response(letter_id)
+
+    @extend_schema(
+        operation_id="manage_letter_pdf",
+        responses={(200, "application/pdf"): OpenApiTypes.BINARY},
+    )
+    def pdf(self, request: Request, edition_id: int, letter_id: int) -> HttpResponse:
+        letter = self.letter(letter_id)
+        if not letter.storage_name:
+            raise Http404
+        return pdf_response(letters.pdf_bytes(letter), f"lettre-invitation-{letter.pk}.pdf")
+
+
+# --- Comptoir (K13) ----------------------------------------------------------------------------
+
+
+class CounterViewSet(ManageViewSet):
+    """``POST …/registrations/counter`` : inscription au comptoir, compte créé au besoin."""
+
+    serializer_class = CounterRequestSerializer
+    required_capabilities = {"create": C.REGISTRATIONS_MANAGE}
+
+    @extend_schema(
+        operation_id="manage_registrations_counter",
+        request=CounterRequestSerializer,
+        responses={201: CounterResponseSerializer},
+    )
+    def create(self, request: Request, edition_id: int) -> Response:
+        serializer = CounterRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        result = counter.counter_registration(
+            self.edition, dict(serializer.validated_data), actor=Actor.from_request(request)
+        )
+        if result.account_created:
+            # Après validation : le lien de définition du mot de passe part en file.
+            counter.send_password_setup(request._request, result.registration.user)
+        registration = result.registration
+        payload = {
+            "registration_id": registration.pk,
+            "reference": registration.reference,
+            "status": registration.status,
+            "total": registration.total,
+            "currency": registration.currency,
+            "account_created": result.account_created,
+        }
+        return Response(CounterResponseSerializer(payload).data, status=201)

@@ -20,7 +20,7 @@ PLACEHOLDERS: Mapping[str, frozenset[str]] = {
     N.PARTICIPATION: frozenset(COMMON),
     N.PRESENTATION: frozenset((*COMMON, "title", "reference")),
     N.REVIEW: frozenset((*COMMON, "count")),
-    N.LETTER: frozenset((*COMMON, "passport_name", "nationality", "stay")),
+    N.LETTER: frozenset((*COMMON, "passport_name", "nationality", "passport", "stay", "embassy")),
 }
 
 TEXT_FIELDS = ("title_fr", "title_en", "body_fr", "body_en", "footer_fr", "footer_en")
@@ -66,15 +66,17 @@ DEFAULTS: Mapping[str, Mapping[str, str]] = {
         "title_fr": "Lettre d'invitation",
         "title_en": "Letter of invitation",
         "body_fr": (
-            "Nous avons le plaisir d'inviter {passport_name}, de nationalité {nationality}, "
-            "à participer à {edition}, qui se tiendra {dates} à {venue}. Séjour prévu : "
-            "{stay}. Cette lettre n'engage pas la prise en charge des frais de voyage ni de "
-            "séjour."
+            "À l'attention de : {embassy}.\n\nNous avons le plaisir d'inviter "
+            "{passport_name}, de nationalité {nationality}, titulaire du passeport n° "
+            "{passport}, à participer à {edition}, qui se tiendra {dates} à {venue}. Séjour "
+            "prévu : {stay}.\n\nCette lettre n'engage pas la prise en charge des frais de "
+            "voyage ni de séjour."
         ),
         "body_en": (
-            "We are pleased to invite {passport_name}, a national of {nationality}, to "
-            "attend {edition}, to be held {dates} in {venue}. Planned stay: {stay}. This "
-            "letter does not imply that travel or accommodation expenses will be covered."
+            "To: {embassy}.\n\nWe are pleased to invite {passport_name}, a national of "
+            "{nationality}, holder of passport no. {passport}, to attend {edition}, to be held "
+            "{dates} in {venue}. Planned stay: {stay}.\n\nThis letter does not imply that "
+            "travel or accommodation expenses will be covered."
         ),
         "footer_fr": "",
         "footer_en": "",

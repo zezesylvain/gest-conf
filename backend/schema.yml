@@ -1809,6 +1809,210 @@ paths:
               schema:
                 $ref: '#/components/schemas/Grid'
           description: ''
+  /v1/manage/editions/{edition_id}/invitation-letters:
+    get:
+      operationId: manage_letters_list
+      description: |-
+        ``…/invitation-letters`` : demandes et lettres (``letters.manage``) ; émission et
+        révocation sous réauthentification récente.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - name: ordering
+        required: false
+        in: query
+        description: Quel champ utiliser pour classer les résultats.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: Un numéro de page de l'ensemble des résultats.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Nombre de résultats à retourner par page.
+        schema:
+          type: integer
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Nom ou référence.
+      - in: query
+        name: status
+        schema:
+          type: string
+        description: Statut.
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedManageLetterList'
+          description: ''
+  /v1/manage/editions/{edition_id}/invitation-letters/{letter_id}:
+    get:
+      operationId: manage_letter_retrieve
+      description: |-
+        ``…/invitation-letters`` : demandes et lettres (``letters.manage``) ; émission et
+        révocation sous réauthentification récente.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: letter_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManageLetterDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/invitation-letters/{letter_id}/issue:
+    post:
+      operationId: manage_letter_issue
+      description: |-
+        ``…/invitation-letters`` : demandes et lettres (``letters.manage``) ; émission et
+        révocation sous réauthentification récente.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: letter_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManageLetterDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/invitation-letters/{letter_id}/pdf:
+    get:
+      operationId: manage_letter_pdf
+      description: |-
+        ``…/invitation-letters`` : demandes et lettres (``letters.manage``) ; émission et
+        révocation sous réauthentification récente.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: letter_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  /v1/manage/editions/{edition_id}/invitation-letters/{letter_id}/refuse:
+    post:
+      operationId: manage_letter_refuse
+      description: |-
+        ``…/invitation-letters`` : demandes et lettres (``letters.manage``) ; émission et
+        révocation sous réauthentification récente.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: letter_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReasonRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManageLetterDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/invitation-letters/{letter_id}/revoke:
+    post:
+      operationId: manage_letter_revoke
+      description: |-
+        ``…/invitation-letters`` : demandes et lettres (``letters.manage``) ; émission et
+        révocation sous réauthentification récente.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: letter_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReasonRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManageLetterDetail'
+          description: ''
   /v1/manage/editions/{edition_id}/invitations:
     get:
       operationId: manage_invitations_list
@@ -4051,6 +4255,34 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Category'
+          description: ''
+  /v1/manage/editions/{edition_id}/registrations/counter:
+    post:
+      operationId: manage_registrations_counter
+      description: '``POST …/registrations/counter`` : inscription au comptoir, compte
+        créé au besoin.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CounterRequestRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CounterResponse'
           description: ''
   /v1/manage/editions/{edition_id}/registrations/export:
     get:
@@ -6521,6 +6753,80 @@ paths:
                 type: string
                 format: binary
           description: ''
+  /v1/registrations/{registration_id}/invitation-letter:
+    get:
+      operationId: registrations_letter
+      description: |-
+        ``GET/POST /v1/registrations/{id}/invitation-letter`` : la demande du participant
+        (dernière en date).
+      parameters:
+      - in: path
+        name: registration_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - registrations
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyLetter'
+          description: ''
+    post:
+      operationId: registrations_letter_request
+      description: |-
+        ``GET/POST /v1/registrations/{id}/invitation-letter`` : la demande du participant
+        (dernière en date).
+      parameters:
+      - in: path
+        name: registration_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - registrations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LetterRequestRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyLetter'
+          description: ''
+  /v1/registrations/{registration_id}/invitation-letter/pdf:
+    get:
+      operationId: registrations_letter_pdf
+      description: '``GET /v1/registrations/{id}/invitation-letter/pdf`` : la lettre
+        émise.'
+      parameters:
+      - in: path
+        name: registration_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - registrations
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+          description: ''
   /v1/registrations/{registration_id}/pay:
     post:
       operationId: registrations_pay
@@ -8479,6 +8785,72 @@ components:
       required:
       - history
       - states
+    CounterRequestRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+        first_name:
+          type: string
+          default: ''
+          maxLength: 150
+        last_name:
+          type: string
+          default: ''
+          maxLength: 150
+        institution:
+          type: string
+          default: ''
+          maxLength: 255
+        country:
+          type: string
+          default: ''
+          maxLength: 2
+        category:
+          type: string
+          minLength: 1
+          maxLength: 32
+        options:
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 32
+        paid:
+          type: boolean
+          default: false
+          description: 'Réglé au comptoir : paiement « sur place » enregistré.'
+      required:
+      - category
+      - email
+    CounterResponse:
+      type: object
+      properties:
+        registration_id:
+          type: integer
+        reference:
+          type: string
+        status:
+          $ref: '#/components/schemas/RegistrationStatus'
+        total:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        currency:
+          type: string
+        account_created:
+          type: boolean
+          description: 'Compte créé sans mot de passe : un lien de définition est
+            envoyé.'
+      required:
+      - account_created
+      - currency
+      - reference
+      - registration_id
+      - status
+      - total
     Criterion:
       type: object
       properties:
@@ -9995,6 +10367,51 @@ components:
       required:
       - at_local
       - code
+    LetterRequestRequest:
+      type: object
+      properties:
+        passport_name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        nationality:
+          type: string
+          minLength: 1
+          maxLength: 100
+        passport_number:
+          type: string
+          minLength: 1
+          maxLength: 40
+        stay_from:
+          type: string
+          format: date
+        stay_to:
+          type: string
+          format: date
+        embassy:
+          type: string
+          minLength: 1
+          description: Ambassade ou consulat, ville.
+          maxLength: 300
+      required:
+      - embassy
+      - nationality
+      - passport_name
+      - passport_number
+      - stay_from
+      - stay_to
+    LetterStatus:
+      enum:
+      - requested
+      - issued
+      - refused
+      - revoked
+      type: string
+      description: |-
+        * `requested` - demandée
+        * `issued` - émise
+        * `refused` - refusée
+        * `revoked` - révoquée
     Line:
       type: object
       properties:
@@ -10110,6 +10527,157 @@ components:
       - from_status
       - reason
       - to_status
+    ManageLetter:
+      type: object
+      description: |-
+        Lettre instruite par le CO (``letters.manage``) : le numéro entier n'est que dans le
+        détail (``passport_number``), vide une fois effacé.
+      properties:
+        id:
+          type: integer
+        status:
+          $ref: '#/components/schemas/LetterStatus'
+        passport_name:
+          type: string
+        nationality:
+          type: string
+        passport_number_masked:
+          type: string
+        stay_from:
+          type: string
+          format: date
+        stay_to:
+          type: string
+          format: date
+        embassy:
+          type: string
+        refuse_reason:
+          type: string
+        requested_at:
+          type: string
+          format: date-time
+        issued_at:
+          type: string
+          format: date-time
+          nullable: true
+        verification_url:
+          type: string
+        registration_id:
+          type: integer
+        reference:
+          type: string
+        person:
+          type: string
+        registration_status:
+          $ref: '#/components/schemas/RegistrationStatus'
+        decided_by:
+          type: string
+        signatory_name:
+          type: string
+        revoked_at:
+          type: string
+          format: date-time
+          nullable: true
+        revoke_reason:
+          type: string
+      required:
+      - decided_by
+      - embassy
+      - id
+      - issued_at
+      - nationality
+      - passport_name
+      - passport_number_masked
+      - person
+      - reference
+      - refuse_reason
+      - registration_id
+      - registration_status
+      - requested_at
+      - revoke_reason
+      - revoked_at
+      - signatory_name
+      - status
+      - stay_from
+      - stay_to
+      - verification_url
+    ManageLetterDetail:
+      type: object
+      description: |-
+        Lettre instruite par le CO (``letters.manage``) : le numéro entier n'est que dans le
+        détail (``passport_number``), vide une fois effacé.
+      properties:
+        id:
+          type: integer
+        status:
+          $ref: '#/components/schemas/LetterStatus'
+        passport_name:
+          type: string
+        nationality:
+          type: string
+        passport_number_masked:
+          type: string
+        stay_from:
+          type: string
+          format: date
+        stay_to:
+          type: string
+          format: date
+        embassy:
+          type: string
+        refuse_reason:
+          type: string
+        requested_at:
+          type: string
+          format: date-time
+        issued_at:
+          type: string
+          format: date-time
+          nullable: true
+        verification_url:
+          type: string
+        registration_id:
+          type: integer
+        reference:
+          type: string
+        person:
+          type: string
+        registration_status:
+          $ref: '#/components/schemas/RegistrationStatus'
+        decided_by:
+          type: string
+        signatory_name:
+          type: string
+        revoked_at:
+          type: string
+          format: date-time
+          nullable: true
+        revoke_reason:
+          type: string
+        passport_number:
+          type: string
+      required:
+      - decided_by
+      - embassy
+      - id
+      - issued_at
+      - nationality
+      - passport_name
+      - passport_number
+      - passport_number_masked
+      - person
+      - reference
+      - refuse_reason
+      - registration_id
+      - registration_status
+      - requested_at
+      - revoke_reason
+      - revoked_at
+      - signatory_name
+      - status
+      - stay_from
+      - stay_to
+      - verification_url
     ManageOrderRequest:
       type: object
       description: |-
@@ -10763,6 +11331,53 @@ components:
       - nature
       - revoked
       - title
+      - verification_url
+    MyLetter:
+      type: object
+      description: 'Lettre du participant : numéro de passeport masqué (trois derniers
+        caractères).'
+      properties:
+        id:
+          type: integer
+        status:
+          $ref: '#/components/schemas/LetterStatus'
+        passport_name:
+          type: string
+        nationality:
+          type: string
+        passport_number_masked:
+          type: string
+        stay_from:
+          type: string
+          format: date
+        stay_to:
+          type: string
+          format: date
+        embassy:
+          type: string
+        refuse_reason:
+          type: string
+        requested_at:
+          type: string
+          format: date-time
+        issued_at:
+          type: string
+          format: date-time
+          nullable: true
+        verification_url:
+          type: string
+      required:
+      - embassy
+      - id
+      - issued_at
+      - nationality
+      - passport_name
+      - passport_number_masked
+      - refuse_reason
+      - requested_at
+      - status
+      - stay_from
+      - stay_to
       - verification_url
     MyRegistration:
       type: object
@@ -11485,6 +12100,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/InvitationWithEmail'
+    PaginatedManageLetterList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ManageLetter'
     PaginatedManageRegistrationListList:
       type: object
       required:

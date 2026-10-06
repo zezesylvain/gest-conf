@@ -1,7 +1,7 @@
 """Jour J, attestations et lettres d'invitation (plan L7 §3 ; étude M14, M10, §8.2).
 
 L7.1 : signature du signataire (K18) et pointages (K4) ; L7.4 : attestations (K9 à K11, K19,
-RG-16), leur paramétrage et leurs gabarits ; les lettres d'invitation arrivent en L7.5.
+RG-16), leur paramétrage et leurs gabarits ; L7.5 : lettres d'invitation (K12).
 """
 
 from __future__ import annotations
@@ -412,3 +412,121 @@ class Certificate(TimeStampedModel):
     @staticmethod
     def make_active_key(edition_id: int, user_id: int, nature: str, submission_id: int | None):
         return f"{edition_id}:{user_id}:{nature}:{submission_id or 0}"
+
+
+# --- Lettres d'invitation (K12) ------------------------------------------------------------------
+
+
+class LetterStatus(models.TextChoices):
+    REQUESTED = "requested", _("demandée")
+    ISSUED = "issued", _("émise")
+    REFUSED = "refused", _("refusée")
+    REVOKED = "revoked", _("révoquée")
+
+
+class InvitationLetter(TimeStampedModel):
+    """Lettre d'invitation (visa) demandée par un participant inscrit (K12), instruite par le
+    CO (``letters.manage``) : émise (PDF figé, vérifiable comme une attestation) ou refusée
+    (motif). Le **numéro de passeport** est effacé à l'anonymisation et 30 jours après la
+    fin de l'édition (K14) ; il ne figure jamais au journal.
+
+    ``active_key`` : une demande en cours ou une lettre émise au plus par inscription.
+    """
+
+    edition = models.ForeignKey(
+        "conferences.Edition",
+        verbose_name=_("édition"),
+        on_delete=models.RESTRICT,
+        related_name="invitation_letters",
+    )
+    registration = models.ForeignKey(
+        "registrations.Registration",
+        verbose_name=_("inscription"),
+        on_delete=models.RESTRICT,
+        related_name="invitation_letters",
+    )
+    passport_name = models.CharField(_("nom (passeport)"), max_length=200)
+    nationality = models.CharField(_("nationalité"), max_length=100)
+    passport_number = models.CharField(
+        _("numéro de passeport"), max_length=40, blank=True, default=""
+    )
+    passport_erased_at = models.DateTimeField(_("numéro effacé le"), null=True, blank=True)
+    stay_from = models.DateField(_("arrivée"))
+    stay_to = models.DateField(_("départ"))
+    embassy = models.CharField(_("ambassade ou consulat"), max_length=300)
+    status = models.CharField(
+        _("statut"), max_length=10, choices=LetterStatus.choices, default=LetterStatus.REQUESTED
+    )
+    decided_at = models.DateTimeField(_("instruite le"), null=True, blank=True)
+    decided_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("instruite par"),
+        null=True,
+        blank=True,
+        on_delete=models.RESTRICT,
+        related_name="+",
+    )
+    refuse_reason = models.CharField(_("motif du refus"), max_length=500, blank=True, default="")
+    verification_code = models.CharField(
+        _("code de vérification"), max_length=32, null=True, blank=True, unique=True
+    )
+    storage_name = models.CharField(
+        _("PDF (nom de stockage)"), max_length=64, blank=True, default=""
+    )
+    sha256 = models.CharField(_("empreinte du PDF"), max_length=64, blank=True, default="")
+    size = models.PositiveIntegerField(_("taille"), default=0)
+    signing_mode = models.CharField(
+        _("signature"), max_length=10, choices=SigningMode.choices, blank=True, default=""
+    )
+    signatory_name = models.CharField(_("signataire"), max_length=150, blank=True, default="")
+    signatory_title_fr = models.CharField(
+        _("fonction du signataire (FR)"), max_length=200, blank=True, default=""
+    )
+    signatory_title_en = models.CharField(
+        _("fonction du signataire (EN)"), max_length=200, blank=True, default=""
+    )
+    signature_sha256 = models.CharField(
+        _("empreinte de l'image de signature"), max_length=64, blank=True, default=""
+    )
+    issued_at = models.DateTimeField(_("émise le"), null=True, blank=True)
+    revoked_at = models.DateTimeField(_("révoquée le"), null=True, blank=True)
+    revoked_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("révoquée par"),
+        null=True,
+        blank=True,
+        on_delete=models.RESTRICT,
+        related_name="+",
+    )
+    revoke_reason = models.CharField(
+        _("motif de révocation"), max_length=500, blank=True, default=""
+    )
+    active_key = models.CharField(
+        _("clé de la lettre active"), max_length=32, null=True, blank=True, unique=True
+    )
+
+    # Jamais le numéro de passeport (K14).
+    AUDIT_FIELDS: ClassVar[tuple[str, ...]] = (
+        "registration",
+        "passport_name",
+        "nationality",
+        "stay_from",
+        "stay_to",
+        "embassy",
+        "status",
+        "refuse_reason",
+        "sha256",
+        "signing_mode",
+        "signatory_name",
+        "revoke_reason",
+    )
+
+    class Meta:
+        db_table = "events_invitation_letter"
+        verbose_name = _("lettre d'invitation")
+        indexes: ClassVar[list] = [
+            models.Index(fields=("edition", "status"), name="events_letter_status"),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.registration_id}:{self.status}"

@@ -675,3 +675,79 @@ nouvelle attestation peut ensuite être émise.
   avertissement.
 
 **Critère de fin** (« Tests RG-16 au vert ») : atteint.
+
+## 16. Bilan de L7.5 (6 octobre 2026)
+
+**Lettres d'invitation** (K12 ; modèle `InvitationLetter`, migration `events/0003` ;
+`apps/events/services/letters.py`) :
+
+- **demande** par le participant (`POST /v1/registrations/{id}/invitation-letter`) :
+  - pour une inscription en attente ou confirmée ;
+  - données : nom tel que sur le passeport, nationalité, numéro de passeport, dates de
+    séjour (90 jours au plus), ambassade ou consulat ;
+  - une demande en cours, ou une lettre émise, à la fois ;
+  - le participant ne revoit que les trois derniers caractères du numéro ;
+- **instruction** par le CO (`letters.manage`) :
+  - émission sous réauthentification : signataire désigné **pour les lettres** (K18) ;
+    gabarit officiel en A4 portrait, à variables fermées (`{embassy}`, `{passport}`,
+    `{stay}`… ajoutées) ; signature PAdES si elle est choisie ; code de vérification ;
+    e-mail au participant ;
+  - refus motivé (e-mail avec le motif) : le participant peut redemander ;
+  - révocation motivée d'une lettre émise ;
+  - le numéro entier n'apparaît que dans le détail de l'instruction ;
+- la lettre rappelle qu'elle n'engage pas la prise en charge des frais (texte par défaut) ;
+- inscription annulée ou expirée : aucune lettre ne peut plus être émise ;
+- **vérification publique** : même adresse que les attestations
+  (`GET /v1/public/certificates/{code}`) ;
+  - réponse de type « lettre » : nom du passeport, ou aucun nom si le titulaire est
+    anonymisé ;
+  - statut valide ou révoquée.
+
+**Numéro de passeport (K14)** :
+
+- jamais journalisé ;
+- effacé à l'anonymisation du compte ;
+- effacé par la tâche de conservation `events.passport_numbers`, 30 jours après la fin de
+  l'édition ou à son archivage ;
+  - **précision de K14** : « la clôture de l'édition » est lue comme ces deux échéances ;
+  - tâche de sécurité, appliquée même en simulation des durées D15, la règle étant validée.
+
+**Comptoir** (K13 ; `apps/events/services/counter.py`, `POST …/registrations/counter`,
+`registrations.manage`) :
+
+- adresse inconnue : compte **sans mot de passe** (inutilisable), adresse non vérifiée,
+  profil minimal (nom, institution, pays) ; journal `registrations.counter_created` ;
+- lien de définition du mot de passe envoyé par la réinitialisation d'allauth, en file ;
+  - **précision de K13** : la réinitialisation ne vérifie pas l'adresse. À la première
+    connexion, allauth demande donc la vérification (vérification obligatoire), soit un
+    second e-mail ; aucune connexion n'est possible avant ;
+- adresse connue d'un compte actif : inscription rattachée, profil inchangé, aucun lien ;
+- compte désactivé ou anonymisé : refus ;
+- inscription par le CO au tarif de la période (« sur place » après la clôture, J2) ;
+- « réglé au comptoir » : paiement manuel « sur place » enregistré dans la même requête ;
+  l'inscription est alors confirmée et son badge imprimable aussitôt ;
+- **placé dans `events`** et non dans `registrations`, qui ne dépend pas de `payments`
+  (L6).
+
+**Autres** :
+
+- l'émission partage avec les attestations le contexte de pièce (`document_context` :
+  signataire, en-tête, PAdES) et l'écriture des intervalles de dates FR et EN
+  (`date_range`) ;
+- registre des données personnelles (lettres, passeport compris, à l'export) ;
+- contrôle `events.letter_files` ; purge des PDF orphelins ;
+- e-mails « lettre disponible » et « demande refusée » ;
+- sept routes de gestion ajoutées à la matrice (quatrième chargeur paresseux du monde).
+
+**Tests** :
+
+- backend : **4 971 réussis**, 10 ignorés (SQLite) ;
+- sous MariaDB : `events`, `registrations`, `payments`, le registre, le schéma et les règles
+  de plateforme (297), plus les cas nouveaux de la matrice (162) ;
+- matrice des droits : **3 746 cas** ;
+- `events` : 93 tests, dont 11 pour les lettres et le comptoir ;
+- front : 388 tests ; client régénéré ;
+- `ruff`, lint, `format:check`, `locale/check.sh`, schéma validé sous MariaDB, sans
+  avertissement.
+
+**Critère de fin** (« Tests au vert ») : atteint.

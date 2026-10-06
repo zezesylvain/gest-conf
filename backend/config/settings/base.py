@@ -379,6 +379,7 @@ SPECTACULAR_SETTINGS = {
         "CheckinMethod": "apps.events.models.CheckinMethod",
         "RetiredTokenReason": "apps.registrations.models.RetiredTokenReason",
         "DocumentNature": "apps.events.models.DocumentNature",
+        "LetterStatus": "apps.events.models.LetterStatus",
         "CertificateNature": "apps.events.serializers.CERTIFICATE_NATURE_CHOICES",
         "SigningMode": "apps.events.models.SigningMode",
         "SignatureLayout": "apps.events.models.SignatureLayout",

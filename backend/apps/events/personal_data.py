@@ -12,14 +12,19 @@ RG-18 ; plan L7, K14).
 - **Attestations** (K9, K14) : export (nature, édition, émission, révocation, code de
   vérification) ; **conservées** à l'anonymisation, preuve délivrée à la personne, avec leur
   nom figé ; la vérification publique n'affiche alors plus le nom.
+- **Lettres d'invitation** (K12, K14) : export (passeport compris) ; à l'anonymisation, le
+  **numéro de passeport** est effacé ; la lettre émise reste (nom figé, vérification sans
+  nom).
 """
 
 from __future__ import annotations
 
 from typing import Any
 
+from django.utils import timezone
+
 from apps.core.personal_data import AnonymizationContext, register_personal_data
-from apps.events.models import Certificate, Checkin, Signature
+from apps.events.models import Certificate, Checkin, InvitationLetter, Signature
 
 
 def _iso(value) -> str | None:
@@ -66,6 +71,24 @@ def _export(user) -> dict[str, Any]:
             .select_related("edition")
             .order_by("issued_at", "id")
         ],
+        "invitation_letters": [
+            {
+                "edition": row.edition.code,
+                "status": row.status,
+                "passport_name": row.passport_name,
+                "nationality": row.nationality,
+                "passport_number": row.passport_number,
+                "stay_from": _iso(row.stay_from),
+                "stay_to": _iso(row.stay_to),
+                "embassy": row.embassy,
+                "refuse_reason": row.refuse_reason,
+                "issued_at": _iso(row.issued_at),
+                "verification_code": row.verification_code,
+            }
+            for row in InvitationLetter.objects.filter(registration__user=user)
+            .select_related("edition")
+            .order_by("created_at", "id")
+        ],
     }
 
 
@@ -75,6 +98,9 @@ def _anonymize(user, context: AnonymizationContext) -> None:
     rows = Signature.objects.filter(user=user)
     for name in rows.exclude(image_storage_name="").values_list("image_storage_name", flat=True):
         IMAGES.remove_after_commit(name)
+    InvitationLetter.objects.filter(registration__user=user).exclude(passport_number="").update(
+        passport_number="", passport_erased_at=timezone.now()
+    )
     rows.update(
         display_name="",
         title_fr="",
@@ -90,7 +116,12 @@ def _anonymize(user, context: AnonymizationContext) -> None:
 def register_events_personal_data() -> None:
     register_personal_data(
         "events.events",
-        models=("events.Signature", "events.Checkin", "events.Certificate"),
+        models=(
+            "events.Signature",
+            "events.Checkin",
+            "events.Certificate",
+            "events.InvitationLetter",
+        ),
         export=_export,
         anonymize=_anonymize,
         rank=490,

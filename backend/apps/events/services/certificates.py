@@ -332,7 +332,12 @@ def update_template(edition: Edition, nature: str, data: dict[str, Any], *, acto
 
 def edition_dates(edition: Edition, language: str) -> str:
     """« du 1er au 3 juin 2027 », « from June 1 to 3, 2027 » ; vide sans dates."""
-    start, end = edition.start_date, edition.end_date or edition.start_date
+    return date_range(edition.start_date, edition.end_date, language)
+
+
+def date_range(start, end, language: str) -> str:
+    """Intervalle de dates écrit dans la langue (FR ou EN) ; vide sans début."""
+    end = end or start
     if start is None:
         return ""
     fr_day = lambda day: "1er" if day.day == 1 else str(day.day)  # noqa: E731
@@ -496,14 +501,23 @@ class IssueContext:
 
 
 def preflight(edition: Edition, nature: str, requested_by: UserType | None = None) -> IssueContext:
-    """Conditions de l'émission : nature activée, signataire désigné (signature complète,
-    rôle actif), signature PAdES disponible si elle est choisie. Rien n'est écrit."""
-    ensure_editable(edition)
+    """Conditions de l'émission d'une attestation : nature activée, puis celles de toute
+    pièce (``document_context``). Rien n'est écrit."""
     if nature not in CERTIFICATE_NATURES:
         raise Invalid(fields={"nature": [_("Nature d'attestation inconnue.")]})
-    current = certificate_settings(edition)
-    if nature == DocumentNature.REVIEW and not current.review_enabled:
+    if nature == DocumentNature.REVIEW and not certificate_settings(edition).review_enabled:
         raise Invalid(fields={"nature": [_("Attestation d'évaluation désactivée pour l'édition.")]})
+    return document_context(edition, nature, requested_by)
+
+
+def document_context(
+    edition: Edition, nature: str, requested_by: UserType | None = None
+) -> IssueContext:
+    """Conditions de l'émission d'une pièce (attestation ou lettre) : édition modifiable,
+    signataire désigné (signature complète, rôle actif), signature PAdES disponible si elle
+    est choisie. Rien n'est écrit."""
+    ensure_editable(edition)
+    current = certificate_settings(edition)
     template = template_for(edition, nature)
     if not _active_signatory(template.signatory):
         raise RuleViolation(
@@ -833,7 +847,9 @@ def verify(raw: str) -> dict[str, Any] | None:
         Certificate.objects.select_related("edition", "user").filter(verification_code=code).first()
     )
     if certificate is None:
-        return None
+        from apps.events.services import letters
+
+        return letters.verify(code)
     edition = certificate.edition
     return {
         "kind": "certificate",

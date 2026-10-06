@@ -1306,6 +1306,62 @@ CASES = [
         {"reason": "Erreur"},
         recent_auth=True,
     ),
+    # --- Lettres d'invitation (plan L7, K12) : letters.manage --------------------------------
+    Case(
+        "manage-letters",
+        "GET",
+        LEM,
+        200,
+        "/v1/manage/editions/{e}/invitation-letters?l={letter}",
+    ),
+    Case("manage-letter", "GET", LEM, 200, "/v1/manage/editions/{e}/invitation-letters/{letter}"),
+    Case(
+        "manage-letter-issue",
+        "POST",
+        LEM,
+        200,
+        "/v1/manage/editions/{e}/invitation-letters/{letter}/issue",
+        recent_auth=True,
+    ),
+    Case(
+        "manage-letter-refuse",
+        "POST",
+        LEM,
+        200,
+        "/v1/manage/editions/{e}/invitation-letters/{letter}/refuse",
+        {"reason": "Dates incohérentes"},
+    ),
+    Case(
+        "manage-letter-revoke",
+        "POST",
+        LEM,
+        200,
+        "/v1/manage/editions/{e}/invitation-letters/{issued_letter}/revoke",
+        {"reason": "Erreur"},
+        recent_auth=True,
+    ),
+    Case(
+        "manage-letter-pdf",
+        "GET",
+        LEM,
+        200,
+        "/v1/manage/editions/{e}/invitation-letters/{issued_letter}/pdf",
+    ),
+    # --- Comptoir (plan L7, K13) : registrations.manage --------------------------------------
+    Case(
+        "manage-registrations-counter",
+        "POST",
+        RGM,
+        201,
+        "/v1/manage/editions/{e}/registrations/counter",
+        lambda ids: {
+            "email": "comptoir@example.org",
+            "first_name": "Kojo",
+            "last_name": "Mensah",
+            "country": "FR",
+            "category": ids["reg_category_code"],
+        },
+    ),
     Case("manage-portal-poster", "GET", R, 200, "/v1/manage/editions/{e}/portal/poster"),
     Case(
         "manage-portal-poster",
@@ -1458,6 +1514,7 @@ def world():
             lambda: _registration_objects(edition),
             lambda: _day_objects(edition),
             lambda: _certificate_objects(edition, users),
+            lambda: _letter_objects(edition, users),
         ),
     )
     return edition, users, ids
@@ -1470,6 +1527,29 @@ def _signing_key() -> bytes:
 
     data, _certificate = pkcs12_file()
     return data
+
+
+def _letter_objects(edition, users) -> dict:
+    """Plan L7 (K12) : signataire désigné pour les lettres ; une demande en cours et une
+    lettre émise."""
+    from apps.core.actor import Actor
+    from apps.events.services import certificates, letters
+    from apps.events.services.signatures import signature_of
+    from apps.events.tests.letter_helpers import PASSPORT
+    from apps.registrations.models import RegistrationStatus
+    from apps.registrations.tests.factories import make_registration
+
+    command = Actor.command("cli:matrice")
+    signature = signature_of(edition, users["SIGNATORY"])
+    certificates.update_template(edition, "letter", {"signatory": signature.pk}, actor=command)
+    found = {}
+    for key in ("letter", "issued_letter"):
+        registration = make_registration(
+            edition, VerifiedUserFactory(), status=RegistrationStatus.PENDING
+        )
+        found[key] = letters.request_letter(registration, PASSPORT, actor=command)
+    letters.issue_letter(found["issued_letter"], actor=command)
+    return {key: letter.pk for key, letter in found.items()}
 
 
 def _certificate_objects(edition, users) -> dict:
@@ -1955,7 +2035,7 @@ def test_matrix_archived_edition_is_read_only(world):
     """§6.3 : une édition archivée est en lecture seule (409 ``edition_archived``)."""
     edition, users, ids = world
     # Objets paresseux (inscriptions, jour J, attestations) créés avant l'archivage.
-    assert ids["reg_pending"] and ids["day_session"] and ids["certificate"]
+    assert ids["reg_pending"] and ids["day_session"] and ids["certificate"] and ids["letter"]
     edition.status = EditionStatus.ARCHIVED
     edition.save()
     clients = {}

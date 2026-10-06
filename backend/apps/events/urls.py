@@ -157,4 +157,49 @@ urlpatterns = [
         views.PublicCertificateView.as_view(),
         name="public-certificate",
     ),
+    path(
+        "registrations/<int:registration_id>/invitation-letter",
+        views.MyLetterView.as_view(),
+        name="registrations-letter",
+    ),
+    path(
+        "registrations/<int:registration_id>/invitation-letter/pdf",
+        views.MyLetterPdfView.as_view(),
+        name="registrations-letter-pdf",
+    ),
+    path(
+        f"{E}/invitation-letters",
+        views.LetterViewSet.as_view({"get": "list"}),
+        name="manage-letters",
+    ),
+    path(
+        f"{E}/invitation-letters/<int:letter_id>",
+        views.LetterViewSet.as_view({"get": "retrieve"}),
+        name="manage-letter",
+    ),
+    path(
+        f"{E}/invitation-letters/<int:letter_id>/issue",
+        views.LetterViewSet.as_view({"post": "issue"}),
+        name="manage-letter-issue",
+    ),
+    path(
+        f"{E}/invitation-letters/<int:letter_id>/refuse",
+        views.LetterViewSet.as_view({"post": "refuse"}),
+        name="manage-letter-refuse",
+    ),
+    path(
+        f"{E}/invitation-letters/<int:letter_id>/revoke",
+        views.LetterViewSet.as_view({"post": "revoke"}),
+        name="manage-letter-revoke",
+    ),
+    path(
+        f"{E}/invitation-letters/<int:letter_id>/pdf",
+        views.LetterViewSet.as_view({"get": "pdf"}),
+        name="manage-letter-pdf",
+    ),
+    path(
+        f"{E}/registrations/counter",
+        views.CounterViewSet.as_view({"post": "create"}),
+        name="manage-registrations-counter",
+    ),
 ]

@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gestconf-backend\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-06 21:28+0000\n"
+"POT-Creation-Date: 2026-10-06 21:51+0000\n"
 "PO-Revision-Date: 2026-10-05 11:00+0000\n"
 "Last-Translator: GEST-CONF\n"
 "Language-Team: GEST-CONF\n"
@@ -201,9 +201,9 @@ msgstr "system"
 #: apps/conferences/models.py:338 apps/core/models.py:98
 #: apps/core/models.py:279 apps/events/models.py:30 apps/events/models.py:98
 #: apps/events/models.py:218 apps/events/models.py:277
-#: apps/events/models.py:332 apps/payments/models.py:40
-#: apps/payments/models.py:237 apps/portal/models.py:54
-#: apps/portal/models.py:132 apps/portal/models.py:213
+#: apps/events/models.py:332 apps/events/models.py:438
+#: apps/payments/models.py:40 apps/payments/models.py:237
+#: apps/portal/models.py:54 apps/portal/models.py:132 apps/portal/models.py:213
 #: apps/portal/models.py:268 apps/program/models.py:46
 #: apps/program/models.py:108 apps/program/models.py:275
 #: apps/program/models.py:298 apps/registrations/models.py:89
@@ -225,9 +225,10 @@ msgstr "organising committee function"
 
 #: apps/accounts/models.py:265 apps/accounts/models.py:356
 #: apps/communications/models.py:58 apps/conferences/models.py:133
-#: apps/core/models.py:208 apps/payments/models.py:136
-#: apps/registrations/models.py:413 apps/reviews/models.py:178
-#: apps/reviews/models.py:300 apps/submissions/models.py:89
+#: apps/core/models.py:208 apps/events/models.py:458
+#: apps/payments/models.py:136 apps/registrations/models.py:413
+#: apps/reviews/models.py:178 apps/reviews/models.py:300
+#: apps/submissions/models.py:89
 msgid "statut"
 msgstr "status"
 
@@ -248,6 +249,7 @@ msgid "révoqué par"
 msgstr "revoked by"
 
 #: apps/accounts/models.py:286 apps/events/models.py:384
+#: apps/events/models.py:502
 msgid "motif de révocation"
 msgstr "revocation reason"
 
@@ -264,7 +266,7 @@ msgstr "pending"
 msgid "acceptée"
 msgstr "accepted"
 
-#: apps/accounts/models.py:326
+#: apps/accounts/models.py:326 apps/events/models.py:423
 msgid "refusée"
 msgstr "declined"
 
@@ -378,7 +380,7 @@ msgid "bénévole"
 msgstr "volunteer"
 
 #: apps/accounts/roles.py:33 apps/events/models.py:36 apps/events/models.py:290
-#: apps/events/models.py:359
+#: apps/events/models.py:359 apps/events/models.py:481
 msgid "signataire"
 msgstr "signatory"
 
@@ -436,7 +438,8 @@ msgstr "Acknowledging the notice cannot be withdrawn."
 #: apps/accounts/services/account.py:169 apps/accounts/services/account.py:191
 #: apps/accounts/services/mfa.py:84 apps/accounts/services/personal_data.py:205
 #: apps/accounts/services/roles.py:196 apps/conferences/services.py:301
-#: apps/events/services/certificates.py:758 apps/events/services/checkin.py:331
+#: apps/events/services/certificates.py:772 apps/events/services/checkin.py:331
+#: apps/events/services/letters.py:222 apps/events/services/letters.py:248
 #: apps/registrations/services/orders.py:284
 #: apps/registrations/services/orders.py:308
 #: apps/registrations/services/orders.py:351
@@ -984,6 +987,7 @@ msgstr ""
 "“%(edition_title)s” (%(edition_code)s)."
 
 #: apps/accounts/templates/role/email/role_revoked_message.txt:4
+#: apps/events/templates/events/email/letter_refused_message.txt:5
 #, python-format
 msgid "Motif : %(reason)s"
 msgstr "Reason: %(reason)s"
@@ -997,7 +1001,7 @@ msgstr "[%(site_name)s] A role was revoked"
 msgid "Identifiant ORCID invalide (forme 0000-0000-0000-000X)."
 msgstr "Invalid ORCID iD (format 0000-0000-0000-000X)."
 
-#: apps/accounts/validators.py:35
+#: apps/accounts/validators.py:35 apps/events/services/counter.py:67
 msgid "Code pays ISO 3166-1 inconnu."
 msgstr "Unknown ISO 3166-1 country code."
 
@@ -1927,6 +1931,7 @@ msgid "image déposée le"
 msgstr "image uploaded at"
 
 #: apps/events/models.py:63 apps/events/models.py:223 apps/events/models.py:358
+#: apps/events/models.py:479
 msgid "signature"
 msgstr "signature"
 
@@ -1938,10 +1943,11 @@ msgstr "QR code scan"
 msgid "saisie manuelle"
 msgstr "manual entry"
 
-#: apps/events/models.py:104 apps/payments/models.py:123
-#: apps/payments/models.py:247 apps/payments/models.py:312
-#: apps/registrations/models.py:61 apps/registrations/models.py:474
-#: apps/registrations/models.py:522 apps/registrations/models.py:543
+#: apps/events/models.py:104 apps/events/models.py:444
+#: apps/payments/models.py:123 apps/payments/models.py:247
+#: apps/payments/models.py:312 apps/registrations/models.py:61
+#: apps/registrations/models.py:474 apps/registrations/models.py:522
+#: apps/registrations/models.py:543
 msgid "inscription"
 msgstr "registration"
 
@@ -2003,7 +2009,7 @@ msgstr "certificate of presentation"
 msgid "attestation d'évaluation"
 msgstr "certificate of reviewing"
 
-#: apps/events/models.py:181
+#: apps/events/models.py:181 apps/events/models.py:526
 msgid "lettre d'invitation"
 msgstr "letter of invitation"
 
@@ -2095,35 +2101,37 @@ msgstr "holder"
 msgid "détails"
 msgstr "details"
 
-#: apps/events/models.py:354
+#: apps/events/models.py:354 apps/events/models.py:471
 msgid "code de vérification"
 msgstr "verification code"
 
-#: apps/events/models.py:355
+#: apps/events/models.py:355 apps/events/models.py:474
 msgid "PDF (nom de stockage)"
 msgstr "PDF (storage name)"
 
-#: apps/events/models.py:356
+#: apps/events/models.py:356 apps/events/models.py:476
 msgid "empreinte du PDF"
 msgstr "PDF hash"
 
-#: apps/events/models.py:357 apps/payments/models.py:274
+#: apps/events/models.py:357 apps/events/models.py:477
+#: apps/payments/models.py:274
 msgid "taille"
 msgstr "size"
 
-#: apps/events/models.py:360
+#: apps/events/models.py:360 apps/events/models.py:483
 msgid "fonction du signataire (FR)"
 msgstr "signatory position (FR)"
 
-#: apps/events/models.py:362
+#: apps/events/models.py:362 apps/events/models.py:486
 msgid "fonction du signataire (EN)"
 msgstr "signatory position (EN)"
 
-#: apps/events/models.py:364
+#: apps/events/models.py:364 apps/events/models.py:489
 msgid "empreinte de l'image de signature"
 msgstr "signature image hash"
 
-#: apps/events/models.py:365 apps/payments/models.py:275
+#: apps/events/models.py:365 apps/events/models.py:491
+#: apps/payments/models.py:275
 msgid "émise le"
 msgstr "issued on"
 
@@ -2131,11 +2139,12 @@ msgstr "issued on"
 msgid "émise à la demande de"
 msgstr "issued at the request of"
 
-#: apps/events/models.py:374 apps/submissions/models.py:313
+#: apps/events/models.py:374 apps/events/models.py:492
+#: apps/submissions/models.py:313
 msgid "révoquée le"
 msgstr "revoked on"
 
-#: apps/events/models.py:377
+#: apps/events/models.py:377 apps/events/models.py:495
 msgid "révoquée par"
 msgstr "revoked by"
 
@@ -2147,7 +2156,64 @@ msgstr "active certificate key"
 msgid "attestation"
 msgstr "certificate"
 
-#: apps/events/serializers.py:180 apps/program/services/planning.py:273
+#: apps/events/models.py:421
+msgid "demandée"
+msgstr "requested"
+
+#: apps/events/models.py:422
+msgid "émise"
+msgstr "issued"
+
+#: apps/events/models.py:424
+msgid "révoquée"
+msgstr "revoked"
+
+#: apps/events/models.py:448
+msgid "nom (passeport)"
+msgstr "name (passport)"
+
+#: apps/events/models.py:449
+msgid "nationalité"
+msgstr "nationality"
+
+#: apps/events/models.py:451
+msgid "numéro de passeport"
+msgstr "passport number"
+
+#: apps/events/models.py:453
+msgid "numéro effacé le"
+msgstr "number erased at"
+
+#: apps/events/models.py:454
+msgid "arrivée"
+msgstr "arrival"
+
+#: apps/events/models.py:455
+msgid "départ"
+msgstr "departure"
+
+#: apps/events/models.py:456
+msgid "ambassade ou consulat"
+msgstr "embassy or consulate"
+
+#: apps/events/models.py:460
+msgid "instruite le"
+msgstr "decided at"
+
+#: apps/events/models.py:463
+msgid "instruite par"
+msgstr "decided by"
+
+#: apps/events/models.py:469
+msgid "motif du refus"
+msgstr "refusal reason"
+
+#: apps/events/models.py:505
+msgid "clé de la lettre active"
+msgstr "active letter key"
+
+#: apps/events/serializers.py:182 apps/events/services/counter.py:57
+#: apps/program/services/planning.py:273
 msgid "Champ obligatoire."
 msgstr "Required field."
 
@@ -2171,36 +2237,37 @@ msgid "Le certificat de signature a expiré."
 msgstr "The signing certificate has expired."
 
 #: apps/events/services/certificates.py:292
-#: apps/events/services/certificates.py:788 apps/portal/services.py:595
+#: apps/events/services/certificates.py:802 apps/portal/services.py:595
 msgid "Nature inconnue."
 msgstr "Unknown kind."
 
 #: apps/events/services/certificates.py:304
 msgid "Signataire de l'édition, au rôle actif et à la signature complète."
-msgstr "Signatory of the edition, with an active role and a complete signature."
+msgstr ""
+"Signatory of the edition, with an active role and a complete signature."
 
-#: apps/events/services/certificates.py:479
-#: apps/events/services/certificates.py:503
+#: apps/events/services/certificates.py:484
+#: apps/events/services/certificates.py:507
 msgid "Nature d'attestation inconnue."
 msgstr "Unknown certificate kind."
 
-#: apps/events/services/certificates.py:506
+#: apps/events/services/certificates.py:509
 msgid "Attestation d'évaluation désactivée pour l'édition."
 msgstr "Reviewing certificates are disabled for this edition."
 
-#: apps/events/services/certificates.py:510
+#: apps/events/services/certificates.py:524
 msgid "Aucun signataire désigné, ou sa signature est incomplète."
 msgstr "No signatory designated, or their signature is incomplete."
 
-#: apps/events/services/certificates.py:515
+#: apps/events/services/certificates.py:529
 msgid "Aucun prestataire de signature qualifiée n'est branché."
 msgstr "No qualified signature provider is connected."
 
-#: apps/events/services/certificates.py:581
+#: apps/events/services/certificates.py:595
 msgid "Attestation délivrée par GEST-CONF"
 msgstr "Certificate issued by GEST-CONF"
 
-#: apps/events/services/certificates.py:761
+#: apps/events/services/certificates.py:775
 msgid "Attestation déjà révoquée."
 msgstr "Certificate already revoked."
 
@@ -2297,6 +2364,39 @@ msgstr "Checked in by"
 msgid "Appareil"
 msgstr "Device"
 
+#: apps/events/services/counter.py:51
+msgid "Compte désactivé : inscription impossible."
+msgstr "Deactivated account: registration impossible."
+
+#: apps/events/services/counter.py:106
+msgid "Comptoir"
+msgstr "Counter"
+
+#: apps/events/services/letters.py:76 apps/events/services/letters.py:185
+msgid "Inscription annulée ou expirée : aucune lettre possible."
+msgstr "Registration cancelled or expired: no letter possible."
+
+#: apps/events/services/letters.py:83
+msgid "Le départ suit l'arrivée."
+msgstr "Departure must follow arrival."
+
+#: apps/events/services/letters.py:85
+msgid "Séjour de 90 jours au plus."
+msgstr "Stay of 90 days at most."
+
+#: apps/events/services/letters.py:96
+msgid "Une demande est déjà en cours, ou une lettre déjà émise."
+msgstr "A request is already pending, or a letter already issued."
+
+#: apps/events/services/letters.py:118 apps/registrations/workflow.py:82
+#, python-format
+msgid "Changement de statut impossible depuis « %(status)s »."
+msgstr "Status change impossible from “%(status)s”."
+
+#: apps/events/services/letters.py:170
+msgid "Lettre d'invitation délivrée par GEST-CONF"
+msgstr "Letter of invitation issued by GEST-CONF"
+
 #: apps/events/services/signatures.py:52
 msgid "Seul un signataire de l'édition renseigne sa signature."
 msgstr "Only a signatory of the edition can fill in their signature."
@@ -2317,7 +2417,8 @@ msgstr "Image too small to be legible."
 msgid ""
 "Signature PAdES indisponible : GESTCONF_SIGNING_ENCRYPTION_KEYS n'est pas "
 "définie."
-msgstr "PAdES signing unavailable: GESTCONF_SIGNING_ENCRYPTION_KEYS is not set."
+msgstr ""
+"PAdES signing unavailable: GESTCONF_SIGNING_ENCRYPTION_KEYS is not set."
 
 #: apps/events/signing.py:62
 msgid "Fichier de 64 ko au plus."
@@ -2341,7 +2442,8 @@ msgstr "Certificate without a signing key usage."
 
 #: apps/events/signing.py:92
 msgid "Certificat de signature indéchiffrable : clé de chiffrement changée ?"
-msgstr "Signing certificate cannot be decrypted: has the encryption key changed?"
+msgstr ""
+"Signing certificate cannot be decrypted: has the encryption key changed?"
 
 #: apps/events/signing.py:108
 msgid "Certificat de signature inutilisable."
@@ -2353,9 +2455,13 @@ msgid ""
 "Bonjour,\n"
 "\n"
 "Votre %(nature)s de %(edition_title)s est disponible."
-msgstr "Hello,\n\nYour %(nature)s for %(edition_title)s is available."
+msgstr ""
+"Hello,\n"
+"\n"
+"Your %(nature)s for %(edition_title)s is available."
 
 #: apps/events/templates/events/email/certificate_available_message.txt:5
+#: apps/events/templates/events/email/letter_issued_message.txt:5
 #, python-format
 msgid "Téléchargez-la dans votre espace, rubrique « Mes documents » : %(link)s"
 msgstr "Download it from your space, under “My documents”: %(link)s"
@@ -2370,16 +2476,54 @@ msgstr "It bears a QR code that lets anyone check its authenticity."
 msgid "[%(site_name)s] Attestation disponible"
 msgstr "[%(site_name)s] Certificate available"
 
-#: apps/events/texts.py:91
+#: apps/events/templates/events/email/letter_issued_message.txt:1
+#, python-format
+msgid ""
+"Bonjour,\n"
+"\n"
+"Votre lettre d'invitation pour %(edition_title)s est disponible."
+msgstr "Hello,\n\nYour letter of invitation for %(edition_title)s is available."
+
+#: apps/events/templates/events/email/letter_issued_message.txt:7
+msgid ""
+"Elle porte un QR code qui permet à l'ambassade ou au consulat d'en vérifier "
+"l'authenticité."
+msgstr "It bears a QR code that lets the embassy or consulate check its authenticity."
+
+#: apps/events/templates/events/email/letter_issued_subject.txt:1
+#, python-format
+msgid "[%(site_name)s] Lettre d'invitation disponible"
+msgstr "[%(site_name)s] Letter of invitation available"
+
+#: apps/events/templates/events/email/letter_refused_message.txt:1
+#, python-format
+msgid ""
+"Bonjour,\n"
+"\n"
+"Votre demande de lettre d'invitation pour %(edition_title)s n'a pas pu être "
+"acceptée."
+msgstr "Hello,\n\nYour request for a letter of invitation for %(edition_title)s could not be accepted."
+
+#: apps/events/templates/events/email/letter_refused_message.txt:7
+#, python-format
+msgid "Vous pouvez la corriger et la renouveler depuis votre espace : %(link)s"
+msgstr "You can correct it and submit it again from your space: %(link)s"
+
+#: apps/events/templates/events/email/letter_refused_subject.txt:1
+#, python-format
+msgid "[%(site_name)s] Demande de lettre d'invitation"
+msgstr "[%(site_name)s] Letter of invitation request"
+
+#: apps/events/texts.py:93
 msgid "Accolade non fermée : doublez-la ({{ ou }}) pour l'afficher."
 msgstr "Unclosed brace: double it ({{ or }}) to display it."
 
-#: apps/events/texts.py:98
+#: apps/events/texts.py:100
 #, python-format
 msgid "Variable inconnue : {%(field)s}. Variables permises : %(allowed)s."
 msgstr "Unknown variable: {%(field)s}. Allowed variables: %(allowed)s."
 
-#: apps/events/views.py:349
+#: apps/events/views.py:365
 msgid "Numéro de lot attendu (1, 2…)."
 msgstr "Batch number expected (1, 2…)."
 
@@ -4130,11 +4274,6 @@ msgstr "Follow-up, pro forma and payment: %(link)s"
 #, python-format
 msgid "[%(site_name)s] Inscription enregistrée"
 msgstr "[%(site_name)s] Registration recorded"
-
-#: apps/registrations/workflow.py:82
-#, python-format
-msgid "Changement de statut impossible depuis « %(status)s »."
-msgstr "Status change impossible from “%(status)s”."
 
 #: apps/reviews/models.py:46
 msgid "note minimale"
