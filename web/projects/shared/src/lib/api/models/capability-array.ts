@@ -23,5 +23,8 @@ export const CAPABILITY: Capability[] = [
   'reviews.read_all',
   'decisions.decide',
   'decisions.publish',
-  'grids.write'
+  'grids.write',
+  'program.read',
+  'program.write',
+  'program.publish'
 ];

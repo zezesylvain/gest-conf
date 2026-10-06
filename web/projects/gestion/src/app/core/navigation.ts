@@ -10,7 +10,14 @@ import type { Capability, Role } from '@gestconf/shared';
  */
 
 export type NavGroupKey =
-  'steering' | 'submissions' | 'settings' | 'committees' | 'portal' | 'control' | 'help';
+  | 'steering'
+  | 'submissions'
+  | 'reviewing'
+  | 'settings'
+  | 'committees'
+  | 'portal'
+  | 'control'
+  | 'help';
 
 /** Entrée du rail, prête à afficher (libellés en clés de traduction). */
 export interface NavEntry {
@@ -47,6 +54,7 @@ export interface ScreenDef {
 export const GROUP_ORDER: readonly NavGroupKey[] = [
   'steering',
   'submissions',
+  'reviewing',
   'settings',
   'committees',
   'portal',
@@ -70,6 +78,39 @@ export const SCREENS: readonly ScreenDef[] = [
     help: 'submissions',
     group: 'submissions',
     capability: 'submissions.read',
+  },
+  // Évaluation (plan L4, H1) : espace du relecteur, puis pilotage du président du CS.
+  {
+    key: 'myReviews',
+    path: 'evaluations',
+    label: 'gestion.nav.myReviews',
+    help: 'my-reviews',
+    group: 'reviewing',
+    capability: 'reviews.write',
+  },
+  {
+    key: 'expertise',
+    path: 'expertises',
+    label: 'gestion.nav.expertise',
+    help: 'my-reviews',
+    group: 'reviewing',
+    capability: 'reviews.write',
+  },
+  {
+    key: 'followUp',
+    path: 'pilotage',
+    label: 'gestion.nav.followUp',
+    help: 'review-follow-up',
+    group: 'reviewing',
+    capability: 'reviews.manage',
+  },
+  {
+    key: 'ranking',
+    path: 'classement',
+    label: 'gestion.nav.ranking',
+    help: 'ranking',
+    group: 'reviewing',
+    capability: 'reviews.read_all',
   },
   {
     key: 'general',
@@ -108,6 +149,14 @@ export const SCREENS: readonly ScreenDef[] = [
     path: 'parametrage/confidentialite',
     label: 'gestion.nav.confidentiality',
     help: 'settings-confidentiality',
+    group: 'settings',
+    capability: 'edition.read',
+  },
+  {
+    key: 'grids',
+    path: 'parametrage/grilles',
+    label: 'gestion.nav.grids',
+    help: 'grids',
     group: 'settings',
     capability: 'edition.read',
   },
@@ -191,10 +240,13 @@ export const EXTRA_HELP_ROUTES: readonly { url: string; help: string }[] = [
  * L'aide est toujours présente.
  */
 export const ROLE_GROUPS: Partial<Record<Role, readonly NavGroupKey[]>> = {
-  ADMIN: ['steering', 'submissions', 'settings', 'committees', 'portal', 'control'],
-  CHAIR: ['steering', 'submissions', 'settings', 'committees', 'portal', 'control'],
-  SC_CHAIR: ['steering', 'submissions', 'committees'],
+  ADMIN: ['steering', 'submissions', 'reviewing', 'settings', 'committees', 'portal', 'control'],
+  CHAIR: ['steering', 'submissions', 'reviewing', 'settings', 'committees', 'portal', 'control'],
+  // Paramétrage pour les grilles d'évaluation (plan L4, H3).
+  SC_CHAIR: ['steering', 'submissions', 'reviewing', 'settings', 'committees'],
   OC_MEMBER: ['steering', 'submissions', 'settings', 'portal'],
+  // Relecteur (plan L4, H1) : ses évaluations seulement.
+  SC_MEMBER: ['reviewing'],
 };
 
 /** Rôles de gestion : ceux que le sélecteur « Rôle actif » propose. */

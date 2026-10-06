@@ -109,6 +109,39 @@
     </section>
   }
 
+  @if (reviewProgress(); as progress) {
+    <section class="card" aria-labelledby="reviewing-title">
+      <h2 id="reviewing-title">{{ 'gestion.dashboard.reviewing.title' | translate }}</h2>
+      <p>
+        {{
+          'gestion.dashboard.reviewing.counts'
+            | translate
+              : {
+                  screening: reviewCounts().screening,
+                  underReview: reviewCounts().underReview,
+                  reviewed: reviewCounts().reviewed,
+                }
+        }}
+      </p>
+      <p>
+        {{
+          'gestion.dashboard.reviewing.alerts'
+            | translate: { divergent: progress.divergent.length, late: lateReviews() }
+        }}
+      </p>
+      <p class="actions">
+        <a [routerLink]="['/editions', current.id, 'pilotage']">{{
+          'gestion.dashboard.reviewing.followUp' | translate
+        }}</a>
+        @if (can('reviews.read_all')) {
+          <a [routerLink]="['/editions', current.id, 'classement']">{{
+            'gestion.dashboard.reviewing.ranking' | translate
+          }}</a>
+        }
+      </p>
+    </section>
+  }
+
   @if (pendingInvitations() !== null) {
     <section class="card" aria-labelledby="invitations-title">
       <h2 id="invitations-title">{{ 'gestion.nav.invitations' | translate }}</h2>

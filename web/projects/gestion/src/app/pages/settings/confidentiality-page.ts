@@ -19,8 +19,9 @@ import { EditionApi } from '../../core/edition-api';
 import { editionCapabilities, errorMessages } from '../../core/page-support';
 
 /**
- * Confidentialité de l'évaluation (plan L1 §6.1) : double aveugle (RG-04) et relecteurs par
- * soumission. Changement **critique** : réauthentification récente exigée (la fenêtre
+ * Confidentialité et paramètres de l'évaluation (plan L1 §6.1 ; plan L4 H4, H6, H12) : double
+ * aveugle (RG-04), relecteurs par soumission, charge maximale par relecteur, seuil de
+ * divergence, note finale pondérée par la confiance. Changement **critique** : réauthentification récente exigée (la fenêtre
  * s'ouvre d'elle-même), audit avant/après. RG-19 : après la première soumission, le double
  * aveugle est gelé ; seul un administrateur le change, avec un motif (`setting_frozen`).
  */
@@ -78,8 +79,39 @@ import { editionCapabilities, errorMessages } from '../../core/page-support';
             min="1"
             max="10"
           />
-          <mat-error>{{ error() }}</mat-error>
+          <mat-error>{{ error('reviewers_per_submission') }}</mat-error>
         </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>{{ 'gestion.settings.confidentiality.maxReviews' | translate }}</mat-label>
+          <input
+            matInput
+            type="number"
+            formControlName="max_reviews_per_reviewer"
+            min="1"
+            max="100"
+          />
+          <mat-hint>{{ 'gestion.settings.confidentiality.maxReviewsHint' | translate }}</mat-hint>
+          <mat-error>{{ error('max_reviews_per_reviewer') }}</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>{{ 'gestion.settings.confidentiality.divergence' | translate }}</mat-label>
+          <input
+            matInput
+            type="number"
+            formControlName="divergence_threshold"
+            min="0"
+            max="100"
+            step="0.01"
+          />
+          <mat-hint>{{ 'gestion.settings.confidentiality.divergenceHint' | translate }}</mat-hint>
+          <mat-error>{{ error('divergence_threshold') }}</mat-error>
+        </mat-form-field>
+        <mat-checkbox formControlName="confidence_weighted_score">
+          {{ 'gestion.settings.confidentiality.confidenceWeighted' | translate }}
+        </mat-checkbox>
+        <p class="muted">
+          {{ 'gestion.settings.confidentiality.confidenceWeightedHint' | translate }}
+        </p>
         @if (canWrite()) {
           <p class="muted">{{ 'gestion.settings.confidentiality.sensitive' | translate }}</p>
           <div class="actions">
@@ -92,6 +124,11 @@ import { editionCapabilities, errorMessages } from '../../core/page-support';
     }
   `,
   styleUrl: '../page.scss',
+  styles: `
+    mat-form-field[subscriptsizing='dynamic'] {
+      margin-bottom: 0.75rem;
+    }
+  `,
 })
 export class ConfidentialityPage implements OnInit {
   readonly editionId = input.required<string>();
@@ -112,6 +149,9 @@ export class ConfidentialityPage implements OnInit {
   protected readonly form = inject(NonNullableFormBuilder).group({
     double_blind: [true],
     reviewers_per_submission: [3, [Validators.required, Validators.min(1), Validators.max(10)]],
+    max_reviews_per_reviewer: [10, [Validators.required, Validators.min(1), Validators.max(100)]],
+    divergence_threshold: [30, [Validators.required, Validators.min(0), Validators.max(100)]],
+    confidence_weighted_score: [false],
     reason: ['', Validators.maxLength(2000)],
   });
   protected readonly loading = signal(true);
@@ -125,6 +165,9 @@ export class ConfidentialityPage implements OnInit {
       this.form.reset({
         double_blind: value.double_blind ?? true,
         reviewers_per_submission: value.reviewers_per_submission ?? 3,
+        max_reviews_per_reviewer: value.max_reviews_per_reviewer ?? 10,
+        divergence_threshold: Number(value.divergence_threshold ?? 30),
+        confidence_weighted_score: value.confidence_weighted_score ?? false,
         reason: '',
       });
       this.initialDoubleBlind = value.double_blind ?? true;
@@ -141,8 +184,10 @@ export class ConfidentialityPage implements OnInit {
     }
   }
 
-  protected error(): string {
-    return fieldErrorMessage(this.translate, this.form.controls.reviewers_per_submission);
+  protected error(
+    name: 'reviewers_per_submission' | 'max_reviews_per_reviewer' | 'divergence_threshold',
+  ): string {
+    return fieldErrorMessage(this.translate, this.form.controls[name]);
   }
 
   /** Changement d'un réglage gelé (RG-19) : un motif est exigé. */
@@ -165,9 +210,11 @@ export class ConfidentialityPage implements OnInit {
     }
     this.saving.set(true);
     try {
-      const { reason, ...value } = this.form.getRawValue();
+      const { reason, divergence_threshold, ...value } = this.form.getRawValue();
       const saved = await this.api.updateConfidentiality(Number(this.editionId()), {
         ...value,
+        // Décimal côté serveur : transmis en chaîne, comme le schéma le décrit.
+        divergence_threshold: String(divergence_threshold),
         ...(this.frozenChange() ? { reason: reason.trim() } : {}),
       });
       this.initialDoubleBlind = saved.double_blind ?? value.double_blind;

@@ -1,13 +1,28 @@
-"""Sérialiseurs de l'évaluation, par rôle (règle n° 3). Gestion ici (grilles, L4.1). Les
-sérialiseurs servis aux relecteurs dérivent de ``apps.reviews.anonymity`` (RG-04)."""
+"""Sérialiseurs de l'évaluation, par rôle (règle n° 3). Gestion ici (grilles, L4.1 ;
+recevabilité et affectations, L4.2). Les sérialiseurs servis aux relecteurs dérivent de
+``apps.reviews.anonymity`` (RG-04)."""
 
 from __future__ import annotations
 
 from decimal import Decimal
 
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
-from apps.reviews.models import Criterion, EvaluationGrid
+from apps.conferences.serializers import LocalDateTimeField
+from apps.reviews.models import (
+    ConflictKind,
+    ConflictOfInterest,
+    Criterion,
+    Decision,
+    DecisionOutcome,
+    DiscussionMessage,
+    EvaluationGrid,
+    Review,
+    ReviewAssignment,
+    ReviewStatus,
+)
+from apps.submissions.models import Submission, SubmissionStatus
 
 
 class CriterionSerializer(serializers.ModelSerializer):
@@ -90,3 +105,433 @@ class GridUpdateSerializer(serializers.Serializer):
     criteria = CriterionWriteSerializer(
         many=True, required=False, help_text="Liste complète et ordonnée (RG-05 : somme 100)."
     )
+
+
+# --- Recevabilité et affectations (président du CS, L4.2) -----------------------------------
+# Servis aux détenteurs de ``reviews.manage`` seulement : noms des relecteurs (H11), jamais
+# leurs adresses.
+
+
+class PersonSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField(help_text="Nom du profil, sinon adresse masquée.")
+
+
+def person(user) -> dict[str, object] | None:
+    from apps.accounts.services.invitations import display_name
+
+    return None if user is None else {"id": user.pk, "name": display_name(user)}
+
+
+class AssignmentManageSerializer(serializers.ModelSerializer):
+    reviewer = serializers.SerializerMethodField()
+    assigned_by = serializers.SerializerMethodField()
+    review_status = serializers.SerializerMethodField(
+        help_text="Évaluation : null (non commencée), draft ou submitted."
+    )
+
+    class Meta:
+        model = ReviewAssignment
+        fields = (
+            "id",
+            "reviewer",
+            "status",
+            "assigned_by",
+            "assigned_at",
+            "due_at",
+            "reason",
+            "conflict_override_reason",
+            "pseudonym_rank",
+            "reminders",
+            "review_status",
+        )
+        read_only_fields = fields
+
+    @extend_schema_field(PersonSerializer)
+    def get_reviewer(self, assignment: ReviewAssignment):
+        return person(assignment.reviewer)
+
+    @extend_schema_field(PersonSerializer(allow_null=True))
+    def get_assigned_by(self, assignment: ReviewAssignment):
+        return person(assignment.assigned_by)
+
+    @extend_schema_field(serializers.ChoiceField(choices=ReviewStatus.choices, allow_null=True))
+    def get_review_status(self, assignment: ReviewAssignment):
+        review = getattr(assignment, "review", None)
+        return review.status if review is not None else None
+
+
+class ConflictManageSerializer(serializers.ModelSerializer):
+    reviewer = serializers.SerializerMethodField()
+    declared_by = serializers.SerializerMethodField()
+    overridden_by = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ConflictOfInterest
+        fields = (
+            "id",
+            "reviewer",
+            "kind",
+            "source",
+            "reason",
+            "declared_by",
+            "created_at",
+            "overridden_by",
+            "overridden_at",
+            "overridden_reason",
+        )
+        read_only_fields = fields
+
+    @extend_schema_field(PersonSerializer)
+    def get_reviewer(self, conflict: ConflictOfInterest):
+        return person(conflict.reviewer)
+
+    @extend_schema_field(PersonSerializer(allow_null=True))
+    def get_declared_by(self, conflict: ConflictOfInterest):
+        return person(conflict.declared_by)
+
+    @extend_schema_field(PersonSerializer(allow_null=True))
+    def get_overridden_by(self, conflict: ConflictOfInterest):
+        return person(conflict.overridden_by)
+
+
+class DecisionManageSerializer(serializers.ModelSerializer):
+    """Décision : provisoire tant que ``published_at`` est nul (H16, RG-09)."""
+
+    assigned_type = serializers.SlugRelatedField(slug_field="code", read_only=True, allow_null=True)
+    decided_by = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Decision
+        fields = (
+            "outcome",
+            "assigned_type",
+            "comment_to_authors",
+            "decided_by",
+            "decided_at",
+            "published_at",
+        )
+        read_only_fields = fields
+
+    @extend_schema_field(PersonSerializer(allow_null=True))
+    def get_decided_by(self, decision: Decision):
+        return person(decision.decided_by)
+
+
+class ReviewSubmissionSerializer(serializers.ModelSerializer):
+    """Ligne du suivi de l'évaluation : compteurs annotés par la vue."""
+
+    track = serializers.SlugRelatedField(slug_field="code", read_only=True, allow_null=True)
+    submission_type = serializers.SlugRelatedField(
+        slug_field="code", read_only=True, allow_null=True
+    )
+    assignment_count = serializers.IntegerField(help_text="Affectations actives.")
+    review_count = serializers.IntegerField(help_text="Évaluations envoyées (actives).")
+    late_count = serializers.IntegerField(help_text="Affectations actives en retard.")
+    required = serializers.SerializerMethodField(help_text="Relecteurs requis (édition).")
+
+    class Meta:
+        model = Submission
+        fields = (
+            "id",
+            "reference",
+            "status",
+            "title",
+            "track",
+            "submission_type",
+            "language",
+            "submitted_at",
+            "assignment_count",
+            "review_count",
+            "late_count",
+            "required",
+        )
+        read_only_fields = fields
+
+    def get_required(self, submission: Submission) -> int:
+        return submission.edition.reviewers_per_submission
+
+
+class ReviewSubmissionDetailSerializer(ReviewSubmissionSerializer):
+    assignments = AssignmentManageSerializer(many=True, read_only=True)
+    conflicts = ConflictManageSerializer(many=True, read_only=True)
+    decision = serializers.SerializerMethodField()
+
+    class Meta(ReviewSubmissionSerializer.Meta):
+        fields = (
+            *ReviewSubmissionSerializer.Meta.fields,
+            "abstract",
+            "keywords",
+            "assignments",
+            "conflicts",
+            "decision",
+        )
+        read_only_fields = fields
+
+    @extend_schema_field(DecisionManageSerializer(allow_null=True))
+    def get_decision(self, submission: Submission):
+        decision = Decision.objects.filter(submission=submission).first()
+        return DecisionManageSerializer(decision).data if decision is not None else None
+
+
+SCREENING_DECISION_CHOICES = [("admissible", "admissible"), ("reject", "reject")]
+
+
+class ScreeningSerializer(serializers.Serializer):
+    """H10 : recevable (ouvre l'évaluation) ou rejet motivé."""
+
+    decision = serializers.ChoiceField(choices=SCREENING_DECISION_CHOICES)
+    reason = serializers.CharField(max_length=2000, required=False, allow_blank=True, default="")
+
+
+class CandidateConflictSerializer(serializers.Serializer):
+    kind = serializers.ChoiceField(choices=ConflictKind.choices)
+    overridable = serializers.BooleanField()
+    overridden = serializers.BooleanField()
+
+
+class CandidateSerializer(serializers.Serializer):
+    """Relecteur proposé pour une soumission (H6, H7, H8)."""
+
+    id = serializers.IntegerField(source="user.pk")
+    name = serializers.SerializerMethodField()
+    institution = serializers.SerializerMethodField()
+    load = serializers.IntegerField(help_text="Affectations actives dans l'édition.")
+    tracks = serializers.ListField(child=serializers.CharField(), help_text="Expertises.")
+    assignment_id = serializers.SerializerMethodField(
+        help_text="Affectation active sur cette soumission, sinon null."
+    )
+    conflicts = CandidateConflictSerializer(many=True)
+
+    def get_name(self, candidate) -> str:
+        return person(candidate.user)["name"]
+
+    def get_institution(self, candidate) -> str:
+        profile = getattr(candidate.user, "profile", None)
+        return profile.institution if profile is not None else ""
+
+    def get_assignment_id(self, candidate) -> int | None:
+        return candidate.assignment.pk if candidate.assignment is not None else None
+
+
+class CandidateListSerializer(serializers.Serializer):
+    max_load = serializers.IntegerField(help_text="Charge maximale par relecteur (édition).")
+    track = serializers.CharField(allow_null=True, help_text="Thématique de la soumission.")
+    candidates = CandidateSerializer(many=True)
+
+
+class AssignmentCreateSerializer(serializers.Serializer):
+    submission = serializers.IntegerField()
+    reviewer = serializers.IntegerField()
+    due_local = LocalDateTimeField(
+        required=False,
+        allow_null=True,
+        help_text="Échéance dans le fuseau de l'édition, sans fuseau ; par défaut, la date "
+        "clé review_deadline.",
+    )
+    override_reason = serializers.CharField(
+        max_length=2000,
+        required=False,
+        allow_blank=True,
+        default="",
+        help_text="Motif de levée d'un conflit levable (réauthentification récente exigée).",
+    )
+
+
+class AssignmentUpdateSerializer(serializers.Serializer):
+    due_local = LocalDateTimeField(help_text="Nouvelle échéance, à l'heure de l'édition.")
+
+
+class AssignmentCancelSerializer(serializers.Serializer):
+    reason = serializers.CharField(max_length=2000)
+
+
+class ConflictCreateSerializer(serializers.Serializer):
+    submission = serializers.IntegerField()
+    reviewer = serializers.IntegerField()
+    reason = serializers.CharField(max_length=2000)
+
+
+# --- Évaluations, discussion, suivi (président, L4.3) ----------------------------------------
+
+
+class ReviewManageSerializer(serializers.ModelSerializer):
+    """Évaluation envoyée, avec le nom du relecteur (H11 : visible du président et du Chair)."""
+
+    assignment_id = serializers.IntegerField(source="assignment.pk", read_only=True)
+    reviewer = serializers.SerializerMethodField()
+    pseudonym_rank = serializers.IntegerField(source="assignment.pseudonym_rank", read_only=True)
+    suggested_type = serializers.SlugRelatedField(
+        slug_field="code", read_only=True, allow_null=True
+    )
+    scores = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Review
+        fields = (
+            "id",
+            "assignment_id",
+            "reviewer",
+            "pseudonym_rank",
+            "recommendation",
+            "confidence",
+            "comment_to_authors",
+            "comment_to_committee",
+            "ethics_flag",
+            "plagiarism_flag",
+            "suggested_type",
+            "weighted_score",
+            "submitted_at",
+            "version",
+            "scores",
+        )
+        read_only_fields = fields
+
+    @extend_schema_field(PersonSerializer)
+    def get_reviewer(self, review: Review):
+        return person(review.assignment.reviewer)
+
+    @extend_schema_field(
+        serializers.DictField(child=serializers.DecimalField(max_digits=4, decimal_places=1))
+    )
+    def get_scores(self, review: Review):
+        return {score.criterion.code: str(score.value) for score in review.scores.all()}
+
+
+class DiscussionMessageManageSerializer(serializers.ModelSerializer):
+    author = serializers.SerializerMethodField()
+    pseudonym_rank = serializers.SerializerMethodField(
+        help_text="Rang du pseudonyme si l'auteur est relecteur de la soumission."
+    )
+
+    class Meta:
+        model = DiscussionMessage
+        fields = ("id", "author", "pseudonym_rank", "body", "at")
+        read_only_fields = fields
+
+    @extend_schema_field(PersonSerializer)
+    def get_author(self, message: DiscussionMessage):
+        return person(message.author)
+
+    def get_pseudonym_rank(self, message: DiscussionMessage) -> int | None:
+        return self.context.get("ranks", {}).get(message.author_id)
+
+
+class SubmissionReviewsSerializer(serializers.Serializer):
+    """Évaluations envoyées d'une soumission, note finale, divergence (H12), discussion."""
+
+    final_score = serializers.DecimalField(max_digits=5, decimal_places=2, allow_null=True)
+    spread = serializers.DecimalField(max_digits=5, decimal_places=2)
+    threshold = serializers.DecimalField(max_digits=5, decimal_places=2)
+    divergent = serializers.BooleanField()
+    reviews = ReviewManageSerializer(many=True)
+    discussion_opened_at = serializers.DateTimeField(allow_null=True)
+    messages = DiscussionMessageManageSerializer(many=True)
+
+
+class MessageCreateSerializer(serializers.Serializer):
+    body = serializers.CharField(max_length=5000)
+
+
+class ReviewerProgressSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    active = serializers.IntegerField(help_text="Affectations actives.")
+    submitted = serializers.IntegerField(help_text="Évaluations envoyées (affectations actives).")
+    late = serializers.IntegerField(help_text="Affectations en retard.")
+
+
+class TrackProgressSerializer(serializers.Serializer):
+    code = serializers.CharField(allow_null=True)
+    in_review = serializers.IntegerField(help_text="Soumissions en évaluation ou évaluées.")
+    reviewed = serializers.IntegerField(help_text="Soumissions évaluées (RG-07).")
+
+
+class DivergentSubmissionSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    reference = serializers.CharField(allow_null=True)
+    title = serializers.CharField()
+    spread = serializers.DecimalField(max_digits=5, decimal_places=2)
+
+
+class ReviewProgressSerializer(serializers.Serializer):
+    """Suivi de l'évaluation (plan L4 §4) : par relecteur, par thématique, divergences."""
+
+    threshold = serializers.DecimalField(max_digits=5, decimal_places=2)
+    reviewers = ReviewerProgressSerializer(many=True)
+    tracks = TrackProgressSerializer(many=True)
+    divergent = DivergentSubmissionSerializer(many=True)
+
+
+# --- Décisions, classement, publication (L4.4) -----------------------------------------------
+
+
+class DecisionWriteSerializer(serializers.Serializer):
+    outcome = serializers.ChoiceField(choices=DecisionOutcome.choices)
+    assigned_type = serializers.SlugField(
+        required=False,
+        allow_null=True,
+        default=None,
+        help_text="Code du format attribué ; par défaut, le type de la soumission (acceptée).",
+    )
+    comment_to_authors = serializers.CharField(
+        required=False, allow_blank=True, default="", max_length=20000
+    )
+
+
+class DecisionBatchItemSerializer(DecisionWriteSerializer):
+    submission = serializers.IntegerField()
+
+
+class DecisionBatchSerializer(serializers.Serializer):
+    items = DecisionBatchItemSerializer(many=True, allow_empty=False, max_length=500)
+
+
+class DecisionBatchResultSerializer(serializers.Serializer):
+    recorded = serializers.IntegerField(help_text="Décisions provisoires enregistrées.")
+
+
+class PublishResultSerializer(serializers.Serializer):
+    published = serializers.IntegerField(help_text="Décisions publiées.")
+
+
+class RankingRowSerializer(serializers.Serializer):
+    id = serializers.IntegerField(source="submission.pk")
+    reference = serializers.CharField(source="submission.reference", allow_null=True)
+    title = serializers.CharField(source="submission.title")
+    status = serializers.ChoiceField(source="submission.status", choices=SubmissionStatus.choices)
+    track = serializers.CharField(source="submission.track.code", allow_null=True, default=None)
+    submission_type = serializers.CharField(
+        source="submission.submission_type.code", allow_null=True, default=None
+    )
+    final_score = serializers.DecimalField(
+        source="final", max_digits=5, decimal_places=2, allow_null=True
+    )
+    spread = serializers.DecimalField(max_digits=5, decimal_places=2)
+    divergent = serializers.BooleanField()
+    review_count = serializers.IntegerField()
+    recommendations = serializers.DictField(
+        child=serializers.IntegerField(), help_text="Recommandation → nombre."
+    )
+    decision = DecisionManageSerializer(allow_null=True)
+
+
+class GroupCountSerializer(serializers.Serializer):
+    code = serializers.CharField(allow_null=True)
+    total = serializers.IntegerField()
+    accepted = serializers.IntegerField(help_text="Au-dessus du seuil.")
+
+
+class SimulationSerializer(serializers.Serializer):
+    """US-06 : nombre de soumissions au-dessus du seuil, au total, par type et thématique."""
+
+    threshold = serializers.DecimalField(max_digits=5, decimal_places=2)
+    accepted = serializers.IntegerField()
+    total = serializers.IntegerField()
+    by_type = GroupCountSerializer(many=True)
+    by_track = GroupCountSerializer(many=True)
+
+
+class RankingSerializer(serializers.Serializer):
+    rows = RankingRowSerializer(many=True)
+    simulation = SimulationSerializer(allow_null=True)

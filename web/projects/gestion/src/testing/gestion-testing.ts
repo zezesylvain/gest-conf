@@ -5,7 +5,8 @@ import { provideRouter, Routes } from '@angular/router';
 import { Me, MeEdition, MeStore } from '@gestconf/shared';
 import { provideI18nTesting, TEST_ME } from '@gestconf/shared/testing';
 
-/** Édition de test : président de la conférence (toutes capacités sauf l'archivage). */
+/** Édition de test : président de la conférence (capacités du serveur : tout sauf l'archivage
+ * et l'évaluation elle-même, `reviews.write`). */
 export const CHAIR_EDITION: MeEdition = {
   id: 3,
   code: 'GC27',
@@ -24,8 +25,20 @@ export const CHAIR_EDITION: MeEdition = {
     'submissions.read',
     'submissions.extend',
     'submissions.export',
+    'reviews.manage',
+    'reviews.read_all',
+    'decisions.decide',
+    'decisions.publish',
+    'grids.write',
   ],
   mfa_required: true,
+};
+
+/** Relecteur (membre du comité scientifique) : ses évaluations seulement (plan L4, H19). */
+export const REVIEWER_EDITION: MeEdition = {
+  ...CHAIR_EDITION,
+  roles: [{ role: 'SC_MEMBER', oc_function: '' }],
+  capabilities: ['reviews.write'],
 };
 
 /** Fournisseurs communs des tests de la gestion : traductions réelles, `/me` simulé. */

@@ -42,5 +42,11 @@ export const ERROR_CODE: ErrorCode[] = [
   'stale_revision',
   'submission_locked',
   'profile_incomplete',
-  'grid_locked'
+  'grid_locked',
+  'conflict_of_interest',
+  'reviewer_overloaded',
+  'reviewers_missing',
+  'review_not_open',
+  'discussion_closed',
+  'deadline_passed'
 ];

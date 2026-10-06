@@ -349,12 +349,14 @@
         "new": "Nouvelle soumission ({{edition}})",
         "closed": "L'appel à communications n'est pas ouvert : aucune nouvelle soumission n'est possible.",
         "empty": "Vous n'avez encore aucune soumission.",
-        "profileIncomplete": "Complétez votre profil (nom, prénom, institution, pays) avant de soumettre."
+        "profileIncomplete": "Complétez votre profil (nom, prénom, institution, pays) avant de soumettre.",
+        "finalDue": "version finale avant le {{date}}"
       },
       "edit": {
         "title": "Soumission",
         "titleWithReference": "Soumission {{reference}}",
         "lead": "Complétez chaque étape ; le récapitulatif indique ce qui manque avant de soumettre.",
+        "leadDecided": "Consultez la décision du comité et, si elle vous est demandée, déposez la version finale.",
         "back": "← Mes soumissions",
         "editableUntil": "modifiable jusqu'au {{date}}",
         "readOnly": "lecture seule"
@@ -458,6 +460,44 @@
         "confirm": "Retirer définitivement",
         "done": "Soumission retirée."
       },
+      "decision": {
+        "title": "Décision du comité",
+        "publishedAt": "publiée le {{date}}",
+        "assignedType": "Format attribué : {{type}}",
+        "outcomes": {
+          "accepted": "Acceptée",
+          "accepted_minor": "Acceptée sous réserve de corrections",
+          "waitlist": "Liste d'attente",
+          "rejected": "Non retenue"
+        },
+        "next": {
+          "accepted": "Déposez la version finale avant la date limite indiquée ci-dessous.",
+          "accepted_minor": "Corrigez votre texte en tenant compte des commentaires, puis déposez la version finale avec une lettre de réponse aux relecteurs.",
+          "waitlist": "Votre communication est en liste d'attente : un e-mail vous préviendra si une place se libère.",
+          "rejected": "Merci pour votre soumission. Les commentaires des relecteurs pourront vous aider pour une prochaine version."
+        },
+        "committee": "Message du comité",
+        "reviews": "Commentaires des relecteurs",
+        "reviewer": "Relecteur {{rank}}",
+        "noReviews": "Aucun commentaire des relecteurs."
+      },
+      "final": {
+        "title": "Version finale",
+        "deadline": "À déposer avant le {{date}}.",
+        "details": "version {{version}}, déposée le {{date}}",
+        "lead": "Version nominative (noms et affiliations des auteurs), au format PDF. Un nouveau dépôt remplace le précédent.",
+        "choose": "Fichier PDF de la version finale",
+        "replace": "Remplacer la version finale (PDF)",
+        "letter": "Lettre de réponse aux relecteurs",
+        "letterHint": "Facultative : indiquez comment les commentaires ont été pris en compte.",
+        "letterHintRequired": "Obligatoire : indiquez comment chaque commentaire a été pris en compte.",
+        "submit": "Déposer la version finale",
+        "saved": "Version finale déposée.",
+        "closed": "La date limite de dépôt de la version finale est passée.",
+        "fileRequired": "Choisissez le fichier PDF de la version finale.",
+        "letterRequired": "La lettre de réponse aux relecteurs est obligatoire.",
+        "letterTooLong": "La lettre de réponse est trop longue."
+      },
       "timeline": {
         "title": "Historique",
         "revisions": "{{count}} version(s) enregistrée(s) après la soumission."
@@ -474,7 +514,10 @@
         "submission_withdrawn": "Votre soumission {{reference}} « {{title}} » a été retirée.",
         "coauthor_added": "Vous êtes déclaré co-auteur de la soumission {{reference}} « {{title}} » ({{edition}}).",
         "extension_granted": "Délai supplémentaire pour votre soumission {{reference}} « {{title}} », jusqu'au {{until}}.",
-        "draft_reminder": "Votre brouillon « {{title}} » n'est pas encore soumis : l'appel ferme le {{closes}}."
+        "draft_reminder": "Votre brouillon « {{title}} » n'est pas encore soumis : l'appel ferme le {{closes}}.",
+        "screening_rejected": "Votre soumission {{reference}} « {{title}} » n'a pas été jugée recevable : elle ne sera pas évaluée.",
+        "decision_published": "Décision publiée pour votre soumission {{reference}} « {{title}} ».",
+        "final_version_received": "Version finale reçue pour votre soumission {{reference}} « {{title}} »."
       }
     }
   }

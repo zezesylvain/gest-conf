@@ -29,24 +29,32 @@ Plateforme de gestion de conférences scientifiques : portail public, espace de 
 10. **Pas de bibliothèque à dépendances système lourdes** (ex. WeasyPrint) sans confirmation de disponibilité sur o2switch : privilégier ReportLab/fpdf2, `pypdf`/`pikepdf`, `segno`.
 11. **Ne jamais committer de secrets** (`.env`, clés agrégateur, `SECRET_KEY`). Configuration par variables d'environnement.
 
-## Structure du dépôt (cible)
+## Structure du dépôt
 
 ```text
 GEST-CONF/
-├── CLAUDE.md
-├── Etude_fonctionnelle_et_technique_GEST-CONF.md / .html
+├── CLAUDE.md, README.md
+├── Etude_fonctionnelle_et_technique_GEST-CONF.md / .html   # étude (Markdown et HTML tenus à jour ensemble)
+├── docs/                    # plans de lot (Lx-…-plan.md) et bilans (Lx-….md), fiche o2switch
+├── deploy/                  # deploy.sh, smoke-test.sh, cron.sh, check-o2switch.sh, README.md
 ├── backend/                 # Django
-│   ├── config/settings/ (base, dev, prod) ; urls.py (API uniquement) ; passenger_wsgi.py
-│   ├── apps/ core, accounts, conferences, committees, submissions, reviews,
-│   │         program, registrations, payments, events, communications,
-│   │         sponsors, logistics, reports
-│   ├── tests/
-│   └── requirements/ (base, prod, dev)
+│   ├── config/settings/ (base, dev, prod, test) ; urls.py (API uniquement) ; mount.py ; passenger_wsgi.py
+│   ├── apps/ core, accounts, conferences, portal, communications, submissions, reviews
+│   │         (à venir, lot par lot : program, registrations, payments, events,
+│   │          sponsors, logistics, reports)
+│   ├── tests/               # tests transverses : matrice des droits, schéma, règles de plateforme
+│   ├── locale/              # traductions du backend (FR/EN)
+│   ├── schema.yml           # schéma OpenAPI versionné
+│   └── requirements/ (base, prod, dev : fichiers .in compilés en .txt à empreintes)
 └── web/                     # Angular
-    └── projects/ portail, gestion, shared (api-client généré, auth, ui-kit, i18n)
+    ├── projects/ portail, gestion, shared (client d'API généré, auth, ui-kit, i18n)
+    ├── e2e/                 # Playwright : playwright.config.ts, seed.py, django.ts, totp.ts, tests/
+    └── scripts/             # api-barrel, check-prerender, inject-csp (et leurs tests)
 ```
 
-Chaque app Django : `models.py`, `services.py` (logique métier), `serializers.py` (par rôle si champs sensibles), `permissions.py`, `views.py`, `urls.py`, `tests/`. **La logique métier va dans `services.py`**, pas dans les vues ni les modèles.
+Les comités n'ont pas d'application propre : rôles par édition dans `accounts`, pages publiques dans `portal` (L2).
+
+Chaque app Django : `models.py`, `services.py` (logique métier ; paquet `services/` quand il grossit, comme `accounts` et `reviews`), `serializers.py` (par rôle si champs sensibles), `permissions.py`, `views.py`, `urls.py`, `tests/`. **La logique métier va dans les services**, pas dans les vues ni les modèles.
 
 ## Conventions de code
 
@@ -74,9 +82,10 @@ npm run start:portail       # :4200 ; npm run start:gestion -> :4201/gestion/ (p
 npm test && npm run lint && npm run format:check
 npm run build               # portail pré-rendu + gestion + CSP à empreintes
 npm run api:generate        # régénérer le client TypeScript après chaque évolution du schéma
+GESTCONF_E2E_PYTHON=../backend/.venv/bin/python npm run e2e   # Playwright lance Django, le portail et la gestion (ports 8000, 4200, 4201 libres) ; GESTCONF_E2E_CHROMIUM=<chemin> pour un Chromium déjà installé
 
 # Déploiement : deploy/deploy.sh puis deploy/smoke-test.sh (voir deploy/README.md)
-# Cron (deploy/cron.sh) : run_jobs (toutes les 5 min), cleanup et check_integrity (quotidiennes)
+# Cron (deploy/cron.sh) : run_jobs (toutes les 5 min), close_call, remind_drafts et remind_reviewers (horaires), cleanup et check_integrity (quotidiennes)
 ```
 
 Les URL Django sont déclarées **sans** le préfixe `/api` (`v1/...`) : `config/mount.py` gère le montage.
@@ -93,7 +102,7 @@ Les URL Django sont déclarées **sans** le préfixe `/api` (`v1/...`) : `config
 
 - Python via cPanel « Setup Python App » (Passenger/WSGI) ; application **hors racine du domaine** ; URL de l'app = `/api`. Les règles de repli SPA du `.htaccess` ne doivent ni écraser le bloc Passenger ni intercepter `/api/`.
 - Déploiement : build Angular en CI → rsync/SSH vers `public_html/` et `public_html/gestion/` → `pip install` → `migrate` → redémarrage Passenger (`tmp/restart.txt`) → tests de fumée.
-- **Non vérifié, à confirmer avant de s'appuyer dessus** : version de MariaDB, fréquence minimale du cron, limites de ressources, sous-domaines autorisés, antivirus, compilation de `mysqlclient` (utiliser `PyMySQL` par défaut). Ne pas affirmer ces points sans vérification.
+- **Non vérifié, à confirmer avant de s'appuyer dessus** : version de MariaDB, fréquence minimale du cron, limites de ressources, sous-domaines autorisés, antivirus, compilation de `mysqlclient` (`PyMySQL` est le pilote retenu). Ne pas affirmer ces points sans vérification. Aucune ligne de la fiche [`docs/L1-verifications-o2switch.md`](docs/L1-verifications-o2switch.md) n'est encore remplie : elle se remplit avec `deploy/check-o2switch.sh` (lecture seule, en SSH) et les contrôles manuels qu'elle décrit.
 - Sauvegarde quotidienne base + fichiers, copie hors hébergement, restauration testée.
 
 ## Méthode de travail attendue
@@ -103,6 +112,15 @@ Les URL Django sont déclarées **sans** le préfixe `/api` (`v1/...`) : `config
 - Avant toute modification large (modèle de données, permissions, workflow de statuts), proposer le plan et attendre validation.
 - Une règle de gestion (RG-xx) implémentée = un test qui la référence dans son nom ou sa docstring.
 - Être rigoureux et critique : signaler les incohérences de l'étude, les risques de sécurité et les hypothèses non vérifiées plutôt que de les contourner. Ne pas inventer d'API de bibliothèque : vérifier dans la documentation ou le code installé.
+- Chaque lot : plan `docs/Lx-…-plan.md` (décisions numérotées) soumis à validation, étapes `Lx.0`…`Lx.n` committées et poussées une à une avec leur bilan dans le plan, puis bilan du lot `docs/Lx-….md`, section « Mises à jour issues du lot » de l'étude (Markdown **et** HTML) et section « Décisions du lot » ci-dessous.
+
+## État d'avancement
+
+| Lot | État |
+|---|---|
+| L0 à L4 (MVP : squelette, socle, portail, soumission, évaluation et décision) | Livrés en code, testés en local et en CI (L4.2 à L4.7 : CI par une nouvelle PR après la fusion de la PR #7) ; bilans dans `docs/`. **Aucune démo sur o2switch** encore faite |
+| L5 — Programme | **En cours** : plan [`docs/L5-programme-plan.md`](docs/L5-programme-plan.md) validé le 6 octobre 2026 (décisions I1 à I18) ; Q14 (noms des auteurs au programme public) reste ouverte |
+| L6 et suivants | Non commencés |
 
 ## Décisions du lot L1
 
@@ -133,6 +151,20 @@ Les décisions F1 à F17 du plan [`docs/L3-soumission-plan.md`](docs/L3-soumissi
 
 Bilan du lot : [`docs/L3-soumission.md`](docs/L3-soumission.md).
 
+## Décisions du lot L4
+
+Les décisions H1 à H19 du plan [`docs/L4-evaluation-plan.md`](docs/L4-evaluation-plan.md) ont été validées le 5 octobre 2026. Elles sont reportées dans l'étude, **§20 « Mises à jour issues du lot L4 »**, qui prévaut sur les sections antérieures (§17 à §19 compris). Points à retenir :
+
+- espace évaluateur dans la gestion (rubrique « Évaluations »), 2FA imposée à `SC_MEMBER` ; capacités `reviews.*`, `decisions.*`, `grids.write` ; le CO n'a aucun accès aux évaluations ;
+- RG-04 : tout sérialiseur relecteur dérive de `ReviewerSerializer` ou `ReviewerModelSerializer` (`apps/reviews/anonymity.py`, liste blanche contrôlée par méta-test) ; toute route `reviewer-…` doit figurer dans `LEAK_TESTED_ROUTES` (`apps/reviews/tests/test_anonymity.py`) avec son test de fuite (`test_leaks.py`), sous peine d'échec de la suite ;
+- note pondérée calculée par le serveur seul (`apps/reviews/services/scoring.py`, `Decimal`) ; grille verrouillée à la première évaluation (RG-05) ;
+- décisions provisoires invisibles des auteurs, transitions et e-mails à la publication seulement (RG-09) ; côté auteur, commentaires sous pseudonymes « Relecteur N », jamais de note ni de commentaire au comité (RG-10) ; `REVISION_REQUESTED` non utilisé (`accepted_minor`) ;
+- gardes et effets de l'évaluation inscrits dans le workflow par `register_guard` et `register_effect` (`apps/reviews/apps.py`) : `submissions` ne dépend pas de `reviews` ;
+- cron : `remind_reviewers`, toutes les heures ;
+- E2E : un seul parcours en série, de l'inscription de l'auteur à sa version finale ; Playwright lance aussi la gestion ; le comité se connecte avec un secret TOTP de test (`web/e2e/seed.py`, `web/e2e/totp.ts`).
+
+Bilan du lot : [`docs/L4-evaluation.md`](docs/L4-evaluation.md).
+
 ## Questions ouvertes (étude §15, à ne pas trancher seul)
 
-Date de la conférence, mono- ou multi-conférences, niveau de double aveugle, grille et pondérations définitives, résumé seul ou article complet, tarifs et agrégateur de paiement, entité de facturation, actes (DOI/ISBN), sessions hybrides, lettres d'invitation, emplacement de l'espace évaluateur (proposé : application `gestion`).
+Date de la conférence, mono- ou multi-conférences, niveau de double aveugle, grille et pondérations définitives, résumé seul ou article complet, tarifs et agrégateur de paiement, entité de facturation, actes (DOI/ISBN), sessions hybrides, lettres d'invitation. (L'emplacement de l'espace évaluateur est tranché : application `gestion`, décision H1.)

@@ -1,3 +1,4 @@
+import { NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -39,16 +40,25 @@ export type Step = (typeof STEPS)[number];
 /** Délai de la sauvegarde automatique après la dernière frappe. */
 export const AUTOSAVE_DELAY_MS = 1200;
 
+/** Longueur maximale de la lettre de réponse aux relecteurs (comme le serveur). */
+export const LETTER_MAX = 50000;
+
 /**
  * Assistant de soumission (plan L3 §5) : informations → auteurs → fichier → déclarations →
  * récapitulatif. Informations et déclarations sont enregistrées automatiquement ; les auteurs
  * et le fichier, par une action explicite. Les écritures sont **sérialisées** et portent la
  * révision lue (If-Match) : un 412 signale une modification faite ailleurs (autre onglet).
  * Le serveur reste juge de la complétude (RG-01) et de la fenêtre d'écriture (RG-02).
+ *
+ * Après publication des résultats (RG-09) : décision, format attribué, message du comité et
+ * commentaires des relecteurs **sous pseudonymes**, sans note ni commentaire confidentiel
+ * (RG-10, filtrés par le serveur) ; dépôt de la version finale et de la lettre de réponse
+ * jusqu'à la date clé `camera_ready` (plan L4, H18).
  */
 @Component({
   selector: 'portail-submission-page',
   imports: [
+    NgTemplateOutlet,
     ReactiveFormsModule,
     RouterLink,
     TranslatePipe,
@@ -110,6 +120,29 @@ export class SubmissionPage implements OnInit {
   protected readonly withdrawReason = this.fb.control('', Validators.maxLength(2000));
   protected readonly words = signal(0);
 
+  protected readonly decision = computed(() => this.submission()?.decision ?? null);
+  /** Retrait encore possible (soumise, ou acceptée : l'auteur renonce à présenter). */
+  protected readonly withdrawable = computed(() => {
+    const current = this.submission();
+    return (
+      !!current &&
+      (current.status === 'submitted' || current.status === 'accepted') &&
+      current.allowed_actions.includes('withdraw')
+    );
+  });
+  /** Dépôt de la version finale ouvert : action permise et date limite non passée (le
+   * serveur revérifie). */
+  protected readonly finalOpen = computed(() => {
+    const current = this.submission();
+    if (!current?.allowed_actions.includes('final_version')) return false;
+    return !current.final_deadline || Date.now() < Date.parse(current.final_deadline);
+  });
+  /** Lettre de réponse obligatoire pour une acceptation sous réserve de corrections (H18). */
+  protected readonly letterRequired = computed(() => this.decision()?.outcome === 'accepted_minor');
+  protected readonly finalFile = signal<File | null>(null);
+  protected readonly finalLetter = this.fb.control('', Validators.maxLength(LETTER_MAX));
+  protected readonly finalErrors = signal<string[]>([]);
+
   /** File d'écriture : chaque écriture attend la précédente et part avec la révision lue. */
   private queue: Promise<unknown> = Promise.resolve();
 
@@ -162,6 +195,11 @@ export class SubmissionPage implements OnInit {
       { emitEvent: false },
     );
     this.words.set(wordCount(submission.abstract));
+    if (!this.finalLetter.dirty) {
+      this.finalLetter.reset(submission.final_version?.response_letter ?? '', {
+        emitEvent: false,
+      });
+    }
     for (const declaration of submission.declarations) {
       if (!this.declarations.contains(declaration.code)) {
         this.declarations.addControl(declaration.code, this.fb.control(false), {
@@ -384,6 +422,50 @@ export class SubmissionPage implements OnInit {
     } finally {
       this.busy.set(false);
     }
+  }
+
+  protected chooseFinalFile(event: Event): void {
+    this.finalFile.set((event.target as HTMLInputElement).files?.[0] ?? null);
+  }
+
+  /** H18 : dépôt de la version finale ; la lettre est exigée pour `accepted_minor`. */
+  protected async sendFinalVersion(input: HTMLInputElement): Promise<void> {
+    const current = this.submission();
+    const file = this.finalFile();
+    const letter = this.finalLetter.value.trim();
+    const missing: string[] = [];
+    if (!file) missing.push(this.translate.instant('portail.submissions.final.fileRequired'));
+    if (this.letterRequired() && !letter) {
+      missing.push(this.translate.instant('portail.submissions.final.letterRequired'));
+    }
+    // `invalid` engloberait le `required` posé par le gabarit : seule la longueur compte ici.
+    if (this.finalLetter.hasError('maxlength')) {
+      missing.push(this.translate.instant('portail.submissions.final.letterTooLong'));
+    }
+    this.finalErrors.set(missing);
+    if (!current || !file || missing.length) return;
+    this.busy.set(true);
+    this.errors.set([]);
+    try {
+      const updated = await this.service.finalVersion(current.id, file, letter);
+      this.finalLetter.markAsPristine();
+      this.load(updated);
+      this.finalFile.set(null);
+      input.value = '';
+      this.notice.set(this.translate.instant('portail.submissions.final.saved'));
+      await this.refreshSide();
+    } catch (error) {
+      this.errors.set([
+        apiErrorMessage(this.translate, error),
+        ...(error instanceof GcApiError ? Object.values(error.fields).flat() : []),
+      ]);
+    } finally {
+      this.busy.set(false);
+    }
+  }
+
+  protected finalVersionUrl(): string {
+    return this.service.finalVersionUrl(this.id);
   }
 
   protected when(iso: string | null | undefined): string {

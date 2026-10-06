@@ -46,21 +46,33 @@ SR, SE, SX = "submissions.read", "submissions.extend", "submissions.export"
 # écrire les grilles.
 RW, RM, RA = "reviews.write", "reviews.manage", "reviews.read_all"
 DD, DP, GW = "decisions.decide", "decisions.publish", "grids.write"
+# Plan L5 (I1) : programme lu par les comités, écrit par le CO « programme » et
+# l'administrateur, publié par le Chair.
+PGR, PGW, PGP = "program.read", "program.write", "program.publish"
 
 SPEC: dict[str, set[str]] = {
-    # H19 : l'administrateur n'évalue pas et ne décide pas.
-    "ADMIN": {R, W, PUB, ARC, MR, MM, AR, PW, SR, SE, SX, RM, RA, GW},
-    "CHAIR": {R, W, PUB, MR, MM, AR, PW, SR, SE, SX, RM, RA, DD, DP, GW},
+    # H19 : l'administrateur n'évalue pas et ne décide pas ; I1 : il ne publie pas le
+    # programme.
+    "ADMIN": {R, W, PUB, ARC, MR, MM, AR, PW, SR, SE, SX, RM, RA, GW, PGR, PGW},
+    # I1 : le Chair lit et publie le programme, sans l'écrire.
+    "CHAIR": {R, W, PUB, MR, MM, AR, PW, SR, SE, SX, RM, RA, DD, DP, GW, PGR, PGP},
     # D8 validée : lecture du paramétrage ; membres du CS seulement. F10, F8 (plan L3) :
     # soumissions (lecture, dérogations, export). H19 : évalue, pilote, décide, publie.
-    "SC_CHAIR": {R, MR, MM, SR, SE, SX, RW, RM, RA, DD, DP, GW},
-    "OC_MEMBER": {R, SR},  # D8 : lecture seule (fonction « finances ») ; F10 : soumissions
-    "OC_COMMUNICATION": {R, PW, SR},  # E11 (plan L2) : le CO « communication » écrit le portail
+    # I1 : lit le programme.
+    "SC_CHAIR": {R, MR, MM, SR, SE, SX, RW, RM, RA, DD, DP, GW, PGR},
+    # D8 : lecture seule (fonction « finances ») ; F10 : soumissions ; I1 : programme lu.
+    "OC_MEMBER": {R, SR, PGR},
+    # E11 (plan L2) : le CO « communication » écrit le portail.
+    "OC_COMMUNICATION": {R, PW, SR, PGR},
+    "OC_PROGRAM": {R, SR, PGR, PGW},  # I1 (plan L5) : le CO « programme » écrit le programme
     "SC_MEMBER": {RW},  # F10 : pas les soumissions ; H19 : ses affectations seulement
     "AUTHOR": set(),
 }
 # Profils qui ne sont pas un rôle seul : (rôle, fonction au CO).
-PROFILE_ROLES = {"OC_COMMUNICATION": (Role.OC_MEMBER, "communication")}
+PROFILE_ROLES = {
+    "OC_COMMUNICATION": (Role.OC_MEMBER, "communication"),
+    "OC_PROGRAM": (Role.OC_MEMBER, "program"),
+}
 # Profils sans rôle actif dans l'édition visée : 404 (D5).
 NON_MEMBERS = ("no_role", "other_edition_chair", "revoked_chair", "invited")
 PROFILES = ("anonymous", *NON_MEMBERS, *SPEC)
@@ -97,8 +109,18 @@ CASES = [
         W,
         200,
         "/v1/manage/editions/{e}/confidentiality",
-        {"double_blind": False},
+        # Réglage non gelé : la soumission en recevabilité du monde gèle double_blind (RG-19).
+        {"max_reviews_per_reviewer": 12},
         recent_auth=True,
+    ),
+    Case("manage-program-settings", "GET", PGR, 200, "/v1/manage/editions/{e}/program/settings"),
+    Case(
+        "manage-program-settings",
+        "PATCH",
+        PGW,
+        200,
+        "/v1/manage/editions/{e}/program/settings",
+        {"session_buffer_minutes": 5},
     ),
     Case("manage-tracks-list", "GET", R, 200, "/v1/manage/editions/{e}/tracks"),
     Case(
@@ -416,6 +438,223 @@ CASES = [
     Case(
         "manage-grids-duplicate", "POST", GW, 201, "/v1/manage/editions/{e}/grids/{grid}/duplicate"
     ),
+    # --- Recevabilité, affectations, conflits (L4.2) ------------------------------------------
+    Case(
+        "manage-review-submissions-list",
+        "GET",
+        RM,
+        200,
+        "/v1/manage/editions/{e}/review-submissions",
+    ),
+    Case(
+        "manage-review-submissions-detail",
+        "GET",
+        RM,
+        200,
+        "/v1/manage/editions/{e}/review-submissions/{review_submission}",
+    ),
+    Case(
+        "manage-review-submissions-candidates",
+        "GET",
+        RM,
+        200,
+        "/v1/manage/editions/{e}/review-submissions/{review_submission}/candidates",
+    ),
+    Case(
+        "manage-review-submissions-screening",
+        "POST",
+        RM,
+        200,
+        "/v1/manage/editions/{e}/review-submissions/{review_submission}/screening",
+        {"decision": "reject", "reason": "Hors du champ de la conférence"},
+    ),
+    Case(
+        "manage-assignments-list",
+        "POST",
+        RM,
+        201,
+        "/v1/manage/editions/{e}/assignments",
+        lambda ids: {"submission": ids["review_submission"], "reviewer": ids["reviewer"]},
+    ),
+    Case(
+        "manage-assignments-detail",
+        "PATCH",
+        RM,
+        200,
+        "/v1/manage/editions/{e}/assignments/{assignment}",
+        {"due_local": "2099-05-01T23:59"},
+    ),
+    Case(
+        "manage-assignments-cancel",
+        "POST",
+        RM,
+        200,
+        "/v1/manage/editions/{e}/assignments/{assignment}/cancel",
+        {"reason": "Remplacement"},
+    ),
+    Case(
+        "manage-conflicts-list",
+        "POST",
+        RM,
+        201,
+        "/v1/manage/editions/{e}/conflicts",
+        lambda ids: {
+            "submission": ids["review_submission"],
+            "reviewer": ids["reviewer"],
+            "reason": "Collaboration récente",
+        },
+    ),
+    # --- Évaluations, discussion, suivi (président, L4.3) -------------------------------------
+    Case(
+        "manage-review-submissions-reviews",
+        "GET",
+        RA,
+        200,
+        "/v1/manage/editions/{e}/review-submissions/{discussed_submission}/reviews",
+    ),
+    Case(
+        "manage-review-submissions-discussion-open",
+        "POST",
+        RM,
+        200,
+        "/v1/manage/editions/{e}/review-submissions/{open_submission}/discussion/open",
+    ),
+    Case(
+        "manage-review-submissions-discussion-messages",
+        "POST",
+        RM,
+        201,
+        "/v1/manage/editions/{e}/review-submissions/{discussed_submission}/discussion/messages",
+        {"body": "Pouvez-vous préciser la méthode ?"},
+    ),
+    Case("manage-review-progress", "GET", RM, 200, "/v1/manage/editions/{e}/review-progress"),
+    # --- Décisions, publication, classement, export (L4.4) ------------------------------------
+    Case(
+        "manage-review-submissions-decision",
+        "PUT",
+        DD,
+        200,
+        "/v1/manage/editions/{e}/review-submissions/{discussed_submission}/decision",
+        {"outcome": "accepted"},
+    ),
+    Case(
+        "manage-review-submissions-decision",
+        "DELETE",
+        DD,
+        200,
+        "/v1/manage/editions/{e}/review-submissions/{discussed_submission}/decision",
+    ),
+    Case(
+        "manage-review-submissions-promote",
+        "POST",
+        DP,
+        200,
+        "/v1/manage/editions/{e}/review-submissions/{waitlisted_submission}/promote",
+    ),
+    Case(
+        "manage-decisions-batch",
+        "POST",
+        DD,
+        200,
+        "/v1/manage/editions/{e}/decisions/batch",
+        lambda ids: {"items": [{"submission": ids["discussed_submission"], "outcome": "rejected"}]},
+    ),
+    Case(
+        "manage-decisions-publish",
+        "POST",
+        DP,
+        200,
+        "/v1/manage/editions/{e}/decisions/publish",
+        recent_auth=True,
+    ),
+    Case("manage-ranking", "GET", RA, 200, "/v1/manage/editions/{e}/ranking?threshold=50"),
+    Case(
+        "manage-reviews-export",
+        "GET",
+        RA,
+        200,
+        "/v1/manage/editions/{e}/reviews-export",
+        recent_auth=True,
+    ),
+    # --- Espace relecteur (L4.3) : ses affectations seulement ({my_*} : celle du profil) -----
+    Case(
+        "reviewer-assignments-list", "GET", RW, 200, "/v1/manage/editions/{e}/reviews/assignments"
+    ),
+    Case(
+        "reviewer-assignments-detail",
+        "GET",
+        RW,
+        200,
+        "/v1/manage/editions/{e}/reviews/assignments/{my_assignment}",
+    ),
+    Case(
+        "reviewer-assignments-file",
+        "GET",
+        RW,
+        200,
+        "/v1/manage/editions/{e}/reviews/assignments/{my_assignment}/file",
+    ),
+    Case(
+        "reviewer-assignments-authors",
+        "GET",
+        RW,
+        200,
+        "/v1/manage/editions/{e}/reviews/assignments/{my_assignment}/authors",
+    ),
+    Case(
+        "reviewer-assignments-decline",
+        "POST",
+        RW,
+        204,
+        "/v1/manage/editions/{e}/reviews/assignments/{my_assignment}/decline",
+        {"reason": "Indisponible"},
+    ),
+    Case(
+        "reviewer-review",
+        "PUT",
+        RW,
+        200,
+        "/v1/manage/editions/{e}/reviews/assignments/{my_assignment}/review",
+        {"scores": {"originalite": "4"}},
+    ),
+    Case(
+        "reviewer-review-submit",
+        "POST",
+        RW,
+        200,
+        "/v1/manage/editions/{e}/reviews/assignments/{my_assignment}/review/submit",
+        {
+            "scores": {code: "4" for code in ("originalite", "methode", "pertinence")}
+            | {"redaction": "3", "impact": "3"},
+            "recommendation": "accept",
+            "confidence": 4,
+            "comment_to_authors": "Travail solide.",
+        },
+    ),
+    Case(
+        "reviewer-discussion",
+        "GET",
+        RW,
+        200,
+        "/v1/manage/editions/{e}/reviews/assignments/{my_discussed}/discussion",
+    ),
+    Case(
+        "reviewer-discussion",
+        "POST",
+        RW,
+        201,
+        "/v1/manage/editions/{e}/reviews/assignments/{my_discussed}/discussion",
+        {"body": "Je maintiens ma note."},
+    ),
+    Case("reviewer-expertise", "GET", RW, 200, "/v1/manage/editions/{e}/reviews/expertise"),
+    Case(
+        "reviewer-expertise",
+        "PUT",
+        RW,
+        200,
+        "/v1/manage/editions/{e}/reviews/expertise",
+        lambda ids: {"tracks": [ids["track_code"]]},
+    ),
     Case("manage-portal-poster", "GET", R, 200, "/v1/manage/editions/{e}/portal/poster"),
     Case(
         "manage-portal-poster",
@@ -452,8 +691,10 @@ MATRIX = [
 
 @pytest.fixture
 def world():
-    """Édition complète (publiable) avec un membre de chaque rôle et les objets visés."""
-    edition = EditionFactory()
+    """Édition complète (publiable) avec un membre de chaque rôle et les objets visés. Sans
+    double aveugle : la route relecteur des auteurs y répond (elle rend 404 en double aveugle,
+    ce que testent les tests de fuite RG-04)."""
+    edition = EditionFactory(double_blind=False)
     other = EditionFactory()
     track = TrackFactory(edition=edition)
     submission_type = SubmissionTypeFactory(edition=edition)
@@ -516,8 +757,15 @@ def world():
     from apps.reviews.services.grids import create_grid
 
     grid = create_grid(edition, name="Grille", actor=Actor.command("cli:matrice"))
+    review_submission, reviewer, assignment = _review_objects(edition)
+    reviewing = _reviewer_objects(edition, users)
     ids = {
+        **reviewing,
+        "track_code": track.code,
         "grid": grid.pk,
+        "review_submission": review_submission.pk,
+        "reviewer": reviewer.pk,
+        "assignment": assignment.pk,
         "submission": submission.pk,
         "submission_file": submission_file.pk,
         "extension": extension.pk,
@@ -570,6 +818,126 @@ def _submission_with_extension(edition):
     return submission, submission_file, extension
 
 
+def _review_objects(edition):
+    """Soumission en recevabilité (statut posé directement : la clôture de l'appel n'est pas
+    passée), un relecteur libre et une affectation active d'un autre relecteur."""
+    from apps.reviews.models import ReviewAssignment
+    from apps.submissions.models import Submission, SubmissionStatus
+    from apps.submissions.tests.factories import author_user, complete_submission
+
+    submission = complete_submission(edition, author_user(first="Kofi", last="Mensah"))
+    Submission.objects.filter(pk=submission.pk).update(
+        status=SubmissionStatus.SCREENING, reference=f"{edition.code}-0001"
+    )
+    reviewer = make_member(edition, Role.SC_MEMBER)
+    assigned = make_member(edition, Role.SC_MEMBER)
+    assignment = ReviewAssignment.objects.create(
+        submission=submission,
+        reviewer=assigned,
+        assigned_at=timezone.now(),
+        pseudonym_rank=1,
+        active_key=f"{submission.pk}:{assigned.pk}",
+    )
+    return submission, reviewer, assignment
+
+
+def _reviewer_objects(edition, users):
+    """Pour chaque profil qui évalue (SC_MEMBER, SC_CHAIR) : une affectation sur une soumission
+    en évaluation (avec PDF), une autre sur une soumission évaluée, son évaluation envoyée et
+    la discussion ouverte. Grille propre au type de ces soumissions : la grille du monde reste
+    modifiable (cases des grilles)."""
+    from decimal import Decimal
+
+    from apps.core.actor import Actor
+    from apps.reviews.models import Decision, Discussion, Review, ReviewAssignment, ReviewStatus
+    from apps.reviews.services.grids import create_grid
+    from apps.submissions import storage
+    from apps.submissions.models import Submission, SubmissionFile, SubmissionStatus
+    from apps.submissions.tests.factories import author_user, complete_submission
+
+    open_submission = complete_submission(edition, author_user(first="Ama", last="Owusu"))
+    Submission.objects.filter(pk=open_submission.pk).update(
+        status=SubmissionStatus.UNDER_REVIEW, reference=f"{edition.code}-0002"
+    )
+    discussed = complete_submission(
+        edition,
+        author_user(first="Yao", last="Kouassi"),
+        submission_type=open_submission.submission_type,
+    )
+    Submission.objects.filter(pk=discussed.pk).update(
+        status=SubmissionStatus.REVIEWED, reference=f"{edition.code}-0003"
+    )
+    grid = create_grid(
+        edition,
+        name="Grille du type",
+        submission_type=open_submission.submission_type,
+        actor=Actor.command("cli:matrice"),
+    )
+    name, digest = storage.write(PDF)
+    SubmissionFile.objects.create(
+        submission=open_submission,
+        kind="main",
+        version=1,
+        storage_name=name,
+        original_name="article.pdf",
+        size=len(PDF),
+        sha256=digest,
+        pages=1,
+        is_current=True,
+        uploaded_by=open_submission.submitter,
+    )
+    Discussion.objects.create(submission=discussed, opened_at=timezone.now())
+    waitlisted = complete_submission(edition, author_user(first="Efua", last="Mensah"))
+    Submission.objects.filter(pk=waitlisted.pk).update(
+        status=SubmissionStatus.WAITLIST, reference=f"{edition.code}-0004"
+    )
+    Decision.objects.create(
+        submission=waitlisted,
+        outcome="waitlist",
+        decided_by=users["CHAIR"],
+        decided_at=timezone.now(),
+        published_at=timezone.now(),
+    )
+    per_profile = {}
+    now = timezone.now()
+    for rank, profile in enumerate(("SC_MEMBER", "SC_CHAIR"), start=1):
+        user = users[profile]
+        mine = ReviewAssignment.objects.create(
+            submission=open_submission,
+            reviewer=user,
+            assigned_at=now,
+            pseudonym_rank=rank,
+            active_key=f"{open_submission.pk}:{user.pk}",
+        )
+        done = ReviewAssignment.objects.create(
+            submission=discussed,
+            reviewer=user,
+            assigned_at=now,
+            pseudonym_rank=rank,
+            active_key=f"{discussed.pk}:{user.pk}",
+        )
+        Review.objects.create(
+            assignment=done,
+            grid=grid,
+            status=ReviewStatus.SUBMITTED,
+            recommendation="accept",
+            confidence=3,
+            comment_to_authors="Bien.",
+            weighted_score=Decimal("70.00"),
+            submitted_at=now,
+            version=1,
+        )
+        per_profile[profile] = {"my_assignment": mine.pk, "my_discussed": done.pk}
+    return {
+        "open_submission": open_submission.pk,
+        "discussed_submission": discussed.pk,
+        "waitlisted_submission": waitlisted.pk,
+        "per_profile": per_profile,
+        "my_assignment": per_profile["SC_MEMBER"]["my_assignment"],
+        "my_discussed": per_profile["SC_MEMBER"]["my_discussed"],
+    }
+
+
 def _png() -> bytes:
     import io
 
@@ -594,8 +962,18 @@ def test_matrix(world, case, profile, expected):
     """Plan L1 §5.9 : anonyme 401, non-membre 404, membre sans capacité 403, sinon succès."""
     _edition, users, ids = world
     client = APIClient() if profile == "anonymous" else client_for(users[profile])
-    response = call(client, case, ids)
+    response = call(client, case, for_profile(ids, profile))
     assert response.status_code == expected, response.content
+
+
+def for_profile(ids: dict, profile: str) -> dict:
+    """Identifiants propres au profil (affectations du relecteur : 404 pour un autre)."""
+    return {**ids, **ids.get("per_profile", {}).get(profile, {})}
+
+
+def holder(capability: str) -> str:
+    """Premier profil de gestion qui détient ``capability``."""
+    return next(p for p in ("ADMIN", "CHAIR", "SC_CHAIR", "SC_MEMBER") if capability in SPEC[p])
 
 
 @pytest.mark.parametrize(
@@ -604,7 +982,8 @@ def test_matrix(world, case, profile, expected):
 def test_matrix_stale_reauthentication(world, case):
     """D12 : sans réauthentification de moins de 5 min → 403 ``reauthentication_required``."""
     _edition, users, ids = world
-    response = call(client_for(users["ADMIN"], recent_auth=False), case, ids)
+    profile = holder(case.capability)
+    response = call(client_for(users[profile], recent_auth=False), case, for_profile(ids, profile))
     assert response.status_code == 403
     assert response.json()["code"] == "reauthentication_required"
 
@@ -614,9 +993,12 @@ def test_matrix_archived_edition_is_read_only(world):
     edition, users, ids = world
     edition.status = EditionStatus.ARCHIVED
     edition.save()
-    client = client_for(users["ADMIN"])
+    clients = {}
     for case in CASES:
-        response = call(client, case, ids)
+        profile = holder(case.capability)
+        if profile not in clients:
+            clients[profile] = client_for(users[profile])
+        response = call(clients[profile], case, for_profile(ids, profile))
         if case.method == "GET":
             assert response.status_code == 200, case
         elif case.route != "manage-edition-status":
@@ -735,3 +1117,12 @@ def test_every_manage_route_is_in_matrix():
     covered = {(case.route, case.method) for case in CASES}
     missing = sorted(set(_manage_routes()) - covered)
     assert missing == []
+
+
+def test_h2_reviewer_routes_require_two_factor_authentication(world):
+    """H2 (plan L4) : la 2FA est imposée aux relecteurs (SC_MEMBER) sur leurs routes."""
+    _edition, users, ids = world
+    path = f"/v1/manage/editions/{ids['e']}/reviews/assignments"
+    response = client_for(users["SC_MEMBER"], mfa=False).get(path)
+    assert (response.status_code, response.json()["code"]) == (403, "mfa_enrollment_required")
+    assert client_for(users["SC_MEMBER"]).get(path).status_code == 200

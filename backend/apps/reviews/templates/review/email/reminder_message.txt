@@ -1,0 +1,7 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate %}Bonjour,{% endblocktranslate %}
+
+{% if kind == "late" %}{% blocktranslate %}L'échéance de votre évaluation de la soumission {{ reference }} « {{ title }} » ({{ edition_title }}) est dépassée depuis le {{ due }}. Merci de l'envoyer au plus vite, ou de la décliner pour qu'un autre relecteur soit désigné.{% endblocktranslate %}{% elif kind == "j1" %}{% blocktranslate %}Votre évaluation de la soumission {{ reference }} « {{ title }} » ({{ edition_title }}) est attendue demain : échéance le {{ due }}.{% endblocktranslate %}{% else %}{% blocktranslate %}Votre évaluation de la soumission {{ reference }} « {{ title }} » ({{ edition_title }}) est attendue dans une semaine : échéance le {{ due }}.{% endblocktranslate %}{% endif %}
+
+{% blocktranslate %}Votre évaluation : {{ link }}{% endblocktranslate %}
+
+{% include "account/email/_signature.txt" %}{% endautoescape %}

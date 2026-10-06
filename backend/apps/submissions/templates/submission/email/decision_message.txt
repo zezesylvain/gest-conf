@@ -1,0 +1,17 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate %}Bonjour,{% endblocktranslate %}
+
+{% if outcome == "accepted" %}{% blocktranslate %}Le comité scientifique de {{ edition_title }} a le plaisir de vous annoncer que la soumission {{ reference }} « {{ title }} » est acceptée.{% endblocktranslate %}{% elif outcome == "accepted_minor" %}{% blocktranslate %}Le comité scientifique de {{ edition_title }} accepte la soumission {{ reference }} « {{ title }} », sous réserve des corrections demandées ci-dessous. Joignez une lettre de réponse aux relecteurs à la version finale.{% endblocktranslate %}{% elif outcome == "waitlist" %}{% blocktranslate %}Le comité scientifique de {{ edition_title }} a placé la soumission {{ reference }} « {{ title }} » sur liste d'attente. Vous serez prévenu si une place se libère.{% endblocktranslate %}{% else %}{% blocktranslate %}Le comité scientifique de {{ edition_title }} regrette de vous annoncer que la soumission {{ reference }} « {{ title }} » n'est pas retenue.{% endblocktranslate %}{% endif %}{% if assigned_type or camera_ready %}
+{% if assigned_type %}
+{% blocktranslate %}Format attribué : {{ assigned_type }}{% endblocktranslate %}{% endif %}{% if camera_ready %}
+{% blocktranslate %}Version finale attendue au plus tard le {{ camera_ready }}.{% endblocktranslate %}{% endif %}{% endif %}{% if chair_comment %}
+
+{% blocktranslate %}Message du comité :{% endblocktranslate %}
+{{ chair_comment }}{% endif %}{% if reviews %}
+
+{% blocktranslate %}Commentaires des relecteurs :{% endblocktranslate %}
+
+{{ reviews }}{% endif %}{% if link %}
+
+{% blocktranslate %}Votre soumission : {{ link }}{% endblocktranslate %}{% endif %}
+
+{% include "account/email/_signature.txt" %}{% endautoescape %}

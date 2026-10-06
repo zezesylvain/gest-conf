@@ -3,8 +3,8 @@
 
 | | |
 |---|---|
-| **Version** | 1.3 – document de cadrage, mis à jour après les lots L1 (§17), L2 (§18) et L3 (§19) |
-| **Date** | 5 octobre 2026 |
+| **Version** | 1.4 – document de cadrage, mis à jour après les lots L1 (§17), L2 (§18), L3 (§19) et L4 (§20) |
+| **Date** | 6 octobre 2026 |
 | **Auteur** | Étude réalisée pour ZDS |
 | **Statut** | Pour validation |
 | **Stack imposée** | Django (sans admin) · Angular · MariaDB · o2switch (mono-domaine) |
@@ -1512,6 +1512,69 @@ Les décisions F1 à F17 du plan [`docs/L3-soumission-plan.md`](docs/L3-soumissi
 - 1 524 tests backend (1 531 sous MariaDB), 274 tests front, **parcours auteur de bout en bout** (Playwright) en CI : inscription, profil, brouillon, co-auteur, PDF, déclarations, soumission, accusé, révision, clôture simulée, refus, recevabilité.
 - Charge de L3 réestimée à 16 – 19,5 j-h (étude : 12 – 16).
 - **Avant l'ouverture réelle de l'appel** : textes définitifs des déclarations et de la notice (Q14), fournisseur d'e-mails de production (D10), décision sur le déploiement continu (D18), démo D sur o2switch. Durées de conservation des notifications (D15, non validées). Budget du portail : 367,7 kB pour un avertissement à 365 kB.
+
+## 20. Mises à jour issues du lot L4 (version 1.4)
+
+Les décisions H1 à H19 du plan [`docs/L4-evaluation-plan.md`](docs/L4-evaluation-plan.md) ont été validées le 5 octobre 2026 et mises en œuvre dans le lot L4. Cette section les reporte dans l'étude ; **en cas de divergence avec les sections précédentes (§17 à §19 compris), elle prévaut**. Le détail (justifications, vérifications, défauts trouvés) est dans le plan, §2 et §11 à §18 ; le bilan du lot dans [`docs/L4-evaluation.md`](docs/L4-evaluation.md).
+
+### 20.1 Évaluation (M5)
+
+- **Espace évaluateur dans l'application `gestion`** (H1, Q16), rubrique « Évaluations », 2FA imposée à `SC_MEMBER` (H2) : liste de ses évaluations, formulaire (soumission anonymisée et PDF, grille, note indicative calculée pendant la saisie), refus motivé, discussion, expertises.
+- **Grilles** (H3, RG-05) : par édition, et facultativement par type ; critères bilingues, poids décimaux de somme exactement 100, échelle par grille (défaut 0 à 5), critères obligatoires ou non. Grille par défaut de l'étude (25/30/15/15/15). **Verrouillée à la première évaluation enregistrée** ; on la duplique en version suivante.
+- **Calcul** (H4) : note pondérée sur 100, en `Decimal`, arrondie à 2 décimales (demi supérieur), **calculée par le serveur** à chaque enregistrement ; critères facultatifs non notés exclus (poids renormalisés). Note finale : moyenne simple, ou pondérée par la confiance (option de l'édition, désactivée par défaut).
+- **Évaluation** (H5) : recommandation `accept`, `accept_minor`, `reject`, `discuss` ; confiance 1 à 5 ; commentaire aux auteurs obligatoire à l'envoi ; commentaire au comité, jamais transmis ; signalements éthique et plagiat.
+- **Affectation manuelle** (H6) par le président du CS ou le Chair : charge maximale par relecteur (défaut 10), échéance par défaut `review_deadline`, relances à J-7, J-1 et au premier jour de retard (H15). Expertises déclarées par thématique (H7). Suggestions automatiques : P2.
+- **Paramètres de l'évaluation** de l'édition (relecteurs par soumission, charge maximale, seuil de divergence, note pondérée par la confiance) : « Paramétrage › Confidentialité », capacité `edition.write`, réauthentification récente, journal avant et après.
+
+### 20.2 Workflow et règles de gestion
+
+- **Transitions ouvertes** : `SCREENING → UNDER_REVIEW` (relecteurs requis affectés) et `SCREENING → REJECTED` (motif) ; `UNDER_REVIEW → REVIEWED` par le système (RG-07) ; `REVIEWED → ACCEPTED`, `ACCEPTED_MINOR`, `WAITLIST`, `REJECTED` à la publication ; `WAITLIST → ACCEPTED` ; `ACCEPTED` ou `ACCEPTED_MINOR → CAMERA_READY_RECEIVED` ; `ACCEPTED → WITHDRAWN`. Le workflow revérifie la capacité du demandeur dans l'édition.
+- **Écart du §5.1 tranché** (H16) : `REVISION_REQUESTED` **n'est pas utilisé** ; `accepted_minor` (« acceptée sous réserve de corrections ») couvre les corrections demandées, avec lettre de réponse obligatoire à la version finale.
+- **RG-03** (H8) : conflit d'auteur jamais levable ; même institution (comparaison normalisée) et conflit déclaré levables par le président, avec un motif, une réauthentification récente et une entrée au journal. Un relecteur en conflit ne voit ni la soumission ni la discussion.
+- **RG-06** (H13) : évaluation modifiable par un nouvel envoi jusqu'à la décision ; **une décision provisoire fige déjà les évaluations**, son annulation les rend de nouveau modifiables. Chaque envoi crée une version (ajout seul).
+- **RG-07** (H14) : passage automatique en « évaluée » au dernier envoi requis ; un relecteur ajouté ensuite ne fait pas revenir en arrière.
+- **RG-08** (H12) : discussion ouverte automatiquement quand toutes les évaluations actives sont envoyées, ou par le président ; un relecteur n'y accède qu'après son propre envoi. **Divergence** au-delà du seuil de l'édition (défaut 30 points) : signalée au pilotage et par un e-mail unique au président du CS.
+- **RG-09** (H16) : décisions provisoires (individuelles ou en lot), invisibles des auteurs ; **publication** par le président, avec réauthentification récente : transitions et e-mails à ce moment seulement. Pas d'annulation de publication. Validation par le Chair : P2.
+- **RG-10** (H11) : l'auteur reçoit l'issue, le format attribué, le message du comité et les commentaires aux auteurs sous pseudonymes « Relecteur N » ; jamais le nom des relecteurs, leurs notes ni les commentaires au comité. Les mêmes pseudonymes servent entre relecteurs d'une soumission (rang tiré au hasard, stable).
+
+### 20.3 Double aveugle (RG-04)
+
+- **Registre des champs d'identité**, sérialiseurs relecteur construits par **liste blanche** (`ReviewerSerializer`), méta-test qui refuse tout champ menant au registre.
+- **Test de fuite** sur chacune des routes relecteur, avec des traceurs (auteurs, institution, nom d'origine du fichier, président, autre relecteur), erreurs comprises ; une route relecteur non testée fait échouer la suite. Le parcours de bout en bout le vérifie aussi dans le navigateur du relecteur.
+- Fichier servi : version nettoyée de L3, nom générique (la référence). Édition **sans** double aveugle (Q3) : noms et affiliations des auteurs par une route dédiée, jamais les adresses.
+- **Limite connue** : l'identité écrite dans le **texte** du PDF n'est pas détectée (P2) ; consigne aux auteurs.
+
+### 20.4 Décision et version finale (M6)
+
+- **Classement et simulation** (US-06) : soumissions évaluées classées par note finale, divergence, recommandations ; seuil simulé avec le nombre retenu au total, par type et par thématique ; décisions préparées selon le seuil puis enregistrées en lot.
+- **Export CSV des évaluations**, nominatif, réauthentification récente, journalisé (RG-17), protégé contre l'injection de formules.
+- **Espace auteur** (portail) : décision et commentaires après publication ; **version finale** (H18) pour `accepted` et `accepted_minor` : PDF nominatif, non nettoyé, et lettre de réponse aux relecteurs, jusqu'à la date clé `camera_ready` ; un nouveau dépôt remplace le précédent ; accusé de réception. Contrôle de la mise en page : non.
+
+### 20.5 Droits et gestion
+
+- **Capacités** (H19) : `reviews.write` (`SC_MEMBER`, `SC_CHAIR`), `reviews.manage`, `reviews.read_all` et `grids.write` (`SC_CHAIR`, `CHAIR`, `ADMIN`), `decisions.decide` et `decisions.publish` (`SC_CHAIR`, `CHAIR`). L'administrateur n'évalue ni ne décide. Le CO n'a aucun accès aux évaluations (matrice §3.3).
+- **Recevabilité** par le président du CS ou le Chair (H10) ; la fonction « secrétariat » du CO (Q12) n'a pas de droit en L4.
+- **Écrans de la gestion** : « Évaluations » (relecteur), « Pilotage » (avancement, divergences, recevabilité, affectations, évaluations nominatives, discussion, décision), « Classement » (simulation, décisions en lot, publication, export), « Grilles », carte « Évaluation » du tableau de bord ; chaque écran est inscrit dans le rail et a sa fiche d'aide.
+- **Noms des relecteurs** visibles du président et du Chair seulement ; jamais leurs adresses dans les réponses de pilotage.
+
+### 20.6 Modèle de données et API
+
+- Application `reviews` : `evaluation_grid`, `criterion`, `reviewer_track` (expertises), `review_assignment` (rang de pseudonyme, échéance, relances), `conflict_of_interest`, `review`, `review_score`, `review_version` (ajout seul), `discussion`, `discussion_message`, `decision`, `final_version`. Édition : `max_reviews_per_reviewer`, `divergence_threshold`, `confidence_weighted_score`. Registre des données personnelles étendu : un relecteur ne s'anonymise pas tant qu'une évaluation est en cours ; ensuite, l'évaluation est conservée sans nom.
+- API relecteur `…/manage/editions/{id}/reviews/…` (ses affectations, fichier, refus, évaluation, discussion, expertises) ; API de pilotage (`review-submissions`, `review-progress`, `assignments`, `conflicts`, `decisions`, `ranking`, `reviews-export`, `grids`) ; API auteur `/v1/submissions/{id}` (`decision`, `final_version`, `final_deadline`) et `…/final-version`.
+- Codes d'erreur ajoutés : `grid_locked`, `conflict_of_interest`, `reviewer_overloaded`, `reviewers_missing`, `review_not_open`, `discussion_closed`, `deadline_passed`.
+
+### 20.7 Exploitation
+
+- Cron : `remind_reviewers` toutes les heures, en plus des commandes des lots précédents ; idempotente et verrouillée.
+- Avant une campagne : créer la grille, régler les paramètres de l'évaluation, saisir `review_deadline` et `camera_ready`, faire enrôler la 2FA des relecteurs (`reset_mfa` en cas de perte).
+- `check_integrity` contrôle aussi les poids des grilles, les notes recalculées et la cohérence des affectations.
+
+### 20.8 Tests, planning et points ouverts
+
+- 2 073 tests backend (2 080 sous MariaDB), dont la matrice des droits (1 188 cas) et le test de fuite RG-04 ; 302 tests front ; **parcours de bout en bout** (Playwright) en CI : de l'inscription de l'auteur à sa version finale, en passant par l'affectation, deux évaluations en double aveugle, la décision et la publication, le comité étant connecté avec sa 2FA.
+- Charge de L4 estimée à 24 – 30,5 j-h (étude : 18 – 24).
+- **Avant la campagne d'évaluation réelle** : démo E sur o2switch avec le cron `remind_reviewers`, grille et pondérations définitives (Q4), niveau de double aveugle (Q3), fournisseur d'e-mails de production (D10). Budget du portail inchangé (367,7 kB pour un avertissement à 365 kB).
+- **Reporté (P2)** : suggestions d'affectation et mots-clés d'expertise, validation des décisions par le Chair, export PDF des évaluations, détection de l'identité dans le texte du PDF.
 
 ---
 

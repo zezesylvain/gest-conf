@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "apps.portal",
     "apps.submissions",
     "apps.reviews",
+    "apps.program",
     # Après les applications du projet : leurs gabarits d'e-mails (account/email/*) priment.
     "allauth",
     "allauth.account",
@@ -361,6 +362,13 @@ SPECTACULAR_SETTINGS = {
         "PublicFileKind": "apps.core.models.PublicFileKind",
         "PortalFileKind": "apps.portal.serializers.PORTAL_FILE_KIND_CHOICES",
         "NotificationKind": "apps.communications.models.NotificationKind",
+        "AssignmentStatus": "apps.reviews.models.AssignmentStatus",
+        "ConflictKind": "apps.reviews.models.ConflictKind",
+        "ConflictSource": "apps.reviews.models.ConflictSource",
+        "ReviewStatus": "apps.reviews.models.ReviewStatus",
+        "Recommendation": "apps.reviews.models.Recommendation",
+        "DecisionOutcome": "apps.reviews.models.DecisionOutcome",
+        "ScreeningDecision": "apps.reviews.serializers.SCREENING_DECISION_CHOICES",
         "ErrorCode": "apps.core.errors.ErrorCode",
     },
     "POSTPROCESSING_HOOKS": [

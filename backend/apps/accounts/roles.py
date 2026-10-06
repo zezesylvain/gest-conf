@@ -74,6 +74,11 @@ class Capability(StrEnum):
     DECISIONS_DECIDE = "decisions.decide"
     DECISIONS_PUBLISH = "decisions.publish"
     GRIDS_WRITE = "grids.write"
+    # Lot L5 (I1) : programme (brouillon lu par les comités, écrit par le CO « programme »,
+    # publié par le Chair).
+    PROGRAM_READ = "program.read"
+    PROGRAM_WRITE = "program.write"
+    PROGRAM_PUBLISH = "program.publish"
 
 
 C = Capability
@@ -84,8 +89,10 @@ CAPABILITY_CHOICES: list[tuple[str, str]] = [(item.value, item.value) for item i
 # Table rôles → capacités (§5.2). SC_CHAIR : lecture du paramétrage (D8, validée) et
 # gestion des membres limitée au comité scientifique (voir MANAGEABLE_ROLES).
 CAPABILITIES: Mapping[str, frozenset[Capability]] = {
-    # ADMIN administre l'édition ; il n'évalue pas et ne décide pas (H19).
-    Role.ADMIN: frozenset(C) - {C.REVIEWS_WRITE, C.DECISIONS_DECIDE, C.DECISIONS_PUBLISH},
+    # ADMIN administre l'édition ; il n'évalue pas et ne décide pas (H19) ; il ne publie pas
+    # le programme, que le Chair valide (I1, étude §5.4).
+    Role.ADMIN: frozenset(C)
+    - {C.REVIEWS_WRITE, C.DECISIONS_DECIDE, C.DECISIONS_PUBLISH, C.PROGRAM_PUBLISH},
     Role.CHAIR: frozenset(
         {
             C.EDITION_READ,
@@ -103,6 +110,9 @@ CAPABILITIES: Mapping[str, frozenset[Capability]] = {
             C.DECISIONS_DECIDE,
             C.DECISIONS_PUBLISH,
             C.GRIDS_WRITE,
+            # I1 : le Chair lit et valide (publie) le programme ; il ne l'écrit pas.
+            C.PROGRAM_READ,
+            C.PROGRAM_PUBLISH,
         }
     ),
     # Président du CS : il peut aussi évaluer (H19).
@@ -120,12 +130,14 @@ CAPABILITIES: Mapping[str, frozenset[Capability]] = {
             C.DECISIONS_DECIDE,
             C.DECISIONS_PUBLISH,
             C.GRIDS_WRITE,
+            C.PROGRAM_READ,
         }
     ),
     # CO en lecture seule en L1, quelle que soit sa fonction (D8) ; écritures partielles
-    # attribuées fonction par fonction dans leur lot (programme L5, finances L6). Lecture
-    # des soumissions, identité des auteurs comprise (F10, matrice §3.3 de l'étude).
-    Role.OC_MEMBER: frozenset({C.EDITION_READ, C.SUBMISSIONS_READ}),
+    # attribuées fonction par fonction dans leur lot (FUNCTION_CAPABILITIES). Lecture des
+    # soumissions, identité des auteurs comprise (F10, matrice §3.3 de l'étude), et du
+    # programme brouillon (I1).
+    Role.OC_MEMBER: frozenset({C.EDITION_READ, C.SUBMISSIONS_READ, C.PROGRAM_READ}),
     # Relecteur : ses affectations seulement, sans identité des auteurs (RG-04, H9).
     Role.SC_MEMBER: frozenset({C.REVIEWS_WRITE}),
     Role.AUTHOR: frozenset(),
@@ -167,10 +179,13 @@ SCIENTIFIC_COMMITTEE: frozenset[str] = frozenset({Role.SC_CHAIR, Role.SC_MEMBER}
 
 
 # Capacités ajoutées par la fonction au comité d'organisation (rôle, fonction) → capacités.
-# E11 (plan L2) : le CO « communication » rédige les contenus du portail. Les autres
-# fonctions reçoivent leurs écritures dans leur lot (programme L5, finances L6).
+# E11 (plan L2) : le CO « communication » rédige les contenus du portail ; I1 (plan L5) : le CO
+# « programme » écrit le programme. Les autres fonctions reçoivent leurs écritures dans leur
+# lot (finances L6).
 FUNCTION_CAPABILITIES: Mapping[tuple[str, str], frozenset[Capability]] = {
     (Role.OC_MEMBER, "communication"): frozenset({C.PORTAL_WRITE}),
+    # I1 (plan L5) : le CO « programme » écrit le programme ; les autres fonctions le lisent.
+    (Role.OC_MEMBER, "program"): frozenset({C.PROGRAM_WRITE}),
 }
 
 

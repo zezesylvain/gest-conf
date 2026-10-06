@@ -83,6 +83,16 @@ class ErrorCode(models.TextChoices):
     PROFILE_INCOMPLETE = "profile_incomplete"
     # Évaluation (plan L4) : grille utilisée par une évaluation (RG-05 : on la duplique).
     GRID_LOCKED = "grid_locked"
+    # Affectations (plan L4, H6, H8, H10) : conflit d'intérêts, charge maximale atteinte,
+    # relecteurs requis non affectés, évaluation non ouverte (ou close) pour la soumission.
+    CONFLICT_OF_INTEREST = "conflict_of_interest"
+    REVIEWER_OVERLOADED = "reviewer_overloaded"
+    REVIEWERS_MISSING = "reviewers_missing"
+    REVIEW_NOT_OPEN = "review_not_open"
+    # Discussion (RG-08) : non ouverte, ou évaluation du relecteur pas encore envoyée.
+    DISCUSSION_CLOSED = "discussion_closed"
+    # Échéance passée (version finale après la date clé « camera_ready », H18).
+    DEADLINE_PASSED = "deadline_passed"
 
 
 class DomainError(Exception):

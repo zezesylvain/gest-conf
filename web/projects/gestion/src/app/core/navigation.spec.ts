@@ -18,7 +18,14 @@ const CHAIR = [
   'submissions.read',
   'submissions.extend',
   'submissions.export',
+  'reviews.manage',
+  'reviews.read_all',
+  'decisions.decide',
+  'decisions.publish',
+  'grids.write',
 ];
+/** Président du CS qui évalue aussi (H19) : tous les écrans du rail lui sont ouverts. */
+const EVERYTHING = [...CHAIR, 'reviews.write'];
 
 /** Catalogue « traduit » minimal : la clé tient lieu de libellé. */
 function items(capabilities: string[], role: Parameters<typeof buildNavigation>[2] = null) {
@@ -31,11 +38,12 @@ function items(capabilities: string[], role: Parameters<typeof buildNavigation>[
 }
 
 describe('Table de navigation de la gestion (plan L2 §2.3)', () => {
-  it('président : sept catégories, ordre du rail numéroté', () => {
+  it('président : huit catégories, ordre du rail numéroté', () => {
     const groups = buildNavigation(3, CHAIR);
     expect(groups.map((group) => group.key)).toEqual([
       'steering',
       'submissions',
+      'reviewing',
       'settings',
       'committees',
       'portal',
@@ -57,6 +65,8 @@ describe('Table de navigation de la gestion (plan L2 §2.3)', () => {
       'types',
       'calendar',
       'confidentiality',
+      // Grilles d'évaluation : lecture avec edition.read (écriture : grids.write).
+      'grids',
       'members',
       'invitations',
       // Lecture du portail (edition.read) ; écriture réservée à portal.write.
@@ -87,9 +97,28 @@ describe('Table de navigation de la gestion (plan L2 §2.3)', () => {
     expect(groups.map((group) => group.key)).toEqual([
       'steering',
       'submissions',
+      'reviewing',
+      'settings',
       'committees',
       'help',
     ]);
+  });
+
+  it('évaluation (plan L4) : le relecteur ne voit que ses évaluations ; le président pilote', () => {
+    const reviewer = buildNavigation(3, ['reviews.write']);
+    expect(catalogue(reviewer).map((entry) => entry.key)).toEqual([
+      'myReviews',
+      'expertise',
+      'guide',
+    ]);
+    expect(catalogue(reviewer)[0].url).toBe('/editions/3/evaluations');
+    const chair = catalogue(buildNavigation(3, CHAIR)).map((entry) => entry.key);
+    expect(chair).toContain('followUp');
+    expect(chair).toContain('ranking');
+    expect(chair).not.toContain('myReviews');
+    expect(helpForUrl('/editions/3/evaluations/12')).toBe('my-reviews');
+    expect(helpForUrl('/editions/3/pilotage/7')).toBe('review-follow-up');
+    expect(helpForUrl('/editions/3/parametrage/grilles')).toBe('grids');
   });
 
   it('aucune capacité dans l’édition : rail vide (pas d’aide seule)', () => {
@@ -105,7 +134,7 @@ describe('Table de navigation de la gestion (plan L2 §2.3)', () => {
   it('une entrée ajoutée au rail est cherchable sans rien déclarer d’autre', () => {
     const keys = SCREENS.map((screen) => screen.key);
     expect(
-      items(CHAIR)
+      items(EVERYTHING)
         .map((item) => item.key)
         .sort(),
     ).toEqual([...keys].sort());

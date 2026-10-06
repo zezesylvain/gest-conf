@@ -191,16 +191,10 @@ class SubmissionManageViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, 
     def file_content(
         self, request: Request, edition_id: int, submission_id: int, file_id: int
     ) -> HttpResponse:
-        """Une version du PDF (règle n° 8 : endpoint authentifié, jamais servi par Apache)."""
+        """Une version du PDF, principal ou final (règle n° 8 : endpoint authentifié, jamais
+        servi par Apache)."""
         submission = get_object_or_404(self.get_queryset(), pk=submission_id)
-        stored = next(
-            (
-                f
-                for f in submission.files.all()
-                if f.pk == file_id and f.kind == SubmissionFileKind.MAIN
-            ),
-            None,
-        )
+        stored = next((f for f in submission.files.all() if f.pk == file_id), None)
         if stored is None:
             raise Http404
         try:
@@ -209,7 +203,10 @@ class SubmissionManageViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, 
             raise Http404 from error
         response = HttpResponse(data, content_type="application/pdf")
         name = submission.reference or f"brouillon-{submission.pk}"
-        response["Content-Disposition"] = f'attachment; filename="{name}-v{stored.version}.pdf"'
+        suffix = "-final" if stored.kind == SubmissionFileKind.CAMERA_READY else ""
+        response["Content-Disposition"] = (
+            f'attachment; filename="{name}{suffix}-v{stored.version}.pdf"'
+        )
         response["X-Content-Type-Options"] = "nosniff"
         response["Cache-Control"] = "private, no-store"
         return response

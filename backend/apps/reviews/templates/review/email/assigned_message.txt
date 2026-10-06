@@ -1,0 +1,11 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate %}Bonjour,
+
+Le comité scientifique de {{ edition_title }} vous confie l'évaluation de la soumission {{ reference }} « {{ title }} ».
+
+Échéance : {{ due }}
+
+Pour lire la soumission et saisir votre évaluation : {{ link }}
+
+Si vous êtes en conflit d'intérêts avec cette soumission, ou si vous ne pouvez pas l'évaluer, déclinez-la depuis le même lien.{% endblocktranslate %}
+
+{% include "account/email/_signature.txt" %}{% endautoescape %}

@@ -1,0 +1,7 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate %}Bonjour,
+
+Les évaluations de la soumission {{ reference }} « {{ title }} » ({{ edition_title }}) divergent : {{ spread }} points d'écart sur 100, au-delà du seuil de {{ threshold }} points. Vous pouvez ouvrir la discussion ou désigner un relecteur supplémentaire.
+
+Pilotage de l'évaluation : {{ link }}{% endblocktranslate %}
+
+{% include "account/email/_signature.txt" %}{% endautoescape %}

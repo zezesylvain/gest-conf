@@ -66,6 +66,38 @@ fieldset {
   border-left: 4px solid var(--gc-primary);
   padding-left: 0.75rem;
 }
+.decision,
+.final {
+  max-width: 48rem;
+  margin: 1rem 0 1.5rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--gc-border);
+  border-radius: 0.25rem;
+}
+.final {
+  display: grid;
+  gap: 0.5rem;
+}
+.final h2 {
+  margin: 0.25rem 0;
+}
+.final > p {
+  margin: 0;
+}
+.outcome {
+  color: var(--gc-primary);
+}
+.comment {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.review {
+  padding: 0.25rem 0;
+  border-top: 1px solid var(--gc-border);
+}
+.review h4 {
+  margin: 0.5rem 0 0.25rem;
+}
 .withdraw {
   display: grid;
   gap: 0.5rem;

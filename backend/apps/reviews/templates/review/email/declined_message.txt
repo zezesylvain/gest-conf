@@ -1,0 +1,7 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate %}Bonjour,
+
+Un relecteur a décliné l'évaluation de la soumission {{ reference }} « {{ title }} » ({{ edition_title }}). Désignez un remplaçant si le nombre de relecteurs requis n'est plus atteint.
+
+Pilotage de l'évaluation : {{ link }}{% endblocktranslate %}
+
+{% include "account/email/_signature.txt" %}{% endautoescape %}

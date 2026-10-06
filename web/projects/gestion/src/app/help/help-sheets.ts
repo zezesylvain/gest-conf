@@ -30,7 +30,13 @@ export interface HelpSheet {
 }
 
 /** Profils de l'index du guide, dans l'ordre d'affichage. */
-export const HELP_PROFILES: readonly Role[] = ['ADMIN', 'CHAIR', 'SC_CHAIR', 'OC_MEMBER'];
+export const HELP_PROFILES: readonly Role[] = [
+  'ADMIN',
+  'CHAIR',
+  'SC_CHAIR',
+  'OC_MEMBER',
+  'SC_MEMBER',
+];
 
 /** Fiches qui ne correspondent à aucun écran et ne sont pas orphelines pour autant. */
 export const TRANSVERSAL: readonly string[] = [
@@ -40,10 +46,13 @@ export const TRANSVERSAL: readonly string[] = [
   'portal-publish',
 ];
 
-const ALL = HELP_PROFILES;
+// Fiches générales : profils de gestion (le relecteur n'a que l'espace d'évaluation).
+const ALL: readonly Role[] = ['ADMIN', 'CHAIR', 'SC_CHAIR', 'OC_MEMBER'];
 const SETTINGS_WRITERS: readonly Role[] = ['ADMIN', 'CHAIR'];
 const MEMBER_MANAGERS: readonly Role[] = ['ADMIN', 'CHAIR', 'SC_CHAIR'];
 const PORTAL_EDITORS: readonly Role[] = ['ADMIN', 'CHAIR', 'OC_MEMBER'];
+const REVIEWERS: readonly Role[] = ['SC_MEMBER', 'SC_CHAIR'];
+const REVIEW_MANAGERS: readonly Role[] = ['SC_CHAIR', 'CHAIR', 'ADMIN'];
 
 /** Constructeur : les clés d'une fiche sont toutes sous `gestion.help.sheets.<id>`. */
 function sheet(
@@ -108,6 +117,36 @@ export const HELP_SHEETS: readonly HelpSheet[] = [
     callout('warning', k, 'closing'),
     callout('info', k, 'who'),
   ]),
+  sheet('my-reviews', REVIEWERS, (k) => [
+    text(k('intro')),
+    steps(k, 'list', 'read', 'score', 'submit', 'discuss'),
+    callout('info', k, 'anonymity'),
+    callout('warning', k, 'decline'),
+    callout('info', k, 'expertise'),
+    callout('warning', k, 'frozen'),
+  ]),
+  sheet('review-follow-up', REVIEW_MANAGERS, (k) => [
+    text(k('intro')),
+    steps(k, 'assign', 'screen', 'follow', 'discuss', 'decide'),
+    callout('warning', k, 'conflicts'),
+    callout('info', k, 'load'),
+    callout('info', k, 'reminders'),
+    callout('info', k, 'divergence'),
+  ]),
+  sheet('ranking', REVIEW_MANAGERS, (k) => [
+    text(k('intro')),
+    steps(k, 'simulate', 'batch', 'publish', 'export'),
+    callout('danger', k, 'noReturn'),
+    callout('info', k, 'authors'),
+    callout('info', k, 'waitlist'),
+  ]),
+  sheet('grids', ['ADMIN', 'CHAIR', 'SC_CHAIR'], (k) => [
+    text(k('intro')),
+    steps(k, 'create', 'criteria', 'duplicate'),
+    callout('warning', k, 'sum'),
+    callout('warning', k, 'locked'),
+    callout('info', k, 'scope'),
+  ]),
   sheet('settings-general', ALL, (k) => [
     text(k('intro')),
     list(k('languages')),
@@ -130,7 +169,7 @@ export const HELP_SHEETS: readonly HelpSheet[] = [
   ]),
   sheet('settings-confidentiality', SETTINGS_WRITERS, (k) => [
     text(k('intro')),
-    list(k('reviewers')),
+    list(k('reviewers'), k('load'), k('divergence'), k('confidence')),
     callout('warning', k, 'sensitive'),
     callout('warning', k, 'frozen'),
   ]),

@@ -37,11 +37,14 @@ describe('EditionLayout', () => {
     expect(links(root)).toEqual([
       'Tableau de bord',
       'Soumissions',
+      "Pilotage de l'évaluation",
+      'Classement et décisions',
       'Informations générales',
       'Thématiques',
       'Types de communication',
       'Calendrier',
       'Confidentialité',
+      "Grilles d'évaluation",
       'Membres',
       'Invitations',
       'Sections',
@@ -57,7 +60,7 @@ describe('EditionLayout', () => {
     const root = await render([CHAIR_EDITION]);
     expect(openGroups(root)).toEqual(['Pilotage']);
     expect(links(root, '.rail ul:not([hidden]) a')).toEqual(['Tableau de bord']);
-    expect(root.querySelectorAll('.rail ul[hidden]').length).toBe(6);
+    expect(root.querySelectorAll('.rail ul[hidden]').length).toBe(7);
   });
 
   it('un clic ouvre une autre catégorie et referme la précédente', async () => {

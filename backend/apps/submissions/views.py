@@ -22,6 +22,7 @@ from apps.submissions.models import SubmissionStatus as S
 from apps.submissions.serializers import (
     AuthorsWriteSerializer,
     DuplicateSerializer,
+    FinalVersionUploadSerializer,
     SubmissionCheckSerializer,
     SubmissionCreateSerializer,
     SubmissionFileUploadSerializer,
@@ -75,6 +76,7 @@ class SubmissionViewSet(GenericViewSet):
             "upload": "submission_upload",
             "submit": "submission_submit",
             "withdraw": "submission_submit",
+            "final_version": "submission_upload",
         }
         self.throttle_scope = scopes.get(self.action, "")
         return super().get_throttles() if self.throttle_scope else []
@@ -244,6 +246,52 @@ class SubmissionViewSet(GenericViewSet):
             reason=serializer.validated_data["reason"],
         )
         return self._respond(submission)
+
+    @extend_schema(
+        operation_id="submissions_final_version",
+        request={"multipart/form-data": FinalVersionUploadSerializer},
+        responses={200: SubmissionSerializer},
+    )
+    def final_version(self, request: Request, submission_id: int) -> Response:
+        """H18 : version finale (PDF nominatif) et lettre de réponse aux relecteurs, jusqu'à
+        la date clé camera_ready ; un nouveau dépôt remplace le précédent."""
+        from apps.reviews.services.decisions import submit_final_version
+
+        submission = self._submission(submission_id)
+        serializer = FinalVersionUploadSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        upload = serializer.validated_data["file"]
+        submit_final_version(
+            submission,
+            data=upload.read(),
+            name=upload.name,
+            response_letter=serializer.validated_data["response_letter"],
+            actor=Actor.from_request(request),
+        )
+        return self._respond(submission)
+
+    @extend_schema(
+        operation_id="submissions_final_version_content",
+        responses={(200, "application/pdf"): OpenApiTypes.BINARY},
+    )
+    def final_version_content(self, request: Request, submission_id: int) -> HttpResponse:
+        """Version finale courante, pour son auteur (règle n° 8)."""
+        submission = self._submission(submission_id)
+        current = submission.files.filter(
+            kind=SubmissionFileKind.CAMERA_READY, is_current=True
+        ).first()
+        if current is None:
+            raise Http404
+        try:
+            data = storage.read(current.storage_name)
+        except FileNotFoundError as error:
+            raise Http404 from error
+        response = HttpResponse(data, content_type="application/pdf")
+        name = f"{submission.reference}-final-v{current.version}.pdf"
+        response["Content-Disposition"] = f'attachment; filename="{name}"'
+        response["X-Content-Type-Options"] = "nosniff"
+        response["Cache-Control"] = "private, no-store"
+        return response
 
     @extend_schema(operation_id="submissions_timeline", responses={200: TimelineSerializer})
     def timeline(self, request: Request, submission_id: int) -> Response:

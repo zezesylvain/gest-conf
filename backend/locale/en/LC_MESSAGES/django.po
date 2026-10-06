@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gestconf-backend\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-06 00:11+0000\n"
+"POT-Creation-Date: 2026-10-06 05:48+0000\n"
 "PO-Revision-Date: 2026-10-05 11:00+0000\n"
 "Last-Translator: GEST-CONF\n"
 "Language-Team: GEST-CONF\n"
@@ -20,7 +20,7 @@ msgid "adresse e-mail"
 msgstr "email address"
 
 #: apps/accounts/models.py:30 apps/accounts/models.py:226
-#: apps/conferences/models.py:263
+#: apps/conferences/models.py:278
 msgid "actif"
 msgstr "active"
 
@@ -71,8 +71,8 @@ msgstr "title"
 msgid "prénom"
 msgstr "first name"
 
-#: apps/accounts/models.py:87 apps/reviews/models.py:45
-#: apps/submissions/models.py:144
+#: apps/accounts/models.py:87 apps/program/models.py:50
+#: apps/reviews/models.py:45 apps/submissions/models.py:144
 msgid "nom"
 msgstr "last name"
 
@@ -147,6 +147,7 @@ msgid "commande"
 msgstr "command"
 
 #: apps/accounts/models.py:184 apps/core/models.py:205 apps/portal/models.py:58
+#: apps/program/models.py:112
 msgid "type"
 msgstr "kind"
 
@@ -193,18 +194,20 @@ msgid "système"
 msgstr "system"
 
 #: apps/accounts/models.py:255 apps/accounts/models.py:345
-#: apps/communications/models.py:45 apps/conferences/models.py:163
-#: apps/conferences/models.py:192 apps/conferences/models.py:236
-#: apps/conferences/models.py:323 apps/core/models.py:98
+#: apps/communications/models.py:45 apps/conferences/models.py:175
+#: apps/conferences/models.py:207 apps/conferences/models.py:251
+#: apps/conferences/models.py:338 apps/core/models.py:98
 #: apps/core/models.py:279 apps/portal/models.py:54 apps/portal/models.py:132
 #: apps/portal/models.py:213 apps/portal/models.py:268
+#: apps/program/models.py:46 apps/program/models.py:108
+#: apps/program/models.py:275 apps/program/models.py:298
 #: apps/reviews/models.py:32 apps/reviews/models.py:126
 #: apps/submissions/models.py:51
 msgid "édition"
 msgstr "edition"
 
 #: apps/accounts/models.py:259 apps/accounts/models.py:306
-#: apps/accounts/models.py:350
+#: apps/accounts/models.py:350 apps/program/models.py:248
 msgid "rôle"
 msgstr "role"
 
@@ -213,7 +216,7 @@ msgid "fonction au CO"
 msgstr "organising committee function"
 
 #: apps/accounts/models.py:265 apps/accounts/models.py:356
-#: apps/communications/models.py:58 apps/conferences/models.py:123
+#: apps/communications/models.py:58 apps/conferences/models.py:133
 #: apps/core/models.py:208 apps/reviews/models.py:178
 #: apps/reviews/models.py:300 apps/submissions/models.py:89
 msgid "statut"
@@ -381,7 +384,8 @@ msgstr "programme"
 msgid "logistique"
 msgstr "logistics"
 
-#: apps/accounts/roles.py:40
+#: apps/accounts/roles.py:40 apps/program/models.py:182
+#: apps/program/models.py:350
 msgid "communication"
 msgstr "communication"
 
@@ -398,7 +402,9 @@ msgid "secrétariat"
 msgstr "secretariat"
 
 #: apps/accounts/services/account.py:66 apps/conferences/services.py:111
-#: apps/conferences/services.py:495
+#: apps/conferences/services.py:495 apps/program/services/planning.py:131
+#: apps/program/services/planning.py:233 apps/program/services/planning.py:514
+#: apps/program/services/settings.py:32
 msgid "Champ non modifiable."
 msgstr "This field cannot be changed."
 
@@ -413,7 +419,10 @@ msgstr "Acknowledging the notice cannot be withdrawn."
 #: apps/accounts/services/account.py:169 apps/accounts/services/account.py:191
 #: apps/accounts/services/mfa.py:84 apps/accounts/services/personal_data.py:205
 #: apps/accounts/services/roles.py:196 apps/conferences/services.py:301
-#: apps/submissions/services.py:611 apps/submissions/workflow.py:125
+#: apps/reviews/services/assignments.py:287
+#: apps/reviews/services/conflicts.py:178 apps/reviews/services/reviews.py:430
+#: apps/submissions/services.py:611 apps/submissions/workflow.py:163
+#: apps/submissions/workflow.py:166
 msgid "Motif obligatoire."
 msgstr "A reason is required."
 
@@ -1011,48 +1020,60 @@ msgstr "sent email"
 msgid "e-mails envoyés"
 msgstr "sent emails"
 
-#: apps/communications/models.py:88
+#: apps/communications/models.py:89
 msgid "soumission reçue"
 msgstr "submission received"
 
-#: apps/communications/models.py:89
+#: apps/communications/models.py:90
 msgid "soumission retirée"
 msgstr "submission withdrawn"
 
-#: apps/communications/models.py:90
+#: apps/communications/models.py:91
 msgid "déclaré co-auteur"
 msgstr "listed as co-author"
 
-#: apps/communications/models.py:91
+#: apps/communications/models.py:92
 msgid "dérogation accordée"
 msgstr "extension granted"
 
-#: apps/communications/models.py:92
+#: apps/communications/models.py:93
 msgid "brouillon à soumettre"
 msgstr "draft to submit"
 
-#: apps/communications/models.py:105 apps/submissions/models.py:137
+#: apps/communications/models.py:94
+msgid "soumission non recevable"
+msgstr "inadmissible submission"
+
+#: apps/communications/models.py:95
+msgid "décision publiée"
+msgstr "decision published"
+
+#: apps/communications/models.py:96 apps/submissions/models.py:34
+msgid "version finale reçue"
+msgstr "camera-ready version received"
+
+#: apps/communications/models.py:109 apps/submissions/models.py:137
 msgid "compte"
 msgstr "account"
 
-#: apps/communications/models.py:109 apps/core/models.py:285
+#: apps/communications/models.py:113 apps/core/models.py:285
 #: apps/reviews/models.py:235 apps/submissions/models.py:177
 msgid "nature"
 msgstr "kind"
 
-#: apps/communications/models.py:110 apps/core/models.py:206
+#: apps/communications/models.py:114 apps/core/models.py:206
 msgid "données"
 msgstr "payload"
 
-#: apps/communications/models.py:111
+#: apps/communications/models.py:115
 msgid "lue le"
 msgstr "read on"
 
-#: apps/communications/models.py:114
+#: apps/communications/models.py:118
 msgid "notification"
 msgstr "notification"
 
-#: apps/communications/models.py:115
+#: apps/communications/models.py:119
 msgid "notifications"
 msgstr "notifications"
 
@@ -1080,21 +1101,23 @@ msgstr "[%(site_name)s] Test email"
 msgid "identifiant"
 msgstr "identifier"
 
-#: apps/conferences/models.py:29 apps/conferences/models.py:195
+#: apps/conferences/models.py:29 apps/conferences/models.py:210
 msgid "nom (FR)"
 msgstr "name (FR)"
 
-#: apps/conferences/models.py:30 apps/conferences/models.py:196
+#: apps/conferences/models.py:30 apps/conferences/models.py:211
 msgid "nom (EN)"
 msgstr "name (EN)"
 
-#: apps/conferences/models.py:31 apps/conferences/models.py:197
-#: apps/conferences/models.py:243 apps/portal/models.py:140
+#: apps/conferences/models.py:31 apps/conferences/models.py:212
+#: apps/conferences/models.py:258 apps/portal/models.py:140
+#: apps/program/models.py:115
 msgid "description (FR)"
 msgstr "description (FR)"
 
-#: apps/conferences/models.py:32 apps/conferences/models.py:198
-#: apps/conferences/models.py:244 apps/portal/models.py:141
+#: apps/conferences/models.py:32 apps/conferences/models.py:213
+#: apps/conferences/models.py:259 apps/portal/models.py:141
+#: apps/program/models.py:116
 msgid "description (EN)"
 msgstr "description (EN)"
 
@@ -1124,8 +1147,8 @@ msgstr "published"
 msgid "archivée"
 msgstr "archived"
 
-#: apps/conferences/models.py:73 apps/conferences/models.py:194
-#: apps/conferences/models.py:240 apps/conferences/models.py:325
+#: apps/conferences/models.py:73 apps/conferences/models.py:209
+#: apps/conferences/models.py:255 apps/conferences/models.py:340
 #: apps/portal/models.py:57 apps/reviews/models.py:86
 msgid "code"
 msgstr "code"
@@ -1136,11 +1159,13 @@ msgstr "year"
 
 #: apps/conferences/models.py:79 apps/core/models.py:294
 #: apps/portal/models.py:59 apps/portal/models.py:137
+#: apps/program/models.py:113
 msgid "titre (FR)"
 msgstr "title (FR)"
 
 #: apps/conferences/models.py:80 apps/core/models.py:295
 #: apps/portal/models.py:60 apps/portal/models.py:138
+#: apps/program/models.py:114
 msgid "titre (EN)"
 msgstr "title (EN)"
 
@@ -1152,11 +1177,13 @@ msgstr "theme (FR)"
 msgid "thème (EN)"
 msgstr "theme (EN)"
 
-#: apps/conferences/models.py:83
+#: apps/conferences/models.py:83 apps/program/models.py:133
+#: apps/program/models.py:178
 msgid "début"
 msgstr "start"
 
-#: apps/conferences/models.py:84
+#: apps/conferences/models.py:84 apps/program/models.py:134
+#: apps/program/models.py:179
 msgid "fin"
 msgstr "end"
 
@@ -1196,134 +1223,145 @@ msgstr "divergence threshold (points out of 100)"
 msgid "score final pondéré par la confiance"
 msgstr "final score weighted by confidence"
 
-#: apps/conferences/models.py:125 apps/reviews/models.py:494
+#: apps/conferences/models.py:125
+msgid "tampon entre créneaux (minutes)"
+msgstr "buffer between slots (minutes)"
+
+#: apps/conferences/models.py:130
+msgid "présentateur inscrit exigé (RG-11)"
+msgstr "registered presenter required (RG-11)"
+
+#: apps/conferences/models.py:135 apps/program/models.py:304
+#: apps/reviews/models.py:494
 msgid "publiée le"
 msgstr "published at"
 
-#: apps/conferences/models.py:126
+#: apps/conferences/models.py:136
 msgid "archivée le"
 msgstr "archived at"
 
-#: apps/conferences/models.py:131
+#: apps/conferences/models.py:141
 msgid "affiche"
 msgstr "poster"
 
-#: apps/conferences/models.py:164
+#: apps/conferences/models.py:176
 msgid "éditions"
 msgstr "editions"
 
-#: apps/conferences/models.py:199 apps/conferences/models.py:262
-#: apps/conferences/models.py:331 apps/core/models.py:296
-#: apps/portal/models.py:228 apps/reviews/models.py:97
+#: apps/conferences/models.py:214 apps/conferences/models.py:277
+#: apps/conferences/models.py:346 apps/core/models.py:296
+#: apps/portal/models.py:228 apps/program/models.py:59
+#: apps/program/models.py:174 apps/reviews/models.py:97
 #: apps/submissions/models.py:134
 msgid "ordre"
 msgstr "order"
 
-#: apps/conferences/models.py:200 apps/reviews/models.py:144
+#: apps/conferences/models.py:215 apps/program/models.py:58
+#: apps/reviews/models.py:144
 msgid "active"
 msgstr "active"
 
-#: apps/conferences/models.py:213 apps/reviews/models.py:129
-#: apps/submissions/models.py:67
+#: apps/conferences/models.py:228 apps/program/models.py:119
+#: apps/reviews/models.py:129 apps/submissions/models.py:67
 msgid "thématique"
 msgstr "track"
 
-#: apps/conferences/models.py:214 apps/portal/models.py:32
+#: apps/conferences/models.py:229 apps/portal/models.py:32
 msgid "thématiques"
 msgstr "tracks"
 
-#: apps/conferences/models.py:226
+#: apps/conferences/models.py:241
 msgid "aucun fichier"
 msgstr "no file"
 
-#: apps/conferences/models.py:227
+#: apps/conferences/models.py:242
 msgid "facultatif"
 msgstr "optional"
 
-#: apps/conferences/models.py:228 apps/reviews/models.py:98
+#: apps/conferences/models.py:243 apps/reviews/models.py:98
 msgid "obligatoire"
 msgstr "required"
 
-#: apps/conferences/models.py:241 apps/conferences/models.py:328
+#: apps/conferences/models.py:256 apps/conferences/models.py:343
 #: apps/portal/models.py:216 apps/reviews/models.py:87
 msgid "libellé (FR)"
 msgstr "label (FR)"
 
-#: apps/conferences/models.py:242 apps/conferences/models.py:329
+#: apps/conferences/models.py:257 apps/conferences/models.py:344
 #: apps/portal/models.py:217 apps/reviews/models.py:88
 msgid "libellé (EN)"
 msgstr "label (EN)"
 
-#: apps/conferences/models.py:247
+#: apps/conferences/models.py:262
 msgid "durée par défaut (min)"
 msgstr "default duration (min)"
 
-#: apps/conferences/models.py:250
+#: apps/conferences/models.py:265
 msgid "mots maximum du résumé"
 msgstr "abstract word limit"
 
-#: apps/conferences/models.py:255
+#: apps/conferences/models.py:270
 msgid "fichier PDF"
 msgstr "PDF file"
 
-#: apps/conferences/models.py:258
+#: apps/conferences/models.py:273
 msgid "taille maximale du fichier (Mo)"
 msgstr "maximum file size (MB)"
 
-#: apps/conferences/models.py:280 apps/reviews/models.py:38
+#: apps/conferences/models.py:295 apps/reviews/models.py:38
 #: apps/submissions/models.py:75
 msgid "type de communication"
 msgstr "submission type"
 
-#: apps/conferences/models.py:281 apps/portal/models.py:33
+#: apps/conferences/models.py:296 apps/portal/models.py:33
 msgid "types de communication"
 msgstr "submission types"
 
-#: apps/conferences/models.py:302
+#: apps/conferences/models.py:317
 msgid "ouverture de l'appel"
 msgstr "call opening"
 
-#: apps/conferences/models.py:303
+#: apps/conferences/models.py:318
 msgid "clôture de l'appel"
 msgstr "call closing"
 
-#: apps/conferences/models.py:304
+#: apps/conferences/models.py:319
 msgid "fin des évaluations"
 msgstr "review deadline"
 
-#: apps/conferences/models.py:305
+#: apps/conferences/models.py:320
 msgid "notification des décisions"
 msgstr "decision notification"
 
-#: apps/conferences/models.py:306
+#: apps/conferences/models.py:321
 msgid "version définitive"
 msgstr "camera-ready version"
 
-#: apps/conferences/models.py:307
+#: apps/conferences/models.py:322
 msgid "ouverture des inscriptions"
 msgstr "registration opening"
 
-#: apps/conferences/models.py:308
+#: apps/conferences/models.py:323
 msgid "fin du tarif préférentiel"
 msgstr "early bird deadline"
 
-#: apps/conferences/models.py:309
+#: apps/conferences/models.py:324
 msgid "clôture des inscriptions"
 msgstr "registration closing"
 
-#: apps/conferences/models.py:326
+#: apps/conferences/models.py:341
 msgid "date (UTC)"
 msgstr "date (UTC)"
 
-#: apps/conferences/models.py:330
+#: apps/conferences/models.py:345
 msgid "publique"
 msgstr "public"
 
-#: apps/conferences/models.py:343
+#: apps/conferences/models.py:358
 msgid "date clé"
 msgstr "key date"
 
-#: apps/conferences/models.py:344 apps/portal/models.py:31
+#: apps/conferences/models.py:359 apps/portal/models.py:31
 msgid "dates clés"
 msgstr "key dates"
 
@@ -1430,27 +1468,27 @@ msgstr "Unknown time zone."
 msgid "Échec de la vérification CSRF : rechargez la page puis réessayez."
 msgstr "CSRF verification failed: reload the page and try again."
 
-#: apps/core/errors.py:97
+#: apps/core/errors.py:107
 msgid "Opération refusée."
 msgstr "Operation refused."
 
-#: apps/core/errors.py:126
+#: apps/core/errors.py:136
 msgid "Opération impossible dans l'état actuel."
 msgstr "This operation is not possible in the current state."
 
-#: apps/core/errors.py:133
+#: apps/core/errors.py:143
 msgid "Action non autorisée."
 msgstr "Action not allowed."
 
-#: apps/core/errors.py:140 apps/core/exceptions.py:110
+#: apps/core/errors.py:150 apps/core/exceptions.py:110
 msgid "Données invalides."
 msgstr "Invalid data."
 
-#: apps/core/errors.py:147
+#: apps/core/errors.py:157
 msgid "Modifié entre-temps (autre onglet ?) : rechargez avant d'enregistrer."
 msgstr "Changed in the meantime (another tab?): reload before saving."
 
-#: apps/core/errors.py:158
+#: apps/core/errors.py:168
 msgid "Quota atteint."
 msgstr "Quota reached."
 
@@ -1879,9 +1917,9 @@ msgstr "menu items"
 msgid "mis en ligne le"
 msgstr "released on"
 
-#: apps/portal/models.py:271 apps/reviews/models.py:44
-#: apps/reviews/models.py:331 apps/reviews/models.py:376
-#: apps/submissions/models.py:178
+#: apps/portal/models.py:271 apps/program/models.py:302
+#: apps/reviews/models.py:44 apps/reviews/models.py:331
+#: apps/reviews/models.py:376 apps/submissions/models.py:178
 msgid "version"
 msgstr "version"
 
@@ -2001,6 +2039,334 @@ msgstr "File in use (%(uses)s): remove it first."
 #: apps/portal/services.py:912
 msgid "Date de build invalide (avec fuseau, et pas dans le futur)."
 msgstr "Invalid build date (with time zone, and not in the future)."
+
+#: apps/program/models.py:31
+msgid "vidéoprojecteur"
+msgstr "projector"
+
+#: apps/program/models.py:32
+msgid "micro"
+msgstr "microphone"
+
+#: apps/program/models.py:33
+msgid "sonorisation"
+msgstr "sound system"
+
+#: apps/program/models.py:34
+msgid "ordinateur"
+msgstr "computer"
+
+#: apps/program/models.py:35
+msgid "tableau"
+msgstr "whiteboard"
+
+#: apps/program/models.py:36
+msgid "interprétation"
+msgstr "interpretation"
+
+#: apps/program/models.py:37
+msgid "enregistrement"
+msgstr "recording"
+
+#: apps/program/models.py:38
+msgid "wifi"
+msgstr "wifi"
+
+#: apps/program/models.py:52
+msgid "capacité"
+msgstr "capacity"
+
+#: apps/program/models.py:54
+msgid "équipements"
+msgstr "equipment"
+
+#: apps/program/models.py:55
+msgid "note sur l'équipement"
+msgstr "equipment note"
+
+#: apps/program/models.py:56
+msgid "accessible"
+msgstr "accessible"
+
+#: apps/program/models.py:57
+msgid "indications d'accès"
+msgstr "access directions"
+
+#: apps/program/models.py:73 apps/program/models.py:127
+msgid "salle"
+msgstr "room"
+
+#: apps/program/models.py:74
+msgid "salles"
+msgstr "rooms"
+
+#: apps/program/models.py:88
+msgid "ouverture"
+msgstr "opening"
+
+#: apps/program/models.py:89
+msgid "conférence plénière"
+msgstr "keynote"
+
+#: apps/program/models.py:90
+msgid "session parallèle"
+msgstr "parallel session"
+
+#: apps/program/models.py:91
+msgid "session posters"
+msgstr "poster session"
+
+#: apps/program/models.py:92
+msgid "atelier"
+msgstr "workshop"
+
+#: apps/program/models.py:93
+msgid "tutoriel"
+msgstr "tutorial"
+
+#: apps/program/models.py:94
+msgid "table ronde"
+msgstr "round table"
+
+#: apps/program/models.py:95
+msgid "assemblée ou réunion"
+msgstr "assembly or meeting"
+
+#: apps/program/models.py:96
+msgid "pause"
+msgstr "break"
+
+#: apps/program/models.py:97
+msgid "repas"
+msgstr "meal"
+
+#: apps/program/models.py:98
+msgid "activité sociale"
+msgstr "social event"
+
+#: apps/program/models.py:99
+msgid "clôture"
+msgstr "closing"
+
+#: apps/program/models.py:135
+msgid "consignes"
+msgstr "instructions"
+
+#: apps/program/models.py:149 apps/program/models.py:172
+#: apps/program/models.py:240
+msgid "session"
+msgstr "session"
+
+#: apps/program/models.py:150
+msgid "sessions"
+msgstr "sessions"
+
+#: apps/program/models.py:176
+msgid "durée (minutes)"
+msgstr "duration (minutes)"
+
+#: apps/program/models.py:188
+msgid "titre libre (FR)"
+msgstr "free title (FR)"
+
+#: apps/program/models.py:189
+msgid "titre libre (EN)"
+msgstr "free title (EN)"
+
+#: apps/program/models.py:192
+msgid "intervenant invité"
+msgstr "invited speaker"
+
+#: apps/program/models.py:212
+msgid "créneau"
+msgstr "slot"
+
+#: apps/program/models.py:213
+msgid "créneaux"
+msgstr "slots"
+
+#: apps/program/models.py:230
+msgid "président de séance"
+msgstr "session chair"
+
+#: apps/program/models.py:231
+msgid "discutant"
+msgstr "discussant"
+
+#: apps/program/models.py:232
+msgid "modérateur"
+msgstr "moderator"
+
+#: apps/program/models.py:233
+msgid "panéliste"
+msgstr "panelist"
+
+#: apps/program/models.py:244
+msgid "personne"
+msgstr "person"
+
+#: apps/program/models.py:253
+msgid "rôle de séance"
+msgstr "session role"
+
+#: apps/program/models.py:254
+msgid "rôles de séance"
+msgstr "session roles"
+
+#: apps/program/models.py:279
+msgid "révision du brouillon"
+msgstr "draft revision"
+
+#: apps/program/models.py:280 apps/program/models.py:303
+msgid "révision publiée"
+msgstr "published revision"
+
+#: apps/program/models.py:281
+msgid "dernière version publiée"
+msgstr "latest published version"
+
+#: apps/program/models.py:284
+msgid "état du programme"
+msgstr "programme state"
+
+#: apps/program/models.py:285
+msgid "états du programme"
+msgstr "programme states"
+
+#: apps/program/models.py:307
+msgid "publiée par"
+msgstr "published by"
+
+#: apps/program/models.py:313
+msgid "instantané"
+msgstr "snapshot"
+
+#: apps/program/models.py:314
+msgid "différences"
+msgstr "differences"
+
+#: apps/program/models.py:329
+msgid "publication du programme"
+msgstr "programme publication"
+
+#: apps/program/models.py:330
+msgid "publications du programme"
+msgstr "programme publications"
+
+#: apps/program/models.py:354
+msgid "présentateurs (positions des auteurs)"
+msgstr "presenters (author positions)"
+
+#: apps/program/models.py:355
+msgid "confirmée le"
+msgstr "confirmed on"
+
+#: apps/program/models.py:358
+msgid "confirmée par"
+msgstr "confirmed by"
+
+#: apps/program/models.py:366
+msgid "confirmation de présentation"
+msgstr "presentation confirmation"
+
+#: apps/program/models.py:367
+msgid "confirmations de présentation"
+msgstr "presentation confirmations"
+
+#: apps/program/services/planning.py:136 apps/program/services/planning.py:159
+#: apps/reviews/services/grids.py:179 apps/reviews/services/grids.py:226
+msgid "Nom obligatoire."
+msgstr "Name required."
+
+#: apps/program/services/planning.py:141
+msgid "Une salle porte déjà ce nom."
+msgstr "A room already has this name."
+
+#: apps/program/services/planning.py:147
+msgid "Équipement inconnu."
+msgstr "Unknown equipment."
+
+#: apps/program/services/planning.py:193
+msgid "Salle utilisée par une session : désactivez-la plutôt."
+msgstr "Room used by a session: deactivate it instead."
+
+#: apps/program/services/planning.py:206
+msgid "Date et heure locales attendues."
+msgstr "A local date and time is expected."
+
+#: apps/program/services/planning.py:216
+msgid "La fin doit suivre le début."
+msgstr "The end must come after the start."
+
+#: apps/program/services/planning.py:218
+msgid "Une session dure au plus 24 heures."
+msgstr "A session lasts at most 24 hours."
+
+#: apps/program/services/planning.py:224
+msgid "La session doit se tenir pendant l'édition."
+msgstr "The session must take place during the edition."
+
+#: apps/program/services/planning.py:238
+msgid "Type de session inconnu."
+msgstr "Unknown session type."
+
+#: apps/program/services/planning.py:240 apps/program/services/planning.py:435
+#: apps/program/services/planning.py:520
+msgid "Titre français obligatoire."
+msgstr "French title required."
+
+#: apps/program/services/planning.py:243 apps/program/services/planning.py:246
+msgid "Salle d'une autre édition."
+msgstr "Room from another edition."
+
+#: apps/program/services/planning.py:248
+msgid "Salle désactivée."
+msgstr "Room deactivated."
+
+#: apps/program/services/planning.py:252
+#: apps/reviews/services/assignments.py:482
+msgid "Thématique d'une autre édition."
+msgstr "Track from another edition."
+
+#: apps/program/services/planning.py:267
+msgid "Champ obligatoire."
+msgstr "Required field."
+
+#: apps/program/services/planning.py:356
+msgid "Durée de 1 à 600 minutes."
+msgstr "Duration from 1 to 600 minutes."
+
+#: apps/program/services/planning.py:381
+msgid "Communication d'une autre édition."
+msgstr "Paper from another edition."
+
+#: apps/program/services/planning.py:384
+msgid "Seule une communication confirmée se programme."
+msgstr "Only a confirmed paper can be scheduled."
+
+#: apps/program/services/planning.py:388
+msgid "Communication déjà programmée : déplacez-la."
+msgstr "Paper already scheduled: move it instead."
+
+#: apps/program/services/planning.py:413
+msgid "Intervenant inconnu."
+msgstr "Unknown speaker."
+
+#: apps/program/services/planning.py:472
+msgid "Session d'une autre édition."
+msgstr "Session from another edition."
+
+#: apps/program/services/planning.py:565
+msgid "Rôle de séance inconnu."
+msgstr "Unknown session role."
+
+#: apps/program/services/planning.py:567
+msgid "Personne inconnue."
+msgstr "Unknown person."
+
+#: apps/program/services/planning.py:569
+msgid "Cette personne a déjà ce rôle dans la session."
+msgstr "This person already has this role in the session."
 
 #: apps/reviews/models.py:46
 msgid "note minimale"
@@ -2337,6 +2703,208 @@ msgstr "camera-ready version"
 msgid "versions finales"
 msgstr "final versions"
 
+#: apps/reviews/notifications.py:50 apps/reviews/notifications.py:93
+#: apps/submissions/notifications.py:71
+msgid "(sans titre)"
+msgstr "(untitled)"
+
+#: apps/reviews/services/assignments.py:80
+msgid "Le relecteur est auteur de la soumission."
+msgstr "The reviewer is an author of the submission."
+
+#: apps/reviews/services/assignments.py:81
+msgid "Le relecteur est de la même institution qu'un auteur."
+msgstr "The reviewer is from the same institution as an author."
+
+#: apps/reviews/services/assignments.py:82
+msgid "Un conflit d'intérêts a été déclaré."
+msgstr "A conflict of interest has been declared."
+
+#: apps/reviews/services/assignments.py:117
+msgid "La date de fin des évaluations est passée : indiquez une échéance."
+msgstr "The review deadline has passed: enter a due date."
+
+#: apps/reviews/services/assignments.py:127 apps/submissions/services.py:617
+msgid "Échéance dans le futur attendue."
+msgstr "A deadline in the future is expected."
+
+#: apps/reviews/services/assignments.py:144
+msgid "Conflit d'intérêts."
+msgstr "Conflict of interest."
+
+#: apps/reviews/services/assignments.py:169
+msgid "Affectation impossible à ce stade de la soumission."
+msgstr "The submission cannot be assigned at this stage."
+
+#: apps/reviews/services/assignments.py:182
+#: apps/reviews/services/conflicts.py:174
+msgid "Ce compte n'est pas membre du comité scientifique."
+msgstr "This account is not a member of the scientific committee."
+
+#: apps/reviews/services/assignments.py:187
+msgid "Ce relecteur est déjà affecté."
+msgstr "This reviewer is already assigned."
+
+#: apps/reviews/services/assignments.py:197
+#, python-format
+msgid "Charge maximale atteinte (%(max)s évaluations)."
+msgstr "Maximum load reached (%(max)s reviews)."
+
+#: apps/reviews/services/assignments.py:271
+msgid "Cette affectation est terminée."
+msgstr "This assignment has ended."
+
+#: apps/reviews/services/assignments.py:291
+msgid "Évaluation déjà envoyée : déclarez un conflit pour l'écarter."
+msgstr "Review already submitted: declare a conflict to set it aside."
+
+#: apps/reviews/services/assignments.py:350
+#, python-format
+msgid "%(count)s relecteur(s) affecté(s) sur %(required)s requis."
+msgstr "%(count)s reviewer(s) assigned out of %(required)s required."
+
+#: apps/reviews/services/assignments.py:356
+msgid "Évaluations envoyées insuffisantes (RG-07)."
+msgstr "Not enough submitted reviews (RG-07)."
+
+#: apps/reviews/services/assignments.py:380
+msgid "Soumission non recevable."
+msgstr "Inadmissible submission."
+
+#: apps/reviews/services/decisions.py:77 apps/reviews/services/reviews.py:250
+msgid "Type de communication inconnu."
+msgstr "Unknown presentation type."
+
+#: apps/reviews/services/decisions.py:98
+msgid "Issue inconnue."
+msgstr "Unknown outcome."
+
+#: apps/reviews/services/decisions.py:101
+#: apps/reviews/services/decisions.py:181
+msgid "Décision déjà publiée."
+msgstr "Decision already published."
+
+#: apps/reviews/services/decisions.py:104
+msgid "Décision possible une fois la soumission évaluée (RG-07)."
+msgstr "A decision is possible once the submission is reviewed (RG-07)."
+
+#: apps/reviews/services/decisions.py:109
+#: apps/reviews/services/decisions.py:421
+msgid "Texte trop long."
+msgstr "Text too long."
+
+#: apps/reviews/services/decisions.py:168
+msgid "Décisions refusées : rien n'a été enregistré."
+msgstr "Decisions refused: nothing was recorded."
+
+#: apps/reviews/services/decisions.py:241
+msgid "Seule une soumission en liste d'attente publiée peut être acceptée."
+msgstr "Only a published waitlisted submission can be accepted."
+
+#: apps/reviews/services/decisions.py:268
+msgid "Aucune décision correspondante."
+msgstr "No matching decision."
+
+#: apps/reviews/services/decisions.py:274
+msgid "Version finale absente."
+msgstr "Final version missing."
+
+#: apps/reviews/services/decisions.py:410
+msgid "Version finale attendue pour une soumission acceptée."
+msgstr "A final version is expected for an accepted submission."
+
+#: apps/reviews/services/decisions.py:416
+msgid "La date limite de la version finale est passée."
+msgstr "The final version deadline has passed."
+
+#: apps/reviews/services/decisions.py:424
+msgid "Lettre de réponse aux relecteurs obligatoire."
+msgstr "Response letter to the reviewers required."
+
+#: apps/reviews/services/decisions.py:427 apps/submissions/services.py:490
+msgid "Fichier PDF attendu (.pdf)."
+msgstr "A PDF file (.pdf) is expected."
+
+#: apps/reviews/services/decisions.py:431
+msgid "Fichier trop volumineux."
+msgstr "File too large."
+
+#: apps/reviews/services/decisions.py:499 apps/submissions/services.py:711
+msgid "Référence"
+msgstr "Reference"
+
+#: apps/reviews/services/decisions.py:500 apps/submissions/services.py:713
+msgid "Titre"
+msgstr "Title"
+
+#: apps/reviews/services/decisions.py:501 apps/submissions/services.py:714
+msgid "Thématique"
+msgstr "Track"
+
+#: apps/reviews/services/decisions.py:502 apps/submissions/services.py:715
+msgid "Type"
+msgstr "Type"
+
+#: apps/reviews/services/decisions.py:503 apps/submissions/services.py:712
+msgid "Statut"
+msgstr "Status"
+
+#: apps/reviews/services/decisions.py:504
+msgid "Note finale"
+msgstr "Final score"
+
+#: apps/reviews/services/decisions.py:505
+msgid "Décision"
+msgstr "Decision"
+
+#: apps/reviews/services/decisions.py:506
+msgid "Relecteur"
+msgstr "Reviewer"
+
+#: apps/reviews/services/decisions.py:507
+msgid "Pseudonyme"
+msgstr "Pseudonym"
+
+#: apps/reviews/services/decisions.py:508
+msgid "Note pondérée"
+msgstr "Weighted score"
+
+#: apps/reviews/services/decisions.py:509
+msgid "Recommandation"
+msgstr "Recommendation"
+
+#: apps/reviews/services/decisions.py:510
+msgid "Confiance"
+msgstr "Confidence"
+
+#: apps/reviews/services/decisions.py:511
+msgid "Éthique"
+msgstr "Ethics"
+
+#: apps/reviews/services/decisions.py:512
+msgid "Plagiat"
+msgstr "Plagiarism"
+
+#: apps/reviews/services/decisions.py:513
+msgid "Format suggéré"
+msgstr "Suggested format"
+
+#: apps/reviews/services/decisions.py:514
+msgid "Commentaire aux auteurs"
+msgstr "Comment to the authors"
+
+#: apps/reviews/services/decisions.py:515
+msgid "Commentaire au comité"
+msgstr "Comment to the committee"
+
+#: apps/reviews/services/decisions.py:516
+msgid "Envoyée le"
+msgstr "Submitted on"
+
+#: apps/reviews/services/decisions.py:517
+msgid "Version"
+msgstr "Version"
+
 #: apps/reviews/services/grids.py:87
 msgid ""
 "Grille déjà utilisée par une évaluation : dupliquez-la en nouvelle version."
@@ -2379,9 +2947,212 @@ msgstr "The weights must add up to 100 (currently %(total)s)."
 msgid "Type d'une autre édition."
 msgstr "Type from another edition."
 
-#: apps/reviews/services/grids.py:179 apps/reviews/services/grids.py:226
-msgid "Nom obligatoire."
-msgstr "Name required."
+#: apps/reviews/services/reviews.py:178
+msgid "Cette évaluation n'est plus modifiable."
+msgstr "This review can no longer be changed."
+
+#: apps/reviews/services/reviews.py:199
+msgid "Notes attendues par code de critère."
+msgstr "Scores expected by criterion code."
+
+#: apps/reviews/services/reviews.py:203
+#, python-format
+msgid "Critère inconnu : %(code)s."
+msgstr "Unknown criterion: %(code)s."
+
+#: apps/reviews/services/reviews.py:211
+#, python-format
+msgid "Note invalide : %(code)s."
+msgstr "Invalid score: %(code)s."
+
+#: apps/reviews/services/reviews.py:218
+#, python-format
+msgid "Note de %(code)s entre %(min)s et %(max)s, une décimale au plus."
+msgstr "Score for %(code)s between %(min)s and %(max)s, at most one decimal."
+
+#: apps/reviews/services/reviews.py:226
+msgid "Recommandation inconnue."
+msgstr "Unknown recommendation."
+
+#: apps/reviews/services/reviews.py:234
+msgid "Confiance de 1 à 5."
+msgstr "Confidence from 1 to 5."
+
+#: apps/reviews/services/reviews.py:240
+#, python-format
+msgid "Texte de %(max)s caractères au plus."
+msgstr "Text of at most %(max)s characters."
+
+#: apps/reviews/services/reviews.py:262
+#, python-format
+msgid "Critères à noter : %(codes)s."
+msgstr "Criteria to score: %(codes)s."
+
+#: apps/reviews/services/reviews.py:264
+msgid "Recommandation obligatoire."
+msgstr "Recommendation required."
+
+#: apps/reviews/services/reviews.py:266
+msgid "Confiance obligatoire."
+msgstr "Confidence required."
+
+#: apps/reviews/services/reviews.py:268
+msgid "Commentaire aux auteurs obligatoire."
+msgstr "Comment to the authors required."
+
+#: apps/reviews/services/reviews.py:279
+msgid ""
+"Aucune grille d'évaluation : prévenez le président du comité scientifique."
+msgstr "No evaluation grid: notify the scientific committee chair."
+
+#: apps/reviews/services/reviews.py:320
+msgid "Évaluation envoyée : renvoyez-la pour la modifier."
+msgstr "Review submitted: submit it again to change it."
+
+#: apps/reviews/services/reviews.py:355
+msgid "Évaluation vide."
+msgstr "Empty review."
+
+#: apps/reviews/services/reviews.py:359
+msgid "Évaluation incomplète."
+msgstr "Incomplete review."
+
+#: apps/reviews/services/reviews.py:434
+msgid "Évaluation déjà envoyée : demandez au président de l'écarter."
+msgstr "Review already submitted: ask the chair to set it aside."
+
+#: apps/reviews/services/reviews.py:511
+#, python-format
+msgid "Message de 1 à %(max)s caractères."
+msgstr "Message of 1 to %(max)s characters."
+
+#: apps/reviews/templates/review/email/assigned_message.txt:1
+#, python-format
+msgid ""
+"Bonjour,\n"
+"\n"
+"Le comité scientifique de %(edition_title)s vous confie l'évaluation de la soumission %(reference)s « %(title)s ».\n"
+"\n"
+"Échéance : %(due)s\n"
+"\n"
+"Pour lire la soumission et saisir votre évaluation : %(link)s\n"
+"\n"
+"Si vous êtes en conflit d'intérêts avec cette soumission, ou si vous ne pouvez pas l'évaluer, déclinez-la depuis le même lien."
+msgstr ""
+"Hello,\n"
+"\n"
+"The scientific committee of %(edition_title)s asks you to review submission %(reference)s “%(title)s”.\n"
+"\n"
+"Due date: %(due)s\n"
+"\n"
+"To read the submission and enter your review: %(link)s\n"
+"\n"
+"If you have a conflict of interest with this submission, or cannot review it, decline it from the same link."
+
+#: apps/reviews/templates/review/email/assigned_subject.txt:1
+#, python-format
+msgid "[%(site_name)s] Nouvelle évaluation à réaliser"
+msgstr "[%(site_name)s] New review to complete"
+
+#: apps/reviews/templates/review/email/cancelled_message.txt:1
+#, python-format
+msgid ""
+"Bonjour,\n"
+"\n"
+"Le comité scientifique de %(edition_title)s a annulé votre évaluation de la soumission %(reference)s « %(title)s ». Vous n'avez plus à l'évaluer."
+msgstr ""
+"Hello,\n"
+"\n"
+"The scientific committee of %(edition_title)s has cancelled your review of submission %(reference)s “%(title)s”. You no longer need to review it."
+
+#: apps/reviews/templates/review/email/cancelled_subject.txt:1
+#, python-format
+msgid "[%(site_name)s] Évaluation annulée"
+msgstr "[%(site_name)s] Review cancelled"
+
+#: apps/reviews/templates/review/email/declined_message.txt:1
+#, python-format
+msgid ""
+"Bonjour,\n"
+"\n"
+"Un relecteur a décliné l'évaluation de la soumission %(reference)s « %(title)s » (%(edition_title)s). Désignez un remplaçant si le nombre de relecteurs requis n'est plus atteint.\n"
+"\n"
+"Pilotage de l'évaluation : %(link)s"
+msgstr ""
+"Hello,\n"
+"\n"
+"A reviewer has declined to review submission %(reference)s “%(title)s” (%(edition_title)s). Appoint a replacement if the required number of reviewers is no longer met.\n"
+"\n"
+"Review follow-up: %(link)s"
+
+#: apps/reviews/templates/review/email/declined_subject.txt:1
+#, python-format
+msgid "[%(site_name)s] Un relecteur a décliné une évaluation"
+msgstr "[%(site_name)s] A reviewer declined a review"
+
+#: apps/reviews/templates/review/email/divergence_message.txt:1
+#, python-format
+msgid ""
+"Bonjour,\n"
+"\n"
+"Les évaluations de la soumission %(reference)s « %(title)s » (%(edition_title)s) divergent : %(spread)s points d'écart sur 100, au-delà du seuil de %(threshold)s points. Vous pouvez ouvrir la discussion ou désigner un relecteur supplémentaire.\n"
+"\n"
+"Pilotage de l'évaluation : %(link)s"
+msgstr ""
+"Hello,\n"
+"\n"
+"The reviews of submission %(reference)s “%(title)s” (%(edition_title)s) diverge: a %(spread)s-point gap out of 100, beyond the %(threshold)s-point threshold. You can open the discussion or appoint an additional reviewer.\n"
+"\n"
+"Review follow-up: %(link)s"
+
+#: apps/reviews/templates/review/email/divergence_subject.txt:1
+#, python-format
+msgid "[%(site_name)s] Évaluations divergentes"
+msgstr "[%(site_name)s] Diverging reviews"
+
+#: apps/reviews/templates/review/email/reminder_message.txt:1
+#: apps/submissions/templates/submission/email/decision_message.txt:1
+msgid "Bonjour,"
+msgstr "Hello,"
+
+#: apps/reviews/templates/review/email/reminder_message.txt:3
+#, python-format
+msgid ""
+"L'échéance de votre évaluation de la soumission %(reference)s « %(title)s » "
+"(%(edition_title)s) est dépassée depuis le %(due)s. Merci de l'envoyer au "
+"plus vite, ou de la décliner pour qu'un autre relecteur soit désigné."
+msgstr ""
+"Your review of submission %(reference)s “%(title)s” (%(edition_title)s) was "
+"due on %(due)s. Please submit it as soon as possible, or decline it so that "
+"another reviewer can be appointed."
+
+#: apps/reviews/templates/review/email/reminder_message.txt:3
+#, python-format
+msgid ""
+"Votre évaluation de la soumission %(reference)s « %(title)s » "
+"(%(edition_title)s) est attendue demain : échéance le %(due)s."
+msgstr ""
+"Your review of submission %(reference)s “%(title)s” (%(edition_title)s) is "
+"expected tomorrow: due on %(due)s."
+
+#: apps/reviews/templates/review/email/reminder_message.txt:3
+#, python-format
+msgid ""
+"Votre évaluation de la soumission %(reference)s « %(title)s » "
+"(%(edition_title)s) est attendue dans une semaine : échéance le %(due)s."
+msgstr ""
+"Your review of submission %(reference)s “%(title)s” (%(edition_title)s) is "
+"expected in one week: due on %(due)s."
+
+#: apps/reviews/templates/review/email/reminder_message.txt:5
+#, python-format
+msgid "Votre évaluation : %(link)s"
+msgstr "Your review: %(link)s"
+
+#: apps/reviews/templates/review/email/reminder_subject.txt:1
+#, python-format
+msgid "[%(site_name)s] Rappel : évaluation attendue"
+msgstr "[%(site_name)s] Reminder: review expected"
 
 #: apps/submissions/models.py:25
 msgid "soumise"
@@ -2402,10 +3173,6 @@ msgstr "reviewed"
 #: apps/submissions/models.py:33
 msgid "corrections demandées"
 msgstr "revisions requested"
-
-#: apps/submissions/models.py:34
-msgid "version finale reçue"
-msgstr "camera-ready version received"
 
 #: apps/submissions/models.py:35
 msgid "présentation confirmée"
@@ -2579,9 +3346,10 @@ msgstr "draft reminder"
 msgid "rappels de brouillon"
 msgstr "draft reminders"
 
-#: apps/submissions/notifications.py:65
-msgid "(sans titre)"
-msgstr "(untitled)"
+#: apps/submissions/notifications.py:193
+#, python-format
+msgid "Relecteur %(rank)s :"
+msgstr "Reviewer %(rank)s:"
 
 #: apps/submissions/pdf.py:47
 msgid "Le fichier n'est pas un PDF."
@@ -2665,7 +3433,7 @@ msgid "Cette soumission n'est plus modifiable."
 msgstr "This submission can no longer be changed."
 
 #: apps/submissions/services.py:199 apps/submissions/services.py:274
-#: apps/submissions/workflow.py:109
+#: apps/submissions/workflow.py:147
 msgid "L'appel à communications est clos."
 msgstr "The call for papers is closed."
 
@@ -2729,10 +3497,6 @@ msgstr "Choose the submission type first."
 msgid "Ce type de communication ne prend pas de fichier."
 msgstr "This submission type takes no file."
 
-#: apps/submissions/services.py:490
-msgid "Fichier PDF attendu (.pdf)."
-msgstr "A PDF file (.pdf) is expected."
-
 #: apps/submissions/services.py:496
 #, python-format
 msgid "Fichier trop volumineux (%(max)s Mo au plus)."
@@ -2745,30 +3509,6 @@ msgstr "A submitted submission cannot be deleted: withdraw it."
 #: apps/submissions/services.py:607
 msgid "Dérogation impossible : la soumission n'est plus modifiable."
 msgstr "Extension impossible: the submission can no longer be changed."
-
-#: apps/submissions/services.py:617
-msgid "Échéance dans le futur attendue."
-msgstr "A deadline in the future is expected."
-
-#: apps/submissions/services.py:711
-msgid "Référence"
-msgstr "Reference"
-
-#: apps/submissions/services.py:712
-msgid "Statut"
-msgstr "Status"
-
-#: apps/submissions/services.py:713
-msgid "Titre"
-msgstr "Title"
-
-#: apps/submissions/services.py:714
-msgid "Thématique"
-msgstr "Track"
-
-#: apps/submissions/services.py:715
-msgid "Type"
-msgstr "Type"
 
 #: apps/submissions/services.py:716
 msgid "Langue"
@@ -2822,6 +3562,74 @@ msgstr ""
 msgid "[%(site_name)s] Vous êtes déclaré co-auteur d'une soumission"
 msgstr "[%(site_name)s] You have been listed as a co-author of a submission"
 
+#: apps/submissions/templates/submission/email/decision_message.txt:3
+#, python-format
+msgid ""
+"Le comité scientifique de %(edition_title)s a le plaisir de vous annoncer que"
+" la soumission %(reference)s « %(title)s » est acceptée."
+msgstr ""
+"The scientific committee of %(edition_title)s is pleased to announce that "
+"submission %(reference)s “%(title)s” is accepted."
+
+#: apps/submissions/templates/submission/email/decision_message.txt:3
+#, python-format
+msgid ""
+"Le comité scientifique de %(edition_title)s accepte la soumission "
+"%(reference)s « %(title)s », sous réserve des corrections demandées ci-"
+"dessous. Joignez une lettre de réponse aux relecteurs à la version finale."
+msgstr ""
+"The scientific committee of %(edition_title)s accepts submission "
+"%(reference)s “%(title)s”, subject to the corrections requested below. Attach"
+" a response letter to the reviewers to the final version."
+
+#: apps/submissions/templates/submission/email/decision_message.txt:3
+#, python-format
+msgid ""
+"Le comité scientifique de %(edition_title)s a placé la soumission "
+"%(reference)s « %(title)s » sur liste d'attente. Vous serez prévenu si une "
+"place se libère."
+msgstr ""
+"The scientific committee of %(edition_title)s has placed submission "
+"%(reference)s “%(title)s” on the waiting list. You will be notified if a "
+"place becomes available."
+
+#: apps/submissions/templates/submission/email/decision_message.txt:3
+#, python-format
+msgid ""
+"Le comité scientifique de %(edition_title)s regrette de vous annoncer que la "
+"soumission %(reference)s « %(title)s » n'est pas retenue."
+msgstr ""
+"The scientific committee of %(edition_title)s regrets to announce that "
+"submission %(reference)s “%(title)s” has not been accepted."
+
+#: apps/submissions/templates/submission/email/decision_message.txt:5
+#, python-format
+msgid "Format attribué : %(assigned_type)s"
+msgstr "Assigned format: %(assigned_type)s"
+
+#: apps/submissions/templates/submission/email/decision_message.txt:6
+#, python-format
+msgid "Version finale attendue au plus tard le %(camera_ready)s."
+msgstr "Final version expected by %(camera_ready)s at the latest."
+
+#: apps/submissions/templates/submission/email/decision_message.txt:8
+msgid "Message du comité :"
+msgstr "Message from the committee:"
+
+#: apps/submissions/templates/submission/email/decision_message.txt:11
+msgid "Commentaires des relecteurs :"
+msgstr "Reviewers' comments:"
+
+#: apps/submissions/templates/submission/email/decision_message.txt:15
+#, python-format
+msgid "Votre soumission : %(link)s"
+msgstr "Your submission: %(link)s"
+
+#: apps/submissions/templates/submission/email/decision_subject.txt:1
+#, python-format
+msgid "[%(site_name)s] Décision sur votre soumission"
+msgstr "[%(site_name)s] Decision on your submission"
+
 #: apps/submissions/templates/submission/email/draft_reminder_message.txt:1
 #, python-format
 msgid ""
@@ -2862,6 +3670,26 @@ msgstr ""
 msgid "[%(site_name)s] Délai supplémentaire pour votre soumission"
 msgstr "[%(site_name)s] Extended deadline for your submission"
 
+#: apps/submissions/templates/submission/email/final_received_message.txt:1
+#, python-format
+msgid ""
+"Bonjour,\n"
+"\n"
+"La version finale de votre soumission « %(title)s » (%(reference)s) à %(edition_title)s a bien été reçue. Vous pouvez la remplacer jusqu'à la date limite.\n"
+"\n"
+"Votre soumission : %(link)s"
+msgstr ""
+"Hello,\n"
+"\n"
+"The final version of your submission “%(title)s” (%(reference)s) to %(edition_title)s has been received. You can replace it until the deadline.\n"
+"\n"
+"Your submission: %(link)s"
+
+#: apps/submissions/templates/submission/email/final_received_subject.txt:1
+#, python-format
+msgid "[%(site_name)s] Version finale reçue"
+msgstr "[%(site_name)s] Final version received"
+
 #: apps/submissions/templates/submission/email/received_message.txt:1
 #, python-format
 msgid ""
@@ -2882,6 +3710,30 @@ msgstr ""
 msgid "[%(site_name)s] Soumission reçue"
 msgstr "[%(site_name)s] Submission received"
 
+#: apps/submissions/templates/submission/email/screening_rejected_message.txt:1
+#, python-format
+msgid ""
+"Bonjour,\n"
+"\n"
+"Votre soumission « %(title)s » (%(reference)s) à %(edition_title)s n'a pas été jugée recevable lors du contrôle préalable à l'évaluation. Elle ne sera pas évaluée.\n"
+"\n"
+"Motif : %(reason)s\n"
+"\n"
+"Votre soumission : %(link)s"
+msgstr ""
+"Hello,\n"
+"\n"
+"Your submission “%(title)s” (%(reference)s) to %(edition_title)s was found inadmissible during the check that precedes reviewing. It will not be reviewed.\n"
+"\n"
+"Reason: %(reason)s\n"
+"\n"
+"Your submission: %(link)s"
+
+#: apps/submissions/templates/submission/email/screening_rejected_subject.txt:1
+#, python-format
+msgid "[%(site_name)s] Soumission non recevable"
+msgstr "[%(site_name)s] Inadmissible submission"
+
 #: apps/submissions/templates/submission/email/withdrawn_message.txt:1
 #, python-format
 msgid ""
@@ -2898,14 +3750,14 @@ msgstr ""
 msgid "[%(site_name)s] Soumission retirée"
 msgstr "[%(site_name)s] Submission withdrawn"
 
-#: apps/submissions/workflow.py:113
+#: apps/submissions/workflow.py:151
 msgid "La soumission est incomplète."
 msgstr "The submission is incomplete."
 
-#: apps/submissions/workflow.py:121
+#: apps/submissions/workflow.py:159
 msgid "La recevabilité commence à la clôture de l'appel (et des dérogations)."
 msgstr "Screening starts when the call (and any extensions) closes."
 
-#: apps/submissions/workflow.py:150
+#: apps/submissions/workflow.py:193
 msgid "Changement de statut non autorisé."
 msgstr "Status change not allowed."

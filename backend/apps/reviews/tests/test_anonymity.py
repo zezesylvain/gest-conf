@@ -1,5 +1,5 @@
 """RG-04 : garde-fous du double aveugle, posés avant le premier endpoint relecteur (plan L4,
-H9). Le test de fuite de chaque route relecteur s'ajoute avec la route (L4.3)."""
+H9). Le test de fuite de chaque route relecteur est dans ``test_leaks.py`` (L4.3)."""
 
 from __future__ import annotations
 
@@ -21,9 +21,19 @@ from apps.reviews.anonymity import (
 )
 from apps.submissions.models import Submission, SubmissionAuthor, SubmissionFile
 
-# Routes relecteur couvertes par un test de fuite (nom d'URL → test). Une route nommée
-# « reviewer-… » absente d'ici fait échouer test_every_reviewer_route_is_leak_tested.
-LEAK_TESTED_ROUTES: dict[str, str] = {}
+# Routes relecteur couvertes par un test de fuite (nom d'URL → test de ``test_leaks.py``). Une
+# route nommée « reviewer-… » absente d'ici fait échouer test_every_reviewer_route_is_leak_tested.
+LEAK_TESTED_ROUTES: dict[str, str] = {
+    "reviewer-assignments-list": "test_rg04_leak_assignments_list",
+    "reviewer-assignments-detail": "test_rg04_leak_assignment_detail",
+    "reviewer-assignments-file": "test_rg04_leak_file_has_a_generic_name",
+    "reviewer-assignments-authors": "test_rg04_leak_authors_route_is_closed_in_double_blind",
+    "reviewer-assignments-decline": "test_rg04_leak_decline",
+    "reviewer-review": "test_rg04_leak_review_save",
+    "reviewer-review-submit": "test_rg04_leak_review_submit",
+    "reviewer-discussion": "test_rg04_leak_discussion",
+    "reviewer-expertise": "test_rg04_leak_expertise",
+}
 
 
 def _import_all_serializer_modules() -> None:
@@ -138,4 +148,7 @@ def _reviewer_route_names() -> set[str]:
 @pytest.mark.django_db
 def test_every_reviewer_route_is_leak_tested():
     """Une route relecteur (nom « reviewer-… ») ne peut pas échapper au test de fuite."""
+    from apps.reviews.tests import test_leaks
+
     assert _reviewer_route_names() == set(LEAK_TESTED_ROUTES)
+    assert all(callable(getattr(test_leaks, name, None)) for name in LEAK_TESTED_ROUTES.values())

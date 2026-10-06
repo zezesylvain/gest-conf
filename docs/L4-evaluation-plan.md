@@ -4,6 +4,9 @@
 > correction). L3 est clos (bilan : `docs/L3-soumission.md`) : H17 se réduit à l'ordre
 > serveur (L4.0 à L4.4), puis écrans (L4.5, L4.6), puis E2E (L4.7).
 >
+> **L4 est clos le 6 octobre 2026** : bilans des étapes aux §11 à §18 ; bilan du lot et
+> exploitation dans `docs/L4-evaluation.md` ; étude mise à jour (§20).
+>
 > Sources :
 > - étude §3.3 (matrice), §4 M5 et M6, §5.1 et §5.2, §6 (RG-03 à RG-10, RG-17), §8.2
 >   (« Évaluation »), §9.2, §10.2, §15 (Q3, Q4, Q16), A2, A3 (US-03 à US-06) ;
@@ -280,3 +283,413 @@ exposés et journalisés avec la confidentialité :
   traductions du backend à jour ; client régénéré ; front 274 tests.
 - **Défaut de test corrigé** : la somme des poids était rendue « 95 » par SQLite et « 95.00 »
   par MariaDB ; le contrôle d'intégrité normalise maintenant à deux décimales.
+
+## 13. Bilan de L4.2 (6 octobre 2026)
+
+**Recevabilité (H10)** : deux transitions du workflow deviennent disponibles.
+
+- `SCREENING → REJECTED` : motif obligatoire. Le soumissionnaire reçoit un e-mail avec le motif
+  et une notification (`screening_rejected`). Les affectations éventuelles sont annulées, sans
+  e-mail : le relecteur n'avait pas encore été prévenu.
+- `SCREENING → UNDER_REVIEW` : refusée tant que les relecteurs requis
+  (`reviewers_per_submission`) ne sont pas affectés (409 `reviewers_missing`). Les relecteurs
+  sont prévenus à ce moment.
+- **Droit revérifié par le workflow** : `Rule.capability` est contrôlée dans `transition()`
+  (`reviews.manage` dans l'édition), pas seulement par la vue.
+- **Garde du nombre de relecteurs** : elle s'inscrit par `register_guard`, l'application
+  `submissions` ne dépend donc pas de `reviews`.
+- **Parcours** : le président affecte d'abord les relecteurs, puis déclare la soumission
+  recevable, ce qui ouvre l'évaluation.
+
+**Affectations (H6, H11, H14)** : `services/assignments.py`.
+
+- Relecteurs : rôles qui portent `reviews.write` (`SC_MEMBER`, `SC_CHAIR`). Affectation possible
+  en recevabilité, en évaluation et une fois évaluée : un relecteur supplémentaire ne fait pas
+  revenir en arrière.
+- Refus :
+  - conflit non levé : 409 `conflict_of_interest` ;
+  - charge maximale de l'édition atteinte, qui ne compte que les affectations actives : 409
+    `reviewer_overloaded` ;
+  - affectation en double ou compte hors du comité scientifique : 400 ;
+  - soumission hors évaluation : 409 `review_not_open`.
+- **Concurrence** : le verrou de la soumission et des rôles du relecteur met en série les
+  affectations simultanées.
+- **Échéance** : saisie à l'heure de l'édition (D13). Par défaut, la date clé
+  `review_deadline` ; si celle-ci est passée, une échéance est exigée.
+- **Pseudonyme** : rang tiré au hasard parmi les rangs libres. Il est stable : un relecteur
+  remplacé garde le sien et le remplaçant en reçoit un nouveau.
+- **Annulation** : motif obligatoire ; impossible si l'évaluation est envoyée (il faut alors
+  déclarer un conflit). Le relecteur prévenu reçoit un e-mail sans le motif, interne au comité.
+- **Nouvelle échéance** : les relances repartent de zéro.
+
+**Conflits (H8, RG-03)** : `services/conflicts.py`.
+
+- **Auteur**, jamais levable : compte du soumissionnaire, compte d'un co-auteur, ou une
+  quelconque adresse du relecteur égale à celle d'un auteur.
+- **Même institution** : comparaison normalisée (accents, casse, ponctuation) du profil et des
+  affiliations déclarées. Levable avec un motif.
+- **Déclaré** par le président (`POST …/conflicts`) : annule l'affectation active, même si
+  l'évaluation est envoyée. Levable avec un motif ; une nouvelle déclaration efface la levée.
+- **Levée** : motif obligatoire et **réauthentification récente** (403
+  `reauthentication_required`). Elle est journalisée (`review.conflict_overridden`) et
+  enregistrée dans `ConflictOfInterest`.
+- **RG-03** : `reviewable_assignments` ne rend que les affectations actives d'une soumission en
+  évaluation, sans conflit déclaré non levé, et jamais une soumission dont le relecteur est
+  auteur. Les vues relecteur de L4.3 s'y appuient.
+
+**Expertises et candidats (H7)** :
+
+- **Candidats** : `GET …/review-submissions/{id}/candidates` donne pour chaque relecteur sa
+  charge, ses expertises, son affectation éventuelle et ses conflits (levables ou non, levés ou
+  non), en nombre de requêtes constant.
+- **Expertises** : le service `set_expertise` est prêt ; sa route relecteur arrive en L4.3, avec
+  les autres routes relecteur et leur test de fuite.
+
+**Relances (H15)** : commande `remind_reviewers`, ajoutée au cron toutes les heures (`cron.sh`,
+README du déploiement).
+
+- J-7, J-1, puis au premier passage après l'échéance, une fois chacune ; idempotente et
+  verrouillée.
+- Pas de relance dans la fenêtre où l'affectation est née : l'e-mail d'affectation vient
+  d'annoncer l'échéance.
+- Ni évaluation envoyée, ni soumission en recevabilité, ni édition archivée.
+- **RG-04 dans les e-mails aux relecteurs** : référence, titre, échéance et lien vers
+  `/gestion/editions/{id}/evaluations/{affectation}`, route à créer en L4.5. Aucun nom
+  d'auteur : un test le vérifie.
+
+**API de gestion** (`reviews.manage`) :
+
+- `GET …/review-submissions` : compteurs d'affectations, d'évaluations envoyées et de retards.
+  Filtres : statut, thématique, type, recherche, relecteurs manquants, retard.
+- `GET …/review-submissions/{id}` : affectations et conflits, avec les noms des relecteurs,
+  jamais leurs adresses.
+- `POST …/review-submissions/{id}/screening`.
+- `POST …/assignments`, `PATCH …/assignments/{id}` (échéance),
+  `POST …/assignments/{id}/cancel`.
+- `POST …/conflicts`.
+- Codes d'erreur ajoutés et traduits dans l'interface : `conflict_of_interest`,
+  `reviewer_overloaded`, `reviewers_missing`, `review_not_open`.
+
+**Intégrité** : clé active cohérente avec le statut ; aucune affectation active d'un relecteur
+auteur de la soumission.
+
+**Vérifications** :
+
+- 1 762 tests backend sous SQLite, 1 769 sous MariaDB. La matrice compte 924 cas, dont les
+  8 routes de L4.2 ; la case « confidentialité » modifie désormais un réglage non gelé, car la
+  soumission en recevabilité du monde de test gèle `double_blind` (RG-19).
+- Schéma régénéré sur MariaDB : statut d'évaluation nullable, d'où le composant `NullEnum` du
+  client. Client régénéré ; traductions du backend et du portail à jour ; front 274 tests.
+
+## 14. Bilan de L4.3 (6 octobre 2026)
+
+**Espace relecteur** (`…/reviews/…`, `reviews.write`, 2FA). Un relecteur ne voit que **ses**
+affectations actives, sans conflit déclaré, sur une soumission en évaluation ou déjà décidée
+(lecture seule) ; toute autre affectation répond 404 (RG-03).
+
+- `GET assignments` (« Mes évaluations ») et `GET assignments/{id}` : soumission anonymisée,
+  grille, sa propre évaluation, état de la discussion, réglage du double aveugle.
+- `GET …/file` : PDF courant, nettoyé en double aveugle (L3). Nom de téléchargement : la
+  référence.
+- `GET …/authors` : sans double aveugle seulement (H9, Q3), avec noms et affiliations, jamais
+  les adresses. En double aveugle, elle répond 404. Elle est servie par un sérialiseur
+  volontairement **hors** de la liste blanche RG-04.
+- `POST …/decline` : motif obligatoire, conflit facultatif. Le président du CS reçoit un e-mail
+  sans le nom du relecteur.
+- `PUT …/review` (brouillon) et `POST …/review/submit` (envoi).
+- `GET` et `POST …/discussion` ; `GET` et `PUT reviews/expertise`.
+
+**Évaluation (H4, H5, H13, RG-05, RG-06)** : `services/reviews.py`.
+
+- **Brouillon** : copie complète.
+  - Notes validées : critère de la grille, échelle, une décimale.
+  - Note pondérée recalculée par le serveur (la valeur envoyée est ignorée).
+  - Grille verrouillée au premier enregistrement.
+- **Envoi** : contrôle de complétude (critères obligatoires, recommandation, confiance,
+  commentaire aux auteurs), puis version en ajout seul et journal (`review.submitted`,
+  `review.resubmitted`).
+- **Après envoi** : l'évaluation ne se modifie que par un nouvel envoi, tant que la soumission
+  est en évaluation (H13).
+- **Sans grille applicable** : 409 `review_not_open`.
+
+**RG-07** : la transition `UNDER_REVIEW → REVIEWED` devient disponible. Elle est déclenchée par
+le système au dernier envoi requis. La garde inscrite par `reviews` compte les évaluations
+envoyées des affectations actives.
+
+**RG-08 (discussion)** :
+
+- **Ouverture** : automatique quand toutes les évaluations actives sont envoyées, ou par le
+  président.
+- **Accès du relecteur** : seulement après l'envoi de sa propre évaluation, sinon 409
+  `discussion_closed` (nouveau code, traduit).
+- **Pseudonymes** (H11) : les autres évaluations et les messages paraissent sous « Relecteur
+  N » ; un message du président n'a pas de rang. Les messages sont fermés après la décision.
+
+**Divergence (H12)** :
+
+- Écart maximal entre notes au-delà du seuil de l'édition : signalé dans le suivi et par un
+  e-mail **unique** (clé d'idempotence) aux présidents du CS, ou à défaut de la conférence.
+- Note finale : moyenne, ou moyenne pondérée par la confiance (option de l'édition).
+
+**Président** :
+
+- `GET …/review-submissions/{id}/reviews` (`reviews.read_all`) : évaluations envoyées avec les
+  noms des relecteurs, note finale, divergence, discussion.
+- `POST …/discussion/open`, `POST …/discussion/messages`.
+- `GET …/review-progress` : par relecteur (actives, envoyées, en retard), par thématique, et
+  liste des soumissions divergentes.
+
+**RG-04, test de fuite** (`tests/test_leaks.py`) : les 9 routes relecteur sont parcourues en
+double aveugle.
+
+- Traceurs : auteurs, institution, nom d'origine du fichier, président et autre relecteur.
+  Aucune réponse n'en contient, erreurs comprises.
+- La table des routes testées renvoie à des tests existants (contrôlé).
+- Variante sans double aveugle : noms des auteurs par la seule route dédiée, jamais
+  d'adresse.
+
+**Matrice** :
+
+- Identifiants propres à chaque profil, car un relecteur n'accède qu'à ses affectations.
+- Le contrôle « édition archivée » emploie un profil qui détient la capacité de la case.
+- 2FA exigée du relecteur sur ses routes (H2).
+- Édition du monde de test sans double aveugle, pour la route des auteurs.
+
+**Liens des e-mails** : à créer en L4.5, avec ces routes de la gestion.
+
+- `/editions/{id}/evaluations/{affectation}` : relecteur.
+- `/editions/{id}/pilotage/{soumission}` : président.
+
+**Vérifications** :
+
+- 1 971 tests backend sous SQLite, 1 978 sous MariaDB ; la matrice compte 1 104 cas.
+- Schéma régénéré sur MariaDB ; client régénéré ; traductions à jour ; front 274 tests.
+
+## 15. Bilan de L4.4 (6 octobre 2026)
+
+**Décisions provisoires (H16)** : `services/decisions.py`.
+
+- **Contenu** : issue (`accepted`, `accepted_minor`, `waitlist`, `rejected`), format attribué
+  (par défaut le type de la soumission si elle est acceptée), message aux auteurs.
+- **Conditions** : soumission évaluée (RG-07) ; décision individuelle (`PUT` / `DELETE
+  …/review-submissions/{id}/decision`) ou en lot (`POST …/decisions/batch`).
+- **Lot** : tout ou rien ; les refus sont rendus ligne par ligne.
+- **Journal** : chaque décision enregistrée est journalisée (`decision.recorded`, avec l'avant
+  et l'après).
+- **RG-06 précisée** : une décision enregistrée, même provisoire, fige les évaluations (« modifiable
+  jusqu'à la décision ») ; l'annuler les rend de nouveau modifiables.
+
+**Publication (RG-09)** : `POST …/decisions/publish` (`decisions.publish`, réauthentification
+récente).
+
+- Les transitions `REVIEWED → ACCEPTED`, `ACCEPTED_MINOR`, `WAITLIST`, `REJECTED` deviennent
+  disponibles. Le workflow revérifie la capacité, et une garde exige la décision
+  correspondante.
+- **Auteurs prévenus à ce moment seulement** : e-mail au soumissionnaire et aux co-auteurs
+  (une fois par adresse ; le lien vers la soumission ne va qu'au soumissionnaire, F5) et
+  notification `decision_published`.
+- **Journal** : nombre de décisions et répartition des issues (`decision.published`).
+- **Liste d'attente** : `POST …/promote` fait passer `WAITLIST → ACCEPTED` après publication ;
+  les auteurs sont prévenus.
+
+**RG-10** : l'auteur ne voit la décision qu'une fois publiée (`decision` dans
+`/v1/submissions/{id}`).
+
+- Il reçoit l'issue, le format, le message du comité et les commentaires aux auteurs sous
+  pseudonyme.
+- Il ne reçoit jamais le nom des relecteurs, leurs notes ni les commentaires au comité.
+- Deux tests le vérifient avec des traceurs, sur l'API et sur les e-mails.
+
+**Version finale (H18)** : `POST /v1/submissions/{id}/final-version` (multipart), réservée au
+soumissionnaire.
+
+- PDF **nominatif**, jamais nettoyé ; lettre de réponse aux relecteurs, obligatoire pour
+  `accepted_minor`.
+- Refusée après la date clé `camera_ready` (409 `deadline_passed`, nouveau code traduit).
+- Un nouveau dépôt remplace le précédent (nouvelle version du fichier).
+- `ACCEPTED` ou `ACCEPTED_MINOR` → `CAMERA_READY_RECEIVED`, avec accusé de réception par
+  e-mail et notification.
+- La gestion télécharge le fichier comme le PDF principal.
+- `ACCEPTED → WITHDRAWN` (motif obligatoire) est aussi ouvert à l'auteur.
+
+**Classement et simulation (US-06)** : `GET …/ranking?threshold=&track=&submission_type=`
+(`reviews.read_all`).
+
+- Soumissions évaluées ou décidées, classées par note finale, avec divergence,
+  recommandations et décision ; les rejets de recevabilité en sont exclus.
+- Avec un seuil (0 à 100), le nombre de soumissions retenues au total, par type et par
+  thématique.
+
+**Export** : `GET …/reviews-export` (`reviews.read_all`, réauthentification récente).
+
+- Une ligne par évaluation, avec le nom du relecteur, une colonne par critère, la note finale
+  et la décision.
+- Cellules neutralisées contre l'injection de formules ; journal `review.exported`.
+
+**Données personnelles** : les lettres de réponse sont ajoutées à l'export de l'auteur et
+nettoyées à son anonymisation.
+
+**Vérifications** :
+
+- 2 073 tests backend sous SQLite, 2 080 sous MariaDB. La matrice compte 1 188 cas, dont les
+  7 routes de L4.4 ; le contrôle de réauthentification emploie un profil qui détient la
+  capacité.
+- Schéma régénéré sur MariaDB ; client régénéré ; traductions du backend et du portail à
+  jour ; front 274 tests.
+
+## 16. Bilan de L4.5 (6 octobre 2026)
+
+**Rubrique « Évaluation » du rail** : nouvelle catégorie entre « Soumissions » et
+« Paramétrage », chaque écran avec sa fiche d'aide et ses mots-clés de recherche.
+
+- Côté relecteur, « Mes évaluations » et « Mes expertises » (`reviews.write`).
+- Côté président, « Pilotage de l'évaluation » (`reviews.manage`) et « Classement et
+  décisions » (`reviews.read_all`).
+- Dans le paramétrage, « Grilles d'évaluation » (lecture `edition.read`, écriture
+  `grids.write`).
+- Le relecteur arrive directement sur « Mes évaluations », la seule catégorie de son rôle.
+
+**Relecteur** :
+
+- **Liste** : échéance et état de chaque évaluation (à faire, brouillon, envoyée, close).
+- **Formulaire**, pour l'évaluation elle-même :
+  - soumission anonymisée et PDF par l'endpoint relecteur ;
+  - grille avec la **note indicative calculée pendant la saisie** (`core/review-score.ts`,
+    même formule que le serveur, qui fait foi) ;
+  - recommandation, confiance, commentaires, signalements ;
+  - enregistrement en brouillon, envoi et renvoi confirmés.
+- **Formulaire**, autour de l'évaluation :
+  - refus motivé, avec conflit facultatif ;
+  - discussion sous pseudonymes ;
+  - auteurs affichés si l'édition n'est pas en double aveugle ;
+  - lecture seule après la décision.
+- **Format suggéré (H5)** : il reste disponible dans l'API mais pas dans le formulaire, car le
+  relecteur n'a pas accès à la liste des types de l'édition.
+
+**Président** :
+
+- **Pilotage** :
+  - avancement par relecteur et par thématique, soumissions divergentes ;
+  - liste filtrable (statut, recherche, relecteurs manquants, retards) ;
+  - fiche de la soumission : recevabilité (motif exigé pour un rejet), affectations
+    (échéance, annulation motivée), candidats avec charge, expertises et conflits ;
+  - un relecteur auteur de la soumission n'a pas de bouton « Affecter » ; un conflit levable
+    exige un motif, et l'intercepteur ouvre la réauthentification ;
+  - conflits déclarés ; évaluations nominatives, divergence et discussion ; décision
+    provisoire, annulation, acceptation depuis la liste d'attente.
+- **Classement** :
+  - simulation de seuil (total, par type, par thématique) et décisions préparées selon le
+    seuil ;
+  - enregistrement en lot, puis publication confirmée ;
+  - export CSV lu par `HttpClient`, pour que la réauthentification soit gérée, puis
+    enregistré côté navigateur.
+- **Grilles** :
+  - liste avec verrouillage et somme des poids affichée pendant la saisie ;
+  - modification, duplication en nouvelle version, suppression, création avec la grille par
+    défaut.
+- **Tableau de bord** : carte « Évaluation » (soumissions en recevabilité, en évaluation et
+  évaluées ; divergences ; retards).
+
+**Vérifications** :
+
+- Front : 109 tests de la gestion. La table de navigation, la redirection du relecteur, la note
+  indicative, chaque écran et la cohérence de l'aide et des traductions sont couverts.
+- Lint, format et build passent. Bundle initial de la gestion : 364,1 kB, contre 360,8 kB ; le
+  dépassement du budget du portail (367,7 kB) est antérieur et inchangé.
+- **Chromium** : parcours complet sur des données réelles, sans erreur dans la console.
+  - Président du CS : affectation de deux relecteurs, recevabilité.
+  - Deux relecteurs : notes en direct (77,00), envoi, divergence de 57 points, discussion.
+  - Président : évaluations nominatives, simulation, décisions en lot, publication.
+  - Grilles : verrou, puis duplication.
+- **Défaut corrigé** : à 375 px, les libellés longs des critères débordaient de 19 px, et les
+  aides des commentaires chevauchaient le champ suivant. Libellés placés au-dessus des champs,
+  aides de hauteur variable : aucun débordement sur les sept écrans de L4.
+
+## 17. Bilan de L4.6 (6 octobre 2026)
+
+**Livré** (portail, espace auteur `/compte/soumissions/:id`) :
+
+- **Décision du comité**, affichée au-dessus de l'assistant dès la publication des résultats
+  (RG-09) :
+  - issue, date de publication, format attribué ;
+  - consigne adaptée à l'issue ; message du comité ;
+  - commentaires des relecteurs sous pseudonymes « Relecteur N » (RG-10). L'écran ne prévoit
+    ni note, ni recommandation, ni commentaire au comité ; le serveur ne les sert pas.
+- **Version finale** (H18), pour une soumission acceptée, acceptée sous réserve ou dont la
+  version finale est déjà reçue :
+  - date limite (`camera_ready`) ; PDF nominatif ; lettre de réponse aux relecteurs,
+    obligatoire pour `accepted_minor` ;
+  - un nouveau dépôt remplace le précédent, et la lettre déjà envoyée est reprise ;
+  - version courante téléchargeable par l'endpoint authentifié (règle n° 8) ;
+  - formulaire masqué une fois la date limite passée. Le serveur revérifie la date, la lettre
+    et le type du fichier.
+- **Retrait** d'une communication acceptée, depuis le bloc de décision (`ACCEPTED → WITHDRAWN`,
+  motif exigé).
+- **Liste** « Mes soumissions » : la date limite de la version finale tient lieu d'échéance
+  tant qu'elle n'est pas déposée. Le chapeau de la page change une fois la décision publiée.
+
+**Vérifications** :
+
+- Front : 116 tests du portail. Décision et pseudonymes, lettre exigée, dépôt, date passée,
+  liste d'attente, retrait et appel multipart du service sont couverts. Lint, format et build
+  passent, budgets inchangés.
+- **Chromium**, sur les données de L4.5 :
+  - une décision `accepted_minor` publiée, avec deux évaluations portant un commentaire au
+    comité traceur ;
+  - aucune fuite du traceur ni des noms des relecteurs dans la page ;
+  - lettre exigée, dépôt puis remplacement (version 2) ;
+  - téléchargement `GC27-0004-final-v1.pdf` en `application/pdf` ; rendu anglais ;
+  - aucun débordement à 375 px, aucune erreur dans la console.
+- **Défaut corrigé** : la lettre vide était aussi signalée « trop longue ». Le `required` du
+  gabarit ajoute un validateur ; seule l'erreur `maxlength` est désormais testée.
+
+## 18. Bilan de L4.7 (6 octobre 2026)
+
+**Parcours de bout en bout** (`web/e2e/tests/author.spec.ts`, en série) : Playwright lance
+aussi la gestion (`ng serve gestion`, :4201).
+
+- **Données** (`web/e2e/seed.py`) :
+  - grille par défaut, dates `review_deadline` et `camera_ready` ;
+  - président du CS et deux relecteurs, rôles attribués par commande ;
+  - comptes vérifiés, profils complets, 2FA TOTP avec un secret de test.
+- **Codes TOTP** : calculés par le test (`web/e2e/totp.ts`, RFC 6238), comme le ferait
+  l'application d'authentification. Un code qui expire dans moins de 5 s est remplacé par
+  celui de la fenêtre suivante.
+- **Comité**, chacun dans son navigateur :
+  - le président affecte deux relecteurs et ouvre l'évaluation ;
+  - chaque relecteur évalue sans voir ni nom, ni adresse, ni institution des auteurs
+    (RG-04), avec une note indicative de 80 ;
+  - la seconde évaluation fait passer la soumission en « évaluée » (RG-07) ;
+  - le président enregistre une décision provisoire : aucun e-mail à l'auteur. Puis il
+    publie : transition et e-mail (RG-09).
+- **Auteur** :
+  - décision, message du comité, « Relecteur 1 » et « Relecteur 2 » avec leurs
+    commentaires ;
+  - ni commentaire confidentiel, ni nom de relecteur, ni note (RG-10) ;
+  - lettre de réponse exigée, puis dépôt (H18) : statut `camera_ready_received`, accusé par
+    e-mail, PDF téléchargeable.
+- Trois séries au vert (5 tests, environ une minute), dont la dernière après la correction
+  ci-dessous.
+
+**Défaut trouvé à la recette** :
+
+- **Constat** : les paramètres de l'évaluation de l'édition, exposés par l'API depuis L4.1,
+  n'avaient pas d'écran. Il s'agit de la charge maximale par relecteur, du seuil de
+  divergence et de la note finale pondérée par la confiance.
+- **Correction** : ils rejoignent « Paramétrage › Confidentialité », renommé « Confidentialité
+  et paramètres de l'évaluation ». Mêmes droits (`edition.write`), même réauthentification,
+  même journal avant et après ; fiche d'aide et mots-clés de recherche complétés.
+- **Contrôle dans Chromium** :
+  - enregistrement, puis relecture des valeurs et du journal ;
+  - à 375 px, un libellé trop long débordait de 35 px : libellés raccourcis, bornes passées
+    dans les aides.
+
+**Recette** :
+
+- Backend : 2 073 tests sous SQLite, 2 080 sous MariaDB.
+- Front : 302 tests (portail 116, gestion 110, shared 76) et 11 tests des scripts de build.
+  Lint, format et build passent ; schéma OpenAPI inchangé.
+- E2E : 5 tests, trois séries.
+- `ruff` couvre `web/e2e`.
+- Documentation : `docs/L4-evaluation.md`, étude §20 (version 1.4, Markdown et HTML), décisions
+  du lot dans `CLAUDE.md`.

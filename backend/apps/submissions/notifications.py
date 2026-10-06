@@ -26,6 +26,9 @@ COAUTHOR = "submission/email/coauthor"
 WITHDRAWN = "submission/email/withdrawn"
 EXTENSION = "submission/email/extension"
 DRAFT_REMINDER = "submission/email/draft_reminder"
+SCREENING_REJECTED = "submission/email/screening_rejected"
+DECISION = "submission/email/decision"
+FINAL_RECEIVED = "submission/email/final_received"
 
 
 def register_submission_templates() -> None:
@@ -34,6 +37,9 @@ def register_submission_templates() -> None:
     register_email_template(WITHDRAWN)
     register_email_template(EXTENSION, fast_path=True)
     register_email_template(DRAFT_REMINDER)
+    register_email_template(SCREENING_REJECTED)
+    register_email_template(DECISION)
+    register_email_template(FINAL_RECEIVED, fast_path=True)
 
 
 def local_datetime(value: datetime | None, tz_name: str, locale: str) -> str:
@@ -84,7 +90,8 @@ def _send_to_submitter(template: str, submission: Submission, **extra: str) -> N
 
 def on_transition(submission: Submission, from_state: str, to_state: str, actor: Actor) -> None:
     """Effet du workflow : accusé de réception et information des co-auteurs à la première
-    soumission ; confirmation du retrait d'une soumission déjà soumise."""
+    soumission ; confirmation du retrait d'une soumission déjà soumise ; rejet de
+    recevabilité motivé (étude §5.2, plan L4 H10), notifié au soumissionnaire."""
     edition = submission.edition
     if from_state == S.DRAFT and to_state == S.SUBMITTED:
         locale = resolve_locale(None, submission.submitter)
@@ -122,6 +129,16 @@ def on_transition(submission: Submission, from_state: str, to_state: str, actor:
     elif to_state == S.WITHDRAWN and from_state != S.DRAFT:
         _send_to_submitter(WITHDRAWN, submission)
         notify(submission.submitter, NotificationKind.SUBMISSION_WITHDRAWN, _payload(submission))
+    elif from_state == S.SCREENING and to_state == S.REJECTED:
+        # Motif : celui de la transition, que ``transition()`` vient d'historiser.
+        last = submission.status_history.order_by("-at", "-id").first()
+        _send_to_submitter(
+            SCREENING_REJECTED,
+            submission,
+            reason=last.reason if last is not None else "",
+            link=submission_link(submission),
+        )
+        notify(submission.submitter, NotificationKind.SCREENING_REJECTED, _payload(submission))
 
 
 def extension_granted(extension: SubmissionExtension) -> None:
@@ -154,3 +171,59 @@ def draft_reminder(submission: Submission, closes_at: datetime) -> None:
         NotificationKind.DRAFT_REMINDER,
         _payload(submission, closes_at=closes_at.isoformat()),
     )
+
+
+def decision_published(decision, comments: list[dict], camera_ready) -> None:
+    """RG-09, RG-10 : décision publiée, aux auteurs (soumissionnaire et co-auteurs, une fois
+    par adresse) ; commentaires des relecteurs sous pseudonyme, jamais leur identité, leurs
+    notes ni les commentaires au comité. Le lien ne va qu'au soumissionnaire (F5)."""
+    submission = decision.submission
+    edition = submission.edition
+    submitter = submission.submitter
+    recipients: list[tuple[str, object]] = [(submitter.email, submitter)]
+    seen = {submitter.email.casefold()}
+    for author in submission.authors.all():
+        if author.email and author.email.casefold() not in seen:
+            seen.add(author.email.casefold())
+            recipients.append((author.email, author.user))
+    for email, user in recipients:
+        locale = resolve_locale(None, user)
+        with translation.override(locale):
+            reviews_text = "\n\n".join(
+                _("Relecteur %(rank)s :") % {"rank": item["pseudonym_rank"]}
+                + "\n"
+                + item["comment"]
+                for item in comments
+            )
+        kind = decision.assigned_type
+        assigned = ""
+        if kind is not None:
+            assigned = kind.label_en if locale == "en" and kind.label_en else kind.label_fr
+        is_submitter = user is not None and user.pk == submitter.pk
+        queue_email(
+            template_code=DECISION,
+            to_email=email,
+            to_user=user,
+            locale=locale,
+            context={
+                **_base_context(submission, locale),
+                "outcome": decision.outcome,
+                "assigned_type": assigned,
+                "chair_comment": decision.comment_to_authors,
+                "reviews": reviews_text,
+                "camera_ready": local_datetime(camera_ready, edition.timezone, locale)
+                if camera_ready
+                else "",
+                "link": submission_link(submission) if is_submitter else "",
+            },
+        )
+        payload = _payload(submission, outcome=decision.outcome)
+        if not is_submitter:
+            del payload["submission_id"]
+        notify(user, NotificationKind.DECISION_PUBLISHED, payload)
+
+
+def final_version_received(submission: Submission, stored) -> None:
+    """H18 : accusé de réception de la version finale (e-mail et cloche)."""
+    _send_to_submitter(FINAL_RECEIVED, submission, link=submission_link(submission))
+    notify(submission.submitter, NotificationKind.FINAL_VERSION_RECEIVED, _payload(submission))

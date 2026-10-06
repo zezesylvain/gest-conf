@@ -1,25 +1,73 @@
 """Évaluation dans la gestion (``/v1/manage/editions/{edition_id}/…``, plan L4 §4).
 
 ``ManageViewSet`` : 401 → 404 → 403, 2FA. Grilles : lecture ``edition.read``, écriture
-``grids.write`` (``ADMIN``, ``CHAIR``, ``SC_CHAIR``).
+``grids.write`` (``ADMIN``, ``CHAIR``, ``SC_CHAIR``). Recevabilité, affectations et conflits :
+``reviews.manage`` (``ADMIN``, ``CHAIR``, ``SC_CHAIR``) ; la levée d'un conflit exige une
+réauthentification récente (plan L4 §6). Évaluations de tous les relecteurs, avec leurs noms :
+``reviews.read_all`` (H11, H19).
 """
 
 from __future__ import annotations
 
+from decimal import Decimal, InvalidOperation
+
+import django_filters
+from django.db.models import Count, F, Prefetch, Q
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from drf_spectacular.utils import extend_schema
-from rest_framework import mixins, status
+from django.utils import timezone
+from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import OpenApiParameter, extend_schema
+from rest_framework import exceptions, mixins, status
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from apps.accounts.permissions import ManageViewSet
+from apps.accounts.models import User
+from apps.accounts.permissions import (
+    ManageViewSet,
+    RecentAuthRequired,
+    has_recent_authentication,
+)
 from apps.accounts.roles import Capability
 from apps.conferences.models import SubmissionType
 from apps.core.actor import Actor
-from apps.core.errors import Invalid
-from apps.reviews.models import EvaluationGrid
-from apps.reviews.serializers import GridCreateSerializer, GridSerializer, GridUpdateSerializer
-from apps.reviews.services import grids
+from apps.core.errors import ErrorCode, Invalid
+from apps.reviews.models import (
+    AssignmentStatus,
+    ConflictOfInterest,
+    Discussion,
+    DiscussionMessage,
+    EvaluationGrid,
+    ReviewAssignment,
+    ReviewStatus,
+)
+from apps.reviews.serializers import (
+    AssignmentCancelSerializer,
+    AssignmentCreateSerializer,
+    AssignmentManageSerializer,
+    AssignmentUpdateSerializer,
+    CandidateListSerializer,
+    ConflictCreateSerializer,
+    ConflictManageSerializer,
+    DecisionBatchResultSerializer,
+    DecisionBatchSerializer,
+    DecisionWriteSerializer,
+    GridCreateSerializer,
+    GridSerializer,
+    GridUpdateSerializer,
+    MessageCreateSerializer,
+    PublishResultSerializer,
+    RankingSerializer,
+    ReviewProgressSerializer,
+    ReviewSubmissionDetailSerializer,
+    ReviewSubmissionSerializer,
+    ScreeningSerializer,
+    SubmissionReviewsSerializer,
+)
+from apps.reviews.services import assignments, conflicts, decisions, grids
+from apps.reviews.services import reviews as review_services
+from apps.submissions.models import Submission, SubmissionStatus
 
 C = Capability
 
@@ -106,3 +154,499 @@ class GridViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, ManageViewSe
         """RG-05 : nouvelle version modifiable d'une grille (verrouillée ou non)."""
         grid = grids.duplicate_grid(self._grid(grid_id), actor=Actor.from_request(request))
         return Response(GridSerializer(self._grid(grid.pk)).data, status=status.HTTP_201_CREATED)
+
+
+# --- Recevabilité et affectations (L4.2) ------------------------------------------------------
+
+# Soumissions du suivi de l'évaluation : à partir de la recevabilité.
+NOT_IN_REVIEW = (SubmissionStatus.DRAFT, SubmissionStatus.SUBMITTED)
+
+
+def _reauthentication_required() -> exceptions.PermissionDenied:
+    return exceptions.PermissionDenied(
+        RecentAuthRequired.message, code=ErrorCode.REAUTHENTICATION_REQUIRED.value
+    )
+
+
+class ReviewSubmissionFilter(django_filters.FilterSet):
+    """Statut (plusieurs), thématique et type (codes), recherche (référence, titre),
+    relecteurs manquants, retards."""
+
+    status = django_filters.MultipleChoiceFilter(
+        choices=[c for c in SubmissionStatus.choices if c[0] not in NOT_IN_REVIEW]
+    )
+    track = django_filters.CharFilter(field_name="track__code")
+    submission_type = django_filters.CharFilter(field_name="submission_type__code")
+    q = django_filters.CharFilter(method="search", max_length=100)
+    missing = django_filters.BooleanFilter(method="filter_missing")
+    late = django_filters.BooleanFilter(method="filter_late")
+
+    class Meta:
+        model = Submission
+        fields = ("status", "track", "submission_type", "q", "missing", "late")
+
+    def search(self, queryset, name, value):
+        value = value.strip()
+        if not value:
+            return queryset
+        return queryset.filter(Q(reference__icontains=value) | Q(title__icontains=value))
+
+    def filter_missing(self, queryset, name, value):
+        required = F("edition__reviewers_per_submission")
+        if value:
+            return queryset.filter(assignment_count__lt=required)
+        return queryset.filter(assignment_count__gte=required)
+
+    def filter_late(self, queryset, name, value):
+        return queryset.filter(late_count__gt=0) if value else queryset.filter(late_count=0)
+
+
+class ReviewSubmissionViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, ManageViewSet):
+    """Suivi de l'évaluation par soumission (H6, H10)."""
+
+    queryset = Submission.objects.select_related("edition", "track", "submission_type")
+    serializer_class = ReviewSubmissionSerializer
+    lookup_url_kwarg = "submission_id"
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = ReviewSubmissionFilter
+    required_capabilities = {
+        "list": C.REVIEWS_MANAGE,
+        "retrieve": C.REVIEWS_MANAGE,
+        "screening": C.REVIEWS_MANAGE,
+        "candidates": C.REVIEWS_MANAGE,
+        "reviews": C.REVIEWS_READ_ALL,
+        "open_discussion": C.REVIEWS_MANAGE,
+        "post_message": C.REVIEWS_MANAGE,
+        "set_decision": C.DECISIONS_DECIDE,
+        "delete_decision": C.DECISIONS_DECIDE,
+        "promote": C.DECISIONS_PUBLISH,
+    }
+
+    def get_queryset(self):
+        active = Q(assignments__status=AssignmentStatus.ACTIVE)
+        pending = Q(assignments__review__isnull=True) | Q(
+            assignments__review__status=ReviewStatus.DRAFT
+        )
+        return (
+            super()
+            .get_queryset()
+            .exclude(status__in=NOT_IN_REVIEW)
+            .annotate(
+                assignment_count=Count("assignments", filter=active, distinct=True),
+                review_count=Count(
+                    "assignments",
+                    filter=active & Q(assignments__review__status=ReviewStatus.SUBMITTED),
+                    distinct=True,
+                ),
+                late_count=Count(
+                    "assignments",
+                    filter=active & pending & Q(assignments__due_at__lt=timezone.now()),
+                    distinct=True,
+                ),
+            )
+            .order_by(F("reference").asc(nulls_last=True), "id")
+        )
+
+    def _detail(self, submission_id: int) -> Submission:
+        person = ("reviewer__profile", "declared_by__profile", "overridden_by__profile")
+        queryset = self.get_queryset().prefetch_related(
+            Prefetch(
+                "assignments",
+                queryset=ReviewAssignment.objects.select_related(
+                    "reviewer__profile", "assigned_by__profile", "review"
+                ).order_by("pseudonym_rank", "id"),
+            ),
+            Prefetch(
+                "conflicts",
+                queryset=ConflictOfInterest.objects.select_related(*person).order_by("id"),
+            ),
+        )
+        return get_object_or_404(queryset, pk=submission_id)
+
+    @extend_schema(operation_id="manage_review_submissions_list")
+    def list(self, request: Request, *args, **kwargs) -> Response:
+        return super().list(request, *args, **kwargs)
+
+    @extend_schema(
+        operation_id="manage_review_submission_retrieve",
+        responses={200: ReviewSubmissionDetailSerializer},
+    )
+    def retrieve(self, request: Request, edition_id: int, submission_id: int) -> Response:
+        return Response(ReviewSubmissionDetailSerializer(self._detail(submission_id)).data)
+
+    @extend_schema(
+        operation_id="manage_review_submission_screening",
+        request=ScreeningSerializer,
+        responses={200: ReviewSubmissionDetailSerializer},
+    )
+    def screening(self, request: Request, edition_id: int, submission_id: int) -> Response:
+        """H10 : recevable (relecteurs requis affectés) ou rejet motivé, notifié à l'auteur."""
+        submission = get_object_or_404(self.get_queryset(), pk=submission_id)
+        serializer = ScreeningSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        assignments.screen(
+            submission,
+            admissible=serializer.validated_data["decision"] == "admissible",
+            reason=serializer.validated_data["reason"],
+            actor=Actor.from_request(request),
+        )
+        return Response(ReviewSubmissionDetailSerializer(self._detail(submission_id)).data)
+
+    @extend_schema(
+        operation_id="manage_review_submission_candidates",
+        responses={200: CandidateListSerializer},
+    )
+    def candidates(self, request: Request, edition_id: int, submission_id: int) -> Response:
+        """Relecteurs de l'édition : charge, expertises, affectation, conflits (H6 à H8)."""
+        submission = get_object_or_404(
+            Submission.objects.select_related("edition", "track")
+            .prefetch_related("authors")
+            .exclude(status__in=NOT_IN_REVIEW),
+            edition=self.edition,
+            pk=submission_id,
+        )
+        payload = {
+            "max_load": self.edition.max_reviews_per_reviewer,
+            "track": submission.track.code if submission.track else None,
+            "candidates": assignments.candidates(submission),
+        }
+        return Response(CandidateListSerializer(payload).data)
+
+    def _reviews_payload(self, submission: Submission) -> Response:
+        state = review_services.summary(submission)
+        discussion = Discussion.objects.filter(submission=submission).first()
+        messages = (
+            DiscussionMessage.objects.filter(discussion=discussion)
+            .select_related("author__profile")
+            .order_by("at", "id")
+            if discussion is not None
+            else DiscussionMessage.objects.none()
+        )
+        payload = {
+            "final_score": state.final,
+            "spread": state.spread,
+            "threshold": submission.edition.divergence_threshold,
+            "divergent": state.divergent,
+            "reviews": state.reviews,
+            "discussion_opened_at": discussion.opened_at if discussion else None,
+            "messages": list(messages),
+        }
+        context = {"ranks": review_services.pseudonyms(submission)}
+        return Response(SubmissionReviewsSerializer(payload, context=context).data)
+
+    def _in_review(self, submission_id: int) -> Submission:
+        return get_object_or_404(self.get_queryset(), pk=submission_id)
+
+    @extend_schema(
+        operation_id="manage_review_submission_reviews",
+        responses={200: SubmissionReviewsSerializer},
+    )
+    def reviews(self, request: Request, edition_id: int, submission_id: int) -> Response:
+        """Évaluations envoyées, noms des relecteurs, note finale, divergence, discussion."""
+        return self._reviews_payload(self._in_review(submission_id))
+
+    @extend_schema(
+        operation_id="manage_review_submission_discussion_open",
+        request=None,
+        responses={200: SubmissionReviewsSerializer},
+    )
+    def open_discussion(self, request: Request, edition_id: int, submission_id: int) -> Response:
+        """RG-08 : ouverture par le président (sinon automatique au dernier envoi)."""
+        submission = self._in_review(submission_id)
+        review_services.open_discussion_by_chair(submission, actor=Actor.from_request(request))
+        return self._reviews_payload(submission)
+
+    @extend_schema(
+        operation_id="manage_review_submission_discussion_message",
+        request=MessageCreateSerializer,
+        responses={201: SubmissionReviewsSerializer},
+    )
+    def post_message(self, request: Request, edition_id: int, submission_id: int) -> Response:
+        submission = self._in_review(submission_id)
+        serializer = MessageCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        review_services.post_message(
+            submission, serializer.validated_data["body"], actor=Actor.from_request(request)
+        )
+        response = self._reviews_payload(submission)
+        response.status_code = status.HTTP_201_CREATED
+        return response
+
+    @extend_schema(
+        operation_id="manage_review_submission_decision",
+        request=DecisionWriteSerializer,
+        responses={200: ReviewSubmissionDetailSerializer},
+    )
+    def set_decision(self, request: Request, edition_id: int, submission_id: int) -> Response:
+        """Décision provisoire (H16) : issue, format attribué, message aux auteurs."""
+        submission = self._in_review(submission_id)
+        serializer = DecisionWriteSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        decisions.record_decision(
+            submission,
+            outcome=data["outcome"],
+            assigned_type=data["assigned_type"],
+            comment_to_authors=data["comment_to_authors"],
+            actor=Actor.from_request(request),
+        )
+        return Response(ReviewSubmissionDetailSerializer(self._detail(submission_id)).data)
+
+    @extend_schema(
+        operation_id="manage_review_submission_decision_delete",
+        responses={200: ReviewSubmissionDetailSerializer},
+    )
+    def delete_decision(self, request: Request, edition_id: int, submission_id: int) -> Response:
+        """Annule une décision **provisoire**."""
+        decisions.cancel_decision(self._in_review(submission_id), actor=Actor.from_request(request))
+        return Response(ReviewSubmissionDetailSerializer(self._detail(submission_id)).data)
+
+    @extend_schema(
+        operation_id="manage_review_submission_promote",
+        request=None,
+        responses={200: ReviewSubmissionDetailSerializer},
+    )
+    def promote(self, request: Request, edition_id: int, submission_id: int) -> Response:
+        """Liste d'attente → acceptée, après publication (H16) ; auteurs prévenus."""
+        decisions.promote(self._in_review(submission_id), actor=Actor.from_request(request))
+        return Response(ReviewSubmissionDetailSerializer(self._detail(submission_id)).data)
+
+
+class DecisionViewSet(ManageViewSet):
+    """Décisions en lot, publication (RG-09), classement et simulation (US-06), export."""
+
+    queryset = Submission.objects.all()
+    pagination_class = None
+    filter_backends = ()
+    required_capabilities = {
+        "batch": C.DECISIONS_DECIDE,
+        "publish": C.DECISIONS_PUBLISH,
+        "ranking": C.REVIEWS_READ_ALL,
+        "export": C.REVIEWS_READ_ALL,
+    }
+
+    @extend_schema(
+        operation_id="manage_decisions_batch",
+        request=DecisionBatchSerializer,
+        responses={200: DecisionBatchResultSerializer},
+    )
+    def batch(self, request: Request, edition_id: int) -> Response:
+        """Décisions provisoires en lot : tout ou rien (refus rendus par ligne)."""
+        serializer = DecisionBatchSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        items = serializer.validated_data["items"]
+        found = {
+            row.pk: row
+            for row in Submission.objects.filter(
+                edition=self.edition, pk__in=[item["submission"] for item in items]
+            )
+        }
+        missing = [str(i) for i, item in enumerate(items) if item["submission"] not in found]
+        if missing:
+            raise Invalid(fields={index: [Invalid.default_message] for index in missing})
+        recorded = decisions.record_decisions(
+            self.edition,
+            [{**item, "submission": found[item["submission"]]} for item in items],
+            actor=Actor.from_request(request),
+        )
+        return Response({"recorded": len(recorded)})
+
+    @extend_schema(
+        operation_id="manage_decisions_publish",
+        request=None,
+        responses={200: PublishResultSerializer},
+    )
+    def publish(self, request: Request, edition_id: int) -> Response:
+        """RG-09 : publie les décisions provisoires (réauthentification récente, journal)."""
+        if not has_recent_authentication(request):
+            raise _reauthentication_required()
+        count = decisions.publish_decisions(self.edition, actor=Actor.from_request(request))
+        return Response({"published": count})
+
+    @extend_schema(
+        operation_id="manage_ranking",
+        parameters=[
+            OpenApiParameter("threshold", OpenApiTypes.DECIMAL, required=False),
+            OpenApiParameter("track", str, required=False),
+            OpenApiParameter("submission_type", str, required=False),
+        ],
+        responses={200: RankingSerializer},
+    )
+    def ranking(self, request: Request, edition_id: int) -> Response:
+        """Classement par note finale ; avec ``threshold``, simulation du seuil (US-06)."""
+        params = request.query_params
+        rows = decisions.ranking(
+            self.edition,
+            track=params.get("track") or None,
+            submission_type=params.get("submission_type") or None,
+        )
+        simulation = None
+        if params.get("threshold"):
+            try:
+                threshold = Decimal(params["threshold"])
+            except InvalidOperation as error:
+                raise Invalid(fields={"threshold": [Invalid.default_message]}) from error
+            if not threshold.is_finite() or not Decimal(0) <= threshold <= Decimal(100):
+                raise Invalid(fields={"threshold": [Invalid.default_message]})
+            simulation = decisions.simulate(rows, threshold)
+        return Response(RankingSerializer({"rows": rows, "simulation": simulation}).data)
+
+    @extend_schema(
+        operation_id="manage_reviews_export",
+        responses={(200, "text/csv"): OpenApiTypes.BINARY},
+    )
+    def export(self, request: Request, edition_id: int) -> HttpResponse:
+        """Évaluations nominatives en CSV (réauthentification récente, journal : RG-17)."""
+        if not has_recent_authentication(request):
+            raise _reauthentication_required()
+        content = decisions.export_reviews_csv(self.edition, actor=Actor.from_request(request))
+        response = HttpResponse(content, content_type="text/csv; charset=utf-8")
+        name = f"evaluations-{self.edition.code}-{timezone.now():%Y%m%d}.csv"
+        response["Content-Disposition"] = f'attachment; filename="{name}"'
+        response["X-Content-Type-Options"] = "nosniff"
+        response["Cache-Control"] = "private, no-store"
+        return response
+
+
+class ReviewProgressViewSet(ManageViewSet):
+    """Suivi de l'évaluation (plan L4 §4) : par relecteur, par thématique, divergences."""
+
+    queryset = Submission.objects.all()
+    pagination_class = None
+    filter_backends = ()
+    required_capabilities = {"progress": C.REVIEWS_MANAGE}
+
+    @extend_schema(operation_id="manage_review_progress", responses={200: ReviewProgressSerializer})
+    def progress(self, request: Request, edition_id: int) -> Response:
+        return Response(ReviewProgressSerializer(review_services.progress(self.edition)).data)
+
+
+class AssignmentViewSet(ManageViewSet):
+    """Affectations (H6, H8, H15) : création, échéance, annulation motivée."""
+
+    queryset = ReviewAssignment.objects.all()
+    serializer_class = AssignmentManageSerializer
+    lookup_url_kwarg = "assignment_id"
+    required_capabilities = {
+        "create": C.REVIEWS_MANAGE,
+        "partial_update": C.REVIEWS_MANAGE,
+        "cancel": C.REVIEWS_MANAGE,
+    }
+
+    def get_queryset(self):
+        # Pas de champ « edition » : rattachement par la soumission.
+        return ReviewAssignment.objects.filter(submission__edition=self.edition).select_related(
+            "submission__edition", "reviewer__profile", "assigned_by__profile", "review"
+        )
+
+    def _assignment(self, assignment_id: int) -> ReviewAssignment:
+        return get_object_or_404(self.get_queryset(), pk=assignment_id)
+
+    def _submission(self, pk: int) -> Submission:
+        submission = Submission.objects.filter(edition=self.edition, pk=pk).first()
+        if submission is None:
+            raise Invalid(fields={"submission": [Invalid.default_message]})
+        return submission
+
+    def _reviewer(self, pk: int) -> User:
+        reviewer = User.objects.filter(pk=pk).first()
+        if reviewer is None:
+            raise Invalid(fields={"reviewer": [Invalid.default_message]})
+        return reviewer
+
+    @extend_schema(
+        operation_id="manage_assignment_create",
+        request=AssignmentCreateSerializer,
+        responses={201: AssignmentManageSerializer},
+    )
+    def create(self, request: Request, edition_id: int) -> Response:
+        serializer = AssignmentCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        submission = self._submission(data["submission"])
+        reviewer = self._reviewer(data["reviewer"])
+        override_reason = data["override_reason"].strip()
+        if override_reason and not has_recent_authentication(request):
+            found = conflicts.blocking_conflicts(submission, reviewer)
+            # Levée effective d'un conflit : réauthentification récente (plan L4 §6).
+            if found and all(conflict.overridable for conflict in found):
+                raise _reauthentication_required()
+        assignment = assignments.assign(
+            submission,
+            reviewer,
+            actor=Actor.from_request(request),
+            due_local=data.get("due_local"),
+            override_reason=override_reason,
+        )
+        return Response(
+            AssignmentManageSerializer(self._assignment(assignment.pk)).data,
+            status=status.HTTP_201_CREATED,
+        )
+
+    @extend_schema(
+        operation_id="manage_assignment_update",
+        request=AssignmentUpdateSerializer,
+        responses={200: AssignmentManageSerializer},
+    )
+    def partial_update(self, request: Request, edition_id: int, assignment_id: int) -> Response:
+        assignment = self._assignment(assignment_id)
+        serializer = AssignmentUpdateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        assignments.change_due_date(
+            assignment,
+            due_local=serializer.validated_data["due_local"],
+            actor=Actor.from_request(request),
+        )
+        return Response(AssignmentManageSerializer(self._assignment(assignment_id)).data)
+
+    @extend_schema(
+        operation_id="manage_assignment_cancel",
+        request=AssignmentCancelSerializer,
+        responses={200: AssignmentManageSerializer},
+    )
+    def cancel(self, request: Request, edition_id: int, assignment_id: int) -> Response:
+        assignment = self._assignment(assignment_id)
+        serializer = AssignmentCancelSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        assignments.cancel_assignment(
+            assignment,
+            reason=serializer.validated_data["reason"],
+            actor=Actor.from_request(request),
+        )
+        return Response(AssignmentManageSerializer(self._assignment(assignment_id)).data)
+
+
+class ConflictViewSet(ManageViewSet):
+    """Conflit déclaré par le président (H8) ; annule l'affectation active éventuelle."""
+
+    queryset = ConflictOfInterest.objects.all()
+    serializer_class = ConflictManageSerializer
+    required_capabilities = {"create": C.REVIEWS_MANAGE}
+
+    def get_queryset(self):
+        return ConflictOfInterest.objects.filter(submission__edition=self.edition)
+
+    @extend_schema(
+        operation_id="manage_conflict_create",
+        request=ConflictCreateSerializer,
+        responses={201: ConflictManageSerializer},
+    )
+    def create(self, request: Request, edition_id: int) -> Response:
+        serializer = ConflictCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        submission = Submission.objects.filter(edition=self.edition, pk=data["submission"]).first()
+        if submission is None:
+            raise Invalid(fields={"submission": [Invalid.default_message]})
+        reviewer = User.objects.filter(pk=data["reviewer"]).first()
+        if reviewer is None:
+            raise Invalid(fields={"reviewer": [Invalid.default_message]})
+        conflict = conflicts.declare_conflict(
+            submission, reviewer, reason=data["reason"], actor=Actor.from_request(request)
+        )
+        conflict = (
+            self.get_queryset()
+            .select_related("reviewer__profile", "declared_by__profile", "overridden_by__profile")
+            .get(pk=conflict.pk)
+        )
+        return Response(ConflictManageSerializer(conflict).data, status=status.HTTP_201_CREATED)

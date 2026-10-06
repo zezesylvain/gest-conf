@@ -7,7 +7,9 @@ mises en file dans la même transaction, envoyées après validation). Un méta-
 qu'aucun autre module n'écrit ``status``.
 
 La table reprend **toutes** les transitions de l'étude ; celles des lots suivants sont
-déclarées mais refusées (``invalid_transition``) jusqu'à leur lot.
+déclarées mais refusées (``invalid_transition``) jusqu'à leur lot. Les gardes propres à
+d'autres applications (relecteurs affectés, plan L4) s'inscrivent par ``register_guard`` :
+le workflow ne dépend pas d'elles.
 """
 
 from __future__ import annotations
@@ -18,9 +20,12 @@ from datetime import datetime
 from enum import StrEnum
 
 from django.db import transaction
+from django.http import Http404
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from apps.accounts.roles import Capability
+from apps.accounts.services.access import edition_access
 from apps.conferences.models import EditionStatus
 from apps.core.actor import Actor, ActorKind
 from apps.core.audit import record
@@ -32,11 +37,11 @@ from apps.submissions.services import active_extension, call_closed_at, can_writ
 
 
 class Who(StrEnum):
-    """Qui peut déclencher une transition (les droits fins des comités arrivent en L4)."""
+    """Qui peut déclencher une transition."""
 
     SUBMITTER = "submitter"
     SYSTEM = "system"  # commande ou tâche planifiée
-    SC = "sc"  # président du CS (L4)
+    SC = "sc"  # détenteur de la capacité de la règle dans l'édition (président du CS, L4)
     ORGANIZERS = "organizers"  # CO, présence, inscription (L5 à L7)
 
 
@@ -45,7 +50,12 @@ class Rule:
     who: Who
     lot: str  # lot qui active la transition
     available: bool = False
+    # Capacité exigée de l'acteur pour ``Who.SC`` (règle n° 2 : revérifiée ici, pas
+    # seulement par la vue).
+    capability: Capability | None = None
 
+
+PUBLISH = Capability.DECISIONS_PUBLISH
 
 # Étude §5.1, transition par transition. REVISION_REQUESTED (statut de M6) n'a aucune
 # transition dans le diagramme de l'étude : écart signalé, à préciser en L4.
@@ -54,17 +64,26 @@ TRANSITIONS: dict[tuple[str, str], Rule] = {
     (S.SUBMITTED, S.SCREENING): Rule(Who.SYSTEM, "L3", available=True),
     (S.DRAFT, S.WITHDRAWN): Rule(Who.SUBMITTER, "L3", available=True),
     (S.SUBMITTED, S.WITHDRAWN): Rule(Who.SUBMITTER, "L3", available=True),
-    (S.SCREENING, S.UNDER_REVIEW): Rule(Who.SC, "L4"),
-    (S.SCREENING, S.REJECTED): Rule(Who.SC, "L4"),
-    (S.UNDER_REVIEW, S.REVIEWED): Rule(Who.SYSTEM, "L4"),
-    (S.REVIEWED, S.ACCEPTED): Rule(Who.SC, "L4"),
-    (S.REVIEWED, S.ACCEPTED_MINOR): Rule(Who.SC, "L4"),
-    (S.REVIEWED, S.WAITLIST): Rule(Who.SC, "L4"),
-    (S.REVIEWED, S.REJECTED): Rule(Who.SC, "L4"),
-    (S.WAITLIST, S.ACCEPTED): Rule(Who.SC, "L4"),
-    (S.ACCEPTED, S.CAMERA_READY_RECEIVED): Rule(Who.SUBMITTER, "L4"),
-    (S.ACCEPTED_MINOR, S.CAMERA_READY_RECEIVED): Rule(Who.SUBMITTER, "L4"),
-    (S.ACCEPTED, S.WITHDRAWN): Rule(Who.SUBMITTER, "L4"),
+    # H10 : recevabilité par le président du CS (ou le Chair), ``reviews.manage``.
+    (S.SCREENING, S.UNDER_REVIEW): Rule(
+        Who.SC, "L4", available=True, capability=Capability.REVIEWS_MANAGE
+    ),
+    (S.SCREENING, S.REJECTED): Rule(
+        Who.SC, "L4", available=True, capability=Capability.REVIEWS_MANAGE
+    ),
+    # RG-07 : automatique, au dernier envoi requis (garde inscrite par l'application reviews).
+    (S.UNDER_REVIEW, S.REVIEWED): Rule(Who.SYSTEM, "L4", available=True),
+    # RG-09, H16 : publication des décisions par le président (« decisions.publish ») ; la
+    # garde de l'application reviews exige la décision correspondante.
+    (S.REVIEWED, S.ACCEPTED): Rule(Who.SC, "L4", available=True, capability=PUBLISH),
+    (S.REVIEWED, S.ACCEPTED_MINOR): Rule(Who.SC, "L4", available=True, capability=PUBLISH),
+    (S.REVIEWED, S.WAITLIST): Rule(Who.SC, "L4", available=True, capability=PUBLISH),
+    (S.REVIEWED, S.REJECTED): Rule(Who.SC, "L4", available=True, capability=PUBLISH),
+    (S.WAITLIST, S.ACCEPTED): Rule(Who.SC, "L4", available=True, capability=PUBLISH),
+    # H18 : version finale déposée par le soumissionnaire ; retrait après acceptation.
+    (S.ACCEPTED, S.CAMERA_READY_RECEIVED): Rule(Who.SUBMITTER, "L4", available=True),
+    (S.ACCEPTED_MINOR, S.CAMERA_READY_RECEIVED): Rule(Who.SUBMITTER, "L4", available=True),
+    (S.ACCEPTED, S.WITHDRAWN): Rule(Who.SUBMITTER, "L4", available=True),
     (S.CAMERA_READY_RECEIVED, S.CONFIRMED): Rule(Who.SYSTEM, "L6"),
     (S.CONFIRMED, S.SCHEDULED): Rule(Who.ORGANIZERS, "L5"),
     (S.SCHEDULED, S.PRESENTED): Rule(Who.ORGANIZERS, "L7"),
@@ -76,10 +95,20 @@ TRANSITIONS: dict[tuple[str, str], Rule] = {
 type Effect = Callable[[Submission, str, str, Actor], None]
 _EFFECTS: list[Effect] = []
 
+# Gardes inscrites par d'autres applications : f(submission, to_status, now), qui lèvent une
+# ``DomainError`` pour refuser (soumission verrouillée, rien n'est encore écrit).
+type Guard = Callable[[Submission, str, datetime], None]
+_GUARDS: list[Guard] = []
+
 
 def register_effect(effect: Effect) -> None:
     if effect not in _EFFECTS:
         _EFFECTS.append(effect)
+
+
+def register_guard(guard: Guard) -> None:
+    if guard not in _GUARDS:
+        _GUARDS.append(guard)
 
 
 def allowed_targets(submission: Submission) -> list[str]:
@@ -98,7 +127,16 @@ def _check_actor(rule: Rule, submission: Submission, actor: Actor) -> None:
     elif rule.who == Who.SYSTEM:
         if actor.kind not in (ActorKind.SYSTEM, ActorKind.COMMAND):
             raise NotAllowed()
-    else:  # pragma: no cover - aucune transition disponible de ces familles en L3
+    elif rule.who == Who.SC and rule.capability is not None:
+        if actor.kind != ActorKind.USER or actor.user is None:
+            raise NotAllowed()
+        try:
+            access = edition_access(actor.user, submission.edition_id)
+        except Http404 as error:
+            raise NotAllowed() from error
+        if not access.has(rule.capability):
+            raise NotAllowed()
+    else:  # pragma: no cover - aucune transition disponible de cette famille avant L5
         raise NotAllowed()
 
 
@@ -123,6 +161,11 @@ def _guard(submission: Submission, to_state: str, reason: str, now: datetime) ->
             )
     elif to_state == S.WITHDRAWN and submission.status != S.DRAFT and not reason.strip():
         raise Invalid(fields={"reason": [_("Motif obligatoire.")]})
+    elif to_state == S.REJECTED and submission.status == S.SCREENING and not reason.strip():
+        # Étude §5.2 : rejet de recevabilité motivé, notifié à l'auteur.
+        raise Invalid(fields={"reason": [_("Motif obligatoire.")]})
+    for guard in list(_GUARDS):
+        guard(submission, to_state, now)
 
 
 @transaction.atomic

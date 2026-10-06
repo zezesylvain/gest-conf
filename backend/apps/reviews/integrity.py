@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from decimal import Decimal
 
-from django.db.models import Sum
+from django.db.models import F, Q, Sum
 
-from apps.reviews.models import EvaluationGrid, Review
+from apps.reviews.models import AssignmentStatus, EvaluationGrid, Review, ReviewAssignment
 from apps.reviews.services.scoring import CriterionWeight, weighted_score
 
 
@@ -39,4 +39,22 @@ def check_review_scores() -> list[str]:
     for review in reviews:
         if review.weighted_score is not None and review_score(review) != review.weighted_score:
             problems.append(f"évaluation {review.pk} : note stockée différente du calcul")
+    return problems
+
+
+def check_assignments() -> list[str]:
+    """H6, H8 : clé active renseignée si et seulement si l'affectation est active ; aucune
+    affectation active d'un relecteur auteur de la soumission (conflit jamais levable)."""
+    problems = []
+    inconsistent = ReviewAssignment.objects.filter(
+        Q(status=AssignmentStatus.ACTIVE, active_key__isnull=True)
+        | (~Q(status=AssignmentStatus.ACTIVE) & Q(active_key__isnull=False))
+    )
+    for pk in inconsistent.values_list("pk", flat=True):
+        problems.append(f"affectation {pk} : clé active incohérente avec le statut")
+    author = ReviewAssignment.objects.filter(status=AssignmentStatus.ACTIVE).filter(
+        Q(reviewer=F("submission__submitter")) | Q(submission__authors__user=F("reviewer"))
+    )
+    for pk in author.values_list("pk", flat=True).distinct():
+        problems.append(f"affectation {pk} : le relecteur est auteur de la soumission")
     return problems

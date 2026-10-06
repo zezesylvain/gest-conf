@@ -349,12 +349,14 @@
         "new": "New submission ({{edition}})",
         "closed": "The call for papers is not open: no new submission is possible.",
         "empty": "You have no submissions yet.",
-        "profileIncomplete": "Complete your profile (first name, last name, institution, country) before submitting."
+        "profileIncomplete": "Complete your profile (first name, last name, institution, country) before submitting.",
+        "finalDue": "final version due by {{date}}"
       },
       "edit": {
         "title": "Submission",
         "titleWithReference": "Submission {{reference}}",
         "lead": "Complete each step; the summary shows what is missing before you submit.",
+        "leadDecided": "Read the committee's decision and, if requested, upload the final version.",
         "back": "← My submissions",
         "editableUntil": "can be edited until {{date}}",
         "readOnly": "read only"
@@ -458,6 +460,44 @@
         "confirm": "Withdraw permanently",
         "done": "Submission withdrawn."
       },
+      "decision": {
+        "title": "Committee's decision",
+        "publishedAt": "published on {{date}}",
+        "assignedType": "Assigned format: {{type}}",
+        "outcomes": {
+          "accepted": "Accepted",
+          "accepted_minor": "Accepted with minor revisions",
+          "waitlist": "Waiting list",
+          "rejected": "Not accepted"
+        },
+        "next": {
+          "accepted": "Upload the final version before the deadline below.",
+          "accepted_minor": "Revise your paper according to the reviewers' comments, then upload the final version with a response letter to the reviewers.",
+          "waitlist": "Your paper is on the waiting list: you will be notified by e-mail if a slot becomes available.",
+          "rejected": "Thank you for your submission. The reviewers' comments may help you with a future version."
+        },
+        "committee": "Committee's message",
+        "reviews": "Reviewers' comments",
+        "reviewer": "Reviewer {{rank}}",
+        "noReviews": "No comments from the reviewers."
+      },
+      "final": {
+        "title": "Final version",
+        "deadline": "Due before {{date}}.",
+        "details": "version {{version}}, uploaded on {{date}}",
+        "lead": "Non-anonymous version (authors' names and affiliations), as a PDF. A new upload replaces the previous one.",
+        "choose": "PDF file of the final version",
+        "replace": "Replace the final version (PDF)",
+        "letter": "Response letter to the reviewers",
+        "letterHint": "Optional: explain how the comments were addressed.",
+        "letterHintRequired": "Required: explain how each comment was addressed.",
+        "submit": "Upload the final version",
+        "saved": "Final version uploaded.",
+        "closed": "The deadline for the final version has passed.",
+        "fileRequired": "Choose the PDF file of the final version.",
+        "letterRequired": "The response letter to the reviewers is required.",
+        "letterTooLong": "The response letter is too long."
+      },
       "timeline": {
         "title": "History",
         "revisions": "{{count}} version(s) recorded after submission."
@@ -474,7 +514,10 @@
         "submission_withdrawn": "Your submission {{reference}} “{{title}}” has been withdrawn.",
         "coauthor_added": "You have been listed as a co-author of submission {{reference}} “{{title}}” ({{edition}}).",
         "extension_granted": "Extended deadline for your submission {{reference}} “{{title}}”, until {{until}}.",
-        "draft_reminder": "Your draft “{{title}}” has not been submitted yet: the call closes on {{closes}}."
+        "draft_reminder": "Your draft “{{title}}” has not been submitted yet: the call closes on {{closes}}.",
+        "screening_rejected": "Your submission {{reference}} “{{title}}” was found inadmissible: it will not be reviewed.",
+        "decision_published": "Decision published for your submission {{reference}} “{{title}}”.",
+        "final_version_received": "Final version received for your submission {{reference}} “{{title}}”."
       }
     }
   }

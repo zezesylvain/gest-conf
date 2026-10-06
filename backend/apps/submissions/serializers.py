@@ -90,7 +90,43 @@ class DeclarationStateSerializer(serializers.Serializer):
 
 
 # Actions offertes à l'auteur (énumération « SubmissionAction » du schéma).
-SUBMISSION_ACTION_CHOICES = [("submit", "submit"), ("withdraw", "withdraw")]
+SUBMISSION_ACTION_CHOICES = [
+    ("submit", "submit"),
+    ("withdraw", "withdraw"),
+    ("final_version", "final_version"),
+]
+
+
+class AuthorReviewCommentSerializer(serializers.Serializer):
+    """RG-10 : commentaire d'un relecteur, sous pseudonyme ; ni nom, ni note."""
+
+    pseudonym_rank = serializers.IntegerField()
+    comment = serializers.CharField()
+
+
+class AuthorDecisionTypeSerializer(serializers.Serializer):
+    code = serializers.CharField()
+    label_fr = serializers.CharField()
+    label_en = serializers.CharField()
+
+
+class AuthorDecisionSerializer(serializers.Serializer):
+    outcome = serializers.CharField(help_text="accepted, accepted_minor, waitlist, rejected.")
+    assigned_type = AuthorDecisionTypeSerializer(allow_null=True)
+    comment_to_authors = serializers.CharField(help_text="Message du comité.")
+    published_at = serializers.DateTimeField()
+    reviews = AuthorReviewCommentSerializer(many=True)
+
+
+class FinalVersionSerializer(serializers.Serializer):
+    submitted_at = serializers.DateTimeField()
+    response_letter = serializers.CharField()
+    file = SubmissionFileSerializer()
+
+
+class FinalVersionUploadSerializer(serializers.Serializer):
+    file = serializers.FileField()
+    response_letter = serializers.CharField(required=False, allow_blank=True, default="")
 
 
 class SubmissionSerializer(serializers.ModelSerializer):
@@ -117,6 +153,13 @@ class SubmissionSerializer(serializers.ModelSerializer):
         help_text="Fin de la période de modification : dérogation en cours, sinon clôture."
     )
     allowed_actions = serializers.SerializerMethodField()
+    decision = serializers.SerializerMethodField(
+        help_text="RG-09 : décision publiée seulement ; RG-10 : commentaires sous pseudonyme."
+    )
+    final_version = serializers.SerializerMethodField(help_text="Version finale déposée (H18).")
+    final_deadline = serializers.SerializerMethodField(
+        help_text="Date limite de la version finale (date clé camera_ready)."
+    )
 
     class Meta:
         model = Submission
@@ -145,8 +188,47 @@ class SubmissionSerializer(serializers.ModelSerializer):
             "can_edit",
             "deadline",
             "allowed_actions",
+            "decision",
+            "final_version",
+            "final_deadline",
         )
         read_only_fields = fields
+
+    @extend_schema_field(AuthorDecisionSerializer(allow_null=True))
+    def get_decision(self, submission: Submission) -> dict | None:
+        from apps.reviews.services.decisions import comments_for_authors, published_decision
+
+        decision = published_decision(submission)
+        if decision is None:
+            return None
+        return AuthorDecisionSerializer(
+            {
+                "outcome": decision.outcome,
+                "assigned_type": decision.assigned_type,
+                "comment_to_authors": decision.comment_to_authors,
+                "published_at": decision.published_at,
+                "reviews": comments_for_authors(submission),
+            }
+        ).data
+
+    @extend_schema_field(FinalVersionSerializer(allow_null=True))
+    def get_final_version(self, submission: Submission) -> dict | None:
+        from apps.reviews.models import FinalVersion
+
+        final = FinalVersion.objects.filter(submission=submission).select_related("file").first()
+        return FinalVersionSerializer(final).data if final is not None else None
+
+    @extend_schema_field(serializers.DateTimeField(allow_null=True))
+    def get_final_deadline(self, submission: Submission) -> Any:
+        from apps.conferences.models import KeyDateCode
+
+        if submission.status not in (
+            SubmissionStatus.ACCEPTED,
+            SubmissionStatus.ACCEPTED_MINOR,
+            SubmissionStatus.CAMERA_READY_RECEIVED,
+        ):
+            return None
+        return services.key_date(submission.edition, KeyDateCode.CAMERA_READY)
 
     @extend_schema_field(SubmissionFileSerializer(allow_null=True))
     def get_file(self, submission: Submission) -> dict | None:
@@ -196,6 +278,10 @@ class SubmissionSerializer(serializers.ModelSerializer):
             actions.append("submit")
         if SubmissionStatus.WITHDRAWN in targets:
             actions.append("withdraw")
+        if SubmissionStatus.CAMERA_READY_RECEIVED in targets or (
+            submission.status == SubmissionStatus.CAMERA_READY_RECEIVED
+        ):
+            actions.append("final_version")
         return actions
 
 

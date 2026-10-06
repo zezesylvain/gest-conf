@@ -27,7 +27,8 @@
         "portal": "Portail",
         "control": "Contrôle",
         "help": "Aide",
-        "submissions": "Soumissions"
+        "submissions": "Soumissions",
+        "reviewing": "Évaluation"
       },
       "keywords": {
         "dashboard": "accueil, statut, publier, publication, archiver, état, résumé",
@@ -35,7 +36,7 @@
         "tracks": "thèmes, axes, sujets, domaines",
         "types": "formats, oral, poster, atelier, communication, résumé, durée",
         "calendar": "dates clés, échéances, appel, ouverture, clôture, inscriptions, notification",
-        "confidentiality": "double aveugle, anonymat, relecteurs, évaluateurs, évaluation",
+        "confidentiality": "double aveugle, anonymat, relecteurs, évaluateurs, évaluation, charge, divergence, confiance, note finale",
         "members": "rôles, comité, utilisateurs, équipe, retirer, révoquer, personnes",
         "invitations": "inviter, ajouter, membre, relance, e-mail, comité",
         "audit": "historique, traces, qui a fait, modifications, audit",
@@ -44,13 +45,23 @@
         "portalPages": "composer, composeur, page personnalisée, informations pratiques, site",
         "portalMenus": "navigation, liens, en-tête, pied de page",
         "portalFiles": "modèle, téléchargement, pdf, fichier, affiche, image, photo",
-        "submissions": "propositions, communications, articles, résumés, auteurs, dérogation, délai, export, csv, références"
+        "submissions": "propositions, communications, articles, résumés, auteurs, dérogation, délai, export, csv, références",
+        "myReviews": "relecture, relecteur, évaluer, noter, grille, recommandation, discussion, décliner",
+        "expertise": "thématiques, compétences, domaines, spécialités, relecteur",
+        "followUp": "recevabilité, affecter, affectation, relecteurs, conflits, retards, relances, divergence, discussion",
+        "ranking": "classement, seuil, simulation, décision, publier, résultats, liste d'attente, export, csv",
+        "grids": "critères, pondération, poids, barème, échelle, notation, version"
       },
       "portalSections": "Sections",
       "portalPages": "Pages",
       "portalMenus": "Menus",
       "portalFiles": "Documents et images",
-      "submissions": "Soumissions"
+      "submissions": "Soumissions",
+      "myReviews": "Mes évaluations",
+      "expertise": "Mes expertises",
+      "followUp": "Pilotage de l'évaluation",
+      "ranking": "Classement et décisions",
+      "grids": "Grilles d'évaluation"
     },
     "status": {
       "draft": "brouillon",
@@ -149,6 +160,13 @@
         "title": "Soumissions",
         "summary": "{{total}} soumission(s) envoyée(s), {{drafts}} brouillon(s) en cours.",
         "see": "Voir les soumissions"
+      },
+      "reviewing": {
+        "title": "Évaluation",
+        "counts": "{{screening}} en recevabilité, {{underReview}} en évaluation, {{reviewed}} évaluée(s).",
+        "alerts": "{{divergent}} soumission(s) aux évaluations divergentes, {{late}} évaluation(s) en retard.",
+        "followUp": "Pilotage de l'évaluation",
+        "ranking": "Classement et décisions"
       }
     },
     "fields": {
@@ -228,10 +246,16 @@
         "labelHint": "Obligatoire pour un code libre."
       },
       "confidentiality": {
-        "title": "Confidentialité de l'évaluation",
+        "title": "Confidentialité et paramètres de l'évaluation",
         "doubleBlind": "Évaluation en double aveugle",
         "doubleBlindHint": "Les relecteurs ne voient ni le nom, ni l'adresse, ni l'affiliation des auteurs.",
         "reviewers": "Relecteurs par soumission (1 à 10)",
+        "maxReviews": "Charge maximale par relecteur",
+        "maxReviewsHint": "De 1 à 100 évaluations actives ; au-delà, une nouvelle affectation est refusée.",
+        "divergence": "Seuil de divergence (sur 100)",
+        "divergenceHint": "De 0 à 100 : écart entre deux notes au-delà duquel la soumission est signalée.",
+        "confidenceWeighted": "Note finale pondérée par la confiance des relecteurs",
+        "confidenceWeightedHint": "Sinon, moyenne simple des évaluations envoyées.",
         "sensitive": "Changement sensible : une confirmation de votre identité peut être demandée ; il est journalisé."
       },
       "frozen": {
@@ -448,11 +472,14 @@
           "publishText": "L'ouverture et la clôture de l'appel sont exigées pour publier l'édition."
         },
         "settings-confidentiality": {
-          "title": "Confidentialité de l'évaluation",
-          "summary": "Double aveugle et nombre de relecteurs par soumission.",
+          "title": "Confidentialité et paramètres de l'évaluation",
+          "summary": "Double aveugle, relecteurs par soumission, charge des relecteurs, divergence et note finale.",
           "path": "Paramétrage › Confidentialité",
           "intro": "En double aveugle, les relecteurs ne voient ni le nom, ni l'adresse, ni l'affiliation des auteurs. C'est le serveur qui retire ces informations, pas l'affichage.",
           "reviewers": "Relecteurs par soumission : de 1 à 10.",
+          "load": "Charge maximale : nombre d'évaluations actives au plus par relecteur (10 par défaut) ; au-delà, l'affectation est refusée.",
+          "divergence": "Seuil de divergence : écart entre la plus haute et la plus basse note (sur 100) au-delà duquel la soumission est signalée au pilotage et par e-mail au président du comité scientifique (30 par défaut).",
+          "confidence": "Note finale : moyenne simple des évaluations envoyées, ou moyenne pondérée par la confiance déclarée par chaque relecteur.",
           "sensitiveTitle": "Changement sensible",
           "sensitiveText": "La modification demande une confirmation d'identité récente ; elle est journalisée avec l'avant et l'après.",
           "frozenTitle": "Double aveugle gelé après la première soumission",
@@ -605,6 +632,92 @@
           "whoText": "Consultation : administrateur, présidents et comité d'organisation. Dérogations et export : administrateur, président de la conférence et président du comité scientifique.",
           "duplicatesTitle": "Doublons possibles",
           "duplicatesText": "Une soumission est signalée quand le même soumissionnaire en a une autre, non retirée, au même titre (casse, accents et ponctuation ignorés). C'est un signal, pas un refus : l'auteur a été averti avant de soumettre."
+        },
+        "my-reviews": {
+          "title": "Mes évaluations",
+          "summary": "Lire, noter, envoyer, discuter ; décliner en cas de conflit.",
+          "path": "Évaluation › Mes évaluations",
+          "intro": "Chaque soumission qui vous est confiée apparaît ici dès l'ouverture de l'évaluation, avec son échéance. Vous évaluez selon la grille de l'édition.",
+          "listTitle": "Choisir une soumission",
+          "listBody": "La liste indique l'échéance et l'état de votre évaluation : à faire, brouillon, envoyée.",
+          "readTitle": "Lire",
+          "readBody": "Résumé, mots-clés et PDF. En double aveugle, le PDF a été nettoyé de ses métadonnées et se télécharge sous la référence.",
+          "scoreTitle": "Noter",
+          "scoreBody": "Notez chaque critère ; la note pondérée indicative s'affiche pendant la saisie. Enregistrez le brouillon à tout moment.",
+          "submitTitle": "Envoyer",
+          "submitBody": "Critères obligatoires, recommandation, confiance et commentaire aux auteurs sont exigés. Chaque envoi est une version ; vous pouvez renvoyer jusqu'à la décision.",
+          "discussTitle": "Discuter",
+          "discussBody": "Une fois votre évaluation envoyée et la discussion ouverte, vous lisez les autres évaluations, sous pseudonyme, et échangez avec le comité.",
+          "anonymityTitle": "Anonymat",
+          "anonymityText": "Vous ne recevez jamais l'identité des auteurs en double aveugle ; les autres relecteurs ne connaissent de vous que votre pseudonyme.",
+          "declineTitle": "Décliner",
+          "declineText": "En cas de conflit d'intérêts ou d'empêchement, déclinez avec un motif : le président désigne un remplaçant. Une évaluation envoyée ne se décline plus.",
+          "expertiseTitle": "Expertises",
+          "expertiseText": "Déclarez vos thématiques de compétence dans « Mes expertises » : elles guident les affectations.",
+          "frozenTitle": "Après la décision",
+          "frozenText": "Dès qu'une décision est enregistrée, les évaluations ne se modifient plus ; elles restent consultables."
+        },
+        "review-follow-up": {
+          "title": "Pilotage de l'évaluation",
+          "summary": "Recevabilité, affectations, conflits, suivi, discussion et décision.",
+          "path": "Évaluation › Pilotage de l'évaluation",
+          "intro": "Après la clôture de l'appel, les soumissions passent en recevabilité. Le président du comité scientifique affecte les relecteurs, ouvre l'évaluation, suit les retards et les divergences, puis décide.",
+          "assignTitle": "Affecter",
+          "assignBody": "Dans la fiche d'une soumission, choisissez parmi les relecteurs disponibles : charge, expertises et conflits sont affichés.",
+          "screenTitle": "Déclarer recevable",
+          "screenBody": "Une fois les relecteurs requis affectés, « Recevable » ouvre l'évaluation et prévient les relecteurs. « Non recevable » rejette, avec un motif transmis à l'auteur.",
+          "followTitle": "Suivre",
+          "followBody": "La liste signale les relecteurs manquants et les retards ; l'avancement montre la charge de chacun et les divergences.",
+          "discussTitle": "Discuter",
+          "discussBody": "La discussion s'ouvre d'elle-même quand toutes les évaluations sont envoyées ; vous pouvez l'ouvrir plus tôt et y écrire.",
+          "decideTitle": "Décider",
+          "decideBody": "Sur une soumission évaluée, enregistrez une décision provisoire ; elle reste invisible des auteurs jusqu'à la publication.",
+          "conflictsTitle": "Conflits d'intérêts",
+          "conflictsText": "Un relecteur auteur de la soumission ne peut jamais l'évaluer. Même institution ou conflit déclaré : levée possible avec un motif, journalisée, après confirmation de votre identité.",
+          "loadTitle": "Charge",
+          "loadText": "Au-delà de la charge maximale de l'édition (Paramétrage › Confidentialité), l'affectation est refusée.",
+          "remindersTitle": "Relances",
+          "remindersText": "Les relecteurs sont relancés automatiquement sept jours et un jour avant l'échéance, puis après elle, une fois chacune.",
+          "divergenceTitle": "Divergence",
+          "divergenceText": "Au-delà du seuil de l'édition, la soumission est signalée et vous recevez un e-mail ; à vous d'ouvrir la discussion ou d'ajouter un relecteur."
+        },
+        "ranking": {
+          "title": "Classement et décisions",
+          "summary": "Simuler un seuil, décider en lot, publier, exporter.",
+          "path": "Évaluation › Classement et décisions",
+          "intro": "Les soumissions évaluées sont classées par note finale (moyenne des évaluations, éventuellement pondérée par la confiance), avec divergence et recommandations.",
+          "simulateTitle": "Simuler",
+          "simulateBody": "Saisissez un seuil : le nombre de soumissions retenues s'affiche, au total, par type et par thématique.",
+          "batchTitle": "Décider en lot",
+          "batchBody": "« Préparer les décisions » propose « acceptée » au-dessus du seuil et « rejetée » en dessous ; ajustez, puis enregistrez. Tout ou rien.",
+          "publishTitle": "Publier",
+          "publishBody": "La publication change les statuts et prévient les auteurs. Elle demande de confirmer votre identité.",
+          "exportTitle": "Exporter",
+          "exportBody": "Le CSV contient une ligne par évaluation, avec le nom du relecteur ; chaque export est journalisé.",
+          "noReturnTitle": "Publication irréversible",
+          "noReturnText": "Une décision publiée ne s'annule pas. Seule une soumission en liste d'attente peut ensuite être acceptée.",
+          "authorsTitle": "Ce que reçoivent les auteurs",
+          "authorsText": "La décision, le format attribué, votre message et les commentaires des relecteurs sous pseudonyme ; jamais leurs noms, leurs notes ni les commentaires confidentiels.",
+          "waitlistTitle": "Liste d'attente",
+          "waitlistText": "Depuis la fiche de la soumission, « Accepter depuis la liste d'attente » prévient aussitôt les auteurs."
+        },
+        "grids": {
+          "title": "Grilles d'évaluation",
+          "summary": "Critères pondérés, versions, verrouillage.",
+          "path": "Paramétrage › Grilles d'évaluation",
+          "intro": "Une grille par édition, et au besoin une par type de communication : les relecteurs notent chaque critère sur l'échelle de la grille.",
+          "createTitle": "Créer",
+          "createBody": "La nouvelle grille reprend la grille par défaut de l'étude ; adaptez-la avant la première évaluation.",
+          "criteriaTitle": "Pondérer",
+          "criteriaBody": "Code, libellés français et anglais, poids et caractère obligatoire. Un critère facultatif non noté est exclu du calcul.",
+          "duplicateTitle": "Nouvelle version",
+          "duplicateBody": "« Dupliquer » crée une version modifiable ; les évaluations déjà faites gardent leur version.",
+          "sumTitle": "Somme des poids",
+          "sumText": "La somme des poids doit valoir exactement 100 ; sinon l'enregistrement est refusé.",
+          "lockedTitle": "Grille verrouillée",
+          "lockedText": "Dès la première évaluation enregistrée, la grille ne se modifie ni ne se supprime : dupliquez-la.",
+          "scopeTitle": "Quelle grille s'applique ?",
+          "scopeText": "La dernière version de la grille du type de la soumission, sinon celle de la grille « tous types »."
         }
       }
     },
@@ -902,6 +1015,353 @@
       "duplicatesOnly": "Doublons possibles seulement (même auteur, même titre)",
       "duplicate": "doublon possible",
       "duplicateHint": "Le même soumissionnaire a une autre soumission au même titre : filtrez « Doublons possibles » pour les comparer."
+    },
+    "reviews": {
+      "title": "Mes évaluations",
+      "lead": "Les soumissions qui vous sont confiées. En double aveugle, l'identité des auteurs ne vous est jamais transmise.",
+      "loading": "Chargement…",
+      "empty": "Aucune évaluation ne vous est confiée pour l'instant.",
+      "back": "← Mes évaluations",
+      "fields": {
+        "submission": "Soumission",
+        "track": "Thématique",
+        "due": "Échéance",
+        "state": "État"
+      },
+      "states": {
+        "todo": "à faire",
+        "draft": "brouillon",
+        "submitted": "envoyée",
+        "closed": "close"
+      },
+      "recommendations": {
+        "accept": "accepter",
+        "accept_minor": "accepter avec corrections",
+        "reject": "rejeter",
+        "discuss": "discuter",
+        "": "—"
+      },
+      "confidence": {
+        "1": "1 — faible",
+        "2": "2",
+        "3": "3 — moyenne",
+        "4": "4",
+        "5": "5 — experte"
+      },
+      "form": {
+        "title": "Évaluation",
+        "lead": "Notez chaque critère, puis envoyez. La note pondérée affichée est indicative : le serveur la recalcule.",
+        "submission": "Soumission",
+        "keywords": "Mots-clés :",
+        "download": "Télécharger le PDF",
+        "blind": "Double aveugle : les auteurs ne vous sont pas présentés.",
+        "authors": "Auteurs",
+        "grid": "Grille",
+        "scale": "Notes de {{min}} à {{max}}.",
+        "optional": "facultatif",
+        "liveScore": "Note pondérée indicative :",
+        "liveScoreHint": "(calculée pendant la saisie ; le serveur fait foi)",
+        "recommendation": "Recommandation",
+        "confidence": "Confiance",
+        "toAuthors": "Commentaire aux auteurs",
+        "toAuthorsHint": "Obligatoire à l'envoi. Transmis aux auteurs sous pseudonyme, avec la décision.",
+        "toCommittee": "Commentaire confidentiel au comité",
+        "toCommitteeHint": "Jamais transmis aux auteurs.",
+        "ethics": "Signalement d'éthique",
+        "plagiarism": "Plagiat présumé",
+        "stateDraft": "Brouillon enregistré.",
+        "stateSubmitted": "Envoyée (version {{version}}) le {{at}}.",
+        "serverScore": "note retenue par le serveur : {{score}} / 100",
+        "save": "Enregistrer le brouillon",
+        "send": "Envoyer l'évaluation",
+        "resubmit": "Renvoyer l'évaluation modifiée",
+        "saved": "Brouillon enregistré.",
+        "submitted": "Évaluation envoyée.",
+        "readOnly": "Cette évaluation n'est plus modifiable (affectation terminée ou décision prise).",
+        "noGrid": "Aucune grille d'évaluation n'est disponible : prévenez le président du comité scientifique.",
+        "submitConfirm": {
+          "title": "Envoyer l'évaluation ?",
+          "message": "Tous les critères obligatoires, la recommandation, la confiance et le commentaire aux auteurs sont exigés. Vous pourrez encore la modifier jusqu'à la décision.",
+          "confirm": "Envoyer"
+        },
+        "resubmitConfirm": {
+          "title": "Renvoyer l'évaluation ?",
+          "message": "Une nouvelle version est enregistrée ; la précédente reste dans l'historique.",
+          "confirm": "Renvoyer"
+        }
+      },
+      "discussion": {
+        "title": "Discussion",
+        "summary": "Note finale : {{final}} / 100 · écart entre évaluations : {{spread}} points.",
+        "messages": "Messages",
+        "empty": "Aucun message.",
+        "message": "Votre message",
+        "send": "Publier",
+        "you": "Vous",
+        "reviewer": "Relecteur {{rank}}",
+        "chair": "Président du comité",
+        "notOpen": "La discussion n'est pas encore ouverte : elle le sera quand toutes les évaluations seront envoyées, ou par le président."
+      },
+      "decline": {
+        "title": "Décliner l'évaluation",
+        "lead": "Vous ne pouvez pas évaluer cette soumission, ou vous êtes en conflit d'intérêts ? Déclinez-la : le président du comité désignera un remplaçant.",
+        "open": "Décliner…",
+        "reason": "Motif",
+        "conflict": "Je déclare un conflit d'intérêts avec cette soumission",
+        "submit": "Décliner",
+        "cancel": "Annuler",
+        "confirm": {
+          "title": "Décliner l'évaluation ?",
+          "message": "L'affectation prend fin ; vous ne verrez plus la soumission.",
+          "confirm": "Décliner"
+        }
+      }
+    },
+    "expertise": {
+      "title": "Mes expertises",
+      "lead": "Les thématiques sur lesquelles vous pouvez évaluer. Elles guident le président du comité dans les affectations.",
+      "tracks": "Thématiques de l'édition",
+      "none": "Aucune thématique active.",
+      "save": "Enregistrer",
+      "saved": "Expertises enregistrées."
+    },
+    "followUp": {
+      "title": "Pilotage de l'évaluation",
+      "lead": "De la recevabilité à la décision : relecteurs affectés, évaluations envoyées, retards et divergences.",
+      "back": "← Pilotage de l'évaluation",
+      "search": "Rechercher (référence, titre)",
+      "missingOnly": "Relecteurs requis non affectés",
+      "lateOnly": "Évaluations en retard",
+      "missing": "relecteurs manquants",
+      "lateCount": "{{count}} en retard",
+      "empty": "Aucune soumission.",
+      "close": "Fermer",
+      "summary": "Résumé",
+      "counts": "{{assigned}} relecteur(s) affecté(s) sur {{required}} requis, {{reviews}} évaluation(s) envoyée(s).",
+      "submissionLink": "Fiche complète de la soumission (auteurs, fichiers, historique)",
+      "fields": {
+        "reviewer": "Relecteur",
+        "reviewers": "Relecteurs",
+        "active": "Affectations",
+        "submitted": "Évaluations envoyées",
+        "late": "En retard",
+        "rank": "Pseudonyme",
+        "state": "Affectation",
+        "due": "Échéance",
+        "review": "Évaluation",
+        "actions": "Actions",
+        "institution": "Institution",
+        "load": "Charge",
+        "expertise": "Expertises",
+        "conflicts": "Conflits"
+      },
+      "progress": {
+        "title": "Avancement",
+        "reviewers": "Par relecteur",
+        "divergent": "{{count}} soumission(s) aux évaluations divergentes (seuil : {{threshold}} points) :",
+        "spread": "écart de {{spread}} points",
+        "noDivergence": "Aucune divergence au-delà du seuil.",
+        "noReviewers": "Aucun membre du comité scientifique.",
+        "track": "{{reviewed}} évaluée(s) sur {{total}}"
+      },
+      "assignmentStatus": {
+        "active": "active",
+        "declined": "déclinée",
+        "cancelled": "annulée"
+      },
+      "reviewStatus": {
+        "none": "non commencée",
+        "draft": "brouillon",
+        "submitted": "envoyée"
+      },
+      "screening": {
+        "title": "Recevabilité",
+        "lead": "Affectez d'abord les relecteurs requis ({{assigned}} sur {{required}}), puis déclarez la soumission recevable : l'évaluation s'ouvre et les relecteurs sont prévenus.",
+        "reason": "Motif du rejet",
+        "reasonHint": "Obligatoire pour un rejet ; transmis à l'auteur.",
+        "reasonRequired": "Indiquez le motif du rejet.",
+        "admit": {
+          "action": "Recevable : ouvrir l'évaluation",
+          "title": "Ouvrir l'évaluation ?",
+          "message": "Les relecteurs affectés sont prévenus par e-mail.",
+          "confirm": "Ouvrir",
+          "done": "Évaluation ouverte."
+        },
+        "reject": {
+          "action": "Non recevable : rejeter",
+          "title": "Rejeter la soumission ?",
+          "message": "Le rejet est définitif ; l'auteur reçoit le motif par e-mail.",
+          "confirm": "Rejeter",
+          "done": "Soumission rejetée."
+        }
+      },
+      "assignments": {
+        "title": "Affectations",
+        "empty": "Aucun relecteur affecté.",
+        "reschedule": "Échéance…",
+        "cancel": "Annuler…",
+        "cancelReason": "Motif de l'annulation",
+        "cancelConfirm": "Annuler l'affectation",
+        "cancelled": "Affectation annulée.",
+        "newDue": "Nouvelle échéance",
+        "dueHint": "Heure de l'édition. Les relances repartent de zéro.",
+        "rescheduleConfirm": "Enregistrer l'échéance",
+        "rescheduled": "Échéance modifiée."
+      },
+      "candidates": {
+        "title": "Relecteurs disponibles",
+        "lead": "Charge maximale : {{max}} évaluations par relecteur. Les expertises qui correspondent à la thématique sont mises en évidence.",
+        "assign": "Affecter…",
+        "assigned": "déjà affecté",
+        "declare": "Conflit…",
+        "empty": "Aucun membre du comité scientifique."
+      },
+      "assign": {
+        "title": "Affecter {{name}}",
+        "due": "Échéance (facultative)",
+        "dueHint": "Heure de l'édition ; par défaut, la date de fin des évaluations.",
+        "overrideLead": "Conflit d'intérêts levable : indiquez le motif de la levée. Elle est journalisée et demande de confirmer votre identité.",
+        "override": "Motif de la levée du conflit",
+        "overrideRequired": "Indiquez le motif de la levée du conflit.",
+        "submit": "Affecter",
+        "done": "Relecteur affecté."
+      },
+      "conflicts": {
+        "title": "Conflits d'intérêts",
+        "author": "auteur",
+        "institution": "même institution",
+        "declared": "Conflit déclaré ; l'affectation éventuelle est annulée.",
+        "overridden": "levé",
+        "overriddenBy": "levé par {{name}} : {{reason}}",
+        "declareTitle": "Déclarer un conflit pour {{name}}",
+        "reason": "Motif",
+        "declare": "Déclarer le conflit"
+      },
+      "reviews": {
+        "title": "Évaluations",
+        "summary": "Note finale : {{final}} / 100 · écart : {{spread}} points.",
+        "divergent": "divergence (seuil {{threshold}})",
+        "empty": "Aucune évaluation envoyée."
+      },
+      "discussion": {
+        "open": "Ouvrir la discussion",
+        "opened": "Discussion ouverte.",
+        "openedAt": "Ouverte le {{at}}.",
+        "posted": "Message publié."
+      },
+      "outcomes": {
+        "accepted": "acceptée",
+        "accepted_minor": "acceptée sous réserve de corrections",
+        "waitlist": "liste d'attente",
+        "rejected": "rejetée"
+      },
+      "decision": {
+        "title": "Décision",
+        "provisional": "provisoire : invisible des auteurs jusqu'à la publication.",
+        "published": "publiée le {{at}}.",
+        "outcome": "Issue",
+        "type": "Format attribué",
+        "sameType": "Type de la soumission",
+        "comment": "Message du comité aux auteurs",
+        "commentHint": "Facultatif ; envoyé avec la décision et les commentaires des relecteurs.",
+        "save": "Enregistrer la décision",
+        "saved": "Décision provisoire enregistrée.",
+        "cancel": {
+          "action": "Annuler la décision",
+          "title": "Annuler la décision provisoire ?",
+          "message": "Les évaluations redeviennent modifiables.",
+          "confirm": "Annuler la décision",
+          "done": "Décision annulée."
+        },
+        "promote": {
+          "action": "Accepter depuis la liste d'attente",
+          "title": "Accepter la soumission ?",
+          "message": "Les auteurs sont prévenus aussitôt.",
+          "confirm": "Accepter",
+          "done": "Soumission acceptée."
+        }
+      }
+    },
+    "ranking": {
+      "title": "Classement et décisions",
+      "lead": "Soumissions évaluées par note finale. Simulez un seuil, préparez les décisions en lot, puis publiez les résultats.",
+      "simulation": {
+        "title": "Simulation de seuil",
+        "threshold": "Seuil (sur 100)",
+        "hint": "Une soumission est retenue si sa note finale atteint le seuil.",
+        "run": "Simuler",
+        "prefill": "Préparer les décisions selon le seuil",
+        "result": "{{accepted}} soumission(s) retenue(s) sur {{total}} au seuil de {{threshold}}.",
+        "byType": "Par type",
+        "byTrack": "Par thématique"
+      },
+      "fields": {
+        "final": "Note finale",
+        "reviews": "Évaluations",
+        "recommendations": "Recommandations",
+        "decision": "Décision"
+      },
+      "divergent": "divergence : {{spread}}",
+      "provisional": "provisoire",
+      "published": "publiée",
+      "empty": "Aucune soumission évaluée.",
+      "batch": {
+        "outcome": "Décision",
+        "none": "—",
+        "save": "Enregistrer les décisions ({{count}})",
+        "done": "{{count}} décision(s) provisoire(s) enregistrée(s)."
+      },
+      "publish": {
+        "action": "Publier les résultats ({{count}})",
+        "title": "Publier les résultats ?",
+        "message": "{{count}} décision(s) deviennent visibles des auteurs, qui sont prévenus par e-mail. La publication est irréversible.",
+        "confirm": "Publier",
+        "done": "{{count}} décision(s) publiée(s)."
+      },
+      "export": "Exporter les évaluations (CSV)"
+    },
+    "grids": {
+      "title": "Grilles d'évaluation",
+      "lead": "Critères pondérés de l'édition, ou d'un type de communication. La somme des poids vaut 100.",
+      "allTypes": "tous types",
+      "locked": "verrouillée",
+      "scale": "Notes de {{min}} à {{max}}.",
+      "fields": {
+        "code": "Code",
+        "label": "Libellé",
+        "labelFr": "Libellé (FR)",
+        "labelEn": "Libellé (EN)",
+        "weight": "Poids (%)",
+        "required": "Obligatoire",
+        "name": "Nom",
+        "scaleMin": "Note minimale",
+        "scaleMax": "Note maximale",
+        "type": "Type de communication"
+      },
+      "mandatory": "obligatoire",
+      "optional": "facultatif",
+      "edit": "Modifier",
+      "duplicate": "Dupliquer en nouvelle version",
+      "save": "Enregistrer la grille",
+      "addCriterion": "Ajouter un critère",
+      "removeCriterion": "Retirer",
+      "total": "Somme des poids : {{total}} (100 attendu).",
+      "empty": "Aucune grille : créez la grille de l'édition.",
+      "created": "Grille créée.",
+      "saved": "Grille enregistrée.",
+      "duplicated": "Nouvelle version créée.",
+      "deleted": "Grille supprimée.",
+      "create": {
+        "title": "Nouvelle grille",
+        "lead": "Créée avec la grille par défaut de l'étude (25 / 30 / 15 / 15 / 15, notes de 0 à 5), à adapter ensuite.",
+        "submit": "Créer la grille"
+      },
+      "delete": {
+        "action": "Supprimer",
+        "title": "Supprimer la grille ?",
+        "message": "La grille « {{name}} » sera supprimée.",
+        "confirm": "Supprimer"
+      }
     }
   }
 }

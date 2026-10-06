@@ -38,6 +38,51 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/submissions/submission-detail-page').then((m) => m.SubmissionDetailPage),
       },
+      // Évaluation (plan L4, H1) : relecteur, puis président du CS.
+      {
+        path: 'evaluations',
+        title: 'gestion.reviews.title',
+        canActivate: [capabilityGuard('reviews.write')],
+        loadComponent: () => import('./pages/reviews/my-reviews-page').then((m) => m.MyReviewsPage),
+      },
+      {
+        path: 'evaluations/:assignmentId',
+        title: 'gestion.reviews.form.title',
+        canActivate: [capabilityGuard('reviews.write')],
+        loadComponent: () =>
+          import('./pages/reviews/review-form-page').then((m) => m.ReviewFormPage),
+      },
+      {
+        path: 'expertises',
+        title: 'gestion.expertise.title',
+        canActivate: [capabilityGuard('reviews.write')],
+        loadComponent: () => import('./pages/reviews/expertise-page').then((m) => m.ExpertisePage),
+      },
+      {
+        path: 'pilotage',
+        title: 'gestion.followUp.title',
+        canActivate: [capabilityGuard('reviews.manage')],
+        loadComponent: () => import('./pages/follow-up/follow-up-page').then((m) => m.FollowUpPage),
+      },
+      {
+        path: 'pilotage/:submissionId',
+        title: 'gestion.followUp.title',
+        canActivate: [capabilityGuard('reviews.manage')],
+        loadComponent: () =>
+          import('./pages/follow-up/follow-up-detail-page').then((m) => m.FollowUpDetailPage),
+      },
+      {
+        path: 'classement',
+        title: 'gestion.ranking.title',
+        canActivate: [capabilityGuard('reviews.read_all')],
+        loadComponent: () => import('./pages/ranking/ranking-page').then((m) => m.RankingPage),
+      },
+      {
+        path: 'parametrage/grilles',
+        title: 'gestion.grids.title',
+        canActivate: [capabilityGuard('edition.read')],
+        loadComponent: () => import('./pages/settings/grids-page').then((m) => m.GridsPage),
+      },
       {
         path: 'parametrage/general',
         title: 'gestion.settings.general.title',

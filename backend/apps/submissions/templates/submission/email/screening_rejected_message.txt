@@ -1,0 +1,9 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate %}Bonjour,
+
+Votre soumission « {{ title }} » ({{ reference }}) à {{ edition_title }} n'a pas été jugée recevable lors du contrôle préalable à l'évaluation. Elle ne sera pas évaluée.
+
+Motif : {{ reason }}
+
+Votre soumission : {{ link }}{% endblocktranslate %}
+
+{% include "account/email/_signature.txt" %}{% endautoescape %}

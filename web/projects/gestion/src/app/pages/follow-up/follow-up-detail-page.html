@@ -1,0 +1,448 @@
+<p>
+  <a [routerLink]="['/editions', editionId(), 'pilotage']">{{
+    'gestion.followUp.back' | translate
+  }}</a>
+</p>
+@if (detail(); as current) {
+  <gc-page-header [heading]="current.reference + ' — ' + current.title" />
+} @else {
+  <gc-page-header [heading]="'gestion.followUp.title' | translate" />
+}
+<div aria-live="polite">
+  @if (status()) {
+    <p class="notice" role="status">{{ status() }}</p>
+  }
+</div>
+<gc-error-summary [messages]="errors()" />
+
+@if (loading()) {
+  <p role="status">{{ 'gestion.reviews.loading' | translate }}</p>
+} @else if (detail(); as current) {
+  <section class="card" aria-labelledby="summary-title">
+    <h2 id="summary-title">{{ 'gestion.followUp.summary' | translate }}</h2>
+    <p>
+      <span class="badge">{{ 'gestion.submissions.status.' + current.status | translate }}</span>
+      · {{ current.track ?? '—' }} · {{ current.submission_type ?? '—' }} ·
+      {{
+        'gestion.followUp.counts'
+          | translate
+            : {
+                assigned: current.assignment_count,
+                required: current.required,
+                reviews: current.review_count,
+              }
+      }}
+    </p>
+    <p class="abstract">{{ current.abstract }}</p>
+    <p>
+      <a [routerLink]="['/editions', editionId(), 'soumissions', current.id]">{{
+        'gestion.followUp.submissionLink' | translate
+      }}</a>
+    </p>
+  </section>
+
+  @if (current.status === 'screening' && canManage()) {
+    <section class="card" aria-labelledby="screening-title">
+      <h2 id="screening-title">{{ 'gestion.followUp.screening.title' | translate }}</h2>
+      <p>
+        {{
+          'gestion.followUp.screening.lead'
+            | translate: { required: current.required, assigned: current.assignment_count }
+        }}
+      </p>
+      <form [formGroup]="screeningForm" novalidate>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'gestion.followUp.screening.reason' | translate }}</mat-label>
+          <textarea matInput rows="2" formControlName="reason"></textarea>
+          <mat-hint>{{ 'gestion.followUp.screening.reasonHint' | translate }}</mat-hint>
+        </mat-form-field>
+        <div class="actions">
+          <button mat-flat-button type="button" (click)="screen(true)" [disabled]="busy()">
+            {{ 'gestion.followUp.screening.admit.action' | translate }}
+          </button>
+          <button mat-stroked-button type="button" (click)="screen(false)" [disabled]="busy()">
+            {{ 'gestion.followUp.screening.reject.action' | translate }}
+          </button>
+        </div>
+      </form>
+    </section>
+  }
+
+  <section class="card" aria-labelledby="assignments-title">
+    <h2 id="assignments-title">{{ 'gestion.followUp.assignments.title' | translate }}</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">{{ 'gestion.followUp.fields.reviewer' | translate }}</th>
+            <th scope="col">{{ 'gestion.followUp.fields.rank' | translate }}</th>
+            <th scope="col">{{ 'gestion.followUp.fields.state' | translate }}</th>
+            <th scope="col">{{ 'gestion.followUp.fields.due' | translate }}</th>
+            <th scope="col">{{ 'gestion.followUp.fields.review' | translate }}</th>
+            @if (canManage() && assignable()) {
+              <th scope="col">{{ 'gestion.followUp.fields.actions' | translate }}</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of current.assignments; track item.id) {
+            <tr>
+              <td>{{ item.reviewer.name }}</td>
+              <td>{{ item.pseudonym_rank }}</td>
+              <td>
+                {{ 'gestion.followUp.assignmentStatus.' + item.status | translate }}
+                @if (item.reason) {
+                  <span class="muted"> — {{ item.reason }}</span>
+                }
+              </td>
+              <td>{{ date(item.due_at) }}</td>
+              <td>
+                {{ 'gestion.followUp.reviewStatus.' + (item.review_status ?? 'none') | translate }}
+              </td>
+              @if (canManage() && assignable()) {
+                <td>
+                  @if (item.status === 'active') {
+                    <button mat-button type="button" (click)="rescheduling.set(item.id)">
+                      {{ 'gestion.followUp.assignments.reschedule' | translate }}
+                    </button>
+                    @if (item.review_status !== 'submitted') {
+                      <button mat-button type="button" (click)="cancelling.set(item.id)">
+                        {{ 'gestion.followUp.assignments.cancel' | translate }}
+                      </button>
+                    }
+                  }
+                </td>
+              }
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="muted">
+                {{ 'gestion.followUp.assignments.empty' | translate }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    @if (cancelling(); as target) {
+      <form [formGroup]="reasonForm" (ngSubmit)="cancel(target)" novalidate>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'gestion.followUp.assignments.cancelReason' | translate }}</mat-label>
+          <textarea matInput rows="2" formControlName="reason" required></textarea>
+        </mat-form-field>
+        <div class="actions">
+          <button mat-flat-button type="submit" [disabled]="busy()">
+            {{ 'gestion.followUp.assignments.cancelConfirm' | translate }}
+          </button>
+          <button mat-button type="button" (click)="cancelling.set(null)">
+            {{ 'gestion.followUp.close' | translate }}
+          </button>
+        </div>
+      </form>
+    }
+    @if (rescheduling(); as target) {
+      <form [formGroup]="dueForm" (ngSubmit)="reschedule(target)" novalidate>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'gestion.followUp.assignments.newDue' | translate }}</mat-label>
+          <input matInput type="datetime-local" formControlName="due_local" required />
+          <mat-hint>{{ 'gestion.followUp.assignments.dueHint' | translate }}</mat-hint>
+        </mat-form-field>
+        <div class="actions">
+          <button mat-flat-button type="submit" [disabled]="busy()">
+            {{ 'gestion.followUp.assignments.rescheduleConfirm' | translate }}
+          </button>
+          <button mat-button type="button" (click)="rescheduling.set(null)">
+            {{ 'gestion.followUp.close' | translate }}
+          </button>
+        </div>
+      </form>
+    }
+  </section>
+
+  @if (candidates(); as list) {
+    <section class="card" aria-labelledby="candidates-title">
+      <h2 id="candidates-title">{{ 'gestion.followUp.candidates.title' | translate }}</h2>
+      <p class="muted">
+        {{ 'gestion.followUp.candidates.lead' | translate: { max: list.max_load } }}
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">{{ 'gestion.followUp.fields.reviewer' | translate }}</th>
+              <th scope="col">{{ 'gestion.followUp.fields.institution' | translate }}</th>
+              <th scope="col">{{ 'gestion.followUp.fields.load' | translate }}</th>
+              <th scope="col">{{ 'gestion.followUp.fields.expertise' | translate }}</th>
+              <th scope="col">{{ 'gestion.followUp.fields.conflicts' | translate }}</th>
+              <th scope="col">{{ 'gestion.followUp.fields.actions' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (candidate of list.candidates; track candidate.id) {
+              <tr>
+                <td>{{ candidate.name }}</td>
+                <td>{{ candidate.institution || '—' }}</td>
+                <td>{{ candidate.load }} / {{ list.max_load }}</td>
+                <td>
+                  @for (code of candidate.tracks; track code) {
+                    <span class="badge" [class.warning]="code === list.track">{{ code }}</span>
+                  }
+                </td>
+                <td>
+                  @for (conflict of candidate.conflicts; track conflict.kind) {
+                    <span class="badge" [class.danger]="!conflict.overridden">
+                      {{ conflictLabel(conflict.kind) }}
+                      @if (conflict.overridden) {
+                        ({{ 'gestion.followUp.conflicts.overridden' | translate }})
+                      }
+                    </span>
+                  }
+                </td>
+                <td>
+                  @if (candidate.assignment_id) {
+                    <span class="muted">{{
+                      'gestion.followUp.candidates.assigned' | translate
+                    }}</span>
+                  } @else {
+                    @if (canAssign(candidate)) {
+                      <button mat-button type="button" (click)="select(candidate)">
+                        {{ 'gestion.followUp.candidates.assign' | translate }}
+                      </button>
+                    }
+                    <button mat-button type="button" (click)="declaringFor.set(candidate)">
+                      {{ 'gestion.followUp.candidates.declare' | translate }}
+                    </button>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="6" class="muted">
+                  {{ 'gestion.followUp.candidates.empty' | translate }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      @if (selected(); as candidate) {
+        <form [formGroup]="assignForm" (ngSubmit)="assign()" novalidate>
+          <h3>{{ 'gestion.followUp.assign.title' | translate: { name: candidate.name } }}</h3>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'gestion.followUp.assign.due' | translate }}</mat-label>
+            <input matInput type="datetime-local" formControlName="due_local" />
+            <mat-hint>{{ 'gestion.followUp.assign.dueHint' | translate }}</mat-hint>
+          </mat-form-field>
+          @if (needsOverride()) {
+            <p class="notice">{{ 'gestion.followUp.assign.overrideLead' | translate }}</p>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.followUp.assign.override' | translate }}</mat-label>
+              <textarea matInput rows="2" formControlName="override_reason" required></textarea>
+            </mat-form-field>
+          }
+          <div class="actions">
+            <button mat-flat-button type="submit" [disabled]="busy()">
+              {{ 'gestion.followUp.assign.submit' | translate }}
+            </button>
+            <button mat-button type="button" (click)="selected.set(null)">
+              {{ 'gestion.followUp.close' | translate }}
+            </button>
+          </div>
+        </form>
+      }
+      @if (declaringFor(); as candidate) {
+        <form [formGroup]="reasonForm" (ngSubmit)="declareConflict()" novalidate>
+          <h3>
+            {{ 'gestion.followUp.conflicts.declareTitle' | translate: { name: candidate.name } }}
+          </h3>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'gestion.followUp.conflicts.reason' | translate }}</mat-label>
+            <textarea matInput rows="2" formControlName="reason" required></textarea>
+          </mat-form-field>
+          <div class="actions">
+            <button mat-flat-button type="submit" [disabled]="busy()">
+              {{ 'gestion.followUp.conflicts.declare' | translate }}
+            </button>
+            <button mat-button type="button" (click)="declaringFor.set(null)">
+              {{ 'gestion.followUp.close' | translate }}
+            </button>
+          </div>
+        </form>
+      }
+    </section>
+  }
+
+  @if (current.conflicts.length) {
+    <section class="card" aria-labelledby="conflicts-title">
+      <h2 id="conflicts-title">{{ 'gestion.followUp.conflicts.title' | translate }}</h2>
+      <ul>
+        @for (conflict of current.conflicts; track conflict.id) {
+          <li>
+            {{ conflict.reviewer.name }} — {{ conflictLabel(conflict.kind) }}
+            @if (conflict.reason) {
+              : {{ conflict.reason }}
+            }
+            @if (conflict.overridden_at) {
+              <span class="muted">
+                ·
+                {{
+                  'gestion.followUp.conflicts.overriddenBy'
+                    | translate
+                      : { name: conflict.overridden_by?.name, reason: conflict.overridden_reason }
+                }}
+              </span>
+            }
+          </li>
+        }
+      </ul>
+    </section>
+  }
+
+  @if (reviews(); as state) {
+    <section class="card" aria-labelledby="reviews-title">
+      <h2 id="reviews-title">{{ 'gestion.followUp.reviews.title' | translate }}</h2>
+      <p>
+        {{
+          'gestion.followUp.reviews.summary'
+            | translate: { final: state.final_score ?? '—', spread: state.spread }
+        }}
+        @if (state.divergent) {
+          <span class="badge danger">{{
+            'gestion.followUp.reviews.divergent' | translate: { threshold: state.threshold }
+          }}</span>
+        }
+      </p>
+      @for (review of state.reviews; track review.id) {
+        <div class="review">
+          <h3>
+            {{ review.reviewer.name }}
+            <span class="muted"
+              >({{
+                'gestion.reviews.discussion.reviewer' | translate: { rank: review.pseudonym_rank }
+              }})</span
+            >
+          </h3>
+          <p>
+            {{ review.weighted_score ?? '—' }} / 100 ·
+            {{ 'gestion.reviews.recommendations.' + review.recommendation | translate }} ·
+            {{ 'gestion.reviews.form.confidence' | translate }} {{ review.confidence ?? '—' }}
+            @if (review.ethics_flag) {
+              <span class="badge danger">{{ 'gestion.reviews.form.ethics' | translate }}</span>
+            }
+            @if (review.plagiarism_flag) {
+              <span class="badge danger">{{ 'gestion.reviews.form.plagiarism' | translate }}</span>
+            }
+          </p>
+          <p class="comment">{{ review.comment_to_authors }}</p>
+          @if (review.comment_to_committee) {
+            <p class="comment muted">{{ review.comment_to_committee }}</p>
+          }
+        </div>
+      } @empty {
+        <p class="muted">{{ 'gestion.followUp.reviews.empty' | translate }}</p>
+      }
+      <h3>{{ 'gestion.reviews.discussion.title' | translate }}</h3>
+      @if (state.discussion_opened_at) {
+        <p class="muted">
+          {{
+            'gestion.followUp.discussion.openedAt'
+              | translate: { at: date(state.discussion_opened_at) }
+          }}
+        </p>
+        @for (message of state.messages; track message.id) {
+          <div class="message">
+            <strong>{{ message.author.name }}</strong>
+            <span class="muted"> · {{ date(message.at) }}</span>
+            <p class="comment">{{ message.body }}</p>
+          </div>
+        } @empty {
+          <p class="muted">{{ 'gestion.reviews.discussion.empty' | translate }}</p>
+        }
+        @if (canManage() && assignable()) {
+          <form [formGroup]="messageForm" (ngSubmit)="post()" novalidate>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.reviews.discussion.message' | translate }}</mat-label>
+              <textarea matInput rows="3" formControlName="body"></textarea>
+            </mat-form-field>
+            <div class="actions">
+              <button mat-stroked-button type="submit" [disabled]="busy()">
+                {{ 'gestion.reviews.discussion.send' | translate }}
+              </button>
+            </div>
+          </form>
+        }
+      } @else if (canManage() && assignable()) {
+        <button mat-stroked-button type="button" (click)="openDiscussion()" [disabled]="busy()">
+          {{ 'gestion.followUp.discussion.open' | translate }}
+        </button>
+      }
+    </section>
+  }
+
+  @if (canDecide() && (current.status === 'reviewed' || current.decision)) {
+    <section class="card" aria-labelledby="decision-title">
+      <h2 id="decision-title">{{ 'gestion.followUp.decision.title' | translate }}</h2>
+      @if (current.decision; as decision) {
+        <p>
+          <span class="badge">{{
+            'gestion.followUp.outcomes.' + decision.outcome | translate
+          }}</span>
+          @if (decision.published_at) {
+            {{
+              'gestion.followUp.decision.published' | translate: { at: date(decision.published_at) }
+            }}
+          } @else {
+            {{ 'gestion.followUp.decision.provisional' | translate }}
+          }
+        </p>
+      }
+      @if (current.status === 'reviewed' && !current.decision?.published_at) {
+        <form [formGroup]="decisionForm" (ngSubmit)="decide()" novalidate>
+          <div class="grid-2">
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.followUp.decision.outcome' | translate }}</mat-label>
+              <mat-select formControlName="outcome">
+                @for (outcome of outcomes; track outcome) {
+                  <mat-option [value]="outcome">{{
+                    'gestion.followUp.outcomes.' + outcome | translate
+                  }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'gestion.followUp.decision.type' | translate }}</mat-label>
+              <mat-select formControlName="assigned_type">
+                <mat-option value="">{{
+                  'gestion.followUp.decision.sameType' | translate
+                }}</mat-option>
+                @for (type of types(); track type.id) {
+                  <mat-option [value]="type.code">{{ type.code }} — {{ type.label_fr }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'gestion.followUp.decision.comment' | translate }}</mat-label>
+            <textarea matInput rows="3" formControlName="comment_to_authors"></textarea>
+            <mat-hint>{{ 'gestion.followUp.decision.commentHint' | translate }}</mat-hint>
+          </mat-form-field>
+          <div class="actions">
+            <button mat-flat-button type="submit" [disabled]="busy()">
+              {{ 'gestion.followUp.decision.save' | translate }}
+            </button>
+            @if (current.decision) {
+              <button mat-button type="button" (click)="cancelDecision()" [disabled]="busy()">
+                {{ 'gestion.followUp.decision.cancel.action' | translate }}
+              </button>
+            }
+          </div>
+        </form>
+      }
+      @if (current.status === 'waitlist' && canPublish()) {
+        <button mat-flat-button type="button" (click)="promote()" [disabled]="busy()">
+          {{ 'gestion.followUp.decision.promote.action' | translate }}
+        </button>
+      }
+    </section>
+  }
+}

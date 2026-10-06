@@ -184,6 +184,96 @@ paths:
               schema:
                 $ref: '#/components/schemas/Edition'
           description: ''
+  /v1/manage/editions/{edition_id}/assignments:
+    post:
+      operationId: manage_assignment_create
+      description: 'Affectations (H6, H8, H15) : création, échéance, annulation motivée.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignmentCreateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignmentManage'
+          description: ''
+  /v1/manage/editions/{edition_id}/assignments/{assignment_id}:
+    patch:
+      operationId: manage_assignment_update
+      description: 'Affectations (H6, H8, H15) : création, échéance, annulation motivée.'
+      parameters:
+      - in: path
+        name: assignment_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAssignmentUpdateRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignmentManage'
+          description: ''
+  /v1/manage/editions/{edition_id}/assignments/{assignment_id}/cancel:
+    post:
+      operationId: manage_assignment_cancel
+      description: 'Affectations (H6, H8, H15) : création, échéance, annulation motivée.'
+      parameters:
+      - in: path
+        name: assignment_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignmentCancelRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignmentManage'
+          description: ''
   /v1/manage/editions/{edition_id}/audit:
     get:
       operationId: manage_audit_list
@@ -291,6 +381,84 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Confidentiality'
+          description: ''
+  /v1/manage/editions/{edition_id}/conflicts:
+    post:
+      operationId: manage_conflict_create
+      description: Conflit déclaré par le président (H8) ; annule l'affectation active
+        éventuelle.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConflictCreateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConflictManage'
+          description: ''
+  /v1/manage/editions/{edition_id}/decisions/batch:
+    post:
+      operationId: manage_decisions_batch
+      description: 'Décisions provisoires en lot : tout ou rien (refus rendus par
+        ligne).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DecisionBatchRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DecisionBatchResult'
+          description: ''
+  /v1/manage/editions/{edition_id}/decisions/publish:
+    post:
+      operationId: manage_decisions_publish
+      description: 'RG-09 : publie les décisions provisoires (réauthentification récente,
+        journal).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublishResult'
           description: ''
   /v1/manage/editions/{edition_id}/grids:
     get:
@@ -1515,6 +1683,793 @@ paths:
               schema:
                 $ref: '#/components/schemas/PublicationStatus'
           description: ''
+  /v1/manage/editions/{edition_id}/program/settings:
+    get:
+      operationId: manage_program_settings_retrieve
+      description: |-
+        ``…/program/settings`` : paramètres du programme (I17). Lecture ``program.read``,
+        écriture ``program.write`` (CO « programme », administrateur ; I1).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProgramSettings'
+          description: ''
+    patch:
+      operationId: manage_program_settings_update
+      description: |-
+        ``…/program/settings`` : paramètres du programme (I17). Lecture ``program.read``,
+        écriture ``program.write`` (CO « programme », administrateur ; I1).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProgramSettingsRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProgramSettings'
+          description: ''
+  /v1/manage/editions/{edition_id}/ranking:
+    get:
+      operationId: manage_ranking
+      description: Classement par note finale ; avec ``threshold``, simulation du
+        seuil (US-06).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: submission_type
+        schema:
+          type: string
+      - in: query
+        name: threshold
+        schema:
+          type: number
+          format: double
+      - in: query
+        name: track
+        schema:
+          type: string
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ranking'
+          description: ''
+  /v1/manage/editions/{edition_id}/review-progress:
+    get:
+      operationId: manage_review_progress
+      description: 'Suivi de l''évaluation (plan L4 §4) : par relecteur, par thématique,
+        divergences.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewProgress'
+          description: ''
+  /v1/manage/editions/{edition_id}/review-submissions:
+    get:
+      operationId: manage_review_submissions_list
+      description: Suivi de l'évaluation par soumission (H6, H10).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: late
+        schema:
+          type: boolean
+      - in: query
+        name: missing
+        schema:
+          type: boolean
+      - name: page
+        required: false
+        in: query
+        description: Un numéro de page de l'ensemble des résultats.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Nombre de résultats à retourner par page.
+        schema:
+          type: integer
+      - in: query
+        name: q
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: array
+          items:
+            type: string
+            title: Statut
+            enum:
+            - accepted
+            - accepted_minor
+            - camera_ready_received
+            - confirmed
+            - presented
+            - published
+            - rejected
+            - reviewed
+            - revision_requested
+            - scheduled
+            - screening
+            - under_review
+            - waitlist
+            - withdrawn
+        description: |-
+          * `screening` - vérification de recevabilité
+          * `under_review` - en cours d'évaluation
+          * `reviewed` - évaluée
+          * `accepted` - acceptée
+          * `accepted_minor` - acceptée sous réserve de corrections
+          * `waitlist` - liste d'attente
+          * `rejected` - rejetée
+          * `revision_requested` - corrections demandées
+          * `camera_ready_received` - version finale reçue
+          * `confirmed` - présentation confirmée
+          * `scheduled` - programmée
+          * `presented` - présentée
+          * `published` - publiée dans les actes
+          * `withdrawn` - retirée
+        explode: true
+        style: form
+      - in: query
+        name: submission_type
+        schema:
+          type: string
+      - in: query
+        name: track
+        schema:
+          type: string
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedReviewSubmissionList'
+          description: ''
+  /v1/manage/editions/{edition_id}/review-submissions/{submission_id}:
+    get:
+      operationId: manage_review_submission_retrieve
+      description: Suivi de l'évaluation par soumission (H6, H10).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewSubmissionDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/review-submissions/{submission_id}/candidates:
+    get:
+      operationId: manage_review_submission_candidates
+      description: 'Relecteurs de l''édition : charge, expertises, affectation, conflits
+        (H6 à H8).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CandidateList'
+          description: ''
+  /v1/manage/editions/{edition_id}/review-submissions/{submission_id}/decision:
+    put:
+      operationId: manage_review_submission_decision
+      description: 'Décision provisoire (H16) : issue, format attribué, message aux
+        auteurs.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DecisionWriteRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewSubmissionDetail'
+          description: ''
+    delete:
+      operationId: manage_review_submission_decision_delete
+      description: Annule une décision **provisoire**.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewSubmissionDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/review-submissions/{submission_id}/discussion/messages:
+    post:
+      operationId: manage_review_submission_discussion_message
+      description: Suivi de l'évaluation par soumission (H6, H10).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessageCreateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmissionReviews'
+          description: ''
+  /v1/manage/editions/{edition_id}/review-submissions/{submission_id}/discussion/open:
+    post:
+      operationId: manage_review_submission_discussion_open
+      description: 'RG-08 : ouverture par le président (sinon automatique au dernier
+        envoi).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmissionReviews'
+          description: ''
+  /v1/manage/editions/{edition_id}/review-submissions/{submission_id}/promote:
+    post:
+      operationId: manage_review_submission_promote
+      description: Liste d'attente → acceptée, après publication (H16) ; auteurs prévenus.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewSubmissionDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/review-submissions/{submission_id}/reviews:
+    get:
+      operationId: manage_review_submission_reviews
+      description: Évaluations envoyées, noms des relecteurs, note finale, divergence,
+        discussion.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmissionReviews'
+          description: ''
+  /v1/manage/editions/{edition_id}/review-submissions/{submission_id}/screening:
+    post:
+      operationId: manage_review_submission_screening
+      description: 'H10 : recevable (relecteurs requis affectés) ou rejet motivé,
+        notifié à l''auteur.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScreeningRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewSubmissionDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/reviews-export:
+    get:
+      operationId: manage_reviews_export
+      description: 'Évaluations nominatives en CSV (réauthentification récente, journal
+        : RG-17).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  /v1/manage/editions/{edition_id}/reviews/assignments:
+    get:
+      operationId: reviewer_assignments_list
+      description: '« Mes évaluations » : affectations actives, échéances, état de
+        l''évaluation.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReviewerAssignment'
+          description: ''
+  /v1/manage/editions/{edition_id}/reviews/assignments/{assignment_id}:
+    get:
+      operationId: reviewer_assignment_retrieve
+      description: Soumission anonymisée, grille, sa propre évaluation.
+      parameters:
+      - in: path
+        name: assignment_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewerAssignmentDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/reviews/assignments/{assignment_id}/authors:
+    get:
+      operationId: reviewer_assignment_authors
+      description: Auteurs, pour une édition **sans** double aveugle seulement (Q3)
+        ; 404 sinon.
+      parameters:
+      - in: path
+        name: assignment_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OpenReviewAuthor'
+          description: ''
+  /v1/manage/editions/{edition_id}/reviews/assignments/{assignment_id}/decline:
+    post:
+      operationId: reviewer_assignment_decline
+      description: Le relecteur décline, en déclarant au besoin un conflit d'intérêts
+        (H8).
+      parameters:
+      - in: path
+        name: assignment_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeclineRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /v1/manage/editions/{edition_id}/reviews/assignments/{assignment_id}/discussion:
+    get:
+      operationId: reviewer_discussion_retrieve
+      description: |-
+        RG-08 : évaluations envoyées (pseudonymes) et messages, une fois sa propre évaluation
+        envoyée et la discussion ouverte (409 ``discussion_closed`` sinon).
+      parameters:
+      - in: path
+        name: assignment_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewerDiscussion'
+          description: ''
+    post:
+      operationId: reviewer_discussion_message
+      description: Base de toutes les routes ``v1/manage/editions/{edition_id}/…``
+        (test de plateforme).
+      parameters:
+      - in: path
+        name: assignment_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessageWriteRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewerDiscussion'
+          description: ''
+  /v1/manage/editions/{edition_id}/reviews/assignments/{assignment_id}/file:
+    get:
+      operationId: reviewer_assignment_file
+      description: |-
+        PDF courant (règle n° 8), nettoyé de ses métadonnées en double aveugle (L3) ; nom
+        de téléchargement générique : la référence (H9).
+      parameters:
+      - in: path
+        name: assignment_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  /v1/manage/editions/{edition_id}/reviews/assignments/{assignment_id}/review:
+    put:
+      operationId: reviewer_review_save
+      description: Brouillon (copie complète) ; note pondérée calculée par le serveur
+        (H4).
+      parameters:
+      - in: path
+        name: assignment_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewerReview'
+          description: ''
+  /v1/manage/editions/{edition_id}/reviews/assignments/{assignment_id}/review/submit:
+    post:
+      operationId: reviewer_review_submit
+      description: |-
+        Envoi (RG-06 : chaque envoi est une version) ; corps facultatif : sans corps, le
+        brouillon enregistré est envoyé.
+      parameters:
+      - in: path
+        name: assignment_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewerReview'
+          description: ''
+  /v1/manage/editions/{edition_id}/reviews/expertise:
+    get:
+      operationId: reviewer_expertise_retrieve
+      description: Expertises du relecteur pour l'édition (H7).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Expertise'
+          description: ''
+    put:
+      operationId: reviewer_expertise_update
+      description: Expertises du relecteur pour l'édition (H7).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpertiseWriteRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Expertise'
+          description: ''
   /v1/manage/editions/{edition_id}/roles:
     get:
       operationId: manage_members_list
@@ -1942,8 +2897,9 @@ paths:
   /v1/manage/editions/{edition_id}/submissions/{submission_id}/files/{file_id}/content:
     get:
       operationId: manage_submission_file_content
-      description: 'Une version du PDF (règle n° 8 : endpoint authentifié, jamais
-        servi par Apache).'
+      description: |-
+        Une version du PDF, principal ou final (règle n° 8 : endpoint authentifié, jamais
+        servi par Apache).
       parameters:
       - in: path
         name: edition_id
@@ -2762,6 +3718,57 @@ paths:
                 type: string
                 format: binary
           description: ''
+  /v1/submissions/{submission_id}/final-version:
+    post:
+      operationId: submissions_final_version
+      description: |-
+        H18 : version finale (PDF nominatif) et lettre de réponse aux relecteurs, jusqu'à
+        la date clé camera_ready ; un nouveau dépôt remplace le précédent.
+      parameters:
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - submissions
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FinalVersionUploadRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Submission'
+          description: ''
+  /v1/submissions/{submission_id}/final-version/content:
+    get:
+      operationId: submissions_final_version_content
+      description: Version finale courante, pour son auteur (règle n° 8).
+      parameters:
+      - in: path
+        name: submission_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - submissions
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+          description: ''
   /v1/submissions/{submission_id}/submit:
     post:
       operationId: submissions_submit
@@ -2893,6 +3900,112 @@ components:
       - code
       - fields
       - message
+    AssignmentCancelRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 2000
+      required:
+      - reason
+    AssignmentCreateRequest:
+      type: object
+      properties:
+        submission:
+          type: integer
+        reviewer:
+          type: integer
+        due_local:
+          type: string
+          format: date-time
+          nullable: true
+          description: Échéance dans le fuseau de l'édition, sans fuseau ; par défaut,
+            la date clé review_deadline.
+        override_reason:
+          type: string
+          default: ''
+          description: Motif de levée d'un conflit levable (réauthentification récente
+            exigée).
+          maxLength: 2000
+      required:
+      - reviewer
+      - submission
+    AssignmentManage:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        reviewer:
+          allOf:
+          - $ref: '#/components/schemas/Person'
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/AssignmentStatus'
+          readOnly: true
+          title: Statut
+        assigned_by:
+          allOf:
+          - $ref: '#/components/schemas/Person'
+          nullable: true
+          readOnly: true
+        assigned_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Affectée le
+        due_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Échéance
+        reason:
+          type: string
+          readOnly: true
+          title: Motif (refus ou annulation)
+        conflict_override_reason:
+          type: string
+          readOnly: true
+          title: Motif de la levée de conflit
+        pseudonym_rank:
+          type: integer
+          readOnly: true
+          title: Rang du pseudonyme
+        reminders:
+          readOnly: true
+          title: Relances envoyées
+        review_status:
+          description: 'Évaluation : null (non commencée), draft ou submitted.'
+          nullable: true
+          readOnly: true
+          oneOf:
+          - $ref: '#/components/schemas/ReviewStatus'
+          - $ref: '#/components/schemas/NullEnum'
+      required:
+      - assigned_at
+      - assigned_by
+      - conflict_override_reason
+      - due_at
+      - id
+      - pseudonym_rank
+      - reason
+      - reminders
+      - review_status
+      - reviewer
+      - status
+    AssignmentStatus:
+      enum:
+      - active
+      - declined
+      - cancelled
+      type: string
+      description: |-
+        * `active` - actif
+        * `declined` - déclinée
+        * `cancelled` - annulée
     AuditEntry:
       type: object
       description: Entrée du journal d'une édition, **sans IP ni navigateur** (minimisation,
@@ -2953,6 +4066,57 @@ components:
       - object_id
       - object_type
       - reason
+    AuthorDecision:
+      type: object
+      properties:
+        outcome:
+          type: string
+          description: accepted, accepted_minor, waitlist, rejected.
+        assigned_type:
+          allOf:
+          - $ref: '#/components/schemas/AuthorDecisionType'
+          nullable: true
+        comment_to_authors:
+          type: string
+          description: Message du comité.
+        published_at:
+          type: string
+          format: date-time
+        reviews:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuthorReviewComment'
+      required:
+      - assigned_type
+      - comment_to_authors
+      - outcome
+      - published_at
+      - reviews
+    AuthorDecisionType:
+      type: object
+      properties:
+        code:
+          type: string
+        label_fr:
+          type: string
+        label_en:
+          type: string
+      required:
+      - code
+      - label_en
+      - label_fr
+    AuthorReviewComment:
+      type: object
+      description: 'RG-10 : commentaire d''un relecteur, sous pseudonyme ; ni nom,
+        ni note.'
+      properties:
+        pseudonym_rank:
+          type: integer
+        comment:
+          type: string
+      required:
+      - comment
+      - pseudonym_rank
     AuthorWriteRequest:
       type: object
       properties:
@@ -2996,6 +4160,74 @@ components:
     BlankEnum:
       enum:
       - ''
+    Candidate:
+      type: object
+      description: Relecteur proposé pour une soumission (H6, H7, H8).
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+          readOnly: true
+        institution:
+          type: string
+          readOnly: true
+        load:
+          type: integer
+          description: Affectations actives dans l'édition.
+        tracks:
+          type: array
+          items:
+            type: string
+          description: Expertises.
+        assignment_id:
+          type: integer
+          nullable: true
+          readOnly: true
+          description: Affectation active sur cette soumission, sinon null.
+        conflicts:
+          type: array
+          items:
+            $ref: '#/components/schemas/CandidateConflict'
+      required:
+      - assignment_id
+      - conflicts
+      - id
+      - institution
+      - load
+      - name
+      - tracks
+    CandidateConflict:
+      type: object
+      properties:
+        kind:
+          $ref: '#/components/schemas/ConflictKind'
+        overridable:
+          type: boolean
+        overridden:
+          type: boolean
+      required:
+      - kind
+      - overridable
+      - overridden
+    CandidateList:
+      type: object
+      properties:
+        max_load:
+          type: integer
+          description: Charge maximale par relecteur (édition).
+        track:
+          type: string
+          nullable: true
+          description: Thématique de la soumission.
+        candidates:
+          type: array
+          items:
+            $ref: '#/components/schemas/Candidate'
+      required:
+      - candidates
+      - max_load
+      - track
     Capability:
       enum:
       - edition.read
@@ -3015,6 +4247,9 @@ components:
       - decisions.decide
       - decisions.publish
       - grids.write
+      - program.read
+      - program.write
+      - program.publish
       type: string
       description: |-
         * `edition.read` - edition.read
@@ -3034,6 +4269,9 @@ components:
         * `decisions.decide` - decisions.decide
         * `decisions.publish` - decisions.publish
         * `grids.write` - grids.write
+        * `program.read` - program.read
+        * `program.write` - program.write
+        * `program.publish` - program.publish
     Confidentiality:
       type: object
       description: Paramètres de l'évaluation (gestion, §6.1 ; plan L4 H4, H6, H12).
@@ -3067,6 +4305,100 @@ components:
           description: Réglages gelés depuis la première soumission (RG-19).
       required:
       - frozen_fields
+    ConflictCreateRequest:
+      type: object
+      properties:
+        submission:
+          type: integer
+        reviewer:
+          type: integer
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 2000
+      required:
+      - reason
+      - reviewer
+      - submission
+    ConflictKind:
+      enum:
+      - author
+      - institution
+      - declared
+      type: string
+      description: |-
+        * `author` - auteur de la soumission
+        * `institution` - même institution
+        * `declared` - déclaré
+    ConflictManage:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        reviewer:
+          allOf:
+          - $ref: '#/components/schemas/Person'
+          readOnly: true
+        kind:
+          allOf:
+          - $ref: '#/components/schemas/ConflictKind'
+          readOnly: true
+          title: Nature
+        source:
+          allOf:
+          - $ref: '#/components/schemas/ConflictSource'
+          readOnly: true
+          title: Origine
+        reason:
+          type: string
+          readOnly: true
+          title: Motif
+        declared_by:
+          allOf:
+          - $ref: '#/components/schemas/Person'
+          nullable: true
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        overridden_by:
+          allOf:
+          - $ref: '#/components/schemas/Person'
+          nullable: true
+          readOnly: true
+        overridden_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Levé le
+        overridden_reason:
+          type: string
+          readOnly: true
+          title: Motif de la levée
+      required:
+      - created_at
+      - declared_by
+      - id
+      - kind
+      - overridden_at
+      - overridden_by
+      - overridden_reason
+      - reason
+      - reviewer
+      - source
+    ConflictSource:
+      enum:
+      - reviewer
+      - system
+      - chair
+      type: string
+      description: |-
+        * `reviewer` - déclaré par le relecteur
+        * `system` - détecté par le système
+        * `chair` - déclaré par le président
     ConsentCreateRequest:
       type: object
       properties:
@@ -3232,6 +4564,115 @@ components:
       - code
       - label_fr
       - weight
+    DecisionBatchItemRequest:
+      type: object
+      properties:
+        outcome:
+          $ref: '#/components/schemas/DecisionOutcome'
+        assigned_type:
+          type: string
+          nullable: true
+          minLength: 1
+          description: Code du format attribué ; par défaut, le type de la soumission
+            (acceptée).
+          pattern: ^[-a-zA-Z0-9_]+$
+        comment_to_authors:
+          type: string
+          default: ''
+          maxLength: 20000
+        submission:
+          type: integer
+      required:
+      - outcome
+      - submission
+    DecisionBatchRequest:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/DecisionBatchItemRequest'
+      required:
+      - items
+    DecisionBatchResult:
+      type: object
+      properties:
+        recorded:
+          type: integer
+          description: Décisions provisoires enregistrées.
+      required:
+      - recorded
+    DecisionManage:
+      type: object
+      description: 'Décision : provisoire tant que ``published_at`` est nul (H16,
+        RG-09).'
+      properties:
+        outcome:
+          allOf:
+          - $ref: '#/components/schemas/DecisionOutcome'
+          readOnly: true
+          title: Issue
+        assigned_type:
+          type: string
+          readOnly: true
+          nullable: true
+        comment_to_authors:
+          type: string
+          readOnly: true
+          title: Commentaire aux auteurs
+        decided_by:
+          allOf:
+          - $ref: '#/components/schemas/Person'
+          nullable: true
+          readOnly: true
+        decided_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Décidée le
+        published_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Publiée le
+      required:
+      - assigned_type
+      - comment_to_authors
+      - decided_at
+      - decided_by
+      - outcome
+      - published_at
+    DecisionOutcome:
+      enum:
+      - accepted
+      - accepted_minor
+      - waitlist
+      - rejected
+      type: string
+      description: |-
+        * `accepted` - acceptée
+        * `accepted_minor` - acceptée sous réserve de corrections
+        * `waitlist` - liste d'attente
+        * `rejected` - rejetée
+    DecisionWriteRequest:
+      type: object
+      properties:
+        outcome:
+          $ref: '#/components/schemas/DecisionOutcome'
+        assigned_type:
+          type: string
+          nullable: true
+          minLength: 1
+          description: Code du format attribué ; par défaut, le type de la soumission
+            (acceptée).
+          pattern: ^[-a-zA-Z0-9_]+$
+        comment_to_authors:
+          type: string
+          default: ''
+          maxLength: 20000
+      required:
+      - outcome
     DeclarationState:
       type: object
       properties:
@@ -3246,6 +4687,102 @@ components:
       - accepted
       - code
       - text_version
+    DeclineRequest:
+      type: object
+      description: |-
+        Marque un sérialiseur servi à un relecteur (liste blanche, contrôlée par le méta-test).
+
+        ``reviewer_computed`` : champs calculés autorisés, nom → justification. Un
+        ``SerializerMethodField`` absent de ce dictionnaire est refusé : ce qu'il renvoie
+        échappe au contrôle des champs, seul le test de fuite le verrait.
+      properties:
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        conflict:
+          type: boolean
+          default: false
+          description: Le relecteur déclare un conflit d'intérêts (H8).
+      required:
+      - reason
+    DiscussionMessageManage:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        author:
+          allOf:
+          - $ref: '#/components/schemas/Person'
+          readOnly: true
+        pseudonym_rank:
+          type: integer
+          nullable: true
+          readOnly: true
+          description: Rang du pseudonyme si l'auteur est relecteur de la soumission.
+        body:
+          type: string
+          readOnly: true
+          title: Message
+        at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Date
+      required:
+      - at
+      - author
+      - body
+      - id
+      - pseudonym_rank
+    DiscussionMessageReviewer:
+      type: object
+      description: 'Message sous pseudonyme : « Relecteur N », ou le président du
+        comité (H11).'
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        pseudonym_rank:
+          type: integer
+          nullable: true
+          readOnly: true
+        mine:
+          type: boolean
+          readOnly: true
+        body:
+          type: string
+          title: Message
+        at:
+          type: string
+          format: date-time
+          title: Date
+      required:
+      - at
+      - body
+      - id
+      - mine
+      - pseudonym_rank
+    DivergentSubmission:
+      type: object
+      properties:
+        id:
+          type: integer
+        reference:
+          type: string
+          nullable: true
+        title:
+          type: string
+        spread:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+      required:
+      - id
+      - reference
+      - spread
+      - title
     Duplicate:
       type: object
       properties:
@@ -3476,6 +5013,12 @@ components:
       - submission_locked
       - profile_incomplete
       - grid_locked
+      - conflict_of_interest
+      - reviewer_overloaded
+      - reviewers_missing
+      - review_not_open
+      - discussion_closed
+      - deadline_passed
       type: string
       description: |-
         * `validation_error` - Validation Error
@@ -3514,6 +5057,48 @@ components:
         * `submission_locked` - Submission Locked
         * `profile_incomplete` - Profile Incomplete
         * `grid_locked` - Grid Locked
+        * `conflict_of_interest` - Conflict Of Interest
+        * `reviewer_overloaded` - Reviewer Overloaded
+        * `reviewers_missing` - Reviewers Missing
+        * `review_not_open` - Review Not Open
+        * `discussion_closed` - Discussion Closed
+        * `deadline_passed` - Deadline Passed
+    Expertise:
+      type: object
+      description: Expertises du relecteur (H7) et thématiques proposées.
+      properties:
+        tracks:
+          type: array
+          items:
+            type: string
+          description: Codes choisis.
+        available:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReviewerTrack'
+          readOnly: true
+      required:
+      - available
+      - tracks
+    ExpertiseWriteRequest:
+      type: object
+      description: |-
+        Marque un sérialiseur servi à un relecteur (liste blanche, contrôlée par le méta-test).
+
+        ``reviewer_computed`` : champs calculés autorisés, nom → justification. Un
+        ``SerializerMethodField`` absent de ce dictionnaire est refusé : ce qu'il renvoie
+        échappe au contrôle des champs, seul le test de fuite le verrait.
+      properties:
+        tracks:
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 32
+            pattern: ^[-a-zA-Z0-9_]+$
+          maxItems: 50
+      required:
+      - tracks
     Extension:
       type: object
       properties:
@@ -3600,6 +5185,31 @@ components:
       required:
       - file
       - kind
+    FinalVersion:
+      type: object
+      properties:
+        submitted_at:
+          type: string
+          format: date-time
+        response_letter:
+          type: string
+        file:
+          $ref: '#/components/schemas/SubmissionFile'
+      required:
+      - file
+      - response_letter
+      - submitted_at
+    FinalVersionUploadRequest:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+        response_letter:
+          type: string
+          default: ''
+      required:
+      - file
     Grid:
       type: object
       properties:
@@ -3681,6 +5291,21 @@ components:
           description: 'Liste complète ; absente : grille par défaut de l''étude (25/30/15/15/15).'
       required:
       - name
+    GroupCount:
+      type: object
+      properties:
+        code:
+          type: string
+          nullable: true
+        total:
+          type: integer
+        accepted:
+          type: integer
+          description: Au-dessus du seuil.
+      required:
+      - accepted
+      - code
+      - total
     Health:
       type: object
       properties:
@@ -4324,6 +5949,30 @@ components:
       required:
       - items
       - location
+    MessageCreateRequest:
+      type: object
+      properties:
+        body:
+          type: string
+          minLength: 1
+          maxLength: 5000
+      required:
+      - body
+    MessageWriteRequest:
+      type: object
+      description: |-
+        Marque un sérialiseur servi à un relecteur (liste blanche, contrôlée par le méta-test).
+
+        ``reviewer_computed`` : champs calculés autorisés, nom → justification. Un
+        ``SerializerMethodField`` absent de ce dictionnaire est refusé : ce qu'il renvoie
+        échappe au contrôle des champs, seul le test de fuite le verrait.
+      properties:
+        body:
+          type: string
+          minLength: 1
+          maxLength: 5000
+      required:
+      - body
     Notification:
       type: object
       properties:
@@ -4363,6 +6012,9 @@ components:
       - coauthor_added
       - extension_granted
       - draft_reminder
+      - screening_rejected
+      - decision_published
+      - final_version_received
       type: string
       description: |-
         * `submission_received` - soumission reçue
@@ -4370,6 +6022,9 @@ components:
         * `coauthor_added` - déclaré co-auteur
         * `extension_granted` - dérogation accordée
         * `draft_reminder` - brouillon à soumettre
+        * `screening_rejected` - soumission non recevable
+        * `decision_published` - décision publiée
+        * `final_version_received` - version finale reçue
     NotificationList:
       type: object
       properties:
@@ -4393,6 +6048,9 @@ components:
             minimum: 1
           description: Notifications à marquer comme lues ; toutes si absent.
           maxItems: 200
+    NullEnum:
+      enum:
+      - null
     OcFunction:
       enum:
       - finance
@@ -4412,6 +6070,39 @@ components:
         * `external_relations` - relations extérieures
         * `volunteers` - bénévoles
         * `secretariat` - secrétariat
+    OpenReviewAuthor:
+      type: object
+      description: |-
+        Auteurs d'une édition **sans** double aveugle (H9, Q3) : noms et affiliations, jamais
+        les adresses. Volontairement hors des sérialiseurs relecteur (RG-04 ne s'applique pas) ;
+        servi par la seule route « reviewer-assignments-authors », qui répond 404 en double
+        aveugle.
+      properties:
+        position:
+          type: integer
+          readOnly: true
+          title: Ordre
+        first_name:
+          type: string
+          readOnly: true
+          title: Prénom
+        last_name:
+          type: string
+          readOnly: true
+          title: Nom
+        institution:
+          type: string
+          readOnly: true
+        country:
+          type: string
+          readOnly: true
+          title: Pays
+      required:
+      - country
+      - first_name
+      - institution
+      - last_name
+      - position
     Page:
       type: object
       properties:
@@ -4591,6 +6282,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/InvitationWithEmail'
+    PaginatedReviewSubmissionList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReviewSubmission'
     PaginatedSubmissionManageList:
       type: object
       required:
@@ -4614,6 +6328,13 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SubmissionManage'
+    PatchedAssignmentUpdateRequest:
+      type: object
+      properties:
+        due_local:
+          type: string
+          format: date-time
+          description: Nouvelle échéance, à l'heure de l'édition.
     PatchedConfidentialityRequest:
       type: object
       description: Paramètres de l'évaluation (gestion, §6.1 ; plan L4 H4, H6, H12).
@@ -4874,6 +6595,20 @@ components:
         linkedin_url:
           type: string
           maxLength: 300
+    PatchedProgramSettingsRequest:
+      type: object
+      description: |-
+        Paramètres du programme de l'édition (I17) : tampon entre créneaux (RG-13) et RG-11,
+        sans effet avant le lot L6.
+      properties:
+        session_buffer_minutes:
+          type: integer
+          maximum: 30
+          minimum: 0
+          title: Tampon entre créneaux (minutes)
+        presenter_registration_required:
+          type: boolean
+          title: Présentateur inscrit exigé (RG-11)
     PatchedPublicFileRequest:
       type: object
       description: Gestion des fichiers de l'édition (documents et images).
@@ -5079,6 +6814,83 @@ components:
         is_active:
           type: boolean
           title: Actif
+    PeerReview:
+      type: object
+      description: Évaluation d'un autre relecteur, sous pseudonyme (RG-08, H11).
+      properties:
+        pseudonym_rank:
+          type: integer
+          readOnly: true
+        mine:
+          type: boolean
+          readOnly: true
+        recommendation:
+          title: Recommandation
+          oneOf:
+          - $ref: '#/components/schemas/Recommendation'
+          - $ref: '#/components/schemas/BlankEnum'
+        confidence:
+          type: integer
+          maximum: 5
+          minimum: 1
+          nullable: true
+          title: Confiance
+        comment_to_authors:
+          type: string
+          title: Commentaire aux auteurs
+        comment_to_committee:
+          type: string
+          title: Commentaire au comité
+        ethics_flag:
+          type: boolean
+          title: Signalement d'éthique
+        plagiarism_flag:
+          type: boolean
+          title: Plagiat présumé
+        suggested_type:
+          type: string
+          readOnly: true
+          nullable: true
+        weighted_score:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+          title: Note pondérée (sur 100)
+        submitted_at:
+          type: string
+          format: date-time
+          nullable: true
+          title: Envoyée le
+        version:
+          type: integer
+          maximum: 4294967295
+          minimum: 0
+          format: int64
+        scores:
+          type: object
+          additionalProperties:
+            type: string
+            format: decimal
+            pattern: ^-?\d{0,3}(?:\.\d{0,1})?$
+          description: Notes par code de critère.
+          readOnly: true
+      required:
+      - mine
+      - pseudonym_rank
+      - scores
+      - suggested_type
+    Person:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+          description: Nom du profil, sinon adresse masquée.
+      required:
+      - id
+      - name
     PhotoUploadRequest:
       type: object
       properties:
@@ -5251,6 +7063,20 @@ components:
         * `pr` - Pr
         * `mr` - M.
         * `ms` - Mme
+    ProgramSettings:
+      type: object
+      description: |-
+        Paramètres du programme de l'édition (I17) : tampon entre créneaux (RG-13) et RG-11,
+        sans effet avant le lot L6.
+      properties:
+        session_buffer_minutes:
+          type: integer
+          maximum: 30
+          minimum: 0
+          title: Tampon entre créneaux (minutes)
+        presenter_registration_required:
+          type: boolean
+          title: Présentateur inscrit exigé (RG-11)
     PublicCommittee:
       type: object
       properties:
@@ -5918,6 +7744,862 @@ components:
       - pending_changes
       - pending_since
       - release
+    PublishResult:
+      type: object
+      properties:
+        published:
+          type: integer
+          description: Décisions publiées.
+      required:
+      - published
+    Ranking:
+      type: object
+      properties:
+        rows:
+          type: array
+          items:
+            $ref: '#/components/schemas/RankingRow'
+        simulation:
+          allOf:
+          - $ref: '#/components/schemas/Simulation'
+          nullable: true
+      required:
+      - rows
+      - simulation
+    RankingRow:
+      type: object
+      properties:
+        id:
+          type: integer
+        reference:
+          type: string
+          nullable: true
+        title:
+          type: string
+        status:
+          $ref: '#/components/schemas/SubmissionStatus'
+        track:
+          type: string
+          nullable: true
+        submission_type:
+          type: string
+          nullable: true
+        final_score:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+        spread:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+        divergent:
+          type: boolean
+        review_count:
+          type: integer
+        recommendations:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Recommandation → nombre.
+        decision:
+          allOf:
+          - $ref: '#/components/schemas/DecisionManage'
+          nullable: true
+      required:
+      - decision
+      - divergent
+      - final_score
+      - id
+      - recommendations
+      - reference
+      - review_count
+      - spread
+      - status
+      - title
+    Recommendation:
+      enum:
+      - accept
+      - accept_minor
+      - reject
+      - discuss
+      type: string
+      description: |-
+        * `accept` - accepter
+        * `accept_minor` - accepter avec corrections
+        * `reject` - rejeter
+        * `discuss` - discuter
+    ReviewManage:
+      type: object
+      description: 'Évaluation envoyée, avec le nom du relecteur (H11 : visible du
+        président et du Chair).'
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        assignment_id:
+          type: integer
+          readOnly: true
+        reviewer:
+          allOf:
+          - $ref: '#/components/schemas/Person'
+          readOnly: true
+        pseudonym_rank:
+          type: integer
+          readOnly: true
+        recommendation:
+          allOf:
+          - $ref: '#/components/schemas/Recommendation'
+          readOnly: true
+          title: Recommandation
+        confidence:
+          type: integer
+          readOnly: true
+          nullable: true
+          title: Confiance
+        comment_to_authors:
+          type: string
+          readOnly: true
+          title: Commentaire aux auteurs
+        comment_to_committee:
+          type: string
+          readOnly: true
+          title: Commentaire au comité
+        ethics_flag:
+          type: boolean
+          readOnly: true
+          title: Signalement d'éthique
+        plagiarism_flag:
+          type: boolean
+          readOnly: true
+          title: Plagiat présumé
+        suggested_type:
+          type: string
+          readOnly: true
+          nullable: true
+        weighted_score:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          readOnly: true
+          nullable: true
+          title: Note pondérée (sur 100)
+        submitted_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Envoyée le
+        version:
+          type: integer
+          readOnly: true
+        scores:
+          type: object
+          additionalProperties:
+            type: string
+            format: decimal
+            pattern: ^-?\d{0,3}(?:\.\d{0,1})?$
+          readOnly: true
+      required:
+      - assignment_id
+      - comment_to_authors
+      - comment_to_committee
+      - confidence
+      - ethics_flag
+      - id
+      - plagiarism_flag
+      - pseudonym_rank
+      - recommendation
+      - reviewer
+      - scores
+      - submitted_at
+      - suggested_type
+      - version
+      - weighted_score
+    ReviewProgress:
+      type: object
+      description: 'Suivi de l''évaluation (plan L4 §4) : par relecteur, par thématique,
+        divergences.'
+      properties:
+        threshold:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+        reviewers:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReviewerProgress'
+        tracks:
+          type: array
+          items:
+            $ref: '#/components/schemas/TrackProgress'
+        divergent:
+          type: array
+          items:
+            $ref: '#/components/schemas/DivergentSubmission'
+      required:
+      - divergent
+      - reviewers
+      - threshold
+      - tracks
+    ReviewStatus:
+      enum:
+      - draft
+      - submitted
+      type: string
+    ReviewSubmission:
+      type: object
+      description: 'Ligne du suivi de l''évaluation : compteurs annotés par la vue.'
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        reference:
+          type: string
+          readOnly: true
+          nullable: true
+          title: Référence
+        status:
+          allOf:
+          - $ref: '#/components/schemas/SubmissionStatus'
+          readOnly: true
+          title: Statut
+        title:
+          type: string
+          readOnly: true
+          title: Titre
+        track:
+          type: string
+          readOnly: true
+          nullable: true
+        submission_type:
+          type: string
+          readOnly: true
+          nullable: true
+        language:
+          type: string
+          readOnly: true
+          title: Langue
+        submitted_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Soumise le
+        assignment_count:
+          type: integer
+          description: Affectations actives.
+        review_count:
+          type: integer
+          description: Évaluations envoyées (actives).
+        late_count:
+          type: integer
+          description: Affectations actives en retard.
+        required:
+          type: integer
+          readOnly: true
+          description: Relecteurs requis (édition).
+      required:
+      - assignment_count
+      - id
+      - language
+      - late_count
+      - reference
+      - required
+      - review_count
+      - status
+      - submission_type
+      - submitted_at
+      - title
+      - track
+    ReviewSubmissionDetail:
+      type: object
+      description: 'Ligne du suivi de l''évaluation : compteurs annotés par la vue.'
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        reference:
+          type: string
+          readOnly: true
+          nullable: true
+          title: Référence
+        status:
+          allOf:
+          - $ref: '#/components/schemas/SubmissionStatus'
+          readOnly: true
+          title: Statut
+        title:
+          type: string
+          readOnly: true
+          title: Titre
+        track:
+          type: string
+          readOnly: true
+          nullable: true
+        submission_type:
+          type: string
+          readOnly: true
+          nullable: true
+        language:
+          type: string
+          readOnly: true
+          title: Langue
+        submitted_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Soumise le
+        assignment_count:
+          type: integer
+          description: Affectations actives.
+        review_count:
+          type: integer
+          description: Évaluations envoyées (actives).
+        late_count:
+          type: integer
+          description: Affectations actives en retard.
+        required:
+          type: integer
+          readOnly: true
+          description: Relecteurs requis (édition).
+        abstract:
+          type: string
+          readOnly: true
+          title: Résumé
+        keywords:
+          readOnly: true
+          title: Mots-clés
+        assignments:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssignmentManage'
+          readOnly: true
+        conflicts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConflictManage'
+          readOnly: true
+        decision:
+          allOf:
+          - $ref: '#/components/schemas/DecisionManage'
+          nullable: true
+          readOnly: true
+      required:
+      - abstract
+      - assignment_count
+      - assignments
+      - conflicts
+      - decision
+      - id
+      - keywords
+      - language
+      - late_count
+      - reference
+      - required
+      - review_count
+      - status
+      - submission_type
+      - submitted_at
+      - title
+      - track
+    ReviewWriteRequest:
+      type: object
+      description: |-
+        Copie de travail envoyée par le relecteur ; la note pondérée est calculée par le
+        serveur (H4), jamais lue ici.
+      properties:
+        scores:
+          type: object
+          additionalProperties:
+            type: string
+            format: decimal
+            pattern: ^-?\d{0,3}(?:\.\d{0,1})?$
+            nullable: true
+        recommendation:
+          default: ''
+          oneOf:
+          - $ref: '#/components/schemas/Recommendation'
+          - $ref: '#/components/schemas/BlankEnum'
+        confidence:
+          type: integer
+          maximum: 5
+          minimum: 1
+          nullable: true
+        comment_to_authors:
+          type: string
+          default: ''
+        comment_to_committee:
+          type: string
+          default: ''
+        ethics_flag:
+          type: boolean
+          default: false
+        plagiarism_flag:
+          type: boolean
+          default: false
+        suggested_type:
+          type: string
+          nullable: true
+          minLength: 1
+          pattern: ^[-a-zA-Z0-9_]+$
+    ReviewerAssignment:
+      type: object
+      description: Ligne de « Mes évaluations ».
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/AssignmentStatus'
+          title: Statut
+        assigned_at:
+          type: string
+          format: date-time
+          title: Affectée le
+        due_at:
+          type: string
+          format: date-time
+          nullable: true
+          title: Échéance
+        pseudonym_rank:
+          type: integer
+          maximum: 65535
+          minimum: 0
+          title: Rang du pseudonyme
+        submission:
+          allOf:
+          - $ref: '#/components/schemas/ReviewerSubmissionSummary'
+          readOnly: true
+        review_status:
+          nullable: true
+          readOnly: true
+          oneOf:
+          - $ref: '#/components/schemas/ReviewStatus'
+          - $ref: '#/components/schemas/NullEnum'
+        can_edit:
+          type: boolean
+          readOnly: true
+      required:
+      - assigned_at
+      - can_edit
+      - id
+      - review_status
+      - submission
+    ReviewerAssignmentDetail:
+      type: object
+      description: Ligne de « Mes évaluations ».
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/AssignmentStatus'
+          title: Statut
+        assigned_at:
+          type: string
+          format: date-time
+          title: Affectée le
+        due_at:
+          type: string
+          format: date-time
+          nullable: true
+          title: Échéance
+        pseudonym_rank:
+          type: integer
+          maximum: 65535
+          minimum: 0
+          title: Rang du pseudonyme
+        submission:
+          allOf:
+          - $ref: '#/components/schemas/ReviewerSubmission'
+          readOnly: true
+        review_status:
+          nullable: true
+          readOnly: true
+          oneOf:
+          - $ref: '#/components/schemas/ReviewStatus'
+          - $ref: '#/components/schemas/NullEnum'
+        can_edit:
+          type: boolean
+          readOnly: true
+        grid:
+          allOf:
+          - $ref: '#/components/schemas/ReviewerGrid'
+          nullable: true
+          readOnly: true
+        review:
+          allOf:
+          - $ref: '#/components/schemas/ReviewerReview'
+          nullable: true
+          readOnly: true
+        discussion_open:
+          type: boolean
+          readOnly: true
+        double_blind:
+          type: boolean
+          readOnly: true
+      required:
+      - assigned_at
+      - can_edit
+      - discussion_open
+      - double_blind
+      - grid
+      - id
+      - review
+      - review_status
+      - submission
+    ReviewerCriterion:
+      type: object
+      description: |-
+        Marque un sérialiseur servi à un relecteur (liste blanche, contrôlée par le méta-test).
+
+        ``reviewer_computed`` : champs calculés autorisés, nom → justification. Un
+        ``SerializerMethodField`` absent de ce dictionnaire est refusé : ce qu'il renvoie
+        échappe au contrôle des champs, seul le test de fuite le verrait.
+      properties:
+        code:
+          type: string
+          maxLength: 32
+          pattern: ^[-a-zA-Z0-9_]+$
+        label_fr:
+          type: string
+          title: Libellé (FR)
+          maxLength: 255
+        label_en:
+          type: string
+          title: Libellé (EN)
+          maxLength: 255
+        help_fr:
+          type: string
+          title: Aide à la notation (FR)
+        help_en:
+          type: string
+          title: Aide à la notation (EN)
+        weight:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          title: Poids (%)
+        is_required:
+          type: boolean
+          title: Obligatoire
+        position:
+          type: integer
+          maximum: 65535
+          minimum: 0
+          title: Ordre
+      required:
+      - code
+      - label_fr
+      - weight
+    ReviewerDiscussion:
+      type: object
+      description: 'RG-08 : évaluations envoyées (pseudonymes) et messages de la discussion.'
+      properties:
+        opened_at:
+          type: string
+          format: date-time
+          readOnly: true
+        final_score:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+        spread:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+        reviews:
+          type: array
+          items:
+            $ref: '#/components/schemas/PeerReview'
+          readOnly: true
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiscussionMessageReviewer'
+          readOnly: true
+      required:
+      - final_score
+      - messages
+      - opened_at
+      - reviews
+      - spread
+    ReviewerGrid:
+      type: object
+      description: |-
+        Marque un sérialiseur servi à un relecteur (liste blanche, contrôlée par le méta-test).
+
+        ``reviewer_computed`` : champs calculés autorisés, nom → justification. Un
+        ``SerializerMethodField`` absent de ce dictionnaire est refusé : ce qu'il renvoie
+        échappe au contrôle des champs, seul le test de fuite le verrait.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          title: Nom
+          maxLength: 150
+        version:
+          type: integer
+          maximum: 65535
+          minimum: 0
+        scale_min:
+          type: integer
+          maximum: 65535
+          minimum: 0
+          title: Note minimale
+        scale_max:
+          type: integer
+          maximum: 100
+          minimum: 0
+          title: Note maximale
+        criteria:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReviewerCriterion'
+          readOnly: true
+      required:
+      - criteria
+      - id
+      - name
+    ReviewerProgress:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        active:
+          type: integer
+          description: Affectations actives.
+        submitted:
+          type: integer
+          description: Évaluations envoyées (affectations actives).
+        late:
+          type: integer
+          description: Affectations en retard.
+      required:
+      - active
+      - id
+      - late
+      - name
+      - submitted
+    ReviewerReview:
+      type: object
+      description: |-
+        Marque un sérialiseur servi à un relecteur (liste blanche, contrôlée par le méta-test).
+
+        ``reviewer_computed`` : champs calculés autorisés, nom → justification. Un
+        ``SerializerMethodField`` absent de ce dictionnaire est refusé : ce qu'il renvoie
+        échappe au contrôle des champs, seul le test de fuite le verrait.
+      properties:
+        status:
+          allOf:
+          - $ref: '#/components/schemas/ReviewStatus'
+          title: Statut
+        recommendation:
+          title: Recommandation
+          oneOf:
+          - $ref: '#/components/schemas/Recommendation'
+          - $ref: '#/components/schemas/BlankEnum'
+        confidence:
+          type: integer
+          maximum: 5
+          minimum: 1
+          nullable: true
+          title: Confiance
+        comment_to_authors:
+          type: string
+          title: Commentaire aux auteurs
+        comment_to_committee:
+          type: string
+          title: Commentaire au comité
+        ethics_flag:
+          type: boolean
+          title: Signalement d'éthique
+        plagiarism_flag:
+          type: boolean
+          title: Plagiat présumé
+        suggested_type:
+          type: string
+          readOnly: true
+          nullable: true
+        weighted_score:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+          title: Note pondérée (sur 100)
+        submitted_at:
+          type: string
+          format: date-time
+          nullable: true
+          title: Envoyée le
+        version:
+          type: integer
+          maximum: 4294967295
+          minimum: 0
+          format: int64
+        scores:
+          type: object
+          additionalProperties:
+            type: string
+            format: decimal
+            pattern: ^-?\d{0,3}(?:\.\d{0,1})?$
+          description: Notes par code de critère.
+          readOnly: true
+      required:
+      - scores
+      - suggested_type
+    ReviewerSubmission:
+      type: object
+      description: |-
+        Marque un sérialiseur servi à un relecteur (liste blanche, contrôlée par le méta-test).
+
+        ``reviewer_computed`` : champs calculés autorisés, nom → justification. Un
+        ``SerializerMethodField`` absent de ce dictionnaire est refusé : ce qu'il renvoie
+        échappe au contrôle des champs, seul le test de fuite le verrait.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        reference:
+          type: string
+          nullable: true
+          title: Référence
+          maxLength: 20
+        title:
+          type: string
+          title: Titre
+          maxLength: 300
+        language:
+          type: string
+          title: Langue
+          maxLength: 2
+        status:
+          allOf:
+          - $ref: '#/components/schemas/SubmissionStatus'
+          title: Statut
+        track:
+          allOf:
+          - $ref: '#/components/schemas/ReviewerTrack'
+          readOnly: true
+          nullable: true
+        submission_type:
+          allOf:
+          - $ref: '#/components/schemas/ReviewerType'
+          readOnly: true
+          nullable: true
+        abstract:
+          type: string
+          title: Résumé
+        keywords:
+          title: Mots-clés
+        has_file:
+          type: boolean
+          readOnly: true
+      required:
+      - has_file
+      - id
+      - submission_type
+      - track
+    ReviewerSubmissionSummary:
+      type: object
+      description: |-
+        Marque un sérialiseur servi à un relecteur (liste blanche, contrôlée par le méta-test).
+
+        ``reviewer_computed`` : champs calculés autorisés, nom → justification. Un
+        ``SerializerMethodField`` absent de ce dictionnaire est refusé : ce qu'il renvoie
+        échappe au contrôle des champs, seul le test de fuite le verrait.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        reference:
+          type: string
+          nullable: true
+          title: Référence
+          maxLength: 20
+        title:
+          type: string
+          title: Titre
+          maxLength: 300
+        language:
+          type: string
+          title: Langue
+          maxLength: 2
+        status:
+          allOf:
+          - $ref: '#/components/schemas/SubmissionStatus'
+          title: Statut
+        track:
+          allOf:
+          - $ref: '#/components/schemas/ReviewerTrack'
+          readOnly: true
+          nullable: true
+        submission_type:
+          allOf:
+          - $ref: '#/components/schemas/ReviewerType'
+          readOnly: true
+          nullable: true
+      required:
+      - id
+      - submission_type
+      - track
+    ReviewerTrack:
+      type: object
+      description: |-
+        Marque un sérialiseur servi à un relecteur (liste blanche, contrôlée par le méta-test).
+
+        ``reviewer_computed`` : champs calculés autorisés, nom → justification. Un
+        ``SerializerMethodField`` absent de ce dictionnaire est refusé : ce qu'il renvoie
+        échappe au contrôle des champs, seul le test de fuite le verrait.
+      properties:
+        code:
+          type: string
+          maxLength: 32
+          pattern: ^[-a-zA-Z0-9_]+$
+        name_fr:
+          type: string
+          title: Nom (FR)
+          maxLength: 255
+        name_en:
+          type: string
+          title: Nom (EN)
+          maxLength: 255
+      required:
+      - code
+      - name_fr
+    ReviewerType:
+      type: object
+      description: |-
+        Marque un sérialiseur servi à un relecteur (liste blanche, contrôlée par le méta-test).
+
+        ``reviewer_computed`` : champs calculés autorisés, nom → justification. Un
+        ``SerializerMethodField`` absent de ce dictionnaire est refusé : ce qu'il renvoie
+        échappe au contrôle des champs, seul le test de fuite le verrait.
+      properties:
+        code:
+          type: string
+          maxLength: 32
+          pattern: ^[-a-zA-Z0-9_]+$
+        label_fr:
+          type: string
+          title: Libellé (FR)
+          maxLength: 255
+        label_en:
+          type: string
+          title: Libellé (EN)
+          maxLength: 255
+      required:
+      - code
+      - label_fr
     RevisionSummary:
       type: object
       properties:
@@ -5974,6 +8656,26 @@ components:
         * `invitation` - invitation
         * `command` - commande
         * `system` - système
+    ScreeningDecision:
+      enum:
+      - admissible
+      - reject
+      type: string
+      description: |-
+        * `admissible` - admissible
+        * `reject` - reject
+    ScreeningRequest:
+      type: object
+      description: 'H10 : recevable (ouvre l''évaluation) ou rejet motivé.'
+      properties:
+        decision:
+          $ref: '#/components/schemas/ScreeningDecision'
+        reason:
+          type: string
+          default: ''
+          maxLength: 2000
+      required:
+      - decision
     Section:
       type: object
       description: Section avec les pages qui la portent (« posée sur »).
@@ -6189,6 +8891,33 @@ components:
       description: |-
         * `ok` - Ok
         * `error` - Error
+    Simulation:
+      type: object
+      description: 'US-06 : nombre de soumissions au-dessus du seuil, au total, par
+        type et thématique.'
+      properties:
+        threshold:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+        accepted:
+          type: integer
+        total:
+          type: integer
+        by_type:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupCount'
+        by_track:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupCount'
+      required:
+      - accepted
+      - by_track
+      - by_type
+      - threshold
+      - total
     SkippedInvitation:
       type: object
       properties:
@@ -6321,6 +9050,25 @@ components:
           items:
             $ref: '#/components/schemas/SubmissionAction'
           readOnly: true
+        decision:
+          allOf:
+          - $ref: '#/components/schemas/AuthorDecision'
+          nullable: true
+          readOnly: true
+          description: 'RG-09 : décision publiée seulement ; RG-10 : commentaires
+            sous pseudonyme.'
+        final_version:
+          allOf:
+          - $ref: '#/components/schemas/FinalVersion'
+          nullable: true
+          readOnly: true
+          description: Version finale déposée (H18).
+        final_deadline:
+          type: string
+          format: date-time
+          nullable: true
+          readOnly: true
+          description: Date limite de la version finale (date clé camera_ready).
       required:
       - abstract
       - allowed_actions
@@ -6328,11 +9076,14 @@ components:
       - can_edit
       - created_at
       - deadline
+      - decision
       - declarations
       - double_blind
       - edition
       - edition_code
       - file
+      - final_deadline
+      - final_version
       - id
       - keywords
       - language
@@ -6350,10 +9101,12 @@ components:
       enum:
       - submit
       - withdraw
+      - final_version
       type: string
       description: |-
         * `submit` - submit
         * `withdraw` - withdraw
+        * `final_version` - final_version
     SubmissionAuthor:
       type: object
       properties:
@@ -6729,6 +9482,46 @@ components:
       - updated_at
       - withdraw_reason
       - withdrawn_at
+    SubmissionReviews:
+      type: object
+      description: Évaluations envoyées d'une soumission, note finale, divergence
+        (H12), discussion.
+      properties:
+        final_score:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+        spread:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+        threshold:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+        divergent:
+          type: boolean
+        reviews:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReviewManage'
+        discussion_opened_at:
+          type: string
+          format: date-time
+          nullable: true
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiscussionMessageManage'
+      required:
+      - discussion_opened_at
+      - divergent
+      - final_score
+      - messages
+      - reviews
+      - spread
+      - threshold
     SubmissionStats:
       type: object
       properties:
@@ -6986,6 +9779,22 @@ components:
       - code
       - id
       - name_fr
+    TrackProgress:
+      type: object
+      properties:
+        code:
+          type: string
+          nullable: true
+        in_review:
+          type: integer
+          description: Soumissions en évaluation ou évaluées.
+        reviewed:
+          type: integer
+          description: Soumissions évaluées (RG-07).
+      required:
+      - code
+      - in_review
+      - reviewed
     TrackRequest:
       type: object
       properties:

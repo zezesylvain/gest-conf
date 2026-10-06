@@ -1,0 +1,164 @@
+<gc-page-header
+  [heading]="'gestion.ranking.title' | translate"
+  [lead]="'gestion.ranking.lead' | translate"
+/>
+<div aria-live="polite">
+  @if (status()) {
+    <p class="notice" role="status">{{ status() }}</p>
+  }
+</div>
+<gc-error-summary [messages]="errors()" />
+
+<form [formGroup]="form" (ngSubmit)="simulate()" novalidate class="card">
+  <h2>{{ 'gestion.ranking.simulation.title' | translate }}</h2>
+  <mat-form-field appearance="outline">
+    <mat-label>{{ 'gestion.ranking.simulation.threshold' | translate }}</mat-label>
+    <input matInput type="number" min="0" max="100" step="1" formControlName="threshold" />
+    <mat-hint>{{ 'gestion.ranking.simulation.hint' | translate }}</mat-hint>
+  </mat-form-field>
+  <div class="actions">
+    <button mat-flat-button type="submit">
+      {{ 'gestion.ranking.simulation.run' | translate }}
+    </button>
+    @if (canDecide() && threshold() !== null) {
+      <button mat-stroked-button type="button" (click)="prefill()">
+        {{ 'gestion.ranking.simulation.prefill' | translate }}
+      </button>
+    }
+  </div>
+  @if (ranking()?.simulation; as simulation) {
+    <p role="status">
+      <strong>{{
+        'gestion.ranking.simulation.result'
+          | translate
+            : {
+                accepted: simulation.accepted,
+                total: simulation.total,
+                threshold: simulation.threshold,
+              }
+      }}</strong>
+    </p>
+    <div class="grid-2">
+      <div>
+        <h3>{{ 'gestion.ranking.simulation.byType' | translate }}</h3>
+        <ul>
+          @for (group of simulation.by_type; track group.code) {
+            <li>{{ group.code ?? '—' }} : {{ group.accepted }} / {{ group.total }}</li>
+          }
+        </ul>
+      </div>
+      <div>
+        <h3>{{ 'gestion.ranking.simulation.byTrack' | translate }}</h3>
+        <ul>
+          @for (group of simulation.by_track; track group.code) {
+            <li>{{ group.code ?? '—' }} : {{ group.accepted }} / {{ group.total }}</li>
+          }
+        </ul>
+      </div>
+    </div>
+  }
+</form>
+
+@if (!loading()) {
+  <div class="actions">
+    @if (canDecide()) {
+      <button
+        mat-flat-button
+        type="button"
+        (click)="saveBatch()"
+        [disabled]="busy() || !batchCount()"
+      >
+        {{ 'gestion.ranking.batch.save' | translate: { count: batchCount() } }}
+      </button>
+    }
+    @if (canPublish()) {
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="publish()"
+        [disabled]="busy() || !pending()"
+      >
+        {{ 'gestion.ranking.publish.action' | translate: { count: pending() } }}
+      </button>
+    }
+    <button mat-button type="button" (click)="exportCsv()" [disabled]="busy()">
+      {{ 'gestion.ranking.export' | translate }}
+    </button>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <caption class="visually-hidden">
+        {{
+          'gestion.ranking.title' | translate
+        }}
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">{{ 'gestion.submissions.fields.reference' | translate }}</th>
+          <th scope="col">{{ 'gestion.submissions.fields.title' | translate }}</th>
+          <th scope="col">{{ 'gestion.ranking.fields.final' | translate }}</th>
+          <th scope="col">{{ 'gestion.ranking.fields.reviews' | translate }}</th>
+          <th scope="col">{{ 'gestion.ranking.fields.recommendations' | translate }}</th>
+          <th scope="col">{{ 'gestion.ranking.fields.decision' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of ranking()?.rows ?? []; track row.id) {
+          <tr [class.below]="below(row)">
+            <td>
+              <a [routerLink]="['/editions', editionId(), 'pilotage', row.id]">{{
+                row.reference
+              }}</a>
+            </td>
+            <td>
+              {{ row.title }}
+              <span class="muted">· {{ row.track ?? '—' }} · {{ row.submission_type ?? '—' }}</span>
+            </td>
+            <td>
+              <strong>{{ row.final_score ?? '—' }}</strong>
+              @if (row.divergent) {
+                <span class="badge danger">{{
+                  'gestion.ranking.divergent' | translate: { spread: row.spread }
+                }}</span>
+              }
+            </td>
+            <td>{{ row.review_count }}</td>
+            <td>{{ recommendations(row) }}</td>
+            <td>
+              @if (row.decision; as decision) {
+                <span class="badge">{{
+                  'gestion.followUp.outcomes.' + decision.outcome | translate
+                }}</span>
+                <span class="muted">
+                  {{
+                    (decision.published_at
+                      ? 'gestion.ranking.published'
+                      : 'gestion.ranking.provisional'
+                    ) | translate
+                  }}
+                </span>
+              }
+              @if (canDecide() && decidable(row)) {
+                <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                  <mat-label>{{ 'gestion.ranking.batch.outcome' | translate }}</mat-label>
+                  <mat-select [value]="batch()[row.id] ?? ''" (valueChange)="choose(row, $event)">
+                    <mat-option value="">{{ 'gestion.ranking.batch.none' | translate }}</mat-option>
+                    @for (outcome of outcomes; track outcome) {
+                      <mat-option [value]="outcome">{{
+                        'gestion.followUp.outcomes.' + outcome | translate
+                      }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+              }
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="6" class="muted">{{ 'gestion.ranking.empty' | translate }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

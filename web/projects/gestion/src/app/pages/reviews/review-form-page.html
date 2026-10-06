@@ -1,0 +1,263 @@
+<p>
+  <a [routerLink]="['/editions', editionId(), 'evaluations']">{{
+    'gestion.reviews.back' | translate
+  }}</a>
+</p>
+@if (assignment(); as current) {
+  <gc-page-header
+    [heading]="current.submission.reference + ' — ' + current.submission.title"
+    [lead]="'gestion.reviews.form.lead' | translate"
+  />
+} @else {
+  <gc-page-header [heading]="'gestion.reviews.form.title' | translate" />
+}
+<div aria-live="polite">
+  @if (status()) {
+    <p class="notice" role="status">{{ status() }}</p>
+  }
+</div>
+<gc-error-summary [messages]="errors()" />
+
+@if (loading()) {
+  <p role="status">{{ 'gestion.reviews.loading' | translate }}</p>
+} @else if (assignment(); as current) {
+  <section class="card" aria-labelledby="submission-title">
+    <h2 id="submission-title">{{ 'gestion.reviews.form.submission' | translate }}</h2>
+    <p class="muted">
+      {{ current.submission.track?.code ?? '—' }} ·
+      {{ current.submission.submission_type?.code ?? '—' }} ·
+      {{ 'shared.language.' + current.submission.language | translate }} ·
+      {{ 'gestion.reviews.fields.due' | translate }} {{ date(current.due_at) }}
+    </p>
+    @if (current.submission.keywords?.length) {
+      <p>
+        <strong>{{ 'gestion.reviews.form.keywords' | translate }}</strong>
+        {{ current.submission.keywords.join(', ') }}
+      </p>
+    }
+    <p class="abstract">{{ current.submission.abstract }}</p>
+    @if (current.submission.has_file) {
+      <p>
+        <a mat-stroked-button [href]="fileHref()" download>{{
+          'gestion.reviews.form.download' | translate
+        }}</a>
+      </p>
+    }
+    @if (current.double_blind) {
+      <p class="muted">{{ 'gestion.reviews.form.blind' | translate }}</p>
+    } @else if (authors().length) {
+      <h3>{{ 'gestion.reviews.form.authors' | translate }}</h3>
+      <ul>
+        @for (author of authors(); track author.position) {
+          <li>
+            {{ author.first_name }} {{ author.last_name }}
+            @if (author.institution) {
+              ({{ author.institution }})
+            }
+          </li>
+        }
+      </ul>
+    }
+  </section>
+
+  @if (current.grid; as grid) {
+    <form
+      [formGroup]="form"
+      (ngSubmit)="save()"
+      novalidate
+      class="card"
+      aria-labelledby="grid-title"
+    >
+      <h2 id="grid-title">{{ 'gestion.reviews.form.grid' | translate }} — {{ grid.name }}</h2>
+      <p class="muted">
+        {{ 'gestion.reviews.form.scale' | translate: { min: grid.scale_min, max: grid.scale_max } }}
+      </p>
+      <div formGroupName="scores">
+        @for (criterion of grid.criteria; track criterion.code) {
+          <div class="criterion">
+            <!-- Libellé complet au-dessus du champ : un libellé long ne déborde pas à 375 px. -->
+            <label class="criterion-label" [for]="'score-' + criterion.code">
+              {{ label(criterion) }} ({{ criterion.weight }} %)
+              @if (criterion.is_required === false) {
+                <span class="muted">— {{ 'gestion.reviews.form.optional' | translate }}</span>
+              }
+            </label>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <input
+                matInput
+                type="number"
+                inputmode="decimal"
+                [min]="grid.scale_min ?? 0"
+                [max]="grid.scale_max ?? 5"
+                step="0.5"
+                [id]="'score-' + criterion.code"
+                [formControlName]="criterion.code"
+              />
+              @if (helpText(criterion)) {
+                <mat-hint>{{ helpText(criterion) }}</mat-hint>
+              }
+            </mat-form-field>
+          </div>
+        }
+      </div>
+      <p aria-live="polite">
+        {{ 'gestion.reviews.form.liveScore' | translate }}
+        <span class="score">{{ score(liveScore()) }}</span> / 100
+        <span class="muted">{{ 'gestion.reviews.form.liveScoreHint' | translate }}</span>
+      </p>
+      <div class="grid-2">
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'gestion.reviews.form.recommendation' | translate }}</mat-label>
+          <mat-select formControlName="recommendation">
+            @for (item of recommendations; track item) {
+              <mat-option [value]="item">{{
+                'gestion.reviews.recommendations.' + item | translate
+              }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'gestion.reviews.form.confidence' | translate }}</mat-label>
+          <mat-select formControlName="confidence">
+            @for (item of confidences; track item) {
+              <mat-option [value]="item">{{
+                'gestion.reviews.confidence.' + item | translate
+              }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>{{ 'gestion.reviews.form.toAuthors' | translate }}</mat-label>
+        <textarea matInput rows="6" formControlName="comment_to_authors"></textarea>
+        <mat-hint>{{ 'gestion.reviews.form.toAuthorsHint' | translate }}</mat-hint>
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>{{ 'gestion.reviews.form.toCommittee' | translate }}</mat-label>
+        <textarea matInput rows="4" formControlName="comment_to_committee"></textarea>
+        <mat-hint>{{ 'gestion.reviews.form.toCommitteeHint' | translate }}</mat-hint>
+      </mat-form-field>
+      <mat-checkbox formControlName="ethics_flag">{{
+        'gestion.reviews.form.ethics' | translate
+      }}</mat-checkbox>
+      <mat-checkbox formControlName="plagiarism_flag">{{
+        'gestion.reviews.form.plagiarism' | translate
+      }}</mat-checkbox>
+      @if (current.review; as review) {
+        <p class="muted">
+          {{
+            (submitted()
+              ? 'gestion.reviews.form.stateSubmitted'
+              : 'gestion.reviews.form.stateDraft'
+            ) | translate: { version: review.version, at: date(review.submitted_at) }
+          }}
+          @if (review.weighted_score) {
+            · {{ 'gestion.reviews.form.serverScore' | translate: { score: review.weighted_score } }}
+          }
+        </p>
+      }
+      @if (editable()) {
+        <div class="actions">
+          @if (!submitted()) {
+            <button mat-stroked-button type="submit" [disabled]="busy()">
+              {{ 'gestion.reviews.form.save' | translate }}
+            </button>
+          }
+          <button mat-flat-button type="button" (click)="submit()" [disabled]="busy()">
+            {{
+              (submitted() ? 'gestion.reviews.form.resubmit' : 'gestion.reviews.form.send')
+                | translate
+            }}
+          </button>
+        </div>
+      } @else {
+        <p class="notice">{{ 'gestion.reviews.form.readOnly' | translate }}</p>
+      }
+    </form>
+  } @else {
+    <p class="notice">{{ 'gestion.reviews.form.noGrid' | translate }}</p>
+  }
+
+  @if (discussion(); as thread) {
+    <section class="card" aria-labelledby="discussion-title">
+      <h2 id="discussion-title">{{ 'gestion.reviews.discussion.title' | translate }}</h2>
+      <p class="muted">
+        {{
+          'gestion.reviews.discussion.summary'
+            | translate: { final: thread.final_score ?? '—', spread: thread.spread }
+        }}
+      </p>
+      @for (peer of thread.reviews; track peer.pseudonym_rank) {
+        <div class="peer">
+          <h3>{{ who(peer.pseudonym_rank, peer.mine) }}</h3>
+          <p>
+            {{ peer.weighted_score ?? '—' }} / 100 ·
+            {{ 'gestion.reviews.recommendations.' + peer.recommendation | translate }} ·
+            {{ 'gestion.reviews.form.confidence' | translate }} {{ peer.confidence ?? '—' }}
+          </p>
+          @if (peer.comment_to_authors) {
+            <p class="comment">{{ peer.comment_to_authors }}</p>
+          }
+          @if (peer.comment_to_committee) {
+            <p class="comment muted">{{ peer.comment_to_committee }}</p>
+          }
+        </div>
+      }
+      <h3>{{ 'gestion.reviews.discussion.messages' | translate }}</h3>
+      @for (message of thread.messages; track message.id) {
+        <div class="message">
+          <strong>{{ who(message.pseudonym_rank, message.mine) }}</strong>
+          <span class="muted"> · {{ date(message.at) }}</span>
+          <p class="comment">{{ message.body }}</p>
+        </div>
+      } @empty {
+        <p class="muted">{{ 'gestion.reviews.discussion.empty' | translate }}</p>
+      }
+      @if (editable()) {
+        <form [formGroup]="messageForm" (ngSubmit)="post()" novalidate>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'gestion.reviews.discussion.message' | translate }}</mat-label>
+            <textarea matInput rows="3" formControlName="body"></textarea>
+          </mat-form-field>
+          <div class="actions">
+            <button mat-stroked-button type="submit" [disabled]="busy()">
+              {{ 'gestion.reviews.discussion.send' | translate }}
+            </button>
+          </div>
+        </form>
+      }
+    </section>
+  } @else if (submitted()) {
+    <p class="muted">{{ 'gestion.reviews.discussion.notOpen' | translate }}</p>
+  }
+
+  @if (editable() && !submitted()) {
+    <section class="card" aria-labelledby="decline-title">
+      <h2 id="decline-title">{{ 'gestion.reviews.decline.title' | translate }}</h2>
+      @if (!declining()) {
+        <p>{{ 'gestion.reviews.decline.lead' | translate }}</p>
+        <button mat-stroked-button type="button" (click)="declining.set(true)">
+          {{ 'gestion.reviews.decline.open' | translate }}
+        </button>
+      } @else {
+        <form [formGroup]="declineForm" (ngSubmit)="decline()" novalidate>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'gestion.reviews.decline.reason' | translate }}</mat-label>
+            <textarea matInput rows="3" formControlName="reason" required></textarea>
+          </mat-form-field>
+          <mat-checkbox formControlName="conflict">{{
+            'gestion.reviews.decline.conflict' | translate
+          }}</mat-checkbox>
+          <div class="actions">
+            <button mat-flat-button type="submit" [disabled]="busy()">
+              {{ 'gestion.reviews.decline.submit' | translate }}
+            </button>
+            <button mat-button type="button" (click)="declining.set(false)">
+              {{ 'gestion.reviews.decline.cancel' | translate }}
+            </button>
+          </div>
+        </form>
+      }
+    </section>
+  }
+}

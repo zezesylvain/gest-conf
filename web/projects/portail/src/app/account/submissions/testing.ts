@@ -89,6 +89,9 @@ export function testSubmission(overrides: Partial<Submission> = {}): Submission 
     submitted_at: null,
     withdrawn_at: null,
     withdraw_reason: '',
+    decision: null,
+    final_version: null,
+    final_deadline: null,
     ...overrides,
   };
 }
