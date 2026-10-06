@@ -125,6 +125,10 @@ export type { ManagePortalSectionsPreview$Params as ManagePortalSectionsPreview$
 export { managePortalSectionsPreview as managePortalSectionsPreview } from './fn/manage/manage-portal-sections-preview';
 export type { ManagePortalStatus$Params as ManagePortalStatus$Params } from './fn/manage/manage-portal-status';
 export { managePortalStatus as managePortalStatus } from './fn/manage/manage-portal-status';
+export type { ManageProgramSettingsRetrieve$Params as ManageProgramSettingsRetrieve$Params } from './fn/manage/manage-program-settings-retrieve';
+export { manageProgramSettingsRetrieve as manageProgramSettingsRetrieve } from './fn/manage/manage-program-settings-retrieve';
+export type { ManageProgramSettingsUpdate$Params as ManageProgramSettingsUpdate$Params } from './fn/manage/manage-program-settings-update';
+export { manageProgramSettingsUpdate as manageProgramSettingsUpdate } from './fn/manage/manage-program-settings-update';
 export type { ManageRanking$Params as ManageRanking$Params } from './fn/manage/manage-ranking';
 export { manageRanking as manageRanking } from './fn/manage/manage-ranking';
 export type { ManageReviewProgress$Params as ManageReviewProgress$Params } from './fn/manage/manage-review-progress';

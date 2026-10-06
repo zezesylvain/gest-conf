@@ -267,3 +267,57 @@ ambiguës (essai : 02:30 le 28 mars et le 31 octobre 2027, à Paris).
   écoulé : à Paris, 01:30 plus 150 minutes affiche 05:00.
 - Les erreurs de saisie sont renvoyées sur le champ concerné de la session (`starts_local`,
   `ends_local`).
+
+## 12. Bilan de L5.1 (6 octobre 2026)
+
+**Application `program`**, une migration, conforme au §3 avec deux adaptations :
+
+- salles (équipements en liste fermée et note libre) ;
+- sessions : type en catalogue fermé, titres FR et EN, thématique, salle, début et fin,
+  consignes ;
+- créneaux : position, durée, début et fin calculés, communication **ou** titre libre
+  (contrainte), intervenant invité. Une communication n'occupe qu'un créneau : c'est un
+  `OneToOneField`, comme le recommande Django ;
+- rôles de séance (unicité session, compte, rôle) ;
+- publications, en ajout seul, avec instantané et différences ;
+- confirmations de présentation.
+
+**Adaptation 1, état du programme** : la révision du brouillon (I14) vit dans une table
+`program_state`, une ligne par édition, et non dans l'édition. La ligne est verrouillée par
+chaque écriture de planification. Les contrôles de conflits sont ainsi mis en série sans
+bloquer les autres écritures de l'édition. Elle porte aussi la révision et la version
+publiées, d'où le nombre de modifications non publiées.
+
+**Adaptation 2, services en paquet** (`apps/program/services/`), comme `reviews` :
+paramètres en L5.1, puis planification, publication et agenda.
+
+**Paramètres de l'édition (I17)** :
+
+- `session_buffer_minutes` (0 à 30, contrainte en base) ;
+- `presenter_registration_required` (RG-11, désactivée, sans effet avant L6) ;
+- route `…/program/settings` : lecture `program.read`, écriture `program.write`, journal
+  `program.settings_changed` (avant et après).
+
+**Capacités (I1)** :
+
+- `program.read` : `ADMIN`, `CHAIR`, `SC_CHAIR`, `OC_MEMBER` (toutes fonctions) ;
+- `program.write` : `ADMIN` et CO « programme » (`FUNCTION_CAPABILITIES`) ;
+- `program.publish` : `CHAIR` seul ; l'administrateur ne publie pas.
+
+**Matrice** : profil « CO programme » ajouté, et cas de la route des paramètres ; elle
+compte 1 328 tests.
+
+**Données personnelles** :
+
+- rôles de séance, créneaux d'intervenant et confirmations, à l'export ;
+- anonymisation **refusée** tant que la personne figure au programme d'une édition non
+  archivée ;
+- ensuite, son nom est retiré des instantanés publiés (`ProgramPublication.redact`).
+
+**Vérifications** :
+
+- 2 208 tests backend sous SQLite ; les tests transverses, du paramétrage et du programme
+  passent aussi sous MariaDB ;
+- schéma régénéré sur MariaDB ; client TypeScript régénéré ;
+- traductions du backend à jour ;
+- front : 302 tests, lint et format.

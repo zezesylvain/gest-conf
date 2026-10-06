@@ -1683,6 +1683,56 @@ paths:
               schema:
                 $ref: '#/components/schemas/PublicationStatus'
           description: ''
+  /v1/manage/editions/{edition_id}/program/settings:
+    get:
+      operationId: manage_program_settings_retrieve
+      description: |-
+        ``…/program/settings`` : paramètres du programme (I17). Lecture ``program.read``,
+        écriture ``program.write`` (CO « programme », administrateur ; I1).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProgramSettings'
+          description: ''
+    patch:
+      operationId: manage_program_settings_update
+      description: |-
+        ``…/program/settings`` : paramètres du programme (I17). Lecture ``program.read``,
+        écriture ``program.write`` (CO « programme », administrateur ; I1).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProgramSettingsRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProgramSettings'
+          description: ''
   /v1/manage/editions/{edition_id}/ranking:
     get:
       operationId: manage_ranking
@@ -4197,6 +4247,9 @@ components:
       - decisions.decide
       - decisions.publish
       - grids.write
+      - program.read
+      - program.write
+      - program.publish
       type: string
       description: |-
         * `edition.read` - edition.read
@@ -4216,6 +4269,9 @@ components:
         * `decisions.decide` - decisions.decide
         * `decisions.publish` - decisions.publish
         * `grids.write` - grids.write
+        * `program.read` - program.read
+        * `program.write` - program.write
+        * `program.publish` - program.publish
     Confidentiality:
       type: object
       description: Paramètres de l'évaluation (gestion, §6.1 ; plan L4 H4, H6, H12).
@@ -6539,6 +6595,20 @@ components:
         linkedin_url:
           type: string
           maxLength: 300
+    PatchedProgramSettingsRequest:
+      type: object
+      description: |-
+        Paramètres du programme de l'édition (I17) : tampon entre créneaux (RG-13) et RG-11,
+        sans effet avant le lot L6.
+      properties:
+        session_buffer_minutes:
+          type: integer
+          maximum: 30
+          minimum: 0
+          title: Tampon entre créneaux (minutes)
+        presenter_registration_required:
+          type: boolean
+          title: Présentateur inscrit exigé (RG-11)
     PatchedPublicFileRequest:
       type: object
       description: Gestion des fichiers de l'édition (documents et images).
@@ -6993,6 +7063,20 @@ components:
         * `pr` - Pr
         * `mr` - M.
         * `ms` - Mme
+    ProgramSettings:
+      type: object
+      description: |-
+        Paramètres du programme de l'édition (I17) : tampon entre créneaux (RG-13) et RG-11,
+        sans effet avant le lot L6.
+      properties:
+        session_buffer_minutes:
+          type: integer
+          maximum: 30
+          minimum: 0
+          title: Tampon entre créneaux (minutes)
+        presenter_registration_required:
+          type: boolean
+          title: Présentateur inscrit exigé (RG-11)
     PublicCommittee:
       type: object
       properties:

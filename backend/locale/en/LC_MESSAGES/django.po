@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gestconf-backend\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-06 01:12+0000\n"
+"POT-Creation-Date: 2026-10-06 05:40+0000\n"
 "PO-Revision-Date: 2026-10-05 11:00+0000\n"
 "Last-Translator: GEST-CONF\n"
 "Language-Team: GEST-CONF\n"
@@ -20,7 +20,7 @@ msgid "adresse e-mail"
 msgstr "email address"
 
 #: apps/accounts/models.py:30 apps/accounts/models.py:226
-#: apps/conferences/models.py:263
+#: apps/conferences/models.py:278
 msgid "actif"
 msgstr "active"
 
@@ -71,8 +71,8 @@ msgstr "title"
 msgid "prénom"
 msgstr "first name"
 
-#: apps/accounts/models.py:87 apps/reviews/models.py:45
-#: apps/submissions/models.py:144
+#: apps/accounts/models.py:87 apps/program/models.py:50
+#: apps/reviews/models.py:45 apps/submissions/models.py:144
 msgid "nom"
 msgstr "last name"
 
@@ -147,6 +147,7 @@ msgid "commande"
 msgstr "command"
 
 #: apps/accounts/models.py:184 apps/core/models.py:205 apps/portal/models.py:58
+#: apps/program/models.py:112
 msgid "type"
 msgstr "kind"
 
@@ -193,18 +194,20 @@ msgid "système"
 msgstr "system"
 
 #: apps/accounts/models.py:255 apps/accounts/models.py:345
-#: apps/communications/models.py:45 apps/conferences/models.py:163
-#: apps/conferences/models.py:192 apps/conferences/models.py:236
-#: apps/conferences/models.py:323 apps/core/models.py:98
+#: apps/communications/models.py:45 apps/conferences/models.py:175
+#: apps/conferences/models.py:207 apps/conferences/models.py:251
+#: apps/conferences/models.py:338 apps/core/models.py:98
 #: apps/core/models.py:279 apps/portal/models.py:54 apps/portal/models.py:132
 #: apps/portal/models.py:213 apps/portal/models.py:268
+#: apps/program/models.py:46 apps/program/models.py:108
+#: apps/program/models.py:275 apps/program/models.py:298
 #: apps/reviews/models.py:32 apps/reviews/models.py:126
 #: apps/submissions/models.py:51
 msgid "édition"
 msgstr "edition"
 
 #: apps/accounts/models.py:259 apps/accounts/models.py:306
-#: apps/accounts/models.py:350
+#: apps/accounts/models.py:350 apps/program/models.py:248
 msgid "rôle"
 msgstr "role"
 
@@ -213,7 +216,7 @@ msgid "fonction au CO"
 msgstr "organising committee function"
 
 #: apps/accounts/models.py:265 apps/accounts/models.py:356
-#: apps/communications/models.py:58 apps/conferences/models.py:123
+#: apps/communications/models.py:58 apps/conferences/models.py:133
 #: apps/core/models.py:208 apps/reviews/models.py:178
 #: apps/reviews/models.py:300 apps/submissions/models.py:89
 msgid "statut"
@@ -381,7 +384,8 @@ msgstr "programme"
 msgid "logistique"
 msgstr "logistics"
 
-#: apps/accounts/roles.py:40
+#: apps/accounts/roles.py:40 apps/program/models.py:182
+#: apps/program/models.py:350
 msgid "communication"
 msgstr "communication"
 
@@ -398,7 +402,7 @@ msgid "secrétariat"
 msgstr "secretariat"
 
 #: apps/accounts/services/account.py:66 apps/conferences/services.py:111
-#: apps/conferences/services.py:495
+#: apps/conferences/services.py:495 apps/program/services/settings.py:32
 msgid "Champ non modifiable."
 msgstr "This field cannot be changed."
 
@@ -1095,21 +1099,23 @@ msgstr "[%(site_name)s] Test email"
 msgid "identifiant"
 msgstr "identifier"
 
-#: apps/conferences/models.py:29 apps/conferences/models.py:195
+#: apps/conferences/models.py:29 apps/conferences/models.py:210
 msgid "nom (FR)"
 msgstr "name (FR)"
 
-#: apps/conferences/models.py:30 apps/conferences/models.py:196
+#: apps/conferences/models.py:30 apps/conferences/models.py:211
 msgid "nom (EN)"
 msgstr "name (EN)"
 
-#: apps/conferences/models.py:31 apps/conferences/models.py:197
-#: apps/conferences/models.py:243 apps/portal/models.py:140
+#: apps/conferences/models.py:31 apps/conferences/models.py:212
+#: apps/conferences/models.py:258 apps/portal/models.py:140
+#: apps/program/models.py:115
 msgid "description (FR)"
 msgstr "description (FR)"
 
-#: apps/conferences/models.py:32 apps/conferences/models.py:198
-#: apps/conferences/models.py:244 apps/portal/models.py:141
+#: apps/conferences/models.py:32 apps/conferences/models.py:213
+#: apps/conferences/models.py:259 apps/portal/models.py:141
+#: apps/program/models.py:116
 msgid "description (EN)"
 msgstr "description (EN)"
 
@@ -1139,8 +1145,8 @@ msgstr "published"
 msgid "archivée"
 msgstr "archived"
 
-#: apps/conferences/models.py:73 apps/conferences/models.py:194
-#: apps/conferences/models.py:240 apps/conferences/models.py:325
+#: apps/conferences/models.py:73 apps/conferences/models.py:209
+#: apps/conferences/models.py:255 apps/conferences/models.py:340
 #: apps/portal/models.py:57 apps/reviews/models.py:86
 msgid "code"
 msgstr "code"
@@ -1151,11 +1157,13 @@ msgstr "year"
 
 #: apps/conferences/models.py:79 apps/core/models.py:294
 #: apps/portal/models.py:59 apps/portal/models.py:137
+#: apps/program/models.py:113
 msgid "titre (FR)"
 msgstr "title (FR)"
 
 #: apps/conferences/models.py:80 apps/core/models.py:295
 #: apps/portal/models.py:60 apps/portal/models.py:138
+#: apps/program/models.py:114
 msgid "titre (EN)"
 msgstr "title (EN)"
 
@@ -1167,11 +1175,13 @@ msgstr "theme (FR)"
 msgid "thème (EN)"
 msgstr "theme (EN)"
 
-#: apps/conferences/models.py:83
+#: apps/conferences/models.py:83 apps/program/models.py:133
+#: apps/program/models.py:178
 msgid "début"
 msgstr "start"
 
-#: apps/conferences/models.py:84
+#: apps/conferences/models.py:84 apps/program/models.py:134
+#: apps/program/models.py:179
 msgid "fin"
 msgstr "end"
 
@@ -1211,134 +1221,145 @@ msgstr "divergence threshold (points out of 100)"
 msgid "score final pondéré par la confiance"
 msgstr "final score weighted by confidence"
 
-#: apps/conferences/models.py:125 apps/reviews/models.py:494
+#: apps/conferences/models.py:125
+msgid "tampon entre créneaux (minutes)"
+msgstr "buffer between slots (minutes)"
+
+#: apps/conferences/models.py:130
+msgid "présentateur inscrit exigé (RG-11)"
+msgstr "registered presenter required (RG-11)"
+
+#: apps/conferences/models.py:135 apps/program/models.py:304
+#: apps/reviews/models.py:494
 msgid "publiée le"
 msgstr "published at"
 
-#: apps/conferences/models.py:126
+#: apps/conferences/models.py:136
 msgid "archivée le"
 msgstr "archived at"
 
-#: apps/conferences/models.py:131
+#: apps/conferences/models.py:141
 msgid "affiche"
 msgstr "poster"
 
-#: apps/conferences/models.py:164
+#: apps/conferences/models.py:176
 msgid "éditions"
 msgstr "editions"
 
-#: apps/conferences/models.py:199 apps/conferences/models.py:262
-#: apps/conferences/models.py:331 apps/core/models.py:296
-#: apps/portal/models.py:228 apps/reviews/models.py:97
+#: apps/conferences/models.py:214 apps/conferences/models.py:277
+#: apps/conferences/models.py:346 apps/core/models.py:296
+#: apps/portal/models.py:228 apps/program/models.py:59
+#: apps/program/models.py:174 apps/reviews/models.py:97
 #: apps/submissions/models.py:134
 msgid "ordre"
 msgstr "order"
 
-#: apps/conferences/models.py:200 apps/reviews/models.py:144
+#: apps/conferences/models.py:215 apps/program/models.py:58
+#: apps/reviews/models.py:144
 msgid "active"
 msgstr "active"
 
-#: apps/conferences/models.py:213 apps/reviews/models.py:129
-#: apps/submissions/models.py:67
+#: apps/conferences/models.py:228 apps/program/models.py:119
+#: apps/reviews/models.py:129 apps/submissions/models.py:67
 msgid "thématique"
 msgstr "track"
 
-#: apps/conferences/models.py:214 apps/portal/models.py:32
+#: apps/conferences/models.py:229 apps/portal/models.py:32
 msgid "thématiques"
 msgstr "tracks"
 
-#: apps/conferences/models.py:226
+#: apps/conferences/models.py:241
 msgid "aucun fichier"
 msgstr "no file"
 
-#: apps/conferences/models.py:227
+#: apps/conferences/models.py:242
 msgid "facultatif"
 msgstr "optional"
 
-#: apps/conferences/models.py:228 apps/reviews/models.py:98
+#: apps/conferences/models.py:243 apps/reviews/models.py:98
 msgid "obligatoire"
 msgstr "required"
 
-#: apps/conferences/models.py:241 apps/conferences/models.py:328
+#: apps/conferences/models.py:256 apps/conferences/models.py:343
 #: apps/portal/models.py:216 apps/reviews/models.py:87
 msgid "libellé (FR)"
 msgstr "label (FR)"
 
-#: apps/conferences/models.py:242 apps/conferences/models.py:329
+#: apps/conferences/models.py:257 apps/conferences/models.py:344
 #: apps/portal/models.py:217 apps/reviews/models.py:88
 msgid "libellé (EN)"
 msgstr "label (EN)"
 
-#: apps/conferences/models.py:247
+#: apps/conferences/models.py:262
 msgid "durée par défaut (min)"
 msgstr "default duration (min)"
 
-#: apps/conferences/models.py:250
+#: apps/conferences/models.py:265
 msgid "mots maximum du résumé"
 msgstr "abstract word limit"
 
-#: apps/conferences/models.py:255
+#: apps/conferences/models.py:270
 msgid "fichier PDF"
 msgstr "PDF file"
 
-#: apps/conferences/models.py:258
+#: apps/conferences/models.py:273
 msgid "taille maximale du fichier (Mo)"
 msgstr "maximum file size (MB)"
 
-#: apps/conferences/models.py:280 apps/reviews/models.py:38
+#: apps/conferences/models.py:295 apps/reviews/models.py:38
 #: apps/submissions/models.py:75
 msgid "type de communication"
 msgstr "submission type"
 
-#: apps/conferences/models.py:281 apps/portal/models.py:33
+#: apps/conferences/models.py:296 apps/portal/models.py:33
 msgid "types de communication"
 msgstr "submission types"
 
-#: apps/conferences/models.py:302
+#: apps/conferences/models.py:317
 msgid "ouverture de l'appel"
 msgstr "call opening"
 
-#: apps/conferences/models.py:303
+#: apps/conferences/models.py:318
 msgid "clôture de l'appel"
 msgstr "call closing"
 
-#: apps/conferences/models.py:304
+#: apps/conferences/models.py:319
 msgid "fin des évaluations"
 msgstr "review deadline"
 
-#: apps/conferences/models.py:305
+#: apps/conferences/models.py:320
 msgid "notification des décisions"
 msgstr "decision notification"
 
-#: apps/conferences/models.py:306
+#: apps/conferences/models.py:321
 msgid "version définitive"
 msgstr "camera-ready version"
 
-#: apps/conferences/models.py:307
+#: apps/conferences/models.py:322
 msgid "ouverture des inscriptions"
 msgstr "registration opening"
 
-#: apps/conferences/models.py:308
+#: apps/conferences/models.py:323
 msgid "fin du tarif préférentiel"
 msgstr "early bird deadline"
 
-#: apps/conferences/models.py:309
+#: apps/conferences/models.py:324
 msgid "clôture des inscriptions"
 msgstr "registration closing"
 
-#: apps/conferences/models.py:326
+#: apps/conferences/models.py:341
 msgid "date (UTC)"
 msgstr "date (UTC)"
 
-#: apps/conferences/models.py:330
+#: apps/conferences/models.py:345
 msgid "publique"
 msgstr "public"
 
-#: apps/conferences/models.py:343
+#: apps/conferences/models.py:358
 msgid "date clé"
 msgstr "key date"
 
-#: apps/conferences/models.py:344 apps/portal/models.py:31
+#: apps/conferences/models.py:359 apps/portal/models.py:31
 msgid "dates clés"
 msgstr "key dates"
 
@@ -1894,9 +1915,9 @@ msgstr "menu items"
 msgid "mis en ligne le"
 msgstr "released on"
 
-#: apps/portal/models.py:271 apps/reviews/models.py:44
-#: apps/reviews/models.py:331 apps/reviews/models.py:376
-#: apps/submissions/models.py:178
+#: apps/portal/models.py:271 apps/program/models.py:302
+#: apps/reviews/models.py:44 apps/reviews/models.py:331
+#: apps/reviews/models.py:376 apps/submissions/models.py:178
 msgid "version"
 msgstr "version"
 
@@ -2016,6 +2037,239 @@ msgstr "File in use (%(uses)s): remove it first."
 #: apps/portal/services.py:912
 msgid "Date de build invalide (avec fuseau, et pas dans le futur)."
 msgstr "Invalid build date (with time zone, and not in the future)."
+
+#: apps/program/models.py:31
+msgid "vidéoprojecteur"
+msgstr "projector"
+
+#: apps/program/models.py:32
+msgid "micro"
+msgstr "microphone"
+
+#: apps/program/models.py:33
+msgid "sonorisation"
+msgstr "sound system"
+
+#: apps/program/models.py:34
+msgid "ordinateur"
+msgstr "computer"
+
+#: apps/program/models.py:35
+msgid "tableau"
+msgstr "whiteboard"
+
+#: apps/program/models.py:36
+msgid "interprétation"
+msgstr "interpretation"
+
+#: apps/program/models.py:37
+msgid "enregistrement"
+msgstr "recording"
+
+#: apps/program/models.py:38
+msgid "wifi"
+msgstr "wifi"
+
+#: apps/program/models.py:52
+msgid "capacité"
+msgstr "capacity"
+
+#: apps/program/models.py:54
+msgid "équipements"
+msgstr "equipment"
+
+#: apps/program/models.py:55
+msgid "note sur l'équipement"
+msgstr "equipment note"
+
+#: apps/program/models.py:56
+msgid "accessible"
+msgstr "accessible"
+
+#: apps/program/models.py:57
+msgid "indications d'accès"
+msgstr "access directions"
+
+#: apps/program/models.py:73 apps/program/models.py:127
+msgid "salle"
+msgstr "room"
+
+#: apps/program/models.py:74
+msgid "salles"
+msgstr "rooms"
+
+#: apps/program/models.py:88
+msgid "ouverture"
+msgstr "opening"
+
+#: apps/program/models.py:89
+msgid "conférence plénière"
+msgstr "keynote"
+
+#: apps/program/models.py:90
+msgid "session parallèle"
+msgstr "parallel session"
+
+#: apps/program/models.py:91
+msgid "session posters"
+msgstr "poster session"
+
+#: apps/program/models.py:92
+msgid "atelier"
+msgstr "workshop"
+
+#: apps/program/models.py:93
+msgid "tutoriel"
+msgstr "tutorial"
+
+#: apps/program/models.py:94
+msgid "table ronde"
+msgstr "round table"
+
+#: apps/program/models.py:95
+msgid "assemblée ou réunion"
+msgstr "assembly or meeting"
+
+#: apps/program/models.py:96
+msgid "pause"
+msgstr "break"
+
+#: apps/program/models.py:97
+msgid "repas"
+msgstr "meal"
+
+#: apps/program/models.py:98
+msgid "activité sociale"
+msgstr "social event"
+
+#: apps/program/models.py:99
+msgid "clôture"
+msgstr "closing"
+
+#: apps/program/models.py:135
+msgid "consignes"
+msgstr "instructions"
+
+#: apps/program/models.py:149 apps/program/models.py:172
+#: apps/program/models.py:240
+msgid "session"
+msgstr "session"
+
+#: apps/program/models.py:150
+msgid "sessions"
+msgstr "sessions"
+
+#: apps/program/models.py:176
+msgid "durée (minutes)"
+msgstr "duration (minutes)"
+
+#: apps/program/models.py:188
+msgid "titre libre (FR)"
+msgstr "free title (FR)"
+
+#: apps/program/models.py:189
+msgid "titre libre (EN)"
+msgstr "free title (EN)"
+
+#: apps/program/models.py:192
+msgid "intervenant invité"
+msgstr "invited speaker"
+
+#: apps/program/models.py:212
+msgid "créneau"
+msgstr "slot"
+
+#: apps/program/models.py:213
+msgid "créneaux"
+msgstr "slots"
+
+#: apps/program/models.py:230
+msgid "président de séance"
+msgstr "session chair"
+
+#: apps/program/models.py:231
+msgid "discutant"
+msgstr "discussant"
+
+#: apps/program/models.py:232
+msgid "modérateur"
+msgstr "moderator"
+
+#: apps/program/models.py:233
+msgid "panéliste"
+msgstr "panelist"
+
+#: apps/program/models.py:244
+msgid "personne"
+msgstr "person"
+
+#: apps/program/models.py:253
+msgid "rôle de séance"
+msgstr "session role"
+
+#: apps/program/models.py:254
+msgid "rôles de séance"
+msgstr "session roles"
+
+#: apps/program/models.py:279
+msgid "révision du brouillon"
+msgstr "draft revision"
+
+#: apps/program/models.py:280 apps/program/models.py:303
+msgid "révision publiée"
+msgstr "published revision"
+
+#: apps/program/models.py:281
+msgid "dernière version publiée"
+msgstr "latest published version"
+
+#: apps/program/models.py:284
+msgid "état du programme"
+msgstr "programme state"
+
+#: apps/program/models.py:285
+msgid "états du programme"
+msgstr "programme states"
+
+#: apps/program/models.py:307
+msgid "publiée par"
+msgstr "published by"
+
+#: apps/program/models.py:313
+msgid "instantané"
+msgstr "snapshot"
+
+#: apps/program/models.py:314
+msgid "différences"
+msgstr "differences"
+
+#: apps/program/models.py:329
+msgid "publication du programme"
+msgstr "programme publication"
+
+#: apps/program/models.py:330
+msgid "publications du programme"
+msgstr "programme publications"
+
+#: apps/program/models.py:354
+msgid "présentateurs (positions des auteurs)"
+msgstr "presenters (author positions)"
+
+#: apps/program/models.py:355
+msgid "confirmée le"
+msgstr "confirmed on"
+
+#: apps/program/models.py:358
+msgid "confirmée par"
+msgstr "confirmed by"
+
+#: apps/program/models.py:366
+msgid "confirmation de présentation"
+msgstr "presentation confirmation"
+
+#: apps/program/models.py:367
+msgid "confirmations de présentation"
+msgstr "presentation confirmations"
 
 #: apps/reviews/models.py:46
 msgid "note minimale"

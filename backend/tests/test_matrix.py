@@ -46,21 +46,33 @@ SR, SE, SX = "submissions.read", "submissions.extend", "submissions.export"
 # écrire les grilles.
 RW, RM, RA = "reviews.write", "reviews.manage", "reviews.read_all"
 DD, DP, GW = "decisions.decide", "decisions.publish", "grids.write"
+# Plan L5 (I1) : programme lu par les comités, écrit par le CO « programme » et
+# l'administrateur, publié par le Chair.
+PGR, PGW, PGP = "program.read", "program.write", "program.publish"
 
 SPEC: dict[str, set[str]] = {
-    # H19 : l'administrateur n'évalue pas et ne décide pas.
-    "ADMIN": {R, W, PUB, ARC, MR, MM, AR, PW, SR, SE, SX, RM, RA, GW},
-    "CHAIR": {R, W, PUB, MR, MM, AR, PW, SR, SE, SX, RM, RA, DD, DP, GW},
+    # H19 : l'administrateur n'évalue pas et ne décide pas ; I1 : il ne publie pas le
+    # programme.
+    "ADMIN": {R, W, PUB, ARC, MR, MM, AR, PW, SR, SE, SX, RM, RA, GW, PGR, PGW},
+    # I1 : le Chair lit et publie le programme, sans l'écrire.
+    "CHAIR": {R, W, PUB, MR, MM, AR, PW, SR, SE, SX, RM, RA, DD, DP, GW, PGR, PGP},
     # D8 validée : lecture du paramétrage ; membres du CS seulement. F10, F8 (plan L3) :
     # soumissions (lecture, dérogations, export). H19 : évalue, pilote, décide, publie.
-    "SC_CHAIR": {R, MR, MM, SR, SE, SX, RW, RM, RA, DD, DP, GW},
-    "OC_MEMBER": {R, SR},  # D8 : lecture seule (fonction « finances ») ; F10 : soumissions
-    "OC_COMMUNICATION": {R, PW, SR},  # E11 (plan L2) : le CO « communication » écrit le portail
+    # I1 : lit le programme.
+    "SC_CHAIR": {R, MR, MM, SR, SE, SX, RW, RM, RA, DD, DP, GW, PGR},
+    # D8 : lecture seule (fonction « finances ») ; F10 : soumissions ; I1 : programme lu.
+    "OC_MEMBER": {R, SR, PGR},
+    # E11 (plan L2) : le CO « communication » écrit le portail.
+    "OC_COMMUNICATION": {R, PW, SR, PGR},
+    "OC_PROGRAM": {R, SR, PGR, PGW},  # I1 (plan L5) : le CO « programme » écrit le programme
     "SC_MEMBER": {RW},  # F10 : pas les soumissions ; H19 : ses affectations seulement
     "AUTHOR": set(),
 }
 # Profils qui ne sont pas un rôle seul : (rôle, fonction au CO).
-PROFILE_ROLES = {"OC_COMMUNICATION": (Role.OC_MEMBER, "communication")}
+PROFILE_ROLES = {
+    "OC_COMMUNICATION": (Role.OC_MEMBER, "communication"),
+    "OC_PROGRAM": (Role.OC_MEMBER, "program"),
+}
 # Profils sans rôle actif dans l'édition visée : 404 (D5).
 NON_MEMBERS = ("no_role", "other_edition_chair", "revoked_chair", "invited")
 PROFILES = ("anonymous", *NON_MEMBERS, *SPEC)
@@ -100,6 +112,15 @@ CASES = [
         # Réglage non gelé : la soumission en recevabilité du monde gèle double_blind (RG-19).
         {"max_reviews_per_reviewer": 12},
         recent_auth=True,
+    ),
+    Case("manage-program-settings", "GET", PGR, 200, "/v1/manage/editions/{e}/program/settings"),
+    Case(
+        "manage-program-settings",
+        "PATCH",
+        PGW,
+        200,
+        "/v1/manage/editions/{e}/program/settings",
+        {"session_buffer_minutes": 5},
     ),
     Case("manage-tracks-list", "GET", R, 200, "/v1/manage/editions/{e}/tracks"),
     Case(

@@ -113,6 +113,7 @@ export type { PatchedMenuItemRequest } from './models/patched-menu-item-request'
 export type { PatchedPageRequest } from './models/patched-page-request';
 export type { PatchedPreferencesRequest } from './models/patched-preferences-request';
 export type { PatchedProfileRequest } from './models/patched-profile-request';
+export type { PatchedProgramSettingsRequest } from './models/patched-program-settings-request';
 export type { PatchedPublicFileRequest } from './models/patched-public-file-request';
 export type { PatchedSectionWriteRequest } from './models/patched-section-write-request';
 export type { PatchedSubmissionTypeRequest } from './models/patched-submission-type-request';
@@ -130,6 +131,7 @@ export type { Preview } from './models/preview';
 export type { PreviewRequest } from './models/preview-request';
 export type { Profile } from './models/profile';
 export type { ProfileTitle } from './models/profile-title';
+export type { ProgramSettings } from './models/program-settings';
 export type { PublicationStatus } from './models/publication-status';
 export type { PublicCommittee } from './models/public-committee';
 export type { PublicCommitteeMember } from './models/public-committee-member';

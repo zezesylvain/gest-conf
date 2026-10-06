@@ -119,6 +119,16 @@ class Edition(TimeStampedModel):
     confidence_weighted_score = models.BooleanField(
         _("score final pondéré par la confiance"), default=False
     )
+    # Programme (plan L5, I17) : tampon de transition entre créneaux (RG-13) et RG-11
+    # (présentateur inscrit, sans effet avant le lot L6).
+    session_buffer_minutes = models.PositiveSmallIntegerField(
+        _("tampon entre créneaux (minutes)"),
+        default=0,
+        validators=[MaxValueValidator(30)],
+    )
+    presenter_registration_required = models.BooleanField(
+        _("présentateur inscrit exigé (RG-11)"), default=False
+    )
     status = models.CharField(
         _("statut"), max_length=10, choices=EditionStatus.choices, default=EditionStatus.DRAFT
     )
@@ -156,6 +166,8 @@ class Edition(TimeStampedModel):
         "max_reviews_per_reviewer",
         "divergence_threshold",
         "confidence_weighted_score",
+        "session_buffer_minutes",
+        "presenter_registration_required",
         "status",
     )
 
@@ -173,6 +185,9 @@ class Edition(TimeStampedModel):
             models.CheckConstraint(
                 condition=Q(reviewers_per_submission__gte=1, reviewers_per_submission__lte=10),
                 name="conf_edition_reviewers_range",
+            ),
+            models.CheckConstraint(
+                condition=Q(session_buffer_minutes__lte=30), name="conf_edition_buffer_range"
             ),
         )
         indexes = (models.Index(fields=["conference", "status"], name="conf_edition_status"),)
