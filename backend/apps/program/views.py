@@ -38,6 +38,7 @@ from apps.program.serializers import (
     PublicProgramDaySerializer,
     PublicProgramSerializer,
     PublicSessionSerializer,
+    PublicSpeakersSerializer,
     RoomWriteSerializer,
     SessionRoleWriteSerializer,
     SessionWriteSerializer,
@@ -47,6 +48,7 @@ from apps.program.serializers import (
     local_day,
     person,
     public_session,
+    public_speakers,
     public_summary,
 )
 from apps.program.services import agenda, planning, publication
@@ -592,6 +594,20 @@ class PublicProgramSessionView(APIView):
         if session is None:
             raise Http404
         return _public(PublicSessionSerializer(public_session(session)).data)
+
+
+class PublicSpeakersView(APIView):
+    """``GET /v1/public/speakers`` : intervenants invités du programme publié (plan L8, N6),
+    lus au build de la page « Intervenants » ; 404 tant que rien n'est publié."""
+
+    authentication_classes = ()
+    permission_classes = (AllowAny,)
+
+    @extend_schema(
+        operation_id="public_speakers", responses={200: PublicSpeakersSerializer}, auth=[]
+    )
+    def get(self, request: Request) -> Response:
+        return _public(PublicSpeakersSerializer(public_speakers(_current_publication())).data)
 
 
 # --- « Mon passage » (I8) ------------------------------------------------------------------

@@ -805,6 +805,17 @@
       "codeLabel": "Verification code",
       "submit": "Verify",
       "codeHint": "End of the address printed under the document's QR code: capital letters and digits."
+    },
+    "community": {
+      "noSponsor": "The conference partners will be presented here.",
+      "otherSponsors": "With the support of",
+      "logoAlt": "{{name}} logo",
+      "website": "{{name}} website",
+      "speakersUnpublished": "Invited speakers will be presented here with the programme.",
+      "noSpeaker": "No invited speaker has been announced yet.",
+      "noNews": "No news yet.",
+      "readMore": "Read the news",
+      "dismiss": "Close the banner"
     }
   }
 }

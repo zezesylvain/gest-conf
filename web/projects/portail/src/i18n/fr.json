@@ -805,6 +805,17 @@
       "codeLabel": "Code de vérification",
       "submit": "Vérifier",
       "codeHint": "Fin de l'adresse imprimée sous le QR du document : lettres majuscules et chiffres."
+    },
+    "community": {
+      "noSponsor": "Les partenaires de la conférence seront présentés ici.",
+      "otherSponsors": "Avec le soutien de",
+      "logoAlt": "Logo de {{name}}",
+      "website": "Site de {{name}}",
+      "speakersUnpublished": "Les intervenants invités seront présentés ici avec le programme.",
+      "noSpeaker": "Aucun intervenant invité n'est encore annoncé.",
+      "noNews": "Aucune actualité pour l'instant.",
+      "readMore": "Lire l'actualité",
+      "dismiss": "Fermer le bandeau"
     }
   }
 }

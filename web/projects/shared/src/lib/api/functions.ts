@@ -653,6 +653,8 @@ export type { PublicProgramSession$Params as PublicProgramSession$Params } from 
 export { publicProgramSession as publicProgramSession } from './fn/public/public-program-session';
 export type { PublicRegistration$Params as PublicRegistration$Params } from './fn/public/public-registration';
 export { publicRegistration as publicRegistration } from './fn/public/public-registration';
+export type { PublicSpeakers$Params as PublicSpeakers$Params } from './fn/public/public-speakers';
+export { publicSpeakers as publicSpeakers } from './fn/public/public-speakers';
 export type { PublicSponsors$Params as PublicSponsors$Params } from './fn/public/public-sponsors';
 export { publicSponsors as publicSponsors } from './fn/public/public-sponsors';
 export type { RegistrationsList$Params as RegistrationsList$Params } from './fn/registrations/registrations-list';

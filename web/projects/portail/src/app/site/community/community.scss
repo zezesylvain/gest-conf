@@ -1,0 +1,86 @@
+// Pages « Partenaires », « Intervenants » et « Actualités » (plan L8) : sans Material.
+.level {
+  margin-block: 2rem;
+}
+
+.cards {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  padding: 0;
+  list-style: none;
+}
+
+.cards.large {
+  grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+}
+
+.cards.small {
+  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+}
+
+.card {
+  border: 1px solid var(--gc-border);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  background: var(--gc-surface);
+}
+
+.logo {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  max-height: 6rem;
+  object-fit: contain;
+  margin-bottom: 0.5rem;
+}
+
+.large .logo {
+  max-height: 9rem;
+}
+
+.small .logo {
+  max-height: 4rem;
+}
+
+.speaker {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 6rem 1fr;
+  align-items: start;
+}
+
+.speaker img {
+  width: 6rem;
+  height: 6rem;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.speaker.no-photo {
+  grid-template-columns: 1fr;
+}
+
+.talks {
+  padding-left: 1.25rem;
+}
+
+.muted {
+  color: var(--gc-muted);
+}
+
+article.news-item {
+  border-bottom: 1px solid var(--gc-border);
+  padding-block: 1rem;
+}
+
+article.news-item:target {
+  outline: 2px solid var(--gc-primary);
+  outline-offset: 0.5rem;
+}
+
+@media (max-width: 30rem) {
+  .speaker {
+    grid-template-columns: 1fr;
+  }
+}

@@ -9091,6 +9091,21 @@ paths:
               schema:
                 $ref: '#/components/schemas/PublicRegistration'
           description: ''
+  /v1/public/speakers:
+    get:
+      operationId: public_speakers
+      description: |-
+        ``GET /v1/public/speakers`` : intervenants invités du programme publié (plan L8, N6),
+        lus au build de la page « Intervenants » ; 404 tant que rien n'est publié.
+      tags:
+      - public
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicSpeakers'
+          description: ''
   /v1/public/sponsors:
     get:
       operationId: public_sponsors
@@ -18609,6 +18624,71 @@ components:
       - edition
       - poster
       - site_url
+    PublicSpeakerProfile:
+      type: object
+      properties:
+        name:
+          type: string
+        institution:
+          type: string
+        bio:
+          type: string
+        photo_url:
+          type: string
+          nullable: true
+        talks:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicSpeakerTalk'
+      required:
+      - bio
+      - institution
+      - name
+      - photo_url
+      - talks
+    PublicSpeakerTalk:
+      type: object
+      properties:
+        session_id:
+          type: integer
+        session_title_fr:
+          type: string
+        session_title_en:
+          type: string
+        title_fr:
+          type: string
+        title_en:
+          type: string
+        starts_at:
+          type: string
+          format: date-time
+        ends_at:
+          type: string
+          format: date-time
+        room:
+          type: string
+          nullable: true
+      required:
+      - ends_at
+      - room
+      - session_id
+      - session_title_en
+      - session_title_fr
+      - starts_at
+      - title_en
+      - title_fr
+    PublicSpeakers:
+      type: object
+      properties:
+        timezone:
+          type: string
+        speakers:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicSpeakerProfile'
+      required:
+      - speakers
+      - timezone
     PublicSponsorCard:
       type: object
       properties:

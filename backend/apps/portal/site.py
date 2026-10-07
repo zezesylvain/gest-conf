@@ -24,8 +24,8 @@ class SitePage:
     title_fr: str
     title_en: str
     # Page « à venir » (E6) : données en L5 et L6, sections éditables dès L2. Le programme
-    # est servi depuis L5 (I7), l'inscription depuis L6 (J13) ; les intervenants (M10)
-    # restent à venir.
+    # est servi depuis L5 (I7), l'inscription depuis L6 (J13), les intervenants, les
+    # partenaires et les actualités depuis L8 (N5, N6, N10) : plus aucune page à venir.
     coming_soon: bool = False
 
 
@@ -36,8 +36,10 @@ SITE_PAGES: tuple[SitePage, ...] = (
     SitePage("tracks", "thematiques", "tracks", "Thématiques", "Tracks"),
     SitePage("committees", "comites", "committees", "Comités", "Committees"),
     SitePage("program", "programme", "program", "Programme", "Programme"),
-    SitePage("speakers", "intervenants", "speakers", "Intervenants", "Speakers", coming_soon=True),
+    SitePage("speakers", "intervenants", "speakers", "Intervenants", "Speakers"),
     SitePage("registration", "inscription", "registration", "Inscription", "Registration"),
+    SitePage("sponsors", "partenaires", "partners", "Partenaires", "Partners"),
+    SitePage("news", "actualites", "news", "Actualités", "News"),
 )
 SITE_ROUTES: dict[str, SitePage] = {page.slug: page for page in SITE_PAGES}
 
@@ -96,5 +98,8 @@ SEED_HEADER_MENU: tuple[str, ...] = (
     "tracks",
     "committees",
     "program",
+    "speakers",
     "registration",
+    "sponsors",
+    "news",
 )

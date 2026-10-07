@@ -1069,3 +1069,40 @@ affichée que dans le compte du portail.
 gestion, chacun inscrit dans `core/navigation.ts` avec sa fiche d'aide ; un point
 d'API ajouté (aperçu authentifié du logo) ; tests du front de la gestion : 263.
 
+
+## 20. Bilan de L8.9 (7 octobre 2026)
+
+### L8.9a — Pages publiques et bandeau
+
+- **pages du site** : « Partenaires » (`/fr/partenaires/`, `/en/partners/`) et
+  « Actualités » (`/fr/actualites/`, `/en/news/`) rejoignent `SITE_PAGES` (backend et
+  `site-pages.json`, comparés par test) ; « Intervenants » n'est plus « à venir » ;
+  migration `portal/0004` qui crée les deux pages pour les éditions existantes (menus
+  existants inchangés) ; le menu d'en-tête livré aux nouvelles éditions les propose, avec
+  « Intervenants » ;
+- **« Partenaires »** : niveaux dans l'ordre, logo à la taille du niveau, présentation, lien
+  vers le site (adresse vérifiée par `safeHref`), partenaires sans niveau en fin de page ;
+- **« Intervenants »** : nouvel `GET /v1/public/speakers` (liste blanche, cache de 5 min,
+  vue anonyme justifiée) lu dans l'**instantané publié** du programme : orateurs des
+  créneaux libres, réunis par personne, avec leurs passages ; biographie et photo telles que
+  figées à la publication selon les consentements de L2 (I11) ; ni clé de compte, ni
+  adresse, ni consigne interne (test) ; 404 avant la première publication, la page le dit ;
+- **précision de N6** : la page présente les **intervenants invités** (créneaux libres) ;
+  les présentateurs des communications, sessions plénières comprises, restent au programme
+  (Q14, noms des auteurs au programme public, toujours ouverte) ;
+- **« Actualités »** : annonces publiées sur ce canal, ancrées (`#actualite-<id>`), texte
+  assaini au serveur et au rendu ;
+- ces trois pages sont **pré-rendues** : une modification n'y paraît qu'à la publication du
+  portail ;
+- **bandeau de dernière minute** : lu dans le navigateur à chaque visite, jamais au
+  pré-rendu ; annoncé (`role="status"`), lien vers l'actualité, refermable pour la visite
+  (stockage de session protégé). **Précision** : le plan prévoyait un `@defer` ; son moteur
+  ajoutait 3,7 ko au bundle initial du portail (premier `@defer` de l'application). Le
+  module est chargé par un `import()` après le premier rendu (`afterNextRender`) : bundle
+  initial 369,4 ko (368,9 ko avant ; 0,5 ko pour les deux pages du catalogue),
+  avertissement de budget déjà connu.
+
+**Tests** : `program` : intervenants publics (404, liste blanche, regroupement, brouillon
+ignoré) ; règles de plateforme ; portail : 7 tests (partenaires et lien piégé écarté,
+aucun partenaire, intervenants et lien vers la session, programme non publié, actualité
+assainie, bandeau et fermeture, bandeau en erreur).

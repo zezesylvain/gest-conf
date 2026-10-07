@@ -16,6 +16,9 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { GcApiError, PublicComposition, PublicSite } from '@gestconf/shared';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
+import { NewsOverview } from './community/news-overview';
+import { SpeakersOverview } from './community/speakers-overview';
+import { SponsorsOverview } from './community/sponsors-overview';
 import { Countdown } from './countdown';
 import { PortalData } from './portal-data';
 import { ProgramOverview } from './program/program-overview';
@@ -63,6 +66,9 @@ const CALL_DATES = ['call_open', 'call_close', 'review_deadline', 'notification'
     CommitteeList,
     ProgramOverview,
     RegistrationOverview,
+    SpeakersOverview,
+    SponsorsOverview,
+    NewsOverview,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './portal-page.html',

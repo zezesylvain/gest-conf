@@ -398,6 +398,46 @@ def public_session(session: dict) -> dict:
     }
 
 
+def public_speakers(publication) -> dict:
+    """Intervenants invités de la dernière publication (plan L8, N6) : les orateurs des
+    créneaux libres, réunis par personne, avec leurs passages. **Liste blanche** de
+    l'instantané : nom, établissement, biographie et photo déjà filtrées par les
+    consentements de L2 à la publication (I11) ; jamais la clé du compte."""
+    snapshot = publication.snapshot
+    people: dict[str, dict] = {}
+    for session in snapshot["sessions"]:
+        for slot in session["slots"]:
+            speaker = slot.get("speaker")
+            if not speaker:
+                continue
+            person = people.setdefault(
+                speaker["key"],
+                {
+                    "name": speaker["name"],
+                    "institution": speaker["institution"],
+                    "bio": speaker.get("bio", ""),
+                    "photo_url": speaker.get("photo_url"),
+                    "talks": [],
+                },
+            )
+            person["talks"].append(
+                {
+                    "session_id": session["id"],
+                    "session_title_fr": session["title_fr"],
+                    "session_title_en": session["title_en"],
+                    "title_fr": slot["title_fr"],
+                    "title_en": slot["title_en"],
+                    "starts_at": slot["starts_at"],
+                    "ends_at": slot["ends_at"],
+                    "room": session["room"]["name"] if session["room"] else None,
+                }
+            )
+    speakers = sorted(people.values(), key=lambda item: item["name"].casefold())
+    for person in speakers:
+        person["talks"].sort(key=lambda talk: talk["starts_at"])
+    return {"timezone": snapshot["edition"]["timezone"], "speakers": speakers}
+
+
 def local_day(value: str, tz_name: str) -> str:
     import datetime as dt
     from zoneinfo import ZoneInfo
@@ -522,6 +562,30 @@ class PublicProgramSerializer(serializers.Serializer):
     published_at = serializers.DateTimeField()
     timezone = serializers.CharField()
     days = PublicProgramDaySummarySerializer(many=True)
+
+
+class PublicSpeakerTalkSerializer(serializers.Serializer):
+    session_id = serializers.IntegerField()
+    session_title_fr = serializers.CharField()
+    session_title_en = serializers.CharField()
+    title_fr = serializers.CharField()
+    title_en = serializers.CharField()
+    starts_at = serializers.DateTimeField()
+    ends_at = serializers.DateTimeField()
+    room = serializers.CharField(allow_null=True)
+
+
+class PublicSpeakerProfileSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    institution = serializers.CharField()
+    bio = serializers.CharField()
+    photo_url = serializers.CharField(allow_null=True)
+    talks = PublicSpeakerTalkSerializer(many=True)
+
+
+class PublicSpeakersSerializer(serializers.Serializer):
+    timezone = serializers.CharField()
+    speakers = PublicSpeakerProfileSerializer(many=True)
 
 
 class PublicProgramDaySerializer(serializers.Serializer):

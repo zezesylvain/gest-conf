@@ -245,6 +245,7 @@ ANONYMOUS_VIEWS = {
     "apps.program.views.PublicProgramView": "programme public publié (L5, I7)",
     "apps.program.views.PublicProgramDayView": "programme public publié, par jour (L5, I7)",
     "apps.program.views.PublicProgramSessionView": "programme public publié, session (L5, I7)",
+    "apps.program.views.PublicSpeakersView": "intervenants invités du programme publié (L8, N6)",
     "apps.registrations.views.PublicRegistrationView": "tarifs et dates d'inscription (L6, J13)",
     "apps.payments.views.PaymentWebhookView": "notification signée du fournisseur (L6, J6, RG-15)",
     "apps.payments.views.FakeCheckoutView": "page du fournisseur factice, hors production (L6)",
