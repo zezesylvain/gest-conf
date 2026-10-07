@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gestconf-backend\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-07 02:38+0000\n"
+"POT-Creation-Date: 2026-10-07 02:51+0000\n"
 "PO-Revision-Date: 2026-10-05 11:00+0000\n"
 "Last-Translator: GEST-CONF\n"
 "Language-Team: GEST-CONF\n"
@@ -2679,7 +2679,8 @@ msgid "Nom"
 msgstr "Name"
 
 #: apps/events/services/checkin.py:471
-#: apps/registrations/services/exports.py:29
+#: apps/registrations/services/exports.py:29 apps/reports/services.py:253
+#: apps/reports/services.py:311
 msgid "Catégorie"
 msgstr "Category"
 
@@ -2692,7 +2693,7 @@ msgid "Reçu le (UTC)"
 msgstr "Received at (UTC)"
 
 #: apps/events/services/checkin.py:474 apps/payments/services/finance.py:131
-#: apps/registrations/services/exports.py:33
+#: apps/registrations/services/exports.py:33 apps/reports/services.py:302
 msgid "Moyen"
 msgstr "Method"
 
@@ -3363,26 +3364,31 @@ msgid "PDF, JPEG ou PNG attendu."
 msgstr "PDF, JPEG or PNG expected."
 
 #: apps/logistics/services/budget.py:335 apps/payments/services/finance.py:168
+#: apps/reports/services.py:440 apps/reports/services.py:464
 msgid "Nature"
 msgstr "Kind"
 
-#: apps/logistics/services/budget.py:336
+#: apps/logistics/services/budget.py:336 apps/reports/services.py:463
 msgid "Poste"
 msgstr "Budget item"
 
 #: apps/logistics/services/budget.py:337 apps/logistics/services/meals.py:198
+#: apps/reports/services.py:99
 msgid "Libellé"
 msgstr "Label"
 
-#: apps/logistics/services/budget.py:338
+#: apps/logistics/services/budget.py:338 apps/reports/services.py:440
+#: apps/reports/services.py:465
 msgid "Prévu"
 msgstr "Planned"
 
-#: apps/logistics/services/budget.py:339
+#: apps/logistics/services/budget.py:339 apps/reports/services.py:440
+#: apps/reports/services.py:466
 msgid "Réalisé"
 msgstr "Actual"
 
-#: apps/logistics/services/budget.py:340
+#: apps/logistics/services/budget.py:340 apps/reports/services.py:440
+#: apps/reports/services.py:467
 msgid "Écart"
 msgstr "Variance"
 
@@ -3449,11 +3455,11 @@ msgstr "Unknown registration option."
 msgid "Marge de 0 à 50 %."
 msgstr "Margin from 0 to 50%."
 
-#: apps/logistics/services/meals.py:196
+#: apps/logistics/services/meals.py:196 apps/reports/services.py:338
 msgid "Jour"
 msgstr "Day"
 
-#: apps/logistics/services/meals.py:197
+#: apps/logistics/services/meals.py:197 apps/logistics/views.py:652
 msgid "Repas"
 msgstr "Meal"
 
@@ -3466,7 +3472,7 @@ msgid "Marge"
 msgstr "Margin"
 
 #: apps/logistics/services/meals.py:201
-#: apps/registrations/services/exports.py:34
+#: apps/registrations/services/exports.py:34 apps/reports/services.py:517
 msgid "Total"
 msgstr "Total"
 
@@ -3518,7 +3524,7 @@ msgstr "Empty comment."
 msgid "20 pièces jointes au plus par tâche."
 msgstr "20 attachments at most per task."
 
-#: apps/logistics/services/tasks.py:279 apps/logistics/views.py:101
+#: apps/logistics/services/tasks.py:279 apps/logistics/views.py:102
 msgid "Fichier de 10 Mo au plus."
 msgstr "File of 10 MB at most."
 
@@ -3569,10 +3575,14 @@ msgstr "The task board: %(link)s"
 msgid "[%(site_name)s] Vos tâches à échéance"
 msgstr "[%(site_name)s] Your tasks due"
 
-#: apps/logistics/views.py:401 apps/logistics/views.py:773
+#: apps/logistics/views.py:402 apps/logistics/views.py:785
 #: apps/sponsors/views.py:210 apps/surveys/views.py:217
 msgid "csv ou xlsx attendu."
 msgstr "csv or xlsx expected."
+
+#: apps/logistics/views.py:650
+msgid "Commande au traiteur"
+msgstr "Catering order"
 
 #: apps/payments/models.py:44
 msgid "raison sociale"
@@ -3839,11 +3849,14 @@ msgid "Référence du fournisseur"
 msgstr "Provider reference"
 
 #: apps/payments/services/finance.py:133 apps/payments/services/finance.py:173
+#: apps/reports/services.py:290 apps/reports/services.py:302
+#: apps/reports/services.py:311
 msgid "Montant"
 msgstr "Amount"
 
 #: apps/payments/services/finance.py:135
-#: apps/registrations/services/exports.py:30
+#: apps/registrations/services/exports.py:30 apps/reports/services.py:80
+#: apps/reports/services.py:230 apps/reports/services.py:494
 #: apps/reviews/services/decisions.py:503 apps/sponsors/views.py:214
 #: apps/submissions/services.py:712
 msgid "Statut"
@@ -4943,7 +4956,7 @@ msgstr "registration history"
 msgid "historiques des inscriptions"
 msgstr "registration histories"
 
-#: apps/registrations/segments.py:24
+#: apps/registrations/segments.py:24 apps/reports/services.py:338
 msgid "Inscrits confirmés"
 msgstr "Confirmed registrants"
 
@@ -4955,7 +4968,8 @@ msgstr "Registrants awaiting payment"
 msgid "Adresse électronique"
 msgstr "Email address"
 
-#: apps/registrations/services/exports.py:28
+#: apps/registrations/services/exports.py:28 apps/reports/services.py:140
+#: apps/reports/services.py:272
 msgid "Pays"
 msgstr "Country"
 
@@ -4963,7 +4977,7 @@ msgstr "Country"
 msgid "Période"
 msgstr "Period"
 
-#: apps/registrations/services/exports.py:32
+#: apps/registrations/services/exports.py:32 apps/reports/services.py:263
 msgid "Zone"
 msgstr "Zone"
 
@@ -5266,6 +5280,275 @@ msgstr "Follow-up, pro forma and payment: %(link)s"
 #, python-format
 msgid "[%(site_name)s] Inscription enregistrée"
 msgstr "[%(site_name)s] Registration recorded"
+
+#: apps/reports/services.py:79
+msgid "Soumissions par statut"
+msgstr "Submissions by status"
+
+#: apps/reports/services.py:80 apps/reports/services.py:230
+#: apps/reports/services.py:494 apps/surveys/services.py:798
+msgid "Nombre"
+msgstr "Count"
+
+#: apps/reports/services.py:99 apps/reports/services.py:140
+msgid "Envoyées"
+msgstr "Sent"
+
+#: apps/reports/services.py:99 apps/reports/services.py:140
+msgid "Acceptées"
+msgstr "Accepted"
+
+#: apps/reports/services.py:99 apps/reports/services.py:140
+#: apps/reports/services.py:338 apps/reports/services.py:389
+msgid "Taux (%)"
+msgstr "Rate (%)"
+
+#: apps/reports/services.py:113
+msgid "Par thématique"
+msgstr "By track"
+
+#: apps/reports/services.py:119
+msgid "Par type de communication"
+msgstr "By submission type"
+
+#: apps/reports/services.py:139
+msgid "Par pays du premier auteur"
+msgstr "By country of the first author"
+
+#: apps/reports/services.py:173
+msgid "Toutes thématiques"
+msgstr "All tracks"
+
+#: apps/reports/services.py:203
+msgid "Délais de relecture et retards"
+msgstr "Review delays and lateness"
+
+#: apps/reports/services.py:205 apps/reviews/services/decisions.py:501
+#: apps/submissions/services.py:714
+msgid "Thématique"
+msgstr "Track"
+
+#: apps/reports/services.py:206
+msgid "Affectations"
+msgstr "Assignments"
+
+#: apps/reports/services.py:207
+msgid "Évaluations envoyées"
+msgstr "Reviews sent"
+
+#: apps/reports/services.py:208
+msgid "En retard"
+msgstr "Late"
+
+#: apps/reports/services.py:209
+msgid "Délai moyen (jours)"
+msgstr "Average delay (days)"
+
+#: apps/reports/services.py:229
+msgid "Inscriptions par statut"
+msgstr "Registrations by status"
+
+#: apps/reports/services.py:241
+msgid "Inscriptions confirmées par semaine"
+msgstr "Confirmed registrations by week"
+
+#: apps/reports/services.py:242
+msgid "Semaine"
+msgstr "Week"
+
+#: apps/reports/services.py:242 apps/reports/services.py:253
+#: apps/reports/services.py:263 apps/reports/services.py:272
+#: apps/reports/services.py:311
+msgid "Confirmées"
+msgstr "Confirmed"
+
+#: apps/reports/services.py:252
+msgid "Par catégorie"
+msgstr "By category"
+
+#: apps/reports/services.py:262
+msgid "Par zone"
+msgstr "By zone"
+
+#: apps/reports/services.py:271
+msgid "Par pays"
+msgstr "By country"
+
+#: apps/reports/services.py:289
+#, python-format
+msgid "Recettes (%(currency)s)"
+msgstr "Revenue (%(currency)s)"
+
+#: apps/reports/services.py:290
+msgid "Indicateur"
+msgstr "Indicator"
+
+#: apps/reports/services.py:292
+msgid "Encaissé"
+msgstr "Collected"
+
+#: apps/reports/services.py:293
+msgid "Remboursé"
+msgstr "Refunded"
+
+#: apps/reports/services.py:294
+msgid "Net"
+msgstr "Net"
+
+#: apps/reports/services.py:295
+msgid "En attente de paiement"
+msgstr "Awaiting payment"
+
+#: apps/reports/services.py:301
+msgid "Encaissements par moyen"
+msgstr "Payments by method"
+
+#: apps/reports/services.py:302
+msgid "Paiements"
+msgstr "Payments"
+
+#: apps/reports/services.py:310
+msgid "Inscriptions confirmées par catégorie"
+msgstr "Confirmed registrations by category"
+
+#: apps/reports/services.py:337
+msgid "Présence par jour"
+msgstr "Attendance by day"
+
+#: apps/reports/services.py:338
+msgid "Présents"
+msgstr "Present"
+
+#: apps/reports/services.py:357
+msgid "Entrées par session"
+msgstr "Entries by session"
+
+#: apps/reports/services.py:359
+msgid "Session"
+msgstr "Session"
+
+#: apps/reports/services.py:360
+msgid "Début"
+msgstr "Start"
+
+#: apps/reports/services.py:361
+msgid "Entrées"
+msgstr "Entries"
+
+#: apps/reports/services.py:362
+msgid "Capacité de la salle"
+msgstr "Room capacity"
+
+#: apps/reports/services.py:363
+msgid "Remplissage (%)"
+msgstr "Occupancy (%)"
+
+#: apps/reports/services.py:388
+msgid "Taux de réponse"
+msgstr "Response rate"
+
+#: apps/reports/services.py:389 apps/reports/services.py:395
+msgid "Questionnaire"
+msgstr "Survey"
+
+#: apps/reports/services.py:389
+msgid "Invités"
+msgstr "Invited"
+
+#: apps/reports/services.py:389 apps/reports/services.py:397
+msgid "Réponses"
+msgstr "Answers"
+
+#: apps/reports/services.py:393
+msgid "Notes moyennes (à partir de 5 réponses)"
+msgstr "Average ratings (from 5 answers)"
+
+#: apps/reports/services.py:396 apps/surveys/services.py:798
+msgid "Question"
+msgstr "Question"
+
+#: apps/reports/services.py:398
+msgid "Moyenne sur 5"
+msgstr "Average out of 5"
+
+#: apps/reports/services.py:439
+#, python-format
+msgid "Budget (%(currency)s)"
+msgstr "Budget (%(currency)s)"
+
+#: apps/reports/services.py:452
+msgid "Solde"
+msgstr "Balance"
+
+#: apps/reports/services.py:461
+msgid "Par poste"
+msgstr "By item"
+
+#: apps/reports/services.py:493
+#, python-format
+msgid "Partenaires par statut (%(currency)s)"
+msgstr "Sponsors by status (%(currency)s)"
+
+#: apps/reports/services.py:506
+msgid "Par niveau (hors refus)"
+msgstr "By level (declined excluded)"
+
+#: apps/reports/services.py:507 apps/sponsors/views.py:213
+msgid "Niveau"
+msgstr "Level"
+
+#: apps/reports/services.py:507 apps/reports/services.py:530
+msgid "Partenaires"
+msgstr "Sponsors"
+
+#: apps/reports/services.py:507
+msgid "Convenu"
+msgstr "Agreed"
+
+#: apps/reports/services.py:507
+msgid "Reçu"
+msgstr "Received"
+
+#: apps/reports/services.py:523
+msgid "Soumissions"
+msgstr "Submissions"
+
+#: apps/reports/services.py:524
+msgid "Relecture"
+msgstr "Reviewing"
+
+#: apps/reports/services.py:525
+msgid "Inscriptions"
+msgstr "Registrations"
+
+#: apps/reports/services.py:526
+msgid "Recettes"
+msgstr "Revenue"
+
+#: apps/reports/services.py:527
+msgid "Présence"
+msgstr "Attendance"
+
+#: apps/reports/services.py:528
+msgid "Satisfaction"
+msgstr "Satisfaction"
+
+#: apps/reports/services.py:529
+msgid "Budget"
+msgstr "Budget"
+
+#: apps/reports/views.py:59
+msgid "Section réservée."
+msgstr "Restricted section."
+
+#: apps/reports/views.py:90
+msgid "csv, xlsx ou pdf attendu."
+msgstr "csv, xlsx or pdf expected."
+
+#: apps/reports/views.py:112
+#, python-format
+msgid "Produit le %(date)s (UTC)"
+msgstr "Produced on %(date)s (UTC)"
 
 #: apps/reviews/models.py:46
 msgid "note minimale"
@@ -5705,10 +5988,6 @@ msgstr "File too large."
 #: apps/reviews/services/decisions.py:500 apps/submissions/services.py:713
 msgid "Titre"
 msgstr "Title"
-
-#: apps/reviews/services/decisions.py:501 apps/submissions/services.py:714
-msgid "Thématique"
-msgstr "Track"
 
 #: apps/reviews/services/decisions.py:502 apps/submissions/services.py:715
 msgid "Type"
@@ -6172,10 +6451,6 @@ msgstr "Amount received and date required."
 #: apps/sponsors/services.py:409
 msgid "Contrepartie de 1 à 200 caractères."
 msgstr "Benefit of 1 to 200 characters."
-
-#: apps/sponsors/views.py:213
-msgid "Niveau"
-msgstr "Level"
 
 #: apps/sponsors/views.py:215
 msgid "Contribution convenue"
@@ -6940,7 +7215,9 @@ msgstr "Closing must follow opening."
 msgid ""
 "Des réponses ont été reçues : les questions ne changent plus. Dupliquez le "
 "questionnaire."
-msgstr "Answers have been received: the questions can no longer change. Duplicate the survey."
+msgstr ""
+"Answers have been received: the questions can no longer change. Duplicate "
+"the survey."
 
 #: apps/surveys/services.py:232
 msgid "Questionnaire publié : non modifiable."
@@ -7020,16 +7297,8 @@ msgid "Moins de %(threshold)s réponses : rien n'est exporté."
 msgstr "Fewer than %(threshold)s answers: nothing is exported."
 
 #: apps/surveys/services.py:798
-msgid "Question"
-msgstr "Question"
-
-#: apps/surveys/services.py:798
 msgid "Réponse"
 msgstr "Answer"
-
-#: apps/surveys/services.py:798
-msgid "Nombre"
-msgstr "Count"
 
 #: apps/surveys/services.py:798
 msgid "Moyenne"
@@ -7048,7 +7317,16 @@ msgid ""
 "\n"
 "Vos réponses sont anonymes : elles sont enregistrées sans lien avec votre "
 "compte. Les commentaires libres seront lus par le comité."
-msgstr "Hello,\n\nThank you for attending %(edition_title)s. The organising committee invites you to give your opinion: “%(survey_title)s”.\n\nThe survey is open until %(closes)s (edition time): %(link)s\n\nYour answers are anonymous: they are recorded without any link to your account. Free comments will be read by the committee."
+msgstr ""
+"Hello,\n"
+"\n"
+"Thank you for attending %(edition_title)s. The organising committee invites "
+"you to give your opinion: “%(survey_title)s”.\n"
+"\n"
+"The survey is open until %(closes)s (edition time): %(link)s\n"
+"\n"
+"Your answers are anonymous: they are recorded without any link to your "
+"account. Free comments will be read by the committee."
 
 #: apps/surveys/templates/surveys/email/invitation_subject.txt:1
 #, python-format
@@ -7065,7 +7343,14 @@ msgid ""
 "l'édition) : %(link)s\n"
 "\n"
 "Vos réponses sont anonymes. Ce rappel est le seul."
-msgstr "Hello,\n\nYou have not yet answered the survey “%(survey_title)s” of %(edition_title)s. It remains open until %(closes)s (edition time): %(link)s\n\nYour answers are anonymous. This is the only reminder."
+msgstr ""
+"Hello,\n"
+"\n"
+"You have not yet answered the survey “%(survey_title)s” of "
+"%(edition_title)s. It remains open until %(closes)s (edition time): "
+"%(link)s\n"
+"\n"
+"Your answers are anonymous. This is the only reminder."
 
 #: apps/surveys/templates/surveys/email/reminder_subject.txt:1
 #, python-format

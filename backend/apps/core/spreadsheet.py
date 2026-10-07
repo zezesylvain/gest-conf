@@ -51,30 +51,51 @@ XLSX_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml
 
 def xlsx_bytes(header: Sequence[str], rows: Iterable[Sequence[Any]], *, title: str) -> bytes:
     """Classeur d'une feuille : en-tête puis lignes ; chaînes en texte, jamais en formule."""
+    return xlsx_workbook([(title, header, rows)])
+
+
+_SHEET_FORBIDDEN = str.maketrans({char: " " for char in "[]:*?/\\"})
+
+
+def _sheet_title(title: str, used: set[str]) -> str:
+    """Titre de feuille valide (31 caractères, sans ``[]:*?/\\``) et unique."""
+    base = (" ".join(title.translate(_SHEET_FORBIDDEN).split()) or "Export")[:31]
+    candidate, rank = base, 2
+    while candidate.lower() in used:
+        suffix = f" ({rank})"
+        candidate, rank = f"{base[: 31 - len(suffix)]}{suffix}", rank + 1
+    used.add(candidate.lower())
+    return candidate
+
+
+def xlsx_workbook(sheets: Sequence[tuple[str, Sequence[str], Iterable[Sequence[Any]]]]) -> bytes:
+    """Classeur d'une feuille par ``(titre, en-tête, lignes)`` (rapports, plan L8 N13)."""
     from openpyxl import Workbook
     from openpyxl.cell import WriteOnlyCell
 
     workbook = Workbook(write_only=True)
-    sheet = workbook.create_sheet(title[:31] or "Export")
+    used: set[str] = set()
+    for title, header, rows in sheets or [("Export", [], [])]:
+        sheet = workbook.create_sheet(_sheet_title(title, used))
 
-    def cells(values: Sequence[Any]) -> list:
-        out = []
-        for value in values:
-            if value is None:
-                value = ""
-            if isinstance(value, bool):
-                value = str(value)
-            item = WriteOnlyCell(
-                sheet, value=value if isinstance(value, int | Decimal) else str(value)
-            )
-            if not isinstance(value, int | Decimal):
-                item.data_type = "s"
-            out.append(item)
-        return out
+        def cells(values: Sequence[Any], sheet=sheet) -> list:
+            out = []
+            for value in values:
+                if value is None:
+                    value = ""
+                if isinstance(value, bool):
+                    value = str(value)
+                item = WriteOnlyCell(
+                    sheet, value=value if isinstance(value, int | Decimal) else str(value)
+                )
+                if not isinstance(value, int | Decimal):
+                    item.data_type = "s"
+                out.append(item)
+            return out
 
-    sheet.append(cells(header))
-    for row in rows:
-        sheet.append(cells(row))
+        sheet.append(cells(header))
+        for row in rows:
+            sheet.append(cells(row))
     output = io.BytesIO()
     workbook.save(output)
     return output.getvalue()

@@ -12,6 +12,7 @@ from __future__ import annotations
 from django.db.models import Count
 from django.http import Http404, HttpResponse
 from django.utils import timezone
+from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
@@ -625,12 +626,15 @@ class MealViewSet(_OrganisationViewSet):
 
     @extend_schema(
         operation_id="manage_meals_export",
-        parameters=[OpenApiParameter("file_format", str, enum=["csv", "xlsx"])],
+        parameters=[OpenApiParameter("file_format", str, enum=["csv", "xlsx", "pdf"])],
         responses={(200, "application/octet-stream"): OpenApiTypes.BINARY},
     )
     def export(self, request: Request, edition_id: int) -> HttpResponse:
-        """Commande au traiteur : effectifs agrégés, sans nom (journalisée)."""
-        file_format = _file_format(request)
+        """Commande au traiteur : effectifs agrégés, sans nom (journalisée) ; le PDF passe par
+        le générateur des rapports (L8.7)."""
+        file_format = request.query_params.get("file_format", "csv")
+        if file_format != "pdf":
+            file_format = _file_format(request)
         header, rows = meal_service.export_rows(self.edition)
         record(
             "meal.exported",
@@ -638,6 +642,14 @@ class MealViewSet(_OrganisationViewSet):
             edition=self.edition,
             after={"format": file_format, "rows": len(rows)},
         )
+        if file_format == "pdf":
+            from apps.reports.services import Table
+            from apps.reports.views import render_tables
+
+            now = timezone.now()
+            table = Table("meals", gettext("Commande au traiteur"), header, rows)
+            name = f"repas-{self.edition.code}-{now:%Y%m%d}.pdf"
+            return render_tables("pdf", gettext("Repas"), self.edition, [table], name, now)
         return _spreadsheet(file_format, header, rows, "repas", self.edition, "Repas")
 
 

@@ -1782,6 +1782,23 @@ CASES = [
         200,
         "/v1/manage/editions/{e}/surveys/{published_survey}/export",
     ),
+    # --- Rapports et fil d'activité (plan L8, N13 et N14) ------------------------------------
+    Case("manage-reports", "GET", R, 200, "/v1/manage/editions/{e}/reports"),
+    Case("manage-report", "GET", SR, 200, "/v1/manage/editions/{e}/reports/submissions"),
+    Case("manage-report", "GET", RM, 200, "/v1/manage/editions/{e}/reports/reviews"),
+    Case("manage-report", "GET", RGR, 200, "/v1/manage/editions/{e}/reports/attendance"),
+    Case("manage-report", "GET", FIR, 200, "/v1/manage/editions/{e}/reports/finance"),
+    Case("manage-report", "GET", SVM, 200, "/v1/manage/editions/{e}/reports/satisfaction"),
+    Case("manage-report", "GET", BGR, 200, "/v1/manage/editions/{e}/reports/budget"),
+    Case("manage-report", "GET", SPR, 200, "/v1/manage/editions/{e}/reports/sponsors"),
+    Case(
+        "manage-report-export",
+        "GET",
+        RGR,
+        200,
+        "/v1/manage/editions/{e}/reports/registrations/export?file_format=pdf",
+    ),
+    Case("manage-activity", "GET", TKR, 200, "/v1/manage/editions/{e}/activity"),
     Case("manage-portal-poster", "GET", R, 200, "/v1/manage/editions/{e}/portal/poster"),
     Case(
         "manage-portal-poster",

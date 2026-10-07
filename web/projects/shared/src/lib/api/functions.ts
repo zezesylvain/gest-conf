@@ -17,6 +17,8 @@ export type { ManageEditionRetrieve$Params as ManageEditionRetrieve$Params } fro
 export { manageEditionRetrieve as manageEditionRetrieve } from './fn/manage/manage-edition-retrieve';
 export type { ManageEditionUpdate$Params as ManageEditionUpdate$Params } from './fn/manage/manage-edition-update';
 export { manageEditionUpdate as manageEditionUpdate } from './fn/manage/manage-edition-update';
+export type { ManageActivity$Params as ManageActivity$Params } from './fn/manage/manage-activity';
+export { manageActivity as manageActivity } from './fn/manage/manage-activity';
 export type { ManageAnnouncementsList$Params as ManageAnnouncementsList$Params } from './fn/manage/manage-announcements-list';
 export { manageAnnouncementsList as manageAnnouncementsList } from './fn/manage/manage-announcements-list';
 export type { ManageAnnouncementsCreate$Params as ManageAnnouncementsCreate$Params } from './fn/manage/manage-announcements-create';
@@ -383,6 +385,12 @@ export type { ManageRegistrationSettingsRetrieve$Params as ManageRegistrationSet
 export { manageRegistrationSettingsRetrieve as manageRegistrationSettingsRetrieve } from './fn/manage/manage-registration-settings-retrieve';
 export type { ManageRegistrationSettingsUpdate$Params as ManageRegistrationSettingsUpdate$Params } from './fn/manage/manage-registration-settings-update';
 export { manageRegistrationSettingsUpdate as manageRegistrationSettingsUpdate } from './fn/manage/manage-registration-settings-update';
+export type { ManageReportsList$Params as ManageReportsList$Params } from './fn/manage/manage-reports-list';
+export { manageReportsList as manageReportsList } from './fn/manage/manage-reports-list';
+export type { ManageReportsRetrieve$Params as ManageReportsRetrieve$Params } from './fn/manage/manage-reports-retrieve';
+export { manageReportsRetrieve as manageReportsRetrieve } from './fn/manage/manage-reports-retrieve';
+export type { ManageReportsExport$Params as ManageReportsExport$Params } from './fn/manage/manage-reports-export';
+export { manageReportsExport as manageReportsExport } from './fn/manage/manage-reports-export';
 export type { ManageReviewProgress$Params as ManageReviewProgress$Params } from './fn/manage/manage-review-progress';
 export { manageReviewProgress as manageReviewProgress } from './fn/manage/manage-review-progress';
 export type { ManageReviewSubmissionsList$Params as ManageReviewSubmissionsList$Params } from './fn/manage/manage-review-submissions-list';

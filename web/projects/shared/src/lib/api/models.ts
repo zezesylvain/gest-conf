@@ -3,6 +3,7 @@
 
 export type { AcceptedRole } from './models/accepted-role';
 export type { AcceptRequest } from './models/accept-request';
+export type { ActivityEntry } from './models/activity-entry';
 export type { ActorKind } from './models/actor-kind';
 export type { AgendaEdition } from './models/agenda-edition';
 export type { AgendaEntry } from './models/agenda-entry';
@@ -347,6 +348,8 @@ export type { RegistrationCounts } from './models/registration-counts';
 export type { RegistrationEdition } from './models/registration-edition';
 export type { RegistrationSettings } from './models/registration-settings';
 export type { RegistrationStatus } from './models/registration-status';
+export type { ReportSection } from './models/report-section';
+export type { ReportTable } from './models/report-table';
 export type { RetiredTokenReason } from './models/retired-token-reason';
 export type { ReviewerAssignment } from './models/reviewer-assignment';
 export type { ReviewerAssignmentDetail } from './models/reviewer-assignment-detail';
@@ -378,6 +381,7 @@ export type { ScreeningRequest } from './models/screening-request';
 export type { Section } from './models/section';
 export type { SectionOrderRequest } from './models/section-order-request';
 export type { SectionRefRequest } from './models/section-ref-request';
+export type { SectionSummary } from './models/section-summary';
 export type { SectionType } from './models/section-type';
 export type { SectionWriteRequest } from './models/section-write-request';
 export type { Segment } from './models/segment';

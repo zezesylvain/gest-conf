@@ -8,16 +8,18 @@ import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
 
-export interface ManageMealsExport$Params {
+export interface ManageReportsExport$Params {
   edition_id: number;
   file_format?: 'csv' | 'pdf' | 'xlsx';
+  section: string;
 }
 
-export function manageMealsExport(http: HttpClient, rootUrl: string, params: ManageMealsExport$Params, context?: HttpContext): Observable<StrictHttpResponse<Blob>> {
-  const rb = new RequestBuilder(rootUrl, manageMealsExport.PATH, 'get');
+export function manageReportsExport(http: HttpClient, rootUrl: string, params: ManageReportsExport$Params, context?: HttpContext): Observable<StrictHttpResponse<Blob>> {
+  const rb = new RequestBuilder(rootUrl, manageReportsExport.PATH, 'get');
   if (params) {
     rb.path('edition_id', params.edition_id, {});
     rb.query('file_format', params.file_format, {});
+    rb.path('section', params.section, {});
   }
 
   return http.request(
@@ -30,4 +32,4 @@ export function manageMealsExport(http: HttpClient, rootUrl: string, params: Man
   );
 }
 
-manageMealsExport.PATH = '/v1/manage/editions/{edition_id}/logistics/meals/export';
+manageReportsExport.PATH = '/v1/manage/editions/{edition_id}/reports/{section}/export';

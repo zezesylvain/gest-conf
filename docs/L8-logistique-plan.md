@@ -859,3 +859,69 @@ d'invitation, de relance, de réponse) ; les réponses, liées à personne, n'y 
   `communications`, le registre et les cas de la matrice réussissent ;
 - `ruff`, `locale/check.sh`, schéma validé sous MariaDB, client TypeScript régénéré,
   vérification des types et tests des trois projets du front.
+
+## 18. Bilan de L8.7 (7 octobre 2026)
+
+**Rapports** (N13 ; `apps/reports`, sans modèle, en lecture seule) :
+
+| Section | Capacité exigée | Tableaux |
+|---|---|---|
+| Soumissions | `submissions.read` | par statut ; envoyées, acceptées et taux par thématique, par type, par pays du premier auteur |
+| Relecture | `reviews.manage` | affectations, évaluations envoyées, retards, délai moyen (jours), en tout et par thématique |
+| Inscriptions | `registrations.read` | par statut ; confirmées par semaine (ISO, fuseau de l'édition), par catégorie, par zone, par pays |
+| Recettes | `finance.read` | encaissé, remboursé, net, en attente ; par moyen ; par catégorie |
+| Présence | `registrations.read` | présents par jour et taux ; entrées par session et remplissage de la salle |
+| Satisfaction | `surveys.manage` | taux de réponse ; notes moyennes, seulement à partir de 5 réponses (RG-21) |
+| Budget | `budget.read` | prévu, réalisé et écart par nature et par poste ; solde |
+| Partenaires | `sponsors.read` | par statut ; par niveau (hors refus) : nombre, convenu, reçu |
+
+- **aucune donnée nominative** : décomptes, taux, moyennes et montants agrégés seulement
+  (tests : ni nom ni adresse dans les tableaux) ; « acceptées » ne lit que les statuts posés
+  à la publication des décisions (RG-09) ;
+- taux et moyennes en `Decimal` arrondis au dixième (ou au centième pour les notes),
+  servis en chaînes par l'API, jamais en flottant ;
+- **droits** : la lecture de l'édition ouvre l'écran ; chaque section est vérifiée côté
+  serveur contre sa capacité (403 sinon, 404 pour une section inconnue) ;
+- **précision de N13** : la présence est réservée à `registrations.read` ; le plan disait
+  « `checkin.manage` ou `registrations.read` », mais tous les détenteurs de
+  `checkin.manage` ont aussi `registrations.read` (matrice), et une capacité unique par
+  section garde le contrôle simple.
+
+**Exports** (`…/reports/{section}/export?file_format=csv|xlsx|pdf`, journalisés
+`report.exported`) :
+
+- CSV : les tableaux à la suite, chacun précédé de son titre ; cellules neutralisées contre
+  l'injection de formules ;
+- XLSX : **une feuille par tableau** (`xlsx_workbook`, nouveau dans
+  `apps/core/spreadsheet.py` : titres de feuilles rendus valides et uniques ; chaînes
+  typées texte, nombres en nombres, comme en L8.0) ;
+- PDF de synthèse `fpdf2` (`apps/reports/pdf.py`, police DejaVu embarquée) ; il sert aussi
+  la **commande au traiteur** en PDF (`…/logistics/meals/export?file_format=pdf`), reportée
+  de L8.4.
+
+**Fil d'activité du CO** (N14 ; `…/activity`, `tasks.read`) : les 50 dernières entrées du
+journal de l'édition, restreintes à une **liste blanche** (tâches, postes de bénévolat,
+repas, publication et retrait d'annonces, publication d'un questionnaire, du programme, du
+portail, changement de statut de l'édition) ; chaque entrée ne donne que l'action, sa date,
+le nom de qui l'a faite et l'objet visé, **jamais les valeurs avant et après** ; ni
+décision, ni identité d'auteur, ni montant (test : un export de régimes ou une ligne de
+budget n'y figurent pas).
+
+**API** (gestion, 2FA) : `…/reports` (sections ouvertes au compte), `…/reports/{section}`
+(tableaux : titre, colonnes, lignes en chaînes), `…/reports/{section}/export`,
+`…/activity`. Les écrans (barres CSS ou SVG doublées de leur tableau) arrivent en L8.8.
+
+**Défaut évité pendant l'étape** : dans le corps de la vue, `list(FORMATS)` désignait la
+méthode `list` de la classe et non la fonction native ; l'énumération du schéma passe par
+une constante de module.
+
+**Tests** :
+
+- `reports` : 6 tests (soumissions par pays et taux sans nom ; inscriptions, recettes et
+  présence ; satisfaction sous et au-dessus du seuil de 5 réponses ; sections selon les
+  capacités, 403 et 404, exports CSV, XLSX à une feuille par tableau et PDF, journal ;
+  fil d'activité en liste blanche sans valeurs ; commande au traiteur en PDF) ;
+- matrice des droits : 10 cas (liste, une section par capacité, export PDF, fil
+  d'activité) ;
+- `ruff`, `locale/check.sh`, schéma validé sous MariaDB, client TypeScript régénéré,
+  vérification des types et tests du front.

@@ -7,27 +7,26 @@ import { filter, map } from 'rxjs/operators';
 import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
+import { ActivityEntry } from '../../models/activity-entry';
 
-export interface ManageMealsExport$Params {
+export interface ManageActivity$Params {
   edition_id: number;
-  file_format?: 'csv' | 'pdf' | 'xlsx';
 }
 
-export function manageMealsExport(http: HttpClient, rootUrl: string, params: ManageMealsExport$Params, context?: HttpContext): Observable<StrictHttpResponse<Blob>> {
-  const rb = new RequestBuilder(rootUrl, manageMealsExport.PATH, 'get');
+export function manageActivity(http: HttpClient, rootUrl: string, params: ManageActivity$Params, context?: HttpContext): Observable<StrictHttpResponse<Array<ActivityEntry>>> {
+  const rb = new RequestBuilder(rootUrl, manageActivity.PATH, 'get');
   if (params) {
     rb.path('edition_id', params.edition_id, {});
-    rb.query('file_format', params.file_format, {});
   }
 
   return http.request(
-    rb.build({ responseType: 'blob', accept: 'application/octet-stream', context })
+    rb.build({ responseType: 'json', accept: 'application/json', context })
   ).pipe(
     filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
     map((r: HttpResponse<any>) => {
-      return r as StrictHttpResponse<Blob>;
+      return r as StrictHttpResponse<Array<ActivityEntry>>;
     })
   );
 }
 
-manageMealsExport.PATH = '/v1/manage/editions/{edition_id}/logistics/meals/export';
+manageActivity.PATH = '/v1/manage/editions/{edition_id}/activity';
