@@ -1,4 +1,4 @@
-import { createDecoder, ScanDebouncer } from './qr-scanner';
+import { createDecoder, preparedDecoder, ScanDebouncer } from './qr-scanner';
 
 describe('Lecture du QR (plan L7, K6)', () => {
   it('même badge devant la caméra : rendu une fois par fenêtre ; un autre badge, aussitôt', () => {
@@ -26,5 +26,11 @@ describe('Lecture du QR (plan L7, K6)', () => {
     const decode = await createDecoder({});
     const video = document.createElement('video');
     expect(await decode(video, document.createElement('canvas'))).toBeNull();
+  });
+
+  it('décodeur préparé à l’ouverture de l’accueil : un seul chargement, réutilisé', async () => {
+    const first = preparedDecoder();
+    expect(preparedDecoder()).toBe(first);
+    expect(typeof (await first)).toBe('function');
   });
 });

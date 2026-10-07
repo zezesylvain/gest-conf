@@ -19,6 +19,7 @@ import {
   countryOptions,
   CounterResponse,
   ErrorSummary,
+  fieldErrorMessage,
   LanguageService,
   Option,
   PageHeader,
@@ -91,6 +92,18 @@ export class CounterPage implements OnInit {
     } catch (error) {
       this.errors.set(errorMessages(this.translate, error));
     }
+  }
+
+  /**
+   * Message d'un champ : celui du serveur d'abord (« Pays obligatoire. », posé sur le champ
+   * par `errorMessages`), sinon `fallback`, sinon celui du formulaire.
+   */
+  protected error(name: string, fallback = ''): string {
+    const control = this.form.get(name);
+    if (fallback && !control?.errors?.['server']) {
+      return this.translate.instant(fallback);
+    }
+    return fieldErrorMessage(this.translate, control);
   }
 
   protected label(item: { label_fr: string; label_en?: string }): string {

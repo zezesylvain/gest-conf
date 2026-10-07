@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { Browser, expect, Page, test } from '@playwright/test';
+import { Browser, BrowserContextOptions, chromium, expect, Page, test } from '@playwright/test';
 
 import { command, literal, python } from '../django';
 import { freshTotpCode } from '../totp';
@@ -28,7 +28,14 @@ import { freshTotpCode } from '../totp';
  *    fournisseur factice, confirmation par la notification vérifiée (RG-15), facture et QR ;
  *    RG-11 levée ;
  * 9. CO « finances » : inscription saisie par virement, paiement reçu, annulation,
- *    remboursement et avoir (J7, J9).
+ *    remboursement et avoir (J7, J9) ;
+ * 10. jour J (plan L7 §7 ; démo H) : signature du signataire, signataire désigné au modèle
+ *     (K18), lettre d'invitation demandée et émise (K12) ;
+ * 11. accueil : badge, liste hors ligne, scan par la caméra simulée **sans réseau**, puis
+ *     synchronisation au retour du réseau, « déjà pointé », mode session (K4 à K7) ;
+ * 12. sessions du jour : communication « présentée » (K8) ; comptoir (K13) ;
+ * 13. attestations émises par la file (`run_jobs`), RG-16 (le présent seul), téléchargement
+ *     et vérification publique (K9 à K11).
  */
 test.describe.configure({ mode: 'serial' });
 
@@ -50,6 +57,10 @@ let seed: {
   conference_chair: string;
   finance: string;
   participant: string;
+  volunteer: string;
+  secretariat: string;
+  signatory: string;
+  signature: string;
 };
 let reference = '';
 
@@ -74,11 +85,16 @@ function submissionStatus(): string {
 }
 
 /** Connexion d'un membre du comité : mot de passe, puis code TOTP (2FA imposée, D3, H2). */
-async function committeeLogin(browser: Browser, email: string): Promise<Page> {
+async function committeeLogin(
+  browser: Browser,
+  email: string,
+  options: BrowserContextOptions = {},
+): Promise<Page> {
   const context = await browser.newContext({
     baseURL: 'http://localhost:4200',
     locale: 'fr-FR',
     viewport: { width: 1280, height: 900 },
+    ...options,
   });
   const page = await context.newPage();
   await page.goto('/compte/connexion');
@@ -576,4 +592,263 @@ test('CO « finances » : virement reçu, annulation, remboursement et avoir (J7
   await finance.goto(`${base}/inscriptions/finances`);
   await expect(finance.locator('main')).toContainText('Remboursé');
   await expect(finance.locator('main')).toContainText(/150\s000/); // 50 000 + 100 000 encaissés
+});
+
+// --- Jour J et attestations (plan L7) ------------------------------------------------------------
+
+function count(model: string, filters: string): number {
+  return Number(
+    python(
+      `from apps.events.models import ${model}\nprint(${model}.objects.filter(${filters}).count())`,
+    ),
+  );
+}
+
+/**
+ * Vidéo Y4M montrant le QR du badge d'une inscription, pour la caméra simulée de Chromium
+ * (bilan de L7.0) : le jeton ne quitte pas le backend de test autrement que par l'image.
+ */
+function badgeVideo(email: string): string {
+  return python(
+    [
+      'import io, segno, tempfile',
+      'from PIL import Image',
+      'from apps.registrations.models import Registration',
+      `token = Registration.objects.get(user__email=${literal(email)}, status="confirmed").qr_token`,
+      'buffer = io.BytesIO()',
+      'segno.make(token, error="m", micro=False).save(buffer, kind="png", scale=8, border=4)',
+      'qr = Image.open(buffer).convert("L")',
+      'canvas = Image.new("L", (640, 480), 235)',
+      'canvas.paste(qr, ((640 - qr.width) // 2, (480 - qr.height) // 2))',
+      'uv = bytes([128]) * (320 * 240)',
+      'video = tempfile.NamedTemporaryFile(prefix="gestconf-e2e-", suffix=".y4m", delete=False)',
+      'video.write(b"YUV4MPEG2 W640 H480 F10:1 Ip A1:1 C420jpeg\\n")',
+      'for _ in range(10):',
+      '    video.write(b"FRAME\\n" + canvas.tobytes() + uv + uv)',
+      'video.close()',
+      'print(video.name)',
+    ].join('\n'),
+  );
+}
+
+test('signataire : sa signature ; secrétariat : signataire désigné au modèle (K18)', async ({
+  browser,
+}) => {
+  test.setTimeout(120_000);
+  const signatory = await committeeLogin(browser, seed.signatory);
+  // Accueil de l'édition sans tableau de bord : directement « Ma signature ».
+  await signatory.goto(`${GESTION}/editions/${seed.edition}`);
+  await expect(signatory).toHaveURL(/\/signature$/);
+  await expect(signatory.locator('main')).toContainText('Signature incomplète');
+  await signatory.getByLabel('Nom affiché').fill('Pr Brou Assi');
+  await signatory.getByLabel('Fonction (français)').fill('Président du comité d’organisation');
+  await signatory.getByLabel('Fonction (anglais)').fill('Organising committee chair');
+  await signatory.getByRole('button', { name: 'Enregistrer' }).click();
+  await expect(signatory.getByText('Signature enregistrée.')).toBeVisible();
+  await signatory.locator('input[type=file]').setInputFiles(seed.signature);
+  await signatory.getByRole('button', { name: "Déposer l'image" }).click();
+  await expect(signatory.getByText('Image enregistrée.')).toBeVisible();
+  await expect(signatory.locator('main')).toContainText('Signature complète');
+
+  // Le secrétariat désigne ce signataire pour la participation, la communication et la lettre.
+  const secretariat = await committeeLogin(browser, seed.secretariat);
+  await secretariat.goto(`${GESTION}/editions/${seed.edition}/attestations/modele`);
+  for (const nature of ['Participation', 'Communication', "Lettre d'invitation"]) {
+    const form = secretariat.locator('form', {
+      has: secretariat.getByRole('heading', { name: nature, exact: true }),
+    });
+    await form.getByLabel('Signataire').click();
+    await secretariat.getByRole('option', { name: /Pr Brou Assi/ }).click();
+    await form.getByRole('button', { name: 'Enregistrer' }).click();
+    await expect(secretariat.getByText(`Modèle « ${nature} » enregistré.`)).toBeVisible();
+  }
+});
+
+test('lettre d’invitation : demande de l’auteure, émission par le secrétariat (K12)', async ({
+  page,
+  browser,
+}) => {
+  test.setTimeout(120_000);
+  await authorLogin(page);
+  await page.goto('/compte/mes-documents');
+  await page.getByRole('button', { name: "Demander une lettre d'invitation" }).click();
+  await page.getByLabel("Nom tel qu'il figure sur le passeport").fill('KONE AWA');
+  await page.getByLabel('Nationalité').fill('Ivoirienne');
+  await page.getByLabel('Numéro de passeport').fill('20AB12345');
+  await page.getByLabel('Arrivée').fill('2027-02-28');
+  await page.getByLabel('Départ').fill('2027-03-04');
+  await page.getByLabel('Ambassade ou consulat').fill('Ambassade de France, Abidjan');
+  await page.getByRole('button', { name: 'Envoyer la demande' }).click();
+  await expect(page.getByText("Demande en cours d'examen")).toBeVisible();
+  // Le participant ne revoit que la fin du numéro.
+  await expect(page.locator('main')).not.toContainText('20AB12345');
+
+  const secretariat = await committeeLogin(browser, seed.secretariat);
+  await secretariat.goto(`${GESTION}/editions/${seed.edition}/lettres`);
+  await secretariat.getByRole('link', { name: 'Awa Koné' }).click();
+  await expect(secretariat.locator('main')).toContainText('20AB12345');
+  await secretariat.getByRole('button', { name: 'Émettre la lettre' }).click();
+  await secretariat.getByRole('dialog').getByRole('button', { name: 'Émettre' }).click();
+  await expect(secretariat.getByText('Lettre émise.')).toBeVisible();
+  expect(outbox(EMAIL)).toContain('events/email/letter_issued');
+
+  await page.reload();
+  const letter = page.getByRole('link', { name: 'Télécharger ma lettre (PDF)' });
+  await expect(letter).toBeVisible();
+  const pdf = await page.request.get((await letter.getAttribute('href'))!);
+  expect(pdf.status()).toBe(200);
+  expect(pdf.headers()['content-type']).toBe('application/pdf');
+});
+
+test('accueil : badge, scan sans réseau, synchronisation, mode session (K4 à K7)', async ({
+  page,
+}) => {
+  test.setTimeout(180_000);
+  // Badge de l'auteure (PDF à la demande, jamais stocké).
+  await authorLogin(page);
+  await page.goto('/compte/mes-documents');
+  const badge = page.getByRole('link', { name: /Télécharger mon badge/ });
+  const pdf = await page.request.get((await badge.getAttribute('href'))!);
+  expect(pdf.status()).toBe(200);
+  expect(pdf.headers()['content-type']).toBe('application/pdf');
+
+  // Téléphone du bénévole : caméra simulée filmant ce badge.
+  const camera = await chromium.launch({
+    executablePath: process.env['GESTCONF_E2E_CHROMIUM'] || undefined,
+    args: [
+      '--use-fake-ui-for-media-stream',
+      '--use-fake-device-for-media-stream',
+      `--use-file-for-fake-video-capture=${badgeVideo(EMAIL)}`,
+    ],
+  });
+  try {
+    const volunteer = await committeeLogin(camera, seed.volunteer, { permissions: ['camera'] });
+    // Accueil de l'édition pour un bénévole : l'écran d'accueil.
+    await volunteer.goto(`${GESTION}/editions/${seed.edition}`);
+    await expect(volunteer).toHaveURL(/\/accueil$/);
+    await volunteer.getByRole('button', { name: 'Télécharger la liste hors ligne' }).click();
+    await expect(volunteer.getByText(/Liste de 1 participant\(s\)/).first()).toBeVisible();
+
+    // Réseau coupé : décision sur la liste de l'appareil, pointage mis en file.
+    await volunteer.context().setOffline(true);
+    await expect(volunteer.locator('.badge.offline')).toHaveText('Hors ligne');
+    await volunteer.getByRole('button', { name: 'Allumer la caméra' }).click();
+    const result = volunteer.locator('.result');
+    await expect(result).toContainText('Pointé');
+    await expect(result).toContainText('Awa Koné');
+    await expect(result).toContainText('Décidé sans réseau');
+    await volunteer.getByRole('button', { name: 'Éteindre la caméra' }).click();
+    await expect(volunteer.getByText("1 pointage(s) en attente d'envoi.")).toBeVisible();
+    expect(count('Checkin', `registration__user__email=${literal(EMAIL)}`)).toBe(0);
+
+    // Retour du réseau : la file part seule, le serveur revérifie et enregistre.
+    await volunteer.context().setOffline(false);
+    await expect(volunteer.getByText(/1 pointage\(s\) envoyé\(s\), dont 0 refusé/)).toBeVisible();
+    await expect(volunteer.getByText("0 pointage(s) en attente d'envoi.")).toBeVisible();
+    expect(
+      count('Checkin', `registration__user__email=${literal(EMAIL)}, session__isnull=True`),
+    ).toBe(1);
+
+    // En ligne : le serveur répond « déjà pointé ».
+    await volunteer.getByRole('button', { name: 'Allumer la caméra' }).click();
+    await expect(result).toContainText('Déjà pointé');
+    await volunteer.getByRole('button', { name: 'Éteindre la caméra' }).click();
+
+    // Mode session (K7) : entrée de la session publiée.
+    await volunteer.getByLabel('Mode').click();
+    await volunteer.getByRole('option', { name: /Santé et IA/ }).click();
+    await expect(volunteer.locator('h2', { hasText: 'Entrée de la session' })).toContainText(
+      'Santé et IA',
+    );
+    await volunteer.getByRole('button', { name: 'Allumer la caméra' }).click();
+    await expect(result).toContainText('Pointé');
+    await volunteer.getByRole('button', { name: 'Éteindre la caméra' }).click();
+    expect(
+      count('Checkin', `registration__user__email=${literal(EMAIL)}, session__isnull=False`),
+    ).toBe(1);
+  } finally {
+    await camera.close();
+  }
+});
+
+test('sessions du jour : « présentée » (K8) ; comptoir : personne sans compte (K13)', async ({
+  browser,
+}) => {
+  test.setTimeout(120_000);
+  const planner = await committeeLogin(browser, seed.program);
+  await planner.goto(`${GESTION}/editions/${seed.edition}/jour-j/sessions`);
+  const session = planner.getByRole('region', { name: 'Santé et IA' });
+  await expect(session).toContainText("1 présent(s) pointé(s) à l'entrée.");
+  await session.getByRole('button', { name: 'Marquer présentée' }).click();
+  await expect(planner.getByText(/marquée présentée/)).toBeVisible();
+  await expect(session).toContainText('Présentée');
+  expect(submissionStatus()).toBe('presented');
+
+  // Comptoir : compte créé sans mot de passe, paiement reçu, badge à imprimer.
+  const secretariat = await committeeLogin(browser, seed.secretariat);
+  await secretariat.goto(`${GESTION}/editions/${seed.edition}/jour-j/comptoir`);
+  await secretariat.getByLabel('Adresse e-mail').fill('sur.place@e2e.example.org');
+  await secretariat.getByLabel('Prénom').fill('Yaya');
+  await secretariat.getByLabel('Nom', { exact: true }).fill('Coulibaly');
+  await secretariat.getByLabel('Pays').click();
+  await secretariat.getByRole('option', { name: /^Côte d.Ivoire$/ }).click();
+  await secretariat.getByLabel('Catégorie').click();
+  await secretariat.getByRole('option', { name: 'Chercheur' }).click();
+  await secretariat.getByRole('button', { name: 'Inscrire' }).click();
+  await expect(secretariat.getByText(/Inscription E2E27-I\d+ enregistrée/)).toBeVisible();
+  await expect(secretariat.locator('main')).toContainText('Compte créé sans mot de passe');
+  const badge = secretariat.getByRole('link', { name: 'Imprimer le badge' });
+  const pdf = await secretariat.request.get((await badge.getAttribute('href'))!);
+  expect(pdf.status()).toBe(200);
+  expect(registrationStatus('sur.place@e2e.example.org')).toBe('confirmed');
+
+  // Présences : l'auteure pointée à l'accueil.
+  await secretariat.goto(`${GESTION}/editions/${seed.edition}/jour-j/presences`);
+  await expect(secretariat.locator('tbody')).toContainText('Awa Koné');
+});
+
+test('attestations : émission en file, RG-16, téléchargement et vérification publique', async ({
+  page,
+  browser,
+}) => {
+  test.setTimeout(150_000);
+  const secretariat = await committeeLogin(browser, seed.secretariat);
+  await secretariat.goto(`${GESTION}/editions/${seed.edition}/attestations`);
+  for (const nature of ['Participation', 'Communication']) {
+    const row = secretariat.locator('tbody tr', { hasText: nature });
+    await expect(row).toContainText('1'); // une personne éligible
+    await row.getByRole('button', { name: 'Émettre' }).click();
+    await secretariat.getByRole('dialog').getByRole('button', { name: 'Émettre' }).click();
+    await expect(
+      secretariat.getByText(`Émission des attestations de ${nature} demandée.`),
+    ).toBeVisible();
+  }
+  // La file de tâches (cron run_jobs) émet les attestations.
+  command('run_jobs');
+  // RG-16 : seule la personne présente reçoit l'attestation de participation ; la personne
+  // inscrite au comptoir, jamais pointée, n'en a pas.
+  expect(count('Certificate', 'nature="participation"')).toBe(1);
+  expect(count('Certificate', `nature="participation", user__email=${literal(EMAIL)}`)).toBe(1);
+  expect(count('Certificate', 'nature="presentation"')).toBe(1);
+  expect(outbox(EMAIL)).toContain('events/email/certificate_available');
+
+  // L'auteure télécharge ses attestations et vérifie l'une d'elles publiquement.
+  await authorLogin(page);
+  await page.goto('/compte/mes-documents');
+  await expect(page.locator('main')).toContainText('Attestation de participation');
+  await expect(page.locator('main')).toContainText('Attestation de communication');
+  const pdf = page.getByRole('link', { name: 'Télécharger (PDF)' }).first();
+  const response = await page.request.get((await pdf.getAttribute('href'))!);
+  expect(response.status()).toBe(200);
+  expect(response.headers()['content-type']).toBe('application/pdf');
+  const link = await page
+    .getByRole('link', { name: 'Page de vérification' })
+    .first()
+    .getAttribute('href');
+  const code = new URL(link!).pathname.split('/').pop()!;
+  await page.goto(`/verification/${code}`);
+  await expect(page.locator('h2')).toHaveText('Attestation authentique');
+  await expect(page.locator('main')).toContainText('Awa Koné');
+  await page.goto('/verification/CODEINCONNU');
+  await expect(page.getByRole('alert')).toContainText('Aucun document ne correspond à ce code');
 });

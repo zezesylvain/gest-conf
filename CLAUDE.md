@@ -121,7 +121,7 @@ Les URL Django sont déclarées **sans** le préfixe `/api` (`v1/...`) : `config
 | L0 à L4 (MVP : squelette, socle, portail, soumission, évaluation et décision) | Livrés en code, testés en local et en CI ; bilans dans `docs/`. **Aucune démo sur o2switch** encore faite |
 | L5 — Programme | **Livré en code, testé en local et en CI** (L5.0 à L5.7, E2E compris ; PR #8 et #9, fusionnées) ; bilan [`docs/L5-programme.md`](docs/L5-programme.md). Ouverts : Q14, `ACCEPTED_MINOR → WITHDRAWN`, seuil d'avertissement du bundle du portail |
 | L6 — Inscriptions et paiements | **Livré en code et testé en local** (L6.0 à L6.7, E2E compris) ; bilan [`docs/L6-inscriptions.md`](docs/L6-inscriptions.md). Passage en CI : nouvelle PR, sur demande. Ouverts : Q7 (tarifs ; carte bancaire absente de l'API v1 de CinetPay), Q8 (entité de facturation, conservation, format du numéro), J15 reportée |
-| L7 — Jour J et attestations | **En cours** : plan [`docs/L7-jour-j-plan.md`](docs/L7-jour-j-plan.md) validé le 6 octobre 2026 (K1 à K17, plus K18 rôle signataire et K19 modèle officiel et signature électronique, issues des réponses à Q11 et Q14). Nouvelle question Q17 : prestataire de signature qualifiée |
+| L7 — Jour J et attestations | **Livré en code et testé en local** (L7.0 à L7.8, E2E compris) ; bilan [`docs/L7-jour-j.md`](docs/L7-jour-j.md). Passage en CI : nouvelle PR, sur demande. Ouverts : Q17 (prestataire de signature qualifiée), nom complet du pays sur les badges, démo H sur téléphones réels |
 | L8 et suivants | Non commencés |
 
 ## Décisions du lot L1
@@ -197,6 +197,23 @@ Les décisions J1 à J16 du plan [`docs/L6-inscriptions-plan.md`](docs/L6-inscri
 
 Bilan du lot : [`docs/L6-inscriptions.md`](docs/L6-inscriptions.md).
 
+## Décisions du lot L7
+
+Les décisions K1 à K17 du plan [`docs/L7-jour-j-plan.md`](docs/L7-jour-j-plan.md) ont été validées le 6 octobre 2026, avec K18 (rôle signataire, Q11) et K19 (modèle officiel et signature électronique, Q14) issues des réponses du commanditaire. Elles sont reportées dans l'étude, **§23 « Mises à jour issues du lot L7 »**, qui prévaut sur les sections antérieures (§17 à §22 compris). Points à retenir :
+
+- application `events` (pointages, signatures, modèles, attestations, lettres) ; rôles `VOLUNTEER` (invitable dès L7, 2FA) et `SIGNATORY` (12ᵉ rôle, 2FA, seul à déposer sa signature) ; capacités `checkin.scan`, `checkin.manage`, `certificates.manage`, `letters.manage`, `signature.manage`, `sessions.chair` (présidence vérifiée session par session) ;
+- **QR du badge = titre d'accès** : le serveur n'accepte que le jeton, jamais son empreinte ; badges PDF `fpdf2` générés à la demande, jamais stockés ; badge perdu = nouveau jeton ; une inscription en attente de paiement est refusée à l'accueil ;
+- **accueil hors ligne** (PWA sous `/gestion/accueil`, service worker ajouté par cet écran seul) : liste d'empreintes valable 48 heures, file de pointages revérifiée par le serveur (lots de 200, clé d'idempotence), effacées à la déconnexion ; 504 du service worker = serveur injoignable ; `npm run build` régénère `ngsw.json` après la CSP (`scripts/check-ngsw.mjs`) ; décodeur du QR (`jsQR`) préparé dès l'ouverture de l'écran ;
+- `SCHEDULED → PRESENTED` par le président de séance (délégation `register_actor_grant` déclarée par `events`), le CO « programme » ou l'administrateur ; correction motivée ;
+- **RG-16** vérifiée à l'émission (présence, communication présentée, évaluations envoyées en nombre seulement) ; attestations et lettres en ajout seul, PDF figés à empreinte vérifiée, révocation motivée ; émission par `run_jobs` ; signataire désigné par nature, sans lui rien ne s'émet ; PAdES par `pyHanko` (`GESTCONF_SIGNING_ENCRYPTION_KEYS`), prestataire qualifié non branché (Q17) ;
+- vérification publique `/verification/<code>` du portail, rendue dans le navigateur, `noindex`, limitée en débit, même réponse pour un code inconnu ou mal formé ;
+- lettres d'invitation instruites par le CO ; numéro de passeport masqué au participant, effacé 30 jours après l'édition (`cleanup`) ; comptoir : inscription d'une personne sans compte ;
+- portail : « Mes documents » (`/compte/mes-documents`) ; gestion : rubriques « Jour J » et « Attestations et lettres », l'édition s'ouvre sur l'écran du rôle ;
+- aucune ligne de cron nouvelle ; `Permissions-Policy: camera=(self)` sous `/gestion/` seulement ;
+- E2E : le parcours en série se prolonge par la signature, la lettre d'invitation, le pointage par caméra simulée sans réseau puis synchronisé, l'entrée de session, « présentée », le comptoir et les attestations vérifiées publiquement ; le seed crée un bénévole, un CO « secrétariat » et un signataire.
+
+Bilan du lot : [`docs/L7-jour-j.md`](docs/L7-jour-j.md).
+
 ## Questions ouvertes (étude §15, à ne pas trancher seul)
 
-Date de la conférence, mono- ou multi-conférences, niveau de double aveugle, grille et pondérations définitives, résumé seul ou article complet, tarifs et agrégateur de paiement, entité de facturation, actes (DOI/ISBN), sessions hybrides, lettres d'invitation, noms des auteurs au programme public (Q14). (L'emplacement de l'espace évaluateur est tranché : application `gestion`, décision H1.)
+Date de la conférence, mono- ou multi-conférences, niveau de double aveugle, grille et pondérations définitives, résumé seul ou article complet, tarifs et agrégateur de paiement, entité de facturation, actes (DOI/ISBN), sessions hybrides, noms des auteurs au programme public (Q14), prestataire de signature qualifiée (Q17). (L'emplacement de l'espace évaluateur est tranché : application `gestion`, décision H1 ; les lettres d'invitation par K12 ; le signataire des attestations par K18.)

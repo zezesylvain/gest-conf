@@ -208,6 +208,17 @@ hr{border:0;border-top:1px solid var(--line);margin:2em 0}
 <li><a href="#22-7-tests-planning-et-points-ouverts">22.7 Tests, planning et points ouverts</a></li>
 </ul>
 </li>
+<li><a href="#23-mises-a-jour-issues-du-lot-l7">23. Mises à jour issues du lot L7 (version 1.7)</a><ul>
+<li><a href="#23-1-roles-et-droits">23.1 Rôles et droits</a></li>
+<li><a href="#23-2-badges-pointage-et-emargement-m14">23.2 Badges, pointage et émargement (M14)</a></li>
+<li><a href="#23-3-attestations-rg-16-et-verification-publique">23.3 Attestations (RG-16) et vérification publique</a></li>
+<li><a href="#23-4-lettres-dinvitation-et-comptoir-m10">23.4 Lettres d'invitation et comptoir (M10)</a></li>
+<li><a href="#23-5-gestion-et-portail">23.5 Gestion et portail</a></li>
+<li><a href="#23-6-modele-de-donnees-et-api">23.6 Modèle de données et API</a></li>
+<li><a href="#23-7-exploitation">23.7 Exploitation</a></li>
+<li><a href="#23-8-tests-planning-et-points-ouverts">23.8 Tests, planning et points ouverts</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </nav><main><h1 id="etude-fonctionnelle-et-technique">Étude fonctionnelle et technique</h1>
@@ -222,7 +233,7 @@ hr{border:0;border-top:1px solid var(--line);margin:2em 0}
 <tbody>
 <tr>
 <td><strong>Version</strong></td>
-<td>1.6 – document de cadrage, mis à jour après les lots L1 (§17), L2 (§18), L3 (§19), L4 (§20), L5 (§21) et L6 (§22)</td>
+<td>1.7 – document de cadrage, mis à jour après les lots L1 (§17), L2 (§18), L3 (§19), L4 (§20), L5 (§21), L6 (§22) et L7 (§23)</td>
 </tr>
 <tr>
 <td><strong>Date</strong></td>
@@ -3499,6 +3510,64 @@ def weighted_score(scores, criteria, scale_min, scale_max):
 <li><strong>Avant la mise en ligne</strong> : démo G sur o2switch avec le cron et une notification réelle ; compte marchand (Q7) ; mentions de facturation et durée de conservation (Q8).</li>
 <li><strong>À trancher</strong> : carte bancaire absente de l'API v1 de CinetPay (Q7) ; format du numéro de facture si une même entité facture toutes les éditions (Q8) ; Q14 ; <code>ACCEPTED_MINOR → WITHDRAWN</code> ; seuil d'avertissement du bundle initial du portail (368,6 kB pour 365 kB).</li>
 <li><strong>Reporté</strong> : « Mon programme » du participant et notification des inscrits (J15) ; inscription au comptoir sans compte et lecture des QR (L7) ; remboursement par l'API du prestataire, paiement partiel, groupes en un seul paiement (P3) ; hébergement groupé.</li>
+</ul>
+<h2 id="23-mises-a-jour-issues-du-lot-l7">23. Mises à jour issues du lot L7 (version 1.7)</h2>
+<p>Les décisions K1 à K17 du plan <a href="docs/L7-jour-j-plan.md"><code>docs/L7-jour-j-plan.md</code></a> ont été validées le 6 octobre 2026, avec les réponses du commanditaire qui ont donné K18 (rôle signataire, Q11) et K19 (modèle officiel et signature électronique, Q14), et mises en œuvre dans le lot L7. Cette section les reporte dans l'étude ; <strong>en cas de divergence avec les sections précédentes (§17 à §22 compris), elle prévaut</strong>. Le détail (justifications, vérifications, défauts trouvés) est dans le plan, §2, §2.1 et §11 à §19 ; le bilan du lot dans <a href="docs/L7-jour-j.md"><code>docs/L7-jour-j.md</code></a>.</p>
+<h3 id="23-1-roles-et-droits">23.1 Rôles et droits</h3>
+<ul>
+<li><strong>Bénévole</strong> (<code>VOLUNTEER</code>, K1, <strong>écart</strong> avec §3 : invitable dès L7 et non en L8) : pointage à l'accueil et en session, sans autre droit, <strong>2FA imposée</strong> (il lit la liste des participants). Invité par l'administrateur, le Chair ou le CO « bénévoles », qui ne voit, n'invite et ne retire que des bénévoles (attributions par fonction au CO).</li>
+<li><strong>Signataire</strong> (<code>SIGNATORY</code>, K18, 12ᵉ rôle d'édition) : renseigne <strong>seul</strong> sa signature (nom affiché, fonction FR et EN, image) ; invité par l'administrateur ou le Chair, avec réauthentification ; 2FA imposée. Personne d'autre, l'administrateur compris, ne peut déposer ou remplacer sa signature.</li>
+<li><strong>Président de séance</strong> : capacité <code>sessions.chair</code>, simple porte d'entrée dans la gestion ; la présidence est vérifiée <strong>session par session</strong> dans le programme publié. Sans 2FA (il ne voit que les présents de ses sessions).</li>
+<li><strong>Capacités</strong> : <code>checkin.scan</code> (<code>ADMIN</code>, bénévoles, tout le CO) ; <code>checkin.manage</code> (<code>ADMIN</code>, CO « secrétariat », « logistique », « bénévoles ») ; <code>certificates.manage</code> (<code>ADMIN</code>, <code>CHAIR</code>, CO « secrétariat ») ; <code>letters.manage</code> (<code>ADMIN</code>, CO « secrétariat », « relations extérieures ») ; <code>signature.manage</code> (signataire seul) ; <code>sessions.chair</code>. Réauthentification récente : attestations (paramétrage, émission, révocation), lettres (émission, révocation), signature, exports des présences.</li>
+</ul>
+<h3 id="23-2-badges-pointage-et-emargement-m14">23.2 Badges, pointage et émargement (M14)</h3>
+<ul>
+<li><strong>Badges</strong> (K3) : PDF <code>fpdf2</code>, A6 pour le participant (dès la confirmation) et planches A4 de quatre badges par catégorie, par fichiers de 200 ; nom, institution, pays (code ISO), catégorie dans sa couleur (<code>RegistrationCategory.badge_color</code>, <strong>écart</strong> : portée par la catégorie), titre de l'édition, QR et référence. Générés à la demande, <strong>jamais stockés</strong>, servis sans cache.</li>
+<li><strong>QR</strong> (K2) : jeton de 192 bits de l'inscription (L6). <strong>Le serveur n'accepte que le jeton comme preuve</strong>, jamais son empreinte. Badge perdu : nouveau jeton, l'ancien refusé (« badge remplacé »). Les empreintes des jetons retirés (annulation, remplacement) sont gardées pour donner un refus explicite.</li>
+<li><strong>Pointage</strong> (K4) : par le QR (<code>checkin.scan</code>) ou par la référence (<code>checkin.manage</code>) ; refus distincts (inconnu, autre édition, annulée, expirée, remplacé, <strong>en attente de paiement</strong> : refusé, renvoi au comptoir) ; « déjà pointé » sans nouvelle ligne ; clé d'idempotence ; heure de l'appareil bornée à 24 heures ; annulation motivée, rien n'est supprimé. Un pointage vaut <strong>présence</strong> (RG-16).</li>
+<li><strong>Hors ligne</strong> (K5) : écran « Accueil » installable (PWA), manifeste et service worker ajoutés par cet écran seul. Liste téléchargée (empreinte, référence, nom, catégorie ; 48 heures, effacée à la déconnexion) ; sans réseau, décision sur la liste et <strong>file</strong> de pointages qui garde le jeton jusqu'à l'envoi ; synchronisation par lots de 200, revérifiée par le serveur. Le 504 renvoyé par le service worker sans réseau vaut « serveur injoignable ».</li>
+<li><strong>Lecture du QR</strong> (K6) : caméra du téléphone, décodage sur l'appareil (<code>BarcodeDetector</code>, sinon <code>jsQR</code>, chargé à l'ouverture de l'écran d'accueil pour rester disponible sans réseau) ; <code>Permissions-Policy</code> ouvre la caméra sous <code>/gestion/</code> seulement ; saisie de la référence en secours.</li>
+<li><strong>Émargement</strong> (K7) : sessions du <strong>programme publié</strong> ; un pointage de session vaut présence ; le président de séance émarge ses sessions. <strong>Communication présentée</strong> (K8) : transition <code>SCHEDULED → PRESENTED</code> par le président de séance de la session, le CO « programme » ou l'administrateur ; correction <code>PRESENTED → SCHEDULED</code> par <code>program.write</code>, motif obligatoire (<strong>précision</strong> : le CO « programme » aussi).</li>
+</ul>
+<h3 id="23-3-attestations-rg-16-et-verification-publique">23.3 Attestations (RG-16) et vérification publique</h3>
+<ul>
+<li><strong>Natures</strong> (K9) : participation (inscription confirmée <strong>et</strong> présence enregistrée) ; communication (présentateur d'une communication <code>PRESENTED</code>) ; évaluation (relecteur ayant envoyé au moins une évaluation, <strong>nombre seulement</strong> : RG-04 ; nature activable par édition, désactivée par défaut). RG-16 est vérifiée par le serveur à l'émission.</li>
+<li><strong>Modèle officiel</strong> (K19) : par nature, titre, texte et pied de page FR et EN à <strong>variables fermées</strong> (<code>{name}</code>, <code>{edition}</code>, <code>{dates}</code>, <code>{venue}</code>, plus <code>{title}</code> et <code>{reference}</code>, ou <code>{count}</code>) ; en-tête de l'institution ; disposition de la signature et du QR ; aperçu sur données fictives. <strong>Signataire désigné</strong> par nature parmi les signatures complètes de rôle actif : sans lui, rien ne s'émet ; la pièce fige nom, fonction et empreinte de l'image.</li>
+<li><strong>Signature électronique</strong> (K19) : image seule (défaut), <strong>PAdES</strong> (<code>pyHanko</code>, certificat PKCS#12 de l'institution rechiffré par <code>GESTCONF_SIGNING_ENCRYPTION_KEYS</code>, mot de passe jamais gardé) ou prestataire qualifié, prévu mais <strong>non branché</strong> (nouvelle question <strong>Q17</strong>). Un certificat dans un fichier n'est pas une signature qualifiée au sens d'eIDAS.</li>
+<li><strong>Émission</strong> (K11) : par le CO, après la conférence, confiée à la file (<code>run_jobs</code>), par lots de 100, idempotente ; émission complémentaire après un pointage tardif ; e-mail « Attestation disponible » vers « Mes documents ». Pièces <strong>figées</strong> en ajout seul, empreinte vérifiée ; <strong>révocation</strong> motivée et journalisée, jamais de suppression.</li>
+<li><strong>Vérification publique</strong> (K10) : code de 128 bits en base32 dans le QR, adresse <code>/verification/&lt;code&gt;</code> du portail, <strong>rendue dans le navigateur</strong>, <code>noindex</code> ; nature, titulaire (aucun nom après anonymisation), conférence et dates, date, statut ; ni institution ni empreinte ; même réponse pour un code inconnu ou mal formé ; limitée en débit.</li>
+</ul>
+<h3 id="23-4-lettres-dinvitation-et-comptoir-m10">23.4 Lettres d'invitation et comptoir (M10)</h3>
+<ul>
+<li><strong>Lettres d'invitation</strong> (K12) : demande depuis « Mes documents » pour une inscription en attente ou confirmée (nom du passeport, nationalité, numéro, séjour de 90 jours au plus, ambassade) ; une demande en cours à la fois ; <strong>instruite</strong> par le CO (<code>letters.manage</code>) : émission (PDF signé, vérifiable comme une attestation) ou refus motivé ; révocation motivée. La lettre n'engage pas la prise en charge des frais. Le participant ne revoit que la fin du numéro ; le <strong>numéro de passeport est effacé</strong> 30 jours après la fin de l'édition ou à son archivage (K14).</li>
+<li><strong>Comptoir</strong> (K13, reporté de L6) : le CO inscrit une personne <strong>sans compte</strong> (compte sans mot de passe, adresse non vérifiée, lien de définition du mot de passe envoyé ; vérification de l'adresse à la première connexion) ou rattache l'inscription à un compte existant ; paiement sur place enregistré dans la même requête ; badge imprimable aussitôt.</li>
+</ul>
+<h3 id="23-5-gestion-et-portail">23.5 Gestion et portail</h3>
+<ul>
+<li><strong>Gestion</strong> (K15) : rubriques « Jour J » (accueil, sessions du jour, présences, badges, comptoir) et « Attestations et lettres » (suivi, modèle, lettres d'invitation, « Ma signature ») ; carte « Jour J et attestations » du tableau de bord ; badge et remplacement du badge dans la fiche d'une inscription ; couleur de badge des catégories ; chaque écran inscrit dans le rail avec sa fiche d'aide. Un écran peut s'ouvrir à l'une de plusieurs capacités (sessions du jour : <code>checkin.scan</code> ou <code>sessions.chair</code>). L'édition s'ouvre sur l'écran du rôle : accueil pour le bénévole, sessions du jour pour le président de séance, signature pour le signataire.</li>
+<li><strong>Portail</strong> : « <strong>Mes documents</strong> » (<code>/compte/mes-documents</code>) : badge, attestations, lettre d'invitation (demande et suivi) ; page publique de vérification <code>/verification/&lt;code&gt;</code>.</li>
+</ul>
+<h3 id="23-6-modele-de-donnees-et-api">23.6 Modèle de données et API</h3>
+<ul>
+<li>Application <code>events</code> : <code>signature</code> (par compte et par édition), <code>checkin</code> (clé d'idempotence unique, clé active par lieu), <code>certificate_settings</code>, <code>document_template</code> (par nature, lettre comprise), <code>certificate</code> (ajout seul), <code>invitation_letter</code>. Dans <code>registrations</code> : <code>retired_qr_token</code> (empreinte et motif) et <code>badge_color</code> des catégories. Transition <code>SCHEDULED → PRESENTED</code> ouverte dans le workflow des soumissions, avec une délégation au président de séance déclarée par <code>events</code> (<code>register_actor_grant</code>).</li>
+<li><strong>Données personnelles</strong> (K14) : pointages, signature, attestations et lettres à l'export ; anonymisation : pointages rattachés à l'inscription anonymisée, attestations et lettres <strong>conservées</strong> avec leur nom figé (la vérification n'en montre plus), signature vidée ; un signataire actif ne s'anonymise pas.</li>
+<li><strong>API</strong> : publique <code>/v1/public/certificates/{code}</code> ; participant <code>/v1/registrations/{id}/badge</code>, <code>/v1/me/certificates</code> et <code>…/{id}/pdf</code>, <code>/v1/registrations/{id}/invitation-letter</code> et <code>…/pdf</code> ; gestion <code>…/manage/editions/{id}/</code> : <code>checkin</code> (scan, saisie, liste hors ligne, synchronisation, compteurs, liste, annulation, export), <code>day/sessions</code> (sessions, présents, lecture à l'entrée, export, « présentée » et correction), <code>registrations/badges</code> (lots), <code>registrations/{id}/badge</code>, <code>registrations/{id}/regenerate-token</code>, <code>registrations/counter</code>, <code>certificates</code> (paramètres, en-tête, certificat, gabarits, signataires, aperçu, suivi, émission, liste, PDF, révocation), <code>invitation-letters</code> (liste, fiche, émission, refus, révocation, PDF), <code>signature</code> et <code>signature/image</code>.</li>
+<li>Codes d'erreur ajoutés : <code>signing_unavailable</code>, <code>signatory_missing</code>.</li>
+</ul>
+<h3 id="23-7-exploitation">23.7 Exploitation</h3>
+<ul>
+<li>Aucune ligne de cron nouvelle : l'émission passe par <code>run_jobs</code>, l'effacement des numéros de passeport et la purge des fichiers orphelins par <code>cleanup</code>.</li>
+<li>Configuration par l'environnement (règle n° 11) : <code>GESTCONF_SIGNING_ENCRYPTION_KEYS</code> (facultative ; sans elle, PAdES est refusé).</li>
+<li>Hébergement : <code>Permissions-Policy: camera=(self)</code> sous <code>/gestion/</code>, type du manifeste, <code>ngsw.json</code> et service worker sans cache long ; <code>npm run build</code> régénère <code>ngsw.json</code> après l'injection de la CSP et en contrôle les empreintes ; <code>Disallow: /verification</code> dans <code>robots.txt</code> ; contrôles du test de fumée.</li>
+<li><code>check_integrity</code> contrôle aussi les pointages d'inscriptions non confirmées et l'intégrité des PDF des attestations et des lettres.</li>
+</ul>
+<h3 id="23-8-tests-planning-et-points-ouverts">23.8 Tests, planning et points ouverts</h3>
+<ul>
+<li>4 972 tests backend (sous-ensembles du lot sous MariaDB) : pointage (refus, idempotence, bornes, deux appareils sur le même badge), liste hors ligne sans donnée sensible, badges, émargement et président de séance, RG-16 pour les trois natures, PAdES validé, vérification publique, lettres et effacement du passeport, comptoir ; matrice des droits (3 746 cas). 469 tests front, dont le poste d'accueil hors ligne et les empreintes de <code>ngsw.json</code>. <strong>Parcours de bout en bout</strong> (Playwright) prolongé : signature et signataire désigné, lettre d'invitation demandée et émise, pointage par une caméra simulée <strong>sans réseau</strong> puis synchronisé, « déjà pointé », entrée de session, communication présentée, comptoir, attestations émises par la file au seul participant présent (RG-16), téléchargées et vérifiées publiquement.</li>
+<li>Charge de L7 estimée à 23,5 – 30 j-h (étude : 8 – 12).</li>
+<li><strong>Avant le jour J réel</strong> : démo H sur o2switch et sur téléphones réels (iOS Safari, Android), réseau coupé ; en-têtes par chemin vérifiés sur l'hébergement.</li>
+<li><strong>À trancher</strong> : prestataire de signature qualifiée (Q17) ; nom complet du pays sur les badges ; Q14 (noms des auteurs au programme public) ; <code>ACCEPTED_MINOR → WITHDRAWN</code> ; seuil d'avertissement du bundle initial du portail (368,9 kB pour 365 kB) ; Q7 et Q8.</li>
+<li><strong>Reporté</strong> : questionnaire de satisfaction et annonces de dernière minute (L8, K16) ; « Mon programme » du participant (J15) ; signature qualifiée (P3) ; impression thermique ; contrôle d'accès aux sessions payantes.</li>
 </ul>
 <hr />
 <p><em>Fin du document.</em></p></main></div>

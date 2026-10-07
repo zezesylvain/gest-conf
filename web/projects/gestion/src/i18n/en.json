@@ -2421,6 +2421,7 @@
         "paid": "Payment received at the counter"
       },
       "emailHint": "Known address: the registration is attached to that account.",
+      "countryHint": "Required for a new account, or if the account has no country: it sets the local or international fee.",
       "emailError": "A valid e-mail address is required.",
       "paidHint": "When ticked, the on-site payment is recorded and the registration confirmed; otherwise it awaits payment.",
       "submit": "Register"

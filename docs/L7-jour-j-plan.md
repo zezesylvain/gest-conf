@@ -1,6 +1,7 @@
 # Lot L7 — Jour J et attestations : plan d'implémentation
 
-> **Statut : validé le 6 octobre 2026, en cours** (décisions K1 à K17 telles que proposées,
+> **Statut : validé le 6 octobre 2026, livré en code et testé en local** (bilan du lot :
+> `docs/L7-jour-j.md` ; décisions K1 à K17 telles que proposées,
 > précisées par les réponses du commanditaire, qui ajoutent K18 et K19 : §2.1). L6 est clos
 > (bilan : `docs/L6-inscriptions.md`).
 >
@@ -1024,3 +1025,68 @@ simulée) :
 - budget du portail : 368,9 ko (avertissement déjà connu, +0,3 ko pour les deux routes).
 
 **Critère de fin** (« Démo H côté portail ») : atteint, hors démo sur o2switch (L7.8).
+
+## 19. Bilan de L7.8 (6 octobre 2026)
+
+**Parcours de bout en bout** (Playwright, `web/e2e/tests/author.spec.ts`) : le parcours en
+série de L4 à L6 se prolonge par six tests :
+
+1. **signataire** (K18) : dépôt de sa signature (nom, fonctions FR/EN, image PNG), puis
+   désignation par le CO « secrétariat » au modèle des trois natures ;
+2. **lettre d'invitation** (K12) :
+   - demande de l'auteure dans « Mes documents » ;
+   - le numéro de passeport n'est jamais réaffiché en clair au participant ;
+   - émission par le secrétariat, e-mail, téléchargement du PDF ;
+3. **accueil** (K4 à K7) :
+   - badge PDF de l'auteure ;
+   - téléphone du bénévole simulé par un second Chromium à **caméra factice** filmant le QR
+     du badge (vidéo Y4M produite par le serveur de test) ;
+   - liste hors ligne téléchargée, réseau coupé : « Pointé », « Décidé sans réseau », un
+     pointage en file et aucun en base ;
+   - retour du réseau : la file part seule, le serveur enregistre le pointage ;
+   - nouveau scan en ligne : « Déjà pointé » ;
+   - mode session : pointage à l'entrée de la session publiée ;
+4. **sessions du jour** (K8) : le CO « programme » voit la présence pointée à l'entrée et
+   marque la communication « présentée » ; **comptoir** (K13) : le secrétariat inscrit une
+   personne sans compte (compte sans mot de passe, inscription confirmée, badge) ; la liste
+   des présences montre l'auteure ;
+5. **attestations** (RG-16) :
+   - émission par la file (`run_jobs`) ;
+   - l'auteure, présente, reçoit participation et communication ; la personne du comptoir,
+     jamais pointée, n'en reçoit pas ;
+   - téléchargement dans « Mes documents » ;
+   - vérification publique par le code.
+
+Le seed crée un bénévole, un CO « secrétariat » et un signataire (2FA), et l'image de
+signature.
+
+**Défauts trouvés par le parcours** :
+
+- **caméra allumée après la coupure du réseau** : « Caméra indisponible » ;
+  - cause : `jsQR` était chargé à la demande, au premier allumage ; hors ligne, sans
+    service worker (serveur de développement) ou avant la fin de sa mise en cache, le
+    chargement échouait ;
+  - correction : décodeur partagé préparé dès l'ouverture de l'écran d'accueil
+    (`preparedDecoder()` de `core/qr-scanner.ts`), un échec n'étant pas retenu ; test
+    ajouté ;
+- **comptoir sans pays** : le serveur refuse (« Pays obligatoire. », il fixe le tarif local
+  ou international), mais le formulaire n'affichait pas ce message, posé sur le champ ;
+  - correction : chaque champ du comptoir affiche l'erreur du serveur (`fieldErrorMessage`),
+    et une aide sous « Pays » dit quand il est obligatoire ; test ajouté.
+
+**Résultats** :
+
+- bout en bout : **16 tests au vert** (4,2 min, Chromium) ;
+- front : **469 tests** (shared 79, portail 158, gestion 219, scripts 13) ; lint,
+  `format:check`, `ruff` ;
+- build complet : bundles initiaux du portail 368,9 ko (avertissement connu) et de la
+  gestion 382,2 ko ; empreintes de `ngsw.json` conformes.
+
+**Recette** :
+
+- étude : §23 « Mises à jour issues du lot L7 » en Markdown et en HTML (version 1.7) ;
+- bilan du lot : `docs/L7-jour-j.md` ;
+- `CLAUDE.md` : état d'avancement et « Décisions du lot L7 ».
+
+**Critère de fin du lot** : atteint en code et en local ; la démo H sur o2switch, sur
+téléphones réels et réseau coupé, reste à faire.

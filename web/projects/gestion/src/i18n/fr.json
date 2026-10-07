@@ -2421,6 +2421,7 @@
         "paid": "Paiement reçu au comptoir"
       },
       "emailHint": "Adresse déjà connue : l'inscription est rattachée à ce compte.",
+      "countryHint": "Obligatoire pour un nouveau compte, ou si le compte n'a pas de pays : il fixe le tarif local ou international.",
       "emailError": "Adresse e-mail valide requise.",
       "paidHint": "Coché, le paiement sur place est enregistré et l'inscription confirmée ; sinon, elle reste en attente de paiement.",
       "submit": "Inscrire"
