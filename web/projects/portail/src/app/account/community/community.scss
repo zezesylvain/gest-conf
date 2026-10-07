@@ -1,0 +1,83 @@
+// Espace compte du lot L8 (plan L8, N6, N7, N11, N12).
+.card {
+  border: 1px solid var(--gc-border);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-block: 1rem;
+}
+
+fieldset {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  border: 1px solid var(--gc-border);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.grid {
+  display: grid;
+  gap: 0 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+}
+
+.wide {
+  width: 100%;
+}
+
+.muted {
+  color: var(--gc-muted);
+}
+
+.notice {
+  padding: 0.5rem 0.75rem;
+  border-left: 4px solid var(--gc-primary);
+}
+
+.facts {
+  display: grid;
+  gap: 0.5rem 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  margin: 0;
+}
+
+.facts dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.list {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.list li {
+  padding: 0.75rem;
+  border: 1px solid var(--gc-border);
+  border-radius: 0.25rem;
+}
+
+.question {
+  border: 1px solid var(--gc-border);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.question legend {
+  font-weight: 600;
+}
+
+.scale {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+}
+
+a {
+  color: var(--gc-primary);
+}

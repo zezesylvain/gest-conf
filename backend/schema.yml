@@ -19259,6 +19259,8 @@ components:
     RegistrationEdition:
       type: object
       properties:
+        id:
+          type: integer
         code:
           type: string
         title_fr:
@@ -19269,6 +19271,7 @@ components:
           type: string
       required:
       - code
+      - id
       - timezone
       - title_en
       - title_fr

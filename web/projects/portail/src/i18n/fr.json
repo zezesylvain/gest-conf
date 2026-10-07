@@ -25,7 +25,10 @@
         "notificationsLabel": "Notifications ({{count}} non lue(s))",
         "agenda": "Mon passage",
         "registration": "Mon inscription",
-        "documents": "Mes documents"
+        "documents": "Mes documents",
+        "visit": "Ma venue",
+        "surveys": "Questionnaires",
+        "preferences": "Régime et annonces"
       },
       "fields": {
         "email": "Adresse e-mail",
@@ -535,8 +538,15 @@
         "draft_reminder": "Votre brouillon « {{title}} » n'est pas encore soumis : l'appel ferme le {{closes}}.",
         "screening_rejected": "Votre soumission {{reference}} « {{title}} » n'a pas été jugée recevable : elle ne sera pas évaluée.",
         "decision_published": "Décision publiée pour votre soumission {{reference}} « {{title}} ».",
-        "final_version_received": "Version finale reçue pour votre soumission {{reference}} « {{title}} »."
-      }
+        "final_version_received": "Version finale reçue pour votre soumission {{reference}} « {{title}} ».",
+        "task_assigned": "Une tâche vous est confiée ({{edition}}) : « {{title}} ».",
+        "shift_assigned": "Un poste de bénévole vous est confié ({{edition}}) : « {{title}} », le {{starts}}.",
+        "shift_removed": "Vous n'êtes plus affecté au poste « {{title}} » ({{edition}}) du {{starts}}.",
+        "announcement": "Annonce ({{edition}}) : « {{title}} ».",
+        "survey_invitation": "Votre avis compte ({{edition}}) : questionnaire « {{title}} »."
+      },
+      "openSurvey": "Répondre au questionnaire",
+      "openManagement": "Ouvrir dans la gestion"
     },
     "program": {
       "title": "Programme",
@@ -815,7 +825,107 @@
       "noSpeaker": "Aucun intervenant invité n'est encore annoncé.",
       "noNews": "Aucune actualité pour l'instant.",
       "readMore": "Lire l'actualité",
-      "dismiss": "Fermer le bandeau"
+      "dismiss": "Fermer le bandeau",
+      "diet": {
+        "vegetarian": "Végétarien",
+        "vegan": "Végétalien",
+        "no_pork": "Sans porc",
+        "gluten_free": "Sans gluten",
+        "lactose_free": "Sans lactose",
+        "other": "Autre"
+      },
+      "equipment": {
+        "projector": "Vidéoprojecteur",
+        "microphone": "Micro",
+        "sound_system": "Sonorisation",
+        "computer": "Ordinateur",
+        "whiteboard": "Tableau blanc",
+        "interpretation": "Interprétation",
+        "recording": "Enregistrement",
+        "wifi": "Wi-Fi"
+      },
+      "means": {
+        "plane": "Avion",
+        "train": "Train",
+        "road": "Route",
+        "other": "Autre"
+      },
+      "visitStatus": {
+        "to_arrange": "À organiser",
+        "booked": "Réservé",
+        "confirmed": "Confirmé"
+      },
+      "dietary": {
+        "title": "Régime alimentaire",
+        "lead": "Facultatif : indiquez un régime ou une allergie pour que le comité prévoie les repas. Les effectifs sont transmis au traiteur sans votre nom.",
+        "diets": "Régimes",
+        "allergies": "Allergies ou précisions",
+        "allergiesHint": "200 caractères au plus.",
+        "consent": "J'accepte que le comité d'organisation utilise ces informations, qui peuvent révéler mon état de santé ou mes convictions, pour organiser les repas de la conférence.",
+        "consentRequired": "Cochez la case de consentement pour enregistrer.",
+        "save": "Enregistrer",
+        "withdraw": "Retirer ma déclaration",
+        "saved": "Régime enregistré.",
+        "withdrawn": "Déclaration retirée.",
+        "retention": "Ces informations sont effacées 30 jours après la conférence."
+      },
+      "visit": {
+        "title": "Ma venue",
+        "lead": "Vos besoins techniques et vos voyages, pour que le comité organise votre venue.",
+        "organised": "Ce que le comité a organisé",
+        "status": "Prise en charge",
+        "hotel": "Hôtel",
+        "nights": "Nuits",
+        "mine": "Vos informations",
+        "needs": "Besoins techniques",
+        "technicalNote": "Précisions techniques",
+        "timezone": "Dates et heures à l'heure locale de la conférence ({{zone}}).",
+        "arrival": "Arrivée",
+        "departure": "Départ",
+        "means": "Moyen de transport",
+        "reference": "Référence (vol, train…)",
+        "accommodation": "J'ai besoin d'un hébergement",
+        "transfer": "J'ai besoin d'un transfert",
+        "note": "Message au comité",
+        "save": "Enregistrer",
+        "saved": "Informations enregistrées.",
+        "none": "Cette page est réservée aux intervenants invités d'une édition."
+      },
+      "preferences": {
+        "title": "Régime et annonces",
+        "lead": "Pour chaque conférence où vous êtes inscrit ou membre d'un comité.",
+        "announcements": "Recevoir les annonces de la conférence par e-mail",
+        "announcementsHint": "Les e-mails de service (inscription, soumission, documents) et les notifications restent envoyés.",
+        "subscribed": "Vous recevrez les annonces par e-mail.",
+        "unsubscribed": "Vous ne recevrez plus les annonces par e-mail.",
+        "none": "Aucune conférence pour l'instant."
+      },
+      "surveys": {
+        "title": "Questionnaires",
+        "lead": "Questionnaires de satisfaction des conférences auxquelles vous avez participé.",
+        "answer": "Répondre",
+        "answered": "Merci, vous avez répondu.",
+        "closes": "jusqu'au {{date}}",
+        "closed": "Ce questionnaire est clos.",
+        "none": "Aucun questionnaire pour l'instant.",
+        "back": "Retour aux questionnaires",
+        "anonymity": "Votre réponse est anonyme : elle est enregistrée sans lien avec votre compte. Les commentaires libres seront lus par le comité ; n'y mettez pas d'information qui vous identifie si vous ne le souhaitez pas.",
+        "required": "réponse obligatoire",
+        "scale": "1 : pas du tout satisfait · 5 : très satisfait",
+        "textHint": "1 000 caractères au plus.",
+        "send": "Envoyer ma réponse",
+        "thanks": "Merci, votre réponse est enregistrée.",
+        "missing": "Répondez à la question « {{label}} »."
+      },
+      "unsubscribe": {
+        "title": "Désabonnement des annonces",
+        "lead": "Vous ne recevrez plus les annonces de cette conférence par e-mail.",
+        "confirm": "Confirmer le désabonnement",
+        "done": "C'est fait : vous ne recevrez plus les annonces de « {{edition}} » par e-mail.",
+        "service": "Les e-mails de service (inscription, soumission, documents) restent envoyés.",
+        "preferences": "Gérer mes préférences",
+        "invalid": "Ce lien de désabonnement n'est pas valide. Connectez-vous pour gérer vos préférences."
+      }
     }
   }
 }

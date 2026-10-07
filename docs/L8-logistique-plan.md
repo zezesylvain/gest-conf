@@ -1106,3 +1106,35 @@ d'API ajouté (aperçu authentifié du logo) ; tests du front de la gestion : 26
 ignoré) ; règles de plateforme ; portail : 7 tests (partenaires et lien piégé écarté,
 aucun partenaire, intervenants et lien vers la session, programme non publié, actualité
 assainie, bandeau et fermeture, bandeau en erreur).
+
+### L8.9b — Espace compte, cloche et tableau de bord
+
+- **« Ma venue »** (`/compte/ma-venue`, intervenants invités ; lien du menu du compte pour
+  eux seuls) : ce que le comité a organisé (prise en charge, hôtel, nuits) en lecture ;
+  besoins techniques, arrivée et départ à l'heure de la conférence (fuseau affiché),
+  hébergement et transfert demandés, message ; la note interne n'est jamais servie ;
+- **carte « Régime alimentaire »** (RG-23) dans « Ma venue » et dans **« Régime et
+  annonces »** (`/compte/preferences`), pour chaque édition où le compte a un rôle ou une
+  inscription : **consentement explicite à chaque déclaration** (la case revient décochée),
+  retrait, rappel de l'effacement à 30 jours ; rien pour qui n'est pas concerné ;
+- **abonnement aux annonces par e-mail** par édition, sur la même page ; les e-mails de
+  service et la cloche restent envoyés ;
+- **précision** : un participant n'ayant pas forcément de rôle, la réponse « Mon
+  inscription » porte désormais l'**identifiant de l'édition** (champ ajouté à
+  `RegistrationEdition`, sans autre changement) ;
+- **« Questionnaires »** (`/compte/questionnaires` et `/compte/questionnaires/{id}`) :
+  anonymat et lecture des commentaires par le comité annoncés avant la réponse ; note de 1 à
+  5 en boutons radio, choix unique ou multiples, texte ; questions obligatoires vérifiées
+  avant l'envoi (et revérifiées au serveur) ; une seule réponse ;
+- **désabonnement par lien** (`/desabonnement/<jeton>`, hors de l'espace compte, `noindex`,
+  sans Material) : rien ne part sans un clic, ce qui protège des aperçus de liens des
+  messageries ; jeton altéré : message clair et renvoi vers les préférences ;
+- **cloche** : textes de `task_assigned`, `shift_assigned`, `shift_removed`, `announcement`
+  et `survey_invitation` ; liens vers le questionnaire, la tâche ou « Mon planning » de la
+  gestion ;
+- **tableau de bord** (complément de N14 à L8.8) : tâches à échéance sous 7 jours, bandeau
+  affiché maintenant (comparé à l'heure de l'édition), réponses aux questionnaires publiés.
+
+**Tests** : portail : 7 tests (régime et consentement, carte masquée, « Ma venue »,
+préférences et abonnement, questionnaire, désabonnement et jeton altéré, cloche) ;
+gestion : carte « Organisation » complétée ; `registrations` inchangés (111).

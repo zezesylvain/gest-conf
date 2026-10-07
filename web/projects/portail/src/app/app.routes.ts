@@ -62,6 +62,14 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/verification/verification-page').then((m) => m.VerificationPage),
   },
+  // Désabonnement des annonces (plan L8, N11) : lien de l'e-mail, jeton signé dans
+  // l'adresse, rendu dans le navigateur (jamais pré-rendu), noindex.
+  {
+    path: 'desabonnement/:token',
+    title: 'portail.community.unsubscribe.title',
+    loadComponent: () =>
+      import('./pages/unsubscribe/unsubscribe-page').then((m) => m.UnsubscribePage),
+  },
   {
     path: '**',
     title: 'portail.notFound.title',

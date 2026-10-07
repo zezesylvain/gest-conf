@@ -25,7 +25,10 @@
         "notificationsLabel": "Notifications ({{count}} unread)",
         "agenda": "My schedule",
         "registration": "My registration",
-        "documents": "My documents"
+        "documents": "My documents",
+        "visit": "My visit",
+        "surveys": "Surveys",
+        "preferences": "Diet and announcements"
       },
       "fields": {
         "email": "Email address",
@@ -535,8 +538,15 @@
         "draft_reminder": "Your draft “{{title}}” has not been submitted yet: the call closes on {{closes}}.",
         "screening_rejected": "Your submission {{reference}} “{{title}}” was found inadmissible: it will not be reviewed.",
         "decision_published": "Decision published for your submission {{reference}} “{{title}}”.",
-        "final_version_received": "Final version received for your submission {{reference}} “{{title}}”."
-      }
+        "final_version_received": "Final version received for your submission {{reference}} “{{title}}”.",
+        "task_assigned": "A task has been assigned to you ({{edition}}): \"{{title}}\".",
+        "shift_assigned": "A volunteer shift has been assigned to you ({{edition}}): \"{{title}}\", on {{starts}}.",
+        "shift_removed": "You are no longer assigned to the shift \"{{title}}\" ({{edition}}) on {{starts}}.",
+        "announcement": "Announcement ({{edition}}): \"{{title}}\".",
+        "survey_invitation": "Your opinion matters ({{edition}}): survey \"{{title}}\"."
+      },
+      "openSurvey": "Answer the survey",
+      "openManagement": "Open in management"
     },
     "program": {
       "title": "Programme",
@@ -815,7 +825,107 @@
       "noSpeaker": "No invited speaker has been announced yet.",
       "noNews": "No news yet.",
       "readMore": "Read the news",
-      "dismiss": "Close the banner"
+      "dismiss": "Close the banner",
+      "diet": {
+        "vegetarian": "Vegetarian",
+        "vegan": "Vegan",
+        "no_pork": "No pork",
+        "gluten_free": "Gluten-free",
+        "lactose_free": "Lactose-free",
+        "other": "Other"
+      },
+      "equipment": {
+        "projector": "Projector",
+        "microphone": "Microphone",
+        "sound_system": "Sound system",
+        "computer": "Computer",
+        "whiteboard": "Whiteboard",
+        "interpretation": "Interpretation",
+        "recording": "Recording",
+        "wifi": "Wi-Fi"
+      },
+      "means": {
+        "plane": "Plane",
+        "train": "Train",
+        "road": "Road",
+        "other": "Other"
+      },
+      "visitStatus": {
+        "to_arrange": "To arrange",
+        "booked": "Booked",
+        "confirmed": "Confirmed"
+      },
+      "dietary": {
+        "title": "Dietary requirements",
+        "lead": "Optional: state a diet or an allergy so that the committee can plan the meals. Headcounts are passed to the caterer without your name.",
+        "diets": "Diets",
+        "allergies": "Allergies or details",
+        "allergiesHint": "200 characters at most.",
+        "consent": "I agree that the organising committee uses this information, which may reveal my health or beliefs, to organise the conference meals.",
+        "consentRequired": "Tick the consent box to save.",
+        "save": "Save",
+        "withdraw": "Withdraw my declaration",
+        "saved": "Dietary requirements saved.",
+        "withdrawn": "Declaration withdrawn.",
+        "retention": "This information is deleted 30 days after the conference."
+      },
+      "visit": {
+        "title": "My visit",
+        "lead": "Your technical needs and your travel, so that the committee can organise your visit.",
+        "organised": "What the committee has arranged",
+        "status": "Arrangements",
+        "hotel": "Hotel",
+        "nights": "Nights",
+        "mine": "Your information",
+        "needs": "Technical needs",
+        "technicalNote": "Technical details",
+        "timezone": "Dates and times in the conference's local time ({{zone}}).",
+        "arrival": "Arrival",
+        "departure": "Departure",
+        "means": "Means of transport",
+        "reference": "Reference (flight, train…)",
+        "accommodation": "I need accommodation",
+        "transfer": "I need a transfer",
+        "note": "Message to the committee",
+        "save": "Save",
+        "saved": "Information saved.",
+        "none": "This page is for the invited speakers of an edition."
+      },
+      "preferences": {
+        "title": "Diet and announcements",
+        "lead": "For each conference where you are registered or a committee member.",
+        "announcements": "Receive the conference announcements by email",
+        "announcementsHint": "Service emails (registration, submission, documents) and notifications are still sent.",
+        "subscribed": "You will receive announcements by email.",
+        "unsubscribed": "You will no longer receive announcements by email.",
+        "none": "No conference yet."
+      },
+      "surveys": {
+        "title": "Surveys",
+        "lead": "Satisfaction surveys of the conferences you attended.",
+        "answer": "Answer",
+        "answered": "Thank you, you have answered.",
+        "closes": "until {{date}}",
+        "closed": "This survey is closed.",
+        "none": "No survey yet.",
+        "back": "Back to surveys",
+        "anonymity": "Your answer is anonymous: it is recorded with no link to your account. Free comments will be read by the committee; do not include information that identifies you if you do not wish to.",
+        "required": "answer required",
+        "scale": "1: not satisfied at all · 5: very satisfied",
+        "textHint": "1,000 characters at most.",
+        "send": "Send my answer",
+        "thanks": "Thank you, your answer has been recorded.",
+        "missing": "Answer the question \"{{label}}\"."
+      },
+      "unsubscribe": {
+        "title": "Unsubscribe from announcements",
+        "lead": "You will no longer receive this conference's announcements by email.",
+        "confirm": "Confirm unsubscribing",
+        "done": "Done: you will no longer receive announcements from \"{{edition}}\" by email.",
+        "service": "Service emails (registration, submission, documents) are still sent.",
+        "preferences": "Manage my preferences",
+        "invalid": "This unsubscribe link is not valid. Sign in to manage your preferences."
+      }
     }
   }
 }

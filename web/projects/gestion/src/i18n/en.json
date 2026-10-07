@@ -265,7 +265,11 @@
         "sponsors": "Partnerships: {{received}} received out of {{agreed}} agreed",
         "visits": "{{count}} speaker visit(s) to arrange",
         "equipment": "{{count}} with equipment missing in the room",
-        "places": "{{count}} volunteer place(s) to fill"
+        "places": "{{count}} volunteer place(s) to fill",
+        "dueSoon": "{{count}} due within 7 days",
+        "banner": "Banner shown: \"{{title}}\"",
+        "noBanner": "No banner shown",
+        "surveys": "Surveys: {{answered}} answer(s) out of {{invited}} invitation(s)"
       }
     },
     "fields": {

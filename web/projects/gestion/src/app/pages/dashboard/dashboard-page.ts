@@ -36,6 +36,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 
 import { EditionApi } from '../../core/edition-api';
+import { CommunicationApi } from '../../core/communication-api';
 import { EventsApi } from '../../core/events-api';
 import { LogisticsApi } from '../../core/logistics-api';
 import { editionTitle } from '../../core/managed-editions';
@@ -61,8 +62,9 @@ interface CheckItem {
  * (plan L5 : à programmer, conflits, modifications non publiées) ; inscriptions avec
  * `registrations.read` et finances avec `finance.read` (plan L6, J12) ; jour J avec
  * `checkin.scan`, attestations avec `certificates.manage`, lettres à instruire avec
- * `letters.manage` (plan L7, K15) ; organisation du CO (plan L8, N16) : mes tâches,
- * budget, partenaires, venues à organiser, postes à pourvoir, chacun selon sa capacité.
+ * `letters.manage` (plan L7, K15) ; organisation du CO (plan L8, N14) : mes tâches,
+ * budget, partenaires, venues à organiser, postes à pourvoir, bandeau affiché, réponses aux
+ * questionnaires, chacun selon sa capacité.
  * La liste de contrôle est
  * indicative : le serveur revérifie les préconditions à la publication (`edition_incomplete`).
  */
@@ -85,6 +87,7 @@ export class DashboardPage implements OnInit {
   private readonly organisationApi = inject(OrganisationApi);
   private readonly sponsorsApi = inject(SponsorsApi);
   private readonly logisticsApi = inject(LogisticsApi);
+  private readonly communicationApi = inject(CommunicationApi);
   private readonly meStore = inject(MeStore);
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
@@ -105,7 +108,13 @@ export class DashboardPage implements OnInit {
   protected readonly certificates = signal<CertificateOverview[] | null>(null);
   protected readonly lettersToReview = signal<number | null>(null);
   /** Organisation du CO (plan L8) : chaque indicateur reste nul sans sa capacité. */
-  protected readonly myTasks = signal<{ open: number; overdue: number } | null>(null);
+  protected readonly myTasks = signal<{ open: number; overdue: number; dueSoon: number } | null>(
+    null,
+  );
+  /** Bandeau du portail affiché maintenant (titre), `''` s'il n'y en a pas. */
+  protected readonly banner = signal<string | null>(null);
+  /** Questionnaires publiés : réponses sur invitations. */
+  protected readonly surveyRate = signal<{ answered: number; invited: number } | null>(null);
   protected readonly budget = signal<Budget | null>(null);
   protected readonly sponsorTotals = signal<SponsorTotals | null>(null);
   protected readonly visits = signal<{ toArrange: number; missing: number } | null>(null);
@@ -113,6 +122,8 @@ export class DashboardPage implements OnInit {
   protected readonly hasOrganisation = computed(
     () =>
       this.myTasks() !== null ||
+      this.banner() !== null ||
+      this.surveyRate() !== null ||
       this.budget() !== null ||
       this.sponsorTotals() !== null ||
       this.visits() !== null ||
@@ -199,9 +210,40 @@ export class DashboardPage implements OnInit {
     if (this.can('tasks.read')) {
       const tasks = await this.organisationApi.tasks(id, { mine: true });
       const open = tasks.filter((task) => task.status !== 'done');
+      const soon = new Date(Date.now() + 7 * 86_400_000).toISOString().slice(0, 10);
       this.myTasks.set({
         open: open.length,
         overdue: open.filter((task) => task.overdue).length,
+        dueSoon: open.filter((task) => !task.overdue && task.due_date && task.due_date <= soon)
+          .length,
+      });
+    }
+    if (this.can('communications.send')) {
+      const zone = this.edition()?.timezone ?? 'UTC';
+      // Heure locale de l'édition, comparable aux bornes du bandeau (`AAAA-MM-JJTHH:MM`).
+      const now = new Intl.DateTimeFormat('sv-SE', {
+        timeZone: zone,
+        dateStyle: 'short',
+        timeStyle: 'short',
+      })
+        .format(new Date())
+        .replace(' ', 'T');
+      const shown = (await this.communicationApi.announcements(id)).find(
+        (item) =>
+          item.status === 'published' &&
+          item.on_banner &&
+          (!item.banner_starts_local || item.banner_starts_local <= now) &&
+          (!item.banner_ends_local || now < item.banner_ends_local),
+      );
+      this.banner.set(shown ? shown.title_fr : '');
+    }
+    if (this.can('surveys.manage')) {
+      const published = (await this.communicationApi.surveys(id)).filter(
+        (survey) => survey.status === 'published',
+      );
+      this.surveyRate.set({
+        answered: published.reduce((sum, survey) => sum + survey.stats.answered, 0),
+        invited: published.reduce((sum, survey) => sum + survey.stats.invited, 0),
       });
     }
     if (this.can('budget.read')) {

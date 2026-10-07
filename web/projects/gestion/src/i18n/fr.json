@@ -265,7 +265,11 @@
         "sponsors": "Partenariats : {{received}} reçus sur {{agreed}} convenus",
         "visits": "{{count}} venue(s) d'intervenant à organiser",
         "equipment": "{{count}} avec un équipement manquant en salle",
-        "places": "{{count}} place(s) de bénévole à pourvoir"
+        "places": "{{count}} place(s) de bénévole à pourvoir",
+        "dueSoon": "{{count}} à échéance sous 7 jours",
+        "banner": "Bandeau affiché : « {{title}} »",
+        "noBanner": "Aucun bandeau affiché",
+        "surveys": "Questionnaires : {{answered}} réponse(s) sur {{invited}} invitation(s)"
       }
     },
     "fields": {

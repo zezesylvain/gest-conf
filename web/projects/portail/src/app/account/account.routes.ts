@@ -101,6 +101,31 @@ export const accountRoutes: Routes = [
         canMatch: [authGuard],
         loadComponent: () => import('./agenda/agenda-page').then((m) => m.AgendaPage),
       },
+      // Lot L8 : « Ma venue » (N6), régime et annonces (N7, N11), questionnaires (N12).
+      {
+        path: 'ma-venue',
+        title: 'portail.community.visit.title',
+        canMatch: [authGuard],
+        loadComponent: () => import('./community/visit-page').then((m) => m.VisitPage),
+      },
+      {
+        path: 'preferences',
+        title: 'portail.community.preferences.title',
+        canMatch: [authGuard],
+        loadComponent: () => import('./community/preferences-page').then((m) => m.PreferencesPage),
+      },
+      {
+        path: 'questionnaires',
+        title: 'portail.community.surveys.title',
+        canMatch: [authGuard],
+        loadComponent: () => import('./community/surveys-page').then((m) => m.SurveysPage),
+      },
+      {
+        path: 'questionnaires/:surveyId',
+        title: 'portail.community.surveys.title',
+        canMatch: [authGuard],
+        loadComponent: () => import('./community/survey-page').then((m) => m.SurveyPage),
+      },
       {
         path: 'notifications',
         title: 'portail.notifications.title',

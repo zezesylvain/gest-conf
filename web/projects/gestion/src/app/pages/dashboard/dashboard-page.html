@@ -281,6 +281,11 @@
                 'gestion.dashboard.organisation.overdue' | translate: { count: tasks.overdue }
               }}</span>
             }
+            @if (tasks.dueSoon) {
+              <span>{{
+                'gestion.dashboard.organisation.dueSoon' | translate: { count: tasks.dueSoon }
+              }}</span>
+            }
           </li>
         }
         @if (budget(); as figures) {
@@ -317,6 +322,23 @@
                 'gestion.dashboard.organisation.equipment' | translate: { count: counts.missing }
               }}</span>
             }
+          </li>
+        }
+        @if (banner() !== null) {
+          <li>
+            <a [routerLink]="['/editions', current.id, 'communication', 'annonces']">{{
+              banner()
+                ? ('gestion.dashboard.organisation.banner' | translate: { title: banner() })
+                : ('gestion.dashboard.organisation.noBanner' | translate)
+            }}</a>
+          </li>
+        }
+        @if (surveyRate(); as rate) {
+          <li>
+            <a [routerLink]="['/editions', current.id, 'communication', 'questionnaires']">{{
+              'gestion.dashboard.organisation.surveys'
+                | translate: { answered: rate.answered, invited: rate.invited }
+            }}</a>
           </li>
         }
         @if (placesToFill() !== null) {

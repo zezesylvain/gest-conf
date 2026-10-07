@@ -4,6 +4,7 @@ import { Edition, GcApiError, MeEdition } from '@gestconf/shared';
 import { useTestLanguage } from '@gestconf/shared/testing';
 
 import { CHAIR_EDITION, provideGestionTesting } from '../../../testing/gestion-testing';
+import { CommunicationApi } from '../../core/communication-api';
 import { EditionApi } from '../../core/edition-api';
 import { LogisticsApi } from '../../core/logistics-api';
 import { OrganisationApi } from '../../core/organisation-api';
@@ -23,6 +24,8 @@ const ORGANISER: MeEdition = {
     'sponsors.read',
     'logistics.read',
     'volunteers.plan',
+    'communications.send',
+    'surveys.manage',
   ],
 };
 
@@ -145,7 +148,7 @@ describe('Rapports (plan L8, N13)', () => {
 });
 
 describe('Tableau de bord : organisation (plan L8, N16)', () => {
-  it('mes tâches et retards, soldes, partenariats, venues, places à pourvoir', async () => {
+  it('tâches, soldes, partenariats, venues, places, bandeau, questionnaires', async () => {
     const edition = {
       id: 3,
       code: 'GC27',
@@ -169,7 +172,7 @@ describe('Tableau de bord : organisation (plan L8, N16)', () => {
         useValue: {
           tasks: vi.fn().mockResolvedValue([
             { status: 'todo', overdue: true },
-            { status: 'doing', overdue: false },
+            { status: 'doing', overdue: false, due_date: '2000-01-02' },
             { status: 'done', overdue: false },
           ]),
           budget: vi.fn().mockResolvedValue({
@@ -186,6 +189,25 @@ describe('Tableau de bord : organisation (plan L8, N16)', () => {
             totals: { currency: 'XOF', agreed: '5000000.00', received: '1000000.00' },
             sponsors: [],
           }),
+        },
+      },
+      {
+        provide: CommunicationApi,
+        useValue: {
+          announcements: vi.fn().mockResolvedValue([
+            {
+              status: 'published',
+              on_banner: true,
+              title_fr: 'Changement de salle',
+              banner_starts_local: '2020-01-01T00:00',
+              banner_ends_local: '2999-01-01T00:00',
+            },
+            { status: 'draft', on_banner: true, title_fr: 'Brouillon' },
+          ]),
+          surveys: vi.fn().mockResolvedValue([
+            { status: 'published', stats: { answered: 12, invited: 40 } },
+            { status: 'draft', stats: { answered: 0, invited: 0 } },
+          ]),
         },
       },
       {
@@ -212,6 +234,9 @@ describe('Tableau de bord : organisation (plan L8, N16)', () => {
     expect(text(root)).toContain("1 venue(s) d'intervenant à organiser");
     expect(text(root)).toContain('1 avec un équipement manquant en salle');
     expect(text(root)).toContain('3 place(s) de bénévole à pourvoir');
+    expect(text(root)).toContain('1 à échéance sous 7 jours');
+    expect(text(root)).toContain('Bandeau affiché : « Changement de salle »');
+    expect(text(root)).toContain('Questionnaires : 12 réponse(s) sur 40 invitation(s)');
     expect(root.querySelector('a[href="/editions/3/logistique/benevoles"]')).not.toBeNull();
   });
 });
