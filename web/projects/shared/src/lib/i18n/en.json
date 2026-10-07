@@ -83,7 +83,10 @@
       "program_conflicts": "The programme has conflicts: fix them before publishing.",
       "program_unchanged": "Nothing has changed since the last publication.",
       "signing_unavailable": "Electronic signing is unavailable: check the signing certificate and its configuration.",
-      "signatory_missing": "No signatory is designated (or their signature is incomplete): nothing can be issued."
+      "signatory_missing": "No signatory is designated (or their signature is incomplete): nothing can be issued.",
+      "shift_overlap": "This volunteer already has a shift at that time: one person's shifts cannot overlap.",
+      "banner_overlap": "Another announcement already occupies the banner during this period: change the dates.",
+      "unsubscribe_link_invalid": "This unsubscribe link is not valid."
     },
     "form": {
       "errorSummary": "The form contains errors:",
