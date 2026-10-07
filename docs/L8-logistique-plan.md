@@ -768,3 +768,94 @@ anonymisé ; registre à jour (`communications.announcements`).
   publiques à jour ;
 - `ruff`, `locale/check.sh`, schéma validé sous MariaDB, client TypeScript régénéré,
   vérification des types des trois projets du front.
+
+## 17. Bilan de L8.6 (7 octobre 2026)
+
+**Questionnaires** (N12 ; `apps/surveys`) :
+
+- questionnaire **global** de l'édition ou d'une **session** (la portée et la session sont
+  vérifiées par contrainte) ; titres et introduction FR et EN ;
+- questions : note de 1 à 5, choix unique, choix multiples (2 à 12 choix numérotés par le
+  serveur), texte libre de 1 000 caractères au plus ; obligatoires ou non ;
+- **modèle par défaut** proposé à la création : organisation, programme, lieu, accueil,
+  recommandation (notes) et commentaire (texte) ;
+- ouverture et clôture **saisies en heure locale de l'édition** (D13) ; publication sous
+  **réauthentification** (elle programme les invitations de toutes les personnes
+  présentes) ; une fois publié, seuls les titres, l'introduction et la clôture changent ;
+- questions **verrouillées** dès la première réponse (`survey_locked`) : on **duplique** le
+  questionnaire, comme une grille (RG-05).
+
+**Invitations et relance** (N12, N17) :
+
+- invités : les personnes **présentes** (pointage non annulé de L7, n'importe où pour un
+  questionnaire global, à l'entrée de la session pour un questionnaire de session) ;
+- deux tâches datées de `run_jobs`, sans ligne de cron nouvelle : `surveys.invite` à
+  l'**ouverture** (cloche `survey_invitation` et e-mail), puis `surveys.remind` ;
+- **précision de N12** : l'**unique relance** part **à mi-chemin** de l'ouverture et de la
+  clôture, par e-mail, aux seules personnes qui n'ont pas répondu ;
+- par lots de 200, idempotents (une invitation par personne ; clés d'e-mail
+  `survey:<id>:invite:<compte>` et `survey:<id>:remind:<compte>`) ;
+- e-mails **groupés** (marque `bulk` de L8.5 : moitié du plafond horaire, étalés) ; ce sont
+  des e-mails de service, liés à la présence de la personne : le désabonnement des
+  annonces ne les arrête pas ;
+- l'e-mail annonce l'anonymat et prévient que les commentaires libres seront lus par le
+  comité.
+
+**Anonymat (RG-21)** :
+
+- la réponse (`SurveyResponse`) n'a **aucune clé** vers un compte ni vers l'invitation ;
+  sa clé primaire est un **UUID aléatoire**, de sorte que l'ordre d'insertion ne se lit
+  pas dans la table ;
+- **précision de N12, plus stricte que le plan** : la réponse ne porte **aucune date**. Le
+  plan prévoyait un jour de réponse sur la réponse comme sur l'invitation ; or la seule
+  personne qui a répondu un jour donné aurait été retrouvée en rapprochant les deux jours.
+  Seule l'invitation garde le **jour** de la réponse, sans horodatage précis (le modèle
+  n'hérite pas de `TimeStampedModel`) ;
+- l'invitation est marquée « répondu » dans la **même transaction** que l'enregistrement
+  de la réponse ; verrouillage dans le même ordre que la relance (questionnaire, puis
+  invitation), sans interblocage ;
+- **rien au journal** ne relie une personne à une réponse (test : aucune entrée
+  `survey.answer…`, aucun identifiant de réponse) ; une réponse par personne
+  (`survey_answered`) ; hors fenêtre ou sans invitation : `survey_not_open` ;
+- résultats agrégés **à partir de 5 réponses** (`survey_threshold` en dessous, à
+  l'export) : moyenne en `Decimal` et répartition des notes, décompte par choix, nombre
+  de textes ;
+- export CSV ou XLSX journalisé : agrégats, puis textes libres dans un **ordre
+  aléatoire** (`random.SystemRandom`).
+
+**Intégrité** : `check_integrity` vérifie qu'un questionnaire a autant de réponses que
+d'invitations marquées « répondu », et qu'un brouillon n'en a aucune (N17).
+
+**Données personnelles** : les invitations entrent dans l'export « Mes données » (jour
+d'invitation, de relance, de réponse) ; les réponses, liées à personne, n'y figurent pas
+(test) ; l'anonymisation laisse les invitations rattachées au compte anonymisé.
+
+**API** :
+
+- gestion (`surveys.manage`, 2FA) : `…/surveys` (liste avec invités, réponses et seuil,
+  création), `…/surveys/{id}` (lecture, modification, suppression d'un brouillon),
+  `…/publish`, `…/duplicate`, `…/questions` et `…/questions/{id}`, `…/results`,
+  `…/export?file_format=csv|xlsx` ;
+- compte : `GET /v1/me/surveys`, `GET` et `POST /v1/me/surveys/{id}` (404 pour qui n'est
+  pas invité). Les écrans (gestion, `/compte/questionnaires/{id}` du portail) arrivent en
+  L8.8 et L8.9.
+
+**Défauts trouvés et corrigés pendant l'étape** :
+
+- la CI de L8.4 a échoué sur le test des traductions communes du front, qui exige un
+  libellé FR et EN pour chaque code d'erreur de l'API (`shift_overlap`) : correctif poussé
+  à part, et les tests des trois projets du front sont désormais lancés avant chaque
+  envoi ; les codes de L8.5 et de L8.6 sont traduits ;
+- le test qui fige les limites de débit ignorait les deux portées de L8.5 : mis à jour.
+
+**Tests** :
+
+- `surveys` : 9 tests (modèle par défaut et tâches programmées ; invitations par cloche et
+  e-mail, une seule relance ; questionnaire de session ; **RG-21** : colonnes de la table
+  des réponses, UUID, journal, réponse unique ; validation et verrouillage, duplication ;
+  questionnaire fermé ; seuil de 5 et textes mélangés ; API de la personne et du comité ;
+  export des données) ;
+- matrice des droits : 12 cas de questionnaires ; sous MariaDB, `surveys`,
+  `communications`, le registre et les cas de la matrice réussissent ;
+- `ruff`, `locale/check.sh`, schéma validé sous MariaDB, client TypeScript régénéré,
+  vérification des types et tests des trois projets du front.

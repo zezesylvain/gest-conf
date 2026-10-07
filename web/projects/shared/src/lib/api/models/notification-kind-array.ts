@@ -18,5 +18,6 @@ export const NOTIFICATION_KIND: NotificationKind[] = [
   'task_assigned',
   'shift_assigned',
   'shift_removed',
-  'announcement'
+  'announcement',
+  'survey_invitation'
 ];

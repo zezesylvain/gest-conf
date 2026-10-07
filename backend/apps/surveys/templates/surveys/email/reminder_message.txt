@@ -1,0 +1,7 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate %}Bonjour,
+
+Vous n'avez pas encore répondu au questionnaire « {{ survey_title }} » de {{ edition_title }}. Il reste ouvert jusqu'au {{ closes }} (heure de l'édition) : {{ link }}
+
+Vos réponses sont anonymes. Ce rappel est le seul.{% endblocktranslate %}
+
+{% include "account/email/_signature.txt" %}{% endautoescape %}

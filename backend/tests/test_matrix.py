@@ -1710,6 +1710,78 @@ CASES = [
         200,
         "/v1/manage/editions/{e}/announcements/{sending_announcement}/cancel",
     ),
+    # --- Questionnaires de satisfaction (plan L8, N12) -------------------------------------
+    Case("manage-surveys", "GET", SVM, 200, "/v1/manage/editions/{e}/surveys"),
+    Case(
+        "manage-surveys",
+        "POST",
+        SVM,
+        201,
+        "/v1/manage/editions/{e}/surveys",
+        {"title_fr": "Votre avis"},
+    ),
+    Case("manage-survey", "GET", SVM, 200, "/v1/manage/editions/{e}/surveys/{survey}"),
+    Case(
+        "manage-survey",
+        "PATCH",
+        SVM,
+        200,
+        "/v1/manage/editions/{e}/surveys/{survey}",
+        {"title_fr": "Votre avis sur la conférence"},
+    ),
+    Case("manage-survey", "DELETE", SVM, 204, "/v1/manage/editions/{e}/surveys/{survey}"),
+    Case(
+        "manage-survey-publish",
+        "POST",
+        SVM,
+        200,
+        "/v1/manage/editions/{e}/surveys/{survey}/publish",
+        recent_auth=True,
+    ),
+    Case(
+        "manage-survey-duplicate",
+        "POST",
+        SVM,
+        201,
+        "/v1/manage/editions/{e}/surveys/{published_survey}/duplicate",
+    ),
+    Case(
+        "manage-survey-questions",
+        "POST",
+        SVM,
+        201,
+        "/v1/manage/editions/{e}/surveys/{survey}/questions",
+        {"kind": "text", "label_fr": "Une remarque ?"},
+    ),
+    Case(
+        "manage-survey-question",
+        "PATCH",
+        SVM,
+        200,
+        "/v1/manage/editions/{e}/surveys/{survey}/questions/{survey_question}",
+        {"required": True},
+    ),
+    Case(
+        "manage-survey-question",
+        "DELETE",
+        SVM,
+        204,
+        "/v1/manage/editions/{e}/surveys/{survey}/questions/{survey_question}",
+    ),
+    Case(
+        "manage-survey-results",
+        "GET",
+        SVM,
+        200,
+        "/v1/manage/editions/{e}/surveys/{published_survey}/results",
+    ),
+    Case(
+        "manage-survey-export",
+        "GET",
+        SVM,
+        200,
+        "/v1/manage/editions/{e}/surveys/{published_survey}/export",
+    ),
     Case("manage-portal-poster", "GET", R, 200, "/v1/manage/editions/{e}/portal/poster"),
     Case(
         "manage-portal-poster",
@@ -1938,8 +2010,27 @@ def _organisation_objects(edition, users) -> dict:
         )
     for key in ("published_announcement", "sending_announcement"):
         announcements.publish(found[key], capabilities=capabilities, actor=command)
+    from apps.surveys import services as surveys
+    from apps.surveys.models import SurveyResponse
+
+    soon = (timezone.now() + dt.timedelta(days=1)).astimezone(dt.UTC).replace(tzinfo=None)
+    survey_dates = {"opens_local": soon, "closes_local": soon + dt.timedelta(days=9)}
+    survey = surveys.create_survey(
+        edition, {"title_fr": "Votre avis", **survey_dates}, actor=command
+    )
+    published_survey = surveys.create_survey(
+        edition, {"title_fr": "Bilan", **survey_dates}, actor=command
+    )
+    surveys.publish(published_survey, actor=command)
+    # Cinq réponses : au-delà du seuil, les résultats et l'export sont servis (N12).
+    SurveyResponse.objects.bulk_create(
+        SurveyResponse(survey=published_survey, answers={}) for _index in range(5)
+    )
     return {
         **{key: announcement.pk for key, announcement in found.items()},
+        "survey": survey.pk,
+        "survey_question": survey.questions.first().pk,
+        "published_survey": published_survey.pk,
         "speaker": speaker.pk,
         "meal_day": day.isoformat(),
         "meal": meal.pk,

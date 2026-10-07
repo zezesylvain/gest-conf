@@ -60,5 +60,9 @@ export const ERROR_CODE: ErrorCode[] = [
   'signatory_missing',
   'shift_overlap',
   'banner_overlap',
-  'unsubscribe_link_invalid'
+  'unsubscribe_link_invalid',
+  'survey_locked',
+  'survey_not_open',
+  'survey_answered',
+  'survey_threshold'
 ];

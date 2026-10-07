@@ -1,0 +1,9 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate %}Bonjour,
+
+Merci d'avoir participé à {{ edition_title }}. Le comité d'organisation vous invite à donner votre avis : « {{ survey_title }} ».
+
+Le questionnaire est ouvert jusqu'au {{ closes }} (heure de l'édition) : {{ link }}
+
+Vos réponses sont anonymes : elles sont enregistrées sans lien avec votre compte. Les commentaires libres seront lus par le comité.{% endblocktranslate %}
+
+{% include "account/email/_signature.txt" %}{% endautoescape %}

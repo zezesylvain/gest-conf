@@ -86,7 +86,11 @@
       "signatory_missing": "No signatory is designated (or their signature is incomplete): nothing can be issued.",
       "shift_overlap": "This volunteer already has a shift at that time: one person's shifts cannot overlap.",
       "banner_overlap": "Another announcement already occupies the banner during this period: change the dates.",
-      "unsubscribe_link_invalid": "This unsubscribe link is not valid."
+      "unsubscribe_link_invalid": "This unsubscribe link is not valid.",
+      "survey_locked": "Answers have been received: the questions can no longer change. Duplicate the survey.",
+      "survey_not_open": "This survey is not open, or you are not invited to it.",
+      "survey_answered": "You have already answered this survey.",
+      "survey_threshold": "Fewer than 5 answers: results stay hidden to preserve anonymity."
     },
     "form": {
       "errorSummary": "The form contains errors:",

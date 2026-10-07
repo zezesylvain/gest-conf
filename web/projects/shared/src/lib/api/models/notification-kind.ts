@@ -15,6 +15,7 @@
  * * `shift_assigned` - poste de bénévolat confié
  * * `shift_removed` - poste de bénévolat retiré
  * * `announcement` - annonce
+ * * `survey_invitation` - questionnaire de satisfaction
  */
-export type NotificationKind = 'submission_received' | 'submission_withdrawn' | 'coauthor_added' | 'extension_granted' | 'draft_reminder' | 'screening_rejected' | 'decision_published' | 'final_version_received' | 'task_assigned' | 'shift_assigned' | 'shift_removed' | 'announcement';
+export type NotificationKind = 'submission_received' | 'submission_withdrawn' | 'coauthor_added' | 'extension_granted' | 'draft_reminder' | 'screening_rejected' | 'decision_published' | 'final_version_received' | 'task_assigned' | 'shift_assigned' | 'shift_removed' | 'announcement' | 'survey_invitation';
 

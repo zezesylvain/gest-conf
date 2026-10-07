@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gestconf-backend\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-07 02:24+0000\n"
+"POT-Creation-Date: 2026-10-07 02:38+0000\n"
 "PO-Revision-Date: 2026-10-05 11:00+0000\n"
 "Last-Translator: GEST-CONF\n"
 "Language-Team: GEST-CONF\n"
@@ -152,6 +152,7 @@ msgstr "command"
 #: apps/accounts/models.py:184 apps/core/models.py:205
 #: apps/logistics/models.py:135 apps/logistics/models.py:426
 #: apps/portal/models.py:58 apps/program/models.py:112
+#: apps/surveys/models.py:116
 msgid "type"
 msgstr "kind"
 
@@ -198,8 +199,8 @@ msgid "système"
 msgstr "system"
 
 #: apps/accounts/models.py:255 apps/accounts/models.py:345
-#: apps/communications/models.py:47 apps/communications/models.py:162
-#: apps/communications/models.py:269 apps/conferences/models.py:175
+#: apps/communications/models.py:47 apps/communications/models.py:163
+#: apps/communications/models.py:270 apps/conferences/models.py:175
 #: apps/conferences/models.py:207 apps/conferences/models.py:251
 #: apps/conferences/models.py:338 apps/core/models.py:98
 #: apps/core/models.py:282 apps/events/models.py:30 apps/events/models.py:98
@@ -217,7 +218,7 @@ msgstr "system"
 #: apps/registrations/models.py:313 apps/registrations/models.py:396
 #: apps/reviews/models.py:32 apps/reviews/models.py:126
 #: apps/sponsors/models.py:32 apps/sponsors/models.py:83
-#: apps/submissions/models.py:51
+#: apps/submissions/models.py:51 apps/surveys/models.py:47
 msgid "édition"
 msgstr "edition"
 
@@ -231,12 +232,13 @@ msgid "fonction au CO"
 msgstr "organising committee function"
 
 #: apps/accounts/models.py:265 apps/accounts/models.py:356
-#: apps/communications/models.py:62 apps/communications/models.py:184
+#: apps/communications/models.py:62 apps/communications/models.py:185
 #: apps/conferences/models.py:133 apps/core/models.py:208
 #: apps/events/models.py:458 apps/logistics/models.py:52
 #: apps/payments/models.py:136 apps/registrations/models.py:413
 #: apps/reviews/models.py:178 apps/reviews/models.py:300
 #: apps/sponsors/models.py:115 apps/submissions/models.py:89
+#: apps/surveys/models.py:69
 msgid "statut"
 msgstr "status"
 
@@ -319,7 +321,7 @@ msgstr "sends"
 msgid "dernier envoi"
 msgstr "last sent at"
 
-#: apps/accounts/models.py:377
+#: apps/accounts/models.py:377 apps/surveys/models.py:149
 msgid "répondu le"
 msgstr "answered at"
 
@@ -454,6 +456,7 @@ msgstr "Volunteers"
 #: apps/program/services/planning.py:534 apps/program/services/settings.py:38
 #: apps/registrations/services/pricing.py:389
 #: apps/registrations/services/settings.py:120 apps/sponsors/services.py:106
+#: apps/surveys/services.py:115 apps/surveys/services.py:326
 msgid "Champ non modifiable."
 msgstr "This field cannot be changed."
 
@@ -1045,13 +1048,14 @@ msgstr "Type exactly the email address of your account."
 
 #: apps/communications/announcements.py:112
 #: apps/logistics/services/shifts.py:59 apps/logistics/services/visits.py:79
-#: apps/sponsors/services.py:89
+#: apps/sponsors/services.py:89 apps/surveys/services.py:106
+#: apps/surveys/services.py:685
 #, python-format
 msgid "%(limit)s caractères au plus."
 msgstr "%(limit)s characters at most."
 
 #: apps/communications/announcements.py:115 apps/logistics/services/tasks.py:78
-#: apps/submissions/services.py:105
+#: apps/submissions/services.py:105 apps/surveys/services.py:127
 msgid "Titre obligatoire."
 msgstr "Title required."
 
@@ -1063,6 +1067,7 @@ msgstr "Text too long."
 
 #: apps/communications/announcements.py:137
 #: apps/logistics/services/shifts.py:67 apps/logistics/services/visits.py:101
+#: apps/surveys/services.py:148
 msgid "Date et heure attendues."
 msgstr "A date and time are expected."
 
@@ -1130,7 +1135,8 @@ msgstr "Unknown segment."
 #: apps/communications/announcements.py:489
 #, python-format
 msgid "Vous recevez ce message au titre de « %(segment)s » pour %(edition)s."
-msgstr "You are receiving this message as part of “%(segment)s” for %(edition)s."
+msgstr ""
+"You are receiving this message as part of “%(segment)s” for %(edition)s."
 
 #: apps/communications/announcements.py:496
 msgid "Essai : ce message n'a été envoyé qu'à vous."
@@ -1160,11 +1166,11 @@ msgstr "sent"
 msgid "en échec"
 msgstr "failed"
 
-#: apps/communications/models.py:23 apps/communications/models.py:149
+#: apps/communications/models.py:23 apps/communications/models.py:150
 msgid "annulé"
 msgstr "cancelled"
 
-#: apps/communications/models.py:36 apps/communications/models.py:239
+#: apps/communications/models.py:36 apps/communications/models.py:240
 msgid "destinataire"
 msgstr "recipient"
 
@@ -1278,191 +1284,198 @@ msgstr "volunteer shift assigned"
 msgid "poste de bénévolat retiré"
 msgstr "volunteer shift removed"
 
-#: apps/communications/models.py:105 apps/communications/models.py:210
-#: apps/communications/models.py:233
+#: apps/communications/models.py:105 apps/communications/models.py:211
+#: apps/communications/models.py:234
 msgid "annonce"
 msgstr "announcement"
 
-#: apps/communications/models.py:118 apps/communications/models.py:263
+#: apps/communications/models.py:106
+msgid "questionnaire de satisfaction"
+msgstr "satisfaction survey"
+
+#: apps/communications/models.py:119 apps/communications/models.py:264
 #: apps/submissions/models.py:137
 msgid "compte"
 msgstr "account"
 
-#: apps/communications/models.py:122 apps/core/models.py:288
+#: apps/communications/models.py:123 apps/core/models.py:288
 #: apps/events/models.py:281 apps/events/models.py:342
 #: apps/logistics/models.py:212 apps/payments/models.py:241
 #: apps/reviews/models.py:235 apps/submissions/models.py:177
 msgid "nature"
 msgstr "kind"
 
-#: apps/communications/models.py:123 apps/core/models.py:206
+#: apps/communications/models.py:124 apps/core/models.py:206
 msgid "données"
 msgstr "payload"
 
-#: apps/communications/models.py:124
+#: apps/communications/models.py:125
 msgid "lue le"
 msgstr "read on"
 
-#: apps/communications/models.py:127
+#: apps/communications/models.py:128
 msgid "notification"
 msgstr "notification"
 
-#: apps/communications/models.py:128
+#: apps/communications/models.py:129
 msgid "notifications"
 msgstr "notifications"
 
-#: apps/communications/models.py:137 apps/conferences/models.py:63
+#: apps/communications/models.py:138 apps/conferences/models.py:63
 #: apps/reviews/models.py:274 apps/submissions/models.py:24
+#: apps/surveys/models.py:29
 msgid "brouillon"
 msgstr "draft"
 
-#: apps/communications/models.py:138 apps/conferences/models.py:64
+#: apps/communications/models.py:139 apps/conferences/models.py:64
 #: apps/portal/models.py:83 apps/portal/models.py:142 apps/portal/models.py:229
 msgid "publiée"
 msgstr "published"
 
-#: apps/communications/models.py:139 apps/submissions/models.py:39
+#: apps/communications/models.py:140 apps/submissions/models.py:39
 msgid "retirée"
 msgstr "withdrawn"
 
-#: apps/communications/models.py:146
+#: apps/communications/models.py:147
 msgid "aucun envoi"
 msgstr "no sending"
 
-#: apps/communications/models.py:147
+#: apps/communications/models.py:148
 msgid "mise en file"
 msgstr "queuing"
 
-#: apps/communications/models.py:148
+#: apps/communications/models.py:149
 msgid "en file d'envoi"
 msgstr "queued for sending"
 
-#: apps/communications/models.py:166 apps/conferences/models.py:79
+#: apps/communications/models.py:167 apps/conferences/models.py:79
 #: apps/core/models.py:297 apps/events/models.py:282 apps/portal/models.py:59
 #: apps/portal/models.py:137 apps/program/models.py:113
+#: apps/surveys/models.py:62
 msgid "titre (FR)"
 msgstr "title (FR)"
 
-#: apps/communications/models.py:167 apps/conferences/models.py:80
+#: apps/communications/models.py:168 apps/conferences/models.py:80
 #: apps/core/models.py:298 apps/events/models.py:283 apps/portal/models.py:60
 #: apps/portal/models.py:138 apps/program/models.py:114
+#: apps/surveys/models.py:63
 msgid "titre (EN)"
 msgstr "title (EN)"
 
-#: apps/communications/models.py:168 apps/events/models.py:284
+#: apps/communications/models.py:169 apps/events/models.py:284
 msgid "texte (FR)"
 msgstr "text (FR)"
 
-#: apps/communications/models.py:169 apps/events/models.py:285
+#: apps/communications/models.py:170 apps/events/models.py:285
 msgid "texte (EN)"
 msgstr "text (EN)"
 
-#: apps/communications/models.py:170
+#: apps/communications/models.py:171
 msgid "actualités"
 msgstr "news"
 
-#: apps/communications/models.py:171
+#: apps/communications/models.py:172
 msgid "bandeau"
 msgstr "banner"
 
-#: apps/communications/models.py:172
+#: apps/communications/models.py:173
 msgid "cloche"
 msgstr "bell"
 
-#: apps/communications/models.py:173
+#: apps/communications/models.py:174
 msgid "e-mail"
 msgstr "email"
 
-#: apps/communications/models.py:174
+#: apps/communications/models.py:175
 msgid "segment"
 msgstr "segment"
 
-#: apps/communications/models.py:176
+#: apps/communications/models.py:177
 msgid "message du bandeau (FR)"
 msgstr "banner message (FR)"
 
-#: apps/communications/models.py:179
+#: apps/communications/models.py:180
 msgid "message du bandeau (EN)"
 msgstr "banner message (EN)"
 
-#: apps/communications/models.py:181
+#: apps/communications/models.py:182
 msgid "début du bandeau"
 msgstr "banner start"
 
-#: apps/communications/models.py:182
+#: apps/communications/models.py:183
 msgid "fin du bandeau"
 msgstr "banner end"
 
-#: apps/communications/models.py:189 apps/conferences/models.py:135
+#: apps/communications/models.py:190 apps/conferences/models.py:135
 #: apps/program/models.py:304 apps/reviews/models.py:494
 msgid "publiée le"
 msgstr "published at"
 
-#: apps/communications/models.py:190 apps/submissions/models.py:95
+#: apps/communications/models.py:191 apps/submissions/models.py:95
 msgid "retirée le"
 msgstr "withdrawn on"
 
-#: apps/communications/models.py:192
+#: apps/communications/models.py:193
 msgid "envoi"
 msgstr "sending"
 
-#: apps/communications/models.py:194
+#: apps/communications/models.py:195
 msgid "destinataires comptés"
 msgstr "recipients counted"
 
-#: apps/communications/models.py:195
+#: apps/communications/models.py:196
 msgid "destinataires traités"
 msgstr "recipients processed"
 
-#: apps/communications/models.py:196
+#: apps/communications/models.py:197
 msgid "e-mails mis en file"
 msgstr "emails queued"
 
-#: apps/communications/models.py:197
+#: apps/communications/models.py:198
 msgid "curseur de mise en file"
 msgstr "queuing cursor"
 
-#: apps/communications/models.py:198
+#: apps/communications/models.py:199
 msgid "envoi commencé le"
 msgstr "sending started at"
 
-#: apps/communications/models.py:199
+#: apps/communications/models.py:200
 msgid "envoi arrêté le"
 msgstr "sending stopped at"
 
-#: apps/communications/models.py:202 apps/logistics/models.py:71
+#: apps/communications/models.py:203 apps/logistics/models.py:71
 msgid "créée par"
 msgstr "created by"
 
-#: apps/communications/models.py:211
+#: apps/communications/models.py:212
 msgid "annonces"
 msgstr "announcements"
 
-#: apps/communications/models.py:243
+#: apps/communications/models.py:244
 msgid "e-mail mis en file"
 msgstr "email queued"
 
-#: apps/communications/models.py:244
+#: apps/communications/models.py:245
 msgid "traité le"
 msgstr "processed at"
 
-#: apps/communications/models.py:247
+#: apps/communications/models.py:248
 msgid "destinataire d'une annonce"
 msgstr "announcement recipient"
 
-#: apps/communications/models.py:248
+#: apps/communications/models.py:249
 msgid "destinataires des annonces"
 msgstr "announcement recipients"
 
-#: apps/communications/models.py:273
+#: apps/communications/models.py:274
 msgid "désabonné le"
 msgstr "unsubscribed at"
 
-#: apps/communications/models.py:276
+#: apps/communications/models.py:277
 msgid "désabonnement des annonces"
 msgstr "announcement opt-out"
 
-#: apps/communications/models.py:277
+#: apps/communications/models.py:278
 msgid "désabonnements des annonces"
 msgstr "announcement opt-outs"
 
@@ -1475,7 +1488,9 @@ msgstr "Stop receiving announcements for this edition"
 msgid ""
 "Les messages liés à votre compte, à vos soumissions ou à votre inscription "
 "restent envoyés."
-msgstr "Messages about your account, your submissions or your registration will still be sent."
+msgstr ""
+"Messages about your account, your submissions or your registration will "
+"still be sent."
 
 #: apps/communications/templates/communications/email/announcement_message.html:12
 #, python-format
@@ -1548,6 +1563,7 @@ msgid "édition courante"
 msgstr "current edition"
 
 #: apps/conferences/models.py:46 apps/conferences/models.py:70
+#: apps/surveys/models.py:24
 msgid "conférence"
 msgstr "conference"
 
@@ -1681,20 +1697,21 @@ msgid "facultatif"
 msgstr "optional"
 
 #: apps/conferences/models.py:243 apps/reviews/models.py:98
+#: apps/surveys/models.py:120
 msgid "obligatoire"
 msgstr "required"
 
 #: apps/conferences/models.py:256 apps/conferences/models.py:343
 #: apps/logistics/models.py:427 apps/portal/models.py:216
 #: apps/registrations/models.py:165 apps/registrations/models.py:245
-#: apps/reviews/models.py:87
+#: apps/reviews/models.py:87 apps/surveys/models.py:117
 msgid "libellé (FR)"
 msgstr "label (FR)"
 
 #: apps/conferences/models.py:257 apps/conferences/models.py:344
 #: apps/logistics/models.py:428 apps/portal/models.py:217
 #: apps/registrations/models.py:166 apps/registrations/models.py:246
-#: apps/reviews/models.py:88
+#: apps/reviews/models.py:88 apps/surveys/models.py:118
 msgid "libellé (EN)"
 msgstr "label (EN)"
 
@@ -1875,27 +1892,27 @@ msgstr "Unknown time zone."
 msgid "Échec de la vérification CSRF : rechargez la page puis réessayez."
 msgstr "CSRF verification failed: reload the page and try again."
 
-#: apps/core/errors.py:127
+#: apps/core/errors.py:133
 msgid "Opération refusée."
 msgstr "Operation refused."
 
-#: apps/core/errors.py:156
+#: apps/core/errors.py:162
 msgid "Opération impossible dans l'état actuel."
 msgstr "This operation is not possible in the current state."
 
-#: apps/core/errors.py:163
+#: apps/core/errors.py:169
 msgid "Action non autorisée."
 msgstr "Action not allowed."
 
-#: apps/core/errors.py:170 apps/core/exceptions.py:110
+#: apps/core/errors.py:176 apps/core/exceptions.py:110
 msgid "Données invalides."
 msgstr "Invalid data."
 
-#: apps/core/errors.py:177
+#: apps/core/errors.py:183
 msgid "Modifié entre-temps (autre onglet ?) : rechargez avant d'enregistrer."
 msgstr "Changed in the meantime (another tab?): reload before saving."
 
-#: apps/core/errors.py:188
+#: apps/core/errors.py:194
 msgid "Quota atteint."
 msgstr "Quota reached."
 
@@ -2108,7 +2125,7 @@ msgstr "width"
 msgid "hauteur"
 msgstr "height"
 
-#: apps/core/models.py:300
+#: apps/core/models.py:300 apps/surveys/models.py:30
 msgid "publié"
 msgstr "published"
 
@@ -2121,6 +2138,7 @@ msgid "fichiers publics"
 msgstr "public files"
 
 #: apps/core/models.py:334 apps/registrations/models.py:321
+#: apps/surveys/models.py:52
 msgid "portée"
 msgstr "scope"
 
@@ -2276,6 +2294,7 @@ msgstr "registration"
 
 #: apps/events/models.py:110 apps/program/models.py:149
 #: apps/program/models.py:172 apps/program/models.py:240
+#: apps/surveys/models.py:25 apps/surveys/models.py:56
 msgid "session"
 msgstr "session"
 
@@ -3018,6 +3037,7 @@ msgid "note"
 msgstr "score"
 
 #: apps/logistics/models.py:227 apps/portal/models.py:189
+#: apps/surveys/models.py:115
 msgid "position"
 msgstr "position"
 
@@ -3300,7 +3320,8 @@ msgstr "Amount too large."
 msgid "Trop de décimales pour la devise %(currency)s."
 msgstr "Too many decimals for the currency %(currency)s."
 
-#: apps/logistics/services/budget.py:184
+#: apps/logistics/services/budget.py:184 apps/surveys/services.py:361
+#: apps/surveys/services.py:386
 msgid "Libellé obligatoire."
 msgstr "Label required."
 
@@ -3315,6 +3336,7 @@ msgstr "2,000 characters at most."
 
 #: apps/logistics/services/budget.py:201 apps/logistics/services/meals.py:97
 #: apps/logistics/services/tasks.py:108 apps/sponsors/services.py:99
+#: apps/surveys/services.py:342
 msgid "Position positive ou nulle attendue."
 msgstr "Zero or positive position expected."
 
@@ -3548,7 +3570,7 @@ msgid "[%(site_name)s] Vos tâches à échéance"
 msgstr "[%(site_name)s] Your tasks due"
 
 #: apps/logistics/views.py:401 apps/logistics/views.py:773
-#: apps/sponsors/views.py:210
+#: apps/sponsors/views.py:210 apps/surveys/views.py:217
 msgid "csv ou xlsx attendu."
 msgstr "csv or xlsx expected."
 
@@ -4205,7 +4227,7 @@ msgstr "room"
 msgid "salles"
 msgstr "rooms"
 
-#: apps/program/models.py:88
+#: apps/program/models.py:88 apps/surveys/models.py:66
 msgid "ouverture"
 msgstr "opening"
 
@@ -4245,7 +4267,7 @@ msgstr "break"
 msgid "activité sociale"
 msgstr "social event"
 
-#: apps/program/models.py:99
+#: apps/program/models.py:99 apps/surveys/models.py:67
 msgid "clôture"
 msgstr "closing"
 
@@ -6792,3 +6814,260 @@ msgstr "Screening starts when the call (and any extensions) closes."
 #: apps/submissions/workflow.py:240
 msgid "Changement de statut non autorisé."
 msgstr "Status change not allowed."
+
+#: apps/surveys/models.py:34
+msgid "note de 1 à 5"
+msgstr "rating from 1 to 5"
+
+#: apps/surveys/models.py:35
+msgid "choix unique"
+msgstr "single choice"
+
+#: apps/surveys/models.py:36
+msgid "choix multiples"
+msgstr "multiple choice"
+
+#: apps/surveys/models.py:37
+msgid "texte libre"
+msgstr "free text"
+
+#: apps/surveys/models.py:64
+msgid "introduction (FR)"
+msgstr "introduction (FR)"
+
+#: apps/surveys/models.py:65
+msgid "introduction (EN)"
+msgstr "introduction (EN)"
+
+#: apps/surveys/models.py:71
+msgid "publié le"
+msgstr "published at"
+
+#: apps/surveys/models.py:72
+msgid "verrouillé le"
+msgstr "locked at"
+
+#: apps/surveys/models.py:73
+msgid "curseur des invitations"
+msgstr "invitation cursor"
+
+#: apps/surveys/models.py:74
+msgid "invitations envoyées"
+msgstr "invitations sent"
+
+#: apps/surveys/models.py:75
+msgid "curseur de la relance"
+msgstr "reminder cursor"
+
+#: apps/surveys/models.py:76
+msgid "relance envoyée"
+msgstr "reminder sent"
+
+#: apps/surveys/models.py:79
+msgid "créé par"
+msgstr "created by"
+
+#: apps/surveys/models.py:87 apps/surveys/models.py:113
+#: apps/surveys/models.py:137 apps/surveys/models.py:168
+msgid "questionnaire"
+msgstr "survey"
+
+#: apps/surveys/models.py:88
+msgid "questionnaires"
+msgstr "surveys"
+
+#: apps/surveys/models.py:119
+msgid "choix"
+msgstr "choices"
+
+#: apps/surveys/models.py:123
+msgid "question"
+msgstr "question"
+
+#: apps/surveys/models.py:124
+msgid "questions"
+msgstr "questions"
+
+#: apps/surveys/models.py:143
+msgid "personne invitée"
+msgstr "invited person"
+
+#: apps/surveys/models.py:147
+msgid "invitée le"
+msgstr "invited on"
+
+#: apps/surveys/models.py:148
+msgid "relancée le"
+msgstr "reminded on"
+
+#: apps/surveys/models.py:152
+msgid "invitation à un questionnaire"
+msgstr "survey invitation"
+
+#: apps/surveys/models.py:153
+msgid "invitations aux questionnaires"
+msgstr "survey invitations"
+
+#: apps/surveys/models.py:170
+msgid "réponses"
+msgstr "answers"
+
+#: apps/surveys/models.py:173
+msgid "réponse à un questionnaire"
+msgstr "survey response"
+
+#: apps/surveys/models.py:174
+msgid "réponses aux questionnaires"
+msgstr "survey responses"
+
+#: apps/surveys/services.py:131
+msgid "Portée inconnue."
+msgstr "Unknown scope."
+
+#: apps/surveys/services.py:140
+msgid "Session de l'édition attendue."
+msgstr "A session of the edition is expected."
+
+#: apps/surveys/services.py:162
+msgid "Choisissez la session."
+msgstr "Choose the session."
+
+#: apps/surveys/services.py:166
+msgid "Clôture après l'ouverture."
+msgstr "Closing must follow opening."
+
+#: apps/surveys/services.py:191
+msgid ""
+"Des réponses ont été reçues : les questions ne changent plus. Dupliquez le "
+"questionnaire."
+msgstr "Answers have been received: the questions can no longer change. Duplicate the survey."
+
+#: apps/surveys/services.py:232
+msgid "Questionnaire publié : non modifiable."
+msgstr "Published survey: cannot be changed."
+
+#: apps/surveys/services.py:258
+msgid "Seul un brouillon se supprime."
+msgstr "Only a draft can be deleted."
+
+#: apps/surveys/services.py:307
+msgid "De 2 à 12 choix."
+msgstr "From 2 to 12 choices."
+
+#: apps/surveys/services.py:312
+msgid "Choix mal formé."
+msgstr "Malformed choice."
+
+#: apps/surveys/services.py:317
+msgid "Chaque choix a un libellé (150 caractères au plus)."
+msgstr "Each choice has a label (150 characters at most)."
+
+#: apps/surveys/services.py:332
+msgid "Type de question inconnu."
+msgstr "Unknown question type."
+
+#: apps/surveys/services.py:424
+msgid "Questionnaire déjà publié."
+msgstr "Survey already published."
+
+#: apps/surveys/services.py:427
+msgid "Ouverture obligatoire."
+msgstr "Opening required."
+
+#: apps/surveys/services.py:429
+msgid "Clôture obligatoire."
+msgstr "Closing required."
+
+#: apps/surveys/services.py:431
+msgid "Clôture dans le passé."
+msgstr "Closing is in the past."
+
+#: apps/surveys/services.py:433
+msgid "Au moins une question."
+msgstr "At least one question."
+
+#: apps/surveys/services.py:655
+msgid "Question inconnue."
+msgstr "Unknown question."
+
+#: apps/surveys/services.py:663
+msgid "Réponse obligatoire."
+msgstr "Answer required."
+
+#: apps/surveys/services.py:668
+msgid "Note de 1 à 5."
+msgstr "Rating from 1 to 5."
+
+#: apps/surveys/services.py:673 apps/surveys/services.py:679
+msgid "Choix inconnu."
+msgstr "Unknown choice."
+
+#: apps/surveys/services.py:708
+msgid "Vous n'êtes pas invité à ce questionnaire."
+msgstr "You are not invited to this survey."
+
+#: apps/surveys/services.py:711
+msgid "Vous avez déjà répondu."
+msgstr "You have already answered."
+
+#: apps/surveys/services.py:713
+msgid "Ce questionnaire n'est pas ouvert."
+msgstr "This survey is not open."
+
+#: apps/surveys/services.py:795
+#, python-format
+msgid "Moins de %(threshold)s réponses : rien n'est exporté."
+msgstr "Fewer than %(threshold)s answers: nothing is exported."
+
+#: apps/surveys/services.py:798
+msgid "Question"
+msgstr "Question"
+
+#: apps/surveys/services.py:798
+msgid "Réponse"
+msgstr "Answer"
+
+#: apps/surveys/services.py:798
+msgid "Nombre"
+msgstr "Count"
+
+#: apps/surveys/services.py:798
+msgid "Moyenne"
+msgstr "Average"
+
+#: apps/surveys/templates/surveys/email/invitation_message.txt:1
+#, python-format
+msgid ""
+"Bonjour,\n"
+"\n"
+"Merci d'avoir participé à %(edition_title)s. Le comité d'organisation vous "
+"invite à donner votre avis : « %(survey_title)s ».\n"
+"\n"
+"Le questionnaire est ouvert jusqu'au %(closes)s (heure de l'édition) : "
+"%(link)s\n"
+"\n"
+"Vos réponses sont anonymes : elles sont enregistrées sans lien avec votre "
+"compte. Les commentaires libres seront lus par le comité."
+msgstr "Hello,\n\nThank you for attending %(edition_title)s. The organising committee invites you to give your opinion: “%(survey_title)s”.\n\nThe survey is open until %(closes)s (edition time): %(link)s\n\nYour answers are anonymous: they are recorded without any link to your account. Free comments will be read by the committee."
+
+#: apps/surveys/templates/surveys/email/invitation_subject.txt:1
+#, python-format
+msgid "[%(site_name)s] Votre avis sur la conférence"
+msgstr "[%(site_name)s] Your opinion on the conference"
+
+#: apps/surveys/templates/surveys/email/reminder_message.txt:1
+#, python-format
+msgid ""
+"Bonjour,\n"
+"\n"
+"Vous n'avez pas encore répondu au questionnaire « %(survey_title)s » de "
+"%(edition_title)s. Il reste ouvert jusqu'au %(closes)s (heure de "
+"l'édition) : %(link)s\n"
+"\n"
+"Vos réponses sont anonymes. Ce rappel est le seul."
+msgstr "Hello,\n\nYou have not yet answered the survey “%(survey_title)s” of %(edition_title)s. It remains open until %(closes)s (edition time): %(link)s\n\nYour answers are anonymous. This is the only reminder."
+
+#: apps/surveys/templates/surveys/email/reminder_subject.txt:1
+#, python-format
+msgid "[%(site_name)s] Rappel : votre avis sur la conférence"
+msgstr "[%(site_name)s] Reminder: your opinion on the conference"

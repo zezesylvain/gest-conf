@@ -113,6 +113,12 @@ class ErrorCode(models.TextChoices):
     # Une seule annonce au bandeau à la fois (N10) ; lien de désabonnement altéré (N11).
     BANNER_OVERLAP = "banner_overlap"
     UNSUBSCRIBE_LINK_INVALID = "unsubscribe_link_invalid"
+    # Questionnaires (N12) : questions verrouillées, questionnaire fermé ou réservé aux
+    # invités, réponse déjà donnée, moins de 5 réponses (pas de résultats).
+    SURVEY_LOCKED = "survey_locked"
+    SURVEY_NOT_OPEN = "survey_not_open"
+    SURVEY_ANSWERED = "survey_answered"
+    SURVEY_THRESHOLD = "survey_threshold"
 
 
 class DomainError(Exception):

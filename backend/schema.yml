@@ -7259,6 +7259,347 @@ paths:
               schema:
                 $ref: '#/components/schemas/SubmissionStats'
           description: ''
+  /v1/manage/editions/{edition_id}/surveys:
+    get:
+      operationId: manage_surveys_list
+      description: '``…/surveys`` : questionnaires, questions, publication, duplication,
+        résultats.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Survey'
+          description: ''
+    post:
+      operationId: manage_surveys_create
+      description: '``…/surveys`` : questionnaires, questions, publication, duplication,
+        résultats.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SurveyCreateRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SurveyDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/surveys/{survey_id}:
+    get:
+      operationId: manage_surveys_retrieve
+      description: '``…/surveys`` : questionnaires, questions, publication, duplication,
+        résultats.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: survey_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SurveyDetail'
+          description: ''
+    patch:
+      operationId: manage_surveys_update
+      description: '``…/surveys`` : questionnaires, questions, publication, duplication,
+        résultats.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: survey_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSurveyWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SurveyDetail'
+          description: ''
+    delete:
+      operationId: manage_surveys_destroy
+      description: '``…/surveys`` : questionnaires, questions, publication, duplication,
+        résultats.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: survey_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /v1/manage/editions/{edition_id}/surveys/{survey_id}/duplicate:
+    post:
+      operationId: manage_surveys_duplicate
+      description: '``…/surveys`` : questionnaires, questions, publication, duplication,
+        résultats.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: survey_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SurveyDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/surveys/{survey_id}/export:
+    get:
+      operationId: manage_surveys_export
+      description: Agrégats et textes libres mélangés (N12), journalisé.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: file_format
+        schema:
+          type: string
+          enum:
+          - csv
+          - xlsx
+      - in: path
+        name: survey_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  /v1/manage/editions/{edition_id}/surveys/{survey_id}/publish:
+    post:
+      operationId: manage_surveys_publish
+      description: '``…/surveys`` : questionnaires, questions, publication, duplication,
+        résultats.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: survey_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SurveyDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/surveys/{survey_id}/questions:
+    post:
+      operationId: manage_surveys_questions_create
+      description: '``…/surveys`` : questionnaires, questions, publication, duplication,
+        résultats.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: survey_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuestionWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Question'
+          description: ''
+  /v1/manage/editions/{edition_id}/surveys/{survey_id}/questions/{question_id}:
+    patch:
+      operationId: manage_surveys_questions_update
+      description: '``…/surveys`` : questionnaires, questions, publication, duplication,
+        résultats.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: question_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: survey_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedQuestionWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Question'
+          description: ''
+    delete:
+      operationId: manage_surveys_questions_destroy
+      description: '``…/surveys`` : questionnaires, questions, publication, duplication,
+        résultats.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: question_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: survey_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /v1/manage/editions/{edition_id}/surveys/{survey_id}/results:
+    get:
+      operationId: manage_surveys_results
+      description: '``…/surveys`` : questionnaires, questions, publication, duplication,
+        résultats.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: survey_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SurveyResults'
+          description: ''
   /v1/manage/editions/{edition_id}/tasks:
     get:
       operationId: manage_tasks_list
@@ -8217,6 +8558,75 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Profile'
+          description: ''
+  /v1/me/surveys:
+    get:
+      operationId: me_surveys
+      description: '``GET /v1/me/surveys`` : questionnaires auxquels la personne est
+        invitée.'
+      tags:
+      - me
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MySurvey'
+          description: ''
+  /v1/me/surveys/{survey_id}:
+    get:
+      operationId: me_survey_retrieve
+      description: |-
+        ``/v1/me/surveys/{id}`` : le questionnaire (invitée seulement, 404 sinon) et la
+        réponse, enregistrée sans lien avec la personne (RG-21).
+      parameters:
+      - in: path
+        name: survey_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - me
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MySurveyDetail'
+          description: ''
+    post:
+      operationId: me_survey_answer
+      description: |-
+        ``/v1/me/surveys/{id}`` : le questionnaire (invitée seulement, 404 sinon) et la
+        réponse, enregistrée sans lien avec la personne (RG-21).
+      parameters:
+      - in: path
+        name: survey_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - me
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnswerRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MySurvey'
           description: ''
   /v1/me/totp-qr:
     get:
@@ -9706,6 +10116,14 @@ components:
           maxLength: 254
       required:
       - confirmation
+    AnswerRequest:
+      type: object
+      properties:
+        answers:
+          type: object
+          additionalProperties: {}
+      required:
+      - answers
     ApiError:
       type: object
       description: 'Format de toute réponse d''erreur de l''API : {code, message,
@@ -11004,6 +11422,19 @@ components:
       - checked_in
       - confirmed
       - pending
+    Choice:
+      type: object
+      properties:
+        value:
+          type: string
+        label_fr:
+          type: string
+        label_en:
+          type: string
+      required:
+      - label_en
+      - label_fr
+      - value
     Confidentiality:
       type: object
       description: Paramètres de l'évaluation (gestion, §6.1 ; plan L4 H4, H6, H12).
@@ -11240,6 +11671,22 @@ components:
       required:
       - history
       - states
+    Count:
+      type: object
+      properties:
+        value:
+          type: string
+        label_fr:
+          type: string
+        label_en:
+          type: string
+        count:
+          type: integer
+      required:
+      - count
+      - label_en
+      - label_fr
+      - value
     CounterRequestRequest:
       type: object
       properties:
@@ -12110,6 +12557,10 @@ components:
       - shift_overlap
       - banner_overlap
       - unsubscribe_link_invalid
+      - survey_locked
+      - survey_not_open
+      - survey_answered
+      - survey_threshold
       type: string
       description: |-
         * `validation_error` - Validation Error
@@ -12166,6 +12617,10 @@ components:
         * `shift_overlap` - Shift Overlap
         * `banner_overlap` - Banner Overlap
         * `unsubscribe_link_invalid` - Unsubscribe Link Invalid
+        * `survey_locked` - Survey Locked
+        * `survey_not_open` - Survey Not Open
+        * `survey_answered` - Survey Answered
+        * `survey_threshold` - Survey Threshold
     Expertise:
       type: object
       description: Expertises du relecteur (H7) et thématiques proposées.
@@ -14221,6 +14676,81 @@ components:
       - status
       - total
       - zone
+    MySurvey:
+      type: object
+      properties:
+        id:
+          type: integer
+        edition_id:
+          type: integer
+        edition_code:
+          type: string
+        title_fr:
+          type: string
+        title_en:
+          type: string
+        session_title:
+          type: string
+        closes_at:
+          type: string
+          format: date-time
+        is_open:
+          type: boolean
+        answered:
+          type: boolean
+      required:
+      - answered
+      - closes_at
+      - edition_code
+      - edition_id
+      - id
+      - is_open
+      - session_title
+      - title_en
+      - title_fr
+    MySurveyDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+        edition_id:
+          type: integer
+        edition_code:
+          type: string
+        title_fr:
+          type: string
+        title_en:
+          type: string
+        session_title:
+          type: string
+        closes_at:
+          type: string
+          format: date-time
+        is_open:
+          type: boolean
+        answered:
+          type: boolean
+        intro_fr:
+          type: string
+        intro_en:
+          type: string
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Question'
+      required:
+      - answered
+      - closes_at
+      - edition_code
+      - edition_id
+      - id
+      - intro_en
+      - intro_fr
+      - is_open
+      - questions
+      - session_title
+      - title_en
+      - title_fr
     MyVisit:
       type: object
       description: '« Ma venue » : la note interne du CO n''y figure jamais (sérialiseur
@@ -14339,6 +14869,7 @@ components:
       - shift_assigned
       - shift_removed
       - announcement
+      - survey_invitation
       type: string
       description: |-
         * `submission_received` - soumission reçue
@@ -14353,6 +14884,7 @@ components:
         * `shift_assigned` - poste de bénévolat confié
         * `shift_removed` - poste de bénévolat retiré
         * `announcement` - annonce
+        * `survey_invitation` - questionnaire de satisfaction
     NotificationList:
       type: object
       properties:
@@ -15618,6 +16150,28 @@ components:
         published:
           type: boolean
           title: Publié
+    PatchedQuestionWriteRequest:
+      type: object
+      properties:
+        kind:
+          $ref: '#/components/schemas/QuestionKind'
+        label_fr:
+          type: string
+          minLength: 1
+          maxLength: 300
+        label_en:
+          type: string
+          maxLength: 300
+        choices:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+        required:
+          type: boolean
+        position:
+          type: integer
+          minimum: 0
     PatchedRegistrationSettingsRequest:
       type: object
       description: |-
@@ -16028,6 +16582,35 @@ components:
           additionalProperties:
             type: boolean
           description: Code → accepté ; la version courante du texte est enregistrée.
+    PatchedSurveyWriteRequest:
+      type: object
+      properties:
+        scope:
+          $ref: '#/components/schemas/SurveyScope'
+        session:
+          type: integer
+          nullable: true
+        title_fr:
+          type: string
+          minLength: 1
+          maxLength: 150
+        title_en:
+          type: string
+          maxLength: 150
+        intro_fr:
+          type: string
+          maxLength: 2000
+        intro_en:
+          type: string
+          maxLength: 2000
+        opens_local:
+          type: string
+          format: date-time
+          nullable: true
+        closes_local:
+          type: string
+          format: date-time
+          nullable: true
     PatchedTaskWriteRequest:
       type: object
       properties:
@@ -18126,6 +18709,97 @@ components:
       - session_title_fr
       - starts_at
       - version
+    Question:
+      type: object
+      properties:
+        id:
+          type: integer
+        position:
+          type: integer
+        kind:
+          $ref: '#/components/schemas/QuestionKind'
+        label_fr:
+          type: string
+        label_en:
+          type: string
+        choices:
+          type: array
+          items:
+            $ref: '#/components/schemas/Choice'
+        required:
+          type: boolean
+      required:
+      - choices
+      - id
+      - kind
+      - label_en
+      - label_fr
+      - position
+      - required
+    QuestionKind:
+      enum:
+      - rating
+      - single
+      - multiple
+      - text
+      type: string
+      description: |-
+        * `rating` - note de 1 à 5
+        * `single` - choix unique
+        * `multiple` - choix multiples
+        * `text` - texte libre
+    QuestionResult:
+      type: object
+      properties:
+        id:
+          type: integer
+        kind:
+          $ref: '#/components/schemas/QuestionKind'
+        label_fr:
+          type: string
+        label_en:
+          type: string
+        answers:
+          type: integer
+        average:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,2}(?:\.\d{0,2})?$
+          nullable: true
+        counts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Count'
+      required:
+      - answers
+      - average
+      - counts
+      - id
+      - kind
+      - label_en
+      - label_fr
+    QuestionWriteRequest:
+      type: object
+      properties:
+        kind:
+          $ref: '#/components/schemas/QuestionKind'
+        label_fr:
+          type: string
+          minLength: 1
+          maxLength: 300
+        label_en:
+          type: string
+          maxLength: 300
+        choices:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+        required:
+          type: boolean
+        position:
+          type: integer
+          minimum: 0
     Quote:
       type: object
       description: Prix calculé par le serveur, sans engagement (aucune place ni code
@@ -21376,6 +22050,194 @@ components:
           type: boolean
       required:
       - subscribed
+    Survey:
+      type: object
+      properties:
+        id:
+          type: integer
+        scope:
+          $ref: '#/components/schemas/SurveyScope'
+        session:
+          type: integer
+          nullable: true
+        session_title:
+          type: string
+        title_fr:
+          type: string
+        title_en:
+          type: string
+        intro_fr:
+          type: string
+        intro_en:
+          type: string
+        opens_local:
+          type: string
+          nullable: true
+        closes_local:
+          type: string
+          nullable: true
+        status:
+          $ref: '#/components/schemas/SurveyStatus'
+        is_open:
+          type: boolean
+        locked:
+          type: boolean
+        stats:
+          $ref: '#/components/schemas/SurveyStats'
+      required:
+      - closes_local
+      - id
+      - intro_en
+      - intro_fr
+      - is_open
+      - locked
+      - opens_local
+      - scope
+      - session
+      - session_title
+      - stats
+      - status
+      - title_en
+      - title_fr
+    SurveyCreateRequest:
+      type: object
+      properties:
+        scope:
+          $ref: '#/components/schemas/SurveyScope'
+        session:
+          type: integer
+          nullable: true
+        title_fr:
+          type: string
+          minLength: 1
+          maxLength: 150
+        title_en:
+          type: string
+          maxLength: 150
+        intro_fr:
+          type: string
+          maxLength: 2000
+        intro_en:
+          type: string
+          maxLength: 2000
+        opens_local:
+          type: string
+          format: date-time
+          nullable: true
+        closes_local:
+          type: string
+          format: date-time
+          nullable: true
+        default_questions:
+          type: boolean
+          default: true
+    SurveyDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+        scope:
+          $ref: '#/components/schemas/SurveyScope'
+        session:
+          type: integer
+          nullable: true
+        session_title:
+          type: string
+        title_fr:
+          type: string
+        title_en:
+          type: string
+        intro_fr:
+          type: string
+        intro_en:
+          type: string
+        opens_local:
+          type: string
+          nullable: true
+        closes_local:
+          type: string
+          nullable: true
+        status:
+          $ref: '#/components/schemas/SurveyStatus'
+        is_open:
+          type: boolean
+        locked:
+          type: boolean
+        stats:
+          $ref: '#/components/schemas/SurveyStats'
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Question'
+      required:
+      - closes_local
+      - id
+      - intro_en
+      - intro_fr
+      - is_open
+      - locked
+      - opens_local
+      - questions
+      - scope
+      - session
+      - session_title
+      - stats
+      - status
+      - title_en
+      - title_fr
+    SurveyResults:
+      type: object
+      properties:
+        invited:
+          type: integer
+        answered:
+          type: integer
+        responses:
+          type: integer
+        threshold:
+          type: integer
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestionResult'
+      required:
+      - answered
+      - invited
+      - questions
+      - responses
+      - threshold
+    SurveyScope:
+      enum:
+      - global
+      - session
+      type: string
+      description: |-
+        * `global` - conférence
+        * `session` - session
+    SurveyStats:
+      type: object
+      properties:
+        invited:
+          type: integer
+        answered:
+          type: integer
+        responses:
+          type: integer
+        threshold:
+          type: integer
+      required:
+      - answered
+      - invited
+      - responses
+      - threshold
+    SurveyStatus:
+      enum:
+      - draft
+      - published
+      type: string
+      description: |-
+        * `draft` - brouillon
+        * `published` - publié
     SyncItemRequest:
       type: object
       properties:
