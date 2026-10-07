@@ -2200,7 +2200,7 @@ Ces mises à jour seront livrées par une PR de documentation en L1.8, **après 
 
 ---
 
-## 16. Écarts constatés pendant l'implémentation (L1.0, L1.1)
+## 16. Écarts constatés pendant l'implémentation (L1.0 à L1.2)
 
 Consignés ici pour ne pas dériver en silence (CLAUDE.md). Les écarts marqués **à valider** attendent
 l'accord du commanditaire ; les autres sont des précisions sans effet sur les décisions D1 à D18.
@@ -2253,3 +2253,65 @@ Ils seront repris dans la PR de documentation de L1.8 (§15).
     `python manage.py createcachetable` après `migrate`, `requirements/compile.sh` (verrouillage
     avec empreintes), `locale/check.sh` (traductions de l'API) et `deploy/check-o2switch.sh`
     (vérifications de l'hébergement, lecture seule).
+
+### Étape L1.2 (audit, file, e-mails, cron)
+
+Arbitrages du coordinateur appliqués : commandes cron non auditées à chaque passage (trace =
+battement de cœur), commandes d'opérateur auditées ; purges de sécurité toujours actives,
+purges D15 simulées tant que `GESTCONF_RETENTION_ENFORCE` est faux ; `/health` `jobs`
+(`ok`, `late`, `unknown`) avec HTTP 200 et `status: degraded` si `late` ; aucune colonne
+`edition` avant L1.5.
+
+11. **§3.5, `CronHeartbeat`.** Trois colonnes s'ajoutent : `last_success_at` (le « dernier
+    succès » que lit `/health`, distinct de la dernière fin, qui peut être un échec),
+    `last_error` (la « dernière erreur » du battement de fin, §8.2 étape 6) et `summary` (JSON
+    de comptes, le « résumé » de `cleanup`, §8.4).
+12. **§3.6, `OutboxEmail`.** Un index sur `sent_at` s'ajoute, pour le comptage du plafond
+    horaire (§4.7). Le plafond est « souple » : le cron et la voie rapide, simultanés, peuvent
+    le dépasser de quelques unités. L'en-tête `Message-ID` est dérivé de l'identifiant **et**
+    de la date de création (`<gestconf.<id>.<horodatage>@<domaine de l'expéditeur>>`), pour
+    rester unique si la base est un jour recréée.
+13. **§7.3, catalogue d'actions.** `audit.network_redacted` s'ajoute (la méthode nommée
+    `redact_network_for_user`, « elle-même auditée » au §7.1, n'avait pas d'action). Les
+    commandes suivent la forme `command.<nom>` : `command.send_test_email`,
+    `command.outbox_retry`. Le catalogue est fermé (`AuditAction`) ; une action n'y entre
+    qu'avec le code qui l'émet, et un test de balayage exige une fabrique par action.
+14. **§4.10 et D17, opérateurs.** Les alertes partent vers `GESTCONF_OPERATOR_EMAILS`, et non
+    `ADMINS` : `ADMINS` alimente `mail_admins` et `AdminEmailHandler`, qui joignent le rapport
+    d'erreur complet (en-têtes, cookies, paramètres, variables locales) et ne sont pas
+    utilisés. Mécanisme retenu (précision attendue par D17) : un gestionnaire de journalisation
+    sur `django.request`, qui n'agit que sur une exception non rattrapée, envoie directement
+    par `EMAIL_BACKEND` (sans passer par la base) et tient son plafond (10 par heure) dans un
+    fichier verrouillé commun aux processus, avec repli en mémoire.
+15. **D10, production sans fournisseur.** Un fournisseur déclaré mais incomplet fait échouer le
+    chargement des réglages (aucun processus ne démarre). Sans fournisseur déclaré, les
+    réglages se chargent pour que `check`, `migrate` et `createcachetable` restent utilisables
+    pendant l'installation, mais l'application web refuse de démarrer (`config/wsgi.py`) et
+    tout envoi échoue explicitement. Vérifié dans anymail 15.2 : classes
+    `anymail.backends.brevo.EmailBackend` et `anymail.backends.mailjet.EmailBackend` ; extras
+    `brevo` et `mailjet` vides ; dépendances transitives `requests`, `urllib3`, `idna`,
+    `certifi`, `charset-normalizer` (ce dernier en roue manylinux2014 précompilée, sans
+    compilation sur l'hébergement) ; délai réseau `ANYMAIL["REQUESTS_TIMEOUT"]`, 30 s par
+    défaut, réglé à 10 s pour le cron et à 3 s (`GESTCONF_EMAIL_FAST_PATH_TIMEOUT`, passé à
+    `get_connection(timeout=…)`) pour la voie rapide et les alertes.
+16. **§8.4, purges de sécurité.** Celle des corps d'e-mails sensibles non envoyés tourne aussi
+    à chaque passage de `run_jobs`, avec celle du cache : une purge seulement quotidienne
+    laissait un lien jusqu'à 48 h en base, au lieu des 24 h de D15. Un e-mail sensible purgé
+    sans avoir été envoyé est annulé avec sa tâche.
+17. **§8.3, voie rapide.** Les codes de `FAST_PATH_TEMPLATES` suivent les préfixes d'allauth
+    (`account.email_confirmation_signup`, `account.account_already_exists`,
+    `account.email_confirmation`, `role.invitation`, `role.invitation_link`,
+    `account.email_added`, notifications `account.*` et `mfa.*`) ; ils sont à confirmer à la
+    création des gabarits (L1.3, L1.5, L1.6). `account.password_reset_key` et
+    `account.unknown_account` sont explicitement exclus. Le compteur par requête est une
+    `ContextVar` (les services ne reçoivent pas la requête), ouverte par
+    `RequestIdMiddleware` ; hors requête, il n'y a pas de voie rapide.
+18. **§9.4, commandes.** `outbox --retry` exige un motif (`--reason`) : il agit sur la
+    correspondance d'un tiers ; la consultation n'est pas auditée et n'affiche que des adresses
+    masquées. `send_test_email` accepte un motif facultatif. `check_integrity` reste prévue en
+    L1.8 ; `deploy/cron.sh`, l'adaptation du test de fumée (`jobs`) et les lignes de crontab
+    de `deploy/README.md` relèvent de l'étape de déploiement.
+19. **§3.1, conventions vérifiées par méta-tests.** Aucun `CharField`/`TextField` nullable hors
+    clé d'unicité nullable (`null=True` et `unique=True`) ; FK des applications du projet en
+    `RESTRICT`. ruff n'émet pas `DJ001` pour un champ `unique=True, blank=True` : le
+    `# noqa: DJ001` annoncé au §3.1 est donc inutile, et c'est le méta-test qui garde la règle.

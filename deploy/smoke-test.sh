@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Tests de fumée après déploiement (étude §11.4, étape 7).
 # Usage : deploy/smoke-test.sh https://conference.exemple.org [version_attendue]
+# Variables : SMOKE_CURL_OPTS (options de curl), SMOKE_REQUIRE_JOBS_OK=1 (exiger jobs: ok).
 # Vérifie notamment que les règles de repli SPA n'interceptent pas /api/.
 
 set -uo pipefail
@@ -72,6 +73,19 @@ health=$("${CURL[@]}" -D - -w '\n%{http_code}' "$BASE_URL/api/v1/health")
 check "API : /api/v1/health répond 200" "$([[ "${health##*$'\n'}" == "200" ]] && echo 1)"
 check "API : health -> base de données OK" "$(json_has "$health" database '"ok"' && echo 1)"
 check "API : health -> cache OK (table créée par createcachetable)" "$(json_has "$health" cache '"ok"' && echo 1)"
+# File de tâches (cron de run_jobs, plan L1 §8.4). « unknown » (aucun passage réussi encore
+# enregistré) est accepté juste après une installation ou avant la saisie des tâches cron ;
+# « late » (aucun succès depuis trois intervalles) est un échec : cron absent ou en panne.
+# SMOKE_REQUIRE_JOBS_OK=1 exige « ok » (jalon J-tech, cron actif depuis la clôture de L1.8).
+if [[ "${SMOKE_REQUIRE_JOBS_OK:-0}" == "1" ]]; then
+  check "API : health -> jobs ok (cron run_jobs actif)" "$(json_has "$health" jobs '"ok"' && echo 1)"
+else
+  check "API : health -> jobs ok ou unknown (late = cron run_jobs en retard)" \
+    "$(json_has "$health" jobs '"(ok|unknown)"' && echo 1)"
+  if json_has "$health" jobs '"unknown"'; then
+    printf '  NOTE    %s\n' "jobs: unknown, aucun passage réussi de run_jobs (tâches cron saisies ? deploy/README.md §5)"
+  fi
+fi
 check "API : en-tête X-Robots-Tag noindex sur /api/" "$(has_header "$health" x-robots-tag 'noindex' && echo 1)"
 if [[ "$BASE_URL" == https://* ]]; then
   check "API : Django voit la requête en HTTPS (secure=true)" "$(json_has "$health" secure true && echo 1)"

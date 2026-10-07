@@ -5,6 +5,8 @@ from collections.abc import Callable
 
 from django.http import HttpRequest, HttpResponse
 
+from apps.core.request_context import request_scope
+
 REQUEST_ID_HEADER = "X-Request-ID"
 ROBOTS_TAG_HEADER = "X-Robots-Tag"
 ROBOTS_TAG_VALUE = "noindex, nofollow"
@@ -17,6 +19,9 @@ class RequestIdMiddleware:
     pour corréler une plainte, une trace d'audit et les journaux du serveur.
     Un identifiant fourni par le client n'est jamais repris : il pourrait être
     forgé pour brouiller la corrélation.
+
+    Ouvre aussi le budget propre à la requête (``apps.core.request_context``) : le
+    plafond des envois d'e-mails par la voie rapide repart de zéro à chaque requête.
     """
 
     def __init__(self, get_response: Callable[[HttpRequest], HttpResponse]) -> None:
@@ -24,7 +29,8 @@ class RequestIdMiddleware:
 
     def __call__(self, request: HttpRequest) -> HttpResponse:
         request.request_id = uuid.uuid4().hex
-        response = self.get_response(request)
+        with request_scope():
+            response = self.get_response(request)
         response[REQUEST_ID_HEADER] = request.request_id
         return response
 

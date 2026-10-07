@@ -127,3 +127,52 @@ dans la fiche L1.0 (dans l'ordre : M02 ; M05 ; M05 ; V06 et V04 ; M10 ; M01) :
 - [ ] Version de MariaDB ≥ 10.5 ; installation de PyMySQL sans compilation.
 - [ ] Modules Apache `mod_rewrite` et `mod_headers` actifs (sinon en-têtes absents).
 - [ ] Fréquence minimale du cron (pour la future commande `run_jobs`).
+
+## 5. Tâches planifiées (cron)
+
+Pas de Celery ni de Redis : les tâches asynchrones (envoi des e-mails, purges) sont des lignes
+de la table `core_job`, exécutées par `manage.py run_jobs`, que lance le cron de cPanel
+(règle n° 9 de `CLAUDE.md`, plan L1 §8.4).
+
+### Lignes à saisir dans cPanel (« Tâches Cron »)
+
+```text
+*/5 * * * *  ~/gestconf-app/deploy/cron.sh run_jobs --max-seconds 240
+17 3 * * *   ~/gestconf-app/deploy/cron.sh cleanup
+```
+
+- Toutes les 5 minutes : choisir 1 minute si o2switch le permet (contrôle M03 de la fiche L1.0),
+  et régler alors `GESTCONF_CRON_INTERVAL_SECONDS=60` dans le `.env`.
+- Minutes décalées (`17 3`) pour éviter les heures pleines. `check_integrity` s'ajoutera
+  en L1.8 (`47 3 * * *   ~/gestconf-app/deploy/cron.sh check_integrity`).
+- `deploy/cron.sh` n'accepte que les commandes de sa liste blanche (`run_jobs`, `cleanup`) et
+  refuse `--settings` et `--pythonpath`. Il impose `config.settings.prod`.
+
+### Venv, `.env` et journal
+
+- **Venv** : `deploy.sh` écrit à chaque déploiement, dans `~/gestconf-app/cron.conf` (hors
+  dépôt, droits 600), la clé `GESTCONF_VENV_ACTIVATE` : le venv où `pip` vient d'installer les
+  dépendances. Sans ce fichier, `cron.sh` prend le seul venv trouvé sous
+  `~/virtualenv/gestconf-app/<version>/` et refuse de choisir s'il y en a plusieurs.
+- **`.env`** : celui que lisent les réglages Django (`~/gestconf-app/.env`). `cron.sh` vérifie
+  qu'il est lisible mais ne l'interprète jamais.
+- **Journal** : `~/gestconf-app/logs/cron.log`, une ligne par message, préfixée par l'heure UTC,
+  la commande et le PID ; rotation simple au-delà de 1 Mio (`cron.log.1`). En cas d'échec,
+  `cron.sh` écrit une seule ligne sur la sortie d'erreur, que cPanel envoie à l'adresse
+  « E-mail du cron ».
+
+### Vérifier que le cron tourne
+
+- `GET /api/v1/health` : `jobs` vaut `ok` si `run_jobs` a réussi depuis moins de trois
+  intervalles, `unknown` avant son premier passage, `late` sinon (`status` devient `degraded`,
+  toujours en HTTP 200 : un cron en retard ne met pas le site en panne).
+- Le battement de cœur de chaque commande est enregistré dans la table `core_cronheartbeat`.
+
+### Jalon « J-tech » (critère de fin de l'étape L1.2)
+
+1. Renseigner le fournisseur d'e-mails dans le `.env` (`GESTCONF_EMAIL_PROVIDER`, sa clé,
+   `DEFAULT_FROM_EMAIL`, voir `backend/.env.example`), puis déployer.
+2. En SSH, dans le venv : `python manage.py send_test_email --to <votre adresse> --reason "J-tech"`.
+3. Au passage suivant du cron, l'e-mail part par le fournisseur : vérifier sa réception, et
+   des en-têtes SPF et DKIM valides (« Afficher l'original » dans le webmail).
+4. `/api/v1/health` renvoie `jobs: ok` ; `python manage.py outbox --status sent` liste l'envoi.

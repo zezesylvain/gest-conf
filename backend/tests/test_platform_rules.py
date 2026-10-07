@@ -102,6 +102,35 @@ def test_no_conditional_unique_constraint_in_models():
     assert offenders == []
 
 
+def test_nullable_char_fields_are_nullable_unique_keys_only():
+    """Plan L1 §3.1 : pas de CharField nullable (texte vide par défaut), sauf la « clé
+    d'unicité nullable » (null=True ET unique=True, NULL = pas d'unicité à appliquer)."""
+    from django.db.models import CharField, TextField
+
+    offenders = [
+        f"{model._meta.label}.{field.name}"
+        for model in django_apps.get_models()
+        if model._meta.app_config.name.startswith("apps.")
+        for field in model._meta.get_fields()
+        if isinstance(field, CharField | TextField) and field.null and not field.unique
+    ]
+    assert offenders == []
+
+
+def test_project_foreign_keys_are_restrict():
+    """Plan L1 §3.1 : FK en RESTRICT (pas de suppression en cascade de données tracées)."""
+    from django.db.models import RESTRICT, ForeignKey
+
+    offenders = [
+        f"{model._meta.label}.{field.name}"
+        for model in django_apps.get_models()
+        if model._meta.app_config.name.startswith("apps.")
+        for field in model._meta.get_fields()
+        if isinstance(field, ForeignKey) and field.remote_field.on_delete is not RESTRICT
+    ]
+    assert offenders == []
+
+
 FORBIDDEN_PERMISSION_NAMES = {
     "DjangoModelPermissions",
     "DjangoModelPermissionsOrAnonReadOnly",

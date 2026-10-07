@@ -20,6 +20,7 @@ def test_health_ok_without_authentication(client):
         "status": "ok",
         "database": "ok",
         "cache": "ok",
+        "jobs": "unknown",
         "secure": False,
         "release": "dev",
     }
@@ -38,6 +39,8 @@ def test_health_degraded_when_database_is_down(client, monkeypatch):
     assert response.json()["database"] == "error"
     # Le cache est en base : il ne peut pas fonctionner sans elle.
     assert response.json()["cache"] == "error"
+    # Battement de cœur illisible sans base : état inconnu, sans nouvelle requête.
+    assert response.json()["jobs"] == "unknown"
 
 
 def test_health_degraded_when_cache_is_down(client, monkeypatch):
@@ -48,6 +51,7 @@ def test_health_degraded_when_cache_is_down(client, monkeypatch):
         "status": "degraded",
         "database": "ok",
         "cache": "error",
+        "jobs": "unknown",
         "secure": False,
         "release": "dev",
     }
@@ -132,3 +136,72 @@ def test_cache_probe_failure_is_reported_until_it_expires(client, monkeypatch):
     assert client.get(reverse("core:health")).status_code == 503
     clock[0] += views.HEALTH_CACHE_PROBE_TTL
     assert client.get(reverse("core:health")).status_code == 200
+
+
+# --- Champ « jobs » : cron de la file de tâches (plan L1 §8.4, arbitrage L1.2) ------------
+
+
+def _heartbeat(last_success_at):
+    from apps.core.models import CronHeartbeat
+
+    CronHeartbeat.objects.update_or_create(
+        name="run_jobs", defaults={"last_success_at": last_success_at}
+    )
+
+
+def test_health_jobs_ok_after_recent_run(client):
+    from django.utils import timezone
+
+    _heartbeat(timezone.now())
+    response = client.get(reverse("core:health"))
+    assert response.status_code == 200
+    assert response.json()["jobs"] == "ok"
+    assert response.json()["status"] == "ok"
+
+
+def test_health_jobs_late_is_degraded_but_not_an_http_error(client, settings):
+    """Un cron en retard ne met pas le site en panne : 200 avec « degraded »."""
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    settings.GESTCONF_CRON_INTERVAL_SECONDS = 60
+    _heartbeat(timezone.now() - timedelta(seconds=3 * 60 + 5))
+    response = client.get(reverse("core:health"))
+    assert response.status_code == 200
+    assert response.json()["jobs"] == "late"
+    assert response.json()["status"] == "degraded"
+    assert response.json()["database"] == "ok"
+
+
+def test_health_jobs_late_threshold_is_three_intervals(settings):
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    from apps.core.heartbeat import jobs_status
+
+    settings.GESTCONF_CRON_INTERVAL_SECONDS = 300
+    now = timezone.now()
+    _heartbeat(now - timedelta(seconds=900))
+    assert jobs_status(now=now) == "ok"
+    assert jobs_status(now=now + timedelta(seconds=1)) == "late"
+
+
+def test_health_jobs_unknown_before_first_success(client):
+    """Aucun passage réussi (installation neuve) : « unknown », qui ne dégrade pas l'état."""
+    _heartbeat(None)
+    response = client.get(reverse("core:health"))
+    assert response.status_code == 200
+    assert response.json()["jobs"] == "unknown"
+    assert response.json()["status"] == "ok"
+
+
+def test_health_jobs_unknown_when_heartbeat_unreadable(monkeypatch):
+    from apps.core import heartbeat
+
+    def broken(*args, **kwargs):
+        raise DatabaseError("table absente")
+
+    monkeypatch.setattr(heartbeat.CronHeartbeat.objects, "filter", broken)
+    assert heartbeat.jobs_status() == "unknown"

@@ -16,3 +16,12 @@ DATABASES = {"default": database_from_env(default="sqlite://:memory:")}
 
 # Hachage rapide : les tests créent beaucoup d'utilisateurs.
 PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
+
+# E-mails conservés en mémoire (django.core.mail.outbox), jamais envoyés.
+EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
+DEFAULT_FROM_EMAIL = "GEST-CONF <no-reply@conference.exemple.org>"
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
+# Aucune alerte aux opérateurs par défaut ; les tests qui en ont besoin la configurent.
+GESTCONF_OPERATOR_EMAILS: list[str] = []
+GESTCONF_RETENTION_ENFORCE = False
+GESTCONF_CRON_INTERVAL_SECONDS = 300

@@ -18,8 +18,9 @@ from rest_framework.views import APIView
 from apps.core.authentication import CsrfFailed
 from apps.core.errors import ErrorCode
 from apps.core.exceptions import error_payload
+from apps.core.heartbeat import jobs_status
 from apps.core.http import client_ip
-from apps.core.serializers import HealthSerializer, HealthStatus, ServiceStatus
+from apps.core.serializers import HealthSerializer, HealthStatus, JobsStatus, ServiceStatus
 from apps.core.throttling import THROTTLE_CACHE_ALIAS
 
 logger = logging.getLogger(__name__)
@@ -97,7 +98,13 @@ def reset_cache_probe() -> None:
 
 
 class HealthView(APIView):
-    """Sonde de disponibilité (supervision externe et tests de fumée du déploiement)."""
+    """Sonde de disponibilité (supervision externe et tests de fumée du déploiement).
+
+    - 503 seulement si la base ou le cache est en panne : le site ne peut pas servir ;
+    - cron de la file en retard (``jobs: late``) : ``status: degraded`` mais 200, car le
+      site fonctionne (seuls les envois différés attendent) ;
+    - ``jobs: unknown`` (aucun passage encore, installation neuve) ne dégrade pas l'état.
+    """
 
     authentication_classes = ()
     permission_classes = (AllowAny,)
@@ -111,10 +118,14 @@ class HealthView(APIView):
         db_ok = database_is_available()
         cache_ok = db_ok and cache_probe_result()
         healthy = db_ok and cache_ok
+        jobs = jobs_status() if db_ok else JobsStatus.UNKNOWN
         payload = {
-            "status": HealthStatus.OK if healthy else HealthStatus.DEGRADED,
+            "status": HealthStatus.OK
+            if healthy and jobs != JobsStatus.LATE
+            else HealthStatus.DEGRADED,
             "database": ServiceStatus.OK if db_ok else ServiceStatus.ERROR,
             "cache": ServiceStatus.OK if cache_ok else ServiceStatus.ERROR,
+            "jobs": jobs,
             "secure": request.is_secure(),
             "release": settings.GESTCONF_RELEASE,
         }

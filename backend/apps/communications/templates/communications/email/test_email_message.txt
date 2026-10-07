@@ -1,0 +1,8 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate %}Bonjour,
+
+Ceci est un e-mail de test envoyé par l'équipe d'exploitation de {{ site_name }}, le {{ timestamp }}.
+
+S'il vous parvient, la chaîne d'envoi fonctionne : file de tâches, cron et fournisseur d'e-mails. Vous n'avez rien à faire.{% endblocktranslate %}
+
+— {{ site_name }}
+{% endautoescape %}

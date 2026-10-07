@@ -4,7 +4,9 @@
 # Prérequis côté serveur (une seule fois, voir deploy/README.md) :
 #   - application Python créée dans cPanel (« Setup Python App », URL /api) ;
 #   - fichier .env de production déposé dans le dossier de l'application ;
-#   - base MariaDB créée (utf8mb4).
+#   - base MariaDB créée (utf8mb4) ;
+#   - tâches cron saisies dans cPanel (deploy/README.md §5) : elles appellent
+#     ~/<application>/deploy/cron.sh, envoyé par ce script avec le code Django.
 #
 # Variables :
 #   DEPLOY_SSH            compte@serveur (obligatoire)
@@ -73,13 +75,18 @@ step "Envoi du code Django vers ~/$DEPLOY_APP_DIR (version $RELEASE)"
 # Seul le contenu versionné du commit déployé est envoyé (git archive) : aucun fichier
 # ignoré par git présent sur le poste (.coverage, htmlcov/, .env.local, db.sqlite3...)
 # ne peut partir sur le serveur.
-git -C "$ROOT" archive --format=tar "$RELEASE" backend | tar -x -C "$STAGING"
+git -C "$ROOT" archive --format=tar "$RELEASE" backend deploy/cron.sh | tar -x -C "$STAGING"
+# Point d'entrée des tâches cron (plan L1 §8.4) : ~/<application>/deploy/cron.sh, exécutable.
+mkdir -p "$STAGING/backend/deploy"
+mv "$STAGING/deploy/cron.sh" "$STAGING/backend/deploy/cron.sh"
+chmod 755 "$STAGING/backend/deploy/cron.sh"
 # --delete évite qu'une migration supprimée du dépôt reste sur le serveur ; les
-# exclusions protègent ce qui n'appartient qu'au serveur (.env, journaux, fichiers cPanel).
+# exclusions protègent ce qui n'appartient qu'au serveur (.env, configuration et journaux
+# du cron, verrous, fichiers cPanel).
 rsync -az --delete \
   --exclude '.venv/' --exclude '__pycache__/' --exclude '.pytest_cache/' --exclude '.ruff_cache/' \
   --exclude '/.env' --exclude '/db.sqlite3' --exclude '/tmp/' --exclude '/RELEASE' \
-  --exclude '/public/' --exclude '*.log' \
+  --exclude '/public/' --exclude '*.log' --exclude '/cron.conf' --exclude '/logs/' \
   "$STAGING/backend/" "$DEPLOY_SSH:$DEPLOY_APP_DIR/"
 
 step "Dépendances, migrations, table de cache, contrôles, redémarrage de Passenger"
@@ -112,6 +119,18 @@ python manage.py migrate --noinput
 # Tables du cache partagé (DatabaseCache : gestconf_cache et gestconf_throttle_cache).
 # Elles ne sont pas créées par une migration ; la commande est sans effet si elles existent.
 python manage.py createcachetable
+# Venv des tâches cron = celui où pip vient d'installer les dépendances : deploy/cron.sh le
+# lit dans cron.conf (hors dépôt, droits 600). Les autres clés du fichier sont conservées.
+touch cron.conf
+chmod 600 cron.conf
+(
+  umask 077 # avant la redirection : cron.conf.new est créé en 600
+  {
+    grep -v '^GESTCONF_VENV_ACTIVATE=' cron.conf || true
+    printf 'GESTCONF_VENV_ACTIVATE=%s\n' "$venv_activate"
+  } >cron.conf.new
+)
+mv -f cron.conf.new cron.conf
 echo "$release" > RELEASE
 mkdir -p tmp && touch tmp/restart.txt
 REMOTE

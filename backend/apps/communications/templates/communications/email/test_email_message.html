@@ -1,0 +1,10 @@
+{% load i18n %}{% get_current_language as LANGUAGE_CODE %}<!doctype html>
+<html lang="{{ LANGUAGE_CODE }}">
+<head><meta charset="utf-8"><title>{{ site_name }}</title></head>
+<body>
+<p>{% translate "Bonjour," %}</p>
+<p>{% blocktranslate %}Ceci est un e-mail de test envoyé par l'équipe d'exploitation de {{ site_name }}, le {{ timestamp }}.{% endblocktranslate %}</p>
+<p>{% translate "S'il vous parvient, la chaîne d'envoi fonctionne : file de tâches, cron et fournisseur d'e-mails. Vous n'avez rien à faire." %}</p>
+<p>— {{ site_name }}</p>
+</body>
+</html>

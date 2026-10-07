@@ -1,4 +1,4 @@
-"""Garde-fous sur les scripts de déploiement (plan L1 §11, étapes L1.0 et L1.1).
+"""Garde-fous sur les scripts de déploiement (plan L1 §11, étapes L1.0 à L1.2).
 
 Ces scripts ne sont pas du Python : on vérifie dans leur texte les invariants qui ont
 déjà causé un défaut (CSP absente en production, bug L0) ou qui doivent rester alignés
@@ -7,8 +7,11 @@ sur les réglages Django (mode SQL, interclassement).
 
 import json
 import re
+import shutil
+import subprocess
 from pathlib import Path
 
+import pytest
 from django.conf import settings
 
 from config.settings.base import database_from_env
@@ -138,3 +141,96 @@ def test_o2switch_check_controls_innodb_row_format():
     code = CHECK_SCRIPT.read_text(encoding="utf-8")
     assert "@@innodb_default_row_format" in code
     assert "@@innodb_page_size" in code
+
+
+# --- Étape L1.2 : tâches cron (deploy/cron.sh) ---------------------------------------------
+
+
+def test_deploy_ships_cron_script_from_the_commit():
+    """cron.sh part avec le code, depuis le commit déployé, vers <application>/deploy/."""
+    code = shell_code(DEPLOY_SCRIPT)
+    assert re.search(r'archive [^\n]*"\$RELEASE" backend deploy/cron\.sh \|', code)
+    assert 'mv "$STAGING/deploy/cron.sh" "$STAGING/backend/deploy/cron.sh"' in code
+    assert 'chmod 755 "$STAGING/backend/deploy/cron.sh"' in code
+
+
+def test_deploy_keeps_server_only_cron_files():
+    """rsync --delete ne supprime ni la configuration du cron ni ses journaux."""
+    code = shell_code(DEPLOY_SCRIPT)
+    rsync = code[code.index("rsync -az --delete") : code.index('"$STAGING/backend/"')]
+    for exclude in ("'/.env'", "'/tmp/'", "'/cron.conf'", "'/logs/'"):
+        assert f"--exclude {exclude}" in rsync
+
+
+def remote_script() -> str:
+    """Script exécuté sur le serveur par deploy.sh (document « REMOTE »)."""
+    text = DEPLOY_SCRIPT.read_text(encoding="utf-8")
+    return text.split("<<'REMOTE'\n", 1)[1].split("\nREMOTE\n", 1)[0] + "\n"
+
+
+def test_deploy_remote_step_writes_the_cron_venv(tmp_path):
+    """Exécution réelle de l'étape distante (pip et python remplacés par des témoins) :
+    ordre des commandes, puis venv du cron écrit dans cron.conf (600), autres clés conservées,
+    une seule ligne de venv après deux déploiements ; cron.conf est lisible par cron.sh."""
+    bash = shutil.which("bash")
+    if bash is None:
+        pytest.skip("bash absent")
+    home = tmp_path / "home"
+    app = home / "gestconf-app"
+    app.mkdir(parents=True)
+    calls = tmp_path / "calls.txt"
+    venv_bin = home / "virtualenv" / "gestconf-app" / "3.12" / "bin"
+    venv_bin.mkdir(parents=True)
+    for tool in ("pip", "python"):
+        stub = venv_bin / tool
+        stub.write_text(f'#!/bin/sh\necho "{tool} $*" >> "{calls}"\n')
+        stub.chmod(0o755)
+    activate = venv_bin / "activate"
+    activate.write_text(f'PATH="{venv_bin}:$PATH"\nexport PATH\n')
+    (app / "cron.conf").write_text(
+        "GESTCONF_CRON_LOG_MAX_BYTES=2048\nGESTCONF_VENV_ACTIVATE=/ancien/bin/activate\n"
+    )
+    (app / "cron.conf").chmod(0o644)
+
+    for release in ("abc1234", "def5678"):
+        subprocess.run(  # noqa: S603  # arguments maîtrisés par le test
+            [bash, "-s", "--", str(activate), "gestconf-app", release],
+            input=remote_script(),
+            cwd=home,
+            env={"HOME": str(home), "PATH": "/usr/bin:/bin"},
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+
+    commands = [line.split(" -")[0] for line in calls.read_text().splitlines()[:5]]
+    assert commands == [
+        "pip install",
+        "python manage.py check",
+        "python manage.py check",
+        "python manage.py migrate",
+        "python manage.py createcachetable",
+    ]
+    conf = app / "cron.conf"
+    assert conf.read_text() == (
+        f"GESTCONF_CRON_LOG_MAX_BYTES=2048\nGESTCONF_VENV_ACTIVATE={activate}\n"
+    )
+    assert conf.stat().st_mode & 0o777 == 0o600
+    assert (app / "RELEASE").read_text() == "def5678\n"
+    assert (app / "tmp" / "restart.txt").exists()
+    assert not (app / "cron.conf.new").exists()
+
+    # cron.sh, tel que deploy.sh le dépose, lance manage.py avec ce venv.
+    (app / "deploy").mkdir()
+    shutil.copy(REPO_DIR / "deploy" / "cron.sh", app / "deploy" / "cron.sh")
+    (app / "manage.py").write_text("")
+    (app / ".env").write_text("")
+    subprocess.run(  # noqa: S603  # arguments maîtrisés par le test
+        [bash, str(app / "deploy" / "cron.sh"), "run_jobs"],
+        cwd=home,
+        env={"HOME": str(home), "PATH": "/usr/bin:/bin"},
+        check=True,
+        timeout=60,
+    )
+    assert calls.read_text().splitlines()[-1] == "python manage.py run_jobs"

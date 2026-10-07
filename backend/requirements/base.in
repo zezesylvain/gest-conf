@@ -8,3 +8,7 @@ drf-spectacular==0.30.0       # schéma OpenAPI -> client TypeScript Angular
 django-filter==26.2
 django-environ==0.14.0        # configuration par variables d'environnement
 PyMySQL==1.2.3                # pilote MariaDB pur Python (pas de compilation sur o2switch)
+# E-mails transactionnels (D10) : backends HTTP Brevo et Mailjet. Les extras « brevo » et
+# « mailjet » n'ajoutent aucune dépendance (vérifié dans les métadonnées de la roue 15.2) ;
+# anymail lui-même n'apporte que requests, urllib3 et idna (purs Python).
+django-anymail[brevo,mailjet]==15.2

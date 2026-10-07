@@ -1,7 +1,8 @@
 """Configuration de production (o2switch).
 
 Variables d'environnement obligatoires : DJANGO_SECRET_KEY, DJANGO_ALLOWED_HOSTS,
-DJANGO_CSRF_TRUSTED_ORIGINS, DATABASE_URL. Voir .env.example.
+DJANGO_CSRF_TRUSTED_ORIGINS, DATABASE_URL ; pour servir le site, le fournisseur d'e-mails
+(GESTCONF_EMAIL_PROVIDER, ses clés et DEFAULT_FROM_EMAIL). Voir .env.example.
 """
 
 from .base import *
@@ -15,6 +16,14 @@ ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS")
 CSRF_TRUSTED_ORIGINS = env.list("DJANGO_CSRF_TRUSTED_ORIGINS")
 
 DATABASES = {"default": database_from_env()}
+
+# E-mails (D10) : fournisseur déclaré mais incomplet = échec immédiat du chargement des
+# réglages (ImproperlyConfigured) ; aucun fournisseur = réglages chargés (check, migrate,
+# createcachetable restent possibles), mais l'application web refuse de démarrer
+# (apps.communications.backends.require_email_provider, appelée par config/wsgi.py) et
+# tout envoi échoue explicitement. Clés lues dans l'environnement, jamais dans le dépôt.
+globals().update(email_settings_from_env(env, timeout=GESTCONF_EMAIL_TIMEOUT))
+GESTCONF_EMAIL_PROVIDER_REQUIRED = True
 
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True

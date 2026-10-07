@@ -6,7 +6,9 @@ hôtes autorisés) est lue dans les variables d'environnement ou dans un fichier
 """
 
 import tomllib
+from email.utils import parseaddr
 from pathlib import Path
+from typing import Any
 
 import environ
 import pymysql
@@ -43,6 +45,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "apps.core",
     "apps.accounts",
+    "apps.communications",
 ]
 
 MIDDLEWARE = [
@@ -68,7 +71,8 @@ WSGI_APPLICATION = "config.wsgi.application"
 # pas de redirection automatique, qui casserait les requêtes POST.
 APPEND_SLASH = False
 
-# Seuls les gabarits des bibliothèques (page Swagger en développement) sont utilisés.
+# Gabarits des applications : page Swagger en développement (drf-spectacular) et gabarits
+# d'e-mails du projet (apps/*/templates/, rendus sans requête ni processeur de contexte).
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -194,6 +198,137 @@ if GESTCONF_TRUSTED_PROXY_COUNT < 0:
 # défaut ; à n'activer que le temps d'une mesure.
 GESTCONF_DIAGNOSTICS = env.bool("GESTCONF_DIAGNOSTICS", default=False)
 
+# --- Tâches asynchrones et cron (plan L1 §8) ---------------------------------------------
+# Intervalle du cron de run_jobs, en secondes (300 = toutes les 5 min, fréquence à
+# confirmer sur o2switch, M01/H-6). /health signale « late » au-delà de 3 intervalles sans
+# passage réussi, et le budget par défaut de run_jobs en vaut 80 %.
+GESTCONF_CRON_INTERVAL_SECONDS = env.int("GESTCONF_CRON_INTERVAL_SECONDS", default=300)
+if GESTCONF_CRON_INTERVAL_SECONDS <= 0:
+    raise ImproperlyConfigured("GESTCONF_CRON_INTERVAL_SECONDS doit être strictement positif.")
+# Dossier des verrous des commandes d'exploitation (flock) et de l'état du plafond des
+# alertes. Dans le dossier de l'application, exclu du déploiement (rsync --exclude /tmp/).
+GESTCONF_LOCK_DIR = Path(env.str("GESTCONF_LOCK_DIR", default=str(BASE_DIR / "tmp")))
+# Purges du cadre légal (D15 : corps d'e-mails 30 j, métadonnées d'envoi 12 mois, contexte
+# réseau de l'audit 6 mois, audit 3 ans, tâches terminées 30 j) : simulées tant que ce
+# réglage est faux, le cadre légal (Q14) n'étant pas tranché. Les purges de sécurité sont
+# toujours actives.
+GESTCONF_RETENTION_ENFORCE = env.bool("GESTCONF_RETENTION_ENFORCE", default=False)
+
+# --- E-mails (plan L1 §8.3, D10, D17) -------------------------------------------------------
+# Nom du site, fixe, repris dans les gabarits d'e-mails (jamais une donnée de personne).
+GESTCONF_SITE_NAME = env.str("GESTCONF_SITE_NAME", default="GEST-CONF")
+# Expéditeur. En production, obligatoire dès qu'un fournisseur est déclaré (prod.py).
+DEFAULT_FROM_EMAIL = env.str("DEFAULT_FROM_EMAIL", default="GEST-CONF <no-reply@localhost>")
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
+# Backend par environnement : console (dev.py), locmem (test.py), fournisseur (prod.py).
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# Délai réseau d'un envoi par le cron, en secondes : SMTP (EMAIL_TIMEOUT) et API HTTP
+# d'anymail (ANYMAIL["REQUESTS_TIMEOUT"], 30 s par défaut dans anymail 15.2, lu dans
+# anymail/backends/base_requests.py ; requests l'applique à la connexion et à la lecture).
+GESTCONF_EMAIL_TIMEOUT = env.int("GESTCONF_EMAIL_TIMEOUT", default=10)
+# Délai réseau de la voie rapide et des alertes aux opérateurs, pendant une requête HTTP :
+# court, pour ne pas bloquer la réponse. Pire cas d'une requête : 3 envois (plafond par
+# requête) fois (connexion + lecture), soit 18 s avec 3 s. Au-delà, l'envoi échoue et le cron
+# le reprend (doublon possible si le fournisseur avait accepté, rare et assumé, §8.3).
+GESTCONF_EMAIL_FAST_PATH_TIMEOUT = env.float("GESTCONF_EMAIL_FAST_PATH_TIMEOUT", default=3.0)
+EMAIL_TIMEOUT = GESTCONF_EMAIL_TIMEOUT
+ANYMAIL: dict[str, Any] = {"REQUESTS_TIMEOUT": GESTCONF_EMAIL_TIMEOUT}
+# Plafond global d'envoi par heure (§4.7) : au-delà, les e-mails sont reportés en file.
+GESTCONF_EMAIL_MAX_PER_HOUR = env.int("GESTCONF_EMAIL_MAX_PER_HOUR", default=300)
+# Fournisseur (prod.py) : vide hors production.
+GESTCONF_EMAIL_PROVIDER = ""
+GESTCONF_EMAIL_PROVIDER_REQUIRED = False
+# Alerte minimale aux opérateurs (D17, apps/core/alerts.py) : adresses séparées par des
+# virgules ; vide = aucune alerte. Plafond d'alertes par heure, tous processus confondus.
+GESTCONF_OPERATOR_EMAILS = [
+    address.strip()
+    for address in env.list("GESTCONF_OPERATOR_EMAILS", default=[])
+    if address.strip()
+]
+if any("@" not in address for address in GESTCONF_OPERATOR_EMAILS):
+    raise ImproperlyConfigured("GESTCONF_OPERATOR_EMAILS : adresses séparées par des virgules.")
+GESTCONF_OPERATOR_ALERTS_PER_HOUR = env.int("GESTCONF_OPERATOR_ALERTS_PER_HOUR", default=10)
+
+EMAIL_PROVIDERS = ("brevo", "mailjet", "smtp")
+# Classes vérifiées dans anymail 15.2 (anymail/backends/brevo.py et mailjet.py).
+ANYMAIL_BACKENDS = {
+    "brevo": "anymail.backends.brevo.EmailBackend",
+    "mailjet": "anymail.backends.mailjet.EmailBackend",
+}
+
+
+def email_settings_from_env(source: environ.Env, *, timeout: int) -> dict[str, Any]:
+    """Réglages d'envoi de production, lus dans l'environnement (D10).
+
+    - ``GESTCONF_EMAIL_PROVIDER`` vide : aucun fournisseur ; ``UnconfiguredEmailBackend``
+      refuse tout envoi et l'application web refuse de démarrer (config/wsgi.py) ;
+    - ``brevo`` : ``GESTCONF_BREVO_API_KEY`` ;
+    - ``mailjet`` : ``GESTCONF_MAILJET_API_KEY`` et ``GESTCONF_MAILJET_SECRET_KEY`` ;
+    - ``smtp`` (secours) : ``GESTCONF_SMTP_HOST`` (et ``_PORT``, ``_USER``, ``_PASSWORD``,
+      ``_USE_SSL``).
+
+    Un fournisseur déclaré exige aussi ``DEFAULT_FROM_EMAIL``. Incomplet ou inconnu :
+    ``ImproperlyConfigured``, qui ne cite que des noms de variables, jamais une valeur.
+    """
+    provider = source.str("GESTCONF_EMAIL_PROVIDER", default="").strip().lower()
+    if not provider:
+        return {
+            "GESTCONF_EMAIL_PROVIDER": "",
+            "EMAIL_BACKEND": "apps.communications.backends.UnconfiguredEmailBackend",
+        }
+    if provider not in EMAIL_PROVIDERS:
+        raise ImproperlyConfigured(
+            f"GESTCONF_EMAIL_PROVIDER inconnu : choisir parmi {', '.join(EMAIL_PROVIDERS)}."
+        )
+    missing: list[str] = []
+
+    def required(name: str) -> str:
+        value = source.str(name, default="").strip()
+        if not value:
+            missing.append(name)
+        return value
+
+    from_email = required("DEFAULT_FROM_EMAIL")
+    if from_email and "@" not in parseaddr(from_email)[1]:
+        raise ImproperlyConfigured("DEFAULT_FROM_EMAIL n'est pas une adresse valide.")
+    result: dict[str, Any] = {
+        "GESTCONF_EMAIL_PROVIDER": provider,
+        "DEFAULT_FROM_EMAIL": from_email,
+        "SERVER_EMAIL": from_email,
+    }
+    if provider == "brevo":
+        result["EMAIL_BACKEND"] = ANYMAIL_BACKENDS["brevo"]
+        result["ANYMAIL"] = {
+            "BREVO_API_KEY": required("GESTCONF_BREVO_API_KEY"),
+            "REQUESTS_TIMEOUT": timeout,
+        }
+    elif provider == "mailjet":
+        result["EMAIL_BACKEND"] = ANYMAIL_BACKENDS["mailjet"]
+        result["ANYMAIL"] = {
+            "MAILJET_API_KEY": required("GESTCONF_MAILJET_API_KEY"),
+            "MAILJET_SECRET_KEY": required("GESTCONF_MAILJET_SECRET_KEY"),
+            "REQUESTS_TIMEOUT": timeout,
+        }
+    else:
+        use_ssl = source.bool("GESTCONF_SMTP_USE_SSL", default=False)
+        user = source.str("GESTCONF_SMTP_USER", default="").strip()
+        result.update(
+            EMAIL_BACKEND="django.core.mail.backends.smtp.EmailBackend",
+            EMAIL_HOST=required("GESTCONF_SMTP_HOST"),
+            EMAIL_PORT=source.int("GESTCONF_SMTP_PORT", default=465 if use_ssl else 587),
+            EMAIL_HOST_USER=user,
+            EMAIL_HOST_PASSWORD=required("GESTCONF_SMTP_PASSWORD") if user else "",
+            EMAIL_USE_SSL=use_ssl,
+            EMAIL_USE_TLS=not use_ssl,
+            EMAIL_TIMEOUT=timeout,
+        )
+    if missing:
+        raise ImproperlyConfigured(
+            f"Fournisseur d'e-mails « {provider} » incomplet : renseigner {', '.join(missing)}."
+        )
+    return result
+
+
 # --- API (Django REST Framework) -----------------------------------------------
 REST_FRAMEWORK = {
     # Session Django, avec 401 sans session et 403 « csrf_failed » (plan L1 §4.6).
@@ -241,6 +376,7 @@ SPECTACULAR_SETTINGS = {
     "ENUM_NAME_OVERRIDES": {
         "HealthStatus": "apps.core.serializers.HealthStatus",
         "ServiceStatus": "apps.core.serializers.ServiceStatus",
+        "JobsStatus": "apps.core.serializers.JobsStatus",
         "ErrorCode": "apps.core.errors.ErrorCode",
     },
     "POSTPROCESSING_HOOKS": [
@@ -264,6 +400,9 @@ X_FRAME_OPTIONS = "DENY"
 
 # --- Journalisation -----------------------------------------------------------------
 # Sortie d'erreur standard : Passenger la redirige vers son journal.
+# Erreurs serveur (exception non rattrapée d'une requête) : alerte minimale aux opérateurs
+# (D17, apps/core/alerts.py), sans corps, en-têtes, cookies ni paramètres. Le gestionnaire
+# n'agit qu'au niveau ERROR et seulement si GESTCONF_OPERATOR_EMAILS est renseigné.
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -272,9 +411,12 @@ LOGGING = {
     },
     "handlers": {
         "console": {"class": "logging.StreamHandler", "formatter": "simple"},
+        "operator_alert": {"class": "apps.core.alerts.OperatorAlertHandler", "level": "ERROR"},
     },
     "root": {"handlers": ["console"], "level": "INFO"},
     "loggers": {
         "django": {"handlers": ["console"], "level": "INFO", "propagate": False},
+        # Propagation vers « django » (console) conservée : l'alerte s'ajoute au journal.
+        "django.request": {"handlers": ["operator_alert"], "propagate": True},
     },
 }

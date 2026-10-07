@@ -56,6 +56,28 @@ def _fresh_health_cache_probe():
     reset_cache_probe()
 
 
+@pytest.fixture(autouse=True)
+def _isolated_lock_dir(settings, tmp_path):
+    """Verrous des commandes et plafond des alertes dans un dossier propre au test.
+
+    Sans cela, deux suites lancées en parallèle (SQLite et MariaDB) se verraient mutuellement
+    « déjà en cours » et le plafond d'alertes d'un test déborderait sur le suivant.
+    """
+    from apps.core.alerts import reset_memory_state
+
+    settings.GESTCONF_LOCK_DIR = tmp_path / "locks"
+    reset_memory_state()
+    yield
+    reset_memory_state()
+
+
+@pytest.fixture
+def operator_emails(settings) -> list[str]:
+    """Active l'alerte aux opérateurs (D17) vers deux adresses de test."""
+    settings.GESTCONF_OPERATOR_EMAILS = ["ops1@example.org", "ops2@example.org"]
+    return settings.GESTCONF_OPERATOR_EMAILS
+
+
 @pytest.fixture
 def api_client() -> APIClient:
     """Client DRF anonyme (contrôle CSRF désactivé, comme le client de Django)."""

@@ -45,8 +45,10 @@ def test_health_enums(schema):
     assert health["status"] == {"$ref": "#/components/schemas/HealthStatus"}
     assert health["database"] == {"$ref": "#/components/schemas/ServiceStatus"}
     assert health["cache"] == {"$ref": "#/components/schemas/ServiceStatus"}
+    assert health["jobs"] == {"$ref": "#/components/schemas/JobsStatus"}
     assert components["HealthStatus"]["enum"] == ["ok", "degraded"]
     assert components["ServiceStatus"]["enum"] == ["ok", "error"]
+    assert components["JobsStatus"]["enum"] == ["ok", "late", "unknown"]
 
 
 def test_api_error_component(schema):

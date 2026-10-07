@@ -25,8 +25,12 @@ composants communs) : `web/projects/shared`, importé sous le nom `@gestconf/sha
 backend/            Django 5.2 LTS + DRF (sans admin Django)
   config/           réglages (base, dev, test, prod), urls, wsgi, montage /api
   apps/core/        socle : santé, erreurs (catalogue ErrorCode, DomainError), CSRF,
-                    Actor, pagination, IP du client, middlewares, modèle horodaté
+                    Actor, pagination, IP du client, middlewares, modèle horodaté,
+                    journal d'audit (RG-17), file de tâches, commandes cron verrouillées,
+                    alerte aux opérateurs, purges de conservation
   apps/accounts/    utilisateur (identifié par e-mail)
+  apps/communications/  registre d'envoi des e-mails (OutboxEmail), gabarits FR/EN,
+                    envoi par la file et voie rapide
   locale/           catalogue « en » des messages de l'API (.po et .mo versionnés)
   requirements/     *.in (sources) → *.txt verrouillés avec empreintes (pip-tools)
   schema.yml        schéma OpenAPI (généré, source du client TypeScript)
@@ -90,6 +94,48 @@ Les deux serveurs de développement relaient `/api` vers `runserver` (`web/proxy
 | Lint / format frontend | `npm run lint` · `npm run format:check` |
 | Build de production | `npm run build` (portail pré-rendu + gestion + CSP) |
 | Déploiement | `deploy/deploy.sh` — voir [`deploy/README.md`](deploy/README.md) |
+| File de tâches | `python manage.py run_jobs` (cron) — voir ci-dessous |
+| E-mail de test | `python manage.py send_test_email --to adresse [--locale en]` |
+
+### File de tâches, e-mails et cron (étape L1.2)
+
+Pas de Celery ni de Redis (hébergement mutualisé) : tout ce qui est asynchrone est une ligne
+de la table `core_job`, exécutée par `manage.py run_jobs`, que lance le cron. Les e-mails sont
+**rendus pendant la requête** (langue du destinataire), enregistrés dans `OutboxEmail` et
+envoyés par la file ; quelques gabarits (inscription, invitations, notifications de sécurité)
+partent aussi immédiatement après la validation de la transaction (« voie rapide », 3 au plus
+par requête), jamais la réinitialisation du mot de passe.
+
+| Commande | Rôle | Lancée par |
+|---|---|---|
+| `run_jobs [--max-seconds N]` | Reprend les tâches au bail expiré (15 min), purge les entrées expirées des deux tables de cache et les corps d'e-mails sensibles, puis exécute les tâches éligibles dans le budget de temps | cron, toutes les 5 min |
+| `cleanup [--dry-run]` | Purges quotidiennes : sécurité toujours (sessions, cache, corps sensibles) ; durées de conservation D15 **simulées** tant que `GESTCONF_RETENTION_ENFORCE` est faux | cron, chaque nuit |
+| `send_test_email --to ADRESSE [--locale fr\|en] [--reason …]` | Met en file un e-mail de test (audité, adresse masquée) ; il part au passage suivant de `run_jobs` | opérateur |
+| `outbox [--status S] [--limit N]` | Liste le registre d'envoi (adresses masquées) | opérateur |
+| `outbox --retry ID --reason "…"` | Remet en file un e-mail en échec (audité, motif obligatoire) | opérateur |
+
+Ces commandes héritent de `LockedCommand` : verrou exclusif (`flock` sur `tmp/<commande>.lock`,
+repli `GET_LOCK` de MariaDB), sortie sans erreur si une autre exécution tient le verrou,
+battement de cœur (`core_cronheartbeat`) au début et à la fin des commandes cron. Le champ
+`jobs` de `/api/v1/health` vaut `late` (et `status` `degraded`, toujours en HTTP 200) si
+`run_jobs` n'a pas réussi depuis 3 intervalles (`GESTCONF_CRON_INTERVAL_SECONDS`).
+
+Crontab de production (o2switch) : `deploy/cron.sh`, envoyé par `deploy.sh` avec le code,
+lance chaque commande avec le même venv et le même `.env` que Passenger (détails :
+[`deploy/README.md`](deploy/README.md), §5) :
+
+```text
+*/5 * * * *  ~/gestconf-app/deploy/cron.sh run_jobs --max-seconds 240
+17 3 * * *   ~/gestconf-app/deploy/cron.sh cleanup
+```
+
+En développement, les e-mails s'affichent dans la console de `runserver` ou de `run_jobs` ;
+en test, ils restent en mémoire. En production, `GESTCONF_EMAIL_PROVIDER` (`brevo`, `mailjet`
+ou `smtp`) et ses clés sont lus dans le `.env` du serveur (voir `backend/.env.example`) : un
+fournisseur incomplet empêche tout démarrage ; aucun fournisseur empêche le site de démarrer.
+Les erreurs serveur et les tâches en échec définitif envoient un e-mail minimal aux adresses
+`GESTCONF_OPERATOR_EMAILS` (10 par heure au plus ; jamais le corps, les en-têtes, les cookies
+ni les paramètres de la requête).
 
 ### Traductions de l'API
 

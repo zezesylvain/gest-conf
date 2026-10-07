@@ -18,6 +18,19 @@ class ServiceStatus(models.TextChoices):
     ERROR = "error"
 
 
+class JobsStatus(models.TextChoices):
+    """État du cron de la file de tâches (nom de schéma ``JobsStatus``, plan L1 §8.4).
+
+    - ``ok`` : dernier passage réussi de ``run_jobs`` récent ;
+    - ``late`` : dernier succès plus vieux que trois intervalles du cron ;
+    - ``unknown`` : aucun passage réussi enregistré (installation neuve).
+    """
+
+    OK = "ok"
+    LATE = "late"
+    UNKNOWN = "unknown"
+
+
 class HealthSerializer(serializers.Serializer):
     status = serializers.ChoiceField(choices=HealthStatus.choices)
     database = serializers.ChoiceField(choices=ServiceStatus.choices)
@@ -25,6 +38,8 @@ class HealthSerializer(serializers.Serializer):
     # Pas de help_text sur les champs à choix : il remplacerait la référence
     # « $ref » à l'énumération par un « allOf » dans le schéma.
     cache = serializers.ChoiceField(choices=ServiceStatus.choices)
+    # Cron de la file de tâches : un retard rend l'état « degraded » sans erreur HTTP (200).
+    jobs = serializers.ChoiceField(choices=JobsStatus.choices)
     secure = serializers.BooleanField(
         help_text="Vrai si Django voit la requête comme HTTPS (contrôle du déploiement)."
     )

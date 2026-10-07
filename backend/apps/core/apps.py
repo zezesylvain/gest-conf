@@ -7,5 +7,6 @@ class CoreConfig(AppConfig):
     verbose_name = "Socle"
 
     def ready(self) -> None:
-        # Enregistre les extensions drf-spectacular (authentification par session).
-        from apps.core import schema  # noqa: F401
+        # Enregistre les extensions drf-spectacular (authentification par session) et les
+        # règles de conservation du socle (cache, sessions, audit, tâches terminées).
+        from apps.core import retention, schema  # noqa: F401

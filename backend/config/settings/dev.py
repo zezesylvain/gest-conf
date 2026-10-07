@@ -18,3 +18,6 @@ DATABASES = {"default": database_from_env(default=f"sqlite:///{BASE_DIR / 'db.sq
 
 # Le serveur de développement Angular (ng serve) relaie /api vers runserver.
 CSRF_TRUSTED_ORIGINS = ["http://localhost:4200", "http://localhost:4201"]
+
+# E-mails affichés dans la console de runserver (et de run_jobs), jamais envoyés.
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"

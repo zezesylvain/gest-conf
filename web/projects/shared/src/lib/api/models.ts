@@ -5,4 +5,5 @@ export type { ApiError } from './models/api-error';
 export type { ErrorCode } from './models/error-code';
 export type { Health } from './models/health';
 export type { HealthStatus } from './models/health-status';
+export type { JobsStatus } from './models/jobs-status';
 export type { ServiceStatus } from './models/service-status';

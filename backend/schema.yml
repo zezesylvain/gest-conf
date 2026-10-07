@@ -7,8 +7,13 @@ paths:
   /v1/health:
     get:
       operationId: health
-      description: Sonde de disponibilité (supervision externe et tests de fumée du
-        déploiement).
+      description: |-
+        Sonde de disponibilité (supervision externe et tests de fumée du déploiement).
+
+        - 503 seulement si la base ou le cache est en panne : le site ne peut pas servir ;
+        - cron de la file en retard (``jobs: late``) : ``status: degraded`` mais 200, car le
+          site fonctionne (seuls les envois différés attendent) ;
+        - ``jobs: unknown`` (aucun passage encore, installation neuve) ne dégrade pas l'état.
       tags:
       - health
       responses:
@@ -84,6 +89,8 @@ components:
           $ref: '#/components/schemas/ServiceStatus'
         cache:
           $ref: '#/components/schemas/ServiceStatus'
+        jobs:
+          $ref: '#/components/schemas/JobsStatus'
         secure:
           type: boolean
           description: Vrai si Django voit la requête comme HTTPS (contrôle du déploiement).
@@ -92,6 +99,7 @@ components:
       required:
       - cache
       - database
+      - jobs
       - release
       - secure
       - status
@@ -103,6 +111,16 @@ components:
       description: |-
         * `ok` - Ok
         * `degraded` - Degraded
+    JobsStatus:
+      enum:
+      - ok
+      - late
+      - unknown
+      type: string
+      description: |-
+        * `ok` - Ok
+        * `late` - Late
+        * `unknown` - Unknown
     ServiceStatus:
       enum:
       - ok
