@@ -271,3 +271,84 @@ aperçu, essai, publication, retrait) ; `segments` (catalogue autorisé, comptag
    (proposé) ?
 9. **Rapports** : indicateurs prioritaires ? Le PDF de synthèse est-il utile, ou le XLSX
    suffit-il ?
+
+## 11. Bilan de L8.0 (7 octobre 2026)
+
+**XLSX (`openpyxl`)** :
+
+- `openpyxl` 3.1.5 et sa seule dépendance `et_xmlfile` 2.0.0 : licence MIT, **Python pur**
+  (aucune extension compilée), donc compatible avec la règle n° 10 ;
+- **piège vérifié** : une chaîne affectée telle quelle à une cellule et commençant par `=`
+  devient une **formule** (`data_type` `f`, élément `<f>` dans le XML). En forçant le type
+  texte (`data_type = "s"`), la chaîne est écrite en texte littéral (`inlineStr`), sans
+  aucun élément `<f>` ; l'apostrophe des exports CSV est donc inutile en XLSX, où elle
+  apparaîtrait telle quelle ;
+- **précision de N13** : un module `apps/core/spreadsheet.py` étendu écrit les XLSX en mode
+  « écriture seule », chaque chaîne typée texte, chaque montant en nombre (`Decimal` reconnu
+  comme numérique) ; un test ouvre le fichier et vérifie l'absence d'élément `<f>` ;
+- 2 000 lignes × 10 colonnes : 0,28 s, 79 ko ;
+- **non vérifié ici** : l'ouverture par Excel et LibreOffice Calc (LibreOffice est installé
+  sans son tableur) ; à contrôler à la recette.
+
+**Bandeau de dernière minute dans le portail pré-rendu** (trois prototypes, build du
+portail, bundle initial de référence : 368,86 ko) :
+
+| Variante | Bundle initial | Écart |
+|---|---|---|
+| `@defer (on idle)` | 373,31 ko | +4,45 ko (mécanique de `@defer`) |
+| `import()` dynamique et `createComponent` | 370,12 ko | +1,26 ko (code partagé redécoupé) |
+| Composant chargé avec la coquille | 369,41 ko | **+0,55 ko** (+0,14 ko transférés) |
+
+- **précision de N10** : le bandeau est un petit composant **chargé avec la coquille**
+  (moins coûteux que le chargement à la demande), qui ne lit l'API que dans le navigateur
+  (`afterNextRender`) : rien n'est pré-rendu, une page publiée ne fige donc jamais un
+  bandeau périmé ;
+- adresse : `GET /v1/public/portal/banner`, édition publique courante
+  (`current_public_edition()`, comme les autres données du portail), et non un code
+  d'édition dans l'adresse ;
+- la CSP du portail permet déjà la lecture (`connect-src 'self'`) : aucun en-tête à
+  changer ;
+- **précision de N10** : le bandeau ne contient que du **texte** (titre, message de
+  280 caractères au plus, lien facultatif vers l'actualité) ; il n'y a donc pas de HTML à
+  assainir dans la coquille.
+
+**Plafond horaire des e-mails** :
+
+- l'état actuel : `GESTCONF_EMAIL_MAX_PER_HOUR` (200 par défaut) est vérifié à chaque envoi
+  ; plafond atteint, le job est reporté (`RetryLater`) sans consommer de tentative ; la file
+  traite les jobs par priorité (`URGENT`, `NORMAL`, puis `BULK`) ;
+- **précision de N11** : les e-mails d'un envoi groupé portent la marque `bulk` ; leur
+  envoi est reporté dès que les e-mails `bulk` de l'heure écoulée atteignent la moitié du
+  plafond. Le plafond global reste appliqué à tous. Les e-mails de compte et de service
+  gardent donc au moins la moitié du plafond ;
+- **précision de N11** : les jobs d'un envoi groupé sont **étalés** dès leur création (un
+  lot égal à la moitié du plafond par heure), ce qui donne la durée estimée et évite que des
+  centaines de jobs ne soient réveillés pour rien.
+
+**Segments et mise en file** (2 000 inscrits confirmés, sonde temporaire, non committée) :
+
+| Base | Segment (une requête) | Mise en file de 500 e-mails | Pour 2 000 |
+|---|---|---|---|
+| SQLite | 6 ms | 0,82 s | ≈ 3,3 s |
+| MariaDB 10.11 | 24 ms | 1,88 s | ≈ 7,5 s |
+
+- le calcul d'un segment est négligeable ;
+- la mise en file (rendu du gabarit, e-mail et job) est trop longue pour une requête HTTP
+  sur un hébergement mutualisé : **précision de N11**, la confirmation d'un envoi crée un
+  job `communications.fan_out` qui met en file **par lots de 200**, chaque lot
+  idempotent (clé `announcement:<id>:<compte>`), puis se relance jusqu'à épuisement du
+  segment.
+
+**Assainisseur de L2** (`apps/portal/sanitizer.py`) :
+
+- liste blanche adaptée aux annonces : `p`, `br`, `strong`, `em`, `ul`, `ol`, `li`, `a`
+  (`http(s):`, `mailto:`, `tel:`), `h3`, `h4`, `blockquote` ; `script` et `img` retirés,
+  vérifié sur un exemple ;
+- **précision de N11** : la version texte de l'e-mail ne peut pas venir de `strip_tags`,
+  qui perd la cible des liens et colle les éléments de liste ; un petit convertisseur sur
+  la même liste blanche (paragraphes, puces « - », liens « texte (adresse) ») est ajouté à
+  `communications`.
+
+**Critère de fin** : choix consignés. Aucune dépendance n'est ajoutée à cette étape :
+`openpyxl` entre dans `requirements/base.in` avec son premier usage (L8.2, export du
+budget).
