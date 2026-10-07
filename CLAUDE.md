@@ -123,7 +123,8 @@ Les URL Django sont déclarées **sans** le préfixe `/api` (`v1/...`) : `config
 | L6 — Inscriptions et paiements | **Livré en code et testé en local** (L6.0 à L6.7, E2E compris) ; bilan [`docs/L6-inscriptions.md`](docs/L6-inscriptions.md). Fusionné dans `main` (PR #12). Ouverts : Q7 (tarifs ; carte bancaire absente de l'API v1 de CinetPay), Q8 (entité de facturation, conservation, format du numéro), J15 reportée |
 | L7 — Jour J et attestations | **Livré en code et testé en local** (L7.0 à L7.8, E2E compris) ; bilan [`docs/L7-jour-j.md`](docs/L7-jour-j.md). L7.0 à L7.7 fusionnés dans `main` (PR #12) ; L7.8 et le correctif du test RG-16 dans la PR #13. Ouverts : Q17 (prestataire de signature qualifiée), nom complet du pays sur les badges, démo H sur téléphones réels |
 | L8 — Logistique, partenaires, communication et reporting | **Livré en code et testé en local** (L8.0 à L8.10, E2E compris) ; bilan [`docs/L8-logistique.md`](docs/L8-logistique.md). Passage en CI : PR #13. Ouverts : questions du §10 du plan (hypothèses retenues), plafond d'e-mails réel sur o2switch, en-tête `List-Unsubscribe` |
-| L9 et suivants | Non commencés |
+| L9 — Recette, sécurité, charge | **Plan proposé, à valider** : [`docs/L9-recette-plan.md`](docs/L9-recette-plan.md) (S1 à S16, questions du §10) |
+| L10 et suivants | Non commencés |
 
 ## Décisions du lot L1
 
