@@ -403,3 +403,94 @@ les capacités de L8 pour chaque profil ; le test qui compare les capacités lue
   `Capability` étendue) ; client TypeScript régénéré.
 
 **Critère de fin** (« Matrice au vert ») : atteint.
+
+## 13. Bilan de L8.2 (7 octobre 2026)
+
+**Tâches du CO** (N3 ; `apps/logistics`, services `tasks` et `reminders`) :
+
+- `Task` (titre, description, statut, priorité, étiquette, responsable, échéance, position,
+  révision, créée par, terminée le, archivée le), `TaskComment`, `TaskAttachment` ;
+- **responsable** : membre actif de l'édition dont un rôle donne `tasks.write`
+  (administrateur, Chair, CO), rôles **tirés de la table des capacités**, jamais recopiés ;
+  un relecteur, un bénévole, un rôle retiré ou une autre édition sont refusés ;
+- chaque écriture verrouille la tâche, compare la révision (`If-Match`, 412
+  `stale_revision`), l'incrémente et écrit le journal `task.*` (avant et après) ;
+- kanban : déplacer une tâche renumérote sa colonne d'arrivée et resserre celle qu'elle
+  quitte ; « terminée » date la fin, rouvrir l'efface ;
+- archivage et restauration, jamais de suppression ;
+- commentaires (2 000 caractères ; le journal ne garde pas leur texte) ;
+- pièces jointes : PDF, PNG ou JPEG de 10 Mo au plus, 20 par tâche, type vérifié par
+  contenu, stockage privé (règle n° 8), téléchargement authentifié et sans cache ;
+  orphelins purgés par `cleanup`, fichiers absents ou modifiés signalés par
+  `check_integrity` ;
+- **cloche** : `task_assigned` au nouveau responsable (pas à soi-même) ; son libellé dans
+  l'espace compte arrive avec les écrans (L8.8, L8.9) ;
+- **`remind_tasks`** (cron quotidien, 6 h 53) : un récapitulatif par responsable et par
+  édition, une fois par jour, des tâches en retard ou à échéance sous deux jours, la date du
+  jour étant lue **dans le fuseau de l'édition** ; idempotent (date du dernier récapitulatif
+  sur la tâche, clé d'idempotence de l'e-mail) et verrouillé.
+
+**Budget** (N4 ; service `budget`) :
+
+- `BudgetLine` : nature, poste (catalogue fermé de N4, cohérent avec la nature), libellé,
+  prévu, réalisé, origine, note, justificatif, position ;
+- montants en `Decimal` **exacts dans la devise de l'édition** (XOF sans décimale), positifs,
+  bornés ;
+- **réalisé calculé** : la ligne « inscriptions » est créée d'office ; son réalisé est
+  l'encaissé net des paiements de L6 (paiements réussis moins remboursements,
+  `payments.services.finance.net_collected`, ajoutée) ; ni réalisé, ni nature, ni poste
+  n'y sont modifiables, et elle ne se supprime pas ; la source « partenaires » s'inscrit en
+  L8.3 (`register_computed_source`) ;
+- **précision de N1** : `logistics` lit `payments` (import différé, lecture seule) ;
+  `payments` ne dépend pas de `logistics` ;
+- synthèse : totaux prévus et réalisés par nature et par poste, soldes ;
+- justificatif PDF, PNG ou JPEG de 5 Mo, privé ;
+- journal `budget.*` ; **export CSV et XLSX** journalisé, avec réauthentification récente.
+
+**XLSX** : `openpyxl` 3.1.5 ajouté à `requirements/base.in` (fichiers verrouillés
+recompilés, seules ses deux entrées s'ajoutent) ; `xlsx_bytes` et `xlsx_response` dans
+`apps/core/spreadsheet.py`, chaînes typées texte (test : aucun élément `<f>`, même pour
+`=SOMME(A1)`).
+
+**API** (gestion, 2FA) :
+
+- `…/tasks` (liste filtrée : statut, responsable, « mes tâches », archivées ; création),
+  `…/tasks/members`, `…/tasks/{id}` (lecture, mise à jour en `If-Match`), `…/archive`,
+  `…/restore`, `…/comments`, `…/attachments` (dépôt), `…/attachments/{id}` (lecture,
+  retrait) ;
+- `…/budget` (synthèse et lignes), `…/budget/lines` et `…/budget/lines/{id}`,
+  `…/budget/lines/{id}/proof`, `…/budget/export?file_format=csv|xlsx`.
+
+**Défauts trouvés en écrivant les tests** :
+
+- le paramètre `format` de l'export était capté par la négociation de contenu de DRF
+  (réponse 404) : il s'appelle `file_format` ;
+- une méthode `detail` des vues masquait l'attribut du même nom des viewsets de DRF :
+  renommée.
+
+**Données personnelles** : tâches confiées ou créées, commentaires et pièces jointes de la
+personne à l'export ; à l'anonymisation, rien n'est effacé (documents de travail du comité,
+le compte anonymisé n'affichant plus de nom).
+
+**Exploitation** : `remind_tasks` ajoutée à `deploy/cron.sh` (liste fermée) et à
+`deploy/README.md`.
+
+**Défaut trouvé par la suite complète** : l'objet du récapitulatif affichait le titre de
+l'édition ; or l'objet d'un e-mail est conservé après la purge des corps et n'affiche que le
+nom du site (test de plateforme). Corrigé.
+
+**Tests** :
+
+- backend : **5 360 réussis**, 10 ignorés (SQLite) ; sous MariaDB, `logistics`, l'export
+  XLSX, le registre, les règles de plateforme, la file d'e-mails et la matrice des tâches et
+  du budget réussissent (480) ;
+- `logistics` et XLSX : 23 tests (tâches : responsable, validation, révision, kanban,
+  archivage, commentaires, pièces jointes et leurs limites, intégrité ; récapitulatif :
+  regroupement, fuseau de l'édition, idempotence, commande ; budget : validation dans la
+  devise, ligne calculée, synthèse, journal, justificatif, API et export) ;
+- matrice des droits : **4 108 cas** (3 746 à la fin de L8.1), dont l'édition archivée en
+  lecture seule et la réauthentification de l'export ;
+- `ruff`, `locale/check.sh`, schéma validé sous MariaDB, client TypeScript régénéré,
+  vérification des types des trois projets du front.
+
+**Critère de fin** (« Tests au vert ») : atteint.

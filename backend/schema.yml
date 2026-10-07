@@ -583,6 +583,227 @@ paths:
               schema:
                 $ref: '#/components/schemas/BillingProfile'
           description: ''
+  /v1/manage/editions/{edition_id}/budget:
+    get:
+      operationId: manage_budget_retrieve
+      description: '``…/budget`` : budget prévisionnel et réalisé (N4).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Budget'
+          description: ''
+  /v1/manage/editions/{edition_id}/budget/export:
+    get:
+      operationId: manage_budget_export
+      description: 'Export du budget (RG-17 : journalisé, réauthentification récente).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: file_format
+        schema:
+          type: string
+          enum:
+          - csv
+          - xlsx
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  /v1/manage/editions/{edition_id}/budget/lines:
+    post:
+      operationId: manage_budget_lines_create
+      description: '``…/budget`` : budget prévisionnel et réalisé (N4).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BudgetLineWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Budget'
+          description: ''
+  /v1/manage/editions/{edition_id}/budget/lines/{line_id}:
+    patch:
+      operationId: manage_budget_lines_update
+      description: '``…/budget`` : budget prévisionnel et réalisé (N4).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: line_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBudgetLineWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Budget'
+          description: ''
+    delete:
+      operationId: manage_budget_lines_destroy
+      description: '``…/budget`` : budget prévisionnel et réalisé (N4).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: line_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Budget'
+          description: ''
+  /v1/manage/editions/{edition_id}/budget/lines/{line_id}/proof:
+    get:
+      operationId: manage_budget_lines_proof_download
+      description: |-
+        ``…/budget/lines/{id}/proof`` : justificatif d'une ligne (lecture, dépôt multipart,
+        retrait).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: line_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+          description: ''
+    put:
+      operationId: manage_budget_lines_proof_upload
+      description: |-
+        ``…/budget/lines/{id}/proof`` : justificatif d'une ligne (lecture, dépôt multipart,
+        retrait).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: line_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AttachmentUploadRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Budget'
+          description: ''
+    delete:
+      operationId: manage_budget_lines_proof_remove
+      description: |-
+        ``…/budget/lines/{id}/proof`` : justificatif d'une ligne (lecture, dépôt multipart,
+        retrait).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: line_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Budget'
+          description: ''
   /v1/manage/editions/{edition_id}/certificates:
     get:
       operationId: manage_certificates_list
@@ -5839,6 +6060,354 @@ paths:
               schema:
                 $ref: '#/components/schemas/SubmissionStats'
           description: ''
+  /v1/manage/editions/{edition_id}/tasks:
+    get:
+      operationId: manage_tasks_list
+      description: '``…/tasks`` : kanban des tâches du CO (N3).'
+      parameters:
+      - in: query
+        name: archived
+        schema:
+          type: boolean
+        description: Tâches archivées (sinon actives).
+      - in: query
+        name: assignee
+        schema:
+          type: integer
+        description: Responsable (compte).
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: mine
+        schema:
+          type: boolean
+        description: Mes tâches seulement.
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - doing
+          - done
+          - todo
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+          description: ''
+    post:
+      operationId: manage_tasks_create
+      description: '``…/tasks`` : kanban des tâches du CO (N3).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/tasks/{task_id}:
+    get:
+      operationId: manage_tasks_retrieve
+      description: '``…/tasks`` : kanban des tâches du CO (N3).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: task_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskDetail'
+          description: ''
+    patch:
+      operationId: manage_tasks_update
+      description: '``…/tasks`` : kanban des tâches du CO (N3).'
+      parameters:
+      - in: header
+        name: If-Match
+        schema:
+          type: integer
+        description: Révision de la tâche lue ; 412 « stale_revision » si elle a changé
+          (N3).
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: task_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedTaskWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/tasks/{task_id}/archive:
+    post:
+      operationId: manage_tasks_archive
+      description: '``…/tasks`` : kanban des tâches du CO (N3).'
+      parameters:
+      - in: header
+        name: If-Match
+        schema:
+          type: integer
+        description: Révision de la tâche lue ; 412 « stale_revision » si elle a changé
+          (N3).
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: task_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/tasks/{task_id}/attachments:
+    post:
+      operationId: manage_tasks_attachments_upload
+      description: '``…/tasks/{id}/attachments`` (POST) : dépôt d''une pièce jointe
+        (multipart).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: task_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AttachmentUploadRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/tasks/{task_id}/attachments/{attachment_id}:
+    get:
+      operationId: manage_tasks_attachments_download
+      description: 'Pièce jointe (règle n° 8 : endpoint authentifié, type vérifié
+        au dépôt).'
+      parameters:
+      - in: path
+        name: attachment_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: task_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+          description: ''
+    delete:
+      operationId: manage_tasks_attachments_remove
+      description: '``…/tasks`` : kanban des tâches du CO (N3).'
+      parameters:
+      - in: path
+        name: attachment_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: task_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/tasks/{task_id}/comments:
+    post:
+      operationId: manage_tasks_comment
+      description: '``…/tasks`` : kanban des tâches du CO (N3).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: task_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskCommentWriteRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/tasks/{task_id}/restore:
+    post:
+      operationId: manage_tasks_restore
+      description: '``…/tasks`` : kanban des tâches du CO (N3).'
+      parameters:
+      - in: header
+        name: If-Match
+        schema:
+          type: integer
+        description: Révision de la tâche lue ; 412 « stale_revision » si elle a changé
+          (N3).
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: task_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/tasks/members:
+    get:
+      operationId: manage_tasks_members
+      description: '``…/tasks`` : kanban des tâches du CO (N3).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TaskPerson'
+          description: ''
   /v1/manage/editions/{edition_id}/tracks:
     get:
       operationId: manage_editions_tracks_list
@@ -7598,6 +8167,14 @@ components:
         * `active` - actif
         * `declined` - déclinée
         * `cancelled` - annulée
+    AttachmentUploadRequest:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+      required:
+      - file
     AuditEntry:
       type: object
       description: Entrée du journal d'une édition, **sans IP ni navigateur** (minimisation,
@@ -7854,6 +8431,210 @@ components:
     BlankEnum:
       enum:
       - ''
+    Budget:
+      type: object
+      properties:
+        currency:
+          type: string
+        expense:
+          $ref: '#/components/schemas/BudgetTotals'
+        income:
+          $ref: '#/components/schemas/BudgetTotals'
+        balance_planned:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+        balance_actual:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+        by_category:
+          type: array
+          items:
+            $ref: '#/components/schemas/BudgetCategoryTotals'
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/BudgetLine'
+      required:
+      - balance_actual
+      - balance_planned
+      - by_category
+      - currency
+      - expense
+      - income
+      - lines
+    BudgetCategory:
+      enum:
+      - venue
+      - catering
+      - travel
+      - accommodation
+      - communication
+      - printing
+      - equipment
+      - staff
+      - other_expense
+      - registrations
+      - sponsorship
+      - grants
+      - other_income
+      type: string
+      description: |-
+        * `venue` - lieu
+        * `catering` - restauration
+        * `travel` - voyages
+        * `accommodation` - hébergement
+        * `communication` - communication
+        * `printing` - impression
+        * `equipment` - matériel
+        * `staff` - personnel
+        * `other_expense` - divers (dépense)
+        * `registrations` - inscriptions
+        * `sponsorship` - partenariats
+        * `grants` - subventions
+        * `other_income` - divers (recette)
+    BudgetCategoryTotals:
+      type: object
+      properties:
+        planned:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+        actual:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+        category:
+          $ref: '#/components/schemas/BudgetCategory'
+        kind:
+          $ref: '#/components/schemas/BudgetKind'
+      required:
+      - actual
+      - category
+      - kind
+      - planned
+    BudgetKind:
+      enum:
+      - expense
+      - income
+      type: string
+      description: |-
+        * `expense` - dépense
+        * `income` - recette
+    BudgetLine:
+      type: object
+      properties:
+        id:
+          type: integer
+        kind:
+          $ref: '#/components/schemas/BudgetKind'
+        category:
+          $ref: '#/components/schemas/BudgetCategory'
+        label:
+          type: string
+        planned:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        actual:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+          nullable: true
+        variance:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+          nullable: true
+        source:
+          $ref: '#/components/schemas/BudgetSource'
+        computed:
+          type: boolean
+        note:
+          type: string
+        position:
+          type: integer
+        proof:
+          allOf:
+          - $ref: '#/components/schemas/BudgetProof'
+          nullable: true
+      required:
+      - actual
+      - category
+      - computed
+      - id
+      - kind
+      - label
+      - note
+      - planned
+      - position
+      - proof
+      - source
+      - variance
+    BudgetLineWriteRequest:
+      type: object
+      properties:
+        kind:
+          $ref: '#/components/schemas/BudgetKind'
+        category:
+          $ref: '#/components/schemas/BudgetCategory'
+        label:
+          type: string
+          maxLength: 200
+        planned:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        actual:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          nullable: true
+        note:
+          type: string
+          maxLength: 2000
+        position:
+          type: integer
+          minimum: 0
+    BudgetProof:
+      type: object
+      properties:
+        name:
+          type: string
+        kind:
+          type: string
+        size:
+          type: integer
+          nullable: true
+      required:
+      - kind
+      - name
+      - size
+    BudgetSource:
+      enum:
+      - manual
+      - registrations
+      - sponsors
+      type: string
+      description: |-
+        * `manual` - saisi
+        * `registrations` - calculé : inscriptions
+        * `sponsors` - calculé : partenaires
+    BudgetTotals:
+      type: object
+      properties:
+        planned:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+        actual:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+      required:
+      - actual
+      - planned
     Bundle:
       type: object
       description: 'Liste de pointage hors ligne (K5) : minimale, sans jeton, à effacer
@@ -11516,6 +12297,7 @@ components:
       - screening_rejected
       - decision_published
       - final_version_received
+      - task_assigned
       type: string
       description: |-
         * `submission_received` - soumission reçue
@@ -11526,6 +12308,7 @@ components:
         * `screening_rejected` - soumission non recevable
         * `decision_published` - décision publiée
         * `final_version_received` - version finale reçue
+        * `task_assigned` - tâche confiée
     NotificationList:
       type: object
       properties:
@@ -12216,6 +12999,31 @@ components:
           minLength: 1
           title: Préfixe des pro forma
           maxLength: 8
+    PatchedBudgetLineWriteRequest:
+      type: object
+      properties:
+        kind:
+          $ref: '#/components/schemas/BudgetKind'
+        category:
+          $ref: '#/components/schemas/BudgetCategory'
+        label:
+          type: string
+          maxLength: 200
+        planned:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        actual:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          nullable: true
+        note:
+          type: string
+          maxLength: 2000
+        position:
+          type: integer
+          minimum: 0
     PatchedCategoryRequest:
       type: object
       description: 'Catégorie et sa grille de tarifs (gestion). ``code`` : fixé à
@@ -12997,6 +13805,32 @@ components:
           additionalProperties:
             type: boolean
           description: Code → accepté ; la version courante du texte est enregistrée.
+    PatchedTaskWriteRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+          maxLength: 5000
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+        priority:
+          $ref: '#/components/schemas/TaskPriority'
+        label:
+          type: string
+          maxLength: 50
+        assignee:
+          type: integer
+          nullable: true
+        due_date:
+          type: string
+          format: date
+          nullable: true
+        position:
+          type: integer
+          minimum: 0
     PatchedTrackRequest:
       type: object
       properties:
@@ -17652,6 +18486,339 @@ components:
             $ref: '#/components/schemas/CheckinResult'
       required:
       - results
+    Task:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          readOnly: true
+          title: Titre
+        description:
+          type: string
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/TaskStatus'
+          readOnly: true
+          title: Statut
+        priority:
+          allOf:
+          - $ref: '#/components/schemas/TaskPriority'
+          readOnly: true
+          title: Priorité
+        label:
+          type: string
+          readOnly: true
+          title: Étiquette
+        assignee:
+          allOf:
+          - $ref: '#/components/schemas/TaskPerson'
+          nullable: true
+          readOnly: true
+        due_date:
+          type: string
+          format: date
+          readOnly: true
+          nullable: true
+          title: Échéance
+        overdue:
+          type: boolean
+          readOnly: true
+        position:
+          type: integer
+          readOnly: true
+          title: Position dans la colonne
+        revision:
+          type: integer
+          readOnly: true
+          title: Révision
+        created_by:
+          allOf:
+          - $ref: '#/components/schemas/TaskPerson'
+          nullable: true
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        done_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Terminée le
+        archived_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Archivée le
+        comment_count:
+          type: integer
+          readOnly: true
+        attachment_count:
+          type: integer
+          readOnly: true
+      required:
+      - archived_at
+      - assignee
+      - attachment_count
+      - comment_count
+      - created_at
+      - created_by
+      - description
+      - done_at
+      - due_date
+      - id
+      - label
+      - overdue
+      - position
+      - priority
+      - revision
+      - status
+      - title
+      - updated_at
+    TaskAttachment:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+          title: Nom du fichier
+        kind:
+          type: string
+          readOnly: true
+          title: Type
+        size:
+          type: integer
+          readOnly: true
+          title: Taille (octets)
+        uploaded_by:
+          allOf:
+          - $ref: '#/components/schemas/TaskPerson'
+          nullable: true
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - kind
+      - name
+      - size
+      - uploaded_by
+    TaskComment:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        author:
+          allOf:
+          - $ref: '#/components/schemas/TaskPerson'
+          nullable: true
+          readOnly: true
+        body:
+          type: string
+          readOnly: true
+          title: Texte
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - author
+      - body
+      - created_at
+      - id
+    TaskCommentWriteRequest:
+      type: object
+      properties:
+        body:
+          type: string
+          minLength: 1
+          maxLength: 2000
+      required:
+      - body
+    TaskDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          readOnly: true
+          title: Titre
+        description:
+          type: string
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/TaskStatus'
+          readOnly: true
+          title: Statut
+        priority:
+          allOf:
+          - $ref: '#/components/schemas/TaskPriority'
+          readOnly: true
+          title: Priorité
+        label:
+          type: string
+          readOnly: true
+          title: Étiquette
+        assignee:
+          allOf:
+          - $ref: '#/components/schemas/TaskPerson'
+          nullable: true
+          readOnly: true
+        due_date:
+          type: string
+          format: date
+          readOnly: true
+          nullable: true
+          title: Échéance
+        overdue:
+          type: boolean
+          readOnly: true
+        position:
+          type: integer
+          readOnly: true
+          title: Position dans la colonne
+        revision:
+          type: integer
+          readOnly: true
+          title: Révision
+        created_by:
+          allOf:
+          - $ref: '#/components/schemas/TaskPerson'
+          nullable: true
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        done_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Terminée le
+        archived_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Archivée le
+        comment_count:
+          type: integer
+          readOnly: true
+        attachment_count:
+          type: integer
+          readOnly: true
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaskComment'
+          readOnly: true
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaskAttachment'
+          readOnly: true
+      required:
+      - archived_at
+      - assignee
+      - attachment_count
+      - attachments
+      - comment_count
+      - comments
+      - created_at
+      - created_by
+      - description
+      - done_at
+      - due_date
+      - id
+      - label
+      - overdue
+      - position
+      - priority
+      - revision
+      - status
+      - title
+      - updated_at
+    TaskPerson:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+      required:
+      - id
+      - name
+    TaskPriority:
+      enum:
+      - low
+      - normal
+      - high
+      type: string
+      description: |-
+        * `low` - basse
+        * `normal` - normale
+        * `high` - haute
+    TaskStatus:
+      enum:
+      - todo
+      - doing
+      - done
+      type: string
+      description: |-
+        * `todo` - à faire
+        * `doing` - en cours
+        * `done` - terminée
+    TaskWriteRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+          maxLength: 5000
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+        priority:
+          $ref: '#/components/schemas/TaskPriority'
+        label:
+          type: string
+          maxLength: 50
+        assignee:
+          type: integer
+          nullable: true
+        due_date:
+          type: string
+          format: date
+          nullable: true
+        position:
+          type: integer
+          minimum: 0
     TemplateCustomized:
       type: object
       properties:

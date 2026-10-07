@@ -1378,6 +1378,107 @@ CASES = [
             "category": ids["reg_category_code"],
         },
     ),
+    # --- Organisation (plan L8, N3, N4) : tâches du CO, budget ---------------------------------
+    Case("manage-tasks", "GET", TKR, 200, "/v1/manage/editions/{e}/tasks"),
+    Case("manage-tasks", "POST", TKW, 201, "/v1/manage/editions/{e}/tasks", {"title": "Salle"}),
+    Case("manage-tasks-members", "GET", TKR, 200, "/v1/manage/editions/{e}/tasks/members"),
+    Case("manage-task", "GET", TKR, 200, "/v1/manage/editions/{e}/tasks/{task}"),
+    Case(
+        "manage-task",
+        "PATCH",
+        TKW,
+        200,
+        "/v1/manage/editions/{e}/tasks/{task}",
+        {"status": "doing"},
+    ),
+    Case("manage-task-archive", "POST", TKW, 200, "/v1/manage/editions/{e}/tasks/{task}/archive"),
+    Case("manage-task-restore", "POST", TKW, 200, "/v1/manage/editions/{e}/tasks/{task}/restore"),
+    Case(
+        "manage-task-comments",
+        "POST",
+        TKW,
+        201,
+        "/v1/manage/editions/{e}/tasks/{task}/comments",
+        {"body": "Devis reçu."},
+    ),
+    Case(
+        "manage-task-attachments",
+        "POST",
+        TKW,
+        201,
+        "/v1/manage/editions/{e}/tasks/{task}/attachments",
+        lambda ids: {"file": SimpleUploadedFile("devis.pdf", PDF, "application/pdf")},
+        format="multipart",
+    ),
+    Case(
+        "manage-task-attachment",
+        "GET",
+        TKR,
+        200,
+        "/v1/manage/editions/{e}/tasks/{task}/attachments/{task_attachment}",
+    ),
+    Case(
+        "manage-task-attachment",
+        "DELETE",
+        TKW,
+        200,
+        "/v1/manage/editions/{e}/tasks/{task}/attachments/{task_attachment}",
+    ),
+    Case("manage-budget", "GET", BGR, 200, "/v1/manage/editions/{e}/budget"),
+    Case(
+        "manage-budget-export",
+        "GET",
+        BGR,
+        200,
+        "/v1/manage/editions/{e}/budget/export?file_format=xlsx",
+        recent_auth=True,
+    ),
+    Case(
+        "manage-budget-lines",
+        "POST",
+        BGW,
+        201,
+        "/v1/manage/editions/{e}/budget/lines",
+        {"kind": "expense", "category": "venue", "label": "Location", "planned": "500000"},
+    ),
+    Case(
+        "manage-budget-line",
+        "PATCH",
+        BGW,
+        200,
+        "/v1/manage/editions/{e}/budget/lines/{budget_line}",
+        {"planned": "600000"},
+    ),
+    Case(
+        "manage-budget-line",
+        "DELETE",
+        BGW,
+        200,
+        "/v1/manage/editions/{e}/budget/lines/{budget_line}",
+    ),
+    Case(
+        "manage-budget-line-proof",
+        "GET",
+        BGR,
+        200,
+        "/v1/manage/editions/{e}/budget/lines/{budget_line}/proof",
+    ),
+    Case(
+        "manage-budget-line-proof",
+        "PUT",
+        BGW,
+        200,
+        "/v1/manage/editions/{e}/budget/lines/{budget_line}/proof",
+        lambda ids: {"file": SimpleUploadedFile("facture.pdf", PDF, "application/pdf")},
+        format="multipart",
+    ),
+    Case(
+        "manage-budget-line-proof",
+        "DELETE",
+        BGW,
+        200,
+        "/v1/manage/editions/{e}/budget/lines/{budget_line}/proof",
+    ),
     Case("manage-portal-poster", "GET", R, 200, "/v1/manage/editions/{e}/portal/poster"),
     Case(
         "manage-portal-poster",
@@ -1527,6 +1628,7 @@ def world():
         # leurs PDF coûtant cher à produire pour chacun des cas. Programme publié du jour J
         # (plan L7) : à part, pour que les cas de publication du programme restent valables.
         loaders=(
+            lambda: _organisation_objects(edition, users),
             lambda: _registration_objects(edition),
             lambda: _day_objects(edition),
             lambda: _certificate_objects(edition, users),
@@ -1534,6 +1636,38 @@ def world():
         ),
     )
     return edition, users, ids
+
+
+def _organisation_objects(edition, users) -> dict:
+    """Plan L8 (N3, N4) : une tâche avec sa pièce jointe ; une ligne de budget justifiée."""
+    from apps.logistics.models import BudgetLine, Task, TaskAttachment
+    from apps.logistics.services.budget import PROOFS
+    from apps.logistics.services.tasks import ATTACHMENTS
+
+    task = Task.objects.create(edition=edition, title="Réserver le traiteur")
+    storage, digest = ATTACHMENTS.write(PDF)
+    attachment = TaskAttachment.objects.create(
+        task=task,
+        storage_name=storage,
+        name="devis.pdf",
+        kind="pdf",
+        size=len(PDF),
+        sha256=digest,
+        uploaded_by=users["ADMIN"],
+    )
+    proof, _digest = PROOFS.write(PDF)
+    line = BudgetLine.objects.create(
+        edition=edition,
+        kind="expense",
+        category="catering",
+        label="Traiteur",
+        planned=1000,
+        proof_storage_name=proof,
+        proof_name="facture.pdf",
+        proof_kind="pdf",
+        proof_size=len(PDF),
+    )
+    return {"task": task.pk, "task_attachment": attachment.pk, "budget_line": line.pk}
 
 
 @functools.cache

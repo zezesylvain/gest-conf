@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gestconf-backend\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-07 00:46+0000\n"
+"POT-Creation-Date: 2026-10-07 01:27+0000\n"
 "PO-Revision-Date: 2026-10-05 11:00+0000\n"
 "Last-Translator: GEST-CONF\n"
 "Language-Team: GEST-CONF\n"
@@ -63,7 +63,8 @@ msgstr "Mr"
 msgid "Mme"
 msgstr "Ms"
 
-#: apps/accounts/models.py:84 apps/submissions/models.py:82
+#: apps/accounts/models.py:84 apps/logistics/models.py:49
+#: apps/submissions/models.py:82
 msgid "titre"
 msgstr "title"
 
@@ -148,7 +149,8 @@ msgstr "account area"
 msgid "commande"
 msgstr "command"
 
-#: apps/accounts/models.py:184 apps/core/models.py:205 apps/portal/models.py:58
+#: apps/accounts/models.py:184 apps/core/models.py:205
+#: apps/logistics/models.py:135 apps/portal/models.py:58
 #: apps/program/models.py:112
 msgid "type"
 msgstr "kind"
@@ -202,6 +204,7 @@ msgstr "system"
 #: apps/core/models.py:279 apps/events/models.py:30 apps/events/models.py:98
 #: apps/events/models.py:218 apps/events/models.py:277
 #: apps/events/models.py:332 apps/events/models.py:438
+#: apps/logistics/models.py:45 apps/logistics/models.py:208
 #: apps/payments/models.py:40 apps/payments/models.py:237
 #: apps/portal/models.py:54 apps/portal/models.py:132 apps/portal/models.py:213
 #: apps/portal/models.py:268 apps/program/models.py:46
@@ -226,9 +229,9 @@ msgstr "organising committee function"
 #: apps/accounts/models.py:265 apps/accounts/models.py:356
 #: apps/communications/models.py:58 apps/conferences/models.py:133
 #: apps/core/models.py:208 apps/events/models.py:458
-#: apps/payments/models.py:136 apps/registrations/models.py:413
-#: apps/reviews/models.py:178 apps/reviews/models.py:300
-#: apps/submissions/models.py:89
+#: apps/logistics/models.py:52 apps/payments/models.py:136
+#: apps/registrations/models.py:413 apps/reviews/models.py:178
+#: apps/reviews/models.py:300 apps/submissions/models.py:89
 msgid "statut"
 msgstr "status"
 
@@ -355,7 +358,8 @@ msgstr "scientific committee chair"
 msgid "membre du comité scientifique"
 msgstr "scientific committee member"
 
-#: apps/accounts/roles.py:26 apps/submissions/models.py:152
+#: apps/accounts/roles.py:26 apps/logistics/models.py:114
+#: apps/submissions/models.py:152
 msgid "auteur"
 msgstr "author"
 
@@ -401,7 +405,8 @@ msgid "logistique"
 msgstr "logistics"
 
 #: apps/accounts/roles.py:43 apps/events/models.py:345
-#: apps/program/models.py:182 apps/program/models.py:350
+#: apps/logistics/models.py:163 apps/program/models.py:182
+#: apps/program/models.py:350
 msgid "communication"
 msgstr "communication"
 
@@ -419,6 +424,7 @@ msgstr "secretariat"
 
 #: apps/accounts/services/account.py:66 apps/conferences/services.py:111
 #: apps/conferences/services.py:495 apps/events/services/certificates.py:97
+#: apps/logistics/services/budget.py:178 apps/logistics/services/tasks.py:72
 #: apps/payments/services/billing.py:77 apps/program/services/planning.py:137
 #: apps/program/services/planning.py:239 apps/program/services/planning.py:534
 #: apps/program/services/settings.py:38
@@ -1131,30 +1137,34 @@ msgstr "decision published"
 msgid "version finale reçue"
 msgstr "camera-ready version received"
 
-#: apps/communications/models.py:109 apps/submissions/models.py:137
+#: apps/communications/models.py:97
+msgid "tâche confiée"
+msgstr "task assigned"
+
+#: apps/communications/models.py:110 apps/submissions/models.py:137
 msgid "compte"
 msgstr "account"
 
-#: apps/communications/models.py:113 apps/core/models.py:285
+#: apps/communications/models.py:114 apps/core/models.py:285
 #: apps/events/models.py:281 apps/events/models.py:342
-#: apps/payments/models.py:241 apps/reviews/models.py:235
-#: apps/submissions/models.py:177
+#: apps/logistics/models.py:212 apps/payments/models.py:241
+#: apps/reviews/models.py:235 apps/submissions/models.py:177
 msgid "nature"
 msgstr "kind"
 
-#: apps/communications/models.py:114 apps/core/models.py:206
+#: apps/communications/models.py:115 apps/core/models.py:206
 msgid "données"
 msgstr "payload"
 
-#: apps/communications/models.py:115
+#: apps/communications/models.py:116
 msgid "lue le"
 msgstr "read on"
 
-#: apps/communications/models.py:118
+#: apps/communications/models.py:119
 msgid "notification"
 msgstr "notification"
 
-#: apps/communications/models.py:119
+#: apps/communications/models.py:120
 msgid "notifications"
 msgstr "notifications"
 
@@ -1279,7 +1289,7 @@ msgstr "start"
 msgid "fin"
 msgstr "end"
 
-#: apps/conferences/models.py:85
+#: apps/conferences/models.py:85 apps/logistics/models.py:159
 msgid "lieu"
 msgstr "venue"
 
@@ -1328,7 +1338,7 @@ msgstr "registered presenter required (RG-11)"
 msgid "publiée le"
 msgstr "published at"
 
-#: apps/conferences/models.py:136
+#: apps/conferences/models.py:136 apps/logistics/models.py:78
 msgid "archivée le"
 msgstr "archived at"
 
@@ -1502,7 +1512,7 @@ msgstr "At least one active submission type."
 msgid "Ouverture et clôture de l'appel obligatoires."
 msgstr "Call opening and closing dates are required."
 
-#: apps/conferences/services.py:291
+#: apps/conferences/services.py:291 apps/logistics/services/tasks.py:94
 msgid "Statut inconnu."
 msgstr "Unknown status."
 
@@ -1648,11 +1658,12 @@ msgstr "audit log entry"
 msgid "journal d'audit"
 msgstr "audit log"
 
-#: apps/core/models.py:184 apps/core/models.py:233 apps/payments/models.py:104
+#: apps/core/models.py:184 apps/core/models.py:233 apps/logistics/models.py:25
+#: apps/payments/models.py:104
 msgid "en cours"
 msgstr "running"
 
-#: apps/core/models.py:185
+#: apps/core/models.py:185 apps/logistics/models.py:26
 msgid "terminée"
 msgstr "succeeded"
 
@@ -1660,7 +1671,7 @@ msgstr "succeeded"
 msgid "urgente"
 msgstr "urgent"
 
-#: apps/core/models.py:194
+#: apps/core/models.py:194 apps/logistics/models.py:31
 msgid "normale"
 msgstr "normal"
 
@@ -1668,7 +1679,7 @@ msgstr "normal"
 msgid "envoi de masse"
 msgstr "bulk sending"
 
-#: apps/core/models.py:210
+#: apps/core/models.py:210 apps/logistics/models.py:55
 msgid "priorité"
 msgstr "priority"
 
@@ -1688,15 +1699,16 @@ msgstr "locked at"
 msgid "réservée par"
 msgstr "locked by"
 
-#: apps/core/models.py:216
+#: apps/core/models.py:216 apps/logistics/models.py:77
 msgid "terminée le"
 msgstr "finished at"
 
-#: apps/core/models.py:224
+#: apps/core/models.py:224 apps/logistics/models.py:93
+#: apps/logistics/models.py:110 apps/logistics/models.py:131
 msgid "tâche"
 msgstr "job"
 
-#: apps/core/models.py:225
+#: apps/core/models.py:225 apps/logistics/models.py:94
 msgid "tâches"
 msgstr "jobs"
 
@@ -1756,7 +1768,8 @@ msgstr "profile photo"
 msgid "identifiant public"
 msgstr "public identifier"
 
-#: apps/core/models.py:286 apps/submissions/models.py:179
+#: apps/core/models.py:286 apps/logistics/models.py:133
+#: apps/submissions/models.py:179
 msgid "nom de stockage"
 msgstr "storage name"
 
@@ -1772,7 +1785,8 @@ msgstr "extension"
 msgid "type de contenu"
 msgstr "content type"
 
-#: apps/core/models.py:290 apps/submissions/models.py:181
+#: apps/core/models.py:290 apps/logistics/models.py:136
+#: apps/submissions/models.py:181
 msgid "taille (octets)"
 msgstr "size (bytes)"
 
@@ -2241,7 +2255,8 @@ msgid "Le certificat de signature a expiré."
 msgstr "The signing certificate has expired."
 
 #: apps/events/services/certificates.py:292
-#: apps/events/services/certificates.py:802 apps/portal/services.py:595
+#: apps/events/services/certificates.py:802
+#: apps/logistics/services/budget.py:207 apps/portal/services.py:595
 msgid "Nature inconnue."
 msgstr "Unknown kind."
 
@@ -2331,7 +2346,7 @@ msgstr "200 check-ins at most per batch."
 msgid "Pointage déjà annulé."
 msgstr "Check-in already cancelled."
 
-#: apps/events/services/checkin.py:469 apps/payments/services/finance.py:118
+#: apps/events/services/checkin.py:469 apps/payments/services/finance.py:127
 #: apps/registrations/services/exports.py:25
 #: apps/reviews/services/decisions.py:499 apps/submissions/services.py:711
 msgid "Référence"
@@ -2355,7 +2370,7 @@ msgstr "Checked in at (UTC)"
 msgid "Reçu le (UTC)"
 msgstr "Received at (UTC)"
 
-#: apps/events/services/checkin.py:474 apps/payments/services/finance.py:122
+#: apps/events/services/checkin.py:474 apps/payments/services/finance.py:131
 #: apps/registrations/services/exports.py:33
 msgid "Moyen"
 msgstr "Method"
@@ -2539,6 +2554,375 @@ msgstr "Unknown variable: {%(field)s}. Allowed variables: %(allowed)s."
 msgid "Numéro de lot attendu (1, 2…)."
 msgstr "Batch number expected (1, 2…)."
 
+#: apps/logistics/models.py:24
+msgid "à faire"
+msgstr "to do"
+
+#: apps/logistics/models.py:30
+msgid "basse"
+msgstr "low"
+
+#: apps/logistics/models.py:32
+msgid "haute"
+msgstr "high"
+
+#: apps/logistics/models.py:50
+msgid "description"
+msgstr "description"
+
+#: apps/logistics/models.py:57
+msgid "étiquette"
+msgstr "label"
+
+#: apps/logistics/models.py:60
+msgid "responsable"
+msgstr "assignee"
+
+#: apps/logistics/models.py:66 apps/reviews/models.py:176
+msgid "échéance"
+msgstr "deadline"
+
+#: apps/logistics/models.py:67
+msgid "position dans la colonne"
+msgstr "position in the column"
+
+#: apps/logistics/models.py:68 apps/submissions/models.py:99
+msgid "révision"
+msgstr "revision"
+
+#: apps/logistics/models.py:71
+msgid "créée par"
+msgstr "created by"
+
+#: apps/logistics/models.py:80
+msgid "rappelée le"
+msgstr "reminded on"
+
+#: apps/logistics/models.py:118
+msgid "texte"
+msgstr "text"
+
+#: apps/logistics/models.py:121
+msgid "commentaire de tâche"
+msgstr "task comment"
+
+#: apps/logistics/models.py:122
+msgid "commentaires de tâche"
+msgstr "task comments"
+
+#: apps/logistics/models.py:134
+msgid "nom du fichier"
+msgstr "file name"
+
+#: apps/logistics/models.py:137
+msgid "empreinte"
+msgstr "fingerprint"
+
+#: apps/logistics/models.py:140
+msgid "déposée par"
+msgstr "uploaded by"
+
+#: apps/logistics/models.py:146
+msgid "pièce jointe de tâche"
+msgstr "task attachment"
+
+#: apps/logistics/models.py:147
+msgid "pièces jointes de tâche"
+msgstr "task attachments"
+
+#: apps/logistics/models.py:152
+msgid "dépense"
+msgstr "expense"
+
+#: apps/logistics/models.py:153
+msgid "recette"
+msgstr "income"
+
+#: apps/logistics/models.py:160
+msgid "restauration"
+msgstr "catering"
+
+#: apps/logistics/models.py:161
+msgid "voyages"
+msgstr "travel"
+
+#: apps/logistics/models.py:162
+msgid "hébergement"
+msgstr "accommodation"
+
+#: apps/logistics/models.py:164
+msgid "impression"
+msgstr "printing"
+
+#: apps/logistics/models.py:165
+msgid "matériel"
+msgstr "equipment"
+
+#: apps/logistics/models.py:166
+msgid "personnel"
+msgstr "staff"
+
+#: apps/logistics/models.py:167
+msgid "divers (dépense)"
+msgstr "other (expense)"
+
+#: apps/logistics/models.py:168 apps/registrations/models.py:475
+msgid "inscriptions"
+msgstr "registrations"
+
+#: apps/logistics/models.py:169
+msgid "partenariats"
+msgstr "sponsorship"
+
+#: apps/logistics/models.py:170
+msgid "subventions"
+msgstr "grants"
+
+#: apps/logistics/models.py:171
+msgid "divers (recette)"
+msgstr "other (income)"
+
+#: apps/logistics/models.py:193
+msgid "saisi"
+msgstr "entered"
+
+#: apps/logistics/models.py:194
+msgid "calculé : inscriptions"
+msgstr "computed: registrations"
+
+#: apps/logistics/models.py:195
+msgid "calculé : partenaires"
+msgstr "computed: sponsors"
+
+#: apps/logistics/models.py:213
+msgid "poste"
+msgstr "budget item"
+
+#: apps/logistics/models.py:214
+msgid "libellé"
+msgstr "label"
+
+#: apps/logistics/models.py:215
+msgid "prévu"
+msgstr "planned"
+
+#: apps/logistics/models.py:216
+msgid "réalisé"
+msgstr "actual"
+
+#: apps/logistics/models.py:218
+msgid "origine du réalisé"
+msgstr "source of the actual amount"
+
+#: apps/logistics/models.py:226 apps/payments/models.py:155
+#: apps/reviews/models.py:357
+msgid "note"
+msgstr "score"
+
+#: apps/logistics/models.py:227 apps/portal/models.py:189
+msgid "position"
+msgstr "position"
+
+#: apps/logistics/models.py:229
+msgid "justificatif (nom de stockage)"
+msgstr "supporting document (storage name)"
+
+#: apps/logistics/models.py:231 apps/registrations/models.py:444
+msgid "justificatif"
+msgstr "proof"
+
+#: apps/logistics/models.py:232 apps/registrations/models.py:448
+msgid "type du justificatif"
+msgstr "proof type"
+
+#: apps/logistics/models.py:233 apps/registrations/models.py:449
+msgid "taille du justificatif"
+msgstr "proof size"
+
+#: apps/logistics/models.py:245
+msgid "ligne de budget"
+msgstr "budget line"
+
+#: apps/logistics/models.py:246
+msgid "lignes de budget"
+msgstr "budget lines"
+
+#: apps/logistics/notifications.py:43
+#, python-format
+msgid "%(title)s : en retard (échéance %(date)s)"
+msgstr "%(title)s: overdue (due %(date)s)"
+
+#: apps/logistics/notifications.py:48
+#, python-format
+msgid "%(title)s : échéance %(date)s"
+msgstr "%(title)s: due %(date)s"
+
+#: apps/logistics/services/budget.py:58
+msgid "Inscriptions (encaissé net)"
+msgstr "Registrations (net collected)"
+
+#: apps/logistics/services/budget.py:158 apps/logistics/services/budget.py:197
+msgid "Montant attendu."
+msgstr "Amount expected."
+
+#: apps/logistics/services/budget.py:161
+#: apps/registrations/services/pricing.py:397
+msgid "Montant positif ou nul attendu."
+msgstr "A positive or zero amount is expected."
+
+#: apps/logistics/services/budget.py:163
+msgid "Montant trop élevé."
+msgstr "Amount too large."
+
+#: apps/logistics/services/budget.py:166
+#: apps/registrations/services/pricing.py:399
+#, python-format
+msgid "Trop de décimales pour la devise %(currency)s."
+msgstr "Too many decimals for the currency %(currency)s."
+
+#: apps/logistics/services/budget.py:184
+msgid "Libellé obligatoire."
+msgstr "Label required."
+
+#: apps/logistics/services/budget.py:186 apps/logistics/services/tasks.py:80
+msgid "200 caractères au plus."
+msgstr "200 characters at most."
+
+#: apps/logistics/services/budget.py:191 apps/logistics/services/tasks.py:264
+msgid "2 000 caractères au plus."
+msgstr "2,000 characters at most."
+
+#: apps/logistics/services/budget.py:201 apps/logistics/services/tasks.py:108
+msgid "Position positive ou nulle attendue."
+msgstr "Zero or positive position expected."
+
+#: apps/logistics/services/budget.py:209
+msgid "Poste inconnu."
+msgstr "Unknown budget item."
+
+#: apps/logistics/services/budget.py:211
+msgid "Poste d'une autre nature."
+msgstr "Budget item of another kind."
+
+#: apps/logistics/services/budget.py:262
+msgid "Ligne calculée : elle ne se supprime pas."
+msgstr "Computed line: it cannot be deleted."
+
+#: apps/logistics/services/budget.py:278
+#: apps/registrations/services/orders.py:436 apps/registrations/views.py:550
+msgid "Fichier de 5 Mo au plus."
+msgstr "File of 5 MB at most."
+
+#: apps/logistics/services/budget.py:281 apps/logistics/services/tasks.py:281
+#: apps/registrations/services/orders.py:439
+msgid "PDF, JPEG ou PNG attendu."
+msgstr "PDF, JPEG or PNG expected."
+
+#: apps/logistics/services/budget.py:334 apps/payments/services/finance.py:168
+msgid "Nature"
+msgstr "Kind"
+
+#: apps/logistics/services/budget.py:335
+msgid "Poste"
+msgstr "Budget item"
+
+#: apps/logistics/services/budget.py:336
+msgid "Libellé"
+msgstr "Label"
+
+#: apps/logistics/services/budget.py:337
+msgid "Prévu"
+msgstr "Planned"
+
+#: apps/logistics/services/budget.py:338
+msgid "Réalisé"
+msgstr "Actual"
+
+#: apps/logistics/services/budget.py:339
+msgid "Écart"
+msgstr "Variance"
+
+#: apps/logistics/services/budget.py:340
+msgid "Origine du réalisé"
+msgstr "Source of the actual amount"
+
+#: apps/logistics/services/budget.py:341
+msgid "Note"
+msgstr "Note"
+
+#: apps/logistics/services/budget.py:342 apps/payments/services/finance.py:134
+#: apps/payments/services/finance.py:174
+#: apps/registrations/services/exports.py:35
+msgid "Devise"
+msgstr "Currency"
+
+#: apps/logistics/services/tasks.py:65
+msgid "Membre du comité d'organisation attendu."
+msgstr "Organising committee member expected."
+
+#: apps/logistics/services/tasks.py:78 apps/submissions/services.py:105
+msgid "Titre obligatoire."
+msgstr "Title required."
+
+#: apps/logistics/services/tasks.py:85
+msgid "5 000 caractères au plus."
+msgstr "5,000 characters at most."
+
+#: apps/logistics/services/tasks.py:90
+msgid "50 caractères au plus."
+msgstr "50 characters at most."
+
+#: apps/logistics/services/tasks.py:98
+msgid "Priorité inconnue."
+msgstr "Unknown priority."
+
+#: apps/logistics/services/tasks.py:103
+msgid "Date attendue."
+msgstr "Date expected."
+
+#: apps/logistics/services/tasks.py:193
+msgid "Tâche archivée : restaurez-la d'abord."
+msgstr "Archived task: restore it first."
+
+#: apps/logistics/services/tasks.py:262
+msgid "Commentaire vide."
+msgstr "Empty comment."
+
+#: apps/logistics/services/tasks.py:276
+msgid "20 pièces jointes au plus par tâche."
+msgstr "20 attachments at most per task."
+
+#: apps/logistics/services/tasks.py:278 apps/logistics/views.py:70
+msgid "Fichier de 10 Mo au plus."
+msgstr "File of 10 MB at most."
+
+#: apps/logistics/templates/logistics/email/tasks_reminder_message.txt:1
+#, python-format
+msgid ""
+"Bonjour,\n"
+"\n"
+"Voici les tâches du comité d'organisation de %(edition_title)s qui vous sont "
+"confiées et arrivent à échéance :"
+msgstr ""
+"Hello,\n"
+"\n"
+"Here are the organising committee tasks of %(edition_title)s assigned to you "
+"that are due:"
+
+#: apps/logistics/templates/logistics/email/tasks_reminder_message.txt:7
+#, python-format
+msgid "Le tableau des tâches : %(link)s"
+msgstr "The task board: %(link)s"
+
+#: apps/logistics/templates/logistics/email/tasks_reminder_subject.txt:1
+#, python-format
+msgid "[%(site_name)s] Vos tâches à échéance"
+msgstr "[%(site_name)s] Your tasks due"
+
+#: apps/logistics/views.py:370
+msgid "csv ou xlsx attendu."
+msgstr "csv or xlsx expected."
+
 #: apps/payments/models.py:44
 msgid "raison sociale"
 msgstr "legal name"
@@ -2651,10 +3035,6 @@ msgstr "last status check"
 #: apps/payments/models.py:149
 msgid "validé par"
 msgstr "validated by"
-
-#: apps/payments/models.py:155 apps/reviews/models.py:357
-msgid "note"
-msgstr "score"
 
 #: apps/payments/models.py:171 apps/payments/models.py:193
 #: apps/payments/models.py:261
@@ -2791,70 +3171,61 @@ msgstr "A pro forma is only for a registration awaiting payment."
 msgid "Montant de 0 à %(max)s."
 msgstr "Amount from 0 to %(max)s."
 
-#: apps/payments/services/finance.py:119 apps/payments/services/finance.py:161
+#: apps/payments/services/finance.py:128 apps/payments/services/finance.py:170
 msgid "Inscription"
 msgstr "Registration"
 
-#: apps/payments/services/finance.py:120
+#: apps/payments/services/finance.py:129
 msgid "Participant"
 msgstr "Attendee"
 
-#: apps/payments/services/finance.py:121
+#: apps/payments/services/finance.py:130
 msgid "Fournisseur"
 msgstr "Provider"
 
-#: apps/payments/services/finance.py:123
+#: apps/payments/services/finance.py:132
 msgid "Référence du fournisseur"
 msgstr "Provider reference"
 
-#: apps/payments/services/finance.py:124 apps/payments/services/finance.py:164
+#: apps/payments/services/finance.py:133 apps/payments/services/finance.py:173
 msgid "Montant"
 msgstr "Amount"
 
-#: apps/payments/services/finance.py:125 apps/payments/services/finance.py:165
-#: apps/registrations/services/exports.py:35
-msgid "Devise"
-msgstr "Currency"
-
-#: apps/payments/services/finance.py:126
+#: apps/payments/services/finance.py:135
 #: apps/registrations/services/exports.py:30
 #: apps/reviews/services/decisions.py:503 apps/submissions/services.py:712
 msgid "Statut"
 msgstr "Status"
 
-#: apps/payments/services/finance.py:127
+#: apps/payments/services/finance.py:136
 msgid "Créé le"
 msgstr "Created on"
 
-#: apps/payments/services/finance.py:128
+#: apps/payments/services/finance.py:137
 msgid "Terminé le"
 msgstr "Completed on"
 
-#: apps/payments/services/finance.py:129
+#: apps/payments/services/finance.py:138
 msgid "Reçu le"
 msgstr "Received on"
 
-#: apps/payments/services/finance.py:158
+#: apps/payments/services/finance.py:167
 msgid "Numéro"
 msgstr "Number"
 
-#: apps/payments/services/finance.py:159
-msgid "Nature"
-msgstr "Kind"
-
-#: apps/payments/services/finance.py:160
+#: apps/payments/services/finance.py:169
 msgid "Facture d'origine"
 msgstr "Original invoice"
 
-#: apps/payments/services/finance.py:162
+#: apps/payments/services/finance.py:171
 msgid "Client"
 msgstr "Customer"
 
-#: apps/payments/services/finance.py:163
+#: apps/payments/services/finance.py:172
 msgid "Organisme"
 msgstr "Organisation"
 
-#: apps/payments/services/finance.py:166
+#: apps/payments/services/finance.py:175
 msgid "Émise le"
 msgstr "Issued on"
 
@@ -2992,10 +3363,6 @@ msgstr "page"
 #: apps/portal/models.py:159 apps/submissions/models.py:183
 msgid "pages"
 msgstr "pages"
-
-#: apps/portal/models.py:189
-msgid "position"
-msgstr "position"
 
 #: apps/portal/models.py:192
 msgid "section posée"
@@ -3874,21 +4241,9 @@ msgstr "billing organisation"
 msgid "adresse de facturation"
 msgstr "billing address"
 
-#: apps/registrations/models.py:444
-msgid "justificatif"
-msgstr "proof"
-
 #: apps/registrations/models.py:446
 msgid "nom du justificatif"
 msgstr "proof file name"
-
-#: apps/registrations/models.py:448
-msgid "type du justificatif"
-msgstr "proof type"
-
-#: apps/registrations/models.py:449
-msgid "taille du justificatif"
-msgstr "proof size"
 
 #: apps/registrations/models.py:450
 msgid "justificatif déposé le"
@@ -3905,10 +4260,6 @@ msgstr "QR token"
 #: apps/registrations/models.py:455 apps/reviews/models.py:191
 msgid "clé d'unicité active"
 msgstr "active uniqueness key"
-
-#: apps/registrations/models.py:475
-msgid "inscriptions"
-msgstr "registrations"
 
 #: apps/registrations/models.py:528
 msgid "retiré le"
@@ -4045,14 +4396,6 @@ msgstr "Invoice issued: the billing identity can no longer change."
 msgid "Aucun justificatif demandé pour cette catégorie."
 msgstr "No proof is required for this category."
 
-#: apps/registrations/services/orders.py:436 apps/registrations/views.py:550
-msgid "Fichier de 5 Mo au plus."
-msgstr "File of 5 MB at most."
-
-#: apps/registrations/services/orders.py:439
-msgid "PDF, JPEG ou PNG attendu."
-msgstr "PDF, JPEG or PNG expected."
-
 #: apps/registrations/services/pricing.py:165
 #: apps/registrations/services/pricing.py:418
 msgid "Catégorie inconnue."
@@ -4102,15 +4445,6 @@ msgstr "Category not offered for this period and zone."
 #, python-format
 msgid "Plus de place disponible pour cette option : %(code)s."
 msgstr "No place left for this option: %(code)s."
-
-#: apps/registrations/services/pricing.py:397
-msgid "Montant positif ou nul attendu."
-msgstr "A positive or zero amount is expected."
-
-#: apps/registrations/services/pricing.py:399
-#, python-format
-msgid "Trop de décimales pour la devise %(currency)s."
-msgstr "Too many decimals for the currency %(currency)s."
 
 #: apps/registrations/services/pricing.py:477
 msgid "Catégorie utilisée par des inscriptions : désactivez-la."
@@ -4368,10 +4702,6 @@ msgstr "assigned by"
 #: apps/reviews/models.py:175
 msgid "affectée le"
 msgstr "assigned on"
-
-#: apps/reviews/models.py:176
-msgid "échéance"
-msgstr "deadline"
 
 #: apps/reviews/models.py:183
 msgid "motif (refus ou annulation)"
@@ -5118,10 +5448,6 @@ msgstr "withdrawn on"
 msgid "motif du retrait"
 msgstr "withdrawal reason"
 
-#: apps/submissions/models.py:99
-msgid "révision"
-msgstr "revision"
-
 #: apps/submissions/models.py:101
 msgid "déclarations"
 msgstr "declarations"
@@ -5262,10 +5588,6 @@ msgid ""
 "réessayez."
 msgstr ""
 "This PDF cannot be anonymised automatically: export it again and retry."
-
-#: apps/submissions/services.py:105
-msgid "Titre obligatoire."
-msgstr "Title required."
 
 #: apps/submissions/services.py:109
 msgid "Résumé obligatoire."

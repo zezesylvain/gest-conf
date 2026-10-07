@@ -101,6 +101,15 @@ def dashboard(edition: Edition) -> dict:
     }
 
 
+def net_collected(edition: Edition) -> Decimal:
+    """Encaissé net de l'édition : paiements réussis moins remboursements (réalisé de la
+    ligne « inscriptions » du budget, plan L8, N4)."""
+    collected = _sum(
+        Payment.objects.filter(registration__edition=edition, status=PaymentStatus.SUCCEEDED)
+    )
+    return collected - _sum(Refund.objects.filter(registration__edition=edition))
+
+
 def _local(edition: Edition):
     zone = ZoneInfo(edition.timezone)
 

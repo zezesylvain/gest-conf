@@ -12,6 +12,7 @@
 #   41 * * * *   $HOME/gestconf-app/deploy/cron.sh sync_payments
 #   17 3 * * *   $HOME/gestconf-app/deploy/cron.sh cleanup
 #   47 3 * * *   $HOME/gestconf-app/deploy/cron.sh check_integrity
+#   53 6 * * *   $HOME/gestconf-app/deploy/cron.sh remind_tasks
 #
 # Charge le MÊME venv que Passenger (chemin écrit par deploy.sh dans VENV_ACTIVATE) et le
 # même .env (lu par config.settings.prod). Toute la sortie va dans logs/cron-<commande>.log :
@@ -26,7 +27,7 @@ command="${1:?Usage : $0 <commande> [options]}"
 # Liste fermée : ce script n'est pas un accès générique à manage.py.
 case "$command" in
   run_jobs | close_call | remind_drafts | remind_reviewers | remind_presentations | cleanup | \
-    check_integrity | expire_registrations | sync_payments) ;;
+    check_integrity | expire_registrations | sync_payments | remind_tasks) ;;
   *)
     echo "Commande non planifiable : $command" >&2
     exit 2

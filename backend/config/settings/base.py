@@ -389,6 +389,12 @@ SPECTACULAR_SETTINGS = {
         "SignatureLayout": "apps.events.models.SignatureLayout",
         "VerificationKind": "apps.events.serializers.VERIFICATION_KIND_CHOICES",
         "VerificationStatus": "apps.events.serializers.VERIFICATION_STATUS_CHOICES",
+        # Plan L8 : organisation.
+        "TaskStatus": "apps.logistics.models.TaskStatus",
+        "TaskPriority": "apps.logistics.models.TaskPriority",
+        "BudgetKind": "apps.logistics.models.BudgetKind",
+        "BudgetCategory": "apps.logistics.models.BudgetCategory",
+        "BudgetSource": "apps.logistics.models.BudgetSource",
         "InvitableRole": "apps.accounts.roles.InvitableRole",
         "OcFunction": "apps.accounts.roles.OcFunction",
         "UserRoleStatus": "apps.accounts.models.UserRoleStatus",

@@ -182,7 +182,7 @@ def test_cron_script_only_runs_scheduled_commands():
     scheduled = (
         r"^\s*run_jobs \| close_call \| remind_drafts \| remind_reviewers \| "
         r"remind_presentations \| cleanup \| \\\n\s*check_integrity \| "
-        r"expire_registrations \| sync_payments\)"
+        r"expire_registrations \| sync_payments \| remind_tasks\)"
     )
     assert re.search(scheduled, code, re.M)
     assert "config.settings.prod" in code
