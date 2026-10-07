@@ -98,6 +98,32 @@ def test_not_acceptable(client):
     assert response.json()["code"] == "not_acceptable"
 
 
+@pytest.mark.parametrize(
+    "accept",
+    [
+        "application/octet-stream",
+        "application/pdf",
+        "text/csv",
+        "text/calendar",
+        "image/png",
+        "image/svg+xml",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    ],
+)
+def test_file_request_falls_back_to_json_errors(client, accept):
+    """Le client généré annonce le type du fichier attendu : pas de 406 avant la vue, et
+    une erreur garde le format normalisé, en JSON (bilan de L8.10)."""
+    response = client.get("/http404", HTTP_ACCEPT=accept)
+    assert response.status_code == 404
+    assert response["Content-Type"] == "application/json"
+    assert_error_shape(response.json())
+
+
+def test_mixed_accept_with_unserved_type_stays_not_acceptable(client):
+    response = client.get("/http404", HTTP_ACCEPT="text/csv, application/xml")
+    assert response.status_code == 406
+
+
 # --- Erreurs métier (DomainError) ---------------------------------------------------
 
 

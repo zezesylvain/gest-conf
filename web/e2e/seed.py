@@ -8,6 +8,8 @@ commande, 2FA TOTP activée avec un secret de test connu du navigateur). Pour le
 sur place ; pays local : CI), une catégorie et sa grille, une option à quota ; CO de fonction
 « finances » ; un second participant (Sénégal, tarif international) sans rôle. Pour le jour J
 (L7) : un bénévole, un CO « secrétariat » et un signataire (2FA), et une image de signature.
+Pour le lot L8 : CO « logistique », « communication » et « relations extérieures », et un
+intervenant invité.
 
 Lu sur l'entrée standard de ``manage.py shell`` par ``e2e/django.ts`` ; imprime du JSON.
 """
@@ -171,6 +173,36 @@ committee = {
         "Université FHB",
         Role.SIGNATORY,
     ),
+    # Lot L8 : CO « logistique » (venues, repas, postes), « communication » (annonces,
+    # questionnaires), « relations extérieures » (partenaires) ; intervenant invité.
+    "logistics": (
+        "logistique@e2e.example.org",
+        "Kader",
+        "Ouattara",
+        "Université FHB",
+        Role.OC_MEMBER,
+    ),
+    "communication": (
+        "communication@e2e.example.org",
+        "Nadia",
+        "Koffi",
+        "Université FHB",
+        Role.OC_MEMBER,
+    ),
+    "relations": (
+        "relations@e2e.example.org",
+        "Paul",
+        "Aka",
+        "Université FHB",
+        Role.OC_MEMBER,
+    ),
+    "speaker": (
+        "intervenant@e2e.example.org",
+        "Ama",
+        "Owusu",
+        "University of Ghana",
+        Role.SPEAKER,
+    ),
     "conference_chair": (
         "president@e2e.example.org",
         "Yao",
@@ -218,6 +250,9 @@ for email, first_name, last_name, institution, role in committee.values():
             "programme@e2e.example.org": "program",
             "finances@e2e.example.org": "finance",
             "secretariat@e2e.example.org": "secretariat",
+            "logistique@e2e.example.org": "logistics",
+            "communication@e2e.example.org": "communication",
+            "relations@e2e.example.org": "external_relations",
         }.get(email, ""),
     )
 

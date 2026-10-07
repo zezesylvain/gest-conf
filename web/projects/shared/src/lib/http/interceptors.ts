@@ -63,15 +63,40 @@ export const acceptLanguageInterceptor: HttpInterceptorFn = (request, next) => {
   return next(request.clone({ setHeaders: { 'Accept-Language': language } }));
 };
 
-/** Convertit les réponses d'erreur de l'API (DRF et allauth) en `GcApiError`. */
+/**
+ * Convertit les réponses d'erreur de l'API (DRF et allauth) en `GcApiError`. Pour une
+ * requête de fichier (`responseType: 'blob'` : exports, PDF, iCal), le corps d'erreur JSON
+ * arrive en `Blob` : il est relu en texte, sans quoi son code serait perdu (une
+ * réauthentification exigée passerait pour un simple refus ; bilan de L8.10).
+ */
 export const apiErrorInterceptor: HttpInterceptorFn = (request, next) => {
   if (!isApiRequest(request)) {
     return next(request);
   }
   return next(request).pipe(
-    catchError((error: unknown) =>
-      throwError(() => (error instanceof HttpErrorResponse ? toApiError(error) : error)),
-    ),
+    catchError((error: unknown) => {
+      if (!(error instanceof HttpErrorResponse)) {
+        return throwError(() => error);
+      }
+      if (!(error.error instanceof Blob)) {
+        return throwError(() => toApiError(error));
+      }
+      return from(error.error.text().catch(() => '')).pipe(
+        switchMap((text) =>
+          throwError(() =>
+            toApiError(
+              new HttpErrorResponse({
+                error: text,
+                headers: error.headers,
+                status: error.status,
+                statusText: error.statusText,
+                url: error.url ?? undefined,
+              }),
+            ),
+          ),
+        ),
+      );
+    }),
   );
 };
 

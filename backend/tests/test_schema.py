@@ -88,3 +88,21 @@ def test_schema_version_is_the_project_version(schema):
         project_version = tomllib.load(handle)["project"]["version"]
     assert settings.SPECTACULAR_SETTINGS["VERSION"] == project_version
     assert schema["info"]["version"] == project_version
+
+
+def test_binary_responses_pass_content_negotiation(schema):
+    """Méta-test (bilan de L8.10) : le client généré envoie en ``Accept`` le type déclaré
+    pour la réponse ; tout type de fichier du schéma doit franchir la négociation de DRF
+    (repli sur le JSON), sans quoi la vue répond 406 avant même de servir le fichier."""
+    from apps.core.negotiation import is_file_media_type
+
+    declared = set()
+    for path, operations in schema["paths"].items():
+        for method, operation in operations.items():
+            for status, response in operation.get("responses", {}).items():
+                for media_type in response.get("content", {}):
+                    if media_type != "application/json" and status.startswith("2"):
+                        declared.add((media_type, f"{method.upper()} {path}"))
+    assert declared, "aucune réponse de fichier dans le schéma"
+    refused = sorted(item for item in declared if not is_file_media_type(item[0]))
+    assert refused == []

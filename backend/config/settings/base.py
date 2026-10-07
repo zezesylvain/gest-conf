@@ -299,6 +299,9 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": ["apps.core.authentication.SessionAuthentication"],
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
+    # Requête de fichier (Accept: text/csv, application/pdf…) : repli sur le JSON au lieu
+    # d'un 406, la vue servant elle-même son fichier (bilan de L8.10).
+    "DEFAULT_CONTENT_NEGOTIATION_CLASS": "apps.core.negotiation.FileAwareContentNegotiation",
     "DEFAULT_PARSER_CLASSES": ["rest_framework.parsers.JSONParser"],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_FILTER_BACKENDS": [

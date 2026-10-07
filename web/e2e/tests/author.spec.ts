@@ -35,7 +35,14 @@ import { freshTotpCode } from '../totp';
  *     synchronisation au retour du réseau, « déjà pointé », mode session (K4 à K7) ;
  * 12. sessions du jour : communication « présentée » (K8) ; comptoir (K13) ;
  * 13. attestations émises par la file (`run_jobs`), RG-16 (le présent seul), téléchargement
- *     et vérification publique (K9 à K11).
+ *     et vérification publique (K9 à K11) ;
+ * 14. organisation du CO (plan L8 §7 ; démo I) : tâche créée puis terminée au clavier,
+ *     budget et recettes calculées, partenaire publié et lu par l'API publique ;
+ * 15. logistique : « Ma venue » de l'intervenant invité et son régime (RG-23), signal dans
+ *     la liste, repas et régime compté sans nom, poste de bénévole et « Mon planning » ;
+ * 16. communication : annonce au bandeau (visible aussitôt sur le portail) et envoi groupé
+ *     (RG-22), questionnaire publié, réponse anonyme (RG-21), résultats sous le seuil puis
+ *     au-dessus, rapport exporté.
  */
 test.describe.configure({ mode: 'serial' });
 
@@ -61,6 +68,10 @@ let seed: {
   secretariat: string;
   signatory: string;
   signature: string;
+  logistics: string;
+  communication: string;
+  relations: string;
+  speaker: string;
 };
 let reference = '';
 
@@ -851,4 +862,182 @@ test('attestations : émission en file, RG-16, téléchargement et vérification
   await expect(page.locator('main')).toContainText('Awa Koné');
   await page.goto('/verification/CODEINCONNU');
   await expect(page.getByRole('alert')).toContainText('Aucun document ne correspond à ce code');
+});
+
+/** Heure locale de l'édition (Africa/Abidjan, UTC+0 sans heure d'été) pour un champ
+ * `datetime-local`, décalée de `hours` heures. */
+function localIn(hours: number): string {
+  return new Date(Date.now() + hours * 3_600_000).toISOString().slice(0, 16);
+}
+
+test('organisation du CO : tâche, budget, partenaire publié', async ({ browser }) => {
+  test.setTimeout(120_000);
+  const finance = await committeeLogin(browser, seed.finance);
+  const base = `${GESTION}/editions/${seed.edition}`;
+
+  // Tâche créée, puis déplacée dans « Terminées » par la liste (sans glisser-déposer).
+  await finance.goto(`${base}/organisation/taches`);
+  await finance.getByLabel('Titre').fill('Réserver le traiteur');
+  await finance.getByRole('button', { name: 'Créer la tâche' }).click();
+  await expect(finance.getByRole('heading', { name: 'À faire (1)' })).toBeVisible();
+  await finance
+    .getByLabel('Déplacer la tâche « Réserver le traiteur » vers une autre colonne')
+    .selectOption('done');
+  await expect(finance.getByRole('heading', { name: 'Terminées (1)' })).toBeVisible();
+
+  // Budget : les recettes d'inscription sont calculées par la plateforme (L6).
+  await finance.goto(`${base}/organisation/budget`);
+  const income = finance.getByRole('region', { name: 'Recettes' });
+  await expect(income).toContainText('calculé');
+
+  // Partenaire créé et publié par le CO « relations extérieures ».
+  const relations = await committeeLogin(browser, seed.relations);
+  await relations.goto(`${base}/partenaires`);
+  await relations.getByLabel('Nom', { exact: true }).fill('Banque du Golfe');
+  await relations.getByRole('button', { name: 'Créer et ouvrir la fiche' }).click();
+  await expect(relations).toHaveURL(/\/partenaires\/\d+$/);
+  await relations.getByLabel('Présentation (français)').fill('Banque régionale.');
+  await relations.getByLabel('Publier sur le portail').check();
+  await relations.getByRole('button', { name: 'Enregistrer' }).click();
+  await expect(relations.getByText('Fiche enregistrée.')).toBeVisible();
+  const sponsors = await relations.request.get('/api/v1/public/sponsors');
+  const body = (await sponsors.json()) as { others: { name: string }[] };
+  expect(body.others.map((item) => item.name)).toEqual(['Banque du Golfe']);
+  // Liste blanche : ni contact, ni montant.
+  expect(JSON.stringify(body)).not.toContain('status');
+});
+
+test('logistique : venue de l’intervenant, régime, repas, poste de bénévole', async ({
+  browser,
+}) => {
+  test.setTimeout(150_000);
+  const base = `${GESTION}/editions/${seed.edition}`;
+
+  // L'intervenant invité renseigne sa venue et son régime (consentement explicite).
+  const speaker = await committeeLogin(browser, seed.speaker);
+  await speaker.goto('/compte/ma-venue');
+  await speaker.getByLabel('Vidéoprojecteur').check();
+  await speaker.getByLabel('Arrivée', { exact: true }).fill('2027-02-28T18:30');
+  await speaker.getByLabel("J'ai besoin d'un hébergement").check();
+  await speaker.getByRole('button', { name: 'Enregistrer' }).first().click();
+  await expect(speaker.getByText('Informations enregistrées.')).toBeVisible();
+  await speaker.getByLabel('Végétarien').check();
+  await speaker.getByLabel(/J'accepte que le comité/).check();
+  await speaker.getByRole('button', { name: 'Enregistrer' }).nth(1).click();
+  await expect(speaker.getByText('Régime enregistré.')).toBeVisible();
+
+  // Le CO « logistique » voit la venue, puis compte le régime au repas, sans nom.
+  const logistics = await committeeLogin(browser, seed.logistics);
+  await logistics.goto(`${base}/logistique/intervenants`);
+  const row = logistics.locator('tbody tr', { hasText: 'Ama Owusu' });
+  await expect(row).toContainText('Demandé, à réserver');
+  await logistics.goto(`${base}/logistique/restauration`);
+  await logistics.getByLabel('Jour', { exact: true }).fill('2027-03-01');
+  await logistics.getByLabel('Intervenants invités').check();
+  await logistics.getByRole('button', { name: 'Ajouter le repas' }).click();
+  await expect(logistics.getByText('Repas ajouté.')).toBeVisible();
+  await expect(logistics.locator('table').first()).toContainText('Végétarien : 1');
+  await expect(logistics.locator('table').first()).not.toContainText('Owusu');
+
+  // Poste de bénévole et affectation ; le bénévole le retrouve dans « Mon planning ».
+  await logistics.goto(`${base}/logistique/benevoles`);
+  await logistics.getByLabel('Intitulé (français)').fill('Accueil des participants');
+  await logistics.getByLabel('Début', { exact: true }).fill('2027-03-01T07:30');
+  await logistics.getByLabel('Fin', { exact: true }).fill('2027-03-01T10:00');
+  await logistics.getByLabel('Bénévoles nécessaires').fill('2');
+  await logistics.getByRole('button', { name: 'Ajouter le poste' }).click();
+  await expect(logistics.getByText('Poste ajouté.')).toBeVisible();
+  await logistics
+    .getByLabel('Bénévole à affecter au poste Accueil des participants')
+    .selectOption({ label: 'Ali Touré' });
+  await logistics.getByRole('button', { name: 'Affecter' }).click();
+  await expect(logistics.getByText('Bénévole affecté.')).toBeVisible();
+  await expect(logistics.locator('main')).toContainText('1 bénévole(s) sur 2');
+  const volunteer = await committeeLogin(browser, seed.volunteer);
+  await volunteer.goto(`${base}/jour-j/mon-planning`);
+  await expect(volunteer.locator('main')).toContainText('Accueil des participants');
+});
+
+test('communication : bandeau, envoi groupé, questionnaire, rapport', async ({ page, browser }) => {
+  test.setTimeout(180_000);
+  const base = `${GESTION}/editions/${seed.edition}`;
+  const communication = await committeeLogin(browser, seed.communication);
+
+  // Annonce : bandeau et e-mail au comité d'organisation (RG-22).
+  await communication.goto(`${base}/communication/annonces`);
+  await communication.getByLabel('Titre (français)').fill('Changement de salle');
+  await communication.getByRole('button', { name: "Créer et ouvrir l'annonce" }).click();
+  await expect(communication).toHaveURL(/\/annonces\/\d+$/);
+  await communication.getByLabel('Texte (français)').fill('<p>La plénière a lieu en salle A.</p>');
+  await communication.getByLabel('Bandeau', { exact: true }).check();
+  await communication.getByLabel('E-mail', { exact: true }).check();
+  await communication.getByLabel('Message du bandeau (français)').fill('Plénière en salle A.');
+  await communication.getByLabel('Bandeau à partir du').fill(localIn(-1));
+  await communication.getByLabel("Bandeau jusqu'au").fill(localIn(24));
+  await communication.getByLabel('Destinataires').click();
+  await communication.getByRole('option', { name: /^Comité d'organisation/ }).click();
+  await communication.getByRole('button', { name: 'Enregistrer' }).click();
+  await expect(communication.getByText('Annonce enregistrée.')).toBeVisible();
+  await communication.getByRole('button', { name: 'Publier', exact: true }).click();
+  await communication.getByRole('dialog').getByRole('button', { name: 'Publier' }).click();
+  await expect(communication.getByText('Annonce publiée.')).toBeVisible();
+
+  // Le bandeau paraît aussitôt sur le portail, sans publication du portail.
+  await page.goto('/fr/');
+  await expect(page.getByRole('status').filter({ hasText: 'Changement de salle' })).toBeVisible();
+  // L'envoi groupé part par la file : un e-mail par personne du segment.
+  command('run_jobs');
+  expect(outbox(seed.finance)).toContain('communications/email/announcement');
+
+  // Questionnaire global publié ; invitations aux personnes présentes par la file.
+  await communication.goto(`${base}/communication/questionnaires`);
+  await communication.getByLabel('Titre (français)').fill('Votre avis sur le colloque');
+  await communication.getByRole('button', { name: 'Créer et ouvrir le questionnaire' }).click();
+  await expect(communication).toHaveURL(/\/questionnaires\/\d+$/);
+  await communication.getByLabel('Ouverture').fill(localIn(-2));
+  await communication.getByLabel('Clôture').fill(localIn(240));
+  await communication.getByRole('button', { name: 'Enregistrer' }).click();
+  await expect(communication.getByText('Questionnaire enregistré.')).toBeVisible();
+  await communication.getByRole('button', { name: 'Publier', exact: true }).click();
+  await communication.getByRole('dialog').getByRole('button', { name: 'Publier' }).click();
+  await expect(communication.getByText('Questionnaire publié.')).toBeVisible();
+  command('run_jobs');
+  expect(outbox(EMAIL)).toContain('surveys/email/invitation');
+
+  // L'auteure, présente, répond ; la page annonce l'anonymat (RG-21).
+  await authorLogin(page);
+  await page.goto('/compte/questionnaires');
+  await page.getByRole('link', { name: 'Répondre' }).click();
+  await expect(page.locator('main')).toContainText('Votre réponse est anonyme');
+  for (const radio of await page.locator('input[type="radio"][value="5"]').all()) {
+    await radio.check();
+  }
+  await page.getByRole('button', { name: 'Envoyer ma réponse' }).click();
+  await expect(page.getByText('Merci, votre réponse est enregistrée.')).toBeVisible();
+
+  // Sous le seuil de 5 réponses : rien d'autre que le nombre ; au-dessus : les moyennes.
+  const surveyUrl = communication.url();
+  await communication.reload();
+  await expect(communication.locator('main')).toContainText(
+    "les résultats s'affichent à partir de 5",
+  );
+  python(
+    'from apps.surveys.models import Survey, SurveyResponse\n' +
+      'survey = Survey.objects.get(title_fr="Votre avis sur le colloque")\n' +
+      'keys = [str(q.pk) for q in survey.questions.filter(kind="rating")]\n' +
+      'for _ in range(4):\n' +
+      '    SurveyResponse.objects.create(survey=survey, answers={k: 4 for k in keys})',
+  );
+  await communication.goto(surveyUrl);
+  await expect(communication.locator('main')).toContainText('Moyenne : 4.20 sur 5');
+
+  // Rapport de la section « Satisfaction » exporté en PDF.
+  await communication.goto(`${base}/rapports`);
+  await communication.getByRole('button', { name: 'Satisfaction' }).click();
+  await expect(communication.locator('main')).toContainText('Taux de réponse');
+  const download = communication.waitForResponse((response) =>
+    response.url().includes('/reports/satisfaction/export'),
+  );
+  await communication.getByRole('button', { name: 'Exporter (PDF)' }).click();
+  expect((await download).status()).toBe(200);
 });

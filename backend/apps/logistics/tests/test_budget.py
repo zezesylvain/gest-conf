@@ -197,6 +197,13 @@ def test_n4_budget_api_rights_and_export(edition, finance):
     assert AuditLog.objects.filter(action="budget.exported").count() == 2
     response = client_for(finance, recent_auth=False).get(f"{base}/export")
     assert (response.status_code, response.json()["code"]) == (403, "reauthentication_required")
+    # Même refus, en JSON, pour l'en-tête du client généré : la gestion ouvre la fenêtre de
+    # réauthentification (bilan de L8.10 ; auparavant 406 avant la vue).
+    response = client_for(finance, recent_auth=False).get(
+        f"{base}/export", HTTP_ACCEPT="application/octet-stream"
+    )
+    assert (response.status_code, response.json()["code"]) == (403, "reauthentication_required")
+    assert response["Content-Type"] == "application/json"
     response = client.get(f"{base}/export?file_format=pdf")
     assert response.status_code == 400
     # Le CO « logistique » ne voit pas le budget.

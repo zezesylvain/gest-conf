@@ -3,8 +3,8 @@
 
 | | |
 |---|---|
-| **Version** | 1.7 – document de cadrage, mis à jour après les lots L1 (§17), L2 (§18), L3 (§19), L4 (§20), L5 (§21), L6 (§22) et L7 (§23) |
-| **Date** | 6 octobre 2026 |
+| **Version** | 1.8 – document de cadrage, mis à jour après les lots L1 (§17), L2 (§18), L3 (§19), L4 (§20), L5 (§21), L6 (§22), L7 (§23) et L8 (§24) |
+| **Date** | 7 octobre 2026 |
 | **Auteur** | Étude réalisée pour ZDS |
 | **Statut** | Pour validation |
 | **Stack imposée** | Django (sans admin) · Angular · MariaDB · o2switch (mono-domaine) |
@@ -1748,6 +1748,100 @@ Les décisions K1 à K17 du plan [`docs/L7-jour-j-plan.md`](docs/L7-jour-j-plan.
 - **Avant le jour J réel** : démo H sur o2switch et sur téléphones réels (iOS Safari, Android), réseau coupé ; en-têtes par chemin vérifiés sur l'hébergement.
 - **À trancher** : prestataire de signature qualifiée (Q17) ; nom complet du pays sur les badges ; Q14 (noms des auteurs au programme public) ; `ACCEPTED_MINOR → WITHDRAWN` ; seuil d'avertissement du bundle initial du portail (368,9 kB pour 365 kB) ; Q7 et Q8.
 - **Reporté** : questionnaire de satisfaction et annonces de dernière minute (L8, K16) ; « Mon programme » du participant (J15) ; signature qualifiée (P3) ; impression thermique ; contrôle d'accès aux sessions payantes.
+
+## 24. Mises à jour issues du lot L8 (version 1.8)
+
+Les décisions N1 à N19 du plan [`docs/L8-logistique-plan.md`](docs/L8-logistique-plan.md) ont été validées le 7 octobre 2026 et mises en œuvre dans le lot L8. Les questions du §10 du plan sont restées sans réponse : ses propositions s'appliquent comme **hypothèses révisables** (plan, §2.1). Cette section les reporte dans l'étude ; **en cas de divergence avec les sections précédentes (§17 à §23 compris), elle prévaut**. Le détail (justifications, vérifications, défauts trouvés) est dans le plan, §2, §2.1 et §11 à §21 ; le bilan du lot dans [`docs/L8-logistique.md`](docs/L8-logistique.md).
+
+### 24.1 Rôles et droits
+
+- **Aucun rôle nouveau**, aucune 2FA nouvelle ; `SPONSOR` reste non invitable (pas d'espace partenaire en libre-service).
+- **Capacités** (N2), attribuées par fonction du CO :
+  - `tasks.read`, `tasks.write` : `ADMIN`, `CHAIR`, tout le CO ;
+  - `budget.read` : `ADMIN`, `CHAIR`, CO « finances » ; `budget.write` : `ADMIN`, CO « finances » ;
+  - `sponsors.read` : `ADMIN`, `CHAIR`, CO « finances », « communication », « relations extérieures » ; `sponsors.write` : `ADMIN`, CO « relations extérieures » ;
+  - `logistics.read` : `ADMIN`, `CHAIR`, CO « logistique », « secrétariat » ; `logistics.write` : `ADMIN`, CO « logistique » ;
+  - `volunteers.plan` : `ADMIN`, CO « bénévoles », « logistique » ; `shifts.own` : le bénévole **seul** (son planning ; l'administrateur n'en a pas) ;
+  - `communications.send` : `ADMIN`, `CHAIR`, CO « communication » ;
+  - `surveys.manage` : `ADMIN`, `CHAIR`, CO « communication », « secrétariat ».
+- **Rapports** : pas de capacité propre ; chaque section s'ouvre à la capacité qui protège déjà ses données, revérifiée par le serveur (24.7).
+- L'intervenant invité (`SPEAKER`) renseigne **sa** venue dans le portail, sans capacité de gestion.
+- Réauthentification récente : exports nominatifs (régimes, contacts des partenaires), exports du budget, **toute** publication d'annonce, publication d'un questionnaire.
+
+### 24.2 Organisation du comité (M11)
+
+- **Tâches** (N3) : kanban à trois colonnes (à faire, en cours, terminé), responsable (membre actif dont un rôle donne `tasks.write`), échéance, priorité, étiquette, commentaires, **pièces jointes privées** (PDF, PNG, JPEG ; 10 Mo ; 20 par tâche ; règle n° 8). Révision en `If-Match` (412 `stale_revision`) ; archivage, jamais de suppression ; journal `task.*`. Déplacement par la liste « Déplacer vers », accessible au clavier (pas de glisser-déposer). Cloche `task_assigned` ; récapitulatif quotidien **`remind_tasks`** des tâches en retard ou à échéance sous deux jours, la date du jour lue dans le fuseau de l'édition.
+- **Documents partagés** (M11) : **réduits** aux pièces jointes des tâches (écart validé).
+- **Budget** (N4) : lignes de dépense ou de recette par poste d'un catalogue fermé, prévu et réalisé en `Decimal` exacts dans la devise de l'édition, justificatif privé facultatif. Lignes **calculées**, ni modifiables ni supprimables : « inscriptions » (encaissé net des paiements de L6) et « partenariats » (contributions reçues, hors refus), déclarées par les applications qui les possèdent (`register_computed_source`). Synthèse et soldes ; export CSV et XLSX. Ce n'est pas une comptabilité (ni TVA, ni écriture, ni rapprochement).
+- **Fil d'activité** (N14) : 50 dernières entrées du journal, **liste blanche** d'actions non sensibles, sans les valeurs avant et après ; ni décision, ni identité d'auteur, ni montant.
+- **Journal** : les textes libres journalisés passent par `mask_emails` (`j***@univ.ci`) ; le journal refuse toujours une adresse en clair.
+
+### 24.3 Partenaires (M13)
+
+- **Niveaux** (publics) : noms, montant indicatif, contreparties, taille du logo, ordre ; un niveau attribué ne se supprime pas.
+- **Partenaire** : partie publique (nom, niveau, logo, site, présentations, publié) et partie privée (contact, statut `prospect` / `agreed` / `received` / `declined`, contribution convenue, reçu et date, note) ; « contribution reçue » exige montant et date. **Contreparties** recopiées du niveau et cochées à leur livraison.
+- **Logo** : nature de fichier public `logo`, réencodé sans métadonnées ; l'adresse publique ne le sert **qu'une fois le partenaire publié** ; la gestion le voit par un aperçu authentifié (`…/sponsors/{id}/logo`, **ajout** au plan).
+- **Contact** : jamais publié, jamais journalisé (`contact_changed` seulement), exporté sous réauthentification ; n'étant pas un compte, il est exempté du registre des données personnelles, avec sa justification.
+- **Portail** : page « Partenaires » pré-rendue par niveau ; seule la partie publique d'un partenaire publié compte dans les modifications non publiées. Badges exposants : une catégorie d'inscription « Exposant » (L6) suffit. Factures des partenaires : hors plateforme (Q8).
+
+### 24.4 Logistique (M10)
+
+- **Venues des intervenants invités** (N6) : une fiche par `SPEAKER` actif et par édition. Part de l'intervenant (besoins techniques du catalogue des équipements de salle, arrivée et départ **saisis à l'heure locale de l'édition** (D13), hébergement et transfert demandés, demandes) ; part du CO (hôtel, nuits, statut `to_arrange` / `booked` / `confirmed`, **note interne jamais servie à l'intervenant**). Signal : besoin absent de l'équipement d'une salle où il passe, lu dans le **programme publié**. Journal sans valeur.
+- **Régimes alimentaires** (N7, **RG-23**, 24.6).
+- **Restauration** (N8) : repas (jour, type, libellés, public : inscrits confirmés ou titulaires d'une **option** de L6, intervenants, comités, bénévoles à cocher, marge de 0 à 50 %) ; estimation calculée, chaque personne **comptée une fois**, marge arrondie au supérieur, répartition par régime **sans nom** ; commande au traiteur en CSV, XLSX et PDF.
+- **Bénévoles** (N9) : postes (intitulés, lieu, début et fin à l'heure locale de l'édition, besoin, consignes), affectation des seuls `VOLUNTEER` de l'édition ; **chevauchement refusé** (`shift_overlap`, 409, sous verrou) ; places manquantes ; cloche à l'affectation et au retrait ; « **Mon planning** » et son fichier iCal.
+
+### 24.5 Communication (M12, M14)
+
+- **Annonces** (N10) : titres et textes FR et EN (HTML assaini par la liste blanche de L2), canaux cochés : actualités, bandeau, cloche, e-mail (ces deux derniers exigent un **segment**). Brouillon, publication (réauthentification), retrait ; après publication, cloche, e-mail et segment sont figés. Journal `announcement.*`.
+- **Bandeau de dernière minute** : texte seul (titre, message de 280 caractères, lien vers l'actualité), fenêtre **à l'heure locale de l'édition**, **une seule annonce à la fois** (`banner_overlap`, 409). `GET /v1/public/portal/banner` (édition publique courante, **écart** : pas de code d'édition dans l'adresse), liste blanche, cache de 60 s, 60 lectures par minute et par adresse. Le portail le lit **dans le navigateur à chaque visite**, jamais au pré-rendu : visible aussitôt, sans publication du portail ; module chargé par `import()` après le premier rendu (**écart** : `@defer` ajoutait 3,7 ko au bundle initial).
+- **Actualités** : page pré-rendue `/fr/actualites/`, `/en/news/` ; visible après `deploy.sh --portal-only`, comptée dans les modifications non publiées.
+- **Envois groupés** (N11, **RG-22**, 24.6) : segments **déclarés** par les applications (`register_segment`) : auteurs (soumission envoyée, acceptés), présentateurs et présidents de séance (programme publié), relecteurs, relecteurs en retard (**réservé à `reviews.manage`**), inscrits (confirmés, en attente de paiement), présents, intervenants invités, comités, bénévoles. Comptage, aperçu de l'e-mail, essai à soi-même, puis publication ; mise en file par la tâche `communications.fan_out`, **par lots de 200** idempotents ; annulation de ce qui n'est pas parti.
+- **Objet des e-mails** : générique (« [site] Annonce de la conférence »), la règle de L1 n'admettant dans un objet que le nom du site ; le titre ouvre le corps.
+- **Désabonnement** des annonces : jeton signé (compte, édition) ; `/desabonnement/<jeton>` du portail, où rien ne part sans un clic ; `POST /v1/public/announcements/unsubscribe` (CSRF, 30 par heure et par adresse) ; abonnement par édition dans le compte. La cloche et les e-mails de service restent envoyés.
+
+### 24.6 Règles de gestion nouvelles
+
+- **RG-21 (adoptée, L8) — anonymat du questionnaire de satisfaction** : la réponse n'a aucune clé vers un compte ni vers l'invitation ; sa clé primaire est un UUID aléatoire ; elle **ne porte aucune date** (**plus strict** que N12, qui prévoyait un jour arrondi : le rapprochement de deux jours aurait suffi à identifier un répondant isolé) ; l'invitation est marquée « répondu » (au jour près) dans la même transaction ; rien au journal ne relie une personne à une réponse ; une réponse par personne ; résultats agrégés **à partir de 5 réponses** ; textes libres exportés dans un ordre aléatoire, la personne étant prévenue que le comité les lira.
+- **RG-22 (adoptée, L8) — envois groupés** : un e-mail par personne, jamais de copie, dans la langue du compte, avec la raison de l'envoi et un lien de désabonnement ; désabonnés exclus ; publication sous réauthentification ; nombre de destinataires connu avant l'envoi ; journal de masse (segment, nombre ; RG-17) ; les e-mails groupés (marque `is_bulk`, file `BULK`) n'utilisent que **la moitié** de `GESTCONF_EMAIL_MAX_PER_HOUR`, sont étalés dès leur création et ne retardent jamais les e-mails de compte et de service.
+- **RG-23 (adoptée, L8) — régimes alimentaires** : déclaration facultative, par personne et par édition, pour qui a un rôle actif ou une inscription en attente ou confirmée ; **consentement explicite à chaque déclaration**, retrait à tout moment (effacement) ; catalogue fermé (végétarien, végétalien, sans porc, sans gluten, sans lactose, autre) et allergies (200 caractères) ; effectifs agrégés pour la restauration ; noms et allergies pour `logistics.read` seulement, par un export réauthentifié et journalisé ; le journal garde l'acte, jamais le contenu ; **effacement 30 jours après la fin de l'édition** ou à son archivage (`cleanup`).
+
+### 24.7 Questionnaire, rapports et tableau de bord (M14, M16)
+
+- **Questionnaire** (N12) : global ou par session ; questions note de 1 à 5, choix unique, choix multiples, texte libre (1 000 caractères) ; modèle par défaut ; ouverture et clôture à l'heure locale de l'édition ; publication sous réauthentification ; **questions verrouillées** dès la première réponse (on duplique, comme une grille, RG-05). Invités : les **présents** (pointage de L7, à l'entrée de la session pour un questionnaire de session) ; invitation à l'ouverture (cloche et e-mail), **une relance à mi-chemin** aux seuls non-répondants, par `run_jobs`, en e-mails groupés mais **de service** (le désabonnement des annonces ne les arrête pas).
+- **Rapports** (N13) : sections soumissions (`submissions.read`), relecture (`reviews.manage`), inscriptions et **présence** (`registrations.read` ; **précision** : capacité unique par section), recettes (`finance.read`), satisfaction (`surveys.manage`, seuil de RG-21), budget (`budget.read`), partenaires (`sponsors.read`). **Aucune donnée nominative** ; taux et moyennes en `Decimal` servis en chaînes. Exports journalisés : CSV, XLSX (`openpyxl`, Python pur, une feuille par tableau, chaînes typées texte : aucune formule possible) et PDF de synthèse (`fpdf2`). Dans la gestion, chaque tableau est doublé de barres CSS sans bibliothèque, masquées aux lecteurs d'écran.
+- **Tableau de bord** (N14) : carte « Organisation » (mes tâches, en retard et sous 7 jours ; soldes du budget ; partenariats ; venues à organiser ; places de bénévole), bandeau actif, réponses aux questionnaires, chaque ligne sous sa capacité.
+
+### 24.8 Gestion et portail
+
+- **Gestion** (N16) : rubriques « Organisation » (tâches, budget, activité), « Logistique » (intervenants invités, restauration, postes des bénévoles), « Partenaires » (partenaires, niveaux), « Communication » (annonces, questionnaires), « Rapports » ; « Mon planning » dans « Jour J » ; 14 écrans, chacun dans le rail avec sa fiche d'aide. Les formulaires de L8 portent les erreurs de champ du serveur au résumé d'erreurs.
+- **Portail public** : « Partenaires » (`/fr/partenaires/`, `/en/partners/`), « Intervenants » (réelle) et « Actualités » pré-rendues ; bandeau de dernière minute. **Précision** de N6 : « Intervenants » présente les **intervenants invités** (créneaux libres), lus dans l'**instantané publié** du programme par `GET /v1/public/speakers` (liste blanche, consentements de L2 figés) ; les présentateurs des communications restent au programme (Q14).
+- **Espace compte** : « Ma venue » (`/compte/ma-venue`, intervenants invités seulement) ; « Régime et annonces » (`/compte/preferences` : carte de régime, abonnement aux annonces) ; « Questionnaires » (`/compte/questionnaires[/{id}]`) ; textes de la cloche (`task_assigned`, `shift_assigned`, `shift_removed`, `announcement`, `survey_invitation`). La réponse « Mon inscription » porte l'**identifiant de l'édition** (participant sans rôle).
+
+### 24.9 Modèle de données et API
+
+- **Applications** (N1) : `logistics` (tâches, budget, venues, régimes, repas, postes), `sponsors`, `surveys` et `reports` (sans modèle, lecture seule, dont aucune ne dépend) ; annonces, livraisons et désabonnements dans `communications`. `communications` ne dépend d'aucune application métier (segments déclarés) ; `logistics` lit `payments` en lecture seule ; `registrations` ne dépend pas de `logistics`.
+- **Modèles** : `task`, `task_comment`, `task_attachment`, `budget_line`, `speaker_visit`, `dietary_declaration`, `meal`, `volunteer_shift`, `shift_assignment` ; `sponsor_level`, `sponsor`, `sponsor_benefit` ; `announcement`, `announcement_delivery`, `announcement_opt_out` ; `survey`, `survey_question`, `survey_invitation`, `survey_response` (sans compte ni date). `OutboxEmail.is_bulk` ; nature de fichier public `logo` ; `NotificationKind` gagne `task_assigned`, `shift_assigned`, `shift_removed`, `announcement`, `survey_invitation`.
+- **Données personnelles** (N15) : venues, régimes, affectations, invitations aux questionnaires, annonces reçues et désabonnements à l'export ; les réponses anonymes n'y figurent pas. Anonymisation : venues, régimes et désabonnements effacés ; tâches, commentaires, affectations et invitations rattachés au compte anonymisé.
+- **API** : publique `GET /v1/public/portal/banner`, `/v1/public/news`, `/v1/public/sponsors`, `/v1/public/speakers`, `POST /v1/public/announcements/unsubscribe` ; compte `/v1/me/editions/{id}/visit`, `…/dietary`, `…/announcements`, `/v1/me/surveys` et `…/{id}` ; gestion `…/manage/editions/{id}/` : `tasks` (membres, archivage, commentaires, pièces jointes), `budget` (lignes, justificatif, export), `sponsors` (aperçu et dépôt du logo, contreparties, export) et `sponsor-levels`, `logistics/visits`, `logistics/dietary` (et export nominatif), `logistics/meals` (et export), `logistics/shifts` (affectations), `me/shifts` (et iCal), `announcements` (aperçu, essai, publication, retrait, annulation), `segments`, `surveys` (questions, publication, duplication, résultats, export), `reports/{section}` (et export), `activity`. Les vues qui renvoient un objet s'appellent `overview` (drf-spectacular décrit toujours `list` comme un tableau).
+- **Téléchargements** (correctif d'un défaut antérieur, trouvé par le parcours de bout en bout) : le client généré annonce en `Accept` le type du fichier attendu ; quand le client n'accepte **que** des types de fichier d'une liste fermée, la négociation de contenu retient le JSON au lieu de répondre 406 avant la vue (`apps/core/negotiation.py`, RFC 9110 §12.5.1) ; la vue sert son fichier, une erreur part en JSON normalisé, que le front relit dans le `Blob` reçu (réauthentification des exports comprise).
+- Codes d'erreur ajoutés (`stale_revision` de L5 sert aussi aux tâches) : `shift_overlap`, `banner_overlap`, `unsubscribe_link_invalid`, `survey_locked`, `survey_answered`, `survey_not_open`, `survey_threshold`.
+
+### 24.10 Exploitation
+
+- **Cron** : une ligne nouvelle, **`remind_tasks`** (quotidienne ; idempotente et verrouillée). Envois groupés, invitations et relance des questionnaires par `run_jobs` ; effacement des régimes et des venues par `cleanup`.
+- **E-mails** : `GESTCONF_EMAIL_MAX_PER_HOUR` (200 par défaut) borne tout ; un envoi groupé à 1 000 personnes prend au moins 10 heures. Pas d'en-tête `List-Unsubscribe` (le registre d'envoi ne stocke pas d'en-têtes). Aucune variable d'environnement nouvelle.
+- **Dépendance** : `openpyxl` (MIT, Python pur, avec `et_xmlfile`), compatible avec la règle n° 10.
+- **Portail** : trois pages pré-rendues nouvelles (republication par `deploy.sh --portal-only`) ; le bandeau, lui, n'en a pas besoin.
+- `check_integrity` contrôle aussi : contribution reçue sans montant ni date, pièces jointes et justificatifs absents ou modifiés, réponses d'un questionnaire égales aux invitations « répondu », aucune réponse à un brouillon. **Précision** de N17 : le chevauchement des affectations d'un bénévole n'y est pas contrôlé, il est refusé à l'écriture, sous verrou du compte.
+
+### 24.11 Tests, planning et points ouverts
+
+- 6 700 tests backend (sous-ensembles du lot sous MariaDB) ; matrice des droits : 5 385 cas. RG-21 (colonnes de la table des réponses, journal, réponse unique, seuil), RG-22 (un e-mail par personne, langue, désabonnés, lots idempotents, moitié du plafond, annulation), RG-23 (consentement, agrégats, export réauthentifié, effacement), listes blanches publiques, rapports sans donnée nominative, exports CSV, XLSX et PDF. 530 tests front. **Parcours de bout en bout** (Playwright) prolongé par trois étapes : tâche terminée au clavier, recettes calculées, partenaire publié ; venue et régime de l'intervenant invité, repas où le régime est compté sans nom, poste retrouvé dans « Mon planning » ; bandeau visible aussitôt sur le portail, e-mail du segment parti par la file, questionnaire répondu, résultats sous puis au-dessus du seuil, rapport exporté.
+- Charge de L8 estimée à 28,5 – 34,5 j-h (étude : 10 – 14).
+- **À vérifier sur o2switch** : plafond d'e-mails réel et délai d'un envoi groupé ; bandeau et pages pré-rendues en production ; ouverture des XLSX par Excel et LibreOffice.
+- **À trancher** (plan L8, §10, hypothèses en vigueur) : ordre des lots L8 et L9 ; niveaux et montants des partenaires ; régimes pour tous ou pour les intervenants seuls ; réservations des voyages ; questionnaire anonyme et par session ; fournisseur d'e-mails de production et volume horaire (D10) ; postes du budget ; indicateurs prioritaires. Toujours ouverts : Q7, Q8, Q14, Q17 ; `ACCEPTED_MINOR → WITHDRAWN` ; seuil d'avertissement du bundle initial du portail (369,8 kB pour 365 kB ; gestion : 389,3 kB).
+- **Reporté** : espace partenaire en libre-service et factures des partenaires (Q8) ; réservation de voyages et d'hôtels ; indisponibilités des intervenants dans le planificateur ; suivi des repas servis ; inventaire du matériel ; SMS et WhatsApp (P3) ; « Mon programme » du participant (J15).
 
 ---
 

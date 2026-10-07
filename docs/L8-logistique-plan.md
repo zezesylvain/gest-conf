@@ -1138,3 +1138,63 @@ assainie, bandeau et fermeture, bandeau en erreur).
 **Tests** : portail : 7 tests (régime et consentement, carte masquée, « Ma venue »,
 préférences et abonnement, questionnaire, désabonnement et jeton altéré, cloche) ;
 gestion : carte « Organisation » complétée ; `registrations` inchangés (111).
+
+## 21. Bilan de L8.10 (7 octobre 2026)
+
+**Parcours de bout en bout** (Playwright, `web/e2e/tests/author.spec.ts`) : le parcours en série
+se prolonge par trois étapes, après les attestations de L7 :
+
+1. **organisation du CO** : tâche créée par le CO « finances », déplacée par la liste
+   « Déplacer vers » jusqu'aux tâches terminées ; budget où la ligne « inscriptions » est
+   calculée par la plateforme ; partenaire créé et publié par le CO « relations extérieures », puis lu par
+   l'API publique ;
+2. **logistique** : l'intervenant invité remplit « Ma venue » (équipement, arrivée à l'heure de
+   la conférence) et déclare un régime avec consentement ; la liste des venues le signale ;
+   un repas compte le régime sans nom ; un poste de bénévole est pourvu et retrouvé par le
+   bénévole dans « Mon planning » ;
+3. **communication** : annonce au bandeau publiée sous réauthentification, visible aussitôt sur
+   le portail sans republication ; e-mail du segment parti par `run_jobs` ; questionnaire
+   publié, invitation de l'auteure présente, réponse anonyme ; résultats sous le seuil, puis
+   au-dessus après quatre réponses ajoutées par le seed ; rapport « Satisfaction » exporté en
+   PDF.
+
+Le seed crée un CO « logistique », un CO « communication », un CO « relations extérieures » et
+un intervenant invité (rôle `SPEAKER`).
+
+**Défauts trouvés par le parcours et corrigés** :
+
+- **téléchargements de la gestion refusés (406)**, défaut **antérieur à L8** : le client
+  généré annonce en `Accept` le type déclaré au schéma pour la réponse (`text/csv`,
+  `application/pdf`, `application/octet-stream`…). L'API ne rend que du JSON, et DRF négocie
+  le format **avant** d'exécuter la vue : 406 sans même atteindre l'export. Les tests
+  unitaires du front simulent l'API et ceux du backend n'envoyaient pas cet en-tête, d'où
+  un défaut invisible jusqu'ici ; il touchait tous les exports et téléchargements de la
+  gestion appelés par le client généré (soumissions, inscriptions, pointages, rapports…).
+  **Correctif** : `apps/core/negotiation.py` retient le rendu JSON quand le client n'accepte
+  **que** des types de fichier d'une liste fermée (la vue sert son fichier ; une erreur part
+  en JSON normalisé) ; tout autre type non servi reste refusé par un 406 (RFC 9110,
+  §12.5.1). Tests : repli pour chaque type de fichier, type mêlé refusé, export du budget
+  et des rapports avec l'en-tête du client, et **méta-test** : tout type de réponse binaire
+  du schéma franchit la négociation ;
+- **réauthentification des exports jamais proposée** : pour une requête de fichier
+  (`responseType: 'blob'`), le corps d'erreur JSON arrive en `Blob` ; son code était perdu
+  et un 403 `reauthentication_required` passait pour un simple refus, sans ouvrir la
+  fenêtre de réauthentification. **Correctif** : l'intercepteur d'erreurs du front relit le
+  `Blob` en texte avant de normaliser l'erreur. Tests : code conservé, réauthentification
+  puis nouvelle tentative, corps illisible.
+
+**Documentation** : bilan du lot (`docs/L8-logistique.md`), étude §24 en Markdown et en HTML
+(version 1.8), `CLAUDE.md` (état d'avancement, « Décisions du lot L8 », structure, cron).
+
+**Tests** : 
+- bout en bout : **19 tests** réussis (16 à la fin de L7 ; les trois étapes nouvelles
+  comprises) ;
+- backend : **6 700 réussis**, 10 ignorés (SQLite) ; sous MariaDB, les sous-ensembles de chaque étape et les tests de la négociation de contenu réussissent ; matrice des droits : 5 385 cas ;
+- front : **530 tests** : shared 82, portail 172, gestion 263, scripts 13 (469 à la fin de L7) ; lint, `format:check` et builds propres ;
+- `ruff`, schéma inchangé (la négociation n'y figure pas) ; `npm run build` : bundles
+  initiaux du portail 369,8 ko (avertissement déjà connu, 368,9 ko à la fin de L7) et de la
+  gestion 389,3 ko (382,2 ko), CSP et empreintes de `ngsw.json` conformes.
+
+**Critère de fin** (« Démo I sur o2switch ») : **non atteint**, comme pour les lots précédents :
+aucune démo n'a encore été faite sur l'hébergement (lot L9). Démo I jouée en local par le
+parcours de bout en bout.

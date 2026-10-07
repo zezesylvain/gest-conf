@@ -104,7 +104,11 @@ def test_n13_sections_follow_existing_capabilities_and_exports_are_journaled(edi
         ("xlsx", "spreadsheetml"),
         ("pdf", "application/pdf"),
     ):
-        response = client.get(f"{base}/budget/export?file_format={file_format}")
+        # En-tête du client généré : le type déclaré au schéma (bilan de L8.10, sans 406).
+        response = client.get(
+            f"{base}/budget/export?file_format={file_format}",
+            HTTP_ACCEPT="application/octet-stream",
+        )
         assert response.status_code == 200 and kind in response["Content-Type"]
     pdf = client.get(f"{base}/budget/export?file_format=pdf").content
     assert pdf.startswith(b"%PDF")

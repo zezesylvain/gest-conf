@@ -40,8 +40,8 @@ GEST-CONF/
 ├── backend/                 # Django
 │   ├── config/settings/ (base, dev, prod, test) ; urls.py (API uniquement) ; mount.py ; passenger_wsgi.py
 │   ├── apps/ core, accounts, conferences, portal, communications, submissions, reviews,
-│   │         program, registrations, payments, events (à venir, lot par lot :
-│   │         sponsors, logistics, reports)
+│   │         program, registrations, payments, events, logistics, sponsors, surveys,
+│   │         reports
 │   ├── tests/               # tests transverses : matrice des droits, schéma, règles de plateforme
 │   ├── locale/              # traductions du backend (FR/EN)
 │   ├── schema.yml           # schéma OpenAPI versionné
@@ -85,7 +85,7 @@ npm run api:generate        # régénérer le client TypeScript après chaque é
 GESTCONF_E2E_PYTHON=../backend/.venv/bin/python npm run e2e   # Playwright lance Django, le portail et la gestion (ports 8000, 4200, 4201 libres) ; GESTCONF_E2E_CHROMIUM=<chemin> pour un Chromium déjà installé
 
 # Déploiement : deploy/deploy.sh puis deploy/smoke-test.sh (voir deploy/README.md)
-# Cron (deploy/cron.sh) : run_jobs (toutes les 5 min), close_call, remind_drafts, remind_reviewers, remind_presentations, expire_registrations et sync_payments (horaires), cleanup et check_integrity (quotidiennes)
+# Cron (deploy/cron.sh) : run_jobs (toutes les 5 min), close_call, remind_drafts, remind_reviewers, remind_presentations, expire_registrations et sync_payments (horaires), remind_tasks, cleanup et check_integrity (quotidiennes)
 ```
 
 Les URL Django sont déclarées **sans** le préfixe `/api` (`v1/...`) : `config/mount.py` gère le montage.
@@ -120,9 +120,9 @@ Les URL Django sont déclarées **sans** le préfixe `/api` (`v1/...`) : `config
 |---|---|
 | L0 à L4 (MVP : squelette, socle, portail, soumission, évaluation et décision) | Livrés en code, testés en local et en CI ; bilans dans `docs/`. **Aucune démo sur o2switch** encore faite |
 | L5 — Programme | **Livré en code, testé en local et en CI** (L5.0 à L5.7, E2E compris ; PR #8 et #9, fusionnées) ; bilan [`docs/L5-programme.md`](docs/L5-programme.md). Ouverts : Q14, `ACCEPTED_MINOR → WITHDRAWN`, seuil d'avertissement du bundle du portail |
-| L6 — Inscriptions et paiements | **Livré en code et testé en local** (L6.0 à L6.7, E2E compris) ; bilan [`docs/L6-inscriptions.md`](docs/L6-inscriptions.md). Passage en CI : nouvelle PR, sur demande. Ouverts : Q7 (tarifs ; carte bancaire absente de l'API v1 de CinetPay), Q8 (entité de facturation, conservation, format du numéro), J15 reportée |
-| L7 — Jour J et attestations | **Livré en code et testé en local** (L7.0 à L7.8, E2E compris) ; bilan [`docs/L7-jour-j.md`](docs/L7-jour-j.md). Passage en CI : nouvelle PR, sur demande. Ouverts : Q17 (prestataire de signature qualifiée), nom complet du pays sur les badges, démo H sur téléphones réels |
-| L8 — Logistique, partenaires, communication et reporting | **En cours** : plan [`docs/L8-logistique-plan.md`](docs/L8-logistique-plan.md) validé le 7 octobre 2026 (N1 à N19 ; questions du §10 sans réponse, propositions retenues comme hypothèses, §2.1) |
+| L6 — Inscriptions et paiements | **Livré en code et testé en local** (L6.0 à L6.7, E2E compris) ; bilan [`docs/L6-inscriptions.md`](docs/L6-inscriptions.md). Fusionné dans `main` (PR #12). Ouverts : Q7 (tarifs ; carte bancaire absente de l'API v1 de CinetPay), Q8 (entité de facturation, conservation, format du numéro), J15 reportée |
+| L7 — Jour J et attestations | **Livré en code et testé en local** (L7.0 à L7.8, E2E compris) ; bilan [`docs/L7-jour-j.md`](docs/L7-jour-j.md). L7.0 à L7.7 fusionnés dans `main` (PR #12) ; L7.8 et le correctif du test RG-16 dans la PR #13. Ouverts : Q17 (prestataire de signature qualifiée), nom complet du pays sur les badges, démo H sur téléphones réels |
+| L8 — Logistique, partenaires, communication et reporting | **Livré en code et testé en local** (L8.0 à L8.10, E2E compris) ; bilan [`docs/L8-logistique.md`](docs/L8-logistique.md). Passage en CI : PR #13. Ouverts : questions du §10 du plan (hypothèses retenues), plafond d'e-mails réel sur o2switch, en-tête `List-Unsubscribe` |
 | L9 et suivants | Non commencés |
 
 ## Décisions du lot L1
@@ -215,6 +215,23 @@ Les décisions K1 à K17 du plan [`docs/L7-jour-j-plan.md`](docs/L7-jour-j-plan.
 
 Bilan du lot : [`docs/L7-jour-j.md`](docs/L7-jour-j.md).
 
+## Décisions du lot L8
+
+Les décisions N1 à N19 du plan [`docs/L8-logistique-plan.md`](docs/L8-logistique-plan.md) ont été validées le 7 octobre 2026 ; les questions de son §10 étant restées sans réponse, ses propositions s'appliquent comme hypothèses révisables (§2.1). Elles sont reportées dans l'étude, **§24 « Mises à jour issues du lot L8 »**, qui prévaut sur les sections antérieures (§17 à §23 compris). Points à retenir :
+
+- applications `logistics` (tâches, budget, venues, régimes, repas, postes de bénévoles), `sponsors`, `surveys` et `reports` (lecture seule, dont aucune ne dépend) ; annonces dans `communications`, qui ne dépend d'aucune application métier : les segments sont **déclarés** (`register_segment`), comme les lignes calculées du budget (`register_computed_source`) ;
+- capacités `tasks.*` (tout le CO), `budget.*` (finances), `sponsors.*` (relations extérieures ; lecture finances et communication), `logistics.*` (logistique ; lecture secrétariat), `volunteers.plan`, `shifts.own` (bénévole seul), `communications.send`, `surveys.manage` ; rapports sans capacité propre, chaque section sous la capacité de ses données ; aucun rôle nouveau ;
+- tâches en kanban **sans glisser-déposer** (« Déplacer vers… »), révision en `If-Match` ; budget en `Decimal`, lignes « inscriptions » et « partenariats » **calculées** ; journal : textes libres par `mask_emails` ;
+- **RG-21** : réponse au questionnaire sans compte, sans invitation, **sans date**, UUID ; résultats à partir de 5 réponses ; **RG-22** : un e-mail par personne, lien de désabonnement signé, envois groupés (`is_bulk`) limités à la **moitié** de `GESTCONF_EMAIL_MAX_PER_HOUR`, mis en file par lots de 200 ; **RG-23** : régime avec consentement à chaque déclaration, noms pour `logistics.read` par export réauthentifié, effacé 30 jours après l'édition ;
+- listes blanches publiques : partenaires publiés (logo public après publication, aperçu authentifié dans la gestion), intervenants **invités** lus dans l'instantané publié, bandeau, actualités ; note interne d'une venue jamais servie à l'intervenant ;
+- portail : « Partenaires », « Intervenants », « Actualités » **pré-rendues** ; **bandeau** lu dans le navigateur à chaque visite (module chargé par `import()` après le premier rendu, pas de `@defer`) ; compte : « Ma venue », « Régime et annonces » (`/compte/preferences`), « Questionnaires », `/desabonnement/<jeton>` ;
+- gestion : rubriques « Organisation », « Logistique », « Partenaires », « Communication », « Rapports », « Mon planning » ; graphiques en barres CSS sans bibliothèque, doublés de tableaux ; exports CSV, XLSX (`openpyxl`, chaînes typées texte) et PDF (`fpdf2`) ; une vue qui renvoie un objet s'appelle `overview`, pas `list` (drf-spectacular décrit `list` comme un tableau) ;
+- **téléchargements** : la négociation de contenu (`apps/core/negotiation.py`) retient le JSON quand le client n'accepte que des types de fichier (sinon 406 avant la vue) ; l'intercepteur relit en JSON un corps d'erreur reçu en `Blob` (réauthentification des exports) ; méta-test sur les réponses binaires du schéma ;
+- cron : `remind_tasks` (quotidienne) ; envois groupés, invitations et relance des questionnaires par `run_jobs` ;
+- E2E : le parcours en série se prolonge par l'organisation (tâche, budget, partenaire publié), la logistique (venue, régime, repas, poste) et la communication (bandeau, envoi groupé, questionnaire, rapport exporté) ; le seed crée un CO « logistique », un CO « communication », un CO « relations extérieures » et un intervenant invité.
+
+Bilan du lot : [`docs/L8-logistique.md`](docs/L8-logistique.md).
+
 ## Questions ouvertes (étude §15, à ne pas trancher seul)
 
-Date de la conférence, mono- ou multi-conférences, niveau de double aveugle, grille et pondérations définitives, résumé seul ou article complet, tarifs et agrégateur de paiement, entité de facturation, actes (DOI/ISBN), sessions hybrides, noms des auteurs au programme public (Q14), prestataire de signature qualifiée (Q17). (L'emplacement de l'espace évaluateur est tranché : application `gestion`, décision H1 ; les lettres d'invitation par K12 ; le signataire des attestations par K18.)
+Date de la conférence, mono- ou multi-conférences, niveau de double aveugle, grille et pondérations définitives, résumé seul ou article complet, tarifs et agrégateur de paiement, entité de facturation, actes (DOI/ISBN), sessions hybrides, noms des auteurs au programme public (Q14), prestataire de signature qualifiée (Q17) ; questions du §10 du plan L8 (hypothèses retenues : niveaux des partenaires, régimes, questionnaire, fournisseur d'e-mails et volume, postes du budget, indicateurs). (L'emplacement de l'espace évaluateur est tranché : application `gestion`, décision H1 ; les lettres d'invitation par K12 ; le signataire des attestations par K18.)
