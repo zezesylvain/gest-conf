@@ -1561,6 +1561,86 @@ CASES = [
         200,
         "/v1/manage/editions/{e}/sponsor-levels/{free_sponsor_level}",
     ),
+    # --- Logistique (plan L8, N6 à N9) ----------------------------------------------------------
+    Case("manage-visits", "GET", LGR, 200, "/v1/manage/editions/{e}/logistics/visits"),
+    Case("manage-visit", "GET", LGR, 200, "/v1/manage/editions/{e}/logistics/visits/{speaker}"),
+    Case(
+        "manage-visit",
+        "PATCH",
+        LGW,
+        200,
+        "/v1/manage/editions/{e}/logistics/visits/{speaker}",
+        {"hotel": "Hôtel Ivoire", "status": "booked"},
+    ),
+    Case("manage-dietary", "GET", LGR, 200, "/v1/manage/editions/{e}/logistics/dietary"),
+    Case(
+        "manage-dietary-export",
+        "GET",
+        LGR,
+        200,
+        "/v1/manage/editions/{e}/logistics/dietary/export",
+        recent_auth=True,
+    ),
+    Case("manage-meals", "GET", LGR, 200, "/v1/manage/editions/{e}/logistics/meals"),
+    Case(
+        "manage-meals",
+        "POST",
+        LGW,
+        201,
+        "/v1/manage/editions/{e}/logistics/meals",
+        lambda ids: {"day": ids["meal_day"], "kind": "lunch"},
+    ),
+    Case("manage-meals-export", "GET", LGR, 200, "/v1/manage/editions/{e}/logistics/meals/export"),
+    Case(
+        "manage-meal",
+        "PATCH",
+        LGW,
+        200,
+        "/v1/manage/editions/{e}/logistics/meals/{meal}",
+        {"margin_percent": 10},
+    ),
+    Case("manage-meal", "DELETE", LGW, 200, "/v1/manage/editions/{e}/logistics/meals/{meal}"),
+    Case("manage-shifts", "GET", VLP, 200, "/v1/manage/editions/{e}/logistics/shifts"),
+    Case(
+        "manage-shifts",
+        "POST",
+        VLP,
+        201,
+        "/v1/manage/editions/{e}/logistics/shifts",
+        {
+            "title_fr": "Vestiaire",
+            "starts_local": "2027-06-02T14:00",
+            "ends_local": "2027-06-02T18:00",
+        },
+    ),
+    Case(
+        "manage-shift",
+        "PATCH",
+        VLP,
+        200,
+        "/v1/manage/editions/{e}/logistics/shifts/{shift}",
+        {"needed": 3},
+    ),
+    Case("manage-shift", "DELETE", VLP, 200, "/v1/manage/editions/{e}/logistics/shifts/{shift}"),
+    Case(
+        "manage-shift-assignments",
+        "POST",
+        VLP,
+        201,
+        "/v1/manage/editions/{e}/logistics/shifts/{shift}/assignments",
+        lambda ids: {"volunteer": ids["volunteer"]},
+    ),
+    Case(
+        "manage-shift-assignment",
+        "DELETE",
+        VLP,
+        200,
+        "/v1/manage/editions/{e}/logistics/shifts/{shift}/assignments/{volunteer}",
+    ),
+    Case("manage-my-shifts", "GET", SHO, 200, "/v1/manage/editions/{e}/me/shifts"),
+    Case(
+        "manage-my-shifts-calendar", "GET", SHO, 200, "/v1/manage/editions/{e}/me/shifts/calendar"
+    ),
     Case("manage-portal-poster", "GET", R, 200, "/v1/manage/editions/{e}/portal/poster"),
     Case(
         "manage-portal-poster",
@@ -1755,7 +1835,22 @@ def _organisation_objects(edition, users) -> dict:
     free = SponsorLevel.objects.create(edition=edition, name_fr="Bronze", position=1)
     sponsor = Sponsor.objects.create(edition=edition, name="Banque Atlantique", level=level)
     benefit = SponsorBenefit.objects.create(sponsor=sponsor, label="Stand")
+    from apps.logistics.models import Meal, ShiftAssignment, VolunteerShift
+
+    speaker = make_member(edition, Role.SPEAKER)
+    day = edition.start_date or timezone.localdate()
+    meal = Meal.objects.create(edition=edition, day=day, kind="lunch")
+    start = dt.datetime(2027, 6, 2, 8, tzinfo=dt.UTC)
+    shift = VolunteerShift.objects.create(
+        edition=edition, title_fr="Accueil", starts_at=start, ends_at=start + dt.timedelta(hours=4)
+    )
+    ShiftAssignment.objects.create(shift=shift, volunteer=users["VOLUNTEER"])
     return {
+        "speaker": speaker.pk,
+        "meal_day": day.isoformat(),
+        "meal": meal.pk,
+        "shift": shift.pk,
+        "volunteer": users["VOLUNTEER"].pk,
         "task": task.pk,
         "task_attachment": attachment.pk,
         "budget_line": line.pk,

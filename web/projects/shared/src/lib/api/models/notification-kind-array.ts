@@ -15,5 +15,7 @@ export const NOTIFICATION_KIND: NotificationKind[] = [
   'screening_rejected',
   'decision_published',
   'final_version_received',
-  'task_assigned'
+  'task_assigned',
+  'shift_assigned',
+  'shift_removed'
 ];

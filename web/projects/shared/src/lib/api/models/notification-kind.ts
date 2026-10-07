@@ -12,6 +12,8 @@
  * * `decision_published` - décision publiée
  * * `final_version_received` - version finale reçue
  * * `task_assigned` - tâche confiée
+ * * `shift_assigned` - poste de bénévolat confié
+ * * `shift_removed` - poste de bénévolat retiré
  */
-export type NotificationKind = 'submission_received' | 'submission_withdrawn' | 'coauthor_added' | 'extension_granted' | 'draft_reminder' | 'screening_rejected' | 'decision_published' | 'final_version_received' | 'task_assigned';
+export type NotificationKind = 'submission_received' | 'submission_withdrawn' | 'coauthor_added' | 'extension_granted' | 'draft_reminder' | 'screening_rejected' | 'decision_published' | 'final_version_received' | 'task_assigned' | 'shift_assigned' | 'shift_removed';
 

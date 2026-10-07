@@ -57,5 +57,6 @@ export const ERROR_CODE: ErrorCode[] = [
   'already_registered',
   'payment_unavailable',
   'signing_unavailable',
-  'signatory_missing'
+  'signatory_missing',
+  'shift_overlap'
 ];

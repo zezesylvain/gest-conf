@@ -11,7 +11,7 @@ from typing import ClassVar
 
 from django.conf import settings
 from django.db import models
-from django.db.models import Q
+from django.db.models import F, Q
 from django.utils.translation import gettext_lazy as _
 
 from apps.core.models import TimeStampedModel
@@ -259,3 +259,247 @@ class BudgetLine(TimeStampedModel):
 
     def __str__(self) -> str:
         return self.label
+
+
+# --- L8.4 : intervenants invités, régimes, repas, bénévoles ------------------------------------
+
+
+class TravelMeans(models.TextChoices):
+    PLANE = "plane", _("avion")
+    TRAIN = "train", _("train")
+    ROAD = "road", _("route")
+    OTHER = "other", _("autre")
+
+
+class VisitStatus(models.TextChoices):
+    """Prise en charge de la venue d'un intervenant invité (N6)."""
+
+    TO_ARRANGE = "to_arrange", _("à organiser")
+    BOOKED = "booked", _("réservée")
+    CONFIRMED = "confirmed", _("confirmée")
+
+
+class SpeakerVisit(TimeStampedModel):
+    """Fiche de venue d'un intervenant invité (N6) : besoins, voyage, hébergement.
+
+    L'intervenant écrit sa part (besoins, arrivée, départ, demandes) depuis le portail ; le
+    CO « logistique » écrit le reste. La **note interne** n'est jamais servie à l'intervenant.
+    Effacée 30 jours après la fin de l'édition (N15).
+    """
+
+    edition = models.ForeignKey(
+        "conferences.Edition",
+        verbose_name=_("édition"),
+        on_delete=models.RESTRICT,
+        related_name="speaker_visits",
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("intervenant"),
+        on_delete=models.RESTRICT,
+        related_name="speaker_visits",
+    )
+    technical_needs = models.JSONField(_("besoins techniques"), default=list, blank=True)
+    technical_note = models.TextField(_("précisions techniques"), blank=True, default="")
+    arrival_at = models.DateTimeField(_("arrivée"), null=True, blank=True)
+    arrival_means = models.CharField(
+        _("moyen d'arrivée"), max_length=8, choices=TravelMeans.choices, blank=True, default=""
+    )
+    arrival_reference = models.CharField(
+        _("vol ou train (arrivée)"), max_length=60, blank=True, default=""
+    )
+    departure_at = models.DateTimeField(_("départ"), null=True, blank=True)
+    departure_means = models.CharField(
+        _("moyen de départ"), max_length=8, choices=TravelMeans.choices, blank=True, default=""
+    )
+    departure_reference = models.CharField(
+        _("vol ou train (départ)"), max_length=60, blank=True, default=""
+    )
+    accommodation_needed = models.BooleanField(_("hébergement demandé"), default=False)
+    transfer_needed = models.BooleanField(_("transfert demandé"), default=False)
+    speaker_note = models.TextField(_("demandes de l'intervenant"), blank=True, default="")
+    hotel = models.CharField(_("hôtel"), max_length=150, blank=True, default="")
+    check_in = models.DateField(_("arrivée à l'hôtel"), null=True, blank=True)
+    check_out = models.DateField(_("départ de l'hôtel"), null=True, blank=True)
+    status = models.CharField(
+        _("prise en charge"),
+        max_length=12,
+        choices=VisitStatus.choices,
+        default=VisitStatus.TO_ARRANGE,
+    )
+    internal_note = models.TextField(_("note interne"), blank=True, default="")
+    updated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("mise à jour par"),
+        on_delete=models.RESTRICT,
+        null=True,
+        blank=True,
+        related_name="+",
+    )
+
+    SPEAKER_FIELDS: ClassVar[tuple[str, ...]] = (
+        "technical_needs",
+        "technical_note",
+        "arrival_at",
+        "arrival_means",
+        "arrival_reference",
+        "departure_at",
+        "departure_means",
+        "departure_reference",
+        "accommodation_needed",
+        "transfer_needed",
+        "speaker_note",
+    )
+    STAFF_FIELDS: ClassVar[tuple[str, ...]] = (
+        "hotel",
+        "check_in",
+        "check_out",
+        "status",
+        "internal_note",
+    )
+
+    class Meta:
+        verbose_name = _("fiche de venue")
+        verbose_name_plural = _("fiches de venue")
+        ordering = ("edition", "id")
+        constraints = (
+            models.UniqueConstraint(fields=("edition", "user"), name="log_visit_unique"),
+        )
+
+
+class Diet(models.TextChoices):
+    """Régimes alimentaires proposés (N7, catalogue fermé)."""
+
+    VEGETARIAN = "vegetarian", _("végétarien")
+    VEGAN = "vegan", _("végétalien")
+    NO_PORK = "no_pork", _("sans porc")
+    GLUTEN_FREE = "gluten_free", _("sans gluten")
+    LACTOSE_FREE = "lactose_free", _("sans lactose")
+    OTHER = "other", _("autre")
+
+
+class DietaryDeclaration(TimeStampedModel):
+    """Régime alimentaire déclaré pour une édition (N7, RG-23) : facultatif, avec
+    consentement explicite (donnée pouvant révéler la santé ou des convictions), retirable,
+    effacé 30 jours après la fin de l'édition."""
+
+    edition = models.ForeignKey(
+        "conferences.Edition",
+        verbose_name=_("édition"),
+        on_delete=models.RESTRICT,
+        related_name="dietary_declarations",
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("personne"),
+        on_delete=models.RESTRICT,
+        related_name="dietary_declarations",
+    )
+    diets = models.JSONField(_("régimes"), default=list, blank=True)
+    allergies = models.CharField(_("allergies"), max_length=200, blank=True, default="")
+    consented_at = models.DateTimeField(_("consentement donné le"))
+
+    class Meta:
+        verbose_name = _("régime alimentaire")
+        verbose_name_plural = _("régimes alimentaires")
+        ordering = ("edition", "id")
+        constraints = (models.UniqueConstraint(fields=("edition", "user"), name="log_diet_unique"),)
+
+
+class MealKind(models.TextChoices):
+    COFFEE_BREAK = "coffee_break", _("pause café")
+    LUNCH = "lunch", _("déjeuner")
+    DINNER = "dinner", _("dîner")
+    COCKTAIL = "cocktail", _("cocktail")
+
+
+class Meal(TimeStampedModel):
+    """Repas de l'édition (N8) et son public ; l'effectif est calculé, jamais saisi."""
+
+    edition = models.ForeignKey(
+        "conferences.Edition",
+        verbose_name=_("édition"),
+        on_delete=models.RESTRICT,
+        related_name="meals",
+    )
+    day = models.DateField(_("jour"))
+    kind = models.CharField(_("type"), max_length=14, choices=MealKind.choices)
+    label_fr = models.CharField(_("libellé (FR)"), max_length=150, blank=True, default="")
+    label_en = models.CharField(_("libellé (EN)"), max_length=150, blank=True, default="")
+    # Inscrits confirmés, tous ou titulaires d'une option de L6 (« diner », par exemple).
+    include_registered = models.BooleanField(_("inscrits confirmés"), default=True)
+    option_code = models.CharField(_("option requise"), max_length=32, blank=True, default="")
+    include_speakers = models.BooleanField(_("intervenants invités"), default=True)
+    include_committees = models.BooleanField(_("membres des comités"), default=False)
+    include_volunteers = models.BooleanField(_("bénévoles"), default=False)
+    margin_percent = models.PositiveSmallIntegerField(_("marge (%)"), default=5)
+    position = models.PositiveIntegerField(_("ordre"), default=0)
+
+    class Meta:
+        verbose_name = _("repas")
+        verbose_name_plural = _("repas")
+        ordering = ("edition", "day", "position", "id")
+        constraints = (
+            models.CheckConstraint(condition=Q(margin_percent__lte=50), name="log_meal_margin"),
+        )
+
+
+class VolunteerShift(TimeStampedModel):
+    """Poste de bénévolat (N9) : intitulé, lieu, horaire, nombre de bénévoles nécessaires."""
+
+    edition = models.ForeignKey(
+        "conferences.Edition",
+        verbose_name=_("édition"),
+        on_delete=models.RESTRICT,
+        related_name="volunteer_shifts",
+    )
+    title_fr = models.CharField(_("intitulé (FR)"), max_length=150)
+    title_en = models.CharField(_("intitulé (EN)"), max_length=150, blank=True, default="")
+    place = models.CharField(_("lieu"), max_length=150, blank=True, default="")
+    starts_at = models.DateTimeField(_("début"))
+    ends_at = models.DateTimeField(_("fin"))
+    needed = models.PositiveSmallIntegerField(_("bénévoles nécessaires"), default=1)
+    instructions = models.TextField(_("consignes"), blank=True, default="")
+
+    class Meta:
+        verbose_name = _("poste de bénévolat")
+        verbose_name_plural = _("postes de bénévolat")
+        ordering = ("edition", "starts_at", "id")
+        constraints = (
+            models.CheckConstraint(condition=Q(ends_at__gt=F("starts_at")), name="log_shift_order"),
+            models.CheckConstraint(condition=Q(needed__gte=1), name="log_shift_needed"),
+        )
+
+
+class ShiftAssignment(TimeStampedModel):
+    """Affectation d'un bénévole à un poste (N9) ; deux postes qui se chevauchent pour la même
+    personne sont refusés par le service."""
+
+    shift = models.ForeignKey(
+        VolunteerShift,
+        verbose_name=_("poste"),
+        on_delete=models.CASCADE,
+        related_name="assignments",
+    )
+    volunteer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("bénévole"),
+        on_delete=models.RESTRICT,
+        related_name="shift_assignments",
+    )
+    assigned_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("affecté par"),
+        on_delete=models.RESTRICT,
+        null=True,
+        blank=True,
+        related_name="+",
+    )
+
+    class Meta:
+        verbose_name = _("affectation de bénévole")
+        verbose_name_plural = _("affectations de bénévoles")
+        ordering = ("shift", "id")
+        constraints = (
+            models.UniqueConstraint(fields=("shift", "volunteer"), name="log_shift_assignment"),
+        )

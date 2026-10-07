@@ -84,7 +84,8 @@ class OutboxEmail(TimeStampedModel):
 
 class NotificationKind(models.TextChoices):
     """Notifications dans l'application (plan L3, F13). Lot L3 : soumissions ; lot L4 :
-    recevabilité, décisions, version finale ; lot L8 : tâche confiée (N3)."""
+    recevabilité, décisions, version finale ; lot L8 : tâche confiée (N3), poste de
+    bénévolat confié ou retiré (N9)."""
 
     SUBMISSION_RECEIVED = "submission_received", _("soumission reçue")
     SUBMISSION_WITHDRAWN = "submission_withdrawn", _("soumission retirée")
@@ -95,6 +96,8 @@ class NotificationKind(models.TextChoices):
     DECISION_PUBLISHED = "decision_published", _("décision publiée")
     FINAL_VERSION_RECEIVED = "final_version_received", _("version finale reçue")
     TASK_ASSIGNED = "task_assigned", _("tâche confiée")
+    SHIFT_ASSIGNED = "shift_assigned", _("poste de bénévolat confié")
+    SHIFT_REMOVED = "shift_removed", _("poste de bénévolat retiré")
 
 
 class Notification(TimeStampedModel):

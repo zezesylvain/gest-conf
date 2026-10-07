@@ -14,17 +14,23 @@ from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from apps.accounts.services.invitations import display_name
+from apps.conferences.serializers import LocalDateTimeField
 from apps.core.money import MAX_DIGITS
 from apps.logistics.models import (
     BudgetCategory,
     BudgetKind,
     BudgetSource,
+    Diet,
+    MealKind,
     Task,
     TaskAttachment,
     TaskComment,
     TaskPriority,
     TaskStatus,
+    TravelMeans,
+    VisitStatus,
 )
+from apps.program.models import Equipment
 
 
 class TaskPersonSerializer(serializers.Serializer):
@@ -221,3 +227,230 @@ class BudgetLineWriteSerializer(serializers.Serializer):
     )
     note = serializers.CharField(max_length=2000, required=False, allow_blank=True)
     position = serializers.IntegerField(required=False, min_value=0)
+
+
+# --- L8.4 : venues, régimes, repas, bénévoles --------------------------------------------------
+
+
+def _local(value, edition) -> str | None:
+    from apps.conferences.services import utc_to_local
+
+    return utc_to_local(value, edition.timezone).isoformat(timespec="minutes") if value else None
+
+
+class VisitSpeakerFieldsSerializer(serializers.Serializer):
+    technical_needs = serializers.ListField(
+        child=serializers.ChoiceField(choices=Equipment.choices)
+    )
+    technical_note = serializers.CharField(allow_blank=True)
+    arrival_local = serializers.CharField(allow_null=True)
+    arrival_means = serializers.ChoiceField(choices=TravelMeans.choices, allow_blank=True)
+    arrival_reference = serializers.CharField(allow_blank=True)
+    departure_local = serializers.CharField(allow_null=True)
+    departure_means = serializers.ChoiceField(choices=TravelMeans.choices, allow_blank=True)
+    departure_reference = serializers.CharField(allow_blank=True)
+    accommodation_needed = serializers.BooleanField()
+    transfer_needed = serializers.BooleanField()
+    speaker_note = serializers.CharField(allow_blank=True)
+    hotel = serializers.CharField(allow_blank=True)
+    check_in = serializers.DateField(allow_null=True)
+    check_out = serializers.DateField(allow_null=True)
+    status = serializers.ChoiceField(choices=VisitStatus.choices)
+
+
+class MyVisitSerializer(VisitSpeakerFieldsSerializer):
+    """« Ma venue » : la note interne du CO n'y figure jamais (sérialiseur par rôle)."""
+
+    edition_id = serializers.IntegerField()
+    edition_code = serializers.CharField()
+    timezone = serializers.CharField()
+
+
+class ManageVisitSerializer(VisitSpeakerFieldsSerializer):
+    speaker = TaskPersonSerializer()
+    institution = serializers.CharField(allow_blank=True)
+    internal_note = serializers.CharField(allow_blank=True)
+    missing_equipment = serializers.ListField(child=serializers.CharField())
+    updated_at = serializers.DateTimeField(allow_null=True)
+
+
+def visit_data(edition, user, visit, *, staff: bool, missing=()) -> dict:
+    data = {
+        "technical_needs": visit.technical_needs if visit else [],
+        "technical_note": visit.technical_note if visit else "",
+        "arrival_local": _local(visit.arrival_at, edition) if visit else None,
+        "arrival_means": visit.arrival_means if visit else "",
+        "arrival_reference": visit.arrival_reference if visit else "",
+        "departure_local": _local(visit.departure_at, edition) if visit else None,
+        "departure_means": visit.departure_means if visit else "",
+        "departure_reference": visit.departure_reference if visit else "",
+        "accommodation_needed": visit.accommodation_needed if visit else False,
+        "transfer_needed": visit.transfer_needed if visit else False,
+        "speaker_note": visit.speaker_note if visit else "",
+        "hotel": visit.hotel if visit else "",
+        "check_in": visit.check_in if visit else None,
+        "check_out": visit.check_out if visit else None,
+        "status": visit.status if visit else VisitStatus.TO_ARRANGE,
+    }
+    if staff:
+        profile = getattr(user, "profile", None)
+        data.update(
+            {
+                "speaker": task_person(user),
+                "institution": profile.institution if profile else "",
+                "internal_note": visit.internal_note if visit else "",
+                "missing_equipment": list(missing),
+                "updated_at": visit.updated_at if visit else None,
+            }
+        )
+    else:
+        data.update(
+            {
+                "edition_id": edition.pk,
+                "edition_code": edition.code,
+                "timezone": edition.timezone,
+            }
+        )
+    return data
+
+
+class VisitSpeakerWriteSerializer(serializers.Serializer):
+    technical_needs = serializers.ListField(
+        child=serializers.ChoiceField(choices=Equipment.choices), required=False
+    )
+    technical_note = serializers.CharField(max_length=500, required=False, allow_blank=True)
+    arrival_local = LocalDateTimeField(required=False, allow_null=True)
+    arrival_means = serializers.ChoiceField(
+        choices=TravelMeans.choices, required=False, allow_blank=True
+    )
+    arrival_reference = serializers.CharField(max_length=60, required=False, allow_blank=True)
+    departure_local = LocalDateTimeField(required=False, allow_null=True)
+    departure_means = serializers.ChoiceField(
+        choices=TravelMeans.choices, required=False, allow_blank=True
+    )
+    departure_reference = serializers.CharField(max_length=60, required=False, allow_blank=True)
+    accommodation_needed = serializers.BooleanField(required=False)
+    transfer_needed = serializers.BooleanField(required=False)
+    speaker_note = serializers.CharField(max_length=1000, required=False, allow_blank=True)
+
+
+class VisitStaffWriteSerializer(VisitSpeakerWriteSerializer):
+    hotel = serializers.CharField(max_length=150, required=False, allow_blank=True)
+    check_in = serializers.DateField(required=False, allow_null=True)
+    check_out = serializers.DateField(required=False, allow_null=True)
+    status = serializers.ChoiceField(choices=VisitStatus.choices, required=False)
+    internal_note = serializers.CharField(max_length=2000, required=False, allow_blank=True)
+
+
+class DietCountsSerializer(serializers.Serializer):
+    by_diet = serializers.DictField(child=serializers.IntegerField())
+    allergies = serializers.IntegerField()
+
+
+class DietarySummarySerializer(DietCountsSerializer):
+    declarations = serializers.IntegerField()
+
+
+class MyDietarySerializer(serializers.Serializer):
+    eligible = serializers.BooleanField()
+    diets = serializers.ListField(child=serializers.ChoiceField(choices=Diet.choices))
+    allergies = serializers.CharField(allow_blank=True)
+    consented_at = serializers.DateTimeField(allow_null=True)
+
+
+class MyDietaryWriteSerializer(serializers.Serializer):
+    diets = serializers.ListField(
+        child=serializers.ChoiceField(choices=Diet.choices), allow_empty=True
+    )
+    allergies = serializers.CharField(max_length=200, allow_blank=True, required=False)
+    consent = serializers.BooleanField()
+
+
+class MealEstimateSerializer(DietCountsSerializer):
+    count = serializers.IntegerField()
+    margin = serializers.IntegerField()
+    total = serializers.IntegerField()
+
+
+class MealSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    day = serializers.DateField()
+    kind = serializers.ChoiceField(choices=MealKind.choices)
+    label_fr = serializers.CharField(allow_blank=True)
+    label_en = serializers.CharField(allow_blank=True)
+    include_registered = serializers.BooleanField()
+    option_code = serializers.CharField(allow_blank=True)
+    include_speakers = serializers.BooleanField()
+    include_committees = serializers.BooleanField()
+    include_volunteers = serializers.BooleanField()
+    margin_percent = serializers.IntegerField()
+    position = serializers.IntegerField()
+    estimate = MealEstimateSerializer()
+
+
+class MealWriteSerializer(serializers.Serializer):
+    day = serializers.DateField(required=False)
+    kind = serializers.ChoiceField(choices=MealKind.choices, required=False)
+    label_fr = serializers.CharField(max_length=150, required=False, allow_blank=True)
+    label_en = serializers.CharField(max_length=150, required=False, allow_blank=True)
+    include_registered = serializers.BooleanField(required=False)
+    option_code = serializers.CharField(max_length=32, required=False, allow_blank=True)
+    include_speakers = serializers.BooleanField(required=False)
+    include_committees = serializers.BooleanField(required=False)
+    include_volunteers = serializers.BooleanField(required=False)
+    margin_percent = serializers.IntegerField(min_value=0, max_value=50, required=False)
+    position = serializers.IntegerField(min_value=0, required=False)
+
+
+class ShiftSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    title_fr = serializers.CharField()
+    title_en = serializers.CharField(allow_blank=True)
+    place = serializers.CharField(allow_blank=True)
+    starts_at = serializers.DateTimeField()
+    ends_at = serializers.DateTimeField()
+    starts_local = serializers.CharField()
+    ends_local = serializers.CharField()
+    needed = serializers.IntegerField()
+    instructions = serializers.CharField(allow_blank=True)
+    volunteers = TaskPersonSerializer(many=True)
+    missing = serializers.IntegerField()
+
+
+def shift_data(shift, *, with_volunteers: bool = True) -> dict:
+    people = (
+        [task_person(row.volunteer) for row in shift.assignments.all()] if with_volunteers else []
+    )
+    return {
+        "id": shift.pk,
+        "title_fr": shift.title_fr,
+        "title_en": shift.title_en,
+        "place": shift.place,
+        "starts_at": shift.starts_at,
+        "ends_at": shift.ends_at,
+        "starts_local": _local(shift.starts_at, shift.edition),
+        "ends_local": _local(shift.ends_at, shift.edition),
+        "needed": shift.needed,
+        "instructions": shift.instructions,
+        "volunteers": people,
+        "missing": max(shift.needed - len(shift.assignments.all()), 0),
+    }
+
+
+class ShiftBoardSerializer(serializers.Serializer):
+    shifts = ShiftSerializer(many=True)
+    volunteers = TaskPersonSerializer(many=True)
+
+
+class ShiftWriteSerializer(serializers.Serializer):
+    title_fr = serializers.CharField(max_length=150, required=False, allow_blank=True)
+    title_en = serializers.CharField(max_length=150, required=False, allow_blank=True)
+    place = serializers.CharField(max_length=150, required=False, allow_blank=True)
+    starts_local = LocalDateTimeField(required=False)
+    ends_local = LocalDateTimeField(required=False)
+    needed = serializers.IntegerField(min_value=1, max_value=100, required=False)
+    instructions = serializers.CharField(max_length=1000, required=False, allow_blank=True)
+
+
+class AssignmentWriteSerializer(serializers.Serializer):
+    volunteer = serializers.IntegerField()

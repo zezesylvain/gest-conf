@@ -566,3 +566,103 @@ synthèse du budget ignorait la nouvelle ligne calculée « partenariats ». Cor
   vérification des types des trois projets du front.
 
 **Critère de fin** (« Tests au vert ») : atteint.
+
+## 15. Bilan de L8.4 (7 octobre 2026)
+
+**Fiches de venue des intervenants invités** (N6 ; `SpeakerVisit`, `apps/logistics/services/visits.py`) :
+
+- une fiche par intervenant invité (rôle `SPEAKER` actif) et par édition, créée à sa
+  première écriture ;
+- **part de l'intervenant** (`SPEAKER_FIELDS`) : besoins techniques (catalogue fermé des
+  équipements de salle de L5) et précisions, arrivée et départ (moyen, vol ou train),
+  hébergement et transfert demandés, demandes ;
+- **part du CO** (`STAFF_FIELDS`) : hôtel, nuits (arrivée et départ de l'hôtel), statut de
+  la prise en charge (`to_arrange`, `booked`, `confirmed`), note interne ;
+- arrivée et départ **saisis en heure locale de l'édition** (`arrival_local`,
+  `departure_local`, D13), stockés en UTC ; départ après l'arrivée, sortie de l'hôtel après
+  l'entrée ;
+- l'intervenant n'écrit que sa part : un champ du CO envoyé par lui est ignoré par l'API
+  (son sérialiseur ne le connaît pas) et refusé par le service (« champ non modifiable »),
+  et la note interne n'est **jamais** servie par `GET /v1/me/editions/{id}/visit` (test) ;
+  il lit l'hôtel et le statut réservés pour lui ;
+- **signal** : besoin technique absent de l'équipement d'une salle où l'intervenant passe,
+  lu dans le **dernier programme publié** (instantané de L5), jamais dans le brouillon ;
+- journal `visit.updated` : la liste des champs changés, **sans valeur** (références de vol
+  et notes restent hors du journal).
+
+**Régimes alimentaires** (N7, **RG-23** ; `DietaryDeclaration`, `services/dietary.py`) :
+
+- peuvent déclarer : les personnes qui ont un rôle actif dans l'édition ou une inscription en
+  attente ou confirmée ;
+- **consentement explicite exigé à chaque écriture** (horodaté), retrait à tout moment par
+  `DELETE` (la déclaration est effacée) ;
+- catalogue fermé (végétarien, végétalien, sans porc, sans gluten, sans lactose, autre) et
+  allergies en texte libre (200 caractères) ;
+- le journal garde l'acte (`dietary.declared`, `dietary.withdrawn`), **jamais le contenu** ;
+- gestion : effectifs **agrégés** (`…/logistics/dietary`) ; liste nominative par
+  `…/logistics/dietary/export` seulement (`logistics.read`, **réauthentification**, journal
+  `dietary.exported`) ;
+- **effacement** 30 jours après la fin de l'édition ou à son archivage : tâche de
+  conservation `logistics.dietary` de `cleanup` (même règle que les numéros de passeport de
+  L7), et `logistics.visits` pour les fiches de venue.
+
+**Restauration** (N8 ; `Meal`, `services/meals.py`) :
+
+- repas : jour (dans les dates de l'édition), type (pause café, déjeuner, dîner, cocktail),
+  libellés FR et EN, public (inscrits confirmés, ou seulement les titulaires d'une **option**
+  de L6 ; intervenants, comités, bénévoles à cocher), marge de 0 à 50 % ;
+- **estimation calculée** : personnes du public **comptées une fois** (une même personne
+  inscrite et membre d'un comité ne compte qu'une fois), marge arrondie au supérieur,
+  total à commander, répartition par régime et nombre d'allergies, **sans nom** ;
+- export pour le traiteur en CSV et XLSX (`…/logistics/meals/export`), agrégé ;
+- **écart** : l'export **PDF** de N8 rejoint les rapports PDF de L8.7 (même générateur
+  `fpdf2`), pour ne pas écrire deux mises en page.
+
+**Bénévoles** (N9 ; `VolunteerShift`, `ShiftAssignment`, `services/shifts.py`) :
+
+- postes : intitulés FR et EN, lieu, début et fin **en heure locale de l'édition**, nombre de
+  bénévoles nécessaires (1 à 100), consignes ;
+- affectation des seuls bénévoles (`VOLUNTEER` actif) de l'édition, ré-affectation sans
+  effet ;
+- **chevauchement refusé** pour une même personne, à l'affectation comme au déplacement d'un
+  poste déjà pourvu (nouveau code d'erreur `shift_overlap`, 409) ; le compte du bénévole est
+  verrouillé le temps de la vérification, de sorte que deux affectations simultanées ne
+  passent pas toutes les deux ;
+- tableau du coordinateur : postes, bénévoles affectés et **places manquantes** ;
+- **cloche** à chaque affectation (`shift_assigned`) et à chaque retrait (`shift_removed`),
+  y compris par la suppression d'un poste pourvu (migration `communications/0007`) ;
+- **« Mon planning »** (`shifts.own`) : `…/me/shifts` et son fichier iCal
+  `…/me/shifts/calendar` (générateur de L5).
+
+**API** :
+
+- gestion (2FA) : `…/logistics/visits` et `…/visits/{user_id}`, `…/logistics/dietary` et
+  `…/dietary/export`, `…/logistics/meals`, `…/meals/export` et `…/meals/{id}`,
+  `…/logistics/shifts`, `…/shifts/{id}`, `…/shifts/{id}/assignments` et
+  `…/assignments/{volunteer_id}`, `…/me/shifts` et `…/me/shifts/calendar` ;
+- compte (portail) : `/v1/me/editions/{id}/visit` (lecture, modification) et
+  `/v1/me/editions/{id}/dietary` (lecture, déclaration, retrait).
+
+**Données personnelles** : les fiches de venue, les déclarations de régime et les postes
+d'un bénévole entrent dans l'export « Mes données » ; l'anonymisation d'un compte efface ses
+fiches de venue et ses déclarations ; registre à jour.
+
+**Reporté** :
+
+- la page publique **« Intervenants »** de N6, construite depuis l'instantané publié du
+  programme, rejoint L8.9 avec les autres pages du portail (son API comprise) ;
+- les écrans (gestion et « Ma venue » du portail) arrivent en L8.8 et L8.9, avec les textes
+  de la cloche pour `task_assigned`, `shift_assigned` et `shift_removed`.
+
+**Tests** :
+
+- `logistics` : 34 tests, dont RG-23 (consentement et éligibilité, journal sans contenu,
+  retrait, agrégats, export nominatif réauthentifié, effacement à 30 jours, API du compte),
+  N6 (part de l'intervenant en heure locale, note interne jamais servie, seuls les
+  intervenants, équipement manquant d'après le programme publié), N8 (personnes comptées
+  une fois, marge, régimes, option, export sans nom) et N9 (chevauchement, retraits et
+  cloche, « Mon planning » et iCal, édition archivée) ;
+- matrice des droits : 18 cas de logistique ;
+- `ruff`, `locale/check.sh`, schéma validé sous MariaDB (énumérations `TravelMeans`,
+  `VisitStatus`, `Diet`, `MealKind` nommées), client TypeScript régénéré, vérification des
+  types des trois projets du front.

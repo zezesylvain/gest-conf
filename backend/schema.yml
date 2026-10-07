@@ -2484,6 +2484,493 @@ paths:
       responses:
         '204':
           description: No response body
+  /v1/manage/editions/{edition_id}/logistics/dietary:
+    get:
+      operationId: manage_dietary_summary
+      description: '``…/logistics/dietary`` : régimes agrégés ; liste nominative en
+        export (RG-23).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DietarySummary'
+          description: ''
+  /v1/manage/editions/{edition_id}/logistics/dietary/export:
+    get:
+      operationId: manage_dietary_export
+      description: 'RG-23 : liste nominative des régimes et allergies, journalisée,
+        réauthentification.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: file_format
+        schema:
+          type: string
+          enum:
+          - csv
+          - xlsx
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  /v1/manage/editions/{edition_id}/logistics/meals:
+    get:
+      operationId: manage_meals_list
+      description: '``…/logistics/meals`` : repas et effectifs estimés (N8).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Meal'
+          description: ''
+    post:
+      operationId: manage_meals_create
+      description: '``…/logistics/meals`` : repas et effectifs estimés (N8).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MealWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Meal'
+          description: ''
+  /v1/manage/editions/{edition_id}/logistics/meals/{meal_id}:
+    patch:
+      operationId: manage_meals_update
+      description: '``…/logistics/meals`` : repas et effectifs estimés (N8).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: meal_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedMealWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Meal'
+          description: ''
+    delete:
+      operationId: manage_meals_destroy
+      description: '``…/logistics/meals`` : repas et effectifs estimés (N8).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: meal_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Meal'
+          description: ''
+  /v1/manage/editions/{edition_id}/logistics/meals/export:
+    get:
+      operationId: manage_meals_export
+      description: 'Commande au traiteur : effectifs agrégés, sans nom (journalisée).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: file_format
+        schema:
+          type: string
+          enum:
+          - csv
+          - xlsx
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  /v1/manage/editions/{edition_id}/logistics/shifts:
+    get:
+      operationId: manage_shifts_list
+      description: '``…/logistics/shifts`` : postes de bénévolat et affectations (N9).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ShiftBoard'
+          description: ''
+    post:
+      operationId: manage_shifts_create
+      description: '``…/logistics/shifts`` : postes de bénévolat et affectations (N9).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ShiftWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShiftBoard'
+          description: ''
+  /v1/manage/editions/{edition_id}/logistics/shifts/{shift_id}:
+    patch:
+      operationId: manage_shifts_update
+      description: '``…/logistics/shifts`` : postes de bénévolat et affectations (N9).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: shift_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedShiftWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShiftBoard'
+          description: ''
+    delete:
+      operationId: manage_shifts_destroy
+      description: '``…/logistics/shifts`` : postes de bénévolat et affectations (N9).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: shift_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShiftBoard'
+          description: ''
+  /v1/manage/editions/{edition_id}/logistics/shifts/{shift_id}/assignments:
+    post:
+      operationId: manage_shifts_assign
+      description: '``…/logistics/shifts`` : postes de bénévolat et affectations (N9).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: shift_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignmentWriteRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShiftBoard'
+          description: ''
+  /v1/manage/editions/{edition_id}/logistics/shifts/{shift_id}/assignments/{volunteer_id}:
+    delete:
+      operationId: manage_shifts_unassign
+      description: '``…/logistics/shifts`` : postes de bénévolat et affectations (N9).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: shift_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: volunteer_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShiftBoard'
+          description: ''
+  /v1/manage/editions/{edition_id}/logistics/visits:
+    get:
+      operationId: manage_visits_list
+      description: '``…/logistics/visits`` : fiches de venue des intervenants invités
+        (N6).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ManageVisit'
+          description: ''
+  /v1/manage/editions/{edition_id}/logistics/visits/{user_id}:
+    get:
+      operationId: manage_visits_retrieve
+      description: '``…/logistics/visits`` : fiches de venue des intervenants invités
+        (N6).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: user_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManageVisit'
+          description: ''
+    patch:
+      operationId: manage_visits_update
+      description: '``…/logistics/visits`` : fiches de venue des intervenants invités
+        (N6).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: user_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedVisitStaffWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManageVisit'
+          description: ''
+  /v1/manage/editions/{edition_id}/me/shifts:
+    get:
+      operationId: manage_my_shifts
+      description: '``…/me/shifts`` : « Mon planning » du bénévole (N9) et son fichier
+        iCal.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Shift'
+          description: ''
+  /v1/manage/editions/{edition_id}/me/shifts/calendar:
+    get:
+      operationId: manage_my_shifts_calendar
+      description: '``…/me/shifts`` : « Mon planning » du bénévole (N9) et son fichier
+        iCal.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            text/calendar:
+              schema:
+                type: string
+                format: binary
+          description: ''
   /v1/manage/editions/{edition_id}/portal/files:
     get:
       operationId: manage_editions_portal_files_list
@@ -7128,6 +7615,129 @@ paths:
                 type: object
                 additionalProperties: {}
           description: Export JSON.
+  /v1/me/editions/{edition_id}/dietary:
+    get:
+      operationId: me_dietary_retrieve
+      description: |-
+        ``/v1/me/editions/{id}/dietary`` : régime alimentaire (N7, RG-23), facultatif, avec
+        consentement explicite ; ``DELETE`` retire la déclaration.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - me
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyDietary'
+          description: ''
+    put:
+      operationId: me_dietary_update
+      description: |-
+        ``/v1/me/editions/{id}/dietary`` : régime alimentaire (N7, RG-23), facultatif, avec
+        consentement explicite ; ``DELETE`` retire la déclaration.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - me
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MyDietaryWriteRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyDietary'
+          description: ''
+    delete:
+      operationId: me_dietary_withdraw
+      description: |-
+        ``/v1/me/editions/{id}/dietary`` : régime alimentaire (N7, RG-23), facultatif, avec
+        consentement explicite ; ``DELETE`` retire la déclaration.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - me
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyDietary'
+          description: ''
+  /v1/me/editions/{edition_id}/visit:
+    get:
+      operationId: me_visit_retrieve
+      description: |-
+        ``/v1/me/editions/{id}/visit`` : « Ma venue » de l'intervenant invité (N6) ; 404 pour
+        qui n'est pas intervenant invité de l'édition. Jamais la note interne du CO.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - me
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyVisit'
+          description: ''
+    put:
+      operationId: me_visit_update
+      description: |-
+        ``/v1/me/editions/{id}/visit`` : « Ma venue » de l'intervenant invité (N6) ; 404 pour
+        qui n'est pas intervenant invité de l'édition. Jamais la note interne du CO.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - me
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VisitSpeakerWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyVisit'
+          description: ''
   /v1/me/notifications:
     get:
       operationId: me_notifications
@@ -8602,6 +9212,13 @@ components:
         * `active` - actif
         * `declined` - déclinée
         * `cancelled` - annulée
+    AssignmentWriteRequest:
+      type: object
+      properties:
+        volunteer:
+          type: integer
+      required:
+      - volunteer
     AttachmentUploadRequest:
       type: object
       properties:
@@ -10387,6 +11004,37 @@ components:
           description: Le relecteur déclare un conflit d'intérêts (H8).
       required:
       - reason
+    Diet:
+      enum:
+      - vegetarian
+      - vegan
+      - no_pork
+      - gluten_free
+      - lactose_free
+      - other
+      type: string
+      description: |-
+        * `vegetarian` - végétarien
+        * `vegan` - végétalien
+        * `no_pork` - sans porc
+        * `gluten_free` - sans gluten
+        * `lactose_free` - sans lactose
+        * `other` - autre
+    DietarySummary:
+      type: object
+      properties:
+        by_diet:
+          type: object
+          additionalProperties:
+            type: integer
+        allergies:
+          type: integer
+        declarations:
+          type: integer
+      required:
+      - allergies
+      - by_diet
+      - declarations
     DiscountKind:
       enum:
       - percent
@@ -10833,6 +11481,7 @@ components:
       - payment_unavailable
       - signing_unavailable
       - signatory_missing
+      - shift_overlap
       type: string
       description: |-
         * `validation_error` - Validation Error
@@ -10886,6 +11535,7 @@ components:
         * `payment_unavailable` - Payment Unavailable
         * `signing_unavailable` - Signing Unavailable
         * `signatory_missing` - Signatory Missing
+        * `shift_overlap` - Shift Overlap
     Expertise:
       type: object
       description: Expertises du relecteur (H7) et thématiques proposées.
@@ -12154,6 +12804,86 @@ components:
       - reference
       - status
       - total
+    ManageVisit:
+      type: object
+      properties:
+        technical_needs:
+          type: array
+          items:
+            $ref: '#/components/schemas/Equipment'
+        technical_note:
+          type: string
+        arrival_local:
+          type: string
+          nullable: true
+        arrival_means:
+          oneOf:
+          - $ref: '#/components/schemas/TravelMeans'
+          - $ref: '#/components/schemas/BlankEnum'
+        arrival_reference:
+          type: string
+        departure_local:
+          type: string
+          nullable: true
+        departure_means:
+          oneOf:
+          - $ref: '#/components/schemas/TravelMeans'
+          - $ref: '#/components/schemas/BlankEnum'
+        departure_reference:
+          type: string
+        accommodation_needed:
+          type: boolean
+        transfer_needed:
+          type: boolean
+        speaker_note:
+          type: string
+        hotel:
+          type: string
+        check_in:
+          type: string
+          format: date
+          nullable: true
+        check_out:
+          type: string
+          format: date
+          nullable: true
+        status:
+          $ref: '#/components/schemas/VisitStatus'
+        speaker:
+          $ref: '#/components/schemas/TaskPerson'
+        institution:
+          type: string
+        internal_note:
+          type: string
+        missing_equipment:
+          type: array
+          items:
+            type: string
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - accommodation_needed
+      - arrival_local
+      - arrival_means
+      - arrival_reference
+      - check_in
+      - check_out
+      - departure_local
+      - departure_means
+      - departure_reference
+      - hotel
+      - institution
+      - internal_note
+      - missing_equipment
+      - speaker
+      - speaker_note
+      - status
+      - technical_needs
+      - technical_note
+      - transfer_needed
+      - updated_at
     ManualPaymentMethod:
       enum:
       - transfer
@@ -12317,6 +13047,115 @@ components:
       - expires_at
       - oc_function
       - role
+    Meal:
+      type: object
+      properties:
+        id:
+          type: integer
+        day:
+          type: string
+          format: date
+        kind:
+          $ref: '#/components/schemas/MealKind'
+        label_fr:
+          type: string
+        label_en:
+          type: string
+        include_registered:
+          type: boolean
+        option_code:
+          type: string
+        include_speakers:
+          type: boolean
+        include_committees:
+          type: boolean
+        include_volunteers:
+          type: boolean
+        margin_percent:
+          type: integer
+        position:
+          type: integer
+        estimate:
+          $ref: '#/components/schemas/MealEstimate'
+      required:
+      - day
+      - estimate
+      - id
+      - include_committees
+      - include_registered
+      - include_speakers
+      - include_volunteers
+      - kind
+      - label_en
+      - label_fr
+      - margin_percent
+      - option_code
+      - position
+    MealEstimate:
+      type: object
+      properties:
+        by_diet:
+          type: object
+          additionalProperties:
+            type: integer
+        allergies:
+          type: integer
+        count:
+          type: integer
+        margin:
+          type: integer
+        total:
+          type: integer
+      required:
+      - allergies
+      - by_diet
+      - count
+      - margin
+      - total
+    MealKind:
+      enum:
+      - coffee_break
+      - lunch
+      - dinner
+      - cocktail
+      type: string
+      description: |-
+        * `coffee_break` - pause café
+        * `lunch` - déjeuner
+        * `dinner` - dîner
+        * `cocktail` - cocktail
+    MealWriteRequest:
+      type: object
+      properties:
+        day:
+          type: string
+          format: date
+        kind:
+          $ref: '#/components/schemas/MealKind'
+        label_fr:
+          type: string
+          maxLength: 150
+        label_en:
+          type: string
+          maxLength: 150
+        include_registered:
+          type: boolean
+        option_code:
+          type: string
+          maxLength: 32
+        include_speakers:
+          type: boolean
+        include_committees:
+          type: boolean
+        include_volunteers:
+          type: boolean
+        margin_percent:
+          type: integer
+          maximum: 50
+          minimum: 0
+        position:
+          type: integer
+          minimum: 0
     MemberWithEmail:
       type: object
       description: Membre d'une édition, sans adresse (``members.read`` seul).
@@ -12562,6 +13401,41 @@ components:
       - revoked
       - title
       - verification_url
+    MyDietary:
+      type: object
+      properties:
+        eligible:
+          type: boolean
+        diets:
+          type: array
+          items:
+            $ref: '#/components/schemas/Diet'
+        allergies:
+          type: string
+        consented_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - allergies
+      - consented_at
+      - diets
+      - eligible
+    MyDietaryWriteRequest:
+      type: object
+      properties:
+        diets:
+          type: array
+          items:
+            $ref: '#/components/schemas/Diet'
+        allergies:
+          type: string
+          maxLength: 200
+        consent:
+          type: boolean
+      required:
+      - consent
+      - diets
     MyLetter:
       type: object
       description: 'Lettre du participant : numéro de passeport masqué (trois derniers
@@ -12717,6 +13591,78 @@ components:
       - status
       - total
       - zone
+    MyVisit:
+      type: object
+      description: '« Ma venue » : la note interne du CO n''y figure jamais (sérialiseur
+        par rôle).'
+      properties:
+        technical_needs:
+          type: array
+          items:
+            $ref: '#/components/schemas/Equipment'
+        technical_note:
+          type: string
+        arrival_local:
+          type: string
+          nullable: true
+        arrival_means:
+          oneOf:
+          - $ref: '#/components/schemas/TravelMeans'
+          - $ref: '#/components/schemas/BlankEnum'
+        arrival_reference:
+          type: string
+        departure_local:
+          type: string
+          nullable: true
+        departure_means:
+          oneOf:
+          - $ref: '#/components/schemas/TravelMeans'
+          - $ref: '#/components/schemas/BlankEnum'
+        departure_reference:
+          type: string
+        accommodation_needed:
+          type: boolean
+        transfer_needed:
+          type: boolean
+        speaker_note:
+          type: string
+        hotel:
+          type: string
+        check_in:
+          type: string
+          format: date
+          nullable: true
+        check_out:
+          type: string
+          format: date
+          nullable: true
+        status:
+          $ref: '#/components/schemas/VisitStatus'
+        edition_id:
+          type: integer
+        edition_code:
+          type: string
+        timezone:
+          type: string
+      required:
+      - accommodation_needed
+      - arrival_local
+      - arrival_means
+      - arrival_reference
+      - check_in
+      - check_out
+      - departure_local
+      - departure_means
+      - departure_reference
+      - edition_code
+      - edition_id
+      - hotel
+      - speaker_note
+      - status
+      - technical_needs
+      - technical_note
+      - timezone
+      - transfer_needed
     Notification:
       type: object
       properties:
@@ -12760,6 +13706,8 @@ components:
       - decision_published
       - final_version_received
       - task_assigned
+      - shift_assigned
+      - shift_removed
       type: string
       description: |-
         * `submission_received` - soumission reçue
@@ -12771,6 +13719,8 @@ components:
         * `decision_published` - décision publiée
         * `final_version_received` - version finale reçue
         * `task_assigned` - tâche confiée
+        * `shift_assigned` - poste de bénévolat confié
+        * `shift_removed` - poste de bénévolat retiré
     NotificationList:
       type: object
       properties:
@@ -13723,6 +14673,38 @@ components:
           type: integer
           maximum: 32767
           minimum: 0
+    PatchedMealWriteRequest:
+      type: object
+      properties:
+        day:
+          type: string
+          format: date
+        kind:
+          $ref: '#/components/schemas/MealKind'
+        label_fr:
+          type: string
+          maxLength: 150
+        label_en:
+          type: string
+          maxLength: 150
+        include_registered:
+          type: boolean
+        option_code:
+          type: string
+          maxLength: 32
+        include_speakers:
+          type: boolean
+        include_committees:
+          type: boolean
+        include_volunteers:
+          type: boolean
+        margin_percent:
+          type: integer
+          maximum: 50
+          minimum: 0
+        position:
+          type: integer
+          minimum: 0
     PatchedMenuItemRequest:
       type: object
       properties:
@@ -14148,6 +15130,31 @@ components:
         instructions:
           type: string
           maxLength: 5000
+    PatchedShiftWriteRequest:
+      type: object
+      properties:
+        title_fr:
+          type: string
+          maxLength: 150
+        title_en:
+          type: string
+          maxLength: 150
+        place:
+          type: string
+          maxLength: 150
+        starts_local:
+          type: string
+          format: date-time
+        ends_local:
+          type: string
+          format: date-time
+        needed:
+          type: integer
+          maximum: 100
+          minimum: 1
+        instructions:
+          type: string
+          maxLength: 1000
     PatchedSignatureRequest:
       type: object
       description: 'Signature du signataire connecté (K18) : jamais le nom de stockage
@@ -14407,6 +15414,61 @@ components:
         is_active:
           type: boolean
           title: Actif
+    PatchedVisitStaffWriteRequest:
+      type: object
+      properties:
+        technical_needs:
+          type: array
+          items:
+            $ref: '#/components/schemas/Equipment'
+        technical_note:
+          type: string
+          maxLength: 500
+        arrival_local:
+          type: string
+          format: date-time
+          nullable: true
+        arrival_means:
+          oneOf:
+          - $ref: '#/components/schemas/TravelMeans'
+          - $ref: '#/components/schemas/BlankEnum'
+        arrival_reference:
+          type: string
+          maxLength: 60
+        departure_local:
+          type: string
+          format: date-time
+          nullable: true
+        departure_means:
+          oneOf:
+          - $ref: '#/components/schemas/TravelMeans'
+          - $ref: '#/components/schemas/BlankEnum'
+        departure_reference:
+          type: string
+          maxLength: 60
+        accommodation_needed:
+          type: boolean
+        transfer_needed:
+          type: boolean
+        speaker_note:
+          type: string
+          maxLength: 1000
+        hotel:
+          type: string
+          maxLength: 150
+        check_in:
+          type: string
+          format: date
+          nullable: true
+        check_out:
+          type: string
+          format: date
+          nullable: true
+        status:
+          $ref: '#/components/schemas/VisitStatus'
+        internal_note:
+          type: string
+          maxLength: 2000
     PaymentCheck:
       type: object
       properties:
@@ -18027,6 +19089,89 @@ components:
         instructions:
           type: string
           maxLength: 5000
+    Shift:
+      type: object
+      properties:
+        id:
+          type: integer
+        title_fr:
+          type: string
+        title_en:
+          type: string
+        place:
+          type: string
+        starts_at:
+          type: string
+          format: date-time
+        ends_at:
+          type: string
+          format: date-time
+        starts_local:
+          type: string
+        ends_local:
+          type: string
+        needed:
+          type: integer
+        instructions:
+          type: string
+        volunteers:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaskPerson'
+        missing:
+          type: integer
+      required:
+      - ends_at
+      - ends_local
+      - id
+      - instructions
+      - missing
+      - needed
+      - place
+      - starts_at
+      - starts_local
+      - title_en
+      - title_fr
+      - volunteers
+    ShiftBoard:
+      type: object
+      properties:
+        shifts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Shift'
+        volunteers:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaskPerson'
+      required:
+      - shifts
+      - volunteers
+    ShiftWriteRequest:
+      type: object
+      properties:
+        title_fr:
+          type: string
+          maxLength: 150
+        title_en:
+          type: string
+          maxLength: 150
+        place:
+          type: string
+          maxLength: 150
+        starts_local:
+          type: string
+          format: date-time
+        ends_local:
+          type: string
+          format: date-time
+        needed:
+          type: integer
+          maximum: 100
+          minimum: 1
+        instructions:
+          type: string
+          maxLength: 1000
     Signatory:
       type: object
       description: 'Signature désignable (K18) : jamais l''image ni son empreinte.'
@@ -19991,6 +21136,18 @@ components:
       required:
       - code
       - name_fr
+    TravelMeans:
+      enum:
+      - plane
+      - train
+      - road
+      - other
+      type: string
+      description: |-
+        * `plane` - avion
+        * `train` - train
+        * `road` - route
+        * `other` - autre
     UnreadCount:
       type: object
       properties:
@@ -20022,6 +21179,55 @@ components:
       description: |-
         * `valid` - valid
         * `revoked` - revoked
+    VisitSpeakerWriteRequest:
+      type: object
+      properties:
+        technical_needs:
+          type: array
+          items:
+            $ref: '#/components/schemas/Equipment'
+        technical_note:
+          type: string
+          maxLength: 500
+        arrival_local:
+          type: string
+          format: date-time
+          nullable: true
+        arrival_means:
+          oneOf:
+          - $ref: '#/components/schemas/TravelMeans'
+          - $ref: '#/components/schemas/BlankEnum'
+        arrival_reference:
+          type: string
+          maxLength: 60
+        departure_local:
+          type: string
+          format: date-time
+          nullable: true
+        departure_means:
+          oneOf:
+          - $ref: '#/components/schemas/TravelMeans'
+          - $ref: '#/components/schemas/BlankEnum'
+        departure_reference:
+          type: string
+          maxLength: 60
+        accommodation_needed:
+          type: boolean
+        transfer_needed:
+          type: boolean
+        speaker_note:
+          type: string
+          maxLength: 1000
+    VisitStatus:
+      enum:
+      - to_arrange
+      - booked
+      - confirmed
+      type: string
+      description: |-
+        * `to_arrange` - à organiser
+        * `booked` - réservée
+        * `confirmed` - confirmée
     WaiverRequest:
       type: object
       properties:

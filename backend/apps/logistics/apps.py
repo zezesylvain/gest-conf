@@ -27,3 +27,8 @@ class LogisticsConfig(AppConfig):
             budget.PROOFS.purge_task(budget.known_proofs),
             security=True,
         )
+        # RG-23, N15 : fiches de venue et régimes effacés 30 jours après l'édition.
+        from apps.logistics.services import dietary, visits
+
+        register_retention_task("logistics.dietary", dietary.erase_after_edition, security=True)
+        register_retention_task("logistics.visits", visits.erase_after_edition, security=True)

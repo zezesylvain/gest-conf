@@ -108,6 +108,8 @@ class ErrorCode(models.TextChoices):
     # Lot L7 : jour J et attestations.
     SIGNING_UNAVAILABLE = "signing_unavailable"
     SIGNATORY_MISSING = "signatory_missing"
+    # Lot L8 : un bénévole ne peut tenir deux postes au même moment (N9).
+    SHIFT_OVERLAP = "shift_overlap"
 
 
 class DomainError(Exception):
