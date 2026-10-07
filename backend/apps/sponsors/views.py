@@ -84,7 +84,7 @@ class SponsorViewSet(_SponsorsViewSet):
 
     serializer_class = SponsorDetailSerializer
     required_capabilities = {
-        "list": C.SPONSORS_READ,
+        "overview": C.SPONSORS_READ,
         "retrieve": C.SPONSORS_READ,
         "export": C.SPONSORS_READ,
         "create": C.SPONSORS_WRITE,
@@ -102,7 +102,9 @@ class SponsorViewSet(_SponsorsViewSet):
         return permissions
 
     @extend_schema(operation_id="manage_sponsors_list", responses={200: SponsorsSerializer})
-    def list(self, request: Request, edition_id: int) -> Response:
+    def overview(self, request: Request, edition_id: int) -> Response:
+        # Action « overview » et non « list » : la réponse est un objet (totaux et partenaires),
+        # que le schéma décrirait sinon comme un tableau.
         rows = self.sponsors().order_by("position", "id")
         data = {"totals": services.totals(self.edition), "sponsors": list(rows)}
         return Response(SponsorsSerializer(data).data)

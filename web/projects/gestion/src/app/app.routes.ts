@@ -178,6 +178,13 @@ export const routes: Routes = [
         canActivate: [capabilityGuard('registrations.manage')],
         loadComponent: () => import('./pages/events/counter-page').then((m) => m.CounterPage),
       },
+      // « Mon planning » du bénévole (plan L8, N9).
+      {
+        path: 'jour-j/mon-planning',
+        title: 'gestion.myShifts.title',
+        canActivate: [capabilityGuard('shifts.own')],
+        loadComponent: () => import('./pages/logistics/my-shifts-page').then((m) => m.MyShiftsPage),
+      },
       // Organisation du CO (plan L8, N3, N4, N14) : tâches, budget, fil d'activité.
       {
         path: 'organisation/taches',
@@ -204,6 +211,33 @@ export const routes: Routes = [
         canActivate: [capabilityGuard('tasks.read')],
         loadComponent: () =>
           import('./pages/organisation/activity-page').then((m) => m.ActivityPage),
+      },
+      // Logistique (plan L8, N6 à N9) : intervenants invités, restauration et régimes,
+      // postes des bénévoles.
+      {
+        path: 'logistique/intervenants',
+        title: 'gestion.speakers.title',
+        canActivate: [capabilityGuard('logistics.read')],
+        loadComponent: () => import('./pages/logistics/speakers-page').then((m) => m.SpeakersPage),
+      },
+      {
+        path: 'logistique/intervenants/:userId',
+        title: 'gestion.speakers.detail.title',
+        canActivate: [capabilityGuard('logistics.read')],
+        loadComponent: () =>
+          import('./pages/logistics/visit-detail-page').then((m) => m.VisitDetailPage),
+      },
+      {
+        path: 'logistique/restauration',
+        title: 'gestion.catering.title',
+        canActivate: [capabilityGuard('logistics.read')],
+        loadComponent: () => import('./pages/logistics/catering-page').then((m) => m.CateringPage),
+      },
+      {
+        path: 'logistique/benevoles',
+        title: 'gestion.shifts.title',
+        canActivate: [capabilityGuard('volunteers.plan')],
+        loadComponent: () => import('./pages/logistics/shifts-page').then((m) => m.ShiftsPage),
       },
       // Attestations, lettres d'invitation et signature (plan L7, K9 à K12, K18, K19).
       {

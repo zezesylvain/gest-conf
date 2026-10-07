@@ -1,0 +1,33 @@
+<gc-page-header
+  [heading]="'gestion.myShifts.title' | translate"
+  [lead]="'gestion.myShifts.lead' | translate"
+/>
+<gc-error-summary [messages]="errors()" />
+
+@if (loading()) {
+  <p role="status">{{ 'gestion.myShifts.loading' | translate }}</p>
+} @else if (shifts().length) {
+  <ol class="checklist">
+    @for (shift of shifts(); track shift.id) {
+      <li class="card">
+        <h2>{{ title(shift) }}</h2>
+        <p>
+          {{ local(shift.starts_local) }} → {{ local(shift.ends_local) }}
+          @if (shift.place) {
+            · {{ shift.place }}
+          }
+        </p>
+        @if (shift.instructions) {
+          <p class="muted">{{ shift.instructions }}</p>
+        }
+      </li>
+    }
+  </ol>
+  <div class="actions">
+    <button mat-stroked-button type="button" (click)="calendar()">
+      {{ 'gestion.myShifts.calendar' | translate }}
+    </button>
+  </div>
+} @else {
+  <p class="muted">{{ 'gestion.myShifts.empty' | translate }}</p>
+}

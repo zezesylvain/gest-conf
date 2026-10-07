@@ -925,3 +925,56 @@ une constante de module.
   d'activité) ;
 - `ruff`, `locale/check.sh`, schéma validé sous MariaDB, client TypeScript régénéré,
   vérification des types et tests du front.
+
+## 19. Bilan de L8.8 (7 octobre 2026, en cours)
+
+L'étape est découpée en sous-étapes committées une à une : L8.8a « Organisation »,
+L8.8b « Logistique », L8.8c « Partenaires », L8.8d « Communication », L8.8e « Rapports » et
+tableau de bord.
+
+### L8.8a — Organisation
+
+- rubrique **« Organisation »** du rail (après le pilotage) : « Tâches » et « Activité »
+  (`tasks.read`), « Budget » (`budget.read`) ; `ROLE_GROUPS` l'ouvre à l'administrateur, au
+  Chair et au CO ;
+- **tâches en kanban** : trois colonnes, déplacement par la liste « Déplacer vers » (le
+  glisser-déposer n'est pas accessible au clavier, comme au planificateur de L5), révision
+  lue envoyée en `If-Match` ; une tâche modifiée entre-temps est rechargée, le message le
+  dit ; fiche avec commentaires, pièces jointes (10 Mo, type revérifié par le serveur),
+  archivage et restauration ;
+- **budget** : synthèse prévu, réalisé et soldes, lignes par nature, lignes calculées non
+  supprimables, justificatifs privés, exports CSV et XLSX (réauthentification ouverte par
+  l'intercepteur) ;
+- **fil d'activité** : actions traduites, lien vers la tâche, « Système » quand personne ;
+- trois fiches d'aide (`tasks`, `budget`, `activity`) ; 9 tests de pages, 1 de navigation.
+
+### L8.8b — Logistique et « Mon planning »
+
+- rubrique **« Logistique »** (entre « Inscriptions » et « Jour J ») : « Intervenants
+  invités » et « Restauration » (`logistics.read`), « Postes des bénévoles »
+  (`volunteers.plan`) ; « Mon planning » (`shifts.own`) dans « Jour J », pour le bénévole ;
+- **intervenants** : liste des venues (prise en charge, arrivée et départ à l'heure de
+  l'édition, hébergement, équipement manquant d'après le programme publié) et fiche en deux
+  parts, celle de l'intervenant et celle du comité ; la note interne est signalée comme
+  jamais montrée à l'intervenant ; sans `logistics.write`, champs figés ;
+- **restauration** : repas avec convives, effectif, marge, total à commander et régimes
+  agrégés, sans nom ; commande au traiteur en CSV, XLSX ou PDF ; option d'inscription lue
+  par `RegistrationsApi` (si le compte ne lit pas les options, le choix disparaît sans
+  erreur) ; régimes déclarés en effectifs, **liste nominative** à part, avec mention de la
+  réauthentification et du journal (RG-23) ;
+- **postes** : cartes avec places à pourvoir, affectation par une liste des seuls bénévoles
+  libres sur ce poste, retrait, formulaire à l'heure du lieu ; le chevauchement refusé par
+  le serveur s'affiche traduit (`shift_overlap`) ;
+- **« Mon planning »** : postes du bénévole et fichier iCal ;
+- quatre fiches d'aide (`speakers`, `catering`, `volunteer-shifts`, `my-shifts`).
+
+**Défaut corrigé pendant l'étape** : drf-spectacular décrit toujours l'action `list` comme
+un **tableau** ; le tableau des postes (`ShiftBoard` : postes et bénévoles) et la liste des
+partenaires (objet avec niveaux et fiches) étaient donc typés à tort dans le client généré.
+Les deux actions s'appellent désormais `overview`, sans changer d'adresse ni de capacité ;
+schéma et client régénérés.
+
+**Tests** : 11 tests de pages (liste et fiche des venues, lecture seule, restauration et
+exports, ajout et suppression d'un repas, postes, chevauchement, création, « Mon planning »),
+1 de navigation ; tests du front (gestion, shared, portail), lint, format, build de la
+gestion ; schéma validé.

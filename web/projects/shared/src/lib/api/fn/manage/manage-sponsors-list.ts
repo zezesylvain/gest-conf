@@ -13,7 +13,7 @@ export interface ManageSponsorsList$Params {
   edition_id: number;
 }
 
-export function manageSponsorsList(http: HttpClient, rootUrl: string, params: ManageSponsorsList$Params, context?: HttpContext): Observable<StrictHttpResponse<Array<Sponsors>>> {
+export function manageSponsorsList(http: HttpClient, rootUrl: string, params: ManageSponsorsList$Params, context?: HttpContext): Observable<StrictHttpResponse<Sponsors>> {
   const rb = new RequestBuilder(rootUrl, manageSponsorsList.PATH, 'get');
   if (params) {
     rb.path('edition_id', params.edition_id, {});
@@ -24,7 +24,7 @@ export function manageSponsorsList(http: HttpClient, rootUrl: string, params: Ma
   ).pipe(
     filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
     map((r: HttpResponse<any>) => {
-      return r as StrictHttpResponse<Array<Sponsors>>;
+      return r as StrictHttpResponse<Sponsors>;
     })
   );
 }

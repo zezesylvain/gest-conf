@@ -33,7 +33,8 @@
         "registrations": "Registration",
         "dayof": "Event day",
         "documents": "Certificates and letters",
-        "organisation": "Organisation"
+        "organisation": "Organisation",
+        "logistics": "Logistics"
       },
       "keywords": {
         "dashboard": "home, status, publish, publication, archive, state, summary",
@@ -78,7 +79,11 @@
         "signature": "signature, signatory, name, position, image",
         "tasks": "kanban, board, to do, assignee, deadline, OC",
         "budget": "expenses, income, planned, actual, receipt, balance",
-        "activity": "feed, history, latest actions, OC"
+        "activity": "feed, history, latest actions, OC",
+        "speakers": "visit, travel, arrival, departure, hotel, accommodation, equipment",
+        "catering": "meals, caterer, lunch, coffee break, dietary requirements, allergies",
+        "volunteerShifts": "volunteers, shifts, assignment, volunteer schedule",
+        "myShifts": "my shifts, my schedule, volunteering, iCal"
       },
       "portalSections": "Sections",
       "portalPages": "Pages",
@@ -112,7 +117,11 @@
       "signature": "My signature",
       "tasks": "Tasks",
       "budget": "Budget",
-      "activity": "Activity"
+      "activity": "Activity",
+      "speakers": "Invited speakers",
+      "catering": "Catering",
+      "volunteerShifts": "Volunteer shifts",
+      "myShifts": "My schedule"
     },
     "status": {
       "draft": "draft",
@@ -1258,6 +1267,60 @@
           "intro": "The feed shows the latest 50 organisation actions: tasks, volunteer shifts, meals, announcements, publications.",
           "whitelistTitle": "What it leaves out",
           "whitelistText": "No decision, author identity, amount or changed value: only the action, its date and who did it."
+        },
+        "speakers": {
+          "title": "Invited speakers",
+          "summary": "Each invited speaker's visit.",
+          "path": "Logistics › Invited speakers",
+          "intro": "Each invited speaker has a visit record: they enter their technical needs, travel and requests from their account; the committee adds the hotel, nights and the state of the arrangements.",
+          "speakerTitle": "Their part",
+          "speakerBody": "Technical needs, arrival, departure, accommodation or transfer requests, message: the speaker fills them in; the \"logistics\" organising committee member can correct them.",
+          "staffTitle": "The committee's part",
+          "staffBody": "Hotel, hotel check-in and check-out dates, state of the arrangements (to arrange, booked, confirmed) and internal note.",
+          "equipmentTitle": "Equipment",
+          "equipmentBody": "The list flags requested equipment missing in a room where the speaker presents, according to the published programme.",
+          "localTitle": "Venue time",
+          "localText": "Arrivals and departures are entered and shown in the edition's local time, whatever your computer's time zone.",
+          "internalTitle": "Internal note",
+          "internalText": "The internal note stays with the committee: it is never shown to the speaker."
+        },
+        "catering": {
+          "title": "Catering",
+          "summary": "Meals, their estimated headcounts and dietary requirements.",
+          "path": "Logistics › Catering",
+          "intro": "Each meal states its guests; the platform estimates the headcount to order from the caterer, with the breakdown of diets, without any name.",
+          "audience": "Guests: registrants (all, or those with an option such as the gala dinner), invited speakers, committees, volunteers.",
+          "margin": "Margin: a percentage added to the headcount, from 0 to 50%.",
+          "diets": "Diets and allergies: declared by each person in their account, counted meal by meal.",
+          "order": "Caterer order: CSV, XLSX or PDF, headcounts only.",
+          "estimateTitle": "An estimate",
+          "estimateText": "A person is counted only once per meal, even when both registered and a volunteer; the headcount follows registrations until the day of the meal.",
+          "nominativeTitle": "List with names",
+          "nominativeText": "Diets are sensitive data: the list with names requires you to confirm your password and its export is logged."
+        },
+        "volunteer-shifts": {
+          "title": "Volunteer shifts",
+          "summary": "Volunteer shifts and their assignments.",
+          "path": "Logistics › Volunteer shifts",
+          "intro": "The \"logistics\" or \"volunteers\" organising committee member creates the edition's shifts and assigns invited volunteers to them.",
+          "createTitle": "Create a shift",
+          "createBody": "Title in French and English, place, start and end in venue time, number of volunteers needed, instructions.",
+          "assignTitle": "Assign",
+          "assignBody": "Pick a volunteer in the shift's list then \"Assign\"; \"Remove\" releases them.",
+          "followTitle": "Follow up",
+          "followBody": "Each shift shows its places still to fill.",
+          "overlapTitle": "Overlap refused",
+          "overlapText": "A volunteer cannot hold two shifts at the same time: the assignment is refused, and so is a time change that would create an overlap.",
+          "notifyTitle": "The volunteer is told",
+          "notifyText": "They receive a notification at each assignment or removal, and find their shifts in \"My schedule\"."
+        },
+        "my-shifts": {
+          "title": "My schedule",
+          "summary": "Your volunteer shifts.",
+          "path": "Event day › My schedule",
+          "intro": "Your shifts, with their place, their times in the conference's time and their instructions.",
+          "calendarTitle": "In your calendar",
+          "calendarText": "The iCal file imports into your calendar; download it again after a change."
         }
       }
     },
@@ -2864,6 +2927,192 @@
         "portal_published": "Portal published",
         "edition_status_changed": "Edition status changed"
       }
+    },
+    "speakers": {
+      "title": "Invited speakers",
+      "lead": "Each invited speaker's visit: travel, accommodation and technical needs.",
+      "loading": "Loading visits…",
+      "speaker": "Speaker",
+      "arrival": "Arrival",
+      "departure": "Departure",
+      "accommodation": "Accommodation",
+      "accommodationRequested": "Requested, to be booked",
+      "technical": "Technical needs",
+      "missing": "Missing in the room: {{items}}",
+      "covered": "Covered",
+      "empty": "No invited speaker in this edition.",
+      "localHint": "Edition local time.",
+      "internalHint": "Committee only: never shown to the speaker.",
+      "fields": {
+        "status": "Arrangements",
+        "technicalNeeds": "Technical needs",
+        "technicalNote": "Technical details",
+        "arrivalLocal": "Arrival",
+        "arrivalMeans": "Arrival by",
+        "arrivalReference": "Reference (flight, train…)",
+        "departureLocal": "Departure",
+        "departureMeans": "Departure by",
+        "departureReference": "Reference (flight, train…)",
+        "accommodationNeeded": "Accommodation requested",
+        "transferNeeded": "Transfer requested",
+        "speakerNote": "Speaker's message",
+        "hotel": "Hotel",
+        "checkIn": "Hotel check-in",
+        "checkOut": "Hotel check-out",
+        "internalNote": "Internal note"
+      },
+      "status": {
+        "to_arrange": "To arrange",
+        "booked": "Booked",
+        "confirmed": "Confirmed"
+      },
+      "means": {
+        "plane": "Plane",
+        "train": "Train",
+        "road": "Road",
+        "other": "Other"
+      },
+      "equipment": {
+        "projector": "Projector",
+        "microphone": "Microphone",
+        "sound_system": "Sound system",
+        "computer": "Computer",
+        "whiteboard": "Whiteboard",
+        "interpretation": "Interpretation",
+        "recording": "Recording",
+        "wifi": "Wi-Fi"
+      },
+      "detail": {
+        "back": "Back to speakers",
+        "title": "Speaker visit",
+        "lead": "The speaker's part, which they fill in themselves, and the organising committee's part.",
+        "missingNotice": "A room where this speaker presents lacks some of the requested equipment.",
+        "speakerPart": "Speaker's part",
+        "staffPart": "Committee's part",
+        "missingShort": "missing in the room",
+        "save": "Save",
+        "saved": "Visit saved."
+      }
+    },
+    "catering": {
+      "title": "Catering",
+      "lead": "The edition's meals, estimated headcounts for the caterer and declared dietary requirements.",
+      "loading": "Loading catering…",
+      "meals": "Meals",
+      "meal": "Meal",
+      "audienceTitle": "Guests",
+      "count": "People",
+      "margin": "Margin",
+      "total": "To order",
+      "dietsTitle": "Diets",
+      "allergiesCount": "Allergies: {{count}}",
+      "actions": "Actions",
+      "edit": "Edit",
+      "editLabel": "Edit meal {{label}}",
+      "deleteLabel": "Delete meal {{label}}",
+      "exportCsv": "Caterer order (CSV)",
+      "exportXlsx": "Caterer order (XLSX)",
+      "exportPdf": "Caterer order (PDF)",
+      "empty": "No meal yet.",
+      "editTitle": "Edit meal",
+      "newTitle": "New meal",
+      "allRegistered": "All registrants",
+      "save": "Save",
+      "add": "Add meal",
+      "cancel": "Cancel",
+      "created": "Meal added.",
+      "updated": "Meal updated.",
+      "deleted": "Meal deleted.",
+      "dietary": "Declared dietary requirements",
+      "declarations": "{{count}} dietary or allergy declaration(s).",
+      "people": "People",
+      "allergies": "Reported allergies",
+      "nominativeHint": "The list with names requires you to confirm your password; its export is logged.",
+      "exportNominativeCsv": "List with names (CSV)",
+      "exportNominativeXlsx": "List with names (XLSX)",
+      "fields": {
+        "day": "Day",
+        "kind": "Type",
+        "labelFr": "Label (French)",
+        "labelEn": "Label (English)",
+        "option": "Registration option",
+        "margin": "Margin (%)"
+      },
+      "audience": {
+        "registered": "Registrants",
+        "option": "Registrants with option {{code}}",
+        "speakers": "Invited speakers",
+        "committees": "Committees",
+        "volunteers": "Volunteers"
+      },
+      "diet": {
+        "vegetarian": "Vegetarian",
+        "vegan": "Vegan",
+        "no_pork": "No pork",
+        "gluten_free": "Gluten-free",
+        "lactose_free": "Lactose-free",
+        "other": "Other"
+      },
+      "kind": {
+        "coffee_break": "Coffee break",
+        "lunch": "Lunch",
+        "dinner": "Dinner",
+        "cocktail": "Cocktail"
+      },
+      "delete": {
+        "title": "Delete this meal?",
+        "message": "The meal \"{{label}}\" will be deleted.",
+        "confirm": "Delete"
+      }
+    },
+    "shifts": {
+      "title": "Volunteer shifts",
+      "lead": "The edition's shifts, in venue time, and the volunteers assigned to them.",
+      "loading": "Loading shifts…",
+      "noVolunteer": "No volunteer in this edition: invite some from Committees › Invitations.",
+      "staffing": "{{count}} of {{needed}} volunteer(s)",
+      "missing": "{{count}} place(s) to fill",
+      "unassign": "Remove",
+      "unassignLabel": "Remove {{name}} from shift {{title}}",
+      "volunteer": "Volunteer",
+      "assignLabel": "Volunteer to assign to shift {{title}}",
+      "assign": "Assign",
+      "edit": "Edit",
+      "editLabel": "Edit shift {{title}}",
+      "deleteLabel": "Delete shift {{title}}",
+      "empty": "No shift yet.",
+      "editTitle": "Edit shift",
+      "newTitle": "New shift",
+      "localHint": "Edition local time.",
+      "save": "Save",
+      "add": "Add shift",
+      "cancel": "Cancel",
+      "created": "Shift added.",
+      "updated": "Shift updated.",
+      "deleted": "Shift deleted.",
+      "assigned": "Volunteer assigned.",
+      "unassigned": "Volunteer removed from the shift.",
+      "fields": {
+        "titleFr": "Title (French)",
+        "titleEn": "Title (English)",
+        "place": "Place",
+        "needed": "Volunteers needed",
+        "starts": "Start",
+        "ends": "End",
+        "instructions": "Instructions"
+      },
+      "delete": {
+        "title": "Delete this shift?",
+        "message": "The shift \"{{title}}\" will be deleted; its volunteers will be notified.",
+        "confirm": "Delete"
+      }
+    },
+    "myShifts": {
+      "title": "My schedule",
+      "lead": "Your volunteer shifts, in the conference venue's time.",
+      "loading": "Loading your schedule…",
+      "calendar": "Download my schedule (iCal)",
+      "empty": "No shift has been assigned to you yet."
     }
   }
 }

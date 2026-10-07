@@ -1,0 +1,94 @@
+<gc-page-header
+  [heading]="'gestion.speakers.title' | translate"
+  [lead]="'gestion.speakers.lead' | translate"
+/>
+<gc-error-summary [messages]="errors()" />
+
+@if (loading()) {
+  <p role="status">{{ 'gestion.speakers.loading' | translate }}</p>
+} @else if (visits().length) {
+  <div class="table-wrap">
+    <table>
+      <caption class="visually-hidden">
+        {{
+          'gestion.speakers.title' | translate
+        }}
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">{{ 'gestion.speakers.speaker' | translate }}</th>
+          <th scope="col">{{ 'gestion.speakers.fields.status' | translate }}</th>
+          <th scope="col">{{ 'gestion.speakers.arrival' | translate }}</th>
+          <th scope="col">{{ 'gestion.speakers.departure' | translate }}</th>
+          <th scope="col">{{ 'gestion.speakers.accommodation' | translate }}</th>
+          <th scope="col">{{ 'gestion.speakers.technical' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (visit of visits(); track visit.speaker.id) {
+          <tr>
+            <td>
+              <a
+                [routerLink]="[
+                  '/editions',
+                  editionId(),
+                  'logistique',
+                  'intervenants',
+                  visit.speaker.id,
+                ]"
+                >{{ visit.speaker.name }}</a
+              >
+              @if (visit.institution) {
+                <br /><span class="muted">{{ visit.institution }}</span>
+              }
+            </td>
+            <td>
+              <span class="badge">{{ 'gestion.speakers.status.' + visit.status | translate }}</span>
+            </td>
+            <td>
+              {{ local(visit.arrival_local) }}
+              @if (visit.arrival_means) {
+                <br /><span class="muted"
+                  >{{ 'gestion.speakers.means.' + visit.arrival_means | translate }}
+                  {{ visit.arrival_reference }}</span
+                >
+              }
+            </td>
+            <td>
+              {{ local(visit.departure_local) }}
+              @if (visit.departure_means) {
+                <br /><span class="muted"
+                  >{{ 'gestion.speakers.means.' + visit.departure_means | translate }}
+                  {{ visit.departure_reference }}</span
+                >
+              }
+            </td>
+            <td>
+              @if (visit.hotel) {
+                {{ visit.hotel }}
+              } @else if (visit.accommodation_needed) {
+                {{ 'gestion.speakers.accommodationRequested' | translate }}
+              } @else {
+                <span class="muted">—</span>
+              }
+            </td>
+            <td>
+              @if (visit.missing_equipment.length) {
+                <span class="ko">{{
+                  'gestion.speakers.missing'
+                    | translate: { items: equipment(visit.missing_equipment) }
+                }}</span>
+              } @else if (visit.technical_needs.length) {
+                <span class="ok">{{ 'gestion.speakers.covered' | translate }}</span>
+              } @else {
+                <span class="muted">—</span>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+} @else {
+  <p class="muted">{{ 'gestion.speakers.empty' | translate }}</p>
+}

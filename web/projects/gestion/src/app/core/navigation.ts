@@ -16,6 +16,7 @@ export type NavGroupKey =
   | 'reviewing'
   | 'program'
   | 'registrations'
+  | 'logistics'
   | 'dayof'
   | 'documents'
   | 'settings'
@@ -77,6 +78,7 @@ export const GROUP_ORDER: readonly NavGroupKey[] = [
   'reviewing',
   'program',
   'registrations',
+  'logistics',
   'dayof',
   'documents',
   'settings',
@@ -228,6 +230,32 @@ export const SCREENS: readonly ScreenDef[] = [
     group: 'registrations',
     capability: 'finance.read',
   },
+  // Logistique (plan L8, N6 à N9) : intervenants invités et restauration (logistics.read),
+  // postes des bénévoles (volunteers.plan).
+  {
+    key: 'speakers',
+    path: 'logistique/intervenants',
+    label: 'gestion.nav.speakers',
+    help: 'speakers',
+    group: 'logistics',
+    capability: 'logistics.read',
+  },
+  {
+    key: 'catering',
+    path: 'logistique/restauration',
+    label: 'gestion.nav.catering',
+    help: 'catering',
+    group: 'logistics',
+    capability: 'logistics.read',
+  },
+  {
+    key: 'volunteerShifts',
+    path: 'logistique/benevoles',
+    label: 'gestion.nav.volunteerShifts',
+    help: 'volunteer-shifts',
+    group: 'logistics',
+    capability: 'volunteers.plan',
+  },
   // Jour J (plan L7, K15) : accueil (PWA), sessions du jour, présences, badges, comptoir.
   {
     key: 'reception',
@@ -268,6 +296,15 @@ export const SCREENS: readonly ScreenDef[] = [
     help: 'counter',
     group: 'dayof',
     capability: 'registrations.manage',
+  },
+  // « Mon planning » du bénévole (plan L8, N9).
+  {
+    key: 'myShifts',
+    path: 'jour-j/mon-planning',
+    label: 'gestion.nav.myShifts',
+    help: 'my-shifts',
+    group: 'dayof',
+    capability: 'shifts.own',
   },
   // Attestations et lettres (plan L7, K9 à K12, K18, K19).
   {
@@ -461,6 +498,7 @@ export const ROLE_GROUPS: Partial<Record<Role, readonly NavGroupKey[]>> = {
     'reviewing',
     'program',
     'registrations',
+    'logistics',
     'dayof',
     'documents',
     'settings',
@@ -475,6 +513,7 @@ export const ROLE_GROUPS: Partial<Record<Role, readonly NavGroupKey[]>> = {
     'reviewing',
     'program',
     'registrations',
+    'logistics',
     'dayof',
     'documents',
     'settings',
@@ -491,6 +530,7 @@ export const ROLE_GROUPS: Partial<Record<Role, readonly NavGroupKey[]>> = {
     'submissions',
     'program',
     'registrations',
+    'logistics',
     'dayof',
     'documents',
     'settings',

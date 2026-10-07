@@ -44,6 +44,9 @@ const EVERYTHING = [
   'signature.manage',
   'tasks.read',
   'budget.read',
+  'logistics.read',
+  'volunteers.plan',
+  'shifts.own',
 ];
 
 /** Catalogue « traduit » minimal : la clé tient lieu de libellé. */
@@ -263,6 +266,26 @@ describe('Table de navigation de la gestion (plan L2 §2.3)', () => {
     expect(catalogue(finance).map((entry) => entry.url)).toContain(
       '/editions/3/organisation/budget',
     );
+  });
+
+  it('logistique (plan L8, N16) : intervenants et restauration en lecture, postes à part', () => {
+    const reader = buildNavigation(3, ['edition.read', 'logistics.read'], 'CHAIR');
+    expect(reader.find((group) => group.key === 'logistics')!.entries.map((e) => e.key)).toEqual([
+      'speakers',
+      'catering',
+    ]);
+    const planner = buildNavigation(3, ['edition.read', 'volunteers.plan'], 'OC_MEMBER');
+    expect(planner.find((group) => group.key === 'logistics')!.entries.map((e) => e.key)).toEqual([
+      'volunteerShifts',
+    ]);
+    // Le bénévole : « Mon planning » dans « Jour J », rien de la logistique.
+    const volunteer = buildNavigation(3, ['checkin.scan', 'shifts.own'], 'VOLUNTEER');
+    expect(volunteer.map((group) => group.key)).not.toContain('logistics');
+    expect(volunteer.find((group) => group.key === 'dayof')!.entries.map((e) => e.key)).toContain(
+      'myShifts',
+    );
+    expect(helpForUrl('/editions/3/logistique/intervenants/12')).toBe('speakers');
+    expect(helpForUrl('/editions/3/jour-j/mon-planning')).toBe('my-shifts');
   });
 
   it('aucune capacité dans l’édition : rail vide (pas d’aide seule)', () => {

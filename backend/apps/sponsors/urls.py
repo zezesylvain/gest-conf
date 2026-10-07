@@ -13,7 +13,9 @@ LEVELS = views.SponsorLevelViewSet
 
 urlpatterns = [
     path(
-        f"{E}/sponsors", SPONSORS.as_view({"get": "list", "post": "create"}), name="manage-sponsors"
+        f"{E}/sponsors",
+        SPONSORS.as_view({"get": "overview", "post": "create"}),
+        name="manage-sponsors",
     ),
     path(
         f"{E}/sponsors/export", SPONSORS.as_view({"get": "export"}), name="manage-sponsors-export"

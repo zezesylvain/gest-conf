@@ -2988,9 +2988,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ShiftBoard'
+                $ref: '#/components/schemas/ShiftBoard'
           description: ''
     post:
       operationId: manage_shifts_create
@@ -6640,9 +6638,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Sponsors'
+                $ref: '#/components/schemas/Sponsors'
           description: ''
     post:
       operationId: manage_sponsors_create

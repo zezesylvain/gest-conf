@@ -71,7 +71,9 @@ urlpatterns = [
         MEALS.as_view({"patch": "partial_update", "delete": "destroy"}),
         name="manage-meal",
     ),
-    path(f"{LOG}/shifts", SHIFTS.as_view({"get": "list", "post": "create"}), name="manage-shifts"),
+    path(
+        f"{LOG}/shifts", SHIFTS.as_view({"get": "overview", "post": "create"}), name="manage-shifts"
+    ),
     path(
         f"{LOG}/shifts/<int:shift_id>",
         SHIFTS.as_view({"patch": "partial_update", "delete": "destroy"}),

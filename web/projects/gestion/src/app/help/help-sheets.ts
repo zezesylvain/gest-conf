@@ -75,6 +75,12 @@ const SIGNATORIES: readonly Role[] = ['SIGNATORY'];
 // Organisation (plan L8, N2) : tâches et activité pour tout le CO, l'administrateur et le
 // Chair ; budget pour le Chair, le CO « finances » et l'administrateur.
 const ORGANISERS: readonly Role[] = ['OC_MEMBER', 'ADMIN', 'CHAIR'];
+// Logistique (plan L8, N2) : lecture pour le Chair et le CO « logistique » ou
+// « secrétariat », écriture par le CO « logistique » ; postes : CO « logistique » ou
+// « bénévoles » et administrateur ; « Mon planning » : le bénévole.
+const LOGISTICS: readonly Role[] = ['OC_MEMBER', 'ADMIN', 'CHAIR'];
+const VOLUNTEER_PLANNERS: readonly Role[] = ['OC_MEMBER', 'ADMIN'];
+const VOLUNTEERS: readonly Role[] = ['VOLUNTEER'];
 
 /** Constructeur : les clés d'une fiche sont toutes sous `gestion.help.sheets.<id>`. */
 function sheet(
@@ -390,6 +396,25 @@ export const HELP_SHEETS: readonly HelpSheet[] = [
     callout('warning', k, 'export'),
   ]),
   sheet('activity', ORGANISERS, (k) => [text(k('intro')), callout('info', k, 'whitelist')]),
+  sheet('speakers', LOGISTICS, (k) => [
+    text(k('intro')),
+    steps(k, 'speaker', 'staff', 'equipment'),
+    callout('info', k, 'local'),
+    callout('warning', k, 'internal'),
+  ]),
+  sheet('catering', LOGISTICS, (k) => [
+    text(k('intro')),
+    list(k('audience'), k('margin'), k('diets'), k('order')),
+    callout('info', k, 'estimate'),
+    callout('warning', k, 'nominative'),
+  ]),
+  sheet('volunteer-shifts', VOLUNTEER_PLANNERS, (k) => [
+    text(k('intro')),
+    steps(k, 'create', 'assign', 'follow'),
+    callout('warning', k, 'overlap'),
+    callout('info', k, 'notify'),
+  ]),
+  sheet('my-shifts', VOLUNTEERS, (k) => [text(k('intro')), callout('tip', k, 'calendar')]),
   sheet('audit', SETTINGS_WRITERS, (k) => [
     text(k('intro')),
     list(k('action'), k('filters'), k('actor')),

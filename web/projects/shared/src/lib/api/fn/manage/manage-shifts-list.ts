@@ -13,7 +13,7 @@ export interface ManageShiftsList$Params {
   edition_id: number;
 }
 
-export function manageShiftsList(http: HttpClient, rootUrl: string, params: ManageShiftsList$Params, context?: HttpContext): Observable<StrictHttpResponse<Array<ShiftBoard>>> {
+export function manageShiftsList(http: HttpClient, rootUrl: string, params: ManageShiftsList$Params, context?: HttpContext): Observable<StrictHttpResponse<ShiftBoard>> {
   const rb = new RequestBuilder(rootUrl, manageShiftsList.PATH, 'get');
   if (params) {
     rb.path('edition_id', params.edition_id, {});
@@ -24,7 +24,7 @@ export function manageShiftsList(http: HttpClient, rootUrl: string, params: Mana
   ).pipe(
     filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
     map((r: HttpResponse<any>) => {
-      return r as StrictHttpResponse<Array<ShiftBoard>>;
+      return r as StrictHttpResponse<ShiftBoard>;
     })
   );
 }

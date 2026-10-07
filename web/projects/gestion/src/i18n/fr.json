@@ -33,7 +33,8 @@
         "registrations": "Inscriptions",
         "dayof": "Jour J",
         "documents": "Attestations et lettres",
-        "organisation": "Organisation"
+        "organisation": "Organisation",
+        "logistics": "Logistique"
       },
       "keywords": {
         "dashboard": "accueil, statut, publier, publication, archiver, état, résumé",
@@ -78,7 +79,11 @@
         "signature": "signature, signataire, nom, fonction, image",
         "tasks": "kanban, tableau, à faire, responsable, date limite, CO",
         "budget": "dépenses, recettes, prévisionnel, réalisé, justificatif, solde",
-        "activity": "fil, historique, dernières actions, CO"
+        "activity": "fil, historique, dernières actions, CO",
+        "speakers": "venue, voyage, arrivée, départ, hôtel, hébergement, équipement",
+        "catering": "repas, traiteur, déjeuner, pause café, régimes alimentaires, allergies",
+        "volunteerShifts": "bénévoles, postes, affectation, planning des bénévoles",
+        "myShifts": "mes postes, mon planning, bénévolat, iCal"
       },
       "portalSections": "Sections",
       "portalPages": "Pages",
@@ -112,7 +117,11 @@
       "signature": "Ma signature",
       "tasks": "Tâches",
       "budget": "Budget",
-      "activity": "Activité"
+      "activity": "Activité",
+      "speakers": "Intervenants invités",
+      "catering": "Restauration",
+      "volunteerShifts": "Postes des bénévoles",
+      "myShifts": "Mon planning"
     },
     "status": {
       "draft": "brouillon",
@@ -1258,6 +1267,60 @@
           "intro": "Le fil montre les 50 dernières actions de l'organisation : tâches, postes de bénévolat, repas, annonces, publications.",
           "whitelistTitle": "Ce qui n'y figure pas",
           "whitelistText": "Ni décision, ni identité d'auteur, ni montant, ni valeur modifiée : seulement l'action, sa date et qui l'a faite."
+        },
+        "speakers": {
+          "title": "Intervenants invités",
+          "summary": "La venue de chaque intervenant invité.",
+          "path": "Logistique › Intervenants invités",
+          "intro": "Chaque intervenant invité a une fiche de venue : il y indique ses besoins techniques, ses voyages et ses demandes depuis son espace ; le comité y ajoute l'hôtel, les nuits et l'état de la prise en charge.",
+          "speakerTitle": "Sa part",
+          "speakerBody": "Besoins techniques, arrivée, départ, hébergement ou transfert demandés, message : l'intervenant les renseigne ; le CO « logistique » peut les corriger.",
+          "staffTitle": "La part du comité",
+          "staffBody": "Hôtel, dates d'arrivée et de départ à l'hôtel, état de la prise en charge (à organiser, réservé, confirmé) et note interne.",
+          "equipmentTitle": "L'équipement",
+          "equipmentBody": "La liste signale un équipement demandé qui manque dans une salle où l'intervenant passe, d'après le programme publié.",
+          "localTitle": "Heure du lieu",
+          "localText": "Arrivées et départs se saisissent et s'affichent à l'heure locale de l'édition, quel que soit le fuseau de votre ordinateur.",
+          "internalTitle": "Note interne",
+          "internalText": "La note interne reste au comité : elle n'est jamais montrée à l'intervenant."
+        },
+        "catering": {
+          "title": "Restauration",
+          "summary": "Les repas, leurs effectifs estimés et les régimes.",
+          "path": "Logistique › Restauration",
+          "intro": "Chaque repas indique ses convives ; la plateforme en estime l'effectif à commander au traiteur, avec la répartition des régimes, sans aucun nom.",
+          "audience": "Convives : les inscrits (tous, ou ceux d'une option comme le dîner de gala), les intervenants invités, les comités, les bénévoles.",
+          "margin": "Marge : un pourcentage ajouté à l'effectif, de 0 à 50 %.",
+          "diets": "Régimes et allergies : déclarés par chacun dans son espace, comptés repas par repas.",
+          "order": "Commande au traiteur : en CSV, XLSX ou PDF, effectifs seulement.",
+          "estimateTitle": "Une estimation",
+          "estimateText": "Une personne n'est comptée qu'une fois par repas, même si elle est à la fois inscrite et bénévole ; l'effectif suit les inscriptions jusqu'au jour du repas.",
+          "nominativeTitle": "Liste nominative",
+          "nominativeText": "Les régimes sont des données sensibles : la liste avec les noms demande de confirmer votre mot de passe et son export est inscrit au journal."
+        },
+        "volunteer-shifts": {
+          "title": "Postes des bénévoles",
+          "summary": "Les postes de bénévolat et leurs affectations.",
+          "path": "Logistique › Postes des bénévoles",
+          "intro": "Le CO « logistique » ou « bénévoles » crée les postes de l'édition et y affecte les bénévoles invités.",
+          "createTitle": "Créer un poste",
+          "createBody": "Intitulé en français et en anglais, lieu, début et fin à l'heure du lieu, nombre de bénévoles nécessaires, consignes.",
+          "assignTitle": "Affecter",
+          "assignBody": "Choisissez un bénévole dans la liste du poste puis « Affecter » ; « Retirer » l'en décharge.",
+          "followTitle": "Suivre",
+          "followBody": "Chaque poste indique ses places à pourvoir.",
+          "overlapTitle": "Chevauchement refusé",
+          "overlapText": "Un bénévole ne peut pas tenir deux postes en même temps : l'affectation est refusée, et la modification d'horaire aussi si elle créait un chevauchement.",
+          "notifyTitle": "Le bénévole est prévenu",
+          "notifyText": "Il reçoit une notification à chaque affectation ou retrait, et retrouve ses postes dans « Mon planning »."
+        },
+        "my-shifts": {
+          "title": "Mon planning",
+          "summary": "Vos postes de bénévole.",
+          "path": "Jour J › Mon planning",
+          "intro": "Vos postes, avec leur lieu, leurs horaires à l'heure de la conférence et leurs consignes.",
+          "calendarTitle": "Dans votre agenda",
+          "calendarText": "Le fichier iCal s'importe dans votre agenda ; téléchargez-le de nouveau après un changement."
         }
       }
     },
@@ -2864,6 +2927,192 @@
         "portal_published": "Portail publié",
         "edition_status_changed": "Statut de l'édition changé"
       }
+    },
+    "speakers": {
+      "title": "Intervenants invités",
+      "lead": "Venue de chaque intervenant invité : voyages, hébergement et besoins techniques.",
+      "loading": "Chargement des venues…",
+      "speaker": "Intervenant",
+      "arrival": "Arrivée",
+      "departure": "Départ",
+      "accommodation": "Hébergement",
+      "accommodationRequested": "Demandé, à réserver",
+      "technical": "Besoins techniques",
+      "missing": "Manque en salle : {{items}}",
+      "covered": "Couverts",
+      "empty": "Aucun intervenant invité dans cette édition.",
+      "localHint": "Heure locale de l'édition.",
+      "internalHint": "Réservée au comité : jamais montrée à l'intervenant.",
+      "fields": {
+        "status": "Prise en charge",
+        "technicalNeeds": "Besoins techniques",
+        "technicalNote": "Précisions techniques",
+        "arrivalLocal": "Arrivée",
+        "arrivalMeans": "Moyen d'arrivée",
+        "arrivalReference": "Référence (vol, train…)",
+        "departureLocal": "Départ",
+        "departureMeans": "Moyen de départ",
+        "departureReference": "Référence (vol, train…)",
+        "accommodationNeeded": "Hébergement demandé",
+        "transferNeeded": "Transfert demandé",
+        "speakerNote": "Message de l'intervenant",
+        "hotel": "Hôtel",
+        "checkIn": "Arrivée à l'hôtel",
+        "checkOut": "Départ de l'hôtel",
+        "internalNote": "Note interne"
+      },
+      "status": {
+        "to_arrange": "À organiser",
+        "booked": "Réservé",
+        "confirmed": "Confirmé"
+      },
+      "means": {
+        "plane": "Avion",
+        "train": "Train",
+        "road": "Route",
+        "other": "Autre"
+      },
+      "equipment": {
+        "projector": "Vidéoprojecteur",
+        "microphone": "Micro",
+        "sound_system": "Sonorisation",
+        "computer": "Ordinateur",
+        "whiteboard": "Tableau blanc",
+        "interpretation": "Interprétation",
+        "recording": "Enregistrement",
+        "wifi": "Wi-Fi"
+      },
+      "detail": {
+        "back": "Retour aux intervenants",
+        "title": "Venue d'un intervenant",
+        "lead": "Sa part, qu'il renseigne lui-même, et celle du comité d'organisation.",
+        "missingNotice": "Une salle où passe cet intervenant n'a pas tout l'équipement demandé.",
+        "speakerPart": "Part de l'intervenant",
+        "staffPart": "Part du comité",
+        "missingShort": "manque en salle",
+        "save": "Enregistrer",
+        "saved": "Fiche de venue enregistrée."
+      }
+    },
+    "catering": {
+      "title": "Restauration",
+      "lead": "Repas de l'édition, effectifs estimés pour le traiteur et régimes déclarés.",
+      "loading": "Chargement de la restauration…",
+      "meals": "Repas",
+      "meal": "Repas",
+      "audienceTitle": "Convives",
+      "count": "Personnes",
+      "margin": "Marge",
+      "total": "À commander",
+      "dietsTitle": "Régimes",
+      "allergiesCount": "Allergies : {{count}}",
+      "actions": "Actions",
+      "edit": "Modifier",
+      "editLabel": "Modifier le repas {{label}}",
+      "deleteLabel": "Supprimer le repas {{label}}",
+      "exportCsv": "Commande au traiteur (CSV)",
+      "exportXlsx": "Commande au traiteur (XLSX)",
+      "exportPdf": "Commande au traiteur (PDF)",
+      "empty": "Aucun repas pour l'instant.",
+      "editTitle": "Modifier le repas",
+      "newTitle": "Nouveau repas",
+      "allRegistered": "Tous les inscrits",
+      "save": "Enregistrer",
+      "add": "Ajouter le repas",
+      "cancel": "Annuler",
+      "created": "Repas ajouté.",
+      "updated": "Repas modifié.",
+      "deleted": "Repas supprimé.",
+      "dietary": "Régimes déclarés",
+      "declarations": "{{count}} déclaration(s) de régime ou d'allergie.",
+      "people": "Personnes",
+      "allergies": "Allergies signalées",
+      "nominativeHint": "La liste nominative demande de confirmer votre mot de passe ; son export est inscrit au journal.",
+      "exportNominativeCsv": "Liste nominative (CSV)",
+      "exportNominativeXlsx": "Liste nominative (XLSX)",
+      "fields": {
+        "day": "Jour",
+        "kind": "Type",
+        "labelFr": "Libellé (français)",
+        "labelEn": "Libellé (anglais)",
+        "option": "Option d'inscription",
+        "margin": "Marge (%)"
+      },
+      "audience": {
+        "registered": "Inscrits",
+        "option": "Inscrits avec l'option {{code}}",
+        "speakers": "Intervenants invités",
+        "committees": "Comités",
+        "volunteers": "Bénévoles"
+      },
+      "diet": {
+        "vegetarian": "Végétarien",
+        "vegan": "Végétalien",
+        "no_pork": "Sans porc",
+        "gluten_free": "Sans gluten",
+        "lactose_free": "Sans lactose",
+        "other": "Autre"
+      },
+      "kind": {
+        "coffee_break": "Pause café",
+        "lunch": "Déjeuner",
+        "dinner": "Dîner",
+        "cocktail": "Cocktail"
+      },
+      "delete": {
+        "title": "Supprimer ce repas ?",
+        "message": "Le repas « {{label}} » sera supprimé.",
+        "confirm": "Supprimer"
+      }
+    },
+    "shifts": {
+      "title": "Postes des bénévoles",
+      "lead": "Postes de l'édition, à l'heure du lieu, et bénévoles affectés.",
+      "loading": "Chargement des postes…",
+      "noVolunteer": "Aucun bénévole dans cette édition : invitez-en depuis Comités › Invitations.",
+      "staffing": "{{count}} bénévole(s) sur {{needed}}",
+      "missing": "{{count}} place(s) à pourvoir",
+      "unassign": "Retirer",
+      "unassignLabel": "Retirer {{name}} du poste {{title}}",
+      "volunteer": "Bénévole",
+      "assignLabel": "Bénévole à affecter au poste {{title}}",
+      "assign": "Affecter",
+      "edit": "Modifier",
+      "editLabel": "Modifier le poste {{title}}",
+      "deleteLabel": "Supprimer le poste {{title}}",
+      "empty": "Aucun poste pour l'instant.",
+      "editTitle": "Modifier le poste",
+      "newTitle": "Nouveau poste",
+      "localHint": "Heure locale de l'édition.",
+      "save": "Enregistrer",
+      "add": "Ajouter le poste",
+      "cancel": "Annuler",
+      "created": "Poste ajouté.",
+      "updated": "Poste modifié.",
+      "deleted": "Poste supprimé.",
+      "assigned": "Bénévole affecté.",
+      "unassigned": "Bénévole retiré du poste.",
+      "fields": {
+        "titleFr": "Intitulé (français)",
+        "titleEn": "Intitulé (anglais)",
+        "place": "Lieu",
+        "needed": "Bénévoles nécessaires",
+        "starts": "Début",
+        "ends": "Fin",
+        "instructions": "Consignes"
+      },
+      "delete": {
+        "title": "Supprimer ce poste ?",
+        "message": "Le poste « {{title}} » sera supprimé ; ses bénévoles en seront avertis.",
+        "confirm": "Supprimer"
+      }
+    },
+    "myShifts": {
+      "title": "Mon planning",
+      "lead": "Vos postes de bénévole, à l'heure du lieu de la conférence.",
+      "loading": "Chargement de votre planning…",
+      "calendar": "Télécharger mon planning (iCal)",
+      "empty": "Aucun poste ne vous est encore confié."
     }
   }
 }

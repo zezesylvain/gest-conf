@@ -658,7 +658,7 @@ class ShiftViewSet(_OrganisationViewSet):
 
     serializer_class = ShiftBoardSerializer
     required_capabilities = {
-        "list": C.VOLUNTEERS_PLAN,
+        "overview": C.VOLUNTEERS_PLAN,
         "create": C.VOLUNTEERS_PLAN,
         "partial_update": C.VOLUNTEERS_PLAN,
         "destroy": C.VOLUNTEERS_PLAN,
@@ -692,8 +692,10 @@ class ShiftViewSet(_OrganisationViewSet):
         }
         return Response(ShiftBoardSerializer(data).data, status=code)
 
+    # Action « overview » et non « list » : la réponse est un objet (postes et bénévoles), que
+    # le schéma décrirait sinon comme un tableau.
     @extend_schema(operation_id="manage_shifts_list", responses={200: ShiftBoardSerializer})
-    def list(self, request: Request, edition_id: int) -> Response:
+    def overview(self, request: Request, edition_id: int) -> Response:
         return self.board()
 
     @extend_schema(
