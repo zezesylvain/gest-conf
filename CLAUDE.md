@@ -122,7 +122,7 @@ Les URL Django sont déclarées **sans** le préfixe `/api` (`v1/...`) : `config
 | L5 — Programme | **Livré en code, testé en local et en CI** (L5.0 à L5.7, E2E compris ; PR #8 et #9, fusionnées) ; bilan [`docs/L5-programme.md`](docs/L5-programme.md). Ouverts : Q14, `ACCEPTED_MINOR → WITHDRAWN`, seuil d'avertissement du bundle du portail |
 | L6 — Inscriptions et paiements | **Livré en code et testé en local** (L6.0 à L6.7, E2E compris) ; bilan [`docs/L6-inscriptions.md`](docs/L6-inscriptions.md). Passage en CI : nouvelle PR, sur demande. Ouverts : Q7 (tarifs ; carte bancaire absente de l'API v1 de CinetPay), Q8 (entité de facturation, conservation, format du numéro), J15 reportée |
 | L7 — Jour J et attestations | **Livré en code et testé en local** (L7.0 à L7.8, E2E compris) ; bilan [`docs/L7-jour-j.md`](docs/L7-jour-j.md). Passage en CI : nouvelle PR, sur demande. Ouverts : Q17 (prestataire de signature qualifiée), nom complet du pays sur les badges, démo H sur téléphones réels |
-| L8 — Logistique, partenaires, communication et reporting | **Plan proposé, à valider** : [`docs/L8-logistique-plan.md`](docs/L8-logistique-plan.md) (N1 à N19 ; questions au §10, dont l'ordre L8 / L9) |
+| L8 — Logistique, partenaires, communication et reporting | **En cours** : plan [`docs/L8-logistique-plan.md`](docs/L8-logistique-plan.md) validé le 7 octobre 2026 (N1 à N19 ; questions du §10 sans réponse, propositions retenues comme hypothèses, §2.1) |
 | L9 et suivants | Non commencés |
 
 ## Décisions du lot L1

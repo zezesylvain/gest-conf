@@ -1,6 +1,7 @@
 # Lot L8 — Logistique, partenaires, communication et reporting : plan d'implémentation
 
-> **Statut : proposé le 7 octobre 2026, à valider** (décisions N1 à N19, questions au §10).
+> **Statut : validé le 7 octobre 2026, en cours** (décisions N1 à N19 telles que proposées ;
+> les questions du §10 restent sans réponse : les propositions valent hypothèses, §2.1).
 > L7 est livré en code et testé en local (bilan : `docs/L7-jour-j.md`). Les décisions de
 > ce lot sont numérotées N : les lettres L et M désignent déjà les lots et les modules de
 > l'étude.
@@ -62,7 +63,7 @@
   (envois groupés), **RG-23** (régimes alimentaires) ; voir N7, N11 et N12 ;
 - une nouvelle commande cron quotidienne, `remind_tasks` (N3).
 
-## 2. Décisions (proposées)
+## 2. Décisions (validées)
 
 | # | Sujet | Proposition |
 |---|---|---|
@@ -85,6 +86,23 @@
 | N17 | Exploitation | Cron : **`remind_tasks`** quotidienne (seule ligne nouvelle) ; les envois groupés, les invitations et la relance du questionnaire passent par `run_jobs` (tâches datées). Aucune variable d'environnement obligatoire nouvelle ; `GESTCONF_EMAIL_MAX_PER_HOUR` borne toujours le total. `check_integrity` : contributions reçues ⇔ statut du partenaire, affectations de bénévoles qui se chevauchent, réponses rattachées à un questionnaire fermé. |
 | N18 | Reporté | Espace partenaire en libre-service et factures des partenaires (Q8), réservation de voyages et d'hôtels, indisponibilités des intervenants dans le planificateur (M7, P2), suivi des repas servis, inventaire du matériel, SMS et WhatsApp (P3), « Mon programme » (J15). |
 | N19 | Ordre | L8.0 vérifications ; L8.1 modèle, droits, matrice, registre ; L8.2 tâches et budget ; L8.3 partenaires ; L8.4 logistique (intervenants, régimes, repas, bénévoles) ; L8.5 annonces, bandeau et envois groupés ; L8.6 questionnaire ; L8.7 rapports et exports ; L8.8 écrans de la gestion ; L8.9 portail ; L8.10 E2E, recette, documentation |
+
+### 2.1 Validation (7 octobre 2026) et hypothèses retenues
+
+Le commanditaire a validé le plan sans répondre aux questions du §10. Les propositions
+s'appliquent donc, comme hypothèses révisables :
+
+| Question (§10) | Hypothèse retenue |
+|---|---|
+| 1. Ordre des lots | L8 puis L9, comme l'étude |
+| 2. Périmètre | Tout le lot, sans bloc différé |
+| 3. Partenaires | Niveaux et montants saisis par le CO ; pas d'espace en libre-service ; factures hors plateforme |
+| 4. Régimes | Recueillis pour tous (inscrits, intervenants, comités, bénévoles), avec consentement ; catalogue de N7 |
+| 5. Intervenants | La plateforme suit les réservations faites par l'organisation |
+| 6. Questionnaire | Anonyme ; global, et par session si l'édition l'active ; modèle par défaut modifiable |
+| 7. Envois groupés | Moitié du plafond horaire ; lien de désabonnement des annonces ; fournisseur de production toujours en attente (D10) |
+| 8. Budget | Catalogue de postes de N4 ; visible du Chair et du CO « finances » |
+| 9. Rapports | Indicateurs de N13 ; PDF de synthèse conservé |
 
 ## 3. Modèle de données (additif)
 
