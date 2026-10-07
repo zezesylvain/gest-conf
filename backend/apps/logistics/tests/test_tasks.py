@@ -205,3 +205,16 @@ def test_n17_integrity_flags_missing_or_altered_attachments(edition, chair, sett
         f"pièce jointe {lost.pk} : fichier absent",
     ]
     assert kept.pk not in {int(item.split()[2]) for item in problems}
+
+
+def test_n3_free_text_with_an_address_is_masked_in_the_audit_log(edition, chair):
+    """Le journal refuse les adresses en clair : celles d'une description sont masquées."""
+    task = service.create_task(
+        edition,
+        {"title": "Écrire à jean.dupont@univ.ci", "description": "Copie à <a@b.org>"},
+        actor=as_user(chair),
+    )
+    entry = AuditLog.objects.get(action="task.created")
+    assert entry.after["title"] == "Écrire à j***@univ.ci"
+    assert entry.after["description"] == "Copie à <a***@b.org>"
+    assert task.title == "Écrire à jean.dupont@univ.ci"

@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gestconf-backend\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-07 01:27+0000\n"
+"POT-Creation-Date: 2026-10-07 01:36+0000\n"
 "PO-Revision-Date: 2026-10-05 11:00+0000\n"
 "Last-Translator: GEST-CONF\n"
 "Language-Team: GEST-CONF\n"
@@ -74,7 +74,7 @@ msgstr "first name"
 
 #: apps/accounts/models.py:87 apps/events/models.py:351
 #: apps/program/models.py:50 apps/reviews/models.py:45
-#: apps/submissions/models.py:144
+#: apps/sponsors/models.py:87 apps/submissions/models.py:144
 msgid "nom"
 msgstr "last name"
 
@@ -201,7 +201,7 @@ msgstr "system"
 #: apps/communications/models.py:45 apps/conferences/models.py:175
 #: apps/conferences/models.py:207 apps/conferences/models.py:251
 #: apps/conferences/models.py:338 apps/core/models.py:98
-#: apps/core/models.py:279 apps/events/models.py:30 apps/events/models.py:98
+#: apps/core/models.py:282 apps/events/models.py:30 apps/events/models.py:98
 #: apps/events/models.py:218 apps/events/models.py:277
 #: apps/events/models.py:332 apps/events/models.py:438
 #: apps/logistics/models.py:45 apps/logistics/models.py:208
@@ -213,6 +213,7 @@ msgstr "system"
 #: apps/registrations/models.py:160 apps/registrations/models.py:240
 #: apps/registrations/models.py:313 apps/registrations/models.py:396
 #: apps/reviews/models.py:32 apps/reviews/models.py:126
+#: apps/sponsors/models.py:32 apps/sponsors/models.py:83
 #: apps/submissions/models.py:51
 msgid "édition"
 msgstr "edition"
@@ -231,7 +232,8 @@ msgstr "organising committee function"
 #: apps/core/models.py:208 apps/events/models.py:458
 #: apps/logistics/models.py:52 apps/payments/models.py:136
 #: apps/registrations/models.py:413 apps/reviews/models.py:178
-#: apps/reviews/models.py:300 apps/submissions/models.py:89
+#: apps/reviews/models.py:300 apps/sponsors/models.py:115
+#: apps/submissions/models.py:89
 msgid "statut"
 msgstr "status"
 
@@ -375,7 +377,8 @@ msgstr "session chair"
 msgid "participant"
 msgstr "attendee"
 
-#: apps/accounts/roles.py:30
+#: apps/accounts/roles.py:30 apps/sponsors/models.py:141
+#: apps/sponsors/models.py:163
 msgid "partenaire"
 msgstr "sponsor"
 
@@ -429,7 +432,7 @@ msgstr "secretariat"
 #: apps/program/services/planning.py:239 apps/program/services/planning.py:534
 #: apps/program/services/settings.py:38
 #: apps/registrations/services/pricing.py:389
-#: apps/registrations/services/settings.py:120
+#: apps/registrations/services/settings.py:120 apps/sponsors/services.py:106
 msgid "Champ non modifiable."
 msgstr "This field cannot be changed."
 
@@ -1145,7 +1148,7 @@ msgstr "task assigned"
 msgid "compte"
 msgstr "account"
 
-#: apps/communications/models.py:114 apps/core/models.py:285
+#: apps/communications/models.py:114 apps/core/models.py:288
 #: apps/events/models.py:281 apps/events/models.py:342
 #: apps/logistics/models.py:212 apps/payments/models.py:241
 #: apps/reviews/models.py:235 apps/submissions/models.py:177
@@ -1200,10 +1203,12 @@ msgid "identifiant"
 msgstr "identifier"
 
 #: apps/conferences/models.py:29 apps/conferences/models.py:210
+#: apps/sponsors/models.py:36
 msgid "nom (FR)"
 msgstr "name (FR)"
 
 #: apps/conferences/models.py:30 apps/conferences/models.py:211
+#: apps/sponsors/models.py:37
 msgid "nom (EN)"
 msgstr "name (EN)"
 
@@ -1259,13 +1264,13 @@ msgstr "code"
 msgid "année"
 msgstr "year"
 
-#: apps/conferences/models.py:79 apps/core/models.py:294
+#: apps/conferences/models.py:79 apps/core/models.py:297
 #: apps/events/models.py:282 apps/portal/models.py:59 apps/portal/models.py:137
 #: apps/program/models.py:113
 msgid "titre (FR)"
 msgstr "title (FR)"
 
-#: apps/conferences/models.py:80 apps/core/models.py:295
+#: apps/conferences/models.py:80 apps/core/models.py:298
 #: apps/events/models.py:283 apps/portal/models.py:60 apps/portal/models.py:138
 #: apps/program/models.py:114
 msgid "titre (EN)"
@@ -1351,11 +1356,12 @@ msgid "éditions"
 msgstr "editions"
 
 #: apps/conferences/models.py:214 apps/conferences/models.py:277
-#: apps/conferences/models.py:346 apps/core/models.py:296
+#: apps/conferences/models.py:346 apps/core/models.py:299
 #: apps/portal/models.py:228 apps/program/models.py:59
 #: apps/program/models.py:174 apps/registrations/models.py:171
 #: apps/registrations/models.py:260 apps/reviews/models.py:97
-#: apps/submissions/models.py:134
+#: apps/sponsors/models.py:44 apps/sponsors/models.py:108
+#: apps/sponsors/models.py:167 apps/submissions/models.py:134
 msgid "ordre"
 msgstr "order"
 
@@ -1513,6 +1519,7 @@ msgid "Ouverture et clôture de l'appel obligatoires."
 msgstr "Call opening and closing dates are required."
 
 #: apps/conferences/services.py:291 apps/logistics/services/tasks.py:94
+#: apps/sponsors/services.py:241
 msgid "Statut inconnu."
 msgstr "Unknown status."
 
@@ -1764,70 +1771,74 @@ msgstr "image"
 msgid "photo de profil"
 msgstr "profile photo"
 
-#: apps/core/models.py:276
+#: apps/core/models.py:266
+msgid "logo de partenaire"
+msgstr "sponsor logo"
+
+#: apps/core/models.py:279
 msgid "identifiant public"
 msgstr "public identifier"
 
-#: apps/core/models.py:286 apps/logistics/models.py:133
+#: apps/core/models.py:289 apps/logistics/models.py:133
 #: apps/submissions/models.py:179
 msgid "nom de stockage"
 msgstr "storage name"
 
-#: apps/core/models.py:287 apps/submissions/models.py:180
+#: apps/core/models.py:290 apps/submissions/models.py:180
 msgid "nom d'origine"
 msgstr "original name"
 
-#: apps/core/models.py:288
+#: apps/core/models.py:291
 msgid "extension"
 msgstr "extension"
 
-#: apps/core/models.py:289
+#: apps/core/models.py:292
 msgid "type de contenu"
 msgstr "content type"
 
-#: apps/core/models.py:290 apps/logistics/models.py:136
+#: apps/core/models.py:293 apps/logistics/models.py:136
 #: apps/submissions/models.py:181
 msgid "taille (octets)"
 msgstr "size (bytes)"
 
-#: apps/core/models.py:291 apps/payments/models.py:273
+#: apps/core/models.py:294 apps/payments/models.py:273
 #: apps/submissions/models.py:182
 msgid "empreinte SHA-256"
 msgstr "SHA-256 digest"
 
-#: apps/core/models.py:292
+#: apps/core/models.py:295
 msgid "largeur"
 msgstr "width"
 
-#: apps/core/models.py:293
+#: apps/core/models.py:296
 msgid "hauteur"
 msgstr "height"
 
-#: apps/core/models.py:297
+#: apps/core/models.py:300
 msgid "publié"
 msgstr "published"
 
-#: apps/core/models.py:313
+#: apps/core/models.py:316
 msgid "fichier public"
 msgstr "public file"
 
-#: apps/core/models.py:314
+#: apps/core/models.py:317
 msgid "fichiers publics"
 msgstr "public files"
 
-#: apps/core/models.py:331 apps/registrations/models.py:321
+#: apps/core/models.py:334 apps/registrations/models.py:321
 msgid "portée"
 msgstr "scope"
 
-#: apps/core/models.py:332
+#: apps/core/models.py:335
 msgid "dernière valeur"
 msgstr "last value"
 
-#: apps/core/models.py:335
+#: apps/core/models.py:338
 msgid "compteur"
 msgstr "counter"
 
-#: apps/core/models.py:336
+#: apps/core/models.py:339
 msgid "compteurs"
 msgstr "counters"
 
@@ -1979,6 +1990,7 @@ msgid "pointé le (appareil)"
 msgstr "checked in at (device)"
 
 #: apps/events/models.py:117 apps/payments/models.py:146
+#: apps/sponsors/models.py:119
 msgid "reçu le"
 msgstr "received on"
 
@@ -2256,7 +2268,7 @@ msgstr "The signing certificate has expired."
 
 #: apps/events/services/certificates.py:292
 #: apps/events/services/certificates.py:802
-#: apps/logistics/services/budget.py:207 apps/portal/services.py:595
+#: apps/logistics/services/budget.py:207 apps/portal/services.py:600
 msgid "Nature inconnue."
 msgstr "Unknown kind."
 
@@ -2353,7 +2365,7 @@ msgid "Référence"
 msgstr "Reference"
 
 #: apps/events/services/checkin.py:470
-#: apps/registrations/services/exports.py:26
+#: apps/registrations/services/exports.py:26 apps/sponsors/views.py:212
 msgid "Nom"
 msgstr "Name"
 
@@ -2762,20 +2774,21 @@ msgid "Inscriptions (encaissé net)"
 msgstr "Registrations (net collected)"
 
 #: apps/logistics/services/budget.py:158 apps/logistics/services/budget.py:197
+#: apps/sponsors/services.py:70
 msgid "Montant attendu."
 msgstr "Amount expected."
 
 #: apps/logistics/services/budget.py:161
-#: apps/registrations/services/pricing.py:397
+#: apps/registrations/services/pricing.py:397 apps/sponsors/services.py:73
 msgid "Montant positif ou nul attendu."
 msgstr "A positive or zero amount is expected."
 
-#: apps/logistics/services/budget.py:163
+#: apps/logistics/services/budget.py:163 apps/sponsors/services.py:75
 msgid "Montant trop élevé."
 msgstr "Amount too large."
 
 #: apps/logistics/services/budget.py:166
-#: apps/registrations/services/pricing.py:399
+#: apps/registrations/services/pricing.py:399 apps/sponsors/services.py:78
 #, python-format
 msgid "Trop de décimales pour la devise %(currency)s."
 msgstr "Too many decimals for the currency %(currency)s."
@@ -2788,11 +2801,12 @@ msgstr "Label required."
 msgid "200 caractères au plus."
 msgstr "200 characters at most."
 
-#: apps/logistics/services/budget.py:191 apps/logistics/services/tasks.py:264
+#: apps/logistics/services/budget.py:191 apps/logistics/services/tasks.py:265
 msgid "2 000 caractères au plus."
 msgstr "2,000 characters at most."
 
 #: apps/logistics/services/budget.py:201 apps/logistics/services/tasks.py:108
+#: apps/sponsors/services.py:99
 msgid "Position positive ou nulle attendue."
 msgstr "Zero or positive position expected."
 
@@ -2804,53 +2818,53 @@ msgstr "Unknown budget item."
 msgid "Poste d'une autre nature."
 msgstr "Budget item of another kind."
 
-#: apps/logistics/services/budget.py:262
+#: apps/logistics/services/budget.py:263
 msgid "Ligne calculée : elle ne se supprime pas."
 msgstr "Computed line: it cannot be deleted."
 
-#: apps/logistics/services/budget.py:278
+#: apps/logistics/services/budget.py:279
 #: apps/registrations/services/orders.py:436 apps/registrations/views.py:550
 msgid "Fichier de 5 Mo au plus."
 msgstr "File of 5 MB at most."
 
-#: apps/logistics/services/budget.py:281 apps/logistics/services/tasks.py:281
+#: apps/logistics/services/budget.py:282 apps/logistics/services/tasks.py:282
 #: apps/registrations/services/orders.py:439
 msgid "PDF, JPEG ou PNG attendu."
 msgstr "PDF, JPEG or PNG expected."
 
-#: apps/logistics/services/budget.py:334 apps/payments/services/finance.py:168
+#: apps/logistics/services/budget.py:335 apps/payments/services/finance.py:168
 msgid "Nature"
 msgstr "Kind"
 
-#: apps/logistics/services/budget.py:335
+#: apps/logistics/services/budget.py:336
 msgid "Poste"
 msgstr "Budget item"
 
-#: apps/logistics/services/budget.py:336
+#: apps/logistics/services/budget.py:337
 msgid "Libellé"
 msgstr "Label"
 
-#: apps/logistics/services/budget.py:337
+#: apps/logistics/services/budget.py:338
 msgid "Prévu"
 msgstr "Planned"
 
-#: apps/logistics/services/budget.py:338
+#: apps/logistics/services/budget.py:339
 msgid "Réalisé"
 msgstr "Actual"
 
-#: apps/logistics/services/budget.py:339
+#: apps/logistics/services/budget.py:340
 msgid "Écart"
 msgstr "Variance"
 
-#: apps/logistics/services/budget.py:340
+#: apps/logistics/services/budget.py:341
 msgid "Origine du réalisé"
 msgstr "Source of the actual amount"
 
-#: apps/logistics/services/budget.py:341
+#: apps/logistics/services/budget.py:342
 msgid "Note"
 msgstr "Note"
 
-#: apps/logistics/services/budget.py:342 apps/payments/services/finance.py:134
+#: apps/logistics/services/budget.py:343 apps/payments/services/finance.py:134
 #: apps/payments/services/finance.py:174
 #: apps/registrations/services/exports.py:35
 msgid "Devise"
@@ -2876,23 +2890,23 @@ msgstr "50 characters at most."
 msgid "Priorité inconnue."
 msgstr "Unknown priority."
 
-#: apps/logistics/services/tasks.py:103
+#: apps/logistics/services/tasks.py:103 apps/sponsors/services.py:251
 msgid "Date attendue."
 msgstr "Date expected."
 
-#: apps/logistics/services/tasks.py:193
+#: apps/logistics/services/tasks.py:194
 msgid "Tâche archivée : restaurez-la d'abord."
 msgstr "Archived task: restore it first."
 
-#: apps/logistics/services/tasks.py:262
+#: apps/logistics/services/tasks.py:263
 msgid "Commentaire vide."
 msgstr "Empty comment."
 
-#: apps/logistics/services/tasks.py:276
+#: apps/logistics/services/tasks.py:277
 msgid "20 pièces jointes au plus par tâche."
 msgstr "20 attachments at most per task."
 
-#: apps/logistics/services/tasks.py:278 apps/logistics/views.py:70
+#: apps/logistics/services/tasks.py:279 apps/logistics/views.py:70
 msgid "Fichier de 10 Mo au plus."
 msgstr "File of 10 MB at most."
 
@@ -2919,7 +2933,7 @@ msgstr "The task board: %(link)s"
 msgid "[%(site_name)s] Vos tâches à échéance"
 msgstr "[%(site_name)s] Your tasks due"
 
-#: apps/logistics/views.py:370
+#: apps/logistics/views.py:370 apps/sponsors/views.py:210
 msgid "csv ou xlsx attendu."
 msgstr "csv or xlsx expected."
 
@@ -3193,7 +3207,8 @@ msgstr "Amount"
 
 #: apps/payments/services/finance.py:135
 #: apps/registrations/services/exports.py:30
-#: apps/reviews/services/decisions.py:503 apps/submissions/services.py:712
+#: apps/reviews/services/decisions.py:503 apps/sponsors/views.py:214
+#: apps/submissions/services.py:712
 msgid "Statut"
 msgstr "Status"
 
@@ -3205,7 +3220,7 @@ msgstr "Created on"
 msgid "Terminé le"
 msgstr "Completed on"
 
-#: apps/payments/services/finance.py:138
+#: apps/payments/services/finance.py:138 apps/sponsors/views.py:217
 msgid "Reçu le"
 msgstr "Received on"
 
@@ -3410,108 +3425,108 @@ msgstr "portal release"
 msgid "mises en ligne du portail"
 msgstr "portal releases"
 
-#: apps/portal/services.py:165
+#: apps/portal/services.py:170
 msgid "Cette valeur est déjà utilisée."
 msgstr "This value is already in use."
 
-#: apps/portal/services.py:191
+#: apps/portal/services.py:196
 msgid "Adresse refusée : https:, mailto:, tel: ou chemin interne (/…)."
 msgstr "Address refused: https:, mailto:, tel: or internal path (/…)."
 
-#: apps/portal/services.py:207
+#: apps/portal/services.py:212
 #, python-format
 msgid "Texte trop long (%(max)s caractères au plus)."
 msgstr "Text too long (%(max)s characters at most)."
 
-#: apps/portal/services.py:218
+#: apps/portal/services.py:223
 msgid "Configuration invalide."
 msgstr "Invalid configuration."
 
-#: apps/portal/services.py:229
+#: apps/portal/services.py:234
 #, python-format
 msgid "Configuration invalide : %(names)s."
 msgstr "Invalid configuration: %(names)s."
 
-#: apps/portal/services.py:235
+#: apps/portal/services.py:240
 msgid "Seule une section « image et texte » porte une image."
 msgstr "Only an “image and text” section carries an image."
 
-#: apps/portal/services.py:237 apps/portal/services.py:667
+#: apps/portal/services.py:242 apps/portal/services.py:672
 msgid "Choisissez une image publique de l'édition."
 msgstr "Choose a public image of the edition."
 
-#: apps/portal/services.py:240
+#: apps/portal/services.py:245
 msgid ""
 "Une section de données n'a pas de corps : son contenu vient de l'édition."
 msgstr "A data section has no body: its content comes from the edition."
 
-#: apps/portal/services.py:264
+#: apps/portal/services.py:269
 msgid "Le type d'une section ne change pas."
 msgstr "The type of a section cannot change."
 
-#: apps/portal/services.py:299
+#: apps/portal/services.py:304
 #, python-format
 msgid "Section posée sur : %(pages)s. Retirez-la de ces pages d'abord."
 msgstr "Section placed on: %(pages)s. Remove it from these pages first."
 
-#: apps/portal/services.py:326
+#: apps/portal/services.py:331
 msgid "Identifiant réservé à une page du site."
 msgstr "Identifier reserved for a site page."
 
-#: apps/portal/services.py:348
+#: apps/portal/services.py:353
 msgid "Figé pour une page du site."
 msgstr "Fixed for a site page."
 
-#: apps/portal/services.py:375
+#: apps/portal/services.py:380
 msgid "Une page du site ne se supprime pas."
 msgstr "A site page cannot be deleted."
 
-#: apps/portal/services.py:378
+#: apps/portal/services.py:383
 msgid "Page présente dans un menu : retirez-la du menu d'abord."
 msgstr "Page used in a menu: remove it from the menu first."
 
-#: apps/portal/services.py:441
+#: apps/portal/services.py:446
 msgid "Section inconnue."
 msgstr "Unknown section."
 
-#: apps/portal/services.py:444
+#: apps/portal/services.py:449
 msgid "Section déjà posée sur cette page."
 msgstr "Section already placed on this page."
 
-#: apps/portal/services.py:458
+#: apps/portal/services.py:463
 msgid "Section absente de cette page."
 msgstr "Section not placed on this page."
 
-#: apps/portal/services.py:472
+#: apps/portal/services.py:477
 msgid "La liste doit contenir exactement les sections posées."
 msgstr "The list must contain exactly the placed sections."
 
-#: apps/portal/services.py:485
+#: apps/portal/services.py:490
 msgid "Choisissez une page ou une adresse, pas les deux."
 msgstr "Choose a page or an address, not both."
 
-#: apps/portal/services.py:487
+#: apps/portal/services.py:492
 msgid "Page inconnue."
 msgstr "Unknown page."
 
-#: apps/portal/services.py:548
+#: apps/portal/services.py:553
 msgid "Emplacement inconnu."
 msgstr "Unknown location."
 
-#: apps/portal/services.py:553
+#: apps/portal/services.py:558
 msgid "La liste doit contenir exactement les entrées de ce menu."
 msgstr "The list must contain exactly the items of this menu."
 
-#: apps/portal/services.py:634
+#: apps/portal/services.py:639
 msgid "affiche de l'édition"
 msgstr "edition poster"
 
-#: apps/portal/services.py:646
+#: apps/portal/services.py:651
 #, python-format
 msgid "Fichier utilisé (%(uses)s) : retirez-le d'abord."
 msgstr "File in use (%(uses)s): remove it first."
 
-#: apps/portal/services.py:915
+#: apps/portal/services.py:922
 msgid "Date de build invalide (avec fuseau, et pas dans le futur)."
 msgstr "Invalid build date (with time zone, and not in the future)."
 
@@ -3781,6 +3796,8 @@ msgstr "Either a paper or a free title, not both."
 
 #: apps/program/services/planning.py:142 apps/program/services/planning.py:165
 #: apps/reviews/services/grids.py:179 apps/reviews/services/grids.py:226
+#: apps/sponsors/services.py:126 apps/sponsors/services.py:128
+#: apps/sponsors/services.py:212
 msgid "Nom obligatoire."
 msgstr "Name required."
 
@@ -5379,6 +5396,195 @@ msgstr "Your review: %(link)s"
 #, python-format
 msgid "[%(site_name)s] Rappel : évaluation attendue"
 msgstr "[%(site_name)s] Reminder: review expected"
+
+#: apps/sponsors/apps.py:21
+msgid "Partenariats (contributions reçues)"
+msgstr "Sponsorship (contributions received)"
+
+#: apps/sponsors/models.py:22
+msgid "petite"
+msgstr "small"
+
+#: apps/sponsors/models.py:23
+msgid "moyenne"
+msgstr "medium"
+
+#: apps/sponsors/models.py:24
+msgid "grande"
+msgstr "large"
+
+#: apps/sponsors/models.py:38
+msgid "montant indicatif"
+msgstr "indicative amount"
+
+#: apps/sponsors/models.py:39
+msgid "contreparties (FR)"
+msgstr "benefits (FR)"
+
+#: apps/sponsors/models.py:40
+msgid "contreparties (EN)"
+msgstr "benefits (EN)"
+
+#: apps/sponsors/models.py:42
+msgid "taille du logo"
+msgstr "logo size"
+
+#: apps/sponsors/models.py:57
+msgid "niveau de partenariat"
+msgstr "sponsorship level"
+
+#: apps/sponsors/models.py:58
+msgid "niveaux de partenariat"
+msgstr "sponsorship levels"
+
+#: apps/sponsors/models.py:71
+msgid "prospect"
+msgstr "prospect"
+
+#: apps/sponsors/models.py:72
+msgid "accord conclu"
+msgstr "agreed"
+
+#: apps/sponsors/models.py:73
+msgid "contribution reçue"
+msgstr "contribution received"
+
+#: apps/sponsors/models.py:74
+msgid "refus"
+msgstr "declined"
+
+#: apps/sponsors/models.py:90
+msgid "niveau"
+msgstr "level"
+
+#: apps/sponsors/models.py:98
+msgid "logo"
+msgstr "logo"
+
+#: apps/sponsors/models.py:104
+msgid "site"
+msgstr "website"
+
+#: apps/sponsors/models.py:105
+msgid "présentation (FR)"
+msgstr "description (FR)"
+
+#: apps/sponsors/models.py:106
+msgid "présentation (EN)"
+msgstr "description (EN)"
+
+#: apps/sponsors/models.py:107
+msgid "publié sur le portail"
+msgstr "published on the portal"
+
+#: apps/sponsors/models.py:109
+msgid "contact"
+msgstr "contact"
+
+#: apps/sponsors/models.py:110
+msgid "adresse du contact"
+msgstr "contact address"
+
+#: apps/sponsors/models.py:112
+msgid "téléphone du contact"
+msgstr "contact phone"
+
+#: apps/sponsors/models.py:117
+msgid "contribution convenue"
+msgstr "agreed contribution"
+
+#: apps/sponsors/models.py:118
+msgid "montant reçu"
+msgstr "amount received"
+
+#: apps/sponsors/models.py:120
+msgid "note interne"
+msgstr "internal note"
+
+#: apps/sponsors/models.py:142
+msgid "partenaires"
+msgstr "sponsors"
+
+#: apps/sponsors/models.py:165 apps/sponsors/models.py:170
+msgid "contrepartie"
+msgstr "benefit"
+
+#: apps/sponsors/models.py:166
+msgid "livrée le"
+msgstr "delivered on"
+
+#: apps/sponsors/models.py:171
+msgid "contreparties"
+msgstr "benefits"
+
+#: apps/sponsors/services.py:89
+#, python-format
+msgid "%(limit)s caractères au plus."
+msgstr "%(limit)s characters at most."
+
+#: apps/sponsors/services.py:133
+msgid "Taille inconnue."
+msgstr "Unknown size."
+
+#: apps/sponsors/services.py:188
+msgid "Niveau attribué à des partenaires : changez-leur de niveau d'abord."
+msgstr "Level assigned to sponsors: change their level first."
+
+#: apps/sponsors/services.py:219
+msgid "Adresse web (http ou https) attendue."
+msgstr "Web address (http or https) expected."
+
+#: apps/sponsors/services.py:227
+msgid "Adresse e-mail invalide."
+msgstr "Invalid e-mail address."
+
+#: apps/sponsors/services.py:237
+msgid "Niveau d'une autre édition."
+msgstr "Level of another edition."
+
+#: apps/sponsors/services.py:260
+msgid "Montant reçu et date obligatoires."
+msgstr "Amount received and date required."
+
+#: apps/sponsors/services.py:409
+msgid "Contrepartie de 1 à 200 caractères."
+msgstr "Benefit of 1 to 200 characters."
+
+#: apps/sponsors/views.py:213
+msgid "Niveau"
+msgstr "Level"
+
+#: apps/sponsors/views.py:215
+msgid "Contribution convenue"
+msgstr "Agreed contribution"
+
+#: apps/sponsors/views.py:216
+msgid "Montant reçu"
+msgstr "Amount received"
+
+#: apps/sponsors/views.py:218
+msgid "Contact"
+msgstr "Contact"
+
+#: apps/sponsors/views.py:219
+msgid "Adresse"
+msgstr "Address"
+
+#: apps/sponsors/views.py:220
+msgid "Téléphone"
+msgstr "Phone"
+
+#: apps/sponsors/views.py:221
+msgid "Publié"
+msgstr "Published"
+
+#: apps/sponsors/views.py:234
+msgid "oui"
+msgstr "yes"
+
+#: apps/sponsors/views.py:234
+msgid "non"
+msgstr "no"
 
 #: apps/submissions/models.py:25
 msgid "soumise"

@@ -261,6 +261,9 @@ class PublicFileKind(models.TextChoices):
     DOCUMENT = "document", _("document")
     IMAGE = "image", _("image")
     PHOTO = "photo", _("photo de profil")
+    # Plan L8 (N5) : logo d'un partenaire, déposé et publié par la fiche du partenaire ;
+    # absent de l'écran des fichiers du portail.
+    LOGO = "logo", _("logo de partenaire")
 
 
 class PublicFile(TimeStampedModel):

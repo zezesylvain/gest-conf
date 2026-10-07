@@ -1479,6 +1479,88 @@ CASES = [
         200,
         "/v1/manage/editions/{e}/budget/lines/{budget_line}/proof",
     ),
+    # --- Partenaires (plan L8, N5) -------------------------------------------------------------
+    Case("manage-sponsors", "GET", SPR, 200, "/v1/manage/editions/{e}/sponsors"),
+    Case(
+        "manage-sponsors", "POST", SPW, 201, "/v1/manage/editions/{e}/sponsors", {"name": "Orange"}
+    ),
+    Case(
+        "manage-sponsors-export",
+        "GET",
+        SPR,
+        200,
+        "/v1/manage/editions/{e}/sponsors/export?file_format=csv",
+        recent_auth=True,
+    ),
+    Case("manage-sponsor", "GET", SPR, 200, "/v1/manage/editions/{e}/sponsors/{sponsor}"),
+    Case(
+        "manage-sponsor",
+        "PATCH",
+        SPW,
+        200,
+        "/v1/manage/editions/{e}/sponsors/{sponsor}",
+        {"status": "agreed"},
+    ),
+    Case("manage-sponsor", "DELETE", SPW, 204, "/v1/manage/editions/{e}/sponsors/{sponsor}"),
+    Case(
+        "manage-sponsor-logo",
+        "PUT",
+        SPW,
+        200,
+        "/v1/manage/editions/{e}/sponsors/{sponsor}/logo",
+        lambda ids: {"file": SimpleUploadedFile("logo.png", _signature_png(), "image/png")},
+        format="multipart",
+    ),
+    Case(
+        "manage-sponsor-logo", "DELETE", SPW, 200, "/v1/manage/editions/{e}/sponsors/{sponsor}/logo"
+    ),
+    Case(
+        "manage-sponsor-benefits",
+        "POST",
+        SPW,
+        201,
+        "/v1/manage/editions/{e}/sponsors/{sponsor}/benefits",
+        {"label": "Logo sur les badges"},
+    ),
+    Case(
+        "manage-sponsor-benefit",
+        "PATCH",
+        SPW,
+        200,
+        "/v1/manage/editions/{e}/sponsors/{sponsor}/benefits/{benefit}",
+        lambda ids: {"delivered_on": ids["today"]},
+    ),
+    Case(
+        "manage-sponsor-benefit",
+        "DELETE",
+        SPW,
+        200,
+        "/v1/manage/editions/{e}/sponsors/{sponsor}/benefits/{benefit}",
+    ),
+    Case("manage-sponsor-levels", "GET", SPR, 200, "/v1/manage/editions/{e}/sponsor-levels"),
+    Case(
+        "manage-sponsor-levels",
+        "POST",
+        SPW,
+        201,
+        "/v1/manage/editions/{e}/sponsor-levels",
+        {"name_fr": "Or", "logo_size": "large"},
+    ),
+    Case(
+        "manage-sponsor-level",
+        "PATCH",
+        SPW,
+        200,
+        "/v1/manage/editions/{e}/sponsor-levels/{sponsor_level}",
+        {"position": 2},
+    ),
+    Case(
+        "manage-sponsor-level",
+        "DELETE",
+        SPW,
+        200,
+        "/v1/manage/editions/{e}/sponsor-levels/{free_sponsor_level}",
+    ),
     Case("manage-portal-poster", "GET", R, 200, "/v1/manage/editions/{e}/portal/poster"),
     Case(
         "manage-portal-poster",
@@ -1667,7 +1749,21 @@ def _organisation_objects(edition, users) -> dict:
         proof_kind="pdf",
         proof_size=len(PDF),
     )
-    return {"task": task.pk, "task_attachment": attachment.pk, "budget_line": line.pk}
+    from apps.sponsors.models import Sponsor, SponsorBenefit, SponsorLevel
+
+    level = SponsorLevel.objects.create(edition=edition, name_fr="Platine", position=0)
+    free = SponsorLevel.objects.create(edition=edition, name_fr="Bronze", position=1)
+    sponsor = Sponsor.objects.create(edition=edition, name="Banque Atlantique", level=level)
+    benefit = SponsorBenefit.objects.create(sponsor=sponsor, label="Stand")
+    return {
+        "task": task.pk,
+        "task_attachment": attachment.pk,
+        "budget_line": line.pk,
+        "sponsor": sponsor.pk,
+        "benefit": benefit.pk,
+        "sponsor_level": level.pk,
+        "free_sponsor_level": free.pk,
+    }
 
 
 @functools.cache

@@ -104,7 +104,12 @@ PORTAL_AFFECTING_ACTIONS = (
     # Programme public (plan L5, I7) : pré-rendu au build, à partir de la dernière publication
     # du programme ; les écritures du brouillon ne changent pas le portail.
     "program.published",
+    # Partenaires (plan L8, N5) : les niveaux sont publics ; un partenaire, seulement quand
+    # l'entrée porte « public » (voir ``pending_changes``).
+    "sponsor_level.",
 )
+# Préfixe des actions des partenaires comptées quand elles portent ``after.public`` vrai.
+PUBLIC_FLAGGED_PREFIXES = ("sponsor.",)
 
 # Actions sur un compte (sans édition) qui changent la fiche publique d'un membre de comité.
 COMMITTEE_MEMBER_ACTIONS = (
@@ -878,6 +883,8 @@ def pending_changes(edition: Edition) -> QuerySet[AuditLog]:
         action__in=("role.granted", "role.reactivated", "role.revoked"),
         after__role__in=sorted({role for codes in COMMITTEE_ROLES.values() for role in codes}),
     )
+    for prefix in PUBLIC_FLAGGED_PREFIXES:
+        condition |= Q(action__startswith=prefix, after__public=True)
     queryset = AuditLog.objects.filter(
         ((condition | committee_roles) & Q(edition=edition)) | member_changes
     ).exclude(action="portal.published")

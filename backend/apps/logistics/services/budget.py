@@ -23,7 +23,7 @@ from django.utils.translation import gettext_lazy as _
 from apps.accounts.services.roles import ensure_editable
 from apps.conferences.models import Edition
 from apps.core.actor import Actor
-from apps.core.audit import record
+from apps.core.audit import mask_emails, record
 from apps.core.errors import Invalid
 from apps.core.money import is_exact
 from apps.core.private_files import PrivateStore, sniff
@@ -220,7 +220,8 @@ def _snapshot(line: BudgetLine) -> dict[str, Any]:
     for name in ("planned", "actual"):
         if values[name] is not None:
             values[name] = str(values[name])
-    return values
+    # Textes libres : le journal refuse les adresses en clair.
+    return mask_emails(values)
 
 
 @transaction.atomic

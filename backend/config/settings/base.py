@@ -395,6 +395,8 @@ SPECTACULAR_SETTINGS = {
         "BudgetKind": "apps.logistics.models.BudgetKind",
         "BudgetCategory": "apps.logistics.models.BudgetCategory",
         "BudgetSource": "apps.logistics.models.BudgetSource",
+        "SponsorStatus": "apps.sponsors.models.SponsorStatus",
+        "LogoSize": "apps.sponsors.models.LogoSize",
         "InvitableRole": "apps.accounts.roles.InvitableRole",
         "OcFunction": "apps.accounts.roles.OcFunction",
         "UserRoleStatus": "apps.accounts.models.UserRoleStatus",

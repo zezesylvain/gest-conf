@@ -33,7 +33,7 @@ from apps.core.models import PublicFile, PublicFileKind
 MiB = 1024 * 1024
 MAX_DOCUMENT_SIZE = 10 * MiB
 MAX_IMAGE_SIZE = 5 * MiB
-IMAGE_MAX_SIDE = {PublicFileKind.IMAGE: 1600, PublicFileKind.PHOTO: 800}
+IMAGE_MAX_SIDE = {PublicFileKind.IMAGE: 1600, PublicFileKind.PHOTO: 800, PublicFileKind.LOGO: 600}
 # Garde contre les « bombes » de décompression (pixels, et contenu des ZIP).
 MAX_PIXELS = 40_000_000
 MAX_ZIP_ENTRIES = 500

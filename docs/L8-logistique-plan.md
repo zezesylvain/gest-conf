@@ -494,3 +494,75 @@ nom du site (test de plateforme). Corrigé.
   vérification des types des trois projets du front.
 
 **Critère de fin** (« Tests au vert ») : atteint.
+
+## 14. Bilan de L8.3 (7 octobre 2026)
+
+**Partenaires** (N5 ; `apps/sponsors`) :
+
+- `SponsorLevel` (public) : noms FR et EN, montant indicatif, contreparties FR et EN, taille
+  du logo, ordre ; supprimé seulement s'il n'est attribué à personne ;
+- `Sponsor` : partie publique (nom, niveau, logo, site, présentations FR et EN, publié,
+  ordre) et partie privée (contact, statut, contribution convenue, montant reçu et date,
+  note interne) ;
+- `SponsorBenefit` : contreparties, recopiées du niveau à l'attribution (une par ligne),
+  cochées à leur livraison, ajoutées ou retirées une à une ;
+- montants en `Decimal` exacts dans la devise de l'édition ; « contribution reçue » exige un
+  montant et une date (`check_integrity` le revérifie) ;
+- **budget** : la ligne « partenariats » est calculée, total reçu hors refus
+  (`register_computed_source`, déclarée par `sponsors`).
+
+**Logo** :
+
+- nouvelle nature de fichier public **`logo`** (migration `core/0005`) : réencodé sans
+  métadonnées, 600 px au plus, servi par l'adresse publique des fichiers (L2) **une fois le
+  partenaire publié**, sa publication suivant celle du partenaire ;
+- **précision de N5** : absent de l'écran des fichiers du portail (qui ne liste que ses
+  natures), donc ni modifiable ni supprimable par là ; remplacé ou supprimé avec le
+  partenaire.
+
+**Page publique** : `GET /v1/public/sponsors` (édition publique courante, cache de 5 min)
+renvoie les niveaux dans l'ordre et leurs partenaires publiés, plus ceux sans niveau, par
+**liste blanche** : nom, site, présentations, logo ; ni contact, ni montant, ni statut, ni
+note (test). La page du portail arrive en L8.9.
+
+**Modifications non publiées du portail** (L2) :
+
+- les actions `sponsor_level.*` comptent ;
+- une action `sponsor.*` compte quand elle porte `public: true` : partie publique d'un
+  partenaire publié, publication ou retrait, logo, suppression d'un partenaire publié ;
+- un montant, un contact, une note ou un partenaire non publié ne comptent pas (test).
+
+**Défaut évité, précision de N3 à N5** : le journal refuse toute adresse e-mail en clair. Les
+textes libres journalisés (titre et description de tâche, nom de pièce jointe, libellé et
+note de budget, présentation d'un partenaire, contreparties) passent par `mask_emails`
+(nouvelle fonction de `apps/core/audit.py`, `j***@univ.ci`) ; sans cela, une description
+contenant une adresse aurait fait échouer l'écriture. Le **contact** d'un partenaire n'est
+jamais journalisé : seul `contact_changed` figure au journal (test).
+
+**API** (gestion, 2FA) : `…/sponsors` (liste et totaux par statut, création),
+`…/sponsors/export?file_format=csv|xlsx` (contacts compris : réauthentification, journal),
+`…/sponsors/{id}` (lecture, modification, suppression), `…/sponsors/{id}/logo` (dépôt,
+retrait), `…/sponsors/{id}/benefits` et `…/benefits/{id}`, `…/sponsor-levels` et
+`…/sponsor-levels/{id}`.
+
+**Données personnelles** : le contact d'un partenaire n'est pas un compte de la plateforme ;
+il est corrigé ou effacé avec la fiche. Son adresse étant un `EmailField`, le modèle est
+**exempté** du registre avec cette justification (le test d'introspection l'exige).
+
+**Défauts trouvés par la suite complète** : l'exemption ci-dessus manquait ; le test de
+synthèse du budget ignorait la nouvelle ligne calculée « partenariats ». Corrigés.
+
+**Tests** :
+
+- backend : **5 654 réussis**, 10 ignorés (SQLite) ; sous MariaDB, `logistics`, `sponsors`,
+  `portal`, `core`, le registre, les règles de plateforme et la matrice des tâches, du
+  budget et des partenaires réussissent (1 122) ;
+- `sponsors` : 7 tests (niveaux et contreparties, contact absent du journal, contribution
+  reçue et budget, page publique en liste blanche, logo et publication, modifications non
+  publiées du portail, API et export) ;
+- `logistics` : test du masquage des adresses au journal ;
+- matrice des droits : **4 394 cas** ;
+- `ruff`, `locale/check.sh`, schéma validé sous MariaDB, client TypeScript régénéré,
+  vérification des types des trois projets du front.
+
+**Critère de fin** (« Tests au vert ») : atteint.

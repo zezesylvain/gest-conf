@@ -29,7 +29,7 @@ from apps.communications.models import NotificationKind
 from apps.communications.notifications import notify
 from apps.conferences.models import Edition
 from apps.core.actor import Actor
-from apps.core.audit import record
+from apps.core.audit import mask_emails, record
 from apps.core.errors import Invalid, StaleRevision
 from apps.core.private_files import PrivateStore, sniff
 from apps.logistics.models import Task, TaskAttachment, TaskComment, TaskPriority, TaskStatus
@@ -119,7 +119,8 @@ def _snapshot(task: Task) -> dict[str, Any]:
     values["assignee"] = task.assignee_id
     if values.get("due_date"):
         values["due_date"] = values["due_date"].isoformat()
-    return values
+    # Textes libres : le journal refuse les adresses en clair.
+    return mask_emails(values)
 
 
 def _column(edition: Edition, status: str, *, excluding: int | None = None):
@@ -294,7 +295,7 @@ def add_attachment(task: Task, *, data: bytes, name: str, actor: Actor) -> TaskA
         actor=actor,
         edition=task.edition,
         obj=task,
-        after={"name": attachment.name, "kind": kind, "size": len(data)},
+        after=mask_emails({"name": attachment.name, "kind": kind, "size": len(data)}),
     )
     return attachment
 
@@ -309,7 +310,9 @@ def remove_attachment(attachment: TaskAttachment, *, actor: Actor) -> None:
         actor=actor,
         edition=task.edition,
         obj=task,
-        before={"name": attachment.name, "kind": attachment.kind, "size": attachment.size},
+        before=mask_emails(
+            {"name": attachment.name, "kind": attachment.kind, "size": attachment.size}
+        ),
     )
     attachment.delete()
 

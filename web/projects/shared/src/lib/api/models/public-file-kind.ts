@@ -6,6 +6,7 @@
  * * `document` - document
  * * `image` - image
  * * `photo` - photo de profil
+ * * `logo` - logo de partenaire
  */
-export type PublicFileKind = 'document' | 'image' | 'photo';
+export type PublicFileKind = 'document' | 'image' | 'photo' | 'logo';
 

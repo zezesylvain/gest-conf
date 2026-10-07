@@ -126,10 +126,12 @@ def test_n4_summary_totals_and_balances(edition):
     assert summary["income"] == {"planned": Decimal("400000"), "actual": Decimal("25000")}
     assert summary["balance_planned"] == Decimal("0")
     assert summary["balance_actual"] == Decimal("-95000")
+    # La ligne calculée des partenariats (L8.3) figure aussi, à zéro.
     assert [row["category"] for row in summary["by_category"]] == [
         "venue",
         "catering",
         "registrations",
+        "sponsorship",
         "grants",
     ]
 

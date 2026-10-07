@@ -5619,6 +5619,426 @@ paths:
               schema:
                 $ref: '#/components/schemas/Signature'
           description: ''
+  /v1/manage/editions/{edition_id}/sponsor-levels:
+    get:
+      operationId: manage_sponsor_levels_list
+      description: '``…/sponsor-levels`` : niveaux de partenariat.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SponsorLevel'
+          description: ''
+    post:
+      operationId: manage_sponsor_levels_create
+      description: '``…/sponsor-levels`` : niveaux de partenariat.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SponsorLevelWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SponsorLevel'
+          description: ''
+  /v1/manage/editions/{edition_id}/sponsor-levels/{level_id}:
+    patch:
+      operationId: manage_sponsor_levels_update
+      description: '``…/sponsor-levels`` : niveaux de partenariat.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: level_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSponsorLevelWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SponsorLevel'
+          description: ''
+    delete:
+      operationId: manage_sponsor_levels_destroy
+      description: '``…/sponsor-levels`` : niveaux de partenariat.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: level_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SponsorLevel'
+          description: ''
+  /v1/manage/editions/{edition_id}/sponsors:
+    get:
+      operationId: manage_sponsors_list
+      description: '``…/sponsors`` : partenaires, contreparties, export.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Sponsors'
+          description: ''
+    post:
+      operationId: manage_sponsors_create
+      description: '``…/sponsors`` : partenaires, contreparties, export.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SponsorWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SponsorDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/sponsors/{sponsor_id}:
+    get:
+      operationId: manage_sponsors_retrieve
+      description: '``…/sponsors`` : partenaires, contreparties, export.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: sponsor_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SponsorDetail'
+          description: ''
+    patch:
+      operationId: manage_sponsors_update
+      description: '``…/sponsors`` : partenaires, contreparties, export.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: sponsor_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSponsorWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SponsorDetail'
+          description: ''
+    delete:
+      operationId: manage_sponsors_destroy
+      description: '``…/sponsors`` : partenaires, contreparties, export.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: sponsor_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /v1/manage/editions/{edition_id}/sponsors/{sponsor_id}/benefits:
+    post:
+      operationId: manage_sponsors_benefits_add
+      description: '``…/sponsors`` : partenaires, contreparties, export.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: sponsor_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BenefitWriteRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SponsorDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/sponsors/{sponsor_id}/benefits/{benefit_id}:
+    patch:
+      operationId: manage_sponsors_benefits_update
+      description: '``…/sponsors`` : partenaires, contreparties, export.'
+      parameters:
+      - in: path
+        name: benefit_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: sponsor_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBenefitUpdateRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SponsorDetail'
+          description: ''
+    delete:
+      operationId: manage_sponsors_benefits_remove
+      description: '``…/sponsors`` : partenaires, contreparties, export.'
+      parameters:
+      - in: path
+        name: benefit_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: sponsor_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SponsorDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/sponsors/{sponsor_id}/logo:
+    put:
+      operationId: manage_sponsors_logo_upload
+      description: '``…/sponsors/{id}/logo`` : dépôt (multipart) ou retrait du logo.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: sponsor_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LogoUploadRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SponsorDetail'
+          description: ''
+    delete:
+      operationId: manage_sponsors_logo_remove
+      description: '``…/sponsors/{id}/logo`` : dépôt (multipart) ou retrait du logo.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: sponsor_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SponsorDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/sponsors/export:
+    get:
+      operationId: manage_sponsors_export
+      description: 'Export des partenaires, contacts compris (RG-17 : journalisé,
+        réauthentification).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: file_format
+        schema:
+          type: string
+          enum:
+          - csv
+          - xlsx
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+          description: ''
   /v1/manage/editions/{edition_id}/status:
     post:
       operationId: manage_edition_status
@@ -7118,6 +7538,21 @@ paths:
               schema:
                 $ref: '#/components/schemas/PublicRegistration'
           description: ''
+  /v1/public/sponsors:
+    get:
+      operationId: public_sponsors
+      description: |-
+        ``GET /v1/public/sponsors`` : partenaires publiés de l'édition courante, par niveau
+        (N5) ; lu au build du portail (page « Partenaires », pré-rendue).
+      tags:
+      - public
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicSponsors'
+          description: ''
   /v1/registrations:
     get:
       operationId: registrations_list
@@ -8339,6 +8774,15 @@ components:
       - batch_size
       - batches
       - count
+    BenefitWriteRequest:
+      type: object
+      properties:
+        label:
+          type: string
+          minLength: 1
+          maxLength: 200
+      required:
+      - label
     BillingDocument:
       type: object
       description: Pièce de facturation (gestion, ``finance.read``).
@@ -11219,6 +11663,24 @@ components:
       description: |-
         * `fr` - Français
         * `en` - English
+    LogoSize:
+      enum:
+      - small
+      - medium
+      - large
+      type: string
+      description: |-
+        * `small` - petite
+        * `medium` - moyenne
+        * `large` - grande
+    LogoUploadRequest:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+      required:
+      - file
     ManageAuthor:
       type: object
       description: 'Auteur vu par la gestion : adresse comprise (contact des auteurs,
@@ -12939,6 +13401,13 @@ components:
           type: string
           format: date-time
           description: Nouvelle échéance, à l'heure de l'édition.
+    PatchedBenefitUpdateRequest:
+      type: object
+      properties:
+        delivered_on:
+          type: string
+          format: date
+          nullable: true
     PatchedBillingIdentityRequest:
       type: object
       properties:
@@ -13718,6 +14187,82 @@ components:
         speaker:
           type: integer
           nullable: true
+    PatchedSponsorLevelWriteRequest:
+      type: object
+      properties:
+        name_fr:
+          type: string
+          maxLength: 100
+        name_en:
+          type: string
+          maxLength: 100
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          nullable: true
+        benefits_fr:
+          type: string
+          maxLength: 2000
+        benefits_en:
+          type: string
+          maxLength: 2000
+        logo_size:
+          $ref: '#/components/schemas/LogoSize'
+        position:
+          type: integer
+          minimum: 0
+    PatchedSponsorWriteRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 150
+        level:
+          type: integer
+          nullable: true
+        website:
+          type: string
+          maxLength: 300
+        description_fr:
+          type: string
+          maxLength: 1000
+        description_en:
+          type: string
+          maxLength: 1000
+        published:
+          type: boolean
+        position:
+          type: integer
+          minimum: 0
+        contact_name:
+          type: string
+          maxLength: 150
+        contact_email:
+          type: string
+          maxLength: 254
+        contact_phone:
+          type: string
+          maxLength: 40
+        status:
+          $ref: '#/components/schemas/SponsorStatus'
+        agreed_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          nullable: true
+        received_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          nullable: true
+        received_on:
+          type: string
+          format: date
+          nullable: true
+        note:
+          type: string
+          maxLength: 2000
     PatchedSubmissionTypeRequest:
       type: object
       properties:
@@ -14893,11 +15438,13 @@ components:
       - document
       - image
       - photo
+      - logo
       type: string
       description: |-
         * `document` - document
         * `image` - image
         * `photo` - photo de profil
+        * `logo` - logo de partenaire
     PublicFileRef:
       type: object
       description: 'Fichier public tel que le voient les pages : adresse, dimensions,
@@ -15533,6 +16080,65 @@ components:
       - edition
       - poster
       - site_url
+    PublicSponsorCard:
+      type: object
+      properties:
+        name:
+          type: string
+        website:
+          type: string
+        description_fr:
+          type: string
+        description_en:
+          type: string
+        logo_url:
+          type: string
+        logo_width:
+          type: integer
+          nullable: true
+        logo_height:
+          type: integer
+          nullable: true
+      required:
+      - description_en
+      - description_fr
+      - logo_height
+      - logo_url
+      - logo_width
+      - name
+      - website
+    PublicSponsorLevel:
+      type: object
+      properties:
+        name_fr:
+          type: string
+        name_en:
+          type: string
+        logo_size:
+          $ref: '#/components/schemas/LogoSize'
+        sponsors:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicSponsorCard'
+      required:
+      - logo_size
+      - name_en
+      - name_fr
+      - sponsors
+    PublicSponsors:
+      type: object
+      properties:
+        levels:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicSponsorLevel'
+        others:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicSponsorCard'
+      required:
+      - levels
+      - others
     PublicSubmissionType:
       type: object
       properties:
@@ -17668,6 +18274,406 @@ components:
         position:
           type: integer
           minimum: 0
+    Sponsor:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+          title: Nom
+        level:
+          type: integer
+          readOnly: true
+          nullable: true
+          title: Niveau
+        published:
+          type: boolean
+          readOnly: true
+          title: Publié sur le portail
+        status:
+          allOf:
+          - $ref: '#/components/schemas/SponsorStatus'
+          readOnly: true
+          title: Statut
+        agreed_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          readOnly: true
+          nullable: true
+          title: Contribution convenue
+        received_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          readOnly: true
+          nullable: true
+          title: Montant reçu
+        received_on:
+          type: string
+          format: date
+          readOnly: true
+          nullable: true
+          title: Reçu le
+        position:
+          type: integer
+          readOnly: true
+          title: Ordre
+        logo:
+          allOf:
+          - $ref: '#/components/schemas/SponsorLogo'
+          nullable: true
+          readOnly: true
+        benefits_due:
+          type: integer
+          readOnly: true
+        benefits_delivered:
+          type: integer
+          readOnly: true
+      required:
+      - agreed_amount
+      - benefits_delivered
+      - benefits_due
+      - id
+      - level
+      - logo
+      - name
+      - position
+      - published
+      - received_amount
+      - received_on
+      - status
+    SponsorBenefit:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        label:
+          type: string
+          readOnly: true
+          title: Contrepartie
+        delivered_on:
+          type: string
+          format: date
+          readOnly: true
+          nullable: true
+          title: Livrée le
+        position:
+          type: integer
+          readOnly: true
+          title: Ordre
+      required:
+      - delivered_on
+      - id
+      - label
+      - position
+    SponsorDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+          title: Nom
+        level:
+          type: integer
+          readOnly: true
+          nullable: true
+          title: Niveau
+        published:
+          type: boolean
+          readOnly: true
+          title: Publié sur le portail
+        status:
+          allOf:
+          - $ref: '#/components/schemas/SponsorStatus'
+          readOnly: true
+          title: Statut
+        agreed_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          readOnly: true
+          nullable: true
+          title: Contribution convenue
+        received_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          readOnly: true
+          nullable: true
+          title: Montant reçu
+        received_on:
+          type: string
+          format: date
+          readOnly: true
+          nullable: true
+          title: Reçu le
+        position:
+          type: integer
+          readOnly: true
+          title: Ordre
+        logo:
+          allOf:
+          - $ref: '#/components/schemas/SponsorLogo'
+          nullable: true
+          readOnly: true
+        benefits_due:
+          type: integer
+          readOnly: true
+        benefits_delivered:
+          type: integer
+          readOnly: true
+        website:
+          type: string
+          format: uri
+          readOnly: true
+          title: Site
+        description_fr:
+          type: string
+          readOnly: true
+          title: Présentation (FR)
+        description_en:
+          type: string
+          readOnly: true
+          title: Présentation (EN)
+        contact_name:
+          type: string
+          readOnly: true
+          title: Contact
+        contact_email:
+          type: string
+          format: email
+          readOnly: true
+          title: Adresse du contact
+        contact_phone:
+          type: string
+          readOnly: true
+          title: Téléphone du contact
+        note:
+          type: string
+          readOnly: true
+          title: Note interne
+        benefits:
+          type: array
+          items:
+            $ref: '#/components/schemas/SponsorBenefit'
+          readOnly: true
+      required:
+      - agreed_amount
+      - benefits
+      - benefits_delivered
+      - benefits_due
+      - contact_email
+      - contact_name
+      - contact_phone
+      - description_en
+      - description_fr
+      - id
+      - level
+      - logo
+      - name
+      - note
+      - position
+      - published
+      - received_amount
+      - received_on
+      - status
+      - website
+    SponsorLevel:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name_fr:
+          type: string
+          readOnly: true
+          title: Nom (FR)
+        name_en:
+          type: string
+          readOnly: true
+          title: Nom (EN)
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          readOnly: true
+          nullable: true
+          title: Montant indicatif
+        benefits_fr:
+          type: string
+          readOnly: true
+          title: Contreparties (FR)
+        benefits_en:
+          type: string
+          readOnly: true
+          title: Contreparties (EN)
+        logo_size:
+          allOf:
+          - $ref: '#/components/schemas/LogoSize'
+          readOnly: true
+          title: Taille du logo
+        position:
+          type: integer
+          readOnly: true
+          title: Ordre
+        sponsor_count:
+          type: integer
+          readOnly: true
+      required:
+      - amount
+      - benefits_en
+      - benefits_fr
+      - id
+      - logo_size
+      - name_en
+      - name_fr
+      - position
+      - sponsor_count
+    SponsorLevelWriteRequest:
+      type: object
+      properties:
+        name_fr:
+          type: string
+          maxLength: 100
+        name_en:
+          type: string
+          maxLength: 100
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          nullable: true
+        benefits_fr:
+          type: string
+          maxLength: 2000
+        benefits_en:
+          type: string
+          maxLength: 2000
+        logo_size:
+          $ref: '#/components/schemas/LogoSize'
+        position:
+          type: integer
+          minimum: 0
+    SponsorLogo:
+      type: object
+      properties:
+        url:
+          type: string
+        width:
+          type: integer
+          nullable: true
+        height:
+          type: integer
+          nullable: true
+      required:
+      - height
+      - url
+      - width
+    SponsorStatus:
+      enum:
+      - prospect
+      - agreed
+      - received
+      - declined
+      type: string
+      description: |-
+        * `prospect` - prospect
+        * `agreed` - accord conclu
+        * `received` - contribution reçue
+        * `declined` - refus
+    SponsorTotals:
+      type: object
+      properties:
+        currency:
+          type: string
+        agreed:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+        received:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+        by_status:
+          type: object
+          additionalProperties:
+            type: integer
+      required:
+      - agreed
+      - by_status
+      - currency
+      - received
+    SponsorWriteRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 150
+        level:
+          type: integer
+          nullable: true
+        website:
+          type: string
+          maxLength: 300
+        description_fr:
+          type: string
+          maxLength: 1000
+        description_en:
+          type: string
+          maxLength: 1000
+        published:
+          type: boolean
+        position:
+          type: integer
+          minimum: 0
+        contact_name:
+          type: string
+          maxLength: 150
+        contact_email:
+          type: string
+          maxLength: 254
+        contact_phone:
+          type: string
+          maxLength: 40
+        status:
+          $ref: '#/components/schemas/SponsorStatus'
+        agreed_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          nullable: true
+        received_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          nullable: true
+        received_on:
+          type: string
+          format: date
+          nullable: true
+        note:
+          type: string
+          maxLength: 2000
+    Sponsors:
+      type: object
+      properties:
+        totals:
+          $ref: '#/components/schemas/SponsorTotals'
+        sponsors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Sponsor'
+      required:
+      - sponsors
+      - totals
     Submission:
       type: object
       description: Vue de l'auteur sur **sa** soumission.
