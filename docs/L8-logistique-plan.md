@@ -352,3 +352,54 @@ portail, bundle initial de référence : 368,86 ko) :
 **Critère de fin** : choix consignés. Aucune dépendance n'est ajoutée à cette étape :
 `openpyxl` entre dans `requirements/base.in` avec son premier usage (L8.2, export du
 budget).
+
+## 12. Bilan de L8.1 (7 octobre 2026)
+
+**Capacités** (N2 ; `apps/accounts/roles.py`) :
+
+- **`tasks.read`** et **`tasks.write`** : administrateur, Chair, tout le CO ;
+- **`budget.read`** : administrateur, Chair, CO « finances » ; **`budget.write`** :
+  administrateur, CO « finances » ;
+- **`sponsors.read`** : administrateur, Chair, CO « finances », « communication »,
+  « relations extérieures » ; **`sponsors.write`** : administrateur, CO « relations
+  extérieures » ;
+- **`logistics.read`** : administrateur, Chair, CO « logistique », « secrétariat » ;
+  **`logistics.write`** : administrateur, CO « logistique » ;
+- **`volunteers.plan`** : administrateur, CO « bénévoles », « logistique » ;
+- **`shifts.own`** : le bénévole **seul**, l'administrateur exclu (le planning personnel est
+  celui d'un bénévole, comme `sessions.chair` est celui d'un président de séance) ;
+- **`communications.send`** : administrateur, Chair, CO « communication » ;
+- **`surveys.manage`** : administrateur, Chair, CO « communication », « secrétariat ».
+
+Aucun rôle nouveau, aucune 2FA nouvelle ; `SPONSOR` reste non invitable.
+
+**Applications** : `logistics`, `sponsors`, `surveys` et `reports` créées et déclarées
+(`INSTALLED_APPS`).
+
+- **Écart avec le §3 du plan, comme en L7.1** : les modèles arrivent avec leurs services
+  (L8.2 à L8.6), par migrations additives, plutôt que vides dès L8.1 ; le registre des
+  données personnelles de chaque modèle arrive avec lui.
+
+**Registre des segments** (N1, N11 ; `apps/communications/segments.py`) :
+
+- `register_segment(Segment(code, libellé, requête, position, capacité))`, déclaré par les
+  applications métier dans leur `ready()` : `communications` ne dépend d'aucune d'elles ;
+- un segment peut exiger une capacité en plus de `communications.send` (« relecteurs en
+  retard » : `reviews.manage`) ;
+- `recipients()` ne garde que les comptes actifs et non anonymisés, chacun une fois ;
+- les segments eux-mêmes sont déclarés en L8.5, avec les annonces.
+
+**Matrice des droits** : la spécification recopiée à la main (`tests/test_matrix.py`) reçoit
+les capacités de L8 pour chaque profil ; le test qui compare les capacités lues par `/v1/me`
+à la spécification passe.
+
+**Tests** :
+
+- `tests`, `accounts` et `communications` : **4 020 réussis**, 1 ignoré (SQLite) ; dont
+  3 tests du registre des segments ;
+- front : 456 tests (shared 79, portail 158, gestion 219) ; vérification des types des trois
+  projets après régénération du client ;
+- `ruff`, `format:check`, `locale/check.sh` ; schéma validé sous MariaDB (énumération
+  `Capability` étendue) ; client TypeScript régénéré.
+
+**Critère de fin** (« Matrice au vert ») : atteint.

@@ -8046,6 +8046,18 @@ components:
       - letters.manage
       - signature.manage
       - sessions.chair
+      - tasks.read
+      - tasks.write
+      - budget.read
+      - budget.write
+      - sponsors.read
+      - sponsors.write
+      - logistics.read
+      - logistics.write
+      - volunteers.plan
+      - shifts.own
+      - communications.send
+      - surveys.manage
       type: string
       description: |-
         * `edition.read` - edition.read
@@ -8078,6 +8090,18 @@ components:
         * `letters.manage` - letters.manage
         * `signature.manage` - signature.manage
         * `sessions.chair` - sessions.chair
+        * `tasks.read` - tasks.read
+        * `tasks.write` - tasks.write
+        * `budget.read` - budget.read
+        * `budget.write` - budget.write
+        * `sponsors.read` - sponsors.read
+        * `sponsors.write` - sponsors.write
+        * `logistics.read` - logistics.read
+        * `logistics.write` - logistics.write
+        * `volunteers.plan` - volunteers.plan
+        * `shifts.own` - shifts.own
+        * `communications.send` - communications.send
+        * `surveys.manage` - surveys.manage
     Category:
       type: object
       description: 'Catégorie et sa grille de tarifs (gestion). ``code`` : fixé à

@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gestconf-backend\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-06 21:51+0000\n"
+"POT-Creation-Date: 2026-10-07 00:46+0000\n"
 "PO-Revision-Date: 2026-10-05 11:00+0000\n"
 "Last-Translator: GEST-CONF\n"
 "Language-Team: GEST-CONF\n"
@@ -1157,6 +1157,10 @@ msgstr "notification"
 #: apps/communications/models.py:119
 msgid "notifications"
 msgstr "notifications"
+
+#: apps/communications/segments.py:66
+msgid "Segment inconnu."
+msgstr "Unknown segment."
 
 #: apps/communications/templates/communications/email/test_message.txt:1
 #, python-format
@@ -2482,13 +2486,17 @@ msgid ""
 "Bonjour,\n"
 "\n"
 "Votre lettre d'invitation pour %(edition_title)s est disponible."
-msgstr "Hello,\n\nYour letter of invitation for %(edition_title)s is available."
+msgstr ""
+"Hello,\n"
+"\n"
+"Your letter of invitation for %(edition_title)s is available."
 
 #: apps/events/templates/events/email/letter_issued_message.txt:7
 msgid ""
 "Elle porte un QR code qui permet à l'ambassade ou au consulat d'en vérifier "
 "l'authenticité."
-msgstr "It bears a QR code that lets the embassy or consulate check its authenticity."
+msgstr ""
+"It bears a QR code that lets the embassy or consulate check its authenticity."
 
 #: apps/events/templates/events/email/letter_issued_subject.txt:1
 #, python-format
@@ -2502,7 +2510,11 @@ msgid ""
 "\n"
 "Votre demande de lettre d'invitation pour %(edition_title)s n'a pas pu être "
 "acceptée."
-msgstr "Hello,\n\nYour request for a letter of invitation for %(edition_title)s could not be accepted."
+msgstr ""
+"Hello,\n"
+"\n"
+"Your request for a letter of invitation for %(edition_title)s could not be "
+"accepted."
 
 #: apps/events/templates/events/email/letter_refused_message.txt:7
 #, python-format

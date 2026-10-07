@@ -104,6 +104,21 @@ class Capability(StrEnum):
     # Président de séance (K1, K7, K8) : accès à la gestion pour ses sessions publiées ; le
     # serveur vérifie la présidence session par session (``CapabilityOrSessionChair``).
     SESSIONS_CHAIR = "sessions.chair"
+    # Lot L8 (N2) : tâches du CO, budget, partenaires, logistique (fiches de venue, régimes,
+    # repas), planning des bénévoles (le leur pour les bénévoles), annonces et envois
+    # groupés, questionnaires de satisfaction.
+    TASKS_READ = "tasks.read"
+    TASKS_WRITE = "tasks.write"
+    BUDGET_READ = "budget.read"
+    BUDGET_WRITE = "budget.write"
+    SPONSORS_READ = "sponsors.read"
+    SPONSORS_WRITE = "sponsors.write"
+    LOGISTICS_READ = "logistics.read"
+    LOGISTICS_WRITE = "logistics.write"
+    VOLUNTEERS_PLAN = "volunteers.plan"
+    SHIFTS_OWN = "shifts.own"
+    COMMUNICATIONS_SEND = "communications.send"
+    SURVEYS_MANAGE = "surveys.manage"
 
 
 C = Capability
@@ -125,6 +140,8 @@ CAPABILITIES: Mapping[str, frozenset[Capability]] = {
         C.PROGRAM_PUBLISH,
         C.SIGNATURE_MANAGE,
         C.SESSIONS_CHAIR,
+        # N2 (plan L8) : le planning personnel est celui d'un bénévole.
+        C.SHIFTS_OWN,
     },
     Role.CHAIR: frozenset(
         {
@@ -151,6 +168,15 @@ CAPABILITIES: Mapping[str, frozenset[Capability]] = {
             C.FINANCE_READ,
             # K1 (plan L7) : il émet et révoque les attestations ; il ne pointe pas.
             C.CERTIFICATES_MANAGE,
+            # N2 (plan L8) : il suit les tâches, le budget, les partenaires et la logistique,
+            # communique et mène les questionnaires.
+            C.TASKS_READ,
+            C.TASKS_WRITE,
+            C.BUDGET_READ,
+            C.SPONSORS_READ,
+            C.LOGISTICS_READ,
+            C.COMMUNICATIONS_SEND,
+            C.SURVEYS_MANAGE,
         }
     ),
     # Président du CS : il peut aussi évaluer (H19).
@@ -175,7 +201,7 @@ CAPABILITIES: Mapping[str, frozenset[Capability]] = {
     # attribuées fonction par fonction dans leur lot (FUNCTION_CAPABILITIES). Lecture des
     # soumissions, identité des auteurs comprise (F10, matrice §3.3 de l'étude), du
     # programme brouillon (I1) et des inscriptions (J1, plan L6). Toutes les fonctions
-    # pointent à l'accueil (K1, plan L7).
+    # pointent à l'accueil (K1, plan L7) et partagent les tâches du CO (N2, plan L8).
     Role.OC_MEMBER: frozenset(
         {
             C.EDITION_READ,
@@ -183,6 +209,8 @@ CAPABILITIES: Mapping[str, frozenset[Capability]] = {
             C.PROGRAM_READ,
             C.REGISTRATIONS_READ,
             C.CHECKIN_SCAN,
+            C.TASKS_READ,
+            C.TASKS_WRITE,
         }
     ),
     # Relecteur : ses affectations seulement, sans identité des auteurs (RG-04, H9).
@@ -193,8 +221,9 @@ CAPABILITIES: Mapping[str, frozenset[Capability]] = {
     Role.SESSION_CHAIR: frozenset({C.SESSIONS_CHAIR}),
     Role.ATTENDEE: frozenset(),
     Role.SPONSOR: frozenset(),
-    # K1 (plan L7) : le bénévole pointe à l'accueil et en session, sans autre droit.
-    Role.VOLUNTEER: frozenset({C.CHECKIN_SCAN}),
+    # K1 (plan L7) : le bénévole pointe à l'accueil et en session ; N2 (plan L8) : il lit
+    # son planning ; rien d'autre.
+    Role.VOLUNTEER: frozenset({C.CHECKIN_SCAN, C.SHIFTS_OWN}),
     # K18 (plan L7) : le signataire renseigne sa propre signature, sans autre droit.
     Role.SIGNATORY: frozenset({C.SIGNATURE_MANAGE}),
 }
@@ -255,21 +284,45 @@ SCIENTIFIC_COMMITTEE: frozenset[str] = frozenset({Role.SC_CHAIR, Role.SC_MEMBER}
 # tarifs et finances, le « secrétariat » les inscriptions. K1 (plan L7) : le jour J (secrétariat,
 # logistique, bénévoles), les attestations (secrétariat), les lettres d'invitation
 # (secrétariat, relations extérieures) ; le CO « bénévoles » gère les bénévoles, et eux seuls
-# (VISIBLE_MEMBER_ROLES, FUNCTION_GRANTORS). Les autres fonctions reçoivent leurs écritures
-# dans leur lot.
+# (VISIBLE_MEMBER_ROLES, FUNCTION_GRANTORS). N2 (plan L8) : budget (finances), partenaires
+# (relations extérieures ; lus par les finances et la communication), logistique (logistique ;
+# lue par le secrétariat), planning des bénévoles (bénévoles, logistique), annonces et envois
+# groupés (communication), questionnaires (communication, secrétariat).
 FUNCTION_CAPABILITIES: Mapping[tuple[str, str], frozenset[Capability]] = {
-    (Role.OC_MEMBER, "communication"): frozenset({C.PORTAL_WRITE}),
+    (Role.OC_MEMBER, "communication"): frozenset(
+        {C.PORTAL_WRITE, C.SPONSORS_READ, C.COMMUNICATIONS_SEND, C.SURVEYS_MANAGE}
+    ),
     # I1 (plan L5) : le CO « programme » écrit le programme ; les autres fonctions le lisent.
     (Role.OC_MEMBER, "program"): frozenset({C.PROGRAM_WRITE}),
     (Role.OC_MEMBER, "finance"): frozenset(
-        {C.REGISTRATIONS_MANAGE, C.PRICING_WRITE, C.FINANCE_READ}
+        {
+            C.REGISTRATIONS_MANAGE,
+            C.PRICING_WRITE,
+            C.FINANCE_READ,
+            C.BUDGET_READ,
+            C.BUDGET_WRITE,
+            C.SPONSORS_READ,
+        }
     ),
     (Role.OC_MEMBER, "secretariat"): frozenset(
-        {C.REGISTRATIONS_MANAGE, C.CHECKIN_MANAGE, C.CERTIFICATES_MANAGE, C.LETTERS_MANAGE}
+        {
+            C.REGISTRATIONS_MANAGE,
+            C.CHECKIN_MANAGE,
+            C.CERTIFICATES_MANAGE,
+            C.LETTERS_MANAGE,
+            C.LOGISTICS_READ,
+            C.SURVEYS_MANAGE,
+        }
     ),
-    (Role.OC_MEMBER, "logistics"): frozenset({C.CHECKIN_MANAGE}),
-    (Role.OC_MEMBER, "volunteers"): frozenset({C.CHECKIN_MANAGE, C.MEMBERS_READ, C.MEMBERS_MANAGE}),
-    (Role.OC_MEMBER, "external_relations"): frozenset({C.LETTERS_MANAGE}),
+    (Role.OC_MEMBER, "logistics"): frozenset(
+        {C.CHECKIN_MANAGE, C.LOGISTICS_READ, C.LOGISTICS_WRITE, C.VOLUNTEERS_PLAN}
+    ),
+    (Role.OC_MEMBER, "volunteers"): frozenset(
+        {C.CHECKIN_MANAGE, C.MEMBERS_READ, C.MEMBERS_MANAGE, C.VOLUNTEERS_PLAN}
+    ),
+    (Role.OC_MEMBER, "external_relations"): frozenset(
+        {C.LETTERS_MANAGE, C.SPONSORS_READ, C.SPONSORS_WRITE}
+    ),
 }
 
 # Rôles visibles dans les listes de membres et d'invitations, hors ADMIN et CHAIR qui voient

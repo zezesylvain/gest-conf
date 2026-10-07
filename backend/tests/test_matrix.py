@@ -59,17 +59,33 @@ PRW, FIR = "pricing.write", "finance.read"
 # d'invitation (secrétariat, relations extérieures) ; signature (le signataire seul).
 CKS, CKM = "checkin.scan", "checkin.manage"
 CEM, LEM, SGM = "certificates.manage", "letters.manage", "signature.manage"
+# Plan L8 (N2) : tâches (CO, Chair), budget (finances ; Chair en lecture), partenaires
+# (relations extérieures ; finances, communication et Chair en lecture), logistique
+# (logistique ; secrétariat et Chair en lecture), planning des bénévoles (bénévoles,
+# logistique), le sien (bénévole), annonces et envois groupés (communication, Chair),
+# questionnaires (communication, secrétariat, Chair).
+TKR, TKW = "tasks.read", "tasks.write"
+BGR, BGW = "budget.read", "budget.write"
+SPR, SPW = "sponsors.read", "sponsors.write"
+LGR, LGW = "logistics.read", "logistics.write"
+VLP, SHO = "volunteers.plan", "shifts.own"
+CMS, SVM = "communications.send", "surveys.manage"
+L8_TEAM = {TKR, TKW}
 
 SPEC: dict[str, set[str]] = {
     # H19 : l'administrateur n'évalue pas et ne décide pas ; I1 : il ne publie pas le
     # programme. J1 : toutes les capacités des inscriptions et des finances.
     # K18 : il ne renseigne pas la signature d'un signataire.
     "ADMIN": {R, W, PUB, ARC, MR, MM, AR, PW, SR, SE, SX, RM, RA, GW, PGR, PGW, RGR, RGM}
-    | {PRW, FIR, CKS, CKM, CEM, LEM},
+    | {PRW, FIR, CKS, CKM, CEM, LEM}
+    | L8_TEAM
+    | {BGR, BGW, SPR, SPW, LGR, LGW, VLP, CMS, SVM},
     # I1 : le Chair lit et publie le programme, sans l'écrire. J1 : il lit les inscriptions
     # et les finances, sans les gérer. K1 : il émet les attestations, ne pointe pas.
     "CHAIR": {R, W, PUB, MR, MM, AR, PW, SR, SE, SX, RM, RA, DD, DP, GW, PGR, PGP, RGR, FIR}
-    | {CEM},
+    | {CEM}
+    | L8_TEAM
+    | {BGR, SPR, LGR, CMS, SVM},
     # D8 validée : lecture du paramétrage ; membres du CS seulement. F10, F8 (plan L3) :
     # soumissions (lecture, dérogations, export). H19 : évalue, pilote, décide, publie.
     # I1 : lit le programme. J1 : aucun accès aux inscriptions.
@@ -77,22 +93,22 @@ SPEC: dict[str, set[str]] = {
     # D8 : lecture seule (fonction « logistique ») ; F10 : soumissions ; I1 : programme lu ;
     # J1 : inscriptions lues. K1 (plan L7) : tout le CO pointe ; la logistique gère les
     # pointages.
-    "OC_MEMBER": {R, SR, PGR, RGR, CKS, CKM},
+    "OC_MEMBER": {R, SR, PGR, RGR, CKS, CKM} | L8_TEAM | {LGR, LGW, VLP},
     # E11 (plan L2) : le CO « communication » écrit le portail.
-    "OC_COMMUNICATION": {R, PW, SR, PGR, RGR, CKS},
+    "OC_COMMUNICATION": {R, PW, SR, PGR, RGR, CKS} | L8_TEAM | {SPR, CMS, SVM},
     # I1 (plan L5) : le CO « programme » écrit le programme.
-    "OC_PROGRAM": {R, SR, PGR, PGW, RGR, CKS},
+    "OC_PROGRAM": {R, SR, PGR, PGW, RGR, CKS} | L8_TEAM,
     # J1 (plan L6) : le CO « finances » gère inscriptions, tarifs et finances ; le
     # « secrétariat » gère les inscriptions, et en L7 (K1) le jour J, les attestations et les
     # lettres d'invitation.
-    "OC_FINANCE": {R, SR, PGR, RGR, RGM, PRW, FIR, CKS},
-    "OC_SECRETARIAT": {R, SR, PGR, RGR, RGM, CKS, CKM, CEM, LEM},
+    "OC_FINANCE": {R, SR, PGR, RGR, RGM, PRW, FIR, CKS} | L8_TEAM | {BGR, BGW, SPR},
+    "OC_SECRETARIAT": {R, SR, PGR, RGR, RGM, CKS, CKM, CEM, LEM} | L8_TEAM | {LGR, SVM},
     # K1 (plan L7) : le CO « bénévoles » gère les pointages et les bénévoles (eux seuls) ; les
     # « relations extérieures » instruisent les lettres d'invitation.
-    "OC_VOLUNTEERS": {R, SR, PGR, RGR, CKS, CKM, MR, MM},
-    "OC_EXTERNAL_RELATIONS": {R, SR, PGR, RGR, CKS, LEM},
+    "OC_VOLUNTEERS": {R, SR, PGR, RGR, CKS, CKM, MR, MM} | L8_TEAM | {VLP},
+    "OC_EXTERNAL_RELATIONS": {R, SR, PGR, RGR, CKS, LEM} | L8_TEAM | {SPR, SPW},
     "SC_MEMBER": {RW},  # F10 : pas les soumissions ; H19 : ses affectations seulement
-    "VOLUNTEER": {CKS},  # K1 (plan L7) : pointer, rien d'autre
+    "VOLUNTEER": {CKS, SHO},  # K1 (plan L7) : pointer ; N2 (plan L8) : son planning
     "SIGNATORY": {SGM},  # K18 (plan L7) : sa signature, rien d'autre
     "AUTHOR": set(),
 }

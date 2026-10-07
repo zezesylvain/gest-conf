@@ -36,5 +36,17 @@ export const CAPABILITY: Capability[] = [
   'certificates.manage',
   'letters.manage',
   'signature.manage',
-  'sessions.chair'
+  'sessions.chair',
+  'tasks.read',
+  'tasks.write',
+  'budget.read',
+  'budget.write',
+  'sponsors.read',
+  'sponsors.write',
+  'logistics.read',
+  'logistics.write',
+  'volunteers.plan',
+  'shifts.own',
+  'communications.send',
+  'surveys.manage'
 ];
