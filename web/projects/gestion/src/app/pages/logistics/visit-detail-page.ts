@@ -146,7 +146,8 @@ export class VisitDetailPage implements OnInit {
       this.show(saved);
       this.status.set(this.translate.instant('gestion.speakers.detail.saved'));
     } catch (error) {
-      this.errors.set(errorMessages(this.translate, error, this.form));
+      // Erreurs de champ du serveur au résumé : ce formulaire n'en affiche pas sous ses champs.
+      this.errors.set(errorMessages(this.translate, error));
     } finally {
       this.busy.set(false);
     }

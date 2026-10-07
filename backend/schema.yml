@@ -6841,9 +6841,38 @@ paths:
                 $ref: '#/components/schemas/SponsorDetail'
           description: ''
   /v1/manage/editions/{edition_id}/sponsors/{sponsor_id}/logo:
+    get:
+      operationId: manage_sponsors_logo_content
+      description: |-
+        Aperçu du logo, partenaire publié ou non : l'adresse publique ne sert un logo
+        qu'une fois le partenaire publié, et seulement pour l'édition publique courante.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: sponsor_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+          description: ''
     put:
       operationId: manage_sponsors_logo_upload
-      description: '``…/sponsors/{id}/logo`` : dépôt (multipart) ou retrait du logo.'
+      description: '``…/sponsors/{id}/logo`` : aperçu dans la gestion, dépôt (multipart)
+        ou retrait.'
       parameters:
       - in: path
         name: edition_id
@@ -6874,7 +6903,8 @@ paths:
           description: ''
     delete:
       operationId: manage_sponsors_logo_remove
-      description: '``…/sponsors/{id}/logo`` : dépôt (multipart) ou retrait du logo.'
+      description: '``…/sponsors/{id}/logo`` : aperçu dans la gestion, dépôt (multipart)
+        ou retrait.'
       parameters:
       - in: path
         name: edition_id
@@ -21341,6 +21371,10 @@ components:
       properties:
         url:
           type: string
+        preview_url:
+          type: string
+          description: Aperçu dans la gestion (authentifié), partenaire publié ou
+            non.
         width:
           type: integer
           nullable: true
@@ -21349,6 +21383,7 @@ components:
           nullable: true
       required:
       - height
+      - preview_url
       - url
       - width
     SponsorStatus:

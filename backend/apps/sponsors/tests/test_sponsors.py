@@ -191,6 +191,30 @@ def test_n5_logo_follows_publication_and_is_replaced(edition):
     assert files == []
 
 
+def test_n5_logo_preview_in_management_whether_published_or_not(edition):
+    """L8.8 : l'adresse publique ne sert le logo qu'une fois le partenaire publié ; la gestion
+    l'affiche par un aperçu authentifié (``sponsors.read``), refusé sans la capacité."""
+    sponsor = services.create_sponsor(edition, {"name": "Orange"}, actor=COMMAND)
+    services.set_logo(sponsor, data=png(), name="a.png", actor=COMMAND)
+    finance = make_member(edition, Role.OC_MEMBER, oc_function=OcFunction.FINANCE)
+    base = f"/v1/manage/editions/{edition.pk}/sponsors/{sponsor.pk}"
+    logo = client_for(finance).get(base).json()["logo"]
+    assert logo["preview_url"] == f"{base}/logo"
+    assert APIClient().get(logo["url"]).status_code == 404
+    response = client_for(finance).get(logo["preview_url"])
+    assert response.status_code == 200
+    assert response["Content-Type"] == "image/png"
+    assert response["Cache-Control"] == "private, no-store"
+    assert response.content.startswith(b"\x89PNG")
+    programme = make_member(edition, Role.OC_MEMBER, oc_function=OcFunction.PROGRAM)
+    assert client_for(programme).get(logo["preview_url"]).status_code == 403
+    assert APIClient().get(logo["preview_url"]).status_code in (401, 403)
+    # Sans logo : 404.
+    other = services.create_sponsor(edition, {"name": "Sans logo"}, actor=COMMAND)
+    url = f"/v1/manage/editions/{edition.pk}/sponsors/{other.pk}/logo"
+    assert client_for(finance).get(url).status_code == 404
+
+
 def test_n5_only_public_changes_count_as_unpublished_portal_changes(edition):
     """L2 : la gestion compte les modifications non publiées ; un changement privé (montant,
     contact, note) ou celui d'un partenaire non publié n'en est pas une."""

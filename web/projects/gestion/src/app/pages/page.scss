@@ -107,3 +107,23 @@ td {
 .wide {
   grid-column: 1 / -1;
 }
+
+// Chiffres clés en cartes (budget, partenaires, rapports ; plan L8).
+.figures {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 0.75rem;
+  margin: 0;
+}
+
+.figures div {
+  border: 1px solid var(--gc-border);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+}
+
+.figures dd {
+  margin: 0.25rem 0 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+}

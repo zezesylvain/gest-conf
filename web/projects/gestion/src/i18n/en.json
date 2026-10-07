@@ -34,7 +34,8 @@
         "dayof": "Event day",
         "documents": "Certificates and letters",
         "organisation": "Organisation",
-        "logistics": "Logistics"
+        "logistics": "Logistics",
+        "partners": "Partners"
       },
       "keywords": {
         "dashboard": "home, status, publish, publication, archive, state, summary",
@@ -83,7 +84,9 @@
         "speakers": "visit, travel, arrival, departure, hotel, accommodation, equipment",
         "catering": "meals, caterer, lunch, coffee break, dietary requirements, allergies",
         "volunteerShifts": "volunteers, shifts, assignment, volunteer schedule",
-        "myShifts": "my shifts, my schedule, volunteering, iCal"
+        "myShifts": "my shifts, my schedule, volunteering, iCal",
+        "sponsors": "sponsors, patrons, contribution, benefits, logo",
+        "sponsorLevels": "gold, silver, bronze, tiers, partnership offer"
       },
       "portalSections": "Sections",
       "portalPages": "Pages",
@@ -121,7 +124,9 @@
       "speakers": "Invited speakers",
       "catering": "Catering",
       "volunteerShifts": "Volunteer shifts",
-      "myShifts": "My schedule"
+      "myShifts": "My schedule",
+      "sponsors": "Partners",
+      "sponsorLevels": "Partnership levels"
     },
     "status": {
       "draft": "draft",
@@ -1321,6 +1326,40 @@
           "intro": "Your shifts, with their place, their times in the conference's time and their instructions.",
           "calendarTitle": "In your calendar",
           "calendarText": "The iCal file imports into your calendar; download it again after a change."
+        },
+        "sponsors": {
+          "title": "Partners",
+          "summary": "Partners, their contributions and their benefits.",
+          "path": "Partners › Partners",
+          "intro": "The list brings together the edition's partners with their status, their contribution and the progress of their benefits; the totals count agreed and received contributions.",
+          "createTitle": "Create",
+          "createBody": "Name, level and status are enough; the record then opens for the rest.",
+          "publicTitle": "Public part",
+          "publicBody": "Name, level, website, descriptions in French and English, logo; tick \"Publish on the portal\" for the partner to appear on the \"Partners\" page.",
+          "privateTitle": "Private part",
+          "privateBody": "Status, agreed and received contribution, contact, internal note: never shown on the portal.",
+          "benefitsTitle": "Benefits",
+          "benefitsBody": "Tick a benefit when it is delivered; add or remove them one by one.",
+          "receivedTitle": "Contribution received",
+          "receivedText": "This status requires the amount and the date; the total received feeds the budget's \"partnerships\" line.",
+          "logoTitle": "Logo and portal",
+          "logoText": "The logo is public as soon as the partner is; the portal page changes at the next portal publication.",
+          "exportTitle": "Export",
+          "exportText": "The export contains contacts: it requires you to confirm your password and is logged."
+        },
+        "sponsor-levels": {
+          "title": "Partnership levels",
+          "summary": "The tiers offered to partners.",
+          "path": "Partners › Partnership levels",
+          "intro": "Each level describes an offer: its name, an indicative amount, its benefits and the logo size on the portal.",
+          "names": "Names in French and English, shown on the portal.",
+          "amount": "Indicative amount, in the edition's currency.",
+          "benefits": "Benefits, one per line.",
+          "size": "Logo size of this level's partners on the portal page.",
+          "copyTitle": "Benefits copied",
+          "copyText": "Assigning a level to a partner adds the level's benefits to their record; those already present are kept.",
+          "deleteTitle": "Level in use",
+          "deleteText": "A level assigned to a partner cannot be deleted: first change the level of the partners concerned."
         }
       }
     },
@@ -3113,6 +3152,131 @@
       "loading": "Loading your schedule…",
       "calendar": "Download my schedule (iCal)",
       "empty": "No shift has been assigned to you yet."
+    },
+    "sponsors": {
+      "title": "Partners",
+      "lead": "The edition's partners: contributions, benefits and presence on the portal.",
+      "loading": "Loading partners…",
+      "totals": "In figures",
+      "agreed": "Agreed contributions",
+      "received": "Received contributions",
+      "exportHint": "The export contains contacts: it requires you to confirm your password and is logged.",
+      "exportCsv": "Export (CSV)",
+      "exportXlsx": "Export (XLSX)",
+      "levelsLink": "Partnership levels",
+      "list": "Partner list",
+      "benefits": "Benefits",
+      "benefitsCount": "{{delivered}} of {{due}} delivered",
+      "portal": "Portal",
+      "published": "Published",
+      "unpublished": "Not published",
+      "empty": "No partner yet.",
+      "new": "New partner",
+      "noLevel": "No level",
+      "create": "Create and open the record",
+      "errors": {
+        "name": "The name is required.",
+        "email": "Invalid email address."
+      },
+      "fields": {
+        "name": "Name",
+        "level": "Level",
+        "status": "Status",
+        "agreedAmount": "Agreed contribution",
+        "receivedAmount": "Amount received",
+        "receivedOn": "Received on",
+        "website": "Website",
+        "descriptionFr": "Description (French)",
+        "descriptionEn": "Description (English)",
+        "published": "Publish on the portal",
+        "contactName": "Contact",
+        "contactEmail": "Contact email",
+        "contactPhone": "Contact phone",
+        "note": "Internal note"
+      },
+      "status": {
+        "prospect": "Prospect",
+        "agreed": "Agreement reached",
+        "received": "Contribution received",
+        "declined": "Declined"
+      },
+      "delete": {
+        "title": "Delete this partner?",
+        "message": "The record of \"{{name}}\", its benefits and its logo will be deleted.",
+        "confirm": "Delete partner"
+      },
+      "detail": {
+        "back": "Back to partners",
+        "title": "Partner record",
+        "lead": "Public part, shown on the portal once published, and private part, for the committee only.",
+        "publicPart": "Public part",
+        "publicHint": "Shown on the portal's \"Partners\" page if the partner is published, after the next portal publication.",
+        "levelHint": "Assigning a level adds its benefits to the record.",
+        "privatePart": "Private part",
+        "receivedHint": "\"Contribution received\" requires an amount and a date.",
+        "save": "Save",
+        "saved": "Record saved.",
+        "logo": "Logo",
+        "noLogo": "No logo.",
+        "logoAlt": "{{name}} logo",
+        "logoHint": "PNG, JPEG or WebP, 5 MB at most; the image is reduced to 600 pixels and its metadata removed.",
+        "logoUpload": "Upload a logo",
+        "logoRemove": "Remove the logo",
+        "logoTooLarge": "The logo exceeds 5 MB.",
+        "logoSaved": "Logo saved.",
+        "logoRemoved": "Logo removed.",
+        "noBenefit": "No benefit.",
+        "deliveredOn": "delivered on {{date}}",
+        "removeBenefit": "Remove",
+        "removeBenefitLabel": "Remove benefit \"{{label}}\"",
+        "benefitLabel": "New benefit",
+        "addBenefit": "Add benefit",
+        "benefitAdded": "Benefit added.",
+        "benefitUpdated": "Benefit updated.",
+        "benefitRemoved": "Benefit removed."
+      }
+    },
+    "sponsorLevels": {
+      "title": "Partnership levels",
+      "lead": "The tiers offered to partners, with their benefits.",
+      "loading": "Loading levels…",
+      "back": "Back to partners",
+      "list": "Levels",
+      "sponsors": "Partners",
+      "actions": "Actions",
+      "edit": "Edit",
+      "editLabel": "Edit level {{name}}",
+      "deleteLabel": "Delete level {{name}}",
+      "empty": "No level yet.",
+      "editTitle": "Edit level",
+      "newTitle": "New level",
+      "benefitsHint": "One benefit per line.",
+      "save": "Save",
+      "add": "Add level",
+      "cancel": "Cancel",
+      "created": "Level added.",
+      "updated": "Level updated.",
+      "deleted": "Level deleted.",
+      "fields": {
+        "name": "Name",
+        "nameFr": "Name (French)",
+        "nameEn": "Name (English)",
+        "amount": "Indicative amount",
+        "benefits": "Benefits",
+        "benefitsFr": "Benefits (French)",
+        "benefitsEn": "Benefits (English)",
+        "logoSize": "Logo size"
+      },
+      "size": {
+        "small": "Small",
+        "medium": "Medium",
+        "large": "Large"
+      },
+      "delete": {
+        "title": "Delete this level?",
+        "message": "The level \"{{name}}\" will be deleted.",
+        "confirm": "Delete"
+      }
     }
   }
 }

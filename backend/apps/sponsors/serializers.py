@@ -46,17 +46,31 @@ class SponsorLevelWriteSerializer(serializers.Serializer):
 
 class SponsorLogoSerializer(serializers.Serializer):
     url = serializers.CharField()
+    preview_url = serializers.CharField(
+        help_text="Aperçu dans la gestion (authentifié), partenaire publié ou non."
+    )
     width = serializers.IntegerField(allow_null=True)
     height = serializers.IntegerField(allow_null=True)
 
 
 def logo_data(sponsor: Sponsor) -> dict | None:
+    from django.urls import reverse
+
     from apps.portal.services import public_file_url
 
     logo = sponsor.logo
     if logo is None:
         return None
-    return {"url": public_file_url(logo), "width": logo.width, "height": logo.height}
+    preview = reverse(
+        "sponsors:manage-sponsor-logo",
+        kwargs={"edition_id": sponsor.edition_id, "sponsor_id": sponsor.pk},
+    )
+    return {
+        "url": public_file_url(logo),
+        "preview_url": preview,
+        "width": logo.width,
+        "height": logo.height,
+    }
 
 
 class SponsorBenefitSerializer(serializers.ModelSerializer):

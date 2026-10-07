@@ -1502,6 +1502,7 @@ CASES = [
         {"status": "agreed"},
     ),
     Case("manage-sponsor", "DELETE", SPW, 204, "/v1/manage/editions/{e}/sponsors/{sponsor}"),
+    Case("manage-sponsor-logo", "GET", SPR, 200, "/v1/manage/editions/{e}/sponsors/{sponsor}/logo"),
     Case(
         "manage-sponsor-logo",
         "PUT",
@@ -1991,7 +1992,12 @@ def _organisation_objects(edition, users) -> dict:
 
     level = SponsorLevel.objects.create(edition=edition, name_fr="Platine", position=0)
     free = SponsorLevel.objects.create(edition=edition, name_fr="Bronze", position=1)
-    sponsor = Sponsor.objects.create(edition=edition, name="Banque Atlantique", level=level)
+    logo = public_files.store(
+        data=_png(), name="logo.png", kind=PublicFileKind.LOGO, edition=edition
+    )
+    sponsor = Sponsor.objects.create(
+        edition=edition, name="Banque Atlantique", level=level, logo=logo
+    )
     benefit = SponsorBenefit.objects.create(sponsor=sponsor, label="Stand")
     from apps.logistics.models import Meal, ShiftAssignment, VolunteerShift
 

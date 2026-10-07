@@ -47,6 +47,7 @@ const EVERYTHING = [
   'logistics.read',
   'volunteers.plan',
   'shifts.own',
+  'sponsors.read',
 ];
 
 /** Catalogue « traduit » minimal : la clé tient lieu de libellé. */
@@ -286,6 +287,21 @@ describe('Table de navigation de la gestion (plan L2 §2.3)', () => {
     );
     expect(helpForUrl('/editions/3/logistique/intervenants/12')).toBe('speakers');
     expect(helpForUrl('/editions/3/jour-j/mon-planning')).toBe('my-shifts');
+  });
+
+  it('partenaires (plan L8, N16) : liste et niveaux avec sponsors.read', () => {
+    const finance = buildNavigation(3, ['edition.read', 'sponsors.read'], 'OC_MEMBER');
+    expect(finance.find((group) => group.key === 'partners')!.entries.map((e) => e.key)).toEqual([
+      'sponsors',
+      'sponsorLevels',
+    ]);
+    expect(buildNavigation(3, ['edition.read']).map((group) => group.key)).not.toContain(
+      'partners',
+    );
+    // Le plus long préfixe : la fiche d'un partenaire relève de la liste, les niveaux de
+    // leur propre fiche.
+    expect(helpForUrl('/editions/3/partenaires/8')).toBe('sponsors');
+    expect(helpForUrl('/editions/3/partenaires/niveaux')).toBe('sponsor-levels');
   });
 
   it('aucune capacité dans l’édition : rail vide (pas d’aide seule)', () => {

@@ -208,10 +208,11 @@ export class TasksPage implements OnInit {
     try {
       await action();
     } catch (error) {
+      // Erreurs de champ du serveur au résumé : ce formulaire n'en affiche pas sous ses champs.
       this.errors.set(
         isStale(error)
           ? [this.translate.instant('gestion.tasks.stale')]
-          : errorMessages(this.translate, error, this.form),
+          : errorMessages(this.translate, error),
       );
     } finally {
       this.busy.set(false);

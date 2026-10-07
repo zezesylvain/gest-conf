@@ -17,6 +17,7 @@ export type NavGroupKey =
   | 'program'
   | 'registrations'
   | 'logistics'
+  | 'partners'
   | 'dayof'
   | 'documents'
   | 'settings'
@@ -79,6 +80,7 @@ export const GROUP_ORDER: readonly NavGroupKey[] = [
   'program',
   'registrations',
   'logistics',
+  'partners',
   'dayof',
   'documents',
   'settings',
@@ -255,6 +257,23 @@ export const SCREENS: readonly ScreenDef[] = [
     help: 'volunteer-shifts',
     group: 'logistics',
     capability: 'volunteers.plan',
+  },
+  // Partenaires (plan L8, N5) : lecture sponsors.read, écriture revérifiée.
+  {
+    key: 'sponsors',
+    path: 'partenaires',
+    label: 'gestion.nav.sponsors',
+    help: 'sponsors',
+    group: 'partners',
+    capability: 'sponsors.read',
+  },
+  {
+    key: 'sponsorLevels',
+    path: 'partenaires/niveaux',
+    label: 'gestion.nav.sponsorLevels',
+    help: 'sponsor-levels',
+    group: 'partners',
+    capability: 'sponsors.read',
   },
   // Jour J (plan L7, K15) : accueil (PWA), sessions du jour, présences, badges, comptoir.
   {
@@ -499,6 +518,7 @@ export const ROLE_GROUPS: Partial<Record<Role, readonly NavGroupKey[]>> = {
     'program',
     'registrations',
     'logistics',
+    'partners',
     'dayof',
     'documents',
     'settings',
@@ -514,6 +534,7 @@ export const ROLE_GROUPS: Partial<Record<Role, readonly NavGroupKey[]>> = {
     'program',
     'registrations',
     'logistics',
+    'partners',
     'dayof',
     'documents',
     'settings',
@@ -531,6 +552,7 @@ export const ROLE_GROUPS: Partial<Record<Role, readonly NavGroupKey[]>> = {
     'program',
     'registrations',
     'logistics',
+    'partners',
     'dayof',
     'documents',
     'settings',

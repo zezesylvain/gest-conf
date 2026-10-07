@@ -27,7 +27,7 @@ urlpatterns = [
     ),
     path(
         f"{S}/logo",
-        views.SponsorLogoViewSet.as_view({"put": "upload", "delete": "remove"}),
+        views.SponsorLogoViewSet.as_view({"get": "content", "put": "upload", "delete": "remove"}),
         name="manage-sponsor-logo",
     ),
     path(

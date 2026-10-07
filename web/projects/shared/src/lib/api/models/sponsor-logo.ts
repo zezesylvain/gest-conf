@@ -3,6 +3,11 @@
 
 export interface SponsorLogo {
   height: number | null;
+
+  /**
+   * Aperçu dans la gestion (authentifié), partenaire publié ou non.
+   */
+  preview_url: string;
   url: string;
   width: number | null;
 }

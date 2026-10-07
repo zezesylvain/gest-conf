@@ -28,6 +28,7 @@ from rest_framework.views import APIView
 from apps.accounts.permissions import ManageViewSet, RecentAuthRequired
 from apps.accounts.roles import Capability as C
 from apps.conferences.services import current_public_edition
+from apps.core import public_files
 from apps.core.actor import Actor
 from apps.core.audit import record
 from apps.core.errors import Invalid
@@ -250,11 +251,36 @@ class SponsorViewSet(_SponsorsViewSet):
 
 
 class SponsorLogoViewSet(_SponsorsViewSet):
-    """``…/sponsors/{id}/logo`` : dépôt (multipart) ou retrait du logo."""
+    """``…/sponsors/{id}/logo`` : aperçu dans la gestion, dépôt (multipart) ou retrait."""
 
     parser_classes = (MultiPartParser,)
     serializer_class = SponsorDetailSerializer
-    required_capabilities = {"upload": C.SPONSORS_WRITE, "remove": C.SPONSORS_WRITE}
+    required_capabilities = {
+        "content": C.SPONSORS_READ,
+        "upload": C.SPONSORS_WRITE,
+        "remove": C.SPONSORS_WRITE,
+    }
+
+    @extend_schema(
+        operation_id="manage_sponsors_logo_content",
+        responses={(200, "application/octet-stream"): OpenApiTypes.BINARY},
+    )
+    def content(self, request: Request, edition_id: int, sponsor_id: int) -> HttpResponse:
+        """Aperçu du logo, partenaire publié ou non : l'adresse publique ne sert un logo
+        qu'une fois le partenaire publié, et seulement pour l'édition publique courante."""
+        logo = self.sponsor(sponsor_id).logo
+        if logo is None:
+            raise Http404
+        try:
+            data = public_files.read(logo)
+        except FileNotFoundError as exc:
+            raise Http404 from exc
+        response = HttpResponse(data, content_type=logo.content_type)
+        response["Cache-Control"] = "private, no-store"
+        response["X-Content-Type-Options"] = "nosniff"
+        response["Content-Security-Policy"] = "default-src 'none'; sandbox"
+        response["Content-Disposition"] = "inline"
+        return response
 
     @extend_schema(
         operation_id="manage_sponsors_logo_upload",

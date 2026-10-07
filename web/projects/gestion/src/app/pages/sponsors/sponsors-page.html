@@ -1,0 +1,141 @@
+<gc-page-header
+  [heading]="'gestion.sponsors.title' | translate"
+  [lead]="'gestion.sponsors.lead' | translate"
+/>
+<gc-error-summary [messages]="errors()" />
+
+@if (loading()) {
+  <p role="status">{{ 'gestion.sponsors.loading' | translate }}</p>
+} @else if (data(); as current) {
+  <section class="card" aria-labelledby="sponsor-totals-title">
+    <h2 id="sponsor-totals-title">{{ 'gestion.sponsors.totals' | translate }}</h2>
+    <dl class="figures">
+      <div>
+        <dt>{{ 'gestion.sponsors.agreed' | translate }}</dt>
+        <dd>{{ amount(current.totals.agreed) }}</dd>
+      </div>
+      <div>
+        <dt>{{ 'gestion.sponsors.received' | translate }}</dt>
+        <dd>{{ amount(current.totals.received) }}</dd>
+      </div>
+      @for (item of statuses; track item) {
+        <div>
+          <dt>{{ 'gestion.sponsors.status.' + item | translate }}</dt>
+          <dd>{{ count(item) }}</dd>
+        </div>
+      }
+    </dl>
+    <p class="muted">{{ 'gestion.sponsors.exportHint' | translate }}</p>
+    <div class="actions">
+      <button mat-stroked-button type="button" (click)="export('csv')" [disabled]="busy()">
+        {{ 'gestion.sponsors.exportCsv' | translate }}
+      </button>
+      <button mat-stroked-button type="button" (click)="export('xlsx')" [disabled]="busy()">
+        {{ 'gestion.sponsors.exportXlsx' | translate }}
+      </button>
+      <a mat-button [routerLink]="['/editions', editionId(), 'partenaires', 'niveaux']">{{
+        'gestion.sponsors.levelsLink' | translate
+      }}</a>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="sponsor-list-title">
+    <h2 id="sponsor-list-title">{{ 'gestion.sponsors.list' | translate }}</h2>
+    @if (current.sponsors.length) {
+      <div class="table-wrap">
+        <table>
+          <caption class="visually-hidden">
+            {{
+              'gestion.sponsors.list' | translate
+            }}
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">{{ 'gestion.sponsors.fields.name' | translate }}</th>
+              <th scope="col">{{ 'gestion.sponsors.fields.level' | translate }}</th>
+              <th scope="col">{{ 'gestion.sponsors.fields.status' | translate }}</th>
+              <th scope="col" class="amount">
+                {{ 'gestion.sponsors.fields.agreedAmount' | translate }}
+              </th>
+              <th scope="col" class="amount">
+                {{ 'gestion.sponsors.fields.receivedAmount' | translate }}
+              </th>
+              <th scope="col">{{ 'gestion.sponsors.benefits' | translate }}</th>
+              <th scope="col">{{ 'gestion.sponsors.portal' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (sponsor of current.sponsors; track sponsor.id) {
+              <tr>
+                <td>
+                  <a [routerLink]="['/editions', editionId(), 'partenaires', sponsor.id]">{{
+                    sponsor.name
+                  }}</a>
+                </td>
+                <td>{{ levelLabel(sponsor.level) }}</td>
+                <td>
+                  <span class="badge">{{
+                    'gestion.sponsors.status.' + sponsor.status | translate
+                  }}</span>
+                </td>
+                <td class="amount">{{ amount(sponsor.agreed_amount) }}</td>
+                <td class="amount">{{ amount(sponsor.received_amount) }}</td>
+                <td>{{ benefits(sponsor) }}</td>
+                <td>
+                  @if (sponsor.published) {
+                    <span class="ok">{{ 'gestion.sponsors.published' | translate }}</span>
+                  } @else {
+                    <span class="muted">{{ 'gestion.sponsors.unpublished' | translate }}</span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <p class="muted">{{ 'gestion.sponsors.empty' | translate }}</p>
+    }
+  </section>
+
+  @if (canWrite()) {
+    <section class="card" aria-labelledby="new-sponsor-title">
+      <h2 id="new-sponsor-title">{{ 'gestion.sponsors.new' | translate }}</h2>
+      <form [formGroup]="form" (ngSubmit)="create()" class="grid-2">
+        <mat-form-field>
+          <mat-label>{{ 'gestion.sponsors.fields.name' | translate }}</mat-label>
+          <input matInput formControlName="name" required maxlength="150" />
+          @if (form.controls.name.hasError('required')) {
+            <mat-error>{{ 'gestion.sponsors.errors.name' | translate }}</mat-error>
+          }
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>{{ 'gestion.sponsors.fields.level' | translate }}</mat-label>
+          <mat-select formControlName="level">
+            <mat-option [value]="null">{{ 'gestion.sponsors.noLevel' | translate }}</mat-option>
+            @for (level of levels(); track level.id) {
+              <mat-option [value]="level.id">{{ levelOption(level) }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>{{ 'gestion.sponsors.fields.status' | translate }}</mat-label>
+          <mat-select formControlName="status">
+            @for (item of statuses; track item) {
+              @if (item !== 'received') {
+                <mat-option [value]="item">{{
+                  'gestion.sponsors.status.' + item | translate
+                }}</mat-option>
+              }
+            }
+          </mat-select>
+        </mat-form-field>
+        <div class="actions">
+          <button mat-flat-button type="submit" [disabled]="busy()">
+            {{ 'gestion.sponsors.create' | translate }}
+          </button>
+        </div>
+      </form>
+    </section>
+  }
+}

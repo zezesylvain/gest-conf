@@ -1,0 +1,209 @@
+<p>
+  <a [routerLink]="['/editions', editionId(), 'partenaires']">{{
+    'gestion.sponsors.detail.back' | translate
+  }}</a>
+</p>
+<gc-page-header
+  [heading]="sponsor()?.name || ('gestion.sponsors.detail.title' | translate)"
+  [lead]="'gestion.sponsors.detail.lead' | translate"
+/>
+<div aria-live="polite">
+  @if (status()) {
+    <p class="notice" role="status">{{ status() }}</p>
+  }
+</div>
+<gc-error-summary [messages]="errors()" />
+
+@if (loading()) {
+  <p role="status">{{ 'gestion.sponsors.loading' | translate }}</p>
+} @else if (sponsor(); as current) {
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <section class="card" aria-labelledby="public-part">
+      <h2 id="public-part">{{ 'gestion.sponsors.detail.publicPart' | translate }}</h2>
+      <p class="muted">{{ 'gestion.sponsors.detail.publicHint' | translate }}</p>
+      <div class="grid-2">
+        <mat-form-field>
+          <mat-label>{{ 'gestion.sponsors.fields.name' | translate }}</mat-label>
+          <input matInput formControlName="name" required maxlength="150" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>{{ 'gestion.sponsors.fields.level' | translate }}</mat-label>
+          <mat-select formControlName="level">
+            <mat-option [value]="null">{{ 'gestion.sponsors.noLevel' | translate }}</mat-option>
+            @for (level of levels(); track level.id) {
+              <mat-option [value]="level.id">{{ levelOption(level) }}</mat-option>
+            }
+          </mat-select>
+          <mat-hint>{{ 'gestion.sponsors.detail.levelHint' | translate }}</mat-hint>
+        </mat-form-field>
+        <mat-form-field class="wide">
+          <mat-label>{{ 'gestion.sponsors.fields.website' | translate }}</mat-label>
+          <input matInput type="url" formControlName="website" maxlength="300" />
+        </mat-form-field>
+        <mat-form-field class="wide">
+          <mat-label>{{ 'gestion.sponsors.fields.descriptionFr' | translate }}</mat-label>
+          <textarea matInput formControlName="description_fr" rows="3" maxlength="1000"></textarea>
+        </mat-form-field>
+        <mat-form-field class="wide">
+          <mat-label>{{ 'gestion.sponsors.fields.descriptionEn' | translate }}</mat-label>
+          <textarea matInput formControlName="description_en" rows="3" maxlength="1000"></textarea>
+        </mat-form-field>
+      </div>
+      <mat-checkbox formControlName="published">{{
+        'gestion.sponsors.fields.published' | translate
+      }}</mat-checkbox>
+    </section>
+
+    <section class="card" aria-labelledby="private-part">
+      <h2 id="private-part">{{ 'gestion.sponsors.detail.privatePart' | translate }}</h2>
+      <div class="grid-2">
+        <mat-form-field>
+          <mat-label>{{ 'gestion.sponsors.fields.status' | translate }}</mat-label>
+          <mat-select formControlName="status">
+            @for (item of statuses; track item) {
+              <mat-option [value]="item">{{
+                'gestion.sponsors.status.' + item | translate
+              }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>{{ 'gestion.sponsors.fields.agreedAmount' | translate }}</mat-label>
+          <input matInput formControlName="agreed_amount" inputmode="decimal" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>{{ 'gestion.sponsors.fields.receivedAmount' | translate }}</mat-label>
+          <input matInput formControlName="received_amount" inputmode="decimal" />
+          <mat-hint>{{ 'gestion.sponsors.detail.receivedHint' | translate }}</mat-hint>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>{{ 'gestion.sponsors.fields.receivedOn' | translate }}</mat-label>
+          <input matInput type="date" formControlName="received_on" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>{{ 'gestion.sponsors.fields.contactName' | translate }}</mat-label>
+          <input matInput formControlName="contact_name" maxlength="150" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>{{ 'gestion.sponsors.fields.contactEmail' | translate }}</mat-label>
+          <input matInput type="email" formControlName="contact_email" maxlength="254" />
+          @if (form.controls.contact_email.hasError('email')) {
+            <mat-error>{{ 'gestion.sponsors.errors.email' | translate }}</mat-error>
+          }
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>{{ 'gestion.sponsors.fields.contactPhone' | translate }}</mat-label>
+          <input matInput type="tel" formControlName="contact_phone" maxlength="40" />
+        </mat-form-field>
+        <mat-form-field class="wide">
+          <mat-label>{{ 'gestion.sponsors.fields.note' | translate }}</mat-label>
+          <textarea matInput formControlName="note" rows="3" maxlength="2000"></textarea>
+        </mat-form-field>
+      </div>
+    </section>
+    @if (canWrite()) {
+      <div class="actions">
+        <button mat-flat-button type="submit" [disabled]="busy()">
+          {{ 'gestion.sponsors.detail.save' | translate }}
+        </button>
+      </div>
+    }
+  </form>
+
+  <section class="card" aria-labelledby="logo-title">
+    <h2 id="logo-title">{{ 'gestion.sponsors.detail.logo' | translate }}</h2>
+    @if (current.logo; as logo) {
+      <img
+        class="logo"
+        [src]="logo.preview_url"
+        [attr.width]="logo.width"
+        [attr.height]="logo.height"
+        [alt]="'gestion.sponsors.detail.logoAlt' | translate: { name: current.name }"
+      />
+    } @else {
+      <p class="muted">{{ 'gestion.sponsors.detail.noLogo' | translate }}</p>
+    }
+    @if (canWrite()) {
+      <p class="muted">{{ 'gestion.sponsors.detail.logoHint' | translate }}</p>
+      <div class="actions">
+        <label>
+          {{ 'gestion.sponsors.detail.logoUpload' | translate }}
+          <input type="file" [accept]="accept" (change)="uploadLogo($event)" [disabled]="busy()" />
+        </label>
+        @if (current.logo) {
+          <button mat-button type="button" (click)="removeLogo()" [disabled]="busy()">
+            {{ 'gestion.sponsors.detail.logoRemove' | translate }}
+          </button>
+        }
+      </div>
+    }
+  </section>
+
+  <section class="card" aria-labelledby="benefits-title">
+    <h2 id="benefits-title">
+      {{ 'gestion.sponsors.benefits' | translate }}
+      <span class="muted"
+        >({{
+          'gestion.sponsors.benefitsCount'
+            | translate: { delivered: current.benefits_delivered, due: current.benefits_due }
+        }})</span
+      >
+    </h2>
+    @if (current.benefits.length) {
+      <ul class="benefits">
+        @for (benefit of current.benefits; track benefit.id) {
+          <li>
+            <mat-checkbox
+              [checked]="!!benefit.delivered_on"
+              [disabled]="!canWrite() || busy()"
+              (change)="toggleBenefit(benefit, $event.checked)"
+              >{{ benefit.label }}</mat-checkbox
+            >
+            @if (benefit.delivered_on) {
+              <span class="muted">{{
+                'gestion.sponsors.detail.deliveredOn'
+                  | translate: { date: day(benefit.delivered_on) }
+              }}</span>
+            }
+            @if (canWrite()) {
+              <button
+                mat-button
+                type="button"
+                (click)="removeBenefit(benefit)"
+                [disabled]="busy()"
+                [attr.aria-label]="
+                  'gestion.sponsors.detail.removeBenefitLabel' | translate: { label: benefit.label }
+                "
+              >
+                {{ 'gestion.sponsors.detail.removeBenefit' | translate }}
+              </button>
+            }
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="muted">{{ 'gestion.sponsors.detail.noBenefit' | translate }}</p>
+    }
+    @if (canWrite()) {
+      <form [formGroup]="benefitForm" (ngSubmit)="addBenefit()" class="grid-2">
+        <mat-form-field>
+          <mat-label>{{ 'gestion.sponsors.detail.benefitLabel' | translate }}</mat-label>
+          <input matInput formControlName="label" required maxlength="200" />
+        </mat-form-field>
+        <div class="actions">
+          <button mat-stroked-button type="submit" [disabled]="busy()">
+            {{ 'gestion.sponsors.detail.addBenefit' | translate }}
+          </button>
+        </div>
+      </form>
+    }
+  </section>
+
+  @if (canWrite()) {
+    <div class="actions">
+      <button mat-button type="button" (click)="remove()" [disabled]="busy()">
+        {{ 'gestion.sponsors.delete.confirm' | translate }}
+      </button>
+    </div>
+  }
+}

@@ -475,6 +475,8 @@ export type { ManageSponsorsBenefitsRemove$Params as ManageSponsorsBenefitsRemov
 export { manageSponsorsBenefitsRemove as manageSponsorsBenefitsRemove } from './fn/manage/manage-sponsors-benefits-remove';
 export type { ManageSponsorsBenefitsUpdate$Params as ManageSponsorsBenefitsUpdate$Params } from './fn/manage/manage-sponsors-benefits-update';
 export { manageSponsorsBenefitsUpdate as manageSponsorsBenefitsUpdate } from './fn/manage/manage-sponsors-benefits-update';
+export type { ManageSponsorsLogoContent$Params as ManageSponsorsLogoContent$Params } from './fn/manage/manage-sponsors-logo-content';
+export { manageSponsorsLogoContent as manageSponsorsLogoContent } from './fn/manage/manage-sponsors-logo-content';
 export type { ManageSponsorsLogoUpload$Params as ManageSponsorsLogoUpload$Params } from './fn/manage/manage-sponsors-logo-upload';
 export { manageSponsorsLogoUpload as manageSponsorsLogoUpload } from './fn/manage/manage-sponsors-logo-upload';
 export type { ManageSponsorsLogoRemove$Params as ManageSponsorsLogoRemove$Params } from './fn/manage/manage-sponsors-logo-remove';

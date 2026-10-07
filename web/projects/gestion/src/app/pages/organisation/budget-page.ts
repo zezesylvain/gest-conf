@@ -56,22 +56,6 @@ const KINDS: readonly BudgetKind[] = ['expense', 'income'];
   templateUrl: './budget-page.html',
   styleUrl: '../page.scss',
   styles: `
-    .figures {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
-      gap: 0.75rem;
-      margin: 0;
-    }
-    .figures div {
-      border: 1px solid var(--gc-border);
-      border-radius: 0.5rem;
-      padding: 0.75rem;
-    }
-    .figures dd {
-      margin: 0.25rem 0 0;
-      font-size: 1.2rem;
-      font-weight: 600;
-    }
     .amount {
       text-align: end;
       white-space: nowrap;
@@ -248,7 +232,8 @@ export class BudgetPage implements OnInit {
       this.budget.set(await action());
       this.status.set(this.translate.instant(message));
     } catch (error) {
-      this.errors.set(errorMessages(this.translate, error, this.form));
+      // Erreurs de champ du serveur au résumé : ce formulaire n'en affiche pas sous ses champs.
+      this.errors.set(errorMessages(this.translate, error));
     } finally {
       this.busy.set(false);
     }

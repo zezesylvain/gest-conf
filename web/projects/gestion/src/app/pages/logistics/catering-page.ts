@@ -246,7 +246,8 @@ export class CateringPage implements OnInit {
       this.meals.set(await action());
       this.status.set(this.translate.instant(message));
     } catch (error) {
-      this.errors.set(errorMessages(this.translate, error, this.form));
+      // Erreurs de champ du serveur au résumé : ce formulaire n'en affiche pas sous ses champs.
+      this.errors.set(errorMessages(this.translate, error));
     } finally {
       this.busy.set(false);
     }

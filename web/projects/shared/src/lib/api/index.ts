@@ -720,6 +720,7 @@ export * from './fn/manage/manage-sponsors-update';
 export * from './fn/manage/manage-sponsors-benefits-add';
 export * from './fn/manage/manage-sponsors-benefits-remove';
 export * from './fn/manage/manage-sponsors-benefits-update';
+export * from './fn/manage/manage-sponsors-logo-content';
 export * from './fn/manage/manage-sponsors-logo-upload';
 export * from './fn/manage/manage-sponsors-logo-remove';
 export * from './fn/manage/manage-sponsors-export';

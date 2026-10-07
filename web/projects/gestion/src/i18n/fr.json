@@ -34,7 +34,8 @@
         "dayof": "Jour J",
         "documents": "Attestations et lettres",
         "organisation": "Organisation",
-        "logistics": "Logistique"
+        "logistics": "Logistique",
+        "partners": "Partenaires"
       },
       "keywords": {
         "dashboard": "accueil, statut, publier, publication, archiver, état, résumé",
@@ -83,7 +84,9 @@
         "speakers": "venue, voyage, arrivée, départ, hôtel, hébergement, équipement",
         "catering": "repas, traiteur, déjeuner, pause café, régimes alimentaires, allergies",
         "volunteerShifts": "bénévoles, postes, affectation, planning des bénévoles",
-        "myShifts": "mes postes, mon planning, bénévolat, iCal"
+        "myShifts": "mes postes, mon planning, bénévolat, iCal",
+        "sponsors": "sponsors, mécènes, contribution, contreparties, logo",
+        "sponsorLevels": "or, argent, bronze, paliers, offre de partenariat"
       },
       "portalSections": "Sections",
       "portalPages": "Pages",
@@ -121,7 +124,9 @@
       "speakers": "Intervenants invités",
       "catering": "Restauration",
       "volunteerShifts": "Postes des bénévoles",
-      "myShifts": "Mon planning"
+      "myShifts": "Mon planning",
+      "sponsors": "Partenaires",
+      "sponsorLevels": "Niveaux de partenariat"
     },
     "status": {
       "draft": "brouillon",
@@ -1321,6 +1326,40 @@
           "intro": "Vos postes, avec leur lieu, leurs horaires à l'heure de la conférence et leurs consignes.",
           "calendarTitle": "Dans votre agenda",
           "calendarText": "Le fichier iCal s'importe dans votre agenda ; téléchargez-le de nouveau après un changement."
+        },
+        "sponsors": {
+          "title": "Partenaires",
+          "summary": "Les partenaires, leurs contributions et leurs contreparties.",
+          "path": "Partenaires › Partenaires",
+          "intro": "La liste réunit les partenaires de l'édition avec leur statut, leur contribution et l'avancement de leurs contreparties ; les totaux comptent les contributions convenues et reçues.",
+          "createTitle": "Créer",
+          "createBody": "Nom, niveau et statut suffisent ; la fiche s'ouvre ensuite pour le reste.",
+          "publicTitle": "Partie publique",
+          "publicBody": "Nom, niveau, site, présentations en français et en anglais, logo ; cochez « Publier sur le portail » pour qu'il figure sur la page « Partenaires ».",
+          "privateTitle": "Partie privée",
+          "privateBody": "Statut, contribution convenue et reçue, contact, note interne : jamais montrés au portail.",
+          "benefitsTitle": "Contreparties",
+          "benefitsBody": "Cochez une contrepartie quand elle est livrée ; ajoutez ou retirez-en une à une.",
+          "receivedTitle": "Contribution reçue",
+          "receivedText": "Ce statut exige le montant et la date ; le total reçu alimente la ligne « partenariats » du budget.",
+          "logoTitle": "Logo et portail",
+          "logoText": "Le logo est public dès que le partenaire l'est ; la page du portail change à la prochaine publication du portail.",
+          "exportTitle": "Export",
+          "exportText": "L'export contient les contacts : il demande de confirmer votre mot de passe et il est inscrit au journal."
+        },
+        "sponsor-levels": {
+          "title": "Niveaux de partenariat",
+          "summary": "Les paliers proposés aux partenaires.",
+          "path": "Partenaires › Niveaux de partenariat",
+          "intro": "Chaque niveau décrit une offre : son nom, un montant indicatif, ses contreparties et la taille du logo au portail.",
+          "names": "Noms en français et en anglais, affichés au portail.",
+          "amount": "Montant indicatif, dans la devise de l'édition.",
+          "benefits": "Contreparties, une par ligne.",
+          "size": "Taille du logo des partenaires de ce niveau sur la page du portail.",
+          "copyTitle": "Contreparties recopiées",
+          "copyText": "Attribuer un niveau à un partenaire ajoute à sa fiche les contreparties du niveau ; celles déjà présentes sont gardées.",
+          "deleteTitle": "Niveau attribué",
+          "deleteText": "Un niveau attribué à un partenaire ne se supprime pas : changez d'abord le niveau des partenaires concernés."
         }
       }
     },
@@ -3113,6 +3152,131 @@
       "loading": "Chargement de votre planning…",
       "calendar": "Télécharger mon planning (iCal)",
       "empty": "Aucun poste ne vous est encore confié."
+    },
+    "sponsors": {
+      "title": "Partenaires",
+      "lead": "Partenaires de l'édition : contributions, contreparties et présence au portail.",
+      "loading": "Chargement des partenaires…",
+      "totals": "En chiffres",
+      "agreed": "Contributions convenues",
+      "received": "Contributions reçues",
+      "exportHint": "L'export contient les contacts : il demande de confirmer votre mot de passe et il est inscrit au journal.",
+      "exportCsv": "Exporter (CSV)",
+      "exportXlsx": "Exporter (XLSX)",
+      "levelsLink": "Niveaux de partenariat",
+      "list": "Liste des partenaires",
+      "benefits": "Contreparties",
+      "benefitsCount": "{{delivered}} livrée(s) sur {{due}}",
+      "portal": "Portail",
+      "published": "Publié",
+      "unpublished": "Non publié",
+      "empty": "Aucun partenaire pour l'instant.",
+      "new": "Nouveau partenaire",
+      "noLevel": "Sans niveau",
+      "create": "Créer et ouvrir la fiche",
+      "errors": {
+        "name": "Le nom est obligatoire.",
+        "email": "Adresse e-mail invalide."
+      },
+      "fields": {
+        "name": "Nom",
+        "level": "Niveau",
+        "status": "Statut",
+        "agreedAmount": "Contribution convenue",
+        "receivedAmount": "Montant reçu",
+        "receivedOn": "Reçu le",
+        "website": "Site web",
+        "descriptionFr": "Présentation (français)",
+        "descriptionEn": "Présentation (anglais)",
+        "published": "Publier sur le portail",
+        "contactName": "Contact",
+        "contactEmail": "Adresse e-mail du contact",
+        "contactPhone": "Téléphone du contact",
+        "note": "Note interne"
+      },
+      "status": {
+        "prospect": "Prospect",
+        "agreed": "Accord conclu",
+        "received": "Contribution reçue",
+        "declined": "Refus"
+      },
+      "delete": {
+        "title": "Supprimer ce partenaire ?",
+        "message": "La fiche de « {{name}} », ses contreparties et son logo seront supprimés.",
+        "confirm": "Supprimer le partenaire"
+      },
+      "detail": {
+        "back": "Retour aux partenaires",
+        "title": "Fiche d'un partenaire",
+        "lead": "Partie publique, montrée au portail une fois publiée, et partie privée, réservée au comité.",
+        "publicPart": "Partie publique",
+        "publicHint": "Visible sur la page « Partenaires » du portail si le partenaire est publié, après la prochaine publication du portail.",
+        "levelHint": "Attribuer un niveau ajoute ses contreparties à la fiche.",
+        "privatePart": "Partie privée",
+        "receivedHint": "« Contribution reçue » exige un montant et une date.",
+        "save": "Enregistrer",
+        "saved": "Fiche enregistrée.",
+        "logo": "Logo",
+        "noLogo": "Aucun logo.",
+        "logoAlt": "Logo de {{name}}",
+        "logoHint": "PNG, JPEG ou WebP, 5 Mo au plus ; l'image est réduite à 600 pixels et ses métadonnées sont retirées.",
+        "logoUpload": "Déposer un logo",
+        "logoRemove": "Retirer le logo",
+        "logoTooLarge": "Le logo dépasse 5 Mo.",
+        "logoSaved": "Logo enregistré.",
+        "logoRemoved": "Logo retiré.",
+        "noBenefit": "Aucune contrepartie.",
+        "deliveredOn": "livrée le {{date}}",
+        "removeBenefit": "Retirer",
+        "removeBenefitLabel": "Retirer la contrepartie « {{label}} »",
+        "benefitLabel": "Nouvelle contrepartie",
+        "addBenefit": "Ajouter la contrepartie",
+        "benefitAdded": "Contrepartie ajoutée.",
+        "benefitUpdated": "Contrepartie mise à jour.",
+        "benefitRemoved": "Contrepartie retirée."
+      }
+    },
+    "sponsorLevels": {
+      "title": "Niveaux de partenariat",
+      "lead": "Les paliers proposés aux partenaires, avec leurs contreparties.",
+      "loading": "Chargement des niveaux…",
+      "back": "Retour aux partenaires",
+      "list": "Niveaux",
+      "sponsors": "Partenaires",
+      "actions": "Actions",
+      "edit": "Modifier",
+      "editLabel": "Modifier le niveau {{name}}",
+      "deleteLabel": "Supprimer le niveau {{name}}",
+      "empty": "Aucun niveau pour l'instant.",
+      "editTitle": "Modifier le niveau",
+      "newTitle": "Nouveau niveau",
+      "benefitsHint": "Une contrepartie par ligne.",
+      "save": "Enregistrer",
+      "add": "Ajouter le niveau",
+      "cancel": "Annuler",
+      "created": "Niveau ajouté.",
+      "updated": "Niveau modifié.",
+      "deleted": "Niveau supprimé.",
+      "fields": {
+        "name": "Nom",
+        "nameFr": "Nom (français)",
+        "nameEn": "Nom (anglais)",
+        "amount": "Montant indicatif",
+        "benefits": "Contreparties",
+        "benefitsFr": "Contreparties (français)",
+        "benefitsEn": "Contreparties (anglais)",
+        "logoSize": "Taille du logo"
+      },
+      "size": {
+        "small": "Petite",
+        "medium": "Moyenne",
+        "large": "Grande"
+      },
+      "delete": {
+        "title": "Supprimer ce niveau ?",
+        "message": "Le niveau « {{name}} » sera supprimé.",
+        "confirm": "Supprimer"
+      }
     }
   }
 }

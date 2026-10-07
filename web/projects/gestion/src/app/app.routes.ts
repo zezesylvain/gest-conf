@@ -239,6 +239,28 @@ export const routes: Routes = [
         canActivate: [capabilityGuard('volunteers.plan')],
         loadComponent: () => import('./pages/logistics/shifts-page').then((m) => m.ShiftsPage),
       },
+      // Partenaires (plan L8, N5) : liste, niveaux (déclarés avant la fiche, dont l'adresse
+      // prendrait sinon « niveaux » pour un identifiant), fiche.
+      {
+        path: 'partenaires',
+        title: 'gestion.sponsors.title',
+        canActivate: [capabilityGuard('sponsors.read')],
+        loadComponent: () => import('./pages/sponsors/sponsors-page').then((m) => m.SponsorsPage),
+      },
+      {
+        path: 'partenaires/niveaux',
+        title: 'gestion.sponsorLevels.title',
+        canActivate: [capabilityGuard('sponsors.read')],
+        loadComponent: () =>
+          import('./pages/sponsors/sponsor-levels-page').then((m) => m.SponsorLevelsPage),
+      },
+      {
+        path: 'partenaires/:sponsorId',
+        title: 'gestion.sponsors.detail.title',
+        canActivate: [capabilityGuard('sponsors.read')],
+        loadComponent: () =>
+          import('./pages/sponsors/sponsor-detail-page').then((m) => m.SponsorDetailPage),
+      },
       // Attestations, lettres d'invitation et signature (plan L7, K9 à K12, K18, K19).
       {
         path: 'attestations',

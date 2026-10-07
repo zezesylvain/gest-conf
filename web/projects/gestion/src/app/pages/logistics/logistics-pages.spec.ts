@@ -98,7 +98,7 @@ function shift(overrides: Partial<Shift> = {}): Shift {
 }
 
 function text(root: HTMLElement): string {
-  return (root.textContent ?? '').replace(/[  ]/g, ' ').replace(/\s+/g, ' ');
+  return (root.textContent ?? '').replace(/[\u00a0\u202f]/g, ' ').replace(/\s+/g, ' ');
 }
 
 function button(root: HTMLElement, label: string): HTMLButtonElement {

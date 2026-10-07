@@ -235,7 +235,8 @@ export class TaskDetailPage implements OnInit {
         this.errors.set([this.translate.instant('gestion.tasks.stale')]);
         await this.reload();
       } else {
-        this.errors.set(errorMessages(this.translate, error, this.form));
+        // Erreurs de champ du serveur au résumé : ce formulaire n'en affiche pas sous ses champs.
+        this.errors.set(errorMessages(this.translate, error));
       }
     } finally {
       this.busy.set(false);

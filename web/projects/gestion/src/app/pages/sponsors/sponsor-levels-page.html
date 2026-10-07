@@ -1,0 +1,144 @@
+<p>
+  <a [routerLink]="['/editions', editionId(), 'partenaires']">{{
+    'gestion.sponsorLevels.back' | translate
+  }}</a>
+</p>
+<gc-page-header
+  [heading]="'gestion.sponsorLevels.title' | translate"
+  [lead]="'gestion.sponsorLevels.lead' | translate"
+/>
+<div aria-live="polite">
+  @if (status()) {
+    <p class="notice" role="status">{{ status() }}</p>
+  }
+</div>
+<gc-error-summary [messages]="errors()" />
+
+@if (loading()) {
+  <p role="status">{{ 'gestion.sponsorLevels.loading' | translate }}</p>
+} @else {
+  <section class="card" aria-labelledby="levels-title">
+    <h2 id="levels-title">{{ 'gestion.sponsorLevels.list' | translate }}</h2>
+    @if (levels().length) {
+      <div class="table-wrap">
+        <table>
+          <caption class="visually-hidden">
+            {{
+              'gestion.sponsorLevels.list' | translate
+            }}
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">{{ 'gestion.sponsorLevels.fields.name' | translate }}</th>
+              <th scope="col" class="amount">
+                {{ 'gestion.sponsorLevels.fields.amount' | translate }}
+              </th>
+              <th scope="col">{{ 'gestion.sponsorLevels.fields.benefits' | translate }}</th>
+              <th scope="col">{{ 'gestion.sponsorLevels.fields.logoSize' | translate }}</th>
+              <th scope="col">{{ 'gestion.sponsorLevels.sponsors' | translate }}</th>
+              @if (canWrite()) {
+                <th scope="col">{{ 'gestion.sponsorLevels.actions' | translate }}</th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (level of levels(); track level.id) {
+              <tr>
+                <td>{{ name(level) }}</td>
+                <td class="amount">{{ amount(level.amount) }}</td>
+                <td class="lines">{{ benefits(level) || '—' }}</td>
+                <td>{{ 'gestion.sponsorLevels.size.' + level.logo_size | translate }}</td>
+                <td>{{ level.sponsor_count }}</td>
+                @if (canWrite()) {
+                  <td>
+                    <button
+                      mat-button
+                      type="button"
+                      (click)="edit(level)"
+                      [attr.aria-label]="
+                        'gestion.sponsorLevels.editLabel' | translate: { name: name(level) }
+                      "
+                    >
+                      {{ 'gestion.sponsorLevels.edit' | translate }}
+                    </button>
+                    @if (!level.sponsor_count) {
+                      <button
+                        mat-button
+                        type="button"
+                        (click)="remove(level)"
+                        [disabled]="busy()"
+                        [attr.aria-label]="
+                          'gestion.sponsorLevels.deleteLabel' | translate: { name: name(level) }
+                        "
+                      >
+                        {{ 'gestion.sponsorLevels.delete.confirm' | translate }}
+                      </button>
+                    }
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <p class="muted">{{ 'gestion.sponsorLevels.empty' | translate }}</p>
+    }
+  </section>
+
+  @if (canWrite()) {
+    <section class="card" aria-labelledby="level-form-title">
+      <h2 id="level-form-title">
+        {{
+          (editing() ? 'gestion.sponsorLevels.editTitle' : 'gestion.sponsorLevels.newTitle')
+            | translate
+        }}
+      </h2>
+      <form [formGroup]="form" (ngSubmit)="submit()" class="grid-2">
+        <mat-form-field>
+          <mat-label>{{ 'gestion.sponsorLevels.fields.nameFr' | translate }}</mat-label>
+          <input matInput formControlName="name_fr" required maxlength="100" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>{{ 'gestion.sponsorLevels.fields.nameEn' | translate }}</mat-label>
+          <input matInput formControlName="name_en" maxlength="100" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>{{ 'gestion.sponsorLevels.fields.amount' | translate }}</mat-label>
+          <input matInput formControlName="amount" inputmode="decimal" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>{{ 'gestion.sponsorLevels.fields.logoSize' | translate }}</mat-label>
+          <mat-select formControlName="logo_size">
+            @for (size of sizes; track size) {
+              <mat-option [value]="size">{{
+                'gestion.sponsorLevels.size.' + size | translate
+              }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field class="wide">
+          <mat-label>{{ 'gestion.sponsorLevels.fields.benefitsFr' | translate }}</mat-label>
+          <textarea matInput formControlName="benefits_fr" rows="4" maxlength="2000"></textarea>
+          <mat-hint>{{ 'gestion.sponsorLevels.benefitsHint' | translate }}</mat-hint>
+        </mat-form-field>
+        <mat-form-field class="wide">
+          <mat-label>{{ 'gestion.sponsorLevels.fields.benefitsEn' | translate }}</mat-label>
+          <textarea matInput formControlName="benefits_en" rows="4" maxlength="2000"></textarea>
+        </mat-form-field>
+        <div class="actions">
+          <button mat-flat-button type="submit" [disabled]="busy()">
+            {{
+              (editing() ? 'gestion.sponsorLevels.save' : 'gestion.sponsorLevels.add') | translate
+            }}
+          </button>
+          @if (editing()) {
+            <button mat-stroked-button type="button" (click)="cancelEdit()">
+              {{ 'gestion.sponsorLevels.cancel' | translate }}
+            </button>
+          }
+        </div>
+      </form>
+    </section>
+  }
+}

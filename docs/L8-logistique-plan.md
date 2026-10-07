@@ -978,3 +978,38 @@ schéma et client régénérés.
 exports, ajout et suppression d'un repas, postes, chevauchement, création, « Mon planning »),
 1 de navigation ; tests du front (gestion, shared, portail), lint, format, build de la
 gestion ; schéma validé.
+
+### L8.8c — Partenaires
+
+- rubrique **« Partenaires »** (après « Logistique ») : « Partenaires » et « Niveaux de
+  partenariat » (`sponsors.read`) ; écriture `sponsors.write` (CO « relations extérieures »,
+  administrateur) ; `ROLE_GROUPS` l'ouvre à l'administrateur, au Chair et au CO ;
+- **liste** : contributions convenues et reçues, effectifs par statut, niveau, contreparties
+  livrées, publication ; export CSV ou XLSX (contacts compris : réauthentification et
+  journal) ; création d'une fiche (nom, niveau, statut hors « contribution reçue », qui exige
+  montant et date), puis ouverture de la fiche ;
+- **fiche** : partie publique et partie privée, logo (PNG, JPEG, WebP, 5 Mo), contreparties
+  cochées à leur livraison (date du jour), ajoutées ou retirées, suppression ;
+- **niveaux** : montant indicatif dans la devise de l'édition, contreparties une par ligne,
+  taille du logo ; un niveau attribué n'offre pas de suppression (le serveur la refuse) ;
+- deux fiches d'aide (`sponsors`, `sponsor-levels`).
+
+**Défaut évité, précision de N5** : l'adresse publique d'un logo ne le sert qu'une fois le
+partenaire publié, et pour l'édition publique courante seulement ; la fiche aurait montré une
+image cassée. Nouvel **aperçu authentifié** `GET …/sponsors/{id}/logo` (`sponsors.read`,
+`private, no-store`, `nosniff`), annoncé par `preview_url` dans la réponse de gestion, comme
+l'aperçu des fichiers du portail (L2). La réponse publique ne change pas.
+
+**Défaut corrigé, écrans du lot** : les formulaires de L8 (tâches, budget, venues, repas,
+postes, partenaires, niveaux) posaient les erreurs de champ du serveur sur des champs qui ne
+les affichent pas ; elles vont désormais au résumé d'erreurs, en tête de page. Les styles
+`.figures` (chiffres clés) passent dans `page.scss`, partagés.
+
+**Défaut corrigé, lint** : deux tests du front contenaient des espaces insécables littéraux
+(règle `no-irregular-whitespace`) ; échappés. Le contrôle avant envoi lit désormais toute la
+sortie du lint, pas ses dernières lignes, qui ne montraient que le dernier projet.
+
+**Tests** : 9 tests de pages (liste, création, fiche et refus du serveur, contreparties, logo,
+suppression, lecture seule, niveaux), 1 de navigation ; `sponsors` : aperçu du logo publié ou
+non, refusé sans `sponsors.read` ; matrice des droits : lecture du logo ; schéma et client
+régénérés.
