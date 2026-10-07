@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import io
+from datetime import timedelta
 
 import pytest
 from django.utils import timezone
@@ -93,12 +94,15 @@ def test_rg16_participation_requires_confirmed_registration_and_presence(edition
     confirmed(edition)  # confirmée, jamais pointée
     from apps.program.models import Session
 
+    # Fin strictement après le début (contrainte `prog_session_order`) : deux appels à
+    # `timezone.now()` peuvent tomber dans la même microseconde.
+    starts_at = timezone.now()
     session = Session.objects.create(
         edition=edition,
         kind="parallel",
         title_fr="Atelier",
-        starts_at=timezone.now(),
-        ends_at=timezone.now(),
+        starts_at=starts_at,
+        ends_at=starts_at + timedelta(hours=1),
     )
     in_session = present(edition, session=session)
     cancelled = present(edition)
