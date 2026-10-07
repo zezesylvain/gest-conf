@@ -62,6 +62,7 @@ Chaque app Django : `models.py`, `services.py` (logique métier ; paquet `servic
 - **Python** : `ruff` (lint + format), typage des signatures publiques des services, `Decimal` pour tout montant et tout score, dates stockées en UTC ; affichage converti dans le fuseau de l'édition côté interface, mais **saisie** des échéances en heure locale de l'édition, convertie côté serveur (décision D13).
 - **Django** : requêtes optimisées (`select_related` / `prefetch_related`, pas de N+1), migrations rétro-compatibles (ajout puis suppression en deux temps), FK `ON DELETE RESTRICT` par défaut, suppression logique ou anonymisation pour les données personnelles. Numérotation (références, factures) via compteur verrouillé en transaction.
 - **DRF** : erreurs normalisées `{code, message, fields}`, pagination/filtre/tri uniformes (`django-filter`), throttling sur auth, inscription, contact, vérification d'attestation.
+- **Vues de fichier** (exports, PDF, iCal, images) : réponse binaire déclarée au schéma ; le client généré envoie ce type en `Accept`, que la négociation (`apps/core/negotiation.py`, liste fermée) doit accepter, sinon 406 avant la vue : tout nouveau type s'y ajoute (méta-test du schéma). Tester l'export avec cet en-tête, pas seulement sans.
 - **Angular** : composants autonomes, lazy loading par route, formulaires réactifs typés, état local en signaux, client API **généré** (ne pas l'éditer à la main), accessibilité WCAG 2.1 AA.
 - **Portail** : pré-rendu statique (SSG), pas de SSR ; budget de bundle surveillé.
 
@@ -103,7 +104,7 @@ Les URL Django sont déclarées **sans** le préfixe `/api` (`v1/...`) : `config
 - Python via cPanel « Setup Python App » (Passenger/WSGI) ; application **hors racine du domaine** ; URL de l'app = `/api`. Les règles de repli SPA du `.htaccess` ne doivent ni écraser le bloc Passenger ni intercepter `/api/`.
 - Déploiement : build Angular en CI → rsync/SSH vers `public_html/` et `public_html/gestion/` → `pip install` → `migrate` → redémarrage Passenger (`tmp/restart.txt`) → tests de fumée.
 - **Non vérifié, à confirmer avant de s'appuyer dessus** : version de MariaDB, fréquence minimale du cron, limites de ressources, sous-domaines autorisés, antivirus, compilation de `mysqlclient` (`PyMySQL` est le pilote retenu). Ne pas affirmer ces points sans vérification. Aucune ligne de la fiche [`docs/L1-verifications-o2switch.md`](docs/L1-verifications-o2switch.md) n'est encore remplie : elle se remplit avec `deploy/check-o2switch.sh` (lecture seule, en SSH) et les contrôles manuels qu'elle décrit.
-- Sauvegarde quotidienne base + fichiers, copie hors hébergement, restauration testée.
+- Sauvegarde quotidienne base + fichiers, copie hors hébergement, restauration testée : **rien de cela n'existe encore** (ni `backup_db`, ni script de restauration, ni sauvegarde avant `migrate` dans `deploy.sh`) ; prévu au plan L9 (S2, S3). Aucune donnée réelle avant une restauration testée (D18).
 
 ## Méthode de travail attendue
 
@@ -121,9 +122,9 @@ Les URL Django sont déclarées **sans** le préfixe `/api` (`v1/...`) : `config
 | L0 à L4 (MVP : squelette, socle, portail, soumission, évaluation et décision) | Livrés en code, testés en local et en CI ; bilans dans `docs/`. **Aucune démo sur o2switch** encore faite |
 | L5 — Programme | **Livré en code, testé en local et en CI** (L5.0 à L5.7, E2E compris ; PR #8 et #9, fusionnées) ; bilan [`docs/L5-programme.md`](docs/L5-programme.md). Ouverts : Q14, `ACCEPTED_MINOR → WITHDRAWN`, seuil d'avertissement du bundle du portail |
 | L6 — Inscriptions et paiements | **Livré en code et testé en local** (L6.0 à L6.7, E2E compris) ; bilan [`docs/L6-inscriptions.md`](docs/L6-inscriptions.md). Fusionné dans `main` (PR #12). Ouverts : Q7 (tarifs ; carte bancaire absente de l'API v1 de CinetPay), Q8 (entité de facturation, conservation, format du numéro), J15 reportée |
-| L7 — Jour J et attestations | **Livré en code et testé en local** (L7.0 à L7.8, E2E compris) ; bilan [`docs/L7-jour-j.md`](docs/L7-jour-j.md). L7.0 à L7.7 fusionnés dans `main` (PR #12) ; L7.8 et le correctif du test RG-16 dans la PR #13. Ouverts : Q17 (prestataire de signature qualifiée), nom complet du pays sur les badges, démo H sur téléphones réels |
-| L8 — Logistique, partenaires, communication et reporting | **Livré en code et testé en local** (L8.0 à L8.10, E2E compris) ; bilan [`docs/L8-logistique.md`](docs/L8-logistique.md). Passage en CI : PR #13. Ouverts : questions du §10 du plan (hypothèses retenues), plafond d'e-mails réel sur o2switch, en-tête `List-Unsubscribe` |
-| L9 — Recette, sécurité, charge | **Plan proposé, à valider** : [`docs/L9-recette-plan.md`](docs/L9-recette-plan.md) (S1 à S16, questions du §10) |
+| L7 — Jour J et attestations | **Livré en code et testé en local** (L7.0 à L7.8, E2E compris) ; bilan [`docs/L7-jour-j.md`](docs/L7-jour-j.md). L7.0 à L7.7 fusionnés dans `main` (PR #12) ; L7.8 et le correctif du test RG-16 dans la PR #13 (CI verte, en attente de fusion). Ouverts : Q17 (prestataire de signature qualifiée), nom complet du pays sur les badges, démo H sur téléphones réels |
+| L8 — Logistique, partenaires, communication et reporting | **Livré en code, testé en local et en CI** (L8.0 à L8.10, E2E compris ; PR #13, CI verte sur `87cf3a7`, en attente de fusion) ; bilan [`docs/L8-logistique.md`](docs/L8-logistique.md). Ouverts : questions du §10 du plan (hypothèses retenues), plafond d'e-mails réel sur o2switch, en-tête `List-Unsubscribe` |
+| L9 — Recette, sécurité, charge | **Plan proposé, à valider** : [`docs/L9-recette-plan.md`](docs/L9-recette-plan.md) (S1 à S16, questions du §10). Deux volets : outils et tests dans le dépôt, puis runbook exécuté sur o2switch par un opérateur du commanditaire (cette session n'a pas accès à l'hébergement) ; ne pas commencer L9.0 avant la validation |
 | L10 et suivants | Non commencés |
 
 ## Décisions du lot L1
