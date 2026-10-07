@@ -36,7 +36,8 @@
         "organisation": "Organisation",
         "logistics": "Logistique",
         "partners": "Partenaires",
-        "communication": "Communication"
+        "communication": "Communication",
+        "reports": "Rapports"
       },
       "keywords": {
         "dashboard": "accueil, statut, publier, publication, archiver, état, résumé",
@@ -89,7 +90,8 @@
         "sponsors": "sponsors, mécènes, contribution, contreparties, logo",
         "sponsorLevels": "or, argent, bronze, paliers, offre de partenariat",
         "announcements": "actualités, bandeau, envoi groupé, e-mailing, segment, cloche",
-        "surveys": "satisfaction, enquête, sondage, avis des participants"
+        "surveys": "satisfaction, enquête, sondage, avis des participants",
+        "reports": "indicateurs, statistiques, bilan chiffré, graphiques, export PDF"
       },
       "portalSections": "Sections",
       "portalPages": "Pages",
@@ -131,7 +133,8 @@
       "sponsors": "Partenaires",
       "sponsorLevels": "Niveaux de partenariat",
       "announcements": "Annonces",
-      "surveys": "Questionnaires"
+      "surveys": "Questionnaires",
+      "reports": "Rapports"
     },
     "status": {
       "draft": "brouillon",
@@ -253,6 +256,16 @@
         "title": "Jour J et attestations",
         "certificates": "{{count}} attestation(s) émise(s).",
         "letters": "{{count}} demande(s) de lettre d'invitation à instruire."
+      },
+      "organisation": {
+        "title": "Organisation",
+        "tasks": "{{count}} tâche(s) à faire ou en cours pour moi",
+        "overdue": "dont {{count}} en retard",
+        "budget": "Solde prévu {{planned}}, réalisé {{actual}}",
+        "sponsors": "Partenariats : {{received}} reçus sur {{agreed}} convenus",
+        "visits": "{{count}} venue(s) d'intervenant à organiser",
+        "equipment": "{{count}} avec un équipement manquant en salle",
+        "places": "{{count}} place(s) de bénévole à pourvoir"
       }
     },
     "fields": {
@@ -1407,6 +1420,19 @@
           "lockedText": "Dès la première réponse, les questions ne changent plus : dupliquez le questionnaire pour en préparer une autre version.",
           "reminderTitle": "Relance",
           "reminderText": "Une seule relance part à mi-chemin entre l'ouverture et la clôture, aux personnes qui n'ont pas répondu."
+        },
+        "reports": {
+          "title": "Rapports",
+          "summary": "Les indicateurs de l'édition et leurs exports.",
+          "path": "Rapports",
+          "intro": "Le rapport réunit, section par section, les chiffres de l'édition : soumissions, relecture, inscriptions, recettes, présence, satisfaction, budget, partenaires.",
+          "sections": "Sections : seules celles de votre rôle s'affichent (la relecture pour le comité scientifique, les recettes pour les finances…).",
+          "charts": "Graphiques : des barres doublent les tableaux, dont les nombres restent lisibles.",
+          "exports": "Exports : CSV, XLSX (une feuille par tableau) ou PDF de synthèse ; chaque export est inscrit au journal.",
+          "aggregatesTitle": "Chiffres agrégés",
+          "aggregatesText": "Aucun nom ni aucune adresse : des décomptes, des taux, des moyennes et des montants seulement.",
+          "thresholdTitle": "Satisfaction",
+          "thresholdText": "Les notes ne s'affichent qu'à partir de 5 réponses, pour qu'aucune réponse ne soit reconnaissable."
         }
       }
     },
@@ -3523,6 +3549,19 @@
         "exportCsv": "Exporter (CSV)",
         "exportXlsx": "Exporter (XLSX)"
       }
+    },
+    "reports": {
+      "title": "Rapports",
+      "lead": "Indicateurs de l'édition, en chiffres agrégés, avec leurs exports.",
+      "loading": "Chargement des rapports…",
+      "sections": "Sections du rapport",
+      "aggregates": "Chiffres agrégés : aucun nom ni aucune adresse.",
+      "chart": "Graphique",
+      "emptyTable": "Aucune donnée.",
+      "none": "Aucune section de rapport n'est ouverte à votre rôle.",
+      "exportCsv": "Exporter (CSV)",
+      "exportXlsx": "Exporter (XLSX)",
+      "exportPdf": "Exporter (PDF)"
     }
   }
 }

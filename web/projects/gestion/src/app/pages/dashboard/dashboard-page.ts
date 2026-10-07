@@ -11,6 +11,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { RouterLink } from '@angular/router';
 import {
+  Budget,
   CertificateOverview,
   CheckinSummary,
   ConfirmDialog,
@@ -27,6 +28,7 @@ import {
   PageHeader,
   ProgramBoard,
   ReviewProgress,
+  SponsorTotals,
   SubmissionStats,
   SubmissionStatus,
 } from '@gestconf/shared';
@@ -35,11 +37,14 @@ import { firstValueFrom } from 'rxjs';
 
 import { EditionApi } from '../../core/edition-api';
 import { EventsApi } from '../../core/events-api';
+import { LogisticsApi } from '../../core/logistics-api';
 import { editionTitle } from '../../core/managed-editions';
+import { OrganisationApi } from '../../core/organisation-api';
 import { editionCapabilities, errorMessages } from '../../core/page-support';
 import { ProgramApi } from '../../core/program-api';
 import { money, RegistrationsApi } from '../../core/registrations-api';
 import { ReviewsApi } from '../../core/reviews-api';
+import { SponsorsApi } from '../../core/sponsors-api';
 import { SubmissionsApi } from '../../core/submissions-api';
 
 interface CheckItem {
@@ -56,7 +61,9 @@ interface CheckItem {
  * (plan L5 : à programmer, conflits, modifications non publiées) ; inscriptions avec
  * `registrations.read` et finances avec `finance.read` (plan L6, J12) ; jour J avec
  * `checkin.scan`, attestations avec `certificates.manage`, lettres à instruire avec
- * `letters.manage` (plan L7, K15). La liste de contrôle est
+ * `letters.manage` (plan L7, K15) ; organisation du CO (plan L8, N16) : mes tâches,
+ * budget, partenaires, venues à organiser, postes à pourvoir, chacun selon sa capacité.
+ * La liste de contrôle est
  * indicative : le serveur revérifie les préconditions à la publication (`edition_incomplete`).
  */
 @Component({
@@ -75,6 +82,9 @@ export class DashboardPage implements OnInit {
   private readonly programApi = inject(ProgramApi);
   private readonly registrationsApi = inject(RegistrationsApi);
   private readonly eventsApi = inject(EventsApi);
+  private readonly organisationApi = inject(OrganisationApi);
+  private readonly sponsorsApi = inject(SponsorsApi);
+  private readonly logisticsApi = inject(LogisticsApi);
   private readonly meStore = inject(MeStore);
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
@@ -94,6 +104,20 @@ export class DashboardPage implements OnInit {
   protected readonly checkin = signal<CheckinSummary | null>(null);
   protected readonly certificates = signal<CertificateOverview[] | null>(null);
   protected readonly lettersToReview = signal<number | null>(null);
+  /** Organisation du CO (plan L8) : chaque indicateur reste nul sans sa capacité. */
+  protected readonly myTasks = signal<{ open: number; overdue: number } | null>(null);
+  protected readonly budget = signal<Budget | null>(null);
+  protected readonly sponsorTotals = signal<SponsorTotals | null>(null);
+  protected readonly visits = signal<{ toArrange: number; missing: number } | null>(null);
+  protected readonly placesToFill = signal<number | null>(null);
+  protected readonly hasOrganisation = computed(
+    () =>
+      this.myTasks() !== null ||
+      this.budget() !== null ||
+      this.sponsorTotals() !== null ||
+      this.visits() !== null ||
+      this.placesToFill() !== null,
+  );
   protected readonly certificatesIssued = computed(() =>
     (this.certificates() ?? []).reduce((sum, row) => sum + row.issued, 0),
   );
@@ -168,6 +192,34 @@ export class DashboardPage implements OnInit {
       this.errors.set(errorMessages(this.translate, error));
     } finally {
       this.busy.set(false);
+    }
+  }
+
+  private async loadOrganisation(id: number): Promise<void> {
+    if (this.can('tasks.read')) {
+      const tasks = await this.organisationApi.tasks(id, { mine: true });
+      const open = tasks.filter((task) => task.status !== 'done');
+      this.myTasks.set({
+        open: open.length,
+        overdue: open.filter((task) => task.overdue).length,
+      });
+    }
+    if (this.can('budget.read')) {
+      this.budget.set(await this.organisationApi.budget(id));
+    }
+    if (this.can('sponsors.read')) {
+      this.sponsorTotals.set((await this.sponsorsApi.sponsors(id)).totals);
+    }
+    if (this.can('logistics.read')) {
+      const visits = await this.logisticsApi.visits(id);
+      this.visits.set({
+        toArrange: visits.filter((visit) => visit.status === 'to_arrange').length,
+        missing: visits.filter((visit) => visit.missing_equipment.length > 0).length,
+      });
+    }
+    if (this.can('volunteers.plan')) {
+      const board = await this.logisticsApi.shifts(id);
+      this.placesToFill.set(board.shifts.reduce((sum, shift) => sum + shift.missing, 0));
     }
   }
 
@@ -250,6 +302,7 @@ export class DashboardPage implements OnInit {
         const letters = await this.eventsApi.letters(id, { status: 'requested', page_size: 1 });
         this.lettersToReview.set(letters.count);
       }
+      await this.loadOrganisation(id);
     } catch (error) {
       this.errors.set(errorMessages(this.translate, error));
     }

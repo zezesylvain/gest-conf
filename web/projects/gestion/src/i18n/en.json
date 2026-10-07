@@ -36,7 +36,8 @@
         "organisation": "Organisation",
         "logistics": "Logistics",
         "partners": "Partners",
-        "communication": "Communication"
+        "communication": "Communication",
+        "reports": "Reports"
       },
       "keywords": {
         "dashboard": "home, status, publish, publication, archive, state, summary",
@@ -89,7 +90,8 @@
         "sponsors": "sponsors, patrons, contribution, benefits, logo",
         "sponsorLevels": "gold, silver, bronze, tiers, partnership offer",
         "announcements": "news, banner, bulk email, mailing, segment, bell",
-        "surveys": "satisfaction, feedback, poll, participant opinion"
+        "surveys": "satisfaction, feedback, poll, participant opinion",
+        "reports": "indicators, statistics, figures, charts, PDF export"
       },
       "portalSections": "Sections",
       "portalPages": "Pages",
@@ -131,7 +133,8 @@
       "sponsors": "Partners",
       "sponsorLevels": "Partnership levels",
       "announcements": "Announcements",
-      "surveys": "Surveys"
+      "surveys": "Surveys",
+      "reports": "Reports"
     },
     "status": {
       "draft": "draft",
@@ -253,6 +256,16 @@
         "title": "Event day and certificates",
         "certificates": "{{count}} certificate(s) issued.",
         "letters": "{{count}} invitation letter request(s) to review."
+      },
+      "organisation": {
+        "title": "Organisation",
+        "tasks": "{{count}} task(s) to do or in progress for me",
+        "overdue": "including {{count}} overdue",
+        "budget": "Planned balance {{planned}}, actual {{actual}}",
+        "sponsors": "Partnerships: {{received}} received out of {{agreed}} agreed",
+        "visits": "{{count}} speaker visit(s) to arrange",
+        "equipment": "{{count}} with equipment missing in the room",
+        "places": "{{count}} volunteer place(s) to fill"
       }
     },
     "fields": {
@@ -1407,6 +1420,19 @@
           "lockedText": "From the first response, the questions no longer change: duplicate the survey to prepare another version.",
           "reminderTitle": "Reminder",
           "reminderText": "A single reminder goes out halfway between opening and closing, to the people who have not answered."
+        },
+        "reports": {
+          "title": "Reports",
+          "summary": "The edition's indicators and their exports.",
+          "path": "Reports",
+          "intro": "The report brings together, section by section, the edition's figures: submissions, reviewing, registrations, revenue, attendance, satisfaction, budget, partners.",
+          "sections": "Sections: only those of your role are shown (reviewing for the scientific committee, revenue for finance…).",
+          "charts": "Charts: bars double the tables, whose numbers remain readable.",
+          "exports": "Exports: CSV, XLSX (one sheet per table) or summary PDF; each export is logged.",
+          "aggregatesTitle": "Aggregated figures",
+          "aggregatesText": "No name and no address: counts, rates, averages and amounts only.",
+          "thresholdTitle": "Satisfaction",
+          "thresholdText": "Ratings are shown only from 5 responses, so that no answer can be recognised."
         }
       }
     },
@@ -3523,6 +3549,19 @@
         "exportCsv": "Export (CSV)",
         "exportXlsx": "Export (XLSX)"
       }
+    },
+    "reports": {
+      "title": "Reports",
+      "lead": "The edition's indicators, as aggregated figures, with their exports.",
+      "loading": "Loading reports…",
+      "sections": "Report sections",
+      "aggregates": "Aggregated figures: no name and no address.",
+      "chart": "Chart",
+      "emptyTable": "No data.",
+      "none": "No report section is open to your role.",
+      "exportCsv": "Export (CSV)",
+      "exportXlsx": "Export (XLSX)",
+      "exportPdf": "Export (PDF)"
     }
   }
 }

@@ -63,7 +63,7 @@ function items(capabilities: string[], role: Parameters<typeof buildNavigation>[
 }
 
 describe('Table de navigation de la gestion (plan L2 §2.3)', () => {
-  it('président : douze catégories, ordre du rail numéroté', () => {
+  it('président : treize catégories, ordre du rail numéroté', () => {
     const groups = buildNavigation(3, CHAIR);
     expect(groups.map((group) => group.key)).toEqual([
       'steering',
@@ -71,6 +71,8 @@ describe('Table de navigation de la gestion (plan L2 §2.3)', () => {
       'reviewing',
       'program',
       'registrations',
+      // Rapports (plan L8, N13) : la lecture de l'édition ouvre l'écran.
+      'reports',
       'dayof',
       'documents',
       'settings',
@@ -89,6 +91,7 @@ describe('Table de navigation de la gestion (plan L2 §2.3)', () => {
     const groups = buildNavigation(3, ['edition.read', 'members.read', 'members.manage']);
     expect(catalogue(groups).map((entry) => entry.key)).toEqual([
       'dashboard',
+      'reports',
       'general',
       'tracks',
       'types',
@@ -128,6 +131,7 @@ describe('Table de navigation de la gestion (plan L2 §2.3)', () => {
       'submissions',
       'reviewing',
       'program',
+      'reports',
       'settings',
       'committees',
       'help',

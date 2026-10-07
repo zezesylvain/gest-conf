@@ -19,6 +19,7 @@ export type NavGroupKey =
   | 'logistics'
   | 'partners'
   | 'communication'
+  | 'reports'
   | 'dayof'
   | 'documents'
   | 'settings'
@@ -83,6 +84,7 @@ export const GROUP_ORDER: readonly NavGroupKey[] = [
   'logistics',
   'partners',
   'communication',
+  'reports',
   'dayof',
   'documents',
   'settings',
@@ -294,6 +296,15 @@ export const SCREENS: readonly ScreenDef[] = [
     help: 'surveys',
     group: 'communication',
     capability: 'surveys.manage',
+  },
+  // Rapports (plan L8, N13) : sections filtrées par le serveur selon les capacités.
+  {
+    key: 'reports',
+    path: 'rapports',
+    label: 'gestion.nav.reports',
+    help: 'reports',
+    group: 'reports',
+    capability: 'edition.read',
   },
   // Jour J (plan L7, K15) : accueil (PWA), sessions du jour, présences, badges, comptoir.
   {
@@ -540,6 +551,7 @@ export const ROLE_GROUPS: Partial<Record<Role, readonly NavGroupKey[]>> = {
     'logistics',
     'partners',
     'communication',
+    'reports',
     'dayof',
     'documents',
     'settings',
@@ -557,6 +569,7 @@ export const ROLE_GROUPS: Partial<Record<Role, readonly NavGroupKey[]>> = {
     'logistics',
     'partners',
     'communication',
+    'reports',
     'dayof',
     'documents',
     'settings',
@@ -565,7 +578,16 @@ export const ROLE_GROUPS: Partial<Record<Role, readonly NavGroupKey[]>> = {
     'control',
   ],
   // Paramétrage pour les grilles d'évaluation (plan L4, H3) ; programme en lecture (L5, I1).
-  SC_CHAIR: ['steering', 'submissions', 'reviewing', 'program', 'settings', 'committees'],
+  // Rapports (plan L8, N13) : soumissions et relecture, sections de ses capacités.
+  SC_CHAIR: [
+    'steering',
+    'submissions',
+    'reviewing',
+    'program',
+    'reports',
+    'settings',
+    'committees',
+  ],
   // Comités : le CO « bénévoles » recrute les bénévoles (plan L7, K1).
   OC_MEMBER: [
     'steering',
@@ -576,6 +598,7 @@ export const ROLE_GROUPS: Partial<Record<Role, readonly NavGroupKey[]>> = {
     'logistics',
     'partners',
     'communication',
+    'reports',
     'dayof',
     'documents',
     'settings',

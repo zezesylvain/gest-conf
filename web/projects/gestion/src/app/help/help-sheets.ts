@@ -442,6 +442,12 @@ export const HELP_SHEETS: readonly HelpSheet[] = [
     callout('info', k, 'pace'),
     callout('tip', k, 'unsubscribe'),
   ]),
+  sheet('reports', ALL, (k) => [
+    text(k('intro')),
+    list(k('sections'), k('charts'), k('exports')),
+    callout('info', k, 'aggregates'),
+    callout('tip', k, 'threshold'),
+  ]),
   sheet('surveys', COMMUNICATORS, (k) => [
     text(k('intro')),
     steps(k, 'create', 'questions', 'publish', 'results'),

@@ -926,7 +926,7 @@ une constante de module.
 - `ruff`, `locale/check.sh`, schéma validé sous MariaDB, client TypeScript régénéré,
   vérification des types et tests du front.
 
-## 19. Bilan de L8.8 (7 octobre 2026, en cours)
+## 19. Bilan de L8.8 (7 octobre 2026)
 
 L'étape est découpée en sous-étapes committées une à une : L8.8a « Organisation »,
 L8.8b « Logistique », L8.8c « Partenaires », L8.8d « Communication », L8.8e « Rapports » et
@@ -1041,3 +1041,31 @@ régénérés.
 champs figés, fenêtre du bandeau et annulation de l'envoi, saisie des choix, création d'un
 questionnaire de session, question ajoutée et publication, questionnaire verrouillé avec
 résultats et export), 1 de navigation.
+
+### L8.8e — Rapports et tableau de bord
+
+- rubrique **« Rapports »** (après « Communication ») : un écran ouvert par la lecture de
+  l'édition, dont les sections sont celles que le serveur ouvre au compte (chacune
+  revérifiée contre sa capacité) ; `ROLE_GROUPS` l'ouvre aussi au président du CS
+  (soumissions et relecture) ;
+- chaque tableau est **doublé d'un graphique** sans bibliothèque : barres CSS sur la
+  première colonne entièrement numérique (aucune pour un tableau d'une ligne), masquées
+  aux lecteurs d'écran, les nombres restant dans les cellules ; changement de section par
+  boutons (`aria-pressed`), annoncé (`aria-live`) ; exports CSV, XLSX et PDF ;
+- **tableau de bord** : carte « Organisation » (mes tâches ouvertes et en retard, soldes
+  prévu et réalisé, partenariats reçus sur convenus, venues à organiser et équipement
+  manquant, places de bénévole à pourvoir), chaque ligne selon sa capacité et menant à
+  son écran ;
+- une fiche d'aide (`reports`).
+
+**Report** : les textes de la **cloche** pour `task_assigned`, `shift_assigned`,
+`shift_removed`, `announcement` et `survey_invitation` rejoignent L8.9, la cloche n'étant
+affichée que dans le compte du portail.
+
+**Tests** : 5 tests (barres, sections et export, aucune section, section refusée, carte
+« Organisation » du tableau de bord) ; tests du rail mis à jour (catégorie « Rapports »).
+
+**Bilan de l'étape** : cinq sous-étapes poussées une à une ; 14 écrans nouveaux dans la
+gestion, chacun inscrit dans `core/navigation.ts` avec sa fiche d'aide ; un point
+d'API ajouté (aperçu authentifié du logo) ; tests du front de la gestion : 263.
+

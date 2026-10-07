@@ -1,0 +1,93 @@
+<gc-page-header
+  [heading]="'gestion.reports.title' | translate"
+  [lead]="'gestion.reports.lead' | translate"
+/>
+<gc-error-summary [messages]="errors()" />
+
+@if (loading()) {
+  <p role="status">{{ 'gestion.reports.loading' | translate }}</p>
+} @else if (sections().length) {
+  <nav class="sections" [attr.aria-label]="'gestion.reports.sections' | translate">
+    @for (section of sections(); track section.code) {
+      <button
+        mat-stroked-button
+        type="button"
+        [attr.aria-pressed]="section.code === selected()"
+        [disabled]="busy()"
+        (click)="select(section.code)"
+      >
+        {{ section.label }}
+      </button>
+    }
+  </nav>
+
+  @if (report(); as shown) {
+    <section class="card" aria-labelledby="report-title" aria-live="polite">
+      <h2 id="report-title">{{ shown.label }}</h2>
+      <p class="muted">{{ 'gestion.reports.aggregates' | translate }}</p>
+      <div class="actions">
+        <button mat-stroked-button type="button" (click)="export('csv')" [disabled]="busy()">
+          {{ 'gestion.reports.exportCsv' | translate }}
+        </button>
+        <button mat-stroked-button type="button" (click)="export('xlsx')" [disabled]="busy()">
+          {{ 'gestion.reports.exportXlsx' | translate }}
+        </button>
+        <button mat-stroked-button type="button" (click)="export('pdf')" [disabled]="busy()">
+          {{ 'gestion.reports.exportPdf' | translate }}
+        </button>
+      </div>
+      @for (table of shown.tables; track table.key) {
+        <h3>{{ table.title }}</h3>
+        @if (table.rows.length) {
+          <div class="table-wrap">
+            <table>
+              <caption class="visually-hidden">
+                {{
+                  table.title
+                }}
+              </caption>
+              <thead>
+                <tr>
+                  @for (column of table.columns; track $index) {
+                    <th scope="col" [class.number]="$index > 0">{{ column }}</th>
+                  }
+                  @if (table.barColumn !== null) {
+                    <th scope="col" class="bar-cell">
+                      <span class="visually-hidden">{{ 'gestion.reports.chart' | translate }}</span>
+                    </th>
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of table.rows; track $index) {
+                  <tr>
+                    @for (cell of row; track $index) {
+                      @if ($index === 0) {
+                        <th scope="row">{{ cell ?? '—' }}</th>
+                      } @else {
+                        <td class="number">{{ cell ?? '—' }}</td>
+                      }
+                    }
+                    @if (table.barColumn !== null) {
+                      <td class="bar-cell">
+                        <span
+                          class="bar"
+                          aria-hidden="true"
+                          [style.width.%]="width(table, row)"
+                        ></span>
+                      </td>
+                    }
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <p class="muted">{{ 'gestion.reports.emptyTable' | translate }}</p>
+        }
+      }
+    </section>
+  }
+} @else {
+  <p class="muted">{{ 'gestion.reports.none' | translate }}</p>
+}

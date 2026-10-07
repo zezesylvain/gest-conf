@@ -48,6 +48,8 @@ describe('EditionLayout', () => {
       'Paiements',
       'Factures et avoirs',
       'Finances',
+      // Rapports (plan L8, N13) : la lecture de l'édition ouvre l'écran.
+      'Rapports',
       // Jour J et attestations (plan L7) : badges en lecture des inscriptions, attestations.
       'Badges',
       'Attestations',
@@ -76,7 +78,7 @@ describe('EditionLayout', () => {
     const root = await render([CHAIR_EDITION]);
     expect(openGroups(root)).toEqual(['Pilotage']);
     expect(links(root, '.rail ul:not([hidden]) a')).toEqual(['Tableau de bord']);
-    expect(root.querySelectorAll('.rail ul[hidden]').length).toBe(11);
+    expect(root.querySelectorAll('.rail ul[hidden]').length).toBe(12);
   });
 
   it('un clic ouvre une autre catégorie et referme la précédente', async () => {

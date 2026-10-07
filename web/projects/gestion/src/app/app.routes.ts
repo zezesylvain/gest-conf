@@ -292,6 +292,14 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/communication/survey-detail-page').then((m) => m.SurveyDetailPage),
       },
+      // Rapports (plan L8, N13) : la lecture de l'édition ouvre l'écran ; chaque section est
+      // revérifiée par le serveur contre sa capacité.
+      {
+        path: 'rapports',
+        title: 'gestion.reports.title',
+        canActivate: [capabilityGuard('edition.read')],
+        loadComponent: () => import('./pages/reports/reports-page').then((m) => m.ReportsPage),
+      },
       // Attestations, lettres d'invitation et signature (plan L7, K9 à K12, K18, K19).
       {
         path: 'attestations',
