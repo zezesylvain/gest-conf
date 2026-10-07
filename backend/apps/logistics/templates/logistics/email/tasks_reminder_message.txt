@@ -1,0 +1,9 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate %}Bonjour,
+
+Voici les tâches du comité d'organisation de {{ edition_title }} qui vous sont confiées et arrivent à échéance :{% endblocktranslate %}
+
+{{ tasks }}
+
+{% blocktranslate %}Le tableau des tâches : {{ link }}{% endblocktranslate %}
+
+{% include "account/email/_signature.txt" %}{% endautoescape %}

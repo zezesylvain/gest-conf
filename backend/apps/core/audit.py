@@ -49,6 +49,23 @@ class AuditDataError(ValueError):
     """Donnée interdite dans un cliché d'audit (secret ou adresse e-mail en clair)."""
 
 
+# Adresse dans un texte libre : partie locale remplacée par « x*** » (plan L8 : descriptions
+# de tâche, notes de budget, présentations de partenaire, que l'on journalise).
+_EMAIL_LOCAL_PART = re.compile(r"[^\s@<>\"'(),;:/*]+@")
+
+
+def mask_emails(value: Any) -> Any:
+    """Masque les adresses des textes libres d'une valeur à journaliser (``j***@univ.ci``),
+    récursivement dans les dictionnaires et les listes."""
+    if isinstance(value, str):
+        return _EMAIL_LOCAL_PART.sub(lambda match: f"{match.group(0)[0]}***@", value)
+    if isinstance(value, Mapping):
+        return {key: mask_emails(item) for key, item in value.items()}
+    if isinstance(value, list | tuple):
+        return [mask_emails(item) for item in value]
+    return value
+
+
 def mask_email(email: str) -> str:
     """``jeanne.dupont@univ.ci`` → ``j***@univ.ci`` (plan L1 §7.2)."""
     local, sep, domain = email.partition("@")

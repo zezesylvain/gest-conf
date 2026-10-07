@@ -35,3 +35,7 @@ class AccountsConfig(AppConfig):
         )
         register_retention_task("accounts.invitation_redact", redact_old_invitations)
         register_retention_task("accounts.consent_network", purge_consent_network)
+        # Segments des envois groupés (plan L8, N11), déclarés auprès de communications.
+        from apps.accounts.segments import register_accounts_segments
+
+        register_accounts_segments()

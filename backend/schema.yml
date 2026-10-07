@@ -184,6 +184,297 @@ paths:
               schema:
                 $ref: '#/components/schemas/Edition'
           description: ''
+  /v1/manage/editions/{edition_id}/activity:
+    get:
+      operationId: manage_activity
+      description: '``…/activity`` : fil d''activité du CO (N14).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ActivityEntry'
+          description: ''
+  /v1/manage/editions/{edition_id}/announcements:
+    get:
+      operationId: manage_announcements_list
+      description: '``…/announcements`` : annonces (brouillon, aperçu, essai, publication,
+        retrait).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Announcement'
+          description: ''
+    post:
+      operationId: manage_announcements_create
+      description: '``…/announcements`` : annonces (brouillon, aperçu, essai, publication,
+        retrait).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnnouncementWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnnouncementDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/announcements/{announcement_id}:
+    get:
+      operationId: manage_announcements_retrieve
+      description: '``…/announcements`` : annonces (brouillon, aperçu, essai, publication,
+        retrait).'
+      parameters:
+      - in: path
+        name: announcement_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnnouncementDetail'
+          description: ''
+    patch:
+      operationId: manage_announcements_update
+      description: '``…/announcements`` : annonces (brouillon, aperçu, essai, publication,
+        retrait).'
+      parameters:
+      - in: path
+        name: announcement_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAnnouncementWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnnouncementDetail'
+          description: ''
+    delete:
+      operationId: manage_announcements_destroy
+      description: '``…/announcements`` : annonces (brouillon, aperçu, essai, publication,
+        retrait).'
+      parameters:
+      - in: path
+        name: announcement_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /v1/manage/editions/{edition_id}/announcements/{announcement_id}/cancel:
+    post:
+      operationId: manage_announcements_cancel
+      description: '``…/announcements`` : annonces (brouillon, aperçu, essai, publication,
+        retrait).'
+      parameters:
+      - in: path
+        name: announcement_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CancelledCount'
+          description: ''
+  /v1/manage/editions/{edition_id}/announcements/{announcement_id}/preview:
+    get:
+      operationId: manage_announcements_preview
+      description: '``…/announcements`` : annonces (brouillon, aperçu, essai, publication,
+        retrait).'
+      parameters:
+      - in: path
+        name: announcement_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: locale
+        schema:
+          type: string
+          enum:
+          - en
+          - fr
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnnouncementPreview'
+          description: ''
+  /v1/manage/editions/{edition_id}/announcements/{announcement_id}/publish:
+    post:
+      operationId: manage_announcements_publish
+      description: '``…/announcements`` : annonces (brouillon, aperçu, essai, publication,
+        retrait).'
+      parameters:
+      - in: path
+        name: announcement_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnnouncementDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/announcements/{announcement_id}/test:
+    post:
+      operationId: manage_announcements_test
+      description: '``…/announcements`` : annonces (brouillon, aperçu, essai, publication,
+        retrait).'
+      parameters:
+      - in: path
+        name: announcement_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '202':
+          description: No response body
+  /v1/manage/editions/{edition_id}/announcements/{announcement_id}/withdraw:
+    post:
+      operationId: manage_announcements_withdraw
+      description: '``…/announcements`` : annonces (brouillon, aperçu, essai, publication,
+        retrait).'
+      parameters:
+      - in: path
+        name: announcement_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnnouncementDetail'
+          description: ''
   /v1/manage/editions/{edition_id}/assignments:
     post:
       operationId: manage_assignment_create
@@ -582,6 +873,227 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BillingProfile'
+          description: ''
+  /v1/manage/editions/{edition_id}/budget:
+    get:
+      operationId: manage_budget_retrieve
+      description: '``…/budget`` : budget prévisionnel et réalisé (N4).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Budget'
+          description: ''
+  /v1/manage/editions/{edition_id}/budget/export:
+    get:
+      operationId: manage_budget_export
+      description: 'Export du budget (RG-17 : journalisé, réauthentification récente).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: file_format
+        schema:
+          type: string
+          enum:
+          - csv
+          - xlsx
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  /v1/manage/editions/{edition_id}/budget/lines:
+    post:
+      operationId: manage_budget_lines_create
+      description: '``…/budget`` : budget prévisionnel et réalisé (N4).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BudgetLineWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Budget'
+          description: ''
+  /v1/manage/editions/{edition_id}/budget/lines/{line_id}:
+    patch:
+      operationId: manage_budget_lines_update
+      description: '``…/budget`` : budget prévisionnel et réalisé (N4).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: line_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBudgetLineWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Budget'
+          description: ''
+    delete:
+      operationId: manage_budget_lines_destroy
+      description: '``…/budget`` : budget prévisionnel et réalisé (N4).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: line_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Budget'
+          description: ''
+  /v1/manage/editions/{edition_id}/budget/lines/{line_id}/proof:
+    get:
+      operationId: manage_budget_lines_proof_download
+      description: |-
+        ``…/budget/lines/{id}/proof`` : justificatif d'une ligne (lecture, dépôt multipart,
+        retrait).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: line_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+          description: ''
+    put:
+      operationId: manage_budget_lines_proof_upload
+      description: |-
+        ``…/budget/lines/{id}/proof`` : justificatif d'une ligne (lecture, dépôt multipart,
+        retrait).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: line_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AttachmentUploadRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Budget'
+          description: ''
+    delete:
+      operationId: manage_budget_lines_proof_remove
+      description: |-
+        ``…/budget/lines/{id}/proof`` : justificatif d'une ligne (lecture, dépôt multipart,
+        retrait).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: line_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Budget'
           description: ''
   /v1/manage/editions/{edition_id}/certificates:
     get:
@@ -2263,6 +2775,494 @@ paths:
       responses:
         '204':
           description: No response body
+  /v1/manage/editions/{edition_id}/logistics/dietary:
+    get:
+      operationId: manage_dietary_summary
+      description: '``…/logistics/dietary`` : régimes agrégés ; liste nominative en
+        export (RG-23).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DietarySummary'
+          description: ''
+  /v1/manage/editions/{edition_id}/logistics/dietary/export:
+    get:
+      operationId: manage_dietary_export
+      description: 'RG-23 : liste nominative des régimes et allergies, journalisée,
+        réauthentification.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: file_format
+        schema:
+          type: string
+          enum:
+          - csv
+          - xlsx
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  /v1/manage/editions/{edition_id}/logistics/meals:
+    get:
+      operationId: manage_meals_list
+      description: '``…/logistics/meals`` : repas et effectifs estimés (N8).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Meal'
+          description: ''
+    post:
+      operationId: manage_meals_create
+      description: '``…/logistics/meals`` : repas et effectifs estimés (N8).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MealWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Meal'
+          description: ''
+  /v1/manage/editions/{edition_id}/logistics/meals/{meal_id}:
+    patch:
+      operationId: manage_meals_update
+      description: '``…/logistics/meals`` : repas et effectifs estimés (N8).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: meal_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedMealWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Meal'
+          description: ''
+    delete:
+      operationId: manage_meals_destroy
+      description: '``…/logistics/meals`` : repas et effectifs estimés (N8).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: meal_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Meal'
+          description: ''
+  /v1/manage/editions/{edition_id}/logistics/meals/export:
+    get:
+      operationId: manage_meals_export
+      description: |-
+        Commande au traiteur : effectifs agrégés, sans nom (journalisée) ; le PDF passe par
+        le générateur des rapports (L8.7).
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: file_format
+        schema:
+          type: string
+          enum:
+          - csv
+          - pdf
+          - xlsx
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  /v1/manage/editions/{edition_id}/logistics/shifts:
+    get:
+      operationId: manage_shifts_list
+      description: '``…/logistics/shifts`` : postes de bénévolat et affectations (N9).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShiftBoard'
+          description: ''
+    post:
+      operationId: manage_shifts_create
+      description: '``…/logistics/shifts`` : postes de bénévolat et affectations (N9).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ShiftWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShiftBoard'
+          description: ''
+  /v1/manage/editions/{edition_id}/logistics/shifts/{shift_id}:
+    patch:
+      operationId: manage_shifts_update
+      description: '``…/logistics/shifts`` : postes de bénévolat et affectations (N9).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: shift_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedShiftWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShiftBoard'
+          description: ''
+    delete:
+      operationId: manage_shifts_destroy
+      description: '``…/logistics/shifts`` : postes de bénévolat et affectations (N9).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: shift_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShiftBoard'
+          description: ''
+  /v1/manage/editions/{edition_id}/logistics/shifts/{shift_id}/assignments:
+    post:
+      operationId: manage_shifts_assign
+      description: '``…/logistics/shifts`` : postes de bénévolat et affectations (N9).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: shift_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignmentWriteRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShiftBoard'
+          description: ''
+  /v1/manage/editions/{edition_id}/logistics/shifts/{shift_id}/assignments/{volunteer_id}:
+    delete:
+      operationId: manage_shifts_unassign
+      description: '``…/logistics/shifts`` : postes de bénévolat et affectations (N9).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: shift_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: volunteer_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShiftBoard'
+          description: ''
+  /v1/manage/editions/{edition_id}/logistics/visits:
+    get:
+      operationId: manage_visits_list
+      description: '``…/logistics/visits`` : fiches de venue des intervenants invités
+        (N6).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ManageVisit'
+          description: ''
+  /v1/manage/editions/{edition_id}/logistics/visits/{user_id}:
+    get:
+      operationId: manage_visits_retrieve
+      description: '``…/logistics/visits`` : fiches de venue des intervenants invités
+        (N6).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: user_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManageVisit'
+          description: ''
+    patch:
+      operationId: manage_visits_update
+      description: '``…/logistics/visits`` : fiches de venue des intervenants invités
+        (N6).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: user_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedVisitStaffWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManageVisit'
+          description: ''
+  /v1/manage/editions/{edition_id}/me/shifts:
+    get:
+      operationId: manage_my_shifts
+      description: '``…/me/shifts`` : « Mon planning » du bénévole (N9) et son fichier
+        iCal.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Shift'
+          description: ''
+  /v1/manage/editions/{edition_id}/me/shifts/calendar:
+    get:
+      operationId: manage_my_shifts_calendar
+      description: '``…/me/shifts`` : « Mon planning » du bénévole (N9) et son fichier
+        iCal.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            text/calendar:
+              schema:
+                type: string
+                format: binary
+          description: ''
   /v1/manage/editions/{edition_id}/portal/files:
     get:
       operationId: manage_editions_portal_files_list
@@ -4539,6 +5539,93 @@ paths:
               schema:
                 $ref: '#/components/schemas/RegistrationSettings'
           description: ''
+  /v1/manage/editions/{edition_id}/reports:
+    get:
+      operationId: manage_reports_list
+      description: La lecture de l'édition ouvre l'écran ; chaque section exige en
+        plus sa capacité.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SectionSummary'
+          description: ''
+  /v1/manage/editions/{edition_id}/reports/{section}:
+    get:
+      operationId: manage_reports_retrieve
+      description: La lecture de l'édition ouvre l'écran ; chaque section exige en
+        plus sa capacité.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: section
+        schema:
+          type: string
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportSection'
+          description: ''
+  /v1/manage/editions/{edition_id}/reports/{section}/export:
+    get:
+      operationId: manage_reports_export
+      description: La lecture de l'édition ouvre l'écran ; chaque section exige en
+        plus sa capacité.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: file_format
+        schema:
+          type: string
+          enum:
+          - csv
+          - pdf
+          - xlsx
+      - in: path
+        name: section
+        schema:
+          type: string
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+          description: ''
   /v1/manage/editions/{edition_id}/review-progress:
     get:
       operationId: manage_review_progress
@@ -5302,6 +6389,30 @@ paths:
               schema:
                 $ref: '#/components/schemas/MemberWithEmail'
           description: ''
+  /v1/manage/editions/{edition_id}/segments:
+    get:
+      operationId: manage_segments_list
+      description: '``…/segments`` : catalogue autorisé et nombre de destinataires
+        de chaque segment.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Segment'
+          description: ''
   /v1/manage/editions/{edition_id}/signature:
     get:
       operationId: manage_signature_retrieve
@@ -5397,6 +6508,454 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Signature'
+          description: ''
+  /v1/manage/editions/{edition_id}/sponsor-levels:
+    get:
+      operationId: manage_sponsor_levels_list
+      description: '``…/sponsor-levels`` : niveaux de partenariat.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SponsorLevel'
+          description: ''
+    post:
+      operationId: manage_sponsor_levels_create
+      description: '``…/sponsor-levels`` : niveaux de partenariat.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SponsorLevelWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SponsorLevel'
+          description: ''
+  /v1/manage/editions/{edition_id}/sponsor-levels/{level_id}:
+    patch:
+      operationId: manage_sponsor_levels_update
+      description: '``…/sponsor-levels`` : niveaux de partenariat.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: level_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSponsorLevelWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SponsorLevel'
+          description: ''
+    delete:
+      operationId: manage_sponsor_levels_destroy
+      description: '``…/sponsor-levels`` : niveaux de partenariat.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: level_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SponsorLevel'
+          description: ''
+  /v1/manage/editions/{edition_id}/sponsors:
+    get:
+      operationId: manage_sponsors_list
+      description: '``…/sponsors`` : partenaires, contreparties, export.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sponsors'
+          description: ''
+    post:
+      operationId: manage_sponsors_create
+      description: '``…/sponsors`` : partenaires, contreparties, export.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SponsorWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SponsorDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/sponsors/{sponsor_id}:
+    get:
+      operationId: manage_sponsors_retrieve
+      description: '``…/sponsors`` : partenaires, contreparties, export.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: sponsor_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SponsorDetail'
+          description: ''
+    patch:
+      operationId: manage_sponsors_update
+      description: '``…/sponsors`` : partenaires, contreparties, export.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: sponsor_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSponsorWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SponsorDetail'
+          description: ''
+    delete:
+      operationId: manage_sponsors_destroy
+      description: '``…/sponsors`` : partenaires, contreparties, export.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: sponsor_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /v1/manage/editions/{edition_id}/sponsors/{sponsor_id}/benefits:
+    post:
+      operationId: manage_sponsors_benefits_add
+      description: '``…/sponsors`` : partenaires, contreparties, export.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: sponsor_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BenefitWriteRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SponsorDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/sponsors/{sponsor_id}/benefits/{benefit_id}:
+    patch:
+      operationId: manage_sponsors_benefits_update
+      description: '``…/sponsors`` : partenaires, contreparties, export.'
+      parameters:
+      - in: path
+        name: benefit_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: sponsor_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBenefitUpdateRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SponsorDetail'
+          description: ''
+    delete:
+      operationId: manage_sponsors_benefits_remove
+      description: '``…/sponsors`` : partenaires, contreparties, export.'
+      parameters:
+      - in: path
+        name: benefit_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: sponsor_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SponsorDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/sponsors/{sponsor_id}/logo:
+    get:
+      operationId: manage_sponsors_logo_content
+      description: |-
+        Aperçu du logo, partenaire publié ou non : l'adresse publique ne sert un logo
+        qu'une fois le partenaire publié, et seulement pour l'édition publique courante.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: sponsor_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+          description: ''
+    put:
+      operationId: manage_sponsors_logo_upload
+      description: '``…/sponsors/{id}/logo`` : aperçu dans la gestion, dépôt (multipart)
+        ou retrait.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: sponsor_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LogoUploadRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SponsorDetail'
+          description: ''
+    delete:
+      operationId: manage_sponsors_logo_remove
+      description: '``…/sponsors/{id}/logo`` : aperçu dans la gestion, dépôt (multipart)
+        ou retrait.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: sponsor_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SponsorDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/sponsors/export:
+    get:
+      operationId: manage_sponsors_export
+      description: 'Export des partenaires, contacts compris (RG-17 : journalisé,
+        réauthentification).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: file_format
+        schema:
+          type: string
+          enum:
+          - csv
+          - xlsx
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
           description: ''
   /v1/manage/editions/{edition_id}/status:
     post:
@@ -5839,6 +7398,695 @@ paths:
               schema:
                 $ref: '#/components/schemas/SubmissionStats'
           description: ''
+  /v1/manage/editions/{edition_id}/surveys:
+    get:
+      operationId: manage_surveys_list
+      description: '``…/surveys`` : questionnaires, questions, publication, duplication,
+        résultats.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Survey'
+          description: ''
+    post:
+      operationId: manage_surveys_create
+      description: '``…/surveys`` : questionnaires, questions, publication, duplication,
+        résultats.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SurveyCreateRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SurveyDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/surveys/{survey_id}:
+    get:
+      operationId: manage_surveys_retrieve
+      description: '``…/surveys`` : questionnaires, questions, publication, duplication,
+        résultats.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: survey_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SurveyDetail'
+          description: ''
+    patch:
+      operationId: manage_surveys_update
+      description: '``…/surveys`` : questionnaires, questions, publication, duplication,
+        résultats.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: survey_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSurveyWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SurveyDetail'
+          description: ''
+    delete:
+      operationId: manage_surveys_destroy
+      description: '``…/surveys`` : questionnaires, questions, publication, duplication,
+        résultats.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: survey_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /v1/manage/editions/{edition_id}/surveys/{survey_id}/duplicate:
+    post:
+      operationId: manage_surveys_duplicate
+      description: '``…/surveys`` : questionnaires, questions, publication, duplication,
+        résultats.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: survey_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SurveyDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/surveys/{survey_id}/export:
+    get:
+      operationId: manage_surveys_export
+      description: Agrégats et textes libres mélangés (N12), journalisé.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: file_format
+        schema:
+          type: string
+          enum:
+          - csv
+          - xlsx
+      - in: path
+        name: survey_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  /v1/manage/editions/{edition_id}/surveys/{survey_id}/publish:
+    post:
+      operationId: manage_surveys_publish
+      description: '``…/surveys`` : questionnaires, questions, publication, duplication,
+        résultats.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: survey_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SurveyDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/surveys/{survey_id}/questions:
+    post:
+      operationId: manage_surveys_questions_create
+      description: '``…/surveys`` : questionnaires, questions, publication, duplication,
+        résultats.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: survey_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuestionWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Question'
+          description: ''
+  /v1/manage/editions/{edition_id}/surveys/{survey_id}/questions/{question_id}:
+    patch:
+      operationId: manage_surveys_questions_update
+      description: '``…/surveys`` : questionnaires, questions, publication, duplication,
+        résultats.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: question_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: survey_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedQuestionWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Question'
+          description: ''
+    delete:
+      operationId: manage_surveys_questions_destroy
+      description: '``…/surveys`` : questionnaires, questions, publication, duplication,
+        résultats.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: question_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: survey_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /v1/manage/editions/{edition_id}/surveys/{survey_id}/results:
+    get:
+      operationId: manage_surveys_results
+      description: '``…/surveys`` : questionnaires, questions, publication, duplication,
+        résultats.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: survey_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SurveyResults'
+          description: ''
+  /v1/manage/editions/{edition_id}/tasks:
+    get:
+      operationId: manage_tasks_list
+      description: '``…/tasks`` : kanban des tâches du CO (N3).'
+      parameters:
+      - in: query
+        name: archived
+        schema:
+          type: boolean
+        description: Tâches archivées (sinon actives).
+      - in: query
+        name: assignee
+        schema:
+          type: integer
+        description: Responsable (compte).
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: query
+        name: mine
+        schema:
+          type: boolean
+        description: Mes tâches seulement.
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - doing
+          - done
+          - todo
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+          description: ''
+    post:
+      operationId: manage_tasks_create
+      description: '``…/tasks`` : kanban des tâches du CO (N3).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/tasks/{task_id}:
+    get:
+      operationId: manage_tasks_retrieve
+      description: '``…/tasks`` : kanban des tâches du CO (N3).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: task_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskDetail'
+          description: ''
+    patch:
+      operationId: manage_tasks_update
+      description: '``…/tasks`` : kanban des tâches du CO (N3).'
+      parameters:
+      - in: header
+        name: If-Match
+        schema:
+          type: integer
+        description: Révision de la tâche lue ; 412 « stale_revision » si elle a changé
+          (N3).
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: task_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedTaskWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/tasks/{task_id}/archive:
+    post:
+      operationId: manage_tasks_archive
+      description: '``…/tasks`` : kanban des tâches du CO (N3).'
+      parameters:
+      - in: header
+        name: If-Match
+        schema:
+          type: integer
+        description: Révision de la tâche lue ; 412 « stale_revision » si elle a changé
+          (N3).
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: task_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/tasks/{task_id}/attachments:
+    post:
+      operationId: manage_tasks_attachments_upload
+      description: '``…/tasks/{id}/attachments`` (POST) : dépôt d''une pièce jointe
+        (multipart).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: task_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AttachmentUploadRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/tasks/{task_id}/attachments/{attachment_id}:
+    get:
+      operationId: manage_tasks_attachments_download
+      description: 'Pièce jointe (règle n° 8 : endpoint authentifié, type vérifié
+        au dépôt).'
+      parameters:
+      - in: path
+        name: attachment_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: task_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+          description: ''
+    delete:
+      operationId: manage_tasks_attachments_remove
+      description: '``…/tasks`` : kanban des tâches du CO (N3).'
+      parameters:
+      - in: path
+        name: attachment_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: task_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/tasks/{task_id}/comments:
+    post:
+      operationId: manage_tasks_comment
+      description: '``…/tasks`` : kanban des tâches du CO (N3).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: task_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskCommentWriteRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/tasks/{task_id}/restore:
+    post:
+      operationId: manage_tasks_restore
+      description: '``…/tasks`` : kanban des tâches du CO (N3).'
+      parameters:
+      - in: header
+        name: If-Match
+        schema:
+          type: integer
+        description: Révision de la tâche lue ; 412 « stale_revision » si elle a changé
+          (N3).
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: task_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskDetail'
+          description: ''
+  /v1/manage/editions/{edition_id}/tasks/members:
+    get:
+      operationId: manage_tasks_members
+      description: '``…/tasks`` : kanban des tâches du CO (N3).'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - manage
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TaskPerson'
+          description: ''
   /v1/manage/editions/{edition_id}/tracks:
     get:
       operationId: manage_editions_tracks_list
@@ -6139,6 +8387,178 @@ paths:
                 type: object
                 additionalProperties: {}
           description: Export JSON.
+  /v1/me/editions/{edition_id}/announcements:
+    get:
+      operationId: me_announcements_subscription
+      description: '``/v1/me/editions/{id}/announcements`` : recevoir ou non les annonces
+        par e-mail.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - me
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+          description: ''
+    put:
+      operationId: me_announcements_subscription_update
+      description: '``/v1/me/editions/{id}/announcements`` : recevoir ou non les annonces
+        par e-mail.'
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - me
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscriptionRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+          description: ''
+  /v1/me/editions/{edition_id}/dietary:
+    get:
+      operationId: me_dietary_retrieve
+      description: |-
+        ``/v1/me/editions/{id}/dietary`` : régime alimentaire (N7, RG-23), facultatif, avec
+        consentement explicite ; ``DELETE`` retire la déclaration.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - me
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyDietary'
+          description: ''
+    put:
+      operationId: me_dietary_update
+      description: |-
+        ``/v1/me/editions/{id}/dietary`` : régime alimentaire (N7, RG-23), facultatif, avec
+        consentement explicite ; ``DELETE`` retire la déclaration.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - me
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MyDietaryWriteRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyDietary'
+          description: ''
+    delete:
+      operationId: me_dietary_withdraw
+      description: |-
+        ``/v1/me/editions/{id}/dietary`` : régime alimentaire (N7, RG-23), facultatif, avec
+        consentement explicite ; ``DELETE`` retire la déclaration.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - me
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyDietary'
+          description: ''
+  /v1/me/editions/{edition_id}/visit:
+    get:
+      operationId: me_visit_retrieve
+      description: |-
+        ``/v1/me/editions/{id}/visit`` : « Ma venue » de l'intervenant invité (N6) ; 404 pour
+        qui n'est pas intervenant invité de l'édition. Jamais la note interne du CO.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - me
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyVisit'
+          description: ''
+    put:
+      operationId: me_visit_update
+      description: |-
+        ``/v1/me/editions/{id}/visit`` : « Ma venue » de l'intervenant invité (N6) ; 404 pour
+        qui n'est pas intervenant invité de l'édition. Jamais la note interne du CO.
+      parameters:
+      - in: path
+        name: edition_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - me
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VisitSpeakerWriteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyVisit'
+          description: ''
   /v1/me/notifications:
     get:
       operationId: me_notifications
@@ -6278,6 +8698,75 @@ paths:
               schema:
                 $ref: '#/components/schemas/Profile'
           description: ''
+  /v1/me/surveys:
+    get:
+      operationId: me_surveys
+      description: '``GET /v1/me/surveys`` : questionnaires auxquels la personne est
+        invitée.'
+      tags:
+      - me
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MySurvey'
+          description: ''
+  /v1/me/surveys/{survey_id}:
+    get:
+      operationId: me_survey_retrieve
+      description: |-
+        ``/v1/me/surveys/{id}`` : le questionnaire (invitée seulement, 404 sinon) et la
+        réponse, enregistrée sans lien avec la personne (RG-21).
+      parameters:
+      - in: path
+        name: survey_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - me
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MySurveyDetail'
+          description: ''
+    post:
+      operationId: me_survey_answer
+      description: |-
+        ``/v1/me/surveys/{id}`` : le questionnaire (invitée seulement, 404 sinon) et la
+        réponse, enregistrée sans lien avec la personne (RG-21).
+      parameters:
+      - in: path
+        name: survey_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - me
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnswerRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MySurvey'
+          description: ''
   /v1/me/totp-qr:
     get:
       operationId: me_totp_qr
@@ -6336,6 +8825,27 @@ paths:
       responses:
         '200':
           description: No response body
+  /v1/public/announcements/unsubscribe:
+    post:
+      operationId: public_announcements_unsubscribe
+      description: |-
+        ``POST /v1/public/announcements/unsubscribe`` : lien du pied de page des annonces
+        (jeton signé, sans connexion) ; limité en débit.
+      tags:
+      - public
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UnsubscribeRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unsubscribed'
+          description: ''
   /v1/public/certificates/{code}:
     get:
       operationId: public_certificate_verify
@@ -6405,6 +8915,38 @@ paths:
               schema:
                 type: string
                 format: binary
+          description: ''
+  /v1/public/news:
+    get:
+      operationId: public_news
+      description: |-
+        ``GET /v1/public/news`` : actualités publiées de l'édition publique courante ; lu au
+        build du portail (page « Actualités », pré-rendue).
+      tags:
+      - public
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PublicNewsItem'
+          description: ''
+  /v1/public/portal/banner:
+    get:
+      operationId: public_banner
+      description: |-
+        ``GET /v1/public/portal/banner`` : bandeau actif de l'édition publique courante, lu
+        dans le navigateur (jamais pré-rendu) ; réponse minimale.
+      tags:
+      - public
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicBanner'
           description: ''
   /v1/public/portal/menu:
     get:
@@ -6548,6 +9090,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PublicRegistration'
+          description: ''
+  /v1/public/speakers:
+    get:
+      operationId: public_speakers
+      description: |-
+        ``GET /v1/public/speakers`` : intervenants invités du programme publié (plan L8, N6),
+        lus au build de la page « Intervenants » ; 404 tant que rien n'est publié.
+      tags:
+      - public
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicSpeakers'
+          description: ''
+  /v1/public/sponsors:
+    get:
+      operationId: public_sponsors
+      description: |-
+        ``GET /v1/public/sponsors`` : partenaires publiés de l'édition courante, par niveau
+        (N5) ; lu au build du portail (page « Partenaires », pré-rendue).
+      tags:
+      - public
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicSponsors'
           description: ''
   /v1/registrations:
     get:
@@ -7349,6 +9921,26 @@ components:
       required:
       - edition_id
       - role
+    ActivityEntry:
+      type: object
+      properties:
+        at:
+          type: string
+          format: date-time
+        action:
+          type: string
+        actor:
+          type: string
+        object_type:
+          type: string
+        object_id:
+          type: string
+      required:
+      - action
+      - actor
+      - at
+      - object_id
+      - object_type
     ActorKind:
       enum:
       - user
@@ -7461,6 +10053,231 @@ components:
       - kind
       - title_en
       - title_fr
+    Announcement:
+      type: object
+      properties:
+        id:
+          type: integer
+        title_fr:
+          type: string
+        title_en:
+          type: string
+        body_fr:
+          type: string
+        body_en:
+          type: string
+        on_news:
+          type: boolean
+        on_banner:
+          type: boolean
+        on_bell:
+          type: boolean
+        by_email:
+          type: boolean
+        segment:
+          type: string
+        banner_message_fr:
+          type: string
+        banner_message_en:
+          type: string
+        banner_starts_local:
+          type: string
+          nullable: true
+        banner_ends_local:
+          type: string
+          nullable: true
+        status:
+          $ref: '#/components/schemas/AnnouncementStatus'
+        published_at:
+          type: string
+          format: date-time
+          nullable: true
+        withdrawn_at:
+          type: string
+          format: date-time
+          nullable: true
+        sending_status:
+          $ref: '#/components/schemas/SendingStatus'
+        recipients_count:
+          type: integer
+        emails_count:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+      required:
+      - banner_ends_local
+      - banner_message_en
+      - banner_message_fr
+      - banner_starts_local
+      - body_en
+      - body_fr
+      - by_email
+      - created_at
+      - emails_count
+      - id
+      - on_banner
+      - on_bell
+      - on_news
+      - published_at
+      - recipients_count
+      - segment
+      - sending_status
+      - status
+      - title_en
+      - title_fr
+      - withdrawn_at
+    AnnouncementDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+        title_fr:
+          type: string
+        title_en:
+          type: string
+        body_fr:
+          type: string
+        body_en:
+          type: string
+        on_news:
+          type: boolean
+        on_banner:
+          type: boolean
+        on_bell:
+          type: boolean
+        by_email:
+          type: boolean
+        segment:
+          type: string
+        banner_message_fr:
+          type: string
+        banner_message_en:
+          type: string
+        banner_starts_local:
+          type: string
+          nullable: true
+        banner_ends_local:
+          type: string
+          nullable: true
+        status:
+          $ref: '#/components/schemas/AnnouncementStatus'
+        published_at:
+          type: string
+          format: date-time
+          nullable: true
+        withdrawn_at:
+          type: string
+          format: date-time
+          nullable: true
+        sending_status:
+          $ref: '#/components/schemas/SendingStatus'
+        recipients_count:
+          type: integer
+        emails_count:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        sending:
+          $ref: '#/components/schemas/SendingStats'
+      required:
+      - banner_ends_local
+      - banner_message_en
+      - banner_message_fr
+      - banner_starts_local
+      - body_en
+      - body_fr
+      - by_email
+      - created_at
+      - emails_count
+      - id
+      - on_banner
+      - on_bell
+      - on_news
+      - published_at
+      - recipients_count
+      - segment
+      - sending
+      - sending_status
+      - status
+      - title_en
+      - title_fr
+      - withdrawn_at
+    AnnouncementPreview:
+      type: object
+      properties:
+        subject:
+          type: string
+        body_text:
+          type: string
+        body_html:
+          type: string
+        recipients:
+          type: integer
+        opted_out:
+          type: integer
+        emails:
+          type: integer
+        estimated_hours:
+          type: integer
+      required:
+      - body_html
+      - body_text
+      - emails
+      - estimated_hours
+      - opted_out
+      - recipients
+      - subject
+    AnnouncementStatus:
+      enum:
+      - draft
+      - published
+      - withdrawn
+      type: string
+      description: |-
+        * `draft` - brouillon
+        * `published` - publiée
+        * `withdrawn` - retirée
+    AnnouncementWriteRequest:
+      type: object
+      properties:
+        title_fr:
+          type: string
+          minLength: 1
+          maxLength: 150
+        title_en:
+          type: string
+          maxLength: 150
+        body_fr:
+          type: string
+        body_en:
+          type: string
+        on_news:
+          type: boolean
+        on_banner:
+          type: boolean
+        on_bell:
+          type: boolean
+        by_email:
+          type: boolean
+        segment:
+          type: string
+          maxLength: 64
+        banner_message_fr:
+          type: string
+          maxLength: 280
+        banner_message_en:
+          type: string
+          maxLength: 280
+        banner_starts_local:
+          type: string
+          format: date-time
+          nullable: true
+        banner_ends_local:
+          type: string
+          format: date-time
+          nullable: true
     AnonymizationRequest:
       type: object
       description: 'Confirmation explicite : l''adresse du compte, saisie à nouveau
@@ -7473,6 +10290,14 @@ components:
           maxLength: 254
       required:
       - confirmation
+    AnswerRequest:
+      type: object
+      properties:
+        answers:
+          type: object
+          additionalProperties: {}
+      required:
+      - answers
     ApiError:
       type: object
       description: 'Format de toute réponse d''erreur de l''API : {code, message,
@@ -7598,6 +10423,21 @@ components:
         * `active` - actif
         * `declined` - déclinée
         * `cancelled` - annulée
+    AssignmentWriteRequest:
+      type: object
+      properties:
+        volunteer:
+          type: integer
+      required:
+      - volunteer
+    AttachmentUploadRequest:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+      required:
+      - file
     AuditEntry:
       type: object
       description: Entrée du journal d'une édition, **sans IP ni navigateur** (minimisation,
@@ -7762,6 +10602,15 @@ components:
       - batch_size
       - batches
       - count
+    BenefitWriteRequest:
+      type: object
+      properties:
+        label:
+          type: string
+          minLength: 1
+          maxLength: 200
+      required:
+      - label
     BillingDocument:
       type: object
       description: Pièce de facturation (gestion, ``finance.read``).
@@ -7854,6 +10703,210 @@ components:
     BlankEnum:
       enum:
       - ''
+    Budget:
+      type: object
+      properties:
+        currency:
+          type: string
+        expense:
+          $ref: '#/components/schemas/BudgetTotals'
+        income:
+          $ref: '#/components/schemas/BudgetTotals'
+        balance_planned:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+        balance_actual:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+        by_category:
+          type: array
+          items:
+            $ref: '#/components/schemas/BudgetCategoryTotals'
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/BudgetLine'
+      required:
+      - balance_actual
+      - balance_planned
+      - by_category
+      - currency
+      - expense
+      - income
+      - lines
+    BudgetCategory:
+      enum:
+      - venue
+      - catering
+      - travel
+      - accommodation
+      - communication
+      - printing
+      - equipment
+      - staff
+      - other_expense
+      - registrations
+      - sponsorship
+      - grants
+      - other_income
+      type: string
+      description: |-
+        * `venue` - lieu
+        * `catering` - restauration
+        * `travel` - voyages
+        * `accommodation` - hébergement
+        * `communication` - communication
+        * `printing` - impression
+        * `equipment` - matériel
+        * `staff` - personnel
+        * `other_expense` - divers (dépense)
+        * `registrations` - inscriptions
+        * `sponsorship` - partenariats
+        * `grants` - subventions
+        * `other_income` - divers (recette)
+    BudgetCategoryTotals:
+      type: object
+      properties:
+        planned:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+        actual:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+        category:
+          $ref: '#/components/schemas/BudgetCategory'
+        kind:
+          $ref: '#/components/schemas/BudgetKind'
+      required:
+      - actual
+      - category
+      - kind
+      - planned
+    BudgetKind:
+      enum:
+      - expense
+      - income
+      type: string
+      description: |-
+        * `expense` - dépense
+        * `income` - recette
+    BudgetLine:
+      type: object
+      properties:
+        id:
+          type: integer
+        kind:
+          $ref: '#/components/schemas/BudgetKind'
+        category:
+          $ref: '#/components/schemas/BudgetCategory'
+        label:
+          type: string
+        planned:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        actual:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+          nullable: true
+        variance:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+          nullable: true
+        source:
+          $ref: '#/components/schemas/BudgetSource'
+        computed:
+          type: boolean
+        note:
+          type: string
+        position:
+          type: integer
+        proof:
+          allOf:
+          - $ref: '#/components/schemas/BudgetProof'
+          nullable: true
+      required:
+      - actual
+      - category
+      - computed
+      - id
+      - kind
+      - label
+      - note
+      - planned
+      - position
+      - proof
+      - source
+      - variance
+    BudgetLineWriteRequest:
+      type: object
+      properties:
+        kind:
+          $ref: '#/components/schemas/BudgetKind'
+        category:
+          $ref: '#/components/schemas/BudgetCategory'
+        label:
+          type: string
+          maxLength: 200
+        planned:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        actual:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          nullable: true
+        note:
+          type: string
+          maxLength: 2000
+        position:
+          type: integer
+          minimum: 0
+    BudgetProof:
+      type: object
+      properties:
+        name:
+          type: string
+        kind:
+          type: string
+        size:
+          type: integer
+          nullable: true
+      required:
+      - kind
+      - name
+      - size
+    BudgetSource:
+      enum:
+      - manual
+      - registrations
+      - sponsors
+      type: string
+      description: |-
+        * `manual` - saisi
+        * `registrations` - calculé : inscriptions
+        * `sponsors` - calculé : partenaires
+    BudgetTotals:
+      type: object
+      properties:
+        planned:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+        actual:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+      required:
+      - actual
+      - planned
     Bundle:
       type: object
       description: 'Liste de pointage hors ligne (K5) : minimale, sans jeton, à effacer
@@ -7946,6 +10999,13 @@ components:
           nullable: true
       required:
       - reason
+    CancelledCount:
+      type: object
+      properties:
+        cancelled:
+          type: integer
+      required:
+      - cancelled
     Candidate:
       type: object
       description: Relecteur proposé pour une soumission (H6, H7, H8).
@@ -8046,6 +11106,18 @@ components:
       - letters.manage
       - signature.manage
       - sessions.chair
+      - tasks.read
+      - tasks.write
+      - budget.read
+      - budget.write
+      - sponsors.read
+      - sponsors.write
+      - logistics.read
+      - logistics.write
+      - volunteers.plan
+      - shifts.own
+      - communications.send
+      - surveys.manage
       type: string
       description: |-
         * `edition.read` - edition.read
@@ -8078,6 +11150,18 @@ components:
         * `letters.manage` - letters.manage
         * `signature.manage` - signature.manage
         * `sessions.chair` - sessions.chair
+        * `tasks.read` - tasks.read
+        * `tasks.write` - tasks.write
+        * `budget.read` - budget.read
+        * `budget.write` - budget.write
+        * `sponsors.read` - sponsors.read
+        * `sponsors.write` - sponsors.write
+        * `logistics.read` - logistics.read
+        * `logistics.write` - logistics.write
+        * `volunteers.plan` - volunteers.plan
+        * `shifts.own` - shifts.own
+        * `communications.send` - communications.send
+        * `surveys.manage` - surveys.manage
     Category:
       type: object
       description: 'Catégorie et sa grille de tarifs (gestion). ``code`` : fixé à
@@ -8512,6 +11596,19 @@ components:
       - checked_in
       - confirmed
       - pending
+    Choice:
+      type: object
+      properties:
+        value:
+          type: string
+        label_fr:
+          type: string
+        label_en:
+          type: string
+      required:
+      - label_en
+      - label_fr
+      - value
     Confidentiality:
       type: object
       description: Paramètres de l'évaluation (gestion, §6.1 ; plan L4 H4, H6, H12).
@@ -8748,6 +11845,22 @@ components:
       required:
       - history
       - states
+    Count:
+      type: object
+      properties:
+        value:
+          type: string
+        label_fr:
+          type: string
+        label_en:
+          type: string
+        count:
+          type: integer
+      required:
+      - count
+      - label_en
+      - label_fr
+      - value
     CounterRequestRequest:
       type: object
       properties:
@@ -9138,6 +12251,37 @@ components:
           description: Le relecteur déclare un conflit d'intérêts (H8).
       required:
       - reason
+    Diet:
+      enum:
+      - vegetarian
+      - vegan
+      - no_pork
+      - gluten_free
+      - lactose_free
+      - other
+      type: string
+      description: |-
+        * `vegetarian` - végétarien
+        * `vegan` - végétalien
+        * `no_pork` - sans porc
+        * `gluten_free` - sans gluten
+        * `lactose_free` - sans lactose
+        * `other` - autre
+    DietarySummary:
+      type: object
+      properties:
+        by_diet:
+          type: object
+          additionalProperties:
+            type: integer
+        allergies:
+          type: integer
+        declarations:
+          type: integer
+      required:
+      - allergies
+      - by_diet
+      - declarations
     DiscountKind:
       enum:
       - percent
@@ -9584,6 +12728,13 @@ components:
       - payment_unavailable
       - signing_unavailable
       - signatory_missing
+      - shift_overlap
+      - banner_overlap
+      - unsubscribe_link_invalid
+      - survey_locked
+      - survey_not_open
+      - survey_answered
+      - survey_threshold
       type: string
       description: |-
         * `validation_error` - Validation Error
@@ -9637,6 +12788,13 @@ components:
         * `payment_unavailable` - Payment Unavailable
         * `signing_unavailable` - Signing Unavailable
         * `signatory_missing` - Signatory Missing
+        * `shift_overlap` - Shift Overlap
+        * `banner_overlap` - Banner Overlap
+        * `unsubscribe_link_invalid` - Unsubscribe Link Invalid
+        * `survey_locked` - Survey Locked
+        * `survey_not_open` - Survey Not Open
+        * `survey_answered` - Survey Answered
+        * `survey_threshold` - Survey Threshold
     Expertise:
       type: object
       description: Expertises du relecteur (H7) et thématiques proposées.
@@ -10414,6 +13572,24 @@ components:
       description: |-
         * `fr` - Français
         * `en` - English
+    LogoSize:
+      enum:
+      - small
+      - medium
+      - large
+      type: string
+      description: |-
+        * `small` - petite
+        * `medium` - moyenne
+        * `large` - grande
+    LogoUploadRequest:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+      required:
+      - file
     ManageAuthor:
       type: object
       description: 'Auteur vu par la gestion : adresse comprise (contact des auteurs,
@@ -10887,6 +14063,86 @@ components:
       - reference
       - status
       - total
+    ManageVisit:
+      type: object
+      properties:
+        technical_needs:
+          type: array
+          items:
+            $ref: '#/components/schemas/Equipment'
+        technical_note:
+          type: string
+        arrival_local:
+          type: string
+          nullable: true
+        arrival_means:
+          oneOf:
+          - $ref: '#/components/schemas/TravelMeans'
+          - $ref: '#/components/schemas/BlankEnum'
+        arrival_reference:
+          type: string
+        departure_local:
+          type: string
+          nullable: true
+        departure_means:
+          oneOf:
+          - $ref: '#/components/schemas/TravelMeans'
+          - $ref: '#/components/schemas/BlankEnum'
+        departure_reference:
+          type: string
+        accommodation_needed:
+          type: boolean
+        transfer_needed:
+          type: boolean
+        speaker_note:
+          type: string
+        hotel:
+          type: string
+        check_in:
+          type: string
+          format: date
+          nullable: true
+        check_out:
+          type: string
+          format: date
+          nullable: true
+        status:
+          $ref: '#/components/schemas/VisitStatus'
+        speaker:
+          $ref: '#/components/schemas/TaskPerson'
+        institution:
+          type: string
+        internal_note:
+          type: string
+        missing_equipment:
+          type: array
+          items:
+            type: string
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - accommodation_needed
+      - arrival_local
+      - arrival_means
+      - arrival_reference
+      - check_in
+      - check_out
+      - departure_local
+      - departure_means
+      - departure_reference
+      - hotel
+      - institution
+      - internal_note
+      - missing_equipment
+      - speaker
+      - speaker_note
+      - status
+      - technical_needs
+      - technical_note
+      - transfer_needed
+      - updated_at
     ManualPaymentMethod:
       enum:
       - transfer
@@ -11050,6 +14306,115 @@ components:
       - expires_at
       - oc_function
       - role
+    Meal:
+      type: object
+      properties:
+        id:
+          type: integer
+        day:
+          type: string
+          format: date
+        kind:
+          $ref: '#/components/schemas/MealKind'
+        label_fr:
+          type: string
+        label_en:
+          type: string
+        include_registered:
+          type: boolean
+        option_code:
+          type: string
+        include_speakers:
+          type: boolean
+        include_committees:
+          type: boolean
+        include_volunteers:
+          type: boolean
+        margin_percent:
+          type: integer
+        position:
+          type: integer
+        estimate:
+          $ref: '#/components/schemas/MealEstimate'
+      required:
+      - day
+      - estimate
+      - id
+      - include_committees
+      - include_registered
+      - include_speakers
+      - include_volunteers
+      - kind
+      - label_en
+      - label_fr
+      - margin_percent
+      - option_code
+      - position
+    MealEstimate:
+      type: object
+      properties:
+        by_diet:
+          type: object
+          additionalProperties:
+            type: integer
+        allergies:
+          type: integer
+        count:
+          type: integer
+        margin:
+          type: integer
+        total:
+          type: integer
+      required:
+      - allergies
+      - by_diet
+      - count
+      - margin
+      - total
+    MealKind:
+      enum:
+      - coffee_break
+      - lunch
+      - dinner
+      - cocktail
+      type: string
+      description: |-
+        * `coffee_break` - pause café
+        * `lunch` - déjeuner
+        * `dinner` - dîner
+        * `cocktail` - cocktail
+    MealWriteRequest:
+      type: object
+      properties:
+        day:
+          type: string
+          format: date
+        kind:
+          $ref: '#/components/schemas/MealKind'
+        label_fr:
+          type: string
+          maxLength: 150
+        label_en:
+          type: string
+          maxLength: 150
+        include_registered:
+          type: boolean
+        option_code:
+          type: string
+          maxLength: 32
+        include_speakers:
+          type: boolean
+        include_committees:
+          type: boolean
+        include_volunteers:
+          type: boolean
+        margin_percent:
+          type: integer
+          maximum: 50
+          minimum: 0
+        position:
+          type: integer
+          minimum: 0
     MemberWithEmail:
       type: object
       description: Membre d'une édition, sans adresse (``members.read`` seul).
@@ -11295,6 +14660,41 @@ components:
       - revoked
       - title
       - verification_url
+    MyDietary:
+      type: object
+      properties:
+        eligible:
+          type: boolean
+        diets:
+          type: array
+          items:
+            $ref: '#/components/schemas/Diet'
+        allergies:
+          type: string
+        consented_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - allergies
+      - consented_at
+      - diets
+      - eligible
+    MyDietaryWriteRequest:
+      type: object
+      properties:
+        diets:
+          type: array
+          items:
+            $ref: '#/components/schemas/Diet'
+        allergies:
+          type: string
+          maxLength: 200
+        consent:
+          type: boolean
+      required:
+      - consent
+      - diets
     MyLetter:
       type: object
       description: 'Lettre du participant : numéro de passeport masqué (trois derniers
@@ -11450,6 +14850,153 @@ components:
       - status
       - total
       - zone
+    MySurvey:
+      type: object
+      properties:
+        id:
+          type: integer
+        edition_id:
+          type: integer
+        edition_code:
+          type: string
+        title_fr:
+          type: string
+        title_en:
+          type: string
+        session_title:
+          type: string
+        closes_at:
+          type: string
+          format: date-time
+        is_open:
+          type: boolean
+        answered:
+          type: boolean
+      required:
+      - answered
+      - closes_at
+      - edition_code
+      - edition_id
+      - id
+      - is_open
+      - session_title
+      - title_en
+      - title_fr
+    MySurveyDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+        edition_id:
+          type: integer
+        edition_code:
+          type: string
+        title_fr:
+          type: string
+        title_en:
+          type: string
+        session_title:
+          type: string
+        closes_at:
+          type: string
+          format: date-time
+        is_open:
+          type: boolean
+        answered:
+          type: boolean
+        intro_fr:
+          type: string
+        intro_en:
+          type: string
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Question'
+      required:
+      - answered
+      - closes_at
+      - edition_code
+      - edition_id
+      - id
+      - intro_en
+      - intro_fr
+      - is_open
+      - questions
+      - session_title
+      - title_en
+      - title_fr
+    MyVisit:
+      type: object
+      description: '« Ma venue » : la note interne du CO n''y figure jamais (sérialiseur
+        par rôle).'
+      properties:
+        technical_needs:
+          type: array
+          items:
+            $ref: '#/components/schemas/Equipment'
+        technical_note:
+          type: string
+        arrival_local:
+          type: string
+          nullable: true
+        arrival_means:
+          oneOf:
+          - $ref: '#/components/schemas/TravelMeans'
+          - $ref: '#/components/schemas/BlankEnum'
+        arrival_reference:
+          type: string
+        departure_local:
+          type: string
+          nullable: true
+        departure_means:
+          oneOf:
+          - $ref: '#/components/schemas/TravelMeans'
+          - $ref: '#/components/schemas/BlankEnum'
+        departure_reference:
+          type: string
+        accommodation_needed:
+          type: boolean
+        transfer_needed:
+          type: boolean
+        speaker_note:
+          type: string
+        hotel:
+          type: string
+        check_in:
+          type: string
+          format: date
+          nullable: true
+        check_out:
+          type: string
+          format: date
+          nullable: true
+        status:
+          $ref: '#/components/schemas/VisitStatus'
+        edition_id:
+          type: integer
+        edition_code:
+          type: string
+        timezone:
+          type: string
+      required:
+      - accommodation_needed
+      - arrival_local
+      - arrival_means
+      - arrival_reference
+      - check_in
+      - check_out
+      - departure_local
+      - departure_means
+      - departure_reference
+      - edition_code
+      - edition_id
+      - hotel
+      - speaker_note
+      - status
+      - technical_needs
+      - technical_note
+      - timezone
+      - transfer_needed
     Notification:
       type: object
       properties:
@@ -11492,6 +15039,11 @@ components:
       - screening_rejected
       - decision_published
       - final_version_received
+      - task_assigned
+      - shift_assigned
+      - shift_removed
+      - announcement
+      - survey_invitation
       type: string
       description: |-
         * `submission_received` - soumission reçue
@@ -11502,6 +15054,11 @@ components:
         * `screening_rejected` - soumission non recevable
         * `decision_published` - décision publiée
         * `final_version_received` - version finale reçue
+        * `task_assigned` - tâche confiée
+        * `shift_assigned` - poste de bénévolat confié
+        * `shift_removed` - poste de bénévolat retiré
+        * `announcement` - annonce
+        * `survey_invitation` - questionnaire de satisfaction
     NotificationList:
       type: object
       properties:
@@ -12125,6 +15682,45 @@ components:
         * `discussant` - discussant
         * `moderator` - moderator
         * `panelist` - panelist
+    PatchedAnnouncementWriteRequest:
+      type: object
+      properties:
+        title_fr:
+          type: string
+          minLength: 1
+          maxLength: 150
+        title_en:
+          type: string
+          maxLength: 150
+        body_fr:
+          type: string
+        body_en:
+          type: string
+        on_news:
+          type: boolean
+        on_banner:
+          type: boolean
+        on_bell:
+          type: boolean
+        by_email:
+          type: boolean
+        segment:
+          type: string
+          maxLength: 64
+        banner_message_fr:
+          type: string
+          maxLength: 280
+        banner_message_en:
+          type: string
+          maxLength: 280
+        banner_starts_local:
+          type: string
+          format: date-time
+          nullable: true
+        banner_ends_local:
+          type: string
+          format: date-time
+          nullable: true
     PatchedAssignmentUpdateRequest:
       type: object
       properties:
@@ -12132,6 +15728,13 @@ components:
           type: string
           format: date-time
           description: Nouvelle échéance, à l'heure de l'édition.
+    PatchedBenefitUpdateRequest:
+      type: object
+      properties:
+        delivered_on:
+          type: string
+          format: date
+          nullable: true
     PatchedBillingIdentityRequest:
       type: object
       properties:
@@ -12192,6 +15795,31 @@ components:
           minLength: 1
           title: Préfixe des pro forma
           maxLength: 8
+    PatchedBudgetLineWriteRequest:
+      type: object
+      properties:
+        kind:
+          $ref: '#/components/schemas/BudgetKind'
+        category:
+          $ref: '#/components/schemas/BudgetCategory'
+        label:
+          type: string
+          maxLength: 200
+        planned:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        actual:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          nullable: true
+        note:
+          type: string
+          maxLength: 2000
+        position:
+          type: integer
+          minimum: 0
     PatchedCategoryRequest:
       type: object
       description: 'Catégorie et sa grille de tarifs (gestion). ``code`` : fixé à
@@ -12421,6 +16049,38 @@ components:
         position:
           type: integer
           maximum: 32767
+          minimum: 0
+    PatchedMealWriteRequest:
+      type: object
+      properties:
+        day:
+          type: string
+          format: date
+        kind:
+          $ref: '#/components/schemas/MealKind'
+        label_fr:
+          type: string
+          maxLength: 150
+        label_en:
+          type: string
+          maxLength: 150
+        include_registered:
+          type: boolean
+        option_code:
+          type: string
+          maxLength: 32
+        include_speakers:
+          type: boolean
+        include_committees:
+          type: boolean
+        include_volunteers:
+          type: boolean
+        margin_percent:
+          type: integer
+          maximum: 50
+          minimum: 0
+        position:
+          type: integer
           minimum: 0
     PatchedMenuItemRequest:
       type: object
@@ -12664,6 +16324,28 @@ components:
         published:
           type: boolean
           title: Publié
+    PatchedQuestionWriteRequest:
+      type: object
+      properties:
+        kind:
+          $ref: '#/components/schemas/QuestionKind'
+        label_fr:
+          type: string
+          minLength: 1
+          maxLength: 300
+        label_en:
+          type: string
+          maxLength: 300
+        choices:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+        required:
+          type: boolean
+        position:
+          type: integer
+          minimum: 0
     PatchedRegistrationSettingsRequest:
       type: object
       description: |-
@@ -12847,6 +16529,31 @@ components:
         instructions:
           type: string
           maxLength: 5000
+    PatchedShiftWriteRequest:
+      type: object
+      properties:
+        title_fr:
+          type: string
+          maxLength: 150
+        title_en:
+          type: string
+          maxLength: 150
+        place:
+          type: string
+          maxLength: 150
+        starts_local:
+          type: string
+          format: date-time
+        ends_local:
+          type: string
+          format: date-time
+        needed:
+          type: integer
+          maximum: 100
+          minimum: 1
+        instructions:
+          type: string
+          maxLength: 1000
     PatchedSignatureRequest:
       type: object
       description: 'Signature du signataire connecté (K18) : jamais le nom de stockage
@@ -12886,6 +16593,82 @@ components:
         speaker:
           type: integer
           nullable: true
+    PatchedSponsorLevelWriteRequest:
+      type: object
+      properties:
+        name_fr:
+          type: string
+          maxLength: 100
+        name_en:
+          type: string
+          maxLength: 100
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          nullable: true
+        benefits_fr:
+          type: string
+          maxLength: 2000
+        benefits_en:
+          type: string
+          maxLength: 2000
+        logo_size:
+          $ref: '#/components/schemas/LogoSize'
+        position:
+          type: integer
+          minimum: 0
+    PatchedSponsorWriteRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 150
+        level:
+          type: integer
+          nullable: true
+        website:
+          type: string
+          maxLength: 300
+        description_fr:
+          type: string
+          maxLength: 1000
+        description_en:
+          type: string
+          maxLength: 1000
+        published:
+          type: boolean
+        position:
+          type: integer
+          minimum: 0
+        contact_name:
+          type: string
+          maxLength: 150
+        contact_email:
+          type: string
+          maxLength: 254
+        contact_phone:
+          type: string
+          maxLength: 40
+        status:
+          $ref: '#/components/schemas/SponsorStatus'
+        agreed_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          nullable: true
+        received_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          nullable: true
+        received_on:
+          type: string
+          format: date
+          nullable: true
+        note:
+          type: string
+          maxLength: 2000
     PatchedSubmissionTypeRequest:
       type: object
       properties:
@@ -12973,6 +16756,61 @@ components:
           additionalProperties:
             type: boolean
           description: Code → accepté ; la version courante du texte est enregistrée.
+    PatchedSurveyWriteRequest:
+      type: object
+      properties:
+        scope:
+          $ref: '#/components/schemas/SurveyScope'
+        session:
+          type: integer
+          nullable: true
+        title_fr:
+          type: string
+          minLength: 1
+          maxLength: 150
+        title_en:
+          type: string
+          maxLength: 150
+        intro_fr:
+          type: string
+          maxLength: 2000
+        intro_en:
+          type: string
+          maxLength: 2000
+        opens_local:
+          type: string
+          format: date-time
+          nullable: true
+        closes_local:
+          type: string
+          format: date-time
+          nullable: true
+    PatchedTaskWriteRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+          maxLength: 5000
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+        priority:
+          $ref: '#/components/schemas/TaskPriority'
+        label:
+          type: string
+          maxLength: 50
+        assignee:
+          type: integer
+          nullable: true
+        due_date:
+          type: string
+          format: date
+          nullable: true
+        position:
+          type: integer
+          minimum: 0
     PatchedTrackRequest:
       type: object
       properties:
@@ -13004,6 +16842,61 @@ components:
         is_active:
           type: boolean
           title: Actif
+    PatchedVisitStaffWriteRequest:
+      type: object
+      properties:
+        technical_needs:
+          type: array
+          items:
+            $ref: '#/components/schemas/Equipment'
+        technical_note:
+          type: string
+          maxLength: 500
+        arrival_local:
+          type: string
+          format: date-time
+          nullable: true
+        arrival_means:
+          oneOf:
+          - $ref: '#/components/schemas/TravelMeans'
+          - $ref: '#/components/schemas/BlankEnum'
+        arrival_reference:
+          type: string
+          maxLength: 60
+        departure_local:
+          type: string
+          format: date-time
+          nullable: true
+        departure_means:
+          oneOf:
+          - $ref: '#/components/schemas/TravelMeans'
+          - $ref: '#/components/schemas/BlankEnum'
+        departure_reference:
+          type: string
+          maxLength: 60
+        accommodation_needed:
+          type: boolean
+        transfer_needed:
+          type: boolean
+        speaker_note:
+          type: string
+          maxLength: 1000
+        hotel:
+          type: string
+          maxLength: 150
+        check_in:
+          type: string
+          format: date
+          nullable: true
+        check_out:
+          type: string
+          format: date
+          nullable: true
+        status:
+          $ref: '#/components/schemas/VisitStatus'
+        internal_note:
+          type: string
+          maxLength: 2000
     PaymentCheck:
       type: object
       properties:
@@ -13712,6 +17605,37 @@ components:
           $ref: '#/components/schemas/PagePaths'
       required:
       - paths
+    PublicBanner:
+      type: object
+      properties:
+        banner:
+          allOf:
+          - $ref: '#/components/schemas/PublicBannerItem'
+          nullable: true
+      required:
+      - banner
+    PublicBannerItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        title_fr:
+          type: string
+        title_en:
+          type: string
+        message_fr:
+          type: string
+        message_en:
+          type: string
+        news:
+          type: boolean
+      required:
+      - id
+      - message_en
+      - message_fr
+      - news
+      - title_en
+      - title_fr
     PublicCategory:
       type: object
       properties:
@@ -14035,11 +17959,13 @@ components:
       - document
       - image
       - photo
+      - logo
       type: string
       description: |-
         * `document` - document
         * `image` - image
         * `photo` - photo de profil
+        * `logo` - logo de partenaire
     PublicFileRef:
       type: object
       description: 'Fichier public tel que le voient les pages : adresse, dimensions,
@@ -14147,6 +18073,29 @@ components:
       - label_fr
       - new_tab
       - page
+    PublicNewsItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        title_fr:
+          type: string
+        title_en:
+          type: string
+        body_fr:
+          type: string
+        body_en:
+          type: string
+        published_at:
+          type: string
+          format: date-time
+      required:
+      - body_en
+      - body_fr
+      - id
+      - published_at
+      - title_en
+      - title_fr
     PublicOption:
       type: object
       properties:
@@ -14675,6 +18624,130 @@ components:
       - edition
       - poster
       - site_url
+    PublicSpeakerProfile:
+      type: object
+      properties:
+        name:
+          type: string
+        institution:
+          type: string
+        bio:
+          type: string
+        photo_url:
+          type: string
+          nullable: true
+        talks:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicSpeakerTalk'
+      required:
+      - bio
+      - institution
+      - name
+      - photo_url
+      - talks
+    PublicSpeakerTalk:
+      type: object
+      properties:
+        session_id:
+          type: integer
+        session_title_fr:
+          type: string
+        session_title_en:
+          type: string
+        title_fr:
+          type: string
+        title_en:
+          type: string
+        starts_at:
+          type: string
+          format: date-time
+        ends_at:
+          type: string
+          format: date-time
+        room:
+          type: string
+          nullable: true
+      required:
+      - ends_at
+      - room
+      - session_id
+      - session_title_en
+      - session_title_fr
+      - starts_at
+      - title_en
+      - title_fr
+    PublicSpeakers:
+      type: object
+      properties:
+        timezone:
+          type: string
+        speakers:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicSpeakerProfile'
+      required:
+      - speakers
+      - timezone
+    PublicSponsorCard:
+      type: object
+      properties:
+        name:
+          type: string
+        website:
+          type: string
+        description_fr:
+          type: string
+        description_en:
+          type: string
+        logo_url:
+          type: string
+        logo_width:
+          type: integer
+          nullable: true
+        logo_height:
+          type: integer
+          nullable: true
+      required:
+      - description_en
+      - description_fr
+      - logo_height
+      - logo_url
+      - logo_width
+      - name
+      - website
+    PublicSponsorLevel:
+      type: object
+      properties:
+        name_fr:
+          type: string
+        name_en:
+          type: string
+        logo_size:
+          $ref: '#/components/schemas/LogoSize'
+        sponsors:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicSponsorCard'
+      required:
+      - logo_size
+      - name_en
+      - name_fr
+      - sponsors
+    PublicSponsors:
+      type: object
+      properties:
+        levels:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicSponsorLevel'
+        others:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicSponsorCard'
+      required:
+      - levels
+      - others
     PublicSubmissionType:
       type: object
       properties:
@@ -14875,6 +18948,97 @@ components:
       - session_title_fr
       - starts_at
       - version
+    Question:
+      type: object
+      properties:
+        id:
+          type: integer
+        position:
+          type: integer
+        kind:
+          $ref: '#/components/schemas/QuestionKind'
+        label_fr:
+          type: string
+        label_en:
+          type: string
+        choices:
+          type: array
+          items:
+            $ref: '#/components/schemas/Choice'
+        required:
+          type: boolean
+      required:
+      - choices
+      - id
+      - kind
+      - label_en
+      - label_fr
+      - position
+      - required
+    QuestionKind:
+      enum:
+      - rating
+      - single
+      - multiple
+      - text
+      type: string
+      description: |-
+        * `rating` - note de 1 à 5
+        * `single` - choix unique
+        * `multiple` - choix multiples
+        * `text` - texte libre
+    QuestionResult:
+      type: object
+      properties:
+        id:
+          type: integer
+        kind:
+          $ref: '#/components/schemas/QuestionKind'
+        label_fr:
+          type: string
+        label_en:
+          type: string
+        answers:
+          type: integer
+        average:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,2}(?:\.\d{0,2})?$
+          nullable: true
+        counts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Count'
+      required:
+      - answers
+      - average
+      - counts
+      - id
+      - kind
+      - label_en
+      - label_fr
+    QuestionWriteRequest:
+      type: object
+      properties:
+        kind:
+          $ref: '#/components/schemas/QuestionKind'
+        label_fr:
+          type: string
+          minLength: 1
+          maxLength: 300
+        label_en:
+          type: string
+          maxLength: 300
+        choices:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+        required:
+          type: boolean
+        position:
+          type: integer
+          minimum: 0
     Quote:
       type: object
       description: Prix calculé par le serveur, sans engagement (aucune place ni code
@@ -15095,6 +19259,8 @@ components:
     RegistrationEdition:
       type: object
       properties:
+        id:
+          type: integer
         code:
           type: string
         title_fr:
@@ -15105,6 +19271,7 @@ components:
           type: string
       required:
       - code
+      - id
       - timezone
       - title_en
       - title_fr
@@ -15178,6 +19345,44 @@ components:
         * `confirmed` - confirmée
         * `cancelled` - annulée
         * `expired` - expirée
+    ReportSection:
+      type: object
+      properties:
+        code:
+          type: string
+        label:
+          type: string
+        tables:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReportTable'
+      required:
+      - code
+      - label
+      - tables
+    ReportTable:
+      type: object
+      properties:
+        key:
+          type: string
+        title:
+          type: string
+        columns:
+          type: array
+          items:
+            type: string
+        rows:
+          type: array
+          items:
+            type: array
+            items:
+              type: string
+              nullable: true
+      required:
+      - columns
+      - key
+      - rows
+      - title
     RetiredTokenReason:
       enum:
       - cancelled
@@ -16286,6 +20491,16 @@ components:
           minimum: 0
       required:
       - section
+    SectionSummary:
+      type: object
+      properties:
+        code:
+          type: string
+        label:
+          type: string
+      required:
+      - code
+      - label
     SectionType:
       enum:
       - rich_text
@@ -16378,6 +20593,59 @@ components:
       required:
       - code
       - section_type
+    Segment:
+      type: object
+      properties:
+        code:
+          type: string
+        label:
+          type: string
+        recipients:
+          type: integer
+      required:
+      - code
+      - label
+      - recipients
+    SendingStats:
+      type: object
+      properties:
+        recipients:
+          type: integer
+        delivered:
+          type: integer
+        emails:
+          type: integer
+        sent:
+          type: integer
+        queued:
+          type: integer
+        failed:
+          type: integer
+        cancelled:
+          type: integer
+        remaining_hours:
+          type: integer
+      required:
+      - cancelled
+      - delivered
+      - emails
+      - failed
+      - queued
+      - recipients
+      - remaining_hours
+      - sent
+    SendingStatus:
+      enum:
+      - none
+      - queuing
+      - queued
+      - cancelled
+      type: string
+      description: |-
+        * `none` - aucun envoi
+        * `queuing` - mise en file
+        * `queued` - en file d'envoi
+        * `cancelled` - annulé
     ServiceStatus:
       enum:
       - ok
@@ -16563,6 +20831,89 @@ components:
         instructions:
           type: string
           maxLength: 5000
+    Shift:
+      type: object
+      properties:
+        id:
+          type: integer
+        title_fr:
+          type: string
+        title_en:
+          type: string
+        place:
+          type: string
+        starts_at:
+          type: string
+          format: date-time
+        ends_at:
+          type: string
+          format: date-time
+        starts_local:
+          type: string
+        ends_local:
+          type: string
+        needed:
+          type: integer
+        instructions:
+          type: string
+        volunteers:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaskPerson'
+        missing:
+          type: integer
+      required:
+      - ends_at
+      - ends_local
+      - id
+      - instructions
+      - missing
+      - needed
+      - place
+      - starts_at
+      - starts_local
+      - title_en
+      - title_fr
+      - volunteers
+    ShiftBoard:
+      type: object
+      properties:
+        shifts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Shift'
+        volunteers:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaskPerson'
+      required:
+      - shifts
+      - volunteers
+    ShiftWriteRequest:
+      type: object
+      properties:
+        title_fr:
+          type: string
+          maxLength: 150
+        title_en:
+          type: string
+          maxLength: 150
+        place:
+          type: string
+          maxLength: 150
+        starts_local:
+          type: string
+          format: date-time
+        ends_local:
+          type: string
+          format: date-time
+        needed:
+          type: integer
+          maximum: 100
+          minimum: 1
+        instructions:
+          type: string
+          maxLength: 1000
     Signatory:
       type: object
       description: 'Signature désignable (K18) : jamais l''image ni son empreinte.'
@@ -16810,6 +21161,411 @@ components:
         position:
           type: integer
           minimum: 0
+    Sponsor:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+          title: Nom
+        level:
+          type: integer
+          readOnly: true
+          nullable: true
+          title: Niveau
+        published:
+          type: boolean
+          readOnly: true
+          title: Publié sur le portail
+        status:
+          allOf:
+          - $ref: '#/components/schemas/SponsorStatus'
+          readOnly: true
+          title: Statut
+        agreed_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          readOnly: true
+          nullable: true
+          title: Contribution convenue
+        received_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          readOnly: true
+          nullable: true
+          title: Montant reçu
+        received_on:
+          type: string
+          format: date
+          readOnly: true
+          nullable: true
+          title: Reçu le
+        position:
+          type: integer
+          readOnly: true
+          title: Ordre
+        logo:
+          allOf:
+          - $ref: '#/components/schemas/SponsorLogo'
+          nullable: true
+          readOnly: true
+        benefits_due:
+          type: integer
+          readOnly: true
+        benefits_delivered:
+          type: integer
+          readOnly: true
+      required:
+      - agreed_amount
+      - benefits_delivered
+      - benefits_due
+      - id
+      - level
+      - logo
+      - name
+      - position
+      - published
+      - received_amount
+      - received_on
+      - status
+    SponsorBenefit:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        label:
+          type: string
+          readOnly: true
+          title: Contrepartie
+        delivered_on:
+          type: string
+          format: date
+          readOnly: true
+          nullable: true
+          title: Livrée le
+        position:
+          type: integer
+          readOnly: true
+          title: Ordre
+      required:
+      - delivered_on
+      - id
+      - label
+      - position
+    SponsorDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+          title: Nom
+        level:
+          type: integer
+          readOnly: true
+          nullable: true
+          title: Niveau
+        published:
+          type: boolean
+          readOnly: true
+          title: Publié sur le portail
+        status:
+          allOf:
+          - $ref: '#/components/schemas/SponsorStatus'
+          readOnly: true
+          title: Statut
+        agreed_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          readOnly: true
+          nullable: true
+          title: Contribution convenue
+        received_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          readOnly: true
+          nullable: true
+          title: Montant reçu
+        received_on:
+          type: string
+          format: date
+          readOnly: true
+          nullable: true
+          title: Reçu le
+        position:
+          type: integer
+          readOnly: true
+          title: Ordre
+        logo:
+          allOf:
+          - $ref: '#/components/schemas/SponsorLogo'
+          nullable: true
+          readOnly: true
+        benefits_due:
+          type: integer
+          readOnly: true
+        benefits_delivered:
+          type: integer
+          readOnly: true
+        website:
+          type: string
+          format: uri
+          readOnly: true
+          title: Site
+        description_fr:
+          type: string
+          readOnly: true
+          title: Présentation (FR)
+        description_en:
+          type: string
+          readOnly: true
+          title: Présentation (EN)
+        contact_name:
+          type: string
+          readOnly: true
+          title: Contact
+        contact_email:
+          type: string
+          format: email
+          readOnly: true
+          title: Adresse du contact
+        contact_phone:
+          type: string
+          readOnly: true
+          title: Téléphone du contact
+        note:
+          type: string
+          readOnly: true
+          title: Note interne
+        benefits:
+          type: array
+          items:
+            $ref: '#/components/schemas/SponsorBenefit'
+          readOnly: true
+      required:
+      - agreed_amount
+      - benefits
+      - benefits_delivered
+      - benefits_due
+      - contact_email
+      - contact_name
+      - contact_phone
+      - description_en
+      - description_fr
+      - id
+      - level
+      - logo
+      - name
+      - note
+      - position
+      - published
+      - received_amount
+      - received_on
+      - status
+      - website
+    SponsorLevel:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name_fr:
+          type: string
+          readOnly: true
+          title: Nom (FR)
+        name_en:
+          type: string
+          readOnly: true
+          title: Nom (EN)
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          readOnly: true
+          nullable: true
+          title: Montant indicatif
+        benefits_fr:
+          type: string
+          readOnly: true
+          title: Contreparties (FR)
+        benefits_en:
+          type: string
+          readOnly: true
+          title: Contreparties (EN)
+        logo_size:
+          allOf:
+          - $ref: '#/components/schemas/LogoSize'
+          readOnly: true
+          title: Taille du logo
+        position:
+          type: integer
+          readOnly: true
+          title: Ordre
+        sponsor_count:
+          type: integer
+          readOnly: true
+      required:
+      - amount
+      - benefits_en
+      - benefits_fr
+      - id
+      - logo_size
+      - name_en
+      - name_fr
+      - position
+      - sponsor_count
+    SponsorLevelWriteRequest:
+      type: object
+      properties:
+        name_fr:
+          type: string
+          maxLength: 100
+        name_en:
+          type: string
+          maxLength: 100
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          nullable: true
+        benefits_fr:
+          type: string
+          maxLength: 2000
+        benefits_en:
+          type: string
+          maxLength: 2000
+        logo_size:
+          $ref: '#/components/schemas/LogoSize'
+        position:
+          type: integer
+          minimum: 0
+    SponsorLogo:
+      type: object
+      properties:
+        url:
+          type: string
+        preview_url:
+          type: string
+          description: Aperçu dans la gestion (authentifié), partenaire publié ou
+            non.
+        width:
+          type: integer
+          nullable: true
+        height:
+          type: integer
+          nullable: true
+      required:
+      - height
+      - preview_url
+      - url
+      - width
+    SponsorStatus:
+      enum:
+      - prospect
+      - agreed
+      - received
+      - declined
+      type: string
+      description: |-
+        * `prospect` - prospect
+        * `agreed` - accord conclu
+        * `received` - contribution reçue
+        * `declined` - refus
+    SponsorTotals:
+      type: object
+      properties:
+        currency:
+          type: string
+        agreed:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+        received:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+        by_status:
+          type: object
+          additionalProperties:
+            type: integer
+      required:
+      - agreed
+      - by_status
+      - currency
+      - received
+    SponsorWriteRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 150
+        level:
+          type: integer
+          nullable: true
+        website:
+          type: string
+          maxLength: 300
+        description_fr:
+          type: string
+          maxLength: 1000
+        description_en:
+          type: string
+          maxLength: 1000
+        published:
+          type: boolean
+        position:
+          type: integer
+          minimum: 0
+        contact_name:
+          type: string
+          maxLength: 150
+        contact_email:
+          type: string
+          maxLength: 254
+        contact_phone:
+          type: string
+          maxLength: 40
+        status:
+          $ref: '#/components/schemas/SponsorStatus'
+        agreed_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          nullable: true
+        received_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          nullable: true
+        received_on:
+          type: string
+          format: date
+          nullable: true
+        note:
+          type: string
+          maxLength: 2000
+    Sponsors:
+      type: object
+      properties:
+        totals:
+          $ref: '#/components/schemas/SponsorTotals'
+        sponsors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Sponsor'
+      required:
+      - sponsors
+      - totals
     Submission:
       type: object
       description: Vue de l'auteur sur **sa** soumission.
@@ -17575,6 +22331,208 @@ components:
       required:
       - code
       - label_fr
+    Subscription:
+      type: object
+      properties:
+        subscribed:
+          type: boolean
+      required:
+      - subscribed
+    SubscriptionRequest:
+      type: object
+      properties:
+        subscribed:
+          type: boolean
+      required:
+      - subscribed
+    Survey:
+      type: object
+      properties:
+        id:
+          type: integer
+        scope:
+          $ref: '#/components/schemas/SurveyScope'
+        session:
+          type: integer
+          nullable: true
+        session_title:
+          type: string
+        title_fr:
+          type: string
+        title_en:
+          type: string
+        intro_fr:
+          type: string
+        intro_en:
+          type: string
+        opens_local:
+          type: string
+          nullable: true
+        closes_local:
+          type: string
+          nullable: true
+        status:
+          $ref: '#/components/schemas/SurveyStatus'
+        is_open:
+          type: boolean
+        locked:
+          type: boolean
+        stats:
+          $ref: '#/components/schemas/SurveyStats'
+      required:
+      - closes_local
+      - id
+      - intro_en
+      - intro_fr
+      - is_open
+      - locked
+      - opens_local
+      - scope
+      - session
+      - session_title
+      - stats
+      - status
+      - title_en
+      - title_fr
+    SurveyCreateRequest:
+      type: object
+      properties:
+        scope:
+          $ref: '#/components/schemas/SurveyScope'
+        session:
+          type: integer
+          nullable: true
+        title_fr:
+          type: string
+          minLength: 1
+          maxLength: 150
+        title_en:
+          type: string
+          maxLength: 150
+        intro_fr:
+          type: string
+          maxLength: 2000
+        intro_en:
+          type: string
+          maxLength: 2000
+        opens_local:
+          type: string
+          format: date-time
+          nullable: true
+        closes_local:
+          type: string
+          format: date-time
+          nullable: true
+        default_questions:
+          type: boolean
+          default: true
+    SurveyDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+        scope:
+          $ref: '#/components/schemas/SurveyScope'
+        session:
+          type: integer
+          nullable: true
+        session_title:
+          type: string
+        title_fr:
+          type: string
+        title_en:
+          type: string
+        intro_fr:
+          type: string
+        intro_en:
+          type: string
+        opens_local:
+          type: string
+          nullable: true
+        closes_local:
+          type: string
+          nullable: true
+        status:
+          $ref: '#/components/schemas/SurveyStatus'
+        is_open:
+          type: boolean
+        locked:
+          type: boolean
+        stats:
+          $ref: '#/components/schemas/SurveyStats'
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Question'
+      required:
+      - closes_local
+      - id
+      - intro_en
+      - intro_fr
+      - is_open
+      - locked
+      - opens_local
+      - questions
+      - scope
+      - session
+      - session_title
+      - stats
+      - status
+      - title_en
+      - title_fr
+    SurveyResults:
+      type: object
+      properties:
+        invited:
+          type: integer
+        answered:
+          type: integer
+        responses:
+          type: integer
+        threshold:
+          type: integer
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestionResult'
+      required:
+      - answered
+      - invited
+      - questions
+      - responses
+      - threshold
+    SurveyScope:
+      enum:
+      - global
+      - session
+      type: string
+      description: |-
+        * `global` - conférence
+        * `session` - session
+    SurveyStats:
+      type: object
+      properties:
+        invited:
+          type: integer
+        answered:
+          type: integer
+        responses:
+          type: integer
+        threshold:
+          type: integer
+      required:
+      - answered
+      - invited
+      - responses
+      - threshold
+    SurveyStatus:
+      enum:
+      - draft
+      - published
+      type: string
+      description: |-
+        * `draft` - brouillon
+        * `published` - publié
     SyncItemRequest:
       type: object
       properties:
@@ -17628,6 +22586,339 @@ components:
             $ref: '#/components/schemas/CheckinResult'
       required:
       - results
+    Task:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          readOnly: true
+          title: Titre
+        description:
+          type: string
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/TaskStatus'
+          readOnly: true
+          title: Statut
+        priority:
+          allOf:
+          - $ref: '#/components/schemas/TaskPriority'
+          readOnly: true
+          title: Priorité
+        label:
+          type: string
+          readOnly: true
+          title: Étiquette
+        assignee:
+          allOf:
+          - $ref: '#/components/schemas/TaskPerson'
+          nullable: true
+          readOnly: true
+        due_date:
+          type: string
+          format: date
+          readOnly: true
+          nullable: true
+          title: Échéance
+        overdue:
+          type: boolean
+          readOnly: true
+        position:
+          type: integer
+          readOnly: true
+          title: Position dans la colonne
+        revision:
+          type: integer
+          readOnly: true
+          title: Révision
+        created_by:
+          allOf:
+          - $ref: '#/components/schemas/TaskPerson'
+          nullable: true
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        done_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Terminée le
+        archived_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Archivée le
+        comment_count:
+          type: integer
+          readOnly: true
+        attachment_count:
+          type: integer
+          readOnly: true
+      required:
+      - archived_at
+      - assignee
+      - attachment_count
+      - comment_count
+      - created_at
+      - created_by
+      - description
+      - done_at
+      - due_date
+      - id
+      - label
+      - overdue
+      - position
+      - priority
+      - revision
+      - status
+      - title
+      - updated_at
+    TaskAttachment:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+          title: Nom du fichier
+        kind:
+          type: string
+          readOnly: true
+          title: Type
+        size:
+          type: integer
+          readOnly: true
+          title: Taille (octets)
+        uploaded_by:
+          allOf:
+          - $ref: '#/components/schemas/TaskPerson'
+          nullable: true
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - kind
+      - name
+      - size
+      - uploaded_by
+    TaskComment:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        author:
+          allOf:
+          - $ref: '#/components/schemas/TaskPerson'
+          nullable: true
+          readOnly: true
+        body:
+          type: string
+          readOnly: true
+          title: Texte
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - author
+      - body
+      - created_at
+      - id
+    TaskCommentWriteRequest:
+      type: object
+      properties:
+        body:
+          type: string
+          minLength: 1
+          maxLength: 2000
+      required:
+      - body
+    TaskDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          readOnly: true
+          title: Titre
+        description:
+          type: string
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/TaskStatus'
+          readOnly: true
+          title: Statut
+        priority:
+          allOf:
+          - $ref: '#/components/schemas/TaskPriority'
+          readOnly: true
+          title: Priorité
+        label:
+          type: string
+          readOnly: true
+          title: Étiquette
+        assignee:
+          allOf:
+          - $ref: '#/components/schemas/TaskPerson'
+          nullable: true
+          readOnly: true
+        due_date:
+          type: string
+          format: date
+          readOnly: true
+          nullable: true
+          title: Échéance
+        overdue:
+          type: boolean
+          readOnly: true
+        position:
+          type: integer
+          readOnly: true
+          title: Position dans la colonne
+        revision:
+          type: integer
+          readOnly: true
+          title: Révision
+        created_by:
+          allOf:
+          - $ref: '#/components/schemas/TaskPerson'
+          nullable: true
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        done_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Terminée le
+        archived_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: Archivée le
+        comment_count:
+          type: integer
+          readOnly: true
+        attachment_count:
+          type: integer
+          readOnly: true
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaskComment'
+          readOnly: true
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaskAttachment'
+          readOnly: true
+      required:
+      - archived_at
+      - assignee
+      - attachment_count
+      - attachments
+      - comment_count
+      - comments
+      - created_at
+      - created_by
+      - description
+      - done_at
+      - due_date
+      - id
+      - label
+      - overdue
+      - position
+      - priority
+      - revision
+      - status
+      - title
+      - updated_at
+    TaskPerson:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+      required:
+      - id
+      - name
+    TaskPriority:
+      enum:
+      - low
+      - normal
+      - high
+      type: string
+      description: |-
+        * `low` - basse
+        * `normal` - normale
+        * `high` - haute
+    TaskStatus:
+      enum:
+      - todo
+      - doing
+      - done
+      type: string
+      description: |-
+        * `todo` - à faire
+        * `doing` - en cours
+        * `done` - terminée
+    TaskWriteRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+          maxLength: 5000
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+        priority:
+          $ref: '#/components/schemas/TaskPriority'
+        label:
+          type: string
+          maxLength: 50
+        assignee:
+          type: integer
+          nullable: true
+        due_date:
+          type: string
+          format: date
+          nullable: true
+        position:
+          type: integer
+          minimum: 0
     TemplateCustomized:
       type: object
       properties:
@@ -17794,6 +23085,18 @@ components:
       required:
       - code
       - name_fr
+    TravelMeans:
+      enum:
+      - plane
+      - train
+      - road
+      - other
+      type: string
+      description: |-
+        * `plane` - avion
+        * `train` - train
+        * `road` - route
+        * `other` - autre
     UnreadCount:
       type: object
       properties:
@@ -17801,6 +23104,25 @@ components:
           type: integer
       required:
       - unread
+    UnsubscribeRequest:
+      type: object
+      properties:
+        token:
+          type: string
+          minLength: 1
+          maxLength: 400
+      required:
+      - token
+    Unsubscribed:
+      type: object
+      properties:
+        edition_title_fr:
+          type: string
+        edition_title_en:
+          type: string
+      required:
+      - edition_title_en
+      - edition_title_fr
     UserRoleStatus:
       enum:
       - active
@@ -17825,6 +23147,55 @@ components:
       description: |-
         * `valid` - valid
         * `revoked` - revoked
+    VisitSpeakerWriteRequest:
+      type: object
+      properties:
+        technical_needs:
+          type: array
+          items:
+            $ref: '#/components/schemas/Equipment'
+        technical_note:
+          type: string
+          maxLength: 500
+        arrival_local:
+          type: string
+          format: date-time
+          nullable: true
+        arrival_means:
+          oneOf:
+          - $ref: '#/components/schemas/TravelMeans'
+          - $ref: '#/components/schemas/BlankEnum'
+        arrival_reference:
+          type: string
+          maxLength: 60
+        departure_local:
+          type: string
+          format: date-time
+          nullable: true
+        departure_means:
+          oneOf:
+          - $ref: '#/components/schemas/TravelMeans'
+          - $ref: '#/components/schemas/BlankEnum'
+        departure_reference:
+          type: string
+          maxLength: 60
+        accommodation_needed:
+          type: boolean
+        transfer_needed:
+          type: boolean
+        speaker_note:
+          type: string
+          maxLength: 1000
+    VisitStatus:
+      enum:
+      - to_arrange
+      - booked
+      - confirmed
+      type: string
+      description: |-
+        * `to_arrange` - à organiser
+        * `booked` - réservée
+        * `confirmed` - confirmée
     WaiverRequest:
       type: object
       properties:

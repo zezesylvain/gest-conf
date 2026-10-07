@@ -18,3 +18,4 @@ pypdf==6.19.0                 # contrôle et nettoyage des PDF déposés (F2, pl
 fpdf2==2.8.9                  # factures, avoirs et pro forma en PDF (J8, plan L6), pur Python ; LGPL-3.0
 segno==1.6.6                  # QR des inscriptions (J11, plan L6), pur Python, sans dépendance ; BSD
 pyHanko==0.37.0               # signature PAdES des attestations (K19, plan L7 ; bilan de L7.0) ; MIT
+openpyxl==3.1.5              # exports XLSX (N13, plan L8 ; bilan de L8.0), pur Python ; MIT

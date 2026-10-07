@@ -30,7 +30,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { CheckinDesk, DeskResult } from '../../core/checkin-desk';
 import { EventsApi } from '../../core/events-api';
 import { editionCapabilities, errorMessages } from '../../core/page-support';
-import { QrScanner } from '../../core/qr-scanner';
+import { preparedDecoder, QrScanner } from '../../core/qr-scanner';
 import { isUnreachable, ReceptionInstaller } from '../../core/reception';
 import {
   deviceName,
@@ -136,6 +136,8 @@ export class ReceptionPage implements OnInit, OnDestroy {
   async ngOnInit(): Promise<void> {
     const id = this.edition();
     void this.installer.install();
+    // Décodeur chargé tout de suite : la caméra peut être allumée plus tard, sans réseau.
+    preparedDecoder().catch(() => undefined);
     try {
       await this.desk.init(id);
     } catch {

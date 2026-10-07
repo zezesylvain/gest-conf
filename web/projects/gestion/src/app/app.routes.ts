@@ -178,6 +178,128 @@ export const routes: Routes = [
         canActivate: [capabilityGuard('registrations.manage')],
         loadComponent: () => import('./pages/events/counter-page').then((m) => m.CounterPage),
       },
+      // « Mon planning » du bénévole (plan L8, N9).
+      {
+        path: 'jour-j/mon-planning',
+        title: 'gestion.myShifts.title',
+        canActivate: [capabilityGuard('shifts.own')],
+        loadComponent: () => import('./pages/logistics/my-shifts-page').then((m) => m.MyShiftsPage),
+      },
+      // Organisation du CO (plan L8, N3, N4, N14) : tâches, budget, fil d'activité.
+      {
+        path: 'organisation/taches',
+        title: 'gestion.tasks.title',
+        canActivate: [capabilityGuard('tasks.read')],
+        loadComponent: () => import('./pages/organisation/tasks-page').then((m) => m.TasksPage),
+      },
+      {
+        path: 'organisation/taches/:taskId',
+        title: 'gestion.tasks.detail.title',
+        canActivate: [capabilityGuard('tasks.read')],
+        loadComponent: () =>
+          import('./pages/organisation/task-detail-page').then((m) => m.TaskDetailPage),
+      },
+      {
+        path: 'organisation/budget',
+        title: 'gestion.budget.title',
+        canActivate: [capabilityGuard('budget.read')],
+        loadComponent: () => import('./pages/organisation/budget-page').then((m) => m.BudgetPage),
+      },
+      {
+        path: 'organisation/activite',
+        title: 'gestion.activity.title',
+        canActivate: [capabilityGuard('tasks.read')],
+        loadComponent: () =>
+          import('./pages/organisation/activity-page').then((m) => m.ActivityPage),
+      },
+      // Logistique (plan L8, N6 à N9) : intervenants invités, restauration et régimes,
+      // postes des bénévoles.
+      {
+        path: 'logistique/intervenants',
+        title: 'gestion.speakers.title',
+        canActivate: [capabilityGuard('logistics.read')],
+        loadComponent: () => import('./pages/logistics/speakers-page').then((m) => m.SpeakersPage),
+      },
+      {
+        path: 'logistique/intervenants/:userId',
+        title: 'gestion.speakers.detail.title',
+        canActivate: [capabilityGuard('logistics.read')],
+        loadComponent: () =>
+          import('./pages/logistics/visit-detail-page').then((m) => m.VisitDetailPage),
+      },
+      {
+        path: 'logistique/restauration',
+        title: 'gestion.catering.title',
+        canActivate: [capabilityGuard('logistics.read')],
+        loadComponent: () => import('./pages/logistics/catering-page').then((m) => m.CateringPage),
+      },
+      {
+        path: 'logistique/benevoles',
+        title: 'gestion.shifts.title',
+        canActivate: [capabilityGuard('volunteers.plan')],
+        loadComponent: () => import('./pages/logistics/shifts-page').then((m) => m.ShiftsPage),
+      },
+      // Partenaires (plan L8, N5) : liste, niveaux (déclarés avant la fiche, dont l'adresse
+      // prendrait sinon « niveaux » pour un identifiant), fiche.
+      {
+        path: 'partenaires',
+        title: 'gestion.sponsors.title',
+        canActivate: [capabilityGuard('sponsors.read')],
+        loadComponent: () => import('./pages/sponsors/sponsors-page').then((m) => m.SponsorsPage),
+      },
+      {
+        path: 'partenaires/niveaux',
+        title: 'gestion.sponsorLevels.title',
+        canActivate: [capabilityGuard('sponsors.read')],
+        loadComponent: () =>
+          import('./pages/sponsors/sponsor-levels-page').then((m) => m.SponsorLevelsPage),
+      },
+      {
+        path: 'partenaires/:sponsorId',
+        title: 'gestion.sponsors.detail.title',
+        canActivate: [capabilityGuard('sponsors.read')],
+        loadComponent: () =>
+          import('./pages/sponsors/sponsor-detail-page').then((m) => m.SponsorDetailPage),
+      },
+      // Communication (plan L8, N10 à N12) : annonces et envois groupés, questionnaires.
+      {
+        path: 'communication/annonces',
+        title: 'gestion.announcements.title',
+        canActivate: [capabilityGuard('communications.send')],
+        loadComponent: () =>
+          import('./pages/communication/announcements-page').then((m) => m.AnnouncementsPage),
+      },
+      {
+        path: 'communication/annonces/:announcementId',
+        title: 'gestion.announcements.detail.title',
+        canActivate: [capabilityGuard('communications.send')],
+        loadComponent: () =>
+          import('./pages/communication/announcement-detail-page').then(
+            (m) => m.AnnouncementDetailPage,
+          ),
+      },
+      {
+        path: 'communication/questionnaires',
+        title: 'gestion.surveys.title',
+        canActivate: [capabilityGuard('surveys.manage')],
+        loadComponent: () =>
+          import('./pages/communication/surveys-page').then((m) => m.SurveysPage),
+      },
+      {
+        path: 'communication/questionnaires/:surveyId',
+        title: 'gestion.surveys.detail.title',
+        canActivate: [capabilityGuard('surveys.manage')],
+        loadComponent: () =>
+          import('./pages/communication/survey-detail-page').then((m) => m.SurveyDetailPage),
+      },
+      // Rapports (plan L8, N13) : la lecture de l'édition ouvre l'écran ; chaque section est
+      // revérifiée par le serveur contre sa capacité.
+      {
+        path: 'rapports',
+        title: 'gestion.reports.title',
+        canActivate: [capabilityGuard('edition.read')],
+        loadComponent: () => import('./pages/reports/reports-page').then((m) => m.ReportsPage),
+      },
       // Attestations, lettres d'invitation et signature (plan L7, K9 à K12, K18, K19).
       {
         path: 'attestations',

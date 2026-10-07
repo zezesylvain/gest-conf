@@ -14,5 +14,10 @@ export const NOTIFICATION_KIND: NotificationKind[] = [
   'draft_reminder',
   'screening_rejected',
   'decision_published',
-  'final_version_received'
+  'final_version_received',
+  'task_assigned',
+  'shift_assigned',
+  'shift_removed',
+  'announcement',
+  'survey_invitation'
 ];

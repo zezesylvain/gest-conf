@@ -47,6 +47,8 @@ def test_throttle_settings_are_scoped_only():
         "payment_webhook": "120/min",
         "signature_upload": "20/hour",
         "certificate_verify": "30/min",
+        "portal_banner": "60/min",
+        "announcement_unsubscribe": "30/hour",
     }
 
 

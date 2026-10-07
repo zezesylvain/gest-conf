@@ -134,6 +134,7 @@ dossier de l'application et y écrit le chemin du venv (`VENV_ACTIVATE`) : le cr
 41 * * * *   $HOME/gestconf-app/deploy/cron.sh sync_payments
 17 3 * * *   $HOME/gestconf-app/deploy/cron.sh cleanup
 47 3 * * *   $HOME/gestconf-app/deploy/cron.sh check_integrity
+53 6 * * *   $HOME/gestconf-app/deploy/cron.sh remind_tasks
 ```
 
 - `close_call` (toutes les heures) : à la clôture de l'appel, fait passer les soumissions en
@@ -152,6 +153,9 @@ dossier de l'application et y écrit le chemin du venv (`VENV_ACTIVATE`) : le cr
   les tentatives en cours (notification perdue ou en retard), abandonne celles de plus de sept
   jours et crée les compteurs de facturation de l'année (plan L6, J6, RG-15). Sans
   fournisseur configuré, elle ne fait que les compteurs.
+- `remind_tasks` (quotidienne, le matin) : récapitulatif à chaque responsable de ses tâches du
+  comité d'organisation en retard ou à échéance sous deux jours, une fois par jour et par
+  édition (plan L8, N3).
 - `check_integrity` (quotidienne, lecture seule) : doublons d'adresses vérifiées et de 2FA
   (contraintes que MariaDB ne crée pas), cohérence invitations/rôles, taille du cache, tâches
   en échec. Les anomalies partent par e-mail aux opérateurs (`GESTCONF_OPERATORS`), sans

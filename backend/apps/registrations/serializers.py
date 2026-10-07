@@ -291,6 +291,9 @@ class QuoteSerializer(serializers.Serializer):
 
 
 class RegistrationEditionSerializer(serializers.Serializer):
+    # Identifiant : l'espace compte en a besoin pour les préférences de l'édition (régime,
+    # annonces ; plan L8, N7, N11), un participant n'ayant pas forcément de rôle.
+    id = serializers.IntegerField()
     code = serializers.CharField()
     title_fr = serializers.CharField()
     title_en = serializers.CharField()
@@ -353,6 +356,7 @@ def registration_data(registration) -> dict:
         "id": registration.pk,
         "reference": registration.reference,
         "edition": {
+            "id": edition.pk,
             "code": edition.code,
             "title_fr": edition.title_fr,
             "title_en": edition.title_en,

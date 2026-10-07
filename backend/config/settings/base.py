@@ -52,6 +52,10 @@ INSTALLED_APPS = [
     "apps.registrations",
     "apps.payments",
     "apps.events",
+    "apps.logistics",
+    "apps.sponsors",
+    "apps.surveys",
+    "apps.reports",
     # Après les applications du projet : leurs gabarits d'e-mails (account/email/*) priment.
     "allauth",
     "allauth.account",
@@ -295,6 +299,9 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": ["apps.core.authentication.SessionAuthentication"],
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
+    # Requête de fichier (Accept: text/csv, application/pdf…) : repli sur le JSON au lieu
+    # d'un 406, la vue servant elle-même son fichier (bilan de L8.10).
+    "DEFAULT_CONTENT_NEGOTIATION_CLASS": "apps.core.negotiation.FileAwareContentNegotiation",
     "DEFAULT_PARSER_CLASSES": ["rest_framework.parsers.JSONParser"],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_FILTER_BACKENDS": [
@@ -330,6 +337,10 @@ REST_FRAMEWORK = {
         "signature_upload": "20/hour",
         # Vérification publique des attestations (K10), par adresse IP.
         "certificate_verify": "30/min",
+        # Annonces (plan L8, N10 et N11) : bandeau lu par le portail et lien de désabonnement,
+        # par adresse IP.
+        "portal_banner": "60/min",
+        "announcement_unsubscribe": "30/hour",
     },
     "NUM_PROXIES": GESTCONF_TRUSTED_PROXY_COUNT,
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
@@ -385,6 +396,23 @@ SPECTACULAR_SETTINGS = {
         "SignatureLayout": "apps.events.models.SignatureLayout",
         "VerificationKind": "apps.events.serializers.VERIFICATION_KIND_CHOICES",
         "VerificationStatus": "apps.events.serializers.VERIFICATION_STATUS_CHOICES",
+        # Plan L8 : organisation.
+        "TaskStatus": "apps.logistics.models.TaskStatus",
+        "TaskPriority": "apps.logistics.models.TaskPriority",
+        "BudgetKind": "apps.logistics.models.BudgetKind",
+        "BudgetCategory": "apps.logistics.models.BudgetCategory",
+        "BudgetSource": "apps.logistics.models.BudgetSource",
+        "SponsorStatus": "apps.sponsors.models.SponsorStatus",
+        "LogoSize": "apps.sponsors.models.LogoSize",
+        "TravelMeans": "apps.logistics.models.TravelMeans",
+        "VisitStatus": "apps.logistics.models.VisitStatus",
+        "Diet": "apps.logistics.models.Diet",
+        "MealKind": "apps.logistics.models.MealKind",
+        "AnnouncementStatus": "apps.communications.models.AnnouncementStatus",
+        "SendingStatus": "apps.communications.models.SendingStatus",
+        "SurveyScope": "apps.surveys.models.SurveyScope",
+        "SurveyStatus": "apps.surveys.models.SurveyStatus",
+        "QuestionKind": "apps.surveys.models.QuestionKind",
         "InvitableRole": "apps.accounts.roles.InvitableRole",
         "OcFunction": "apps.accounts.roles.OcFunction",
         "UserRoleStatus": "apps.accounts.models.UserRoleStatus",

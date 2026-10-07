@@ -64,6 +64,22 @@ export async function createDecoder(
   };
 }
 
+let prepared: Promise<FrameDecoder> | null = null;
+
+/**
+ * Décodeur partagé, préparé dès l'ouverture de l'écran d'accueil (bilan de L7.8) : `jsQR`
+ * est ainsi chargé tant que le réseau est là, et non au premier allumage de la caméra, qui
+ * peut survenir hors ligne avant que le service worker n'ait tout mis en cache. Un échec
+ * n'est pas retenu : l'appel suivant réessaie.
+ */
+export function preparedDecoder(): Promise<FrameDecoder> {
+  prepared ??= createDecoder().catch((error: unknown) => {
+    prepared = null;
+    throw error;
+  });
+  return prepared;
+}
+
 /**
  * Un badge reste devant la caméra plusieurs images de suite : le même texte n'est rendu
  * qu'une fois par fenêtre de `windowMs` (un autre badge passe aussitôt).
@@ -97,7 +113,7 @@ export class QrScanner {
     private readonly video: HTMLVideoElement,
     private readonly canvas: HTMLCanvasElement,
     private readonly onCode: (text: string) => void,
-    private readonly decoder: () => Promise<FrameDecoder> = () => createDecoder(),
+    private readonly decoder: () => Promise<FrameDecoder> = preparedDecoder,
   ) {}
 
   get active(): boolean {

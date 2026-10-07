@@ -1,0 +1,139 @@
+<gc-page-header
+  [heading]="'gestion.tasks.title' | translate"
+  [lead]="'gestion.tasks.lead' | translate"
+/>
+<div aria-live="polite">
+  @if (status()) {
+    <p class="notice" role="status">{{ status() }}</p>
+  }
+</div>
+<gc-error-summary [messages]="errors()" />
+
+<div class="filters">
+  <mat-checkbox [checked]="mine()" (change)="toggleMine($event.checked)">
+    {{ 'gestion.tasks.mine' | translate }}
+  </mat-checkbox>
+  <mat-checkbox [checked]="archived()" (change)="toggleArchived($event.checked)">
+    {{ 'gestion.tasks.archived' | translate }}
+  </mat-checkbox>
+  <a [routerLink]="['/editions', editionId(), 'organisation', 'activite']">{{
+    'gestion.tasks.activityLink' | translate
+  }}</a>
+</div>
+
+@if (canWrite() && !archived()) {
+  <section class="card" aria-labelledby="new-task-title">
+    <h2 id="new-task-title">{{ 'gestion.tasks.new' | translate }}</h2>
+    <form [formGroup]="form" (ngSubmit)="create()" class="grid-2">
+      <mat-form-field>
+        <mat-label>{{ 'gestion.tasks.fields.title' | translate }}</mat-label>
+        <input matInput formControlName="title" required maxlength="200" />
+        @if (form.controls.title.hasError('required')) {
+          <mat-error>{{ 'gestion.tasks.errors.title' | translate }}</mat-error>
+        }
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>{{ 'gestion.tasks.fields.assignee' | translate }}</mat-label>
+        <mat-select formControlName="assignee">
+          <mat-option [value]="null">{{ 'gestion.tasks.unassigned' | translate }}</mat-option>
+          @for (member of members(); track member.id) {
+            <mat-option [value]="member.id">{{ member.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>{{ 'gestion.tasks.fields.dueDate' | translate }}</mat-label>
+        <input matInput type="date" formControlName="due_date" />
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>{{ 'gestion.tasks.fields.priority' | translate }}</mat-label>
+        <mat-select formControlName="priority">
+          @for (priority of priorities; track priority) {
+            <mat-option [value]="priority">{{
+              'gestion.tasks.priority.' + priority | translate
+            }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>{{ 'gestion.tasks.fields.label' | translate }}</mat-label>
+        <input matInput formControlName="label" maxlength="50" />
+      </mat-form-field>
+      <div class="actions">
+        <button mat-flat-button type="submit" [disabled]="busy()">
+          {{ 'gestion.tasks.create' | translate }}
+        </button>
+      </div>
+    </form>
+  </section>
+}
+
+@if (loading()) {
+  <p role="status">{{ 'gestion.tasks.loading' | translate }}</p>
+} @else {
+  <div class="board">
+    @for (column of columns(); track column.status) {
+      <section class="column" [attr.aria-labelledby]="'column-' + column.status">
+        <h2 [id]="'column-' + column.status">
+          {{ 'gestion.tasks.status.' + column.status | translate }}
+          <span class="muted">({{ column.tasks.length }})</span>
+        </h2>
+        @if (column.tasks.length) {
+          <ul>
+            @for (task of column.tasks; track task.id) {
+              <li class="task">
+                <h3>
+                  <a [routerLink]="['/editions', editionId(), 'organisation', 'taches', task.id]">{{
+                    task.title
+                  }}</a>
+                </h3>
+                <p class="meta">
+                  {{ task.assignee?.name || ('gestion.tasks.unassigned' | translate) }}
+                  · {{ 'gestion.tasks.priority.' + task.priority | translate }}
+                  @if (task.label) {
+                    · <span class="badge">{{ task.label }}</span>
+                  }
+                </p>
+                @if (task.due_date) {
+                  <p class="meta" [class.late]="task.overdue">
+                    {{ 'gestion.tasks.due' | translate: { date: day(task.due_date) } }}
+                    @if (task.overdue) {
+                      — {{ 'gestion.tasks.overdue' | translate }}
+                    }
+                  </p>
+                }
+                <p class="meta muted">
+                  {{
+                    'gestion.tasks.counts'
+                      | translate
+                        : { comments: task.comment_count, attachments: task.attachment_count }
+                  }}
+                </p>
+                @if (canWrite() && !task.archived_at) {
+                  <label class="meta">
+                    {{ 'gestion.tasks.moveTo' | translate }}
+                    <select
+                      [attr.aria-label]="
+                        'gestion.tasks.moveLabel' | translate: { title: task.title }
+                      "
+                      [disabled]="busy()"
+                      (change)="move(task, $any($event.target).value)"
+                    >
+                      @for (target of statuses; track target) {
+                        <option [value]="target" [selected]="target === task.status">
+                          {{ 'gestion.tasks.status.' + target | translate }}
+                        </option>
+                      }
+                    </select>
+                  </label>
+                }
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="muted">{{ 'gestion.tasks.empty' | translate }}</p>
+        }
+      </section>
+    }
+  </div>
+}

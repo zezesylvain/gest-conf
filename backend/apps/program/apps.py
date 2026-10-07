@@ -23,3 +23,7 @@ class ProgramConfig(AppConfig):
         workflow.register_effect(presentation.on_transition)
         # Pages du programme public à pré-rendre et à contrôler au build (I7).
         register_route_provider(public_paths)
+        # Segments des envois groupés (plan L8, N11), déclarés auprès de communications.
+        from apps.program.segments import register_program_segments
+
+        register_program_segments()

@@ -16,7 +16,8 @@ import { NotificationsStore } from './notifications.store';
 /**
  * Notifications de l'espace compte (plan L3, F13) : le texte est composé ici à partir de la
  * nature et des éléments transmis (référence, titre, échéance), dans la langue courante.
- * Une notification liée à une de ses soumissions ouvre celle-ci et devient lue.
+ * Une notification liée à une de ses soumissions ouvre celle-ci et devient lue ; celles du
+ * lot L8 mènent au questionnaire ou à l'écran de la gestion (tâche, « Mon planning »).
  */
 @Component({
   selector: 'portail-notifications-page',
@@ -54,6 +55,18 @@ import { NotificationsStore } from './notifications.store';
                   (click)="open(item)"
                 >
                   {{ 'portail.notifications.open' | translate }}
+                </a>
+              } @else if (item.payload['survey_id']) {
+                <a
+                  [routerLink]="['/compte/questionnaires', item.payload['survey_id']]"
+                  (click)="open(item)"
+                >
+                  {{ 'portail.notifications.openSurvey' | translate }}
+                </a>
+              } @else if (management(item); as href) {
+                <!-- Tâche ou poste de bénévolat : écran de la gestion (autre application). -->
+                <a [href]="href" (click)="open(item)">
+                  {{ 'portail.notifications.openManagement' | translate }}
                 </a>
               }
             </li>
@@ -116,13 +129,35 @@ export class NotificationsPage implements OnInit {
 
   protected text(item: Notification): string {
     const payload = item.payload as Record<string, string | undefined>;
+    // Annonces et questionnaires (plan L8) : titre dans la langue courante, français sinon.
+    const localized =
+      (this.language.current() === 'en' && payload['title_en']) || payload['title_fr'];
     return this.translate.instant(`portail.notifications.kinds.${item.kind}`, {
       reference: payload['reference'] || this.translate.instant('portail.submissions.draft'),
-      title: payload['title'] || this.translate.instant('portail.submissions.untitled'),
+      title:
+        payload['title'] || localized || this.translate.instant('portail.submissions.untitled'),
       edition: payload['edition_code'] ?? '',
       until: payload['until'] ? this.when(payload['until']) : '',
       closes: payload['closes_at'] ? this.when(payload['closes_at']) : '',
+      starts: payload['starts_at'] ? this.when(payload['starts_at']) : '',
     });
+  }
+
+  /**
+   * Lien vers la gestion (plan L8) : tâche confiée, poste de bénévolat confié ou retiré.
+   * Les droits restent vérifiés par la gestion et le serveur (règle n° 2).
+   */
+  protected management(item: Notification): string | null {
+    const payload = item.payload as Record<string, string | number | undefined>;
+    const edition = payload['edition_id'];
+    if (!edition) return null;
+    if (item.kind === 'task_assigned' && payload['task_id']) {
+      return `/gestion/editions/${edition}/organisation/taches/${payload['task_id']}`;
+    }
+    if (item.kind === 'shift_assigned' || item.kind === 'shift_removed') {
+      return `/gestion/editions/${edition}/jour-j/mon-planning`;
+    }
+    return null;
   }
 
   protected when(iso: string): string {

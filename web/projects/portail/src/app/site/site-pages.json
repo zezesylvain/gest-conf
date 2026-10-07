@@ -53,7 +53,7 @@
     "en": "speakers",
     "title_fr": "Intervenants",
     "title_en": "Speakers",
-    "coming_soon": true
+    "coming_soon": false
   },
   {
     "slug": "registration",
@@ -61,6 +61,22 @@
     "en": "registration",
     "title_fr": "Inscription",
     "title_en": "Registration",
+    "coming_soon": false
+  },
+  {
+    "slug": "sponsors",
+    "fr": "partenaires",
+    "en": "partners",
+    "title_fr": "Partenaires",
+    "title_en": "Partners",
+    "coming_soon": false
+  },
+  {
+    "slug": "news",
+    "fr": "actualites",
+    "en": "news",
+    "title_fr": "Actualités",
+    "title_en": "News",
     "coming_soon": false
   }
 ]

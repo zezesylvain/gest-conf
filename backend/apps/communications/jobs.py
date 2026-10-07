@@ -64,7 +64,7 @@ def send_email(job: Job) -> None:
         OutboxEmail.objects.filter(pk=email.pk).update(status=OutboxStatus.FAILED)
         return
     now = timezone.now()
-    retry_at = hourly_limit_reached(now)
+    retry_at = hourly_limit_reached(now, bulk=email.is_bulk)
     if retry_at is not None:
         raise RetryLater(retry_at)
 
@@ -93,3 +93,12 @@ def send_email(job: Job) -> None:
     if email.is_sensitive:
         update.update(body_text="", body_html="", purged_at=sent_at)
     OutboxEmail.objects.filter(pk=email.pk).update(**update)
+
+
+@register_job("communications.fan_out")
+def fan_out(job: Job) -> None:
+    """Un lot de la mise en file d'une annonce (plan L8, N11) ; le lot suivant est remis en
+    file par le service tant qu'il reste des destinataires. Idempotent."""
+    from apps.communications.announcements import fan_out_batch
+
+    fan_out_batch(int(job.payload["announcement_id"]))

@@ -1,0 +1,114 @@
+<gc-page-header
+  [heading]="'portail.community.visit.title' | translate"
+  [lead]="'portail.community.visit.lead' | translate"
+/>
+<div aria-live="polite">
+  @if (status()) {
+    <p class="notice" role="status">{{ status() }}</p>
+  }
+</div>
+<gc-error-summary [messages]="errors()" />
+
+@if (loading()) {
+  <p role="status">{{ 'portail.account.home.loading' | translate }}</p>
+} @else if (visit(); as current) {
+  <section class="card" aria-labelledby="organised-title">
+    <h2 id="organised-title">{{ 'portail.community.visit.organised' | translate }}</h2>
+    <dl class="facts">
+      <div>
+        <dt>{{ 'portail.community.visit.status' | translate }}</dt>
+        <dd>{{ 'portail.community.visitStatus.' + current.status | translate }}</dd>
+      </div>
+      <div>
+        <dt>{{ 'portail.community.visit.hotel' | translate }}</dt>
+        <dd>{{ current.hotel || '—' }}</dd>
+      </div>
+      <div>
+        <dt>{{ 'portail.community.visit.nights' | translate }}</dt>
+        <dd>{{ day(current.check_in) }} → {{ day(current.check_out) }}</dd>
+      </div>
+    </dl>
+  </section>
+
+  <form [formGroup]="form" (ngSubmit)="save()" class="card">
+    <h2>{{ 'portail.community.visit.mine' | translate }}</h2>
+    <fieldset>
+      <legend>{{ 'portail.community.visit.needs' | translate }}</legend>
+      @for (item of equipment; track item) {
+        <mat-checkbox
+          [checked]="needs().includes(item)"
+          (change)="toggleNeed(item, $event.checked)"
+          >{{ 'portail.community.equipment.' + item | translate }}</mat-checkbox
+        >
+      }
+    </fieldset>
+    <mat-form-field class="wide">
+      <mat-label>{{ 'portail.community.visit.technicalNote' | translate }}</mat-label>
+      <input matInput formControlName="technical_note" maxlength="500" />
+    </mat-form-field>
+    <p class="muted">
+      {{ 'portail.community.visit.timezone' | translate: { zone: current.timezone } }}
+    </p>
+    <div class="grid">
+      <mat-form-field>
+        <mat-label>{{ 'portail.community.visit.arrival' | translate }}</mat-label>
+        <input matInput type="datetime-local" formControlName="arrival_local" />
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>{{ 'portail.community.visit.means' | translate }}</mat-label>
+        <mat-select formControlName="arrival_means">
+          <mat-option value="">—</mat-option>
+          @for (item of means; track item) {
+            <mat-option [value]="item">{{
+              'portail.community.means.' + item | translate
+            }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>{{ 'portail.community.visit.reference' | translate }}</mat-label>
+        <input matInput formControlName="arrival_reference" maxlength="60" />
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>{{ 'portail.community.visit.departure' | translate }}</mat-label>
+        <input matInput type="datetime-local" formControlName="departure_local" />
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>{{ 'portail.community.visit.means' | translate }}</mat-label>
+        <mat-select formControlName="departure_means">
+          <mat-option value="">—</mat-option>
+          @for (item of means; track item) {
+            <mat-option [value]="item">{{
+              'portail.community.means.' + item | translate
+            }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>{{ 'portail.community.visit.reference' | translate }}</mat-label>
+        <input matInput formControlName="departure_reference" maxlength="60" />
+      </mat-form-field>
+    </div>
+    <p>
+      <mat-checkbox formControlName="accommodation_needed">{{
+        'portail.community.visit.accommodation' | translate
+      }}</mat-checkbox>
+      <mat-checkbox formControlName="transfer_needed">{{
+        'portail.community.visit.transfer' | translate
+      }}</mat-checkbox>
+    </p>
+    <mat-form-field class="wide">
+      <mat-label>{{ 'portail.community.visit.note' | translate }}</mat-label>
+      <textarea matInput formControlName="speaker_note" rows="3" maxlength="1000"></textarea>
+    </mat-form-field>
+    <p>
+      <button mat-flat-button type="submit" [disabled]="busy()">
+        {{ 'portail.community.visit.save' | translate }}
+      </button>
+    </p>
+  </form>
+
+  <portail-dietary-card [editionId]="current.edition_id" />
+} @else {
+  <p>{{ 'portail.community.visit.none' | translate }}</p>
+}

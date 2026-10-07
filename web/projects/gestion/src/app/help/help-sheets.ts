@@ -72,6 +72,21 @@ const DAY_MANAGERS: readonly Role[] = ['OC_MEMBER', 'ADMIN'];
 const DOCUMENT_MANAGERS: readonly Role[] = ['OC_MEMBER', 'ADMIN', 'CHAIR'];
 const LETTER_MANAGERS: readonly Role[] = ['OC_MEMBER', 'ADMIN'];
 const SIGNATORIES: readonly Role[] = ['SIGNATORY'];
+// Organisation (plan L8, N2) : tâches et activité pour tout le CO, l'administrateur et le
+// Chair ; budget pour le Chair, le CO « finances » et l'administrateur.
+const ORGANISERS: readonly Role[] = ['OC_MEMBER', 'ADMIN', 'CHAIR'];
+// Logistique (plan L8, N2) : lecture pour le Chair et le CO « logistique » ou
+// « secrétariat », écriture par le CO « logistique » ; postes : CO « logistique » ou
+// « bénévoles » et administrateur ; « Mon planning » : le bénévole.
+const LOGISTICS: readonly Role[] = ['OC_MEMBER', 'ADMIN', 'CHAIR'];
+const VOLUNTEER_PLANNERS: readonly Role[] = ['OC_MEMBER', 'ADMIN'];
+const VOLUNTEERS: readonly Role[] = ['VOLUNTEER'];
+// Partenaires (plan L8, N2) : lecture pour le Chair et le CO « relations extérieures »,
+// « finances » ou « communication » ; écriture par les relations extérieures.
+const PARTNERS: readonly Role[] = ['OC_MEMBER', 'ADMIN', 'CHAIR'];
+// Communication (plan L8, N2) : annonces par le Chair, le CO « communication » et
+// l'administrateur ; questionnaires aussi par le CO « secrétariat ».
+const COMMUNICATORS: readonly Role[] = ['OC_MEMBER', 'ADMIN', 'CHAIR'];
 
 /** Constructeur : les clés d'une fiche sont toutes sous `gestion.help.sheets.<id>`. */
 function sheet(
@@ -371,6 +386,74 @@ export const HELP_SHEETS: readonly HelpSheet[] = [
     steps(k, 'identity', 'image'),
     callout('info', k, 'only'),
     callout('warning', k, 'frozen'),
+  ]),
+  // Organisation du CO (plan L8, N3, N4, N14).
+  sheet('tasks', ORGANISERS, (k) => [
+    text(k('intro')),
+    steps(k, 'create', 'move', 'detail'),
+    callout('info', k, 'keyboard'),
+    callout('warning', k, 'stale'),
+    callout('tip', k, 'reminder'),
+  ]),
+  sheet('budget', ORGANISERS, (k) => [
+    text(k('intro')),
+    list(k('planned'), k('actual'), k('computed'), k('proof')),
+    callout('info', k, 'computedLines'),
+    callout('warning', k, 'export'),
+  ]),
+  sheet('activity', ORGANISERS, (k) => [text(k('intro')), callout('info', k, 'whitelist')]),
+  sheet('speakers', LOGISTICS, (k) => [
+    text(k('intro')),
+    steps(k, 'speaker', 'staff', 'equipment'),
+    callout('info', k, 'local'),
+    callout('warning', k, 'internal'),
+  ]),
+  sheet('catering', LOGISTICS, (k) => [
+    text(k('intro')),
+    list(k('audience'), k('margin'), k('diets'), k('order')),
+    callout('info', k, 'estimate'),
+    callout('warning', k, 'nominative'),
+  ]),
+  sheet('volunteer-shifts', VOLUNTEER_PLANNERS, (k) => [
+    text(k('intro')),
+    steps(k, 'create', 'assign', 'follow'),
+    callout('warning', k, 'overlap'),
+    callout('info', k, 'notify'),
+  ]),
+  sheet('my-shifts', VOLUNTEERS, (k) => [text(k('intro')), callout('tip', k, 'calendar')]),
+  sheet('sponsors', PARTNERS, (k) => [
+    text(k('intro')),
+    steps(k, 'create', 'public', 'private', 'benefits'),
+    callout('info', k, 'received'),
+    callout('warning', k, 'logo'),
+    callout('warning', k, 'export'),
+  ]),
+  sheet('sponsor-levels', PARTNERS, (k) => [
+    text(k('intro')),
+    list(k('names'), k('amount'), k('benefits'), k('size')),
+    callout('info', k, 'copy'),
+    callout('warning', k, 'delete'),
+  ]),
+  sheet('announcements', COMMUNICATORS, (k) => [
+    text(k('intro')),
+    steps(k, 'write', 'channels', 'check', 'publish'),
+    callout('info', k, 'banner'),
+    callout('warning', k, 'sent'),
+    callout('info', k, 'pace'),
+    callout('tip', k, 'unsubscribe'),
+  ]),
+  sheet('reports', ALL, (k) => [
+    text(k('intro')),
+    list(k('sections'), k('charts'), k('exports')),
+    callout('info', k, 'aggregates'),
+    callout('tip', k, 'threshold'),
+  ]),
+  sheet('surveys', COMMUNICATORS, (k) => [
+    text(k('intro')),
+    steps(k, 'create', 'questions', 'publish', 'results'),
+    callout('info', k, 'anonymity'),
+    callout('warning', k, 'locked'),
+    callout('info', k, 'reminder'),
   ]),
   sheet('audit', SETTINGS_WRITERS, (k) => [
     text(k('intro')),

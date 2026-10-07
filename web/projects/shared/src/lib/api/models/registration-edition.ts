@@ -3,6 +3,7 @@
 
 export interface RegistrationEdition {
   code: string;
+  id: number;
   timezone: string;
   title_en: string;
   title_fr: string;

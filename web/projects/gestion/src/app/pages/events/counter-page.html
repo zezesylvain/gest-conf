@@ -39,7 +39,7 @@
         <mat-label>{{ 'gestion.counter.fields.email' | translate }}</mat-label>
         <input matInput type="email" formControlName="email" autocomplete="off" required />
         <mat-hint>{{ 'gestion.counter.emailHint' | translate }}</mat-hint>
-        <mat-error>{{ 'gestion.counter.emailError' | translate }}</mat-error>
+        <mat-error>{{ error('email', 'gestion.counter.emailError') }}</mat-error>
       </mat-form-field>
       <mat-form-field appearance="outline">
         <mat-label>{{ 'gestion.registrations.fields.category' | translate }}</mat-label>
@@ -48,21 +48,22 @@
             <mat-option [value]="category.code">{{ label(category) }}</mat-option>
           }
         </mat-select>
-        <mat-error>{{ 'shared.form.required' | translate }}</mat-error>
+        <mat-error>{{ error('category') }}</mat-error>
       </mat-form-field>
       <mat-form-field appearance="outline">
         <mat-label>{{ 'gestion.counter.fields.firstName' | translate }}</mat-label>
         <input matInput formControlName="first_name" autocomplete="off" required />
-        <mat-error>{{ 'shared.form.required' | translate }}</mat-error>
+        <mat-error>{{ error('first_name') }}</mat-error>
       </mat-form-field>
       <mat-form-field appearance="outline">
         <mat-label>{{ 'gestion.counter.fields.lastName' | translate }}</mat-label>
         <input matInput formControlName="last_name" autocomplete="off" required />
-        <mat-error>{{ 'shared.form.required' | translate }}</mat-error>
+        <mat-error>{{ error('last_name') }}</mat-error>
       </mat-form-field>
       <mat-form-field appearance="outline">
         <mat-label>{{ 'gestion.counter.fields.institution' | translate }}</mat-label>
         <input matInput formControlName="institution" autocomplete="off" />
+        <mat-error>{{ error('institution') }}</mat-error>
       </mat-form-field>
       <mat-form-field appearance="outline">
         <mat-label>{{ 'gestion.fields.country' | translate }}</mat-label>
@@ -72,6 +73,8 @@
             <mat-option [value]="country.code">{{ country.name }}</mat-option>
           }
         </mat-select>
+        <mat-hint>{{ 'gestion.counter.countryHint' | translate }}</mat-hint>
+        <mat-error>{{ error('country') }}</mat-error>
       </mat-form-field>
       @if (options().length) {
         <mat-form-field appearance="outline">

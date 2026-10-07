@@ -81,6 +81,18 @@
               <h1>{{ heading() }}</h1>
               <portail-registration-overview [language]="lang()" />
             }
+            @case ('speakers') {
+              <h1>{{ heading() }}</h1>
+              <portail-speakers-overview [language]="lang()" />
+            }
+            @case ('sponsors') {
+              <h1>{{ heading() }}</h1>
+              <portail-sponsors-overview [language]="lang()" />
+            }
+            @case ('news') {
+              <h1>{{ heading() }}</h1>
+              <portail-news-overview [language]="lang()" />
+            }
             @default {
               <h1>{{ heading() }}</h1>
               @if (page.coming_soon) {

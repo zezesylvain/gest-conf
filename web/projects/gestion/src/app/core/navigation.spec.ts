@@ -42,6 +42,14 @@ const EVERYTHING = [
   'registrations.manage',
   'letters.manage',
   'signature.manage',
+  'tasks.read',
+  'budget.read',
+  'logistics.read',
+  'volunteers.plan',
+  'shifts.own',
+  'sponsors.read',
+  'communications.send',
+  'surveys.manage',
 ];
 
 /** Catalogue « traduit » minimal : la clé tient lieu de libellé. */
@@ -55,7 +63,7 @@ function items(capabilities: string[], role: Parameters<typeof buildNavigation>[
 }
 
 describe('Table de navigation de la gestion (plan L2 §2.3)', () => {
-  it('président : douze catégories, ordre du rail numéroté', () => {
+  it('président : treize catégories, ordre du rail numéroté', () => {
     const groups = buildNavigation(3, CHAIR);
     expect(groups.map((group) => group.key)).toEqual([
       'steering',
@@ -63,6 +71,8 @@ describe('Table de navigation de la gestion (plan L2 §2.3)', () => {
       'reviewing',
       'program',
       'registrations',
+      // Rapports (plan L8, N13) : la lecture de l'édition ouvre l'écran.
+      'reports',
       'dayof',
       'documents',
       'settings',
@@ -81,6 +91,7 @@ describe('Table de navigation de la gestion (plan L2 §2.3)', () => {
     const groups = buildNavigation(3, ['edition.read', 'members.read', 'members.manage']);
     expect(catalogue(groups).map((entry) => entry.key)).toEqual([
       'dashboard',
+      'reports',
       'general',
       'tracks',
       'types',
@@ -120,6 +131,7 @@ describe('Table de navigation de la gestion (plan L2 §2.3)', () => {
       'submissions',
       'reviewing',
       'program',
+      'reports',
       'settings',
       'committees',
       'help',
@@ -248,6 +260,71 @@ describe('Table de navigation de la gestion (plan L2 §2.3)', () => {
     expect(helpForUrl('/editions/3/attestations/modele')).toBe('certificate-settings');
     expect(helpForUrl('/editions/3/lettres/12')).toBe('letters');
     expect(helpForUrl('/editions/3/jour-j/presences')).toBe('attendance');
+  });
+
+  it('organisation (plan L8, N16) : tâches et activité pour le CO, budget avec budget.read', () => {
+    const team = buildNavigation(3, ['edition.read', 'tasks.read', 'tasks.write']);
+    expect(team.find((group) => group.key === 'organisation')!.entries.map((e) => e.key)).toEqual([
+      'tasks',
+      'activity',
+    ]);
+    const finance = buildNavigation(3, ['edition.read', 'tasks.read', 'budget.read'], 'OC_MEMBER');
+    expect(finance.map((group) => group.key)).toContain('organisation');
+    expect(catalogue(finance).map((entry) => entry.url)).toContain(
+      '/editions/3/organisation/budget',
+    );
+  });
+
+  it('logistique (plan L8, N16) : intervenants et restauration en lecture, postes à part', () => {
+    const reader = buildNavigation(3, ['edition.read', 'logistics.read'], 'CHAIR');
+    expect(reader.find((group) => group.key === 'logistics')!.entries.map((e) => e.key)).toEqual([
+      'speakers',
+      'catering',
+    ]);
+    const planner = buildNavigation(3, ['edition.read', 'volunteers.plan'], 'OC_MEMBER');
+    expect(planner.find((group) => group.key === 'logistics')!.entries.map((e) => e.key)).toEqual([
+      'volunteerShifts',
+    ]);
+    // Le bénévole : « Mon planning » dans « Jour J », rien de la logistique.
+    const volunteer = buildNavigation(3, ['checkin.scan', 'shifts.own'], 'VOLUNTEER');
+    expect(volunteer.map((group) => group.key)).not.toContain('logistics');
+    expect(volunteer.find((group) => group.key === 'dayof')!.entries.map((e) => e.key)).toContain(
+      'myShifts',
+    );
+    expect(helpForUrl('/editions/3/logistique/intervenants/12')).toBe('speakers');
+    expect(helpForUrl('/editions/3/jour-j/mon-planning')).toBe('my-shifts');
+  });
+
+  it('partenaires (plan L8, N16) : liste et niveaux avec sponsors.read', () => {
+    const finance = buildNavigation(3, ['edition.read', 'sponsors.read'], 'OC_MEMBER');
+    expect(finance.find((group) => group.key === 'partners')!.entries.map((e) => e.key)).toEqual([
+      'sponsors',
+      'sponsorLevels',
+    ]);
+    expect(buildNavigation(3, ['edition.read']).map((group) => group.key)).not.toContain(
+      'partners',
+    );
+    // Le plus long préfixe : la fiche d'un partenaire relève de la liste, les niveaux de
+    // leur propre fiche.
+    expect(helpForUrl('/editions/3/partenaires/8')).toBe('sponsors');
+    expect(helpForUrl('/editions/3/partenaires/niveaux')).toBe('sponsor-levels');
+  });
+
+  it('communication (plan L8, N16) : annonces et questionnaires selon la capacité', () => {
+    const secretariat = buildNavigation(3, ['edition.read', 'surveys.manage'], 'OC_MEMBER');
+    expect(
+      secretariat.find((group) => group.key === 'communication')!.entries.map((e) => e.key),
+    ).toEqual(['surveys']);
+    const communication = buildNavigation(
+      3,
+      ['edition.read', 'communications.send', 'surveys.manage'],
+      'OC_MEMBER',
+    );
+    expect(
+      communication.find((group) => group.key === 'communication')!.entries.map((e) => e.key),
+    ).toEqual(['announcements', 'surveys']);
+    expect(helpForUrl('/editions/3/communication/annonces/4')).toBe('announcements');
+    expect(helpForUrl('/editions/3/communication/questionnaires/6')).toBe('surveys');
   });
 
   it('aucune capacité dans l’édition : rail vide (pas d’aide seule)', () => {

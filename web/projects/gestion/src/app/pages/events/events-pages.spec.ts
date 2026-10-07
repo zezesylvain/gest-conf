@@ -1,7 +1,7 @@
 import { Type } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
-import { MeEdition } from '@gestconf/shared';
+import { GcApiError, MeEdition } from '@gestconf/shared';
 import { useTestLanguage } from '@gestconf/shared/testing';
 import { of } from 'rxjs';
 
@@ -342,6 +342,30 @@ describe('Comptoir (plan L7, K13)', () => {
     expect(
       root.querySelector('a[href="/api/v1/manage/editions/3/registrations/44/badge"]'),
     ).not.toBeNull();
+  });
+  it('pays manquant : le message du serveur s’affiche sous le champ (bilan de L7.8)', async () => {
+    const { fixture, root, settle } = await setup(CounterPage, SECRETARIAT);
+    api['counter'].mockRejectedValueOnce(
+      new GcApiError(409, 'conflict', 'Inscription impossible', {
+        country: ['Pays obligatoire.'],
+      }),
+    );
+    const page = fixture.componentInstance as unknown as {
+      form: { setValue(value: unknown): void };
+    };
+    page.form.setValue({
+      email: 'nouvelle@univ.ci',
+      first_name: 'Aya',
+      last_name: 'Traoré',
+      institution: '',
+      country: '',
+      category: 'researcher',
+      options: [],
+      paid: true,
+    });
+    button(root, 'Inscrire').click();
+    await settle();
+    expect(root.querySelector('mat-error')?.textContent).toContain('Pays obligatoire.');
   });
 });
 

@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   DOCUMENT,
   effect,
   inject,
@@ -58,6 +59,17 @@ import { ensureThemeStylesheet } from './theme';
         </a>
         <a routerLink="/compte/mes-documents" routerLinkActive="active">
           {{ 'portail.account.nav.documents' | translate }}
+        </a>
+        @if (isSpeaker()) {
+          <a routerLink="/compte/ma-venue" routerLinkActive="active">
+            {{ 'portail.account.nav.visit' | translate }}
+          </a>
+        }
+        <a routerLink="/compte/questionnaires" routerLinkActive="active">
+          {{ 'portail.account.nav.surveys' | translate }}
+        </a>
+        <a routerLink="/compte/preferences" routerLinkActive="active">
+          {{ 'portail.account.nav.preferences' | translate }}
         </a>
         <a
           routerLink="/compte/notifications"
@@ -146,6 +158,12 @@ export class AccountShell implements OnInit, OnDestroy {
   private unregisterReauthentication: (() => void) | null = null;
 
   protected readonly loggingOut = signal(false);
+  /** « Ma venue » (plan L8, N6) : pour les intervenants invités d'une édition seulement. */
+  protected readonly isSpeaker = computed(() =>
+    (this.meStore.me()?.editions ?? []).some((edition) =>
+      edition.roles.some((item) => item.role === 'SPEAKER'),
+    ),
+  );
   private languageAdopted = false;
 
   constructor() {

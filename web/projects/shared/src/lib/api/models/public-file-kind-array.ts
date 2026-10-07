@@ -9,5 +9,6 @@ import { PublicFileKind } from './public-file-kind';
 export const PUBLIC_FILE_KIND: PublicFileKind[] = [
   'document',
   'image',
-  'photo'
+  'photo',
+  'logo'
 ];

@@ -267,6 +267,43 @@ def test_i11_speaker_bio_and_photo_only_with_consent(world):
     assert detail["slots"][0]["speaker"]["bio"] == "Biologiste."
 
 
+def test_n6_public_speakers_from_the_published_programme_whitelisted(world):
+    """L8, N6 : page « Intervenants » réelle, lue dans l'instantané publié ; 404 avant toute
+    publication ; ni clé de compte, ni adresse, ni consigne interne ; biographie selon le
+    consentement de L2, figé à la publication."""
+    current, chair, _morning, *_rest = world
+    anonymous = APIClient()
+    assert anonymous.get("/v1/public/speakers").status_code == 404
+    speaker = make_member(current, Role.SPEAKER)
+    Profile.objects.update_or_create(
+        user=speaker, defaults={"first_name": "Ama", "last_name": "Owusu", "bio": "Biologiste."}
+    )
+    plenary = session(current, local(1, 11), local(1, 12), title="Plénière")
+    planning.update_session(plenary, {"instructions": "Micro-cravate"}, actor=COMMAND)
+    planning.add_free_slot(plenary, title_fr="Conférence invitée", speaker=speaker, actor=COMMAND)
+    closing = session(current, local(1, 16), local(1, 17), title="Clôture")
+    planning.add_free_slot(closing, title_fr="Mot de clôture", speaker=speaker, actor=COMMAND)
+    publish(current, chair)
+    body = anonymous.get("/v1/public/speakers").json()
+    assert body["timezone"] == current.timezone
+    (person,) = body["speakers"]
+    assert (person["name"], person["bio"], person["photo_url"]) == ("Ama Owusu", "", None)
+    assert [talk["title_fr"] for talk in person["talks"]] == [
+        "Conférence invitée",
+        "Mot de clôture",
+    ]
+    assert person["talks"][0]["session_title_fr"] == "Plénière"
+    text = str(body)
+    for leak in ("user:", speaker.email, "Micro-cravate", "key"):
+        assert leak not in text
+    # Les auteurs des communications restent au programme, pas sur cette page.
+    assert "Zadi" not in text
+    # Le brouillon ne compte pas : un nouvel orateur attend la publication suivante.
+    other = make_member(current, Role.SPEAKER)
+    planning.add_free_slot(closing, title_fr="Invité", speaker=other, actor=COMMAND)
+    assert len(anonymous.get("/v1/public/speakers").json()["speakers"]) == 1
+
+
 # --- « Mon passage » et iCal (I8) ------------------------------------------------------------
 
 

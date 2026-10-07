@@ -77,6 +77,7 @@ urlpatterns = [
         views.PublicProgramSessionView.as_view(),
         name="public-program-session",
     ),
+    path("public/speakers", views.PublicSpeakersView.as_view(), name="public-speakers"),
     path("me/agenda", views.MyAgendaView.as_view(), name="me-agenda"),
     path("me/agenda.ics", views.MyAgendaCalendarView.as_view(), name="me-agenda-ics"),
     path(

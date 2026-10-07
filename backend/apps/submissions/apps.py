@@ -26,3 +26,7 @@ class SubmissionsConfig(AppConfig):
 
         # Fichiers écrits puis transaction annulée : toujours purgés (sécurité, comme L2).
         register_retention_task("submissions.orphan_files", purge_orphan_files, security=True)
+        # Segments des envois groupés (plan L8, N11), déclarés auprès de communications.
+        from apps.submissions.segments import register_submissions_segments
+
+        register_submissions_segments()

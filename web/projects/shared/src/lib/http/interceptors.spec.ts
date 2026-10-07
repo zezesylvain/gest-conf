@@ -119,6 +119,51 @@ describe('Intercepteurs de l’API', () => {
     expect(((await result) as GcApiError).code).toBe('reauthentication_required');
   });
 
+  it('requête de fichier : le corps d’erreur JSON reçu en Blob garde son code', async () => {
+    const result = firstValueFrom(
+      http.get('/api/v1/manage/editions/1/budget/export', { responseType: 'blob' }),
+    ).catch((error: unknown) => error);
+    const body = { code: 'not_found', message: 'Introuvable.', fields: {} };
+    backend
+      .expectOne('/api/v1/manage/editions/1/budget/export')
+      .flush(new Blob([JSON.stringify(body)], { type: 'application/json' }), {
+        status: 404,
+        statusText: '',
+      });
+    const error = (await result) as GcApiError;
+    expect(error).toBeInstanceOf(GcApiError);
+    expect([error.status, error.code, error.message]).toEqual([404, 'not_found', 'Introuvable.']);
+  });
+
+  it('requête de fichier : réauthentification exigée, fenêtre puis nouvelle tentative', async () => {
+    const prompt = vi.fn().mockResolvedValue(true);
+    TestBed.inject(ReauthenticationPrompt).register(prompt);
+    const url = '/api/v1/manage/editions/1/budget/export';
+    const result = firstValueFrom(http.get(url, { responseType: 'blob' }));
+    const refusal = { code: 'reauthentication_required', message: 'Non.', fields: {} };
+    backend
+      .expectOne(url)
+      .flush(new Blob([JSON.stringify(refusal)], { type: 'application/json' }), {
+        status: 403,
+        statusText: '',
+      });
+    const retry = await vi.waitFor(() => backend.expectOne(url));
+    retry.flush(new Blob(['a;b'], { type: 'text/csv' }));
+    expect(await (await result).text()).toBe('a;b');
+    expect(prompt).toHaveBeenCalledTimes(1);
+  });
+
+  it('requête de fichier : corps illisible, code selon le statut', async () => {
+    const url = '/api/v1/manage/editions/1/budget/export';
+    const result = firstValueFrom(http.get(url, { responseType: 'blob' })).catch(
+      (error: unknown) => error,
+    );
+    backend
+      .expectOne(url)
+      .flush(new Blob(['<html>'], { type: 'text/html' }), { status: 500, statusText: '' });
+    expect(((await result) as GcApiError).code).toBe('server_error');
+  });
+
   it('mfa_required : traitement 2FA appelé, erreur transmise', async () => {
     const result = firstValueFrom(http.get('/api/v1/manage/editions/1')).catch(
       (error: unknown) => error,

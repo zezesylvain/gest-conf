@@ -1,0 +1,230 @@
+<gc-page-header
+  [heading]="'gestion.catering.title' | translate"
+  [lead]="'gestion.catering.lead' | translate"
+/>
+<div aria-live="polite">
+  @if (status()) {
+    <p class="notice" role="status">{{ status() }}</p>
+  }
+</div>
+<gc-error-summary [messages]="errors()" />
+
+@if (loading()) {
+  <p role="status">{{ 'gestion.catering.loading' | translate }}</p>
+} @else {
+  <section class="card" aria-labelledby="meals-title">
+    <h2 id="meals-title">{{ 'gestion.catering.meals' | translate }}</h2>
+    @if (meals().length) {
+      <div class="table-wrap">
+        <table>
+          <caption class="visually-hidden">
+            {{
+              'gestion.catering.meals' | translate
+            }}
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">{{ 'gestion.catering.fields.day' | translate }}</th>
+              <th scope="col">{{ 'gestion.catering.meal' | translate }}</th>
+              <th scope="col">{{ 'gestion.catering.audienceTitle' | translate }}</th>
+              <th scope="col" class="number">{{ 'gestion.catering.count' | translate }}</th>
+              <th scope="col" class="number">{{ 'gestion.catering.margin' | translate }}</th>
+              <th scope="col" class="number">{{ 'gestion.catering.total' | translate }}</th>
+              <th scope="col">{{ 'gestion.catering.dietsTitle' | translate }}</th>
+              @if (canWrite()) {
+                <th scope="col">{{ 'gestion.catering.actions' | translate }}</th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (meal of meals(); track meal.id) {
+              <tr>
+                <td>{{ day(meal.day) }}</td>
+                <td>{{ mealLabel(meal) }}</td>
+                <td>{{ audience(meal) }}</td>
+                <td class="number">{{ meal.estimate.count }}</td>
+                <td class="number">{{ meal.estimate.margin }} ({{ meal.margin_percent }} %)</td>
+                <td class="number">
+                  <strong>{{ meal.estimate.total }}</strong>
+                </td>
+                <td>
+                  @for (item of diets; track item) {
+                    @if (diet(meal, item)) {
+                      <span class="badge"
+                        >{{ 'gestion.catering.diet.' + item | translate }} :
+                        {{ diet(meal, item) }}</span
+                      >
+                    }
+                  }
+                  @if (meal.estimate.allergies) {
+                    <span class="badge">{{
+                      'gestion.catering.allergiesCount'
+                        | translate: { count: meal.estimate.allergies }
+                    }}</span>
+                  }
+                </td>
+                @if (canWrite()) {
+                  <td>
+                    <button
+                      mat-button
+                      type="button"
+                      (click)="edit(meal)"
+                      [attr.aria-label]="
+                        'gestion.catering.editLabel' | translate: { label: mealLabel(meal) }
+                      "
+                    >
+                      {{ 'gestion.catering.edit' | translate }}
+                    </button>
+                    <button
+                      mat-button
+                      type="button"
+                      (click)="remove(meal)"
+                      [disabled]="busy()"
+                      [attr.aria-label]="
+                        'gestion.catering.deleteLabel' | translate: { label: mealLabel(meal) }
+                      "
+                    >
+                      {{ 'gestion.catering.delete.confirm' | translate }}
+                    </button>
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <div class="actions">
+        <button mat-stroked-button type="button" (click)="exportMeals('csv')" [disabled]="busy()">
+          {{ 'gestion.catering.exportCsv' | translate }}
+        </button>
+        <button mat-stroked-button type="button" (click)="exportMeals('xlsx')" [disabled]="busy()">
+          {{ 'gestion.catering.exportXlsx' | translate }}
+        </button>
+        <button mat-stroked-button type="button" (click)="exportMeals('pdf')" [disabled]="busy()">
+          {{ 'gestion.catering.exportPdf' | translate }}
+        </button>
+      </div>
+    } @else {
+      <p class="muted">{{ 'gestion.catering.empty' | translate }}</p>
+    }
+  </section>
+
+  @if (canWrite()) {
+    <section class="card" aria-labelledby="meal-form-title">
+      <h2 id="meal-form-title">
+        {{ (editing() ? 'gestion.catering.editTitle' : 'gestion.catering.newTitle') | translate }}
+      </h2>
+      <form [formGroup]="form" (ngSubmit)="submit()" class="grid-2">
+        <mat-form-field>
+          <mat-label>{{ 'gestion.catering.fields.day' | translate }}</mat-label>
+          <input matInput type="date" formControlName="day" required />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>{{ 'gestion.catering.fields.kind' | translate }}</mat-label>
+          <mat-select formControlName="kind">
+            @for (kind of kinds; track kind) {
+              <mat-option [value]="kind">{{
+                'gestion.catering.kind.' + kind | translate
+              }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>{{ 'gestion.catering.fields.labelFr' | translate }}</mat-label>
+          <input matInput formControlName="label_fr" maxlength="150" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>{{ 'gestion.catering.fields.labelEn' | translate }}</mat-label>
+          <input matInput formControlName="label_en" maxlength="150" />
+        </mat-form-field>
+        <div class="checks wide">
+          <mat-checkbox formControlName="include_registered">{{
+            'gestion.catering.audience.registered' | translate
+          }}</mat-checkbox>
+          <mat-checkbox formControlName="include_speakers">{{
+            'gestion.catering.audience.speakers' | translate
+          }}</mat-checkbox>
+          <mat-checkbox formControlName="include_committees">{{
+            'gestion.catering.audience.committees' | translate
+          }}</mat-checkbox>
+          <mat-checkbox formControlName="include_volunteers">{{
+            'gestion.catering.audience.volunteers' | translate
+          }}</mat-checkbox>
+        </div>
+        @if (options().length) {
+          <mat-form-field>
+            <mat-label>{{ 'gestion.catering.fields.option' | translate }}</mat-label>
+            <mat-select formControlName="option_code">
+              <mat-option value="">{{ 'gestion.catering.allRegistered' | translate }}</mat-option>
+              @for (option of options(); track option.id) {
+                <mat-option [value]="option.code">{{ optionLabel(option) }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        }
+        <mat-form-field>
+          <mat-label>{{ 'gestion.catering.fields.margin' | translate }}</mat-label>
+          <input matInput type="number" min="0" max="50" formControlName="margin_percent" />
+        </mat-form-field>
+        <div class="actions">
+          <button mat-flat-button type="submit" [disabled]="busy()">
+            {{ (editing() ? 'gestion.catering.save' : 'gestion.catering.add') | translate }}
+          </button>
+          @if (editing()) {
+            <button mat-stroked-button type="button" (click)="cancelEdit()">
+              {{ 'gestion.catering.cancel' | translate }}
+            </button>
+          }
+        </div>
+      </form>
+    </section>
+  }
+
+  @if (dietary(); as summary) {
+    <section class="card" aria-labelledby="dietary-title">
+      <h2 id="dietary-title">{{ 'gestion.catering.dietary' | translate }}</h2>
+      <p>{{ 'gestion.catering.declarations' | translate: { count: summary.declarations } }}</p>
+      <div class="table-wrap">
+        <table>
+          <caption class="visually-hidden">
+            {{
+              'gestion.catering.dietary' | translate
+            }}
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">{{ 'gestion.catering.dietsTitle' | translate }}</th>
+              <th scope="col" class="number">{{ 'gestion.catering.people' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of diets; track item) {
+              <tr>
+                <td>{{ 'gestion.catering.diet.' + item | translate }}</td>
+                <td class="number">{{ summary.by_diet[item] ?? 0 }}</td>
+              </tr>
+            }
+            <tr>
+              <td>{{ 'gestion.catering.allergies' | translate }}</td>
+              <td class="number">{{ summary.allergies }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="muted">{{ 'gestion.catering.nominativeHint' | translate }}</p>
+      <div class="actions">
+        <button mat-stroked-button type="button" (click)="exportDietary('csv')" [disabled]="busy()">
+          {{ 'gestion.catering.exportNominativeCsv' | translate }}
+        </button>
+        <button
+          mat-stroked-button
+          type="button"
+          (click)="exportDietary('xlsx')"
+          [disabled]="busy()"
+        >
+          {{ 'gestion.catering.exportNominativeXlsx' | translate }}
+        </button>
+      </div>
+    </section>
+  }
+}

@@ -6,7 +6,10 @@ version finale, président du comité scientifique et deux relecteurs (rôles at
 commande, 2FA TOTP activée avec un secret de test connu du navigateur). Pour les inscriptions
 (L6) : dates d'inscription, paramètres (paiement en ligne par le fournisseur factice, virement,
 sur place ; pays local : CI), une catégorie et sa grille, une option à quota ; CO de fonction
-« finances » ; un second participant (Sénégal, tarif international) sans rôle.
+« finances » ; un second participant (Sénégal, tarif international) sans rôle. Pour le jour J
+(L7) : un bénévole, un CO « secrétariat » et un signataire (2FA), et une image de signature.
+Pour le lot L8 : CO « logistique », « communication » et « relations extérieures », et un
+intervenant invité.
 
 Lu sur l'entrée standard de ``manage.py shell`` par ``e2e/django.ts`` ; imprime du JSON.
 """
@@ -21,6 +24,7 @@ from allauth.account.models import EmailAddress
 from allauth.mfa.models import Authenticator
 from allauth.mfa.utils import encrypt
 from django.utils import timezone
+from PIL import Image, ImageDraw
 from pypdf import PdfWriter
 
 from apps.accounts.models import Profile, Role, RoleSource, User
@@ -152,6 +156,53 @@ committee = {
         "Université FHB",
         Role.OC_MEMBER,
     ),
+    # Jour J (plan L7, K1, K18) : bénévole (accueil), CO « secrétariat » (comptoir,
+    # présences, attestations, lettres) et signataire.
+    "volunteer": ("benevole@e2e.example.org", "Ali", "Touré", "Université FHB", Role.VOLUNTEER),
+    "secretariat": (
+        "secretariat@e2e.example.org",
+        "Adjoua",
+        "Kouamé",
+        "Université FHB",
+        Role.OC_MEMBER,
+    ),
+    "signatory": (
+        "signataire@e2e.example.org",
+        "Brou",
+        "Assi",
+        "Université FHB",
+        Role.SIGNATORY,
+    ),
+    # Lot L8 : CO « logistique » (venues, repas, postes), « communication » (annonces,
+    # questionnaires), « relations extérieures » (partenaires) ; intervenant invité.
+    "logistics": (
+        "logistique@e2e.example.org",
+        "Kader",
+        "Ouattara",
+        "Université FHB",
+        Role.OC_MEMBER,
+    ),
+    "communication": (
+        "communication@e2e.example.org",
+        "Nadia",
+        "Koffi",
+        "Université FHB",
+        Role.OC_MEMBER,
+    ),
+    "relations": (
+        "relations@e2e.example.org",
+        "Paul",
+        "Aka",
+        "Université FHB",
+        Role.OC_MEMBER,
+    ),
+    "speaker": (
+        "intervenant@e2e.example.org",
+        "Ama",
+        "Owusu",
+        "University of Ghana",
+        Role.SPEAKER,
+    ),
     "conference_chair": (
         "president@e2e.example.org",
         "Yao",
@@ -198,6 +249,10 @@ for email, first_name, last_name, institution, role in committee.values():
         oc_function={
             "programme@e2e.example.org": "program",
             "finances@e2e.example.org": "finance",
+            "secretariat@e2e.example.org": "secretariat",
+            "logistique@e2e.example.org": "logistics",
+            "communication@e2e.example.org": "communication",
+            "relations@e2e.example.org": "external_relations",
         }.get(email, ""),
     )
 
@@ -215,6 +270,13 @@ Profile.objects.update_or_create(
     },
 )
 
+# Image de signature (plan L7, K18), déposée par le signataire dans la gestion.
+signature_image = Image.new("RGB", (480, 160), "white")
+pen = ImageDraw.Draw(signature_image)
+pen.line([(30, 120), (120, 40), (200, 110), (300, 50), (440, 100)], fill="navy", width=6)
+with tempfile.NamedTemporaryFile(prefix="gestconf-e2e-", suffix=".png", delete=False) as image:
+    signature_image.save(image, format="PNG")
+
 print(
     json.dumps(
         {
@@ -224,6 +286,7 @@ print(
             "password": PASSWORD,
             "totp": TOTP_SECRET,
             "participant": PARTICIPANT,
+            "signature": image.name,
             **{key: value[0] for key, value in committee.items()},
         }
     )

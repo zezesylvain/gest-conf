@@ -40,8 +40,8 @@ GEST-CONF/
 ├── backend/                 # Django
 │   ├── config/settings/ (base, dev, prod, test) ; urls.py (API uniquement) ; mount.py ; passenger_wsgi.py
 │   ├── apps/ core, accounts, conferences, portal, communications, submissions, reviews,
-│   │         program, registrations, payments, events (à venir, lot par lot :
-│   │         sponsors, logistics, reports)
+│   │         program, registrations, payments, events, logistics, sponsors, surveys,
+│   │         reports
 │   ├── tests/               # tests transverses : matrice des droits, schéma, règles de plateforme
 │   ├── locale/              # traductions du backend (FR/EN)
 │   ├── schema.yml           # schéma OpenAPI versionné
@@ -62,6 +62,7 @@ Chaque app Django : `models.py`, `services.py` (logique métier ; paquet `servic
 - **Python** : `ruff` (lint + format), typage des signatures publiques des services, `Decimal` pour tout montant et tout score, dates stockées en UTC ; affichage converti dans le fuseau de l'édition côté interface, mais **saisie** des échéances en heure locale de l'édition, convertie côté serveur (décision D13).
 - **Django** : requêtes optimisées (`select_related` / `prefetch_related`, pas de N+1), migrations rétro-compatibles (ajout puis suppression en deux temps), FK `ON DELETE RESTRICT` par défaut, suppression logique ou anonymisation pour les données personnelles. Numérotation (références, factures) via compteur verrouillé en transaction.
 - **DRF** : erreurs normalisées `{code, message, fields}`, pagination/filtre/tri uniformes (`django-filter`), throttling sur auth, inscription, contact, vérification d'attestation.
+- **Vues de fichier** (exports, PDF, iCal, images) : réponse binaire déclarée au schéma ; le client généré envoie ce type en `Accept`, que la négociation (`apps/core/negotiation.py`, liste fermée) doit accepter, sinon 406 avant la vue : tout nouveau type s'y ajoute (méta-test du schéma). Tester l'export avec cet en-tête, pas seulement sans.
 - **Angular** : composants autonomes, lazy loading par route, formulaires réactifs typés, état local en signaux, client API **généré** (ne pas l'éditer à la main), accessibilité WCAG 2.1 AA.
 - **Portail** : pré-rendu statique (SSG), pas de SSR ; budget de bundle surveillé.
 
@@ -85,7 +86,7 @@ npm run api:generate        # régénérer le client TypeScript après chaque é
 GESTCONF_E2E_PYTHON=../backend/.venv/bin/python npm run e2e   # Playwright lance Django, le portail et la gestion (ports 8000, 4200, 4201 libres) ; GESTCONF_E2E_CHROMIUM=<chemin> pour un Chromium déjà installé
 
 # Déploiement : deploy/deploy.sh puis deploy/smoke-test.sh (voir deploy/README.md)
-# Cron (deploy/cron.sh) : run_jobs (toutes les 5 min), close_call, remind_drafts, remind_reviewers, remind_presentations, expire_registrations et sync_payments (horaires), cleanup et check_integrity (quotidiennes)
+# Cron (deploy/cron.sh) : run_jobs (toutes les 5 min), close_call, remind_drafts, remind_reviewers, remind_presentations, expire_registrations et sync_payments (horaires), remind_tasks, cleanup et check_integrity (quotidiennes)
 ```
 
 Les URL Django sont déclarées **sans** le préfixe `/api` (`v1/...`) : `config/mount.py` gère le montage.
@@ -103,7 +104,7 @@ Les URL Django sont déclarées **sans** le préfixe `/api` (`v1/...`) : `config
 - Python via cPanel « Setup Python App » (Passenger/WSGI) ; application **hors racine du domaine** ; URL de l'app = `/api`. Les règles de repli SPA du `.htaccess` ne doivent ni écraser le bloc Passenger ni intercepter `/api/`.
 - Déploiement : build Angular en CI → rsync/SSH vers `public_html/` et `public_html/gestion/` → `pip install` → `migrate` → redémarrage Passenger (`tmp/restart.txt`) → tests de fumée.
 - **Non vérifié, à confirmer avant de s'appuyer dessus** : version de MariaDB, fréquence minimale du cron, limites de ressources, sous-domaines autorisés, antivirus, compilation de `mysqlclient` (`PyMySQL` est le pilote retenu). Ne pas affirmer ces points sans vérification. Aucune ligne de la fiche [`docs/L1-verifications-o2switch.md`](docs/L1-verifications-o2switch.md) n'est encore remplie : elle se remplit avec `deploy/check-o2switch.sh` (lecture seule, en SSH) et les contrôles manuels qu'elle décrit.
-- Sauvegarde quotidienne base + fichiers, copie hors hébergement, restauration testée.
+- Sauvegarde quotidienne base + fichiers, copie hors hébergement, restauration testée : **rien de cela n'existe encore** (ni `backup_db`, ni script de restauration, ni sauvegarde avant `migrate` dans `deploy.sh`) ; prévu au plan L9 (S2, S3). Aucune donnée réelle avant une restauration testée (D18).
 
 ## Méthode de travail attendue
 
@@ -120,9 +121,11 @@ Les URL Django sont déclarées **sans** le préfixe `/api` (`v1/...`) : `config
 |---|---|
 | L0 à L4 (MVP : squelette, socle, portail, soumission, évaluation et décision) | Livrés en code, testés en local et en CI ; bilans dans `docs/`. **Aucune démo sur o2switch** encore faite |
 | L5 — Programme | **Livré en code, testé en local et en CI** (L5.0 à L5.7, E2E compris ; PR #8 et #9, fusionnées) ; bilan [`docs/L5-programme.md`](docs/L5-programme.md). Ouverts : Q14, `ACCEPTED_MINOR → WITHDRAWN`, seuil d'avertissement du bundle du portail |
-| L6 — Inscriptions et paiements | **Livré en code et testé en local** (L6.0 à L6.7, E2E compris) ; bilan [`docs/L6-inscriptions.md`](docs/L6-inscriptions.md). Passage en CI : nouvelle PR, sur demande. Ouverts : Q7 (tarifs ; carte bancaire absente de l'API v1 de CinetPay), Q8 (entité de facturation, conservation, format du numéro), J15 reportée |
-| L7 — Jour J et attestations | **En cours** : plan [`docs/L7-jour-j-plan.md`](docs/L7-jour-j-plan.md) validé le 6 octobre 2026 (K1 à K17, plus K18 rôle signataire et K19 modèle officiel et signature électronique, issues des réponses à Q11 et Q14). Nouvelle question Q17 : prestataire de signature qualifiée |
-| L8 et suivants | Non commencés |
+| L6 — Inscriptions et paiements | **Livré en code et testé en local** (L6.0 à L6.7, E2E compris) ; bilan [`docs/L6-inscriptions.md`](docs/L6-inscriptions.md). Fusionné dans `main` (PR #12). Ouverts : Q7 (tarifs ; carte bancaire absente de l'API v1 de CinetPay), Q8 (entité de facturation, conservation, format du numéro), J15 reportée |
+| L7 — Jour J et attestations | **Livré en code et testé en local** (L7.0 à L7.8, E2E compris) ; bilan [`docs/L7-jour-j.md`](docs/L7-jour-j.md). L7.0 à L7.7 fusionnés dans `main` (PR #12) ; L7.8 et le correctif du test RG-16 dans la PR #13 (CI verte, en attente de fusion). Ouverts : Q17 (prestataire de signature qualifiée), nom complet du pays sur les badges, démo H sur téléphones réels |
+| L8 — Logistique, partenaires, communication et reporting | **Livré en code, testé en local et en CI** (L8.0 à L8.10, E2E compris ; PR #13, CI verte sur `87cf3a7`, en attente de fusion) ; bilan [`docs/L8-logistique.md`](docs/L8-logistique.md). Ouverts : questions du §10 du plan (hypothèses retenues), plafond d'e-mails réel sur o2switch, en-tête `List-Unsubscribe` |
+| L9 — Recette, sécurité, charge | **Plan proposé, à valider** : [`docs/L9-recette-plan.md`](docs/L9-recette-plan.md) (S1 à S16, questions du §10). Deux volets : outils et tests dans le dépôt, puis runbook exécuté sur o2switch par un opérateur du commanditaire (cette session n'a pas accès à l'hébergement) ; ne pas commencer L9.0 avant la validation |
+| L10 et suivants | Non commencés |
 
 ## Décisions du lot L1
 
@@ -197,6 +200,40 @@ Les décisions J1 à J16 du plan [`docs/L6-inscriptions-plan.md`](docs/L6-inscri
 
 Bilan du lot : [`docs/L6-inscriptions.md`](docs/L6-inscriptions.md).
 
+## Décisions du lot L7
+
+Les décisions K1 à K17 du plan [`docs/L7-jour-j-plan.md`](docs/L7-jour-j-plan.md) ont été validées le 6 octobre 2026, avec K18 (rôle signataire, Q11) et K19 (modèle officiel et signature électronique, Q14) issues des réponses du commanditaire. Elles sont reportées dans l'étude, **§23 « Mises à jour issues du lot L7 »**, qui prévaut sur les sections antérieures (§17 à §22 compris). Points à retenir :
+
+- application `events` (pointages, signatures, modèles, attestations, lettres) ; rôles `VOLUNTEER` (invitable dès L7, 2FA) et `SIGNATORY` (12ᵉ rôle, 2FA, seul à déposer sa signature) ; capacités `checkin.scan`, `checkin.manage`, `certificates.manage`, `letters.manage`, `signature.manage`, `sessions.chair` (présidence vérifiée session par session) ;
+- **QR du badge = titre d'accès** : le serveur n'accepte que le jeton, jamais son empreinte ; badges PDF `fpdf2` générés à la demande, jamais stockés ; badge perdu = nouveau jeton ; une inscription en attente de paiement est refusée à l'accueil ;
+- **accueil hors ligne** (PWA sous `/gestion/accueil`, service worker ajouté par cet écran seul) : liste d'empreintes valable 48 heures, file de pointages revérifiée par le serveur (lots de 200, clé d'idempotence), effacées à la déconnexion ; 504 du service worker = serveur injoignable ; `npm run build` régénère `ngsw.json` après la CSP (`scripts/check-ngsw.mjs`) ; décodeur du QR (`jsQR`) préparé dès l'ouverture de l'écran ;
+- `SCHEDULED → PRESENTED` par le président de séance (délégation `register_actor_grant` déclarée par `events`), le CO « programme » ou l'administrateur ; correction motivée ;
+- **RG-16** vérifiée à l'émission (présence, communication présentée, évaluations envoyées en nombre seulement) ; attestations et lettres en ajout seul, PDF figés à empreinte vérifiée, révocation motivée ; émission par `run_jobs` ; signataire désigné par nature, sans lui rien ne s'émet ; PAdES par `pyHanko` (`GESTCONF_SIGNING_ENCRYPTION_KEYS`), prestataire qualifié non branché (Q17) ;
+- vérification publique `/verification/<code>` du portail, rendue dans le navigateur, `noindex`, limitée en débit, même réponse pour un code inconnu ou mal formé ;
+- lettres d'invitation instruites par le CO ; numéro de passeport masqué au participant, effacé 30 jours après l'édition (`cleanup`) ; comptoir : inscription d'une personne sans compte ;
+- portail : « Mes documents » (`/compte/mes-documents`) ; gestion : rubriques « Jour J » et « Attestations et lettres », l'édition s'ouvre sur l'écran du rôle ;
+- aucune ligne de cron nouvelle ; `Permissions-Policy: camera=(self)` sous `/gestion/` seulement ;
+- E2E : le parcours en série se prolonge par la signature, la lettre d'invitation, le pointage par caméra simulée sans réseau puis synchronisé, l'entrée de session, « présentée », le comptoir et les attestations vérifiées publiquement ; le seed crée un bénévole, un CO « secrétariat » et un signataire.
+
+Bilan du lot : [`docs/L7-jour-j.md`](docs/L7-jour-j.md).
+
+## Décisions du lot L8
+
+Les décisions N1 à N19 du plan [`docs/L8-logistique-plan.md`](docs/L8-logistique-plan.md) ont été validées le 7 octobre 2026 ; les questions de son §10 étant restées sans réponse, ses propositions s'appliquent comme hypothèses révisables (§2.1). Elles sont reportées dans l'étude, **§24 « Mises à jour issues du lot L8 »**, qui prévaut sur les sections antérieures (§17 à §23 compris). Points à retenir :
+
+- applications `logistics` (tâches, budget, venues, régimes, repas, postes de bénévoles), `sponsors`, `surveys` et `reports` (lecture seule, dont aucune ne dépend) ; annonces dans `communications`, qui ne dépend d'aucune application métier : les segments sont **déclarés** (`register_segment`), comme les lignes calculées du budget (`register_computed_source`) ;
+- capacités `tasks.*` (tout le CO), `budget.*` (finances), `sponsors.*` (relations extérieures ; lecture finances et communication), `logistics.*` (logistique ; lecture secrétariat), `volunteers.plan`, `shifts.own` (bénévole seul), `communications.send`, `surveys.manage` ; rapports sans capacité propre, chaque section sous la capacité de ses données ; aucun rôle nouveau ;
+- tâches en kanban **sans glisser-déposer** (« Déplacer vers… »), révision en `If-Match` ; budget en `Decimal`, lignes « inscriptions » et « partenariats » **calculées** ; journal : textes libres par `mask_emails` ;
+- **RG-21** : réponse au questionnaire sans compte, sans invitation, **sans date**, UUID ; résultats à partir de 5 réponses ; **RG-22** : un e-mail par personne, lien de désabonnement signé, envois groupés (`is_bulk`) limités à la **moitié** de `GESTCONF_EMAIL_MAX_PER_HOUR`, mis en file par lots de 200 ; **RG-23** : régime avec consentement à chaque déclaration, noms pour `logistics.read` par export réauthentifié, effacé 30 jours après l'édition ;
+- listes blanches publiques : partenaires publiés (logo public après publication, aperçu authentifié dans la gestion), intervenants **invités** lus dans l'instantané publié, bandeau, actualités ; note interne d'une venue jamais servie à l'intervenant ;
+- portail : « Partenaires », « Intervenants », « Actualités » **pré-rendues** ; **bandeau** lu dans le navigateur à chaque visite (module chargé par `import()` après le premier rendu, pas de `@defer`) ; compte : « Ma venue », « Régime et annonces » (`/compte/preferences`), « Questionnaires », `/desabonnement/<jeton>` ;
+- gestion : rubriques « Organisation », « Logistique », « Partenaires », « Communication », « Rapports », « Mon planning » ; graphiques en barres CSS sans bibliothèque, doublés de tableaux ; exports CSV, XLSX (`openpyxl`, chaînes typées texte) et PDF (`fpdf2`) ; une vue qui renvoie un objet s'appelle `overview`, pas `list` (drf-spectacular décrit `list` comme un tableau) ;
+- **téléchargements** : la négociation de contenu (`apps/core/negotiation.py`) retient le JSON quand le client n'accepte que des types de fichier (sinon 406 avant la vue) ; l'intercepteur relit en JSON un corps d'erreur reçu en `Blob` (réauthentification des exports) ; méta-test sur les réponses binaires du schéma ;
+- cron : `remind_tasks` (quotidienne) ; envois groupés, invitations et relance des questionnaires par `run_jobs` ;
+- E2E : le parcours en série se prolonge par l'organisation (tâche, budget, partenaire publié), la logistique (venue, régime, repas, poste) et la communication (bandeau, envoi groupé, questionnaire, rapport exporté) ; le seed crée un CO « logistique », un CO « communication », un CO « relations extérieures » et un intervenant invité.
+
+Bilan du lot : [`docs/L8-logistique.md`](docs/L8-logistique.md).
+
 ## Questions ouvertes (étude §15, à ne pas trancher seul)
 
-Date de la conférence, mono- ou multi-conférences, niveau de double aveugle, grille et pondérations définitives, résumé seul ou article complet, tarifs et agrégateur de paiement, entité de facturation, actes (DOI/ISBN), sessions hybrides, lettres d'invitation, noms des auteurs au programme public (Q14). (L'emplacement de l'espace évaluateur est tranché : application `gestion`, décision H1.)
+Date de la conférence, mono- ou multi-conférences, niveau de double aveugle, grille et pondérations définitives, résumé seul ou article complet, tarifs et agrégateur de paiement, entité de facturation, actes (DOI/ISBN), sessions hybrides, noms des auteurs au programme public (Q14), prestataire de signature qualifiée (Q17) ; questions du §10 du plan L8 (hypothèses retenues : niveaux des partenaires, régimes, questionnaire, fournisseur d'e-mails et volume, postes du budget, indicateurs). (L'emplacement de l'espace évaluateur est tranché : application `gestion`, décision H1 ; les lettres d'invitation par K12 ; le signataire des attestations par K18.)

@@ -245,10 +245,21 @@ ANONYMOUS_VIEWS = {
     "apps.program.views.PublicProgramView": "programme public publié (L5, I7)",
     "apps.program.views.PublicProgramDayView": "programme public publié, par jour (L5, I7)",
     "apps.program.views.PublicProgramSessionView": "programme public publié, session (L5, I7)",
+    "apps.program.views.PublicSpeakersView": "intervenants invités du programme publié (L8, N6)",
     "apps.registrations.views.PublicRegistrationView": "tarifs et dates d'inscription (L6, J13)",
     "apps.payments.views.PaymentWebhookView": "notification signée du fournisseur (L6, J6, RG-15)",
     "apps.payments.views.FakeCheckoutView": "page du fournisseur factice, hors production (L6)",
     "apps.events.views.PublicCertificateView": "vérification publique d'une attestation (L7, K10)",
+    "apps.sponsors.views.PublicSponsorsView": "partenaires publiés, page du portail (L8, N5)",
+    "apps.communications.announcement_views.PublicBannerView": (
+        "bandeau de dernière minute, lu par le portail (L8, N10)"
+    ),
+    "apps.communications.announcement_views.PublicNewsView": (
+        "actualités publiées, page du portail (L8, N10)"
+    ),
+    "apps.communications.announcement_views.UnsubscribeView": (
+        "désabonnement des annonces par jeton signé, CSRF imposé (L8, N11)"
+    ),
 }
 
 # Seule vue de ``v1/manage/`` hors ``ManageViewSet`` : sélecteur d'édition.

@@ -1,5 +1,9 @@
 <a class="skip-link" href="#contenu">{{ 'portail.layout.skipToContent' | translate }}</a>
 
+<!-- Bandeau de dernière minute (plan L8, N10) : inséré après le premier rendu, dans le
+     navigateur seulement (voir App). -->
+<ng-container #banner />
+
 <header class="site-header">
   <div class="header-row">
     <a class="brand" [routerLink]="homeLink()">{{ 'shared.appName' | translate }}</a>

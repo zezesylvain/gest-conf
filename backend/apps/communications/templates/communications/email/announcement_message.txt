@@ -1,0 +1,12 @@
+{% load i18n %}{% autoescape off %}{% if test_notice %}{{ test_notice }}
+
+{% endif %}{{ title }}
+
+{{ body_text }}
+
+--
+{{ reason }}
+{% blocktranslate %}Ne plus recevoir les annonces de cette édition : {{ unsubscribe_url }}{% endblocktranslate %}
+{% blocktranslate %}Les messages liés à votre compte, à vos soumissions ou à votre inscription restent envoyés.{% endblocktranslate %}
+
+{% include "account/email/_signature.txt" %}{% endautoescape %}

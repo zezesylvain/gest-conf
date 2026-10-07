@@ -53,6 +53,7 @@ export function myRegistration(overrides: Partial<MyRegistration> = {}): MyRegis
     id: 12,
     reference: 'GC27-I00012',
     edition: {
+      id: 3,
       code: 'GC27',
       title_fr: 'GEST-CONF 2027',
       title_en: 'GEST-CONF 2027',

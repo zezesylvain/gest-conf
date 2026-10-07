@@ -83,7 +83,14 @@
       "program_conflicts": "Le programme contient des conflits : corrigez-les avant de publier.",
       "program_unchanged": "Aucune modification depuis la dernière publication.",
       "signing_unavailable": "La signature électronique est indisponible : vérifiez le certificat de signature et sa configuration.",
-      "signatory_missing": "Aucun signataire n'est désigné (ou sa signature est incomplète) : rien ne peut être émis."
+      "signatory_missing": "Aucun signataire n'est désigné (ou sa signature est incomplète) : rien ne peut être émis.",
+      "shift_overlap": "Ce bénévole a déjà un poste sur ce créneau : les postes d'une même personne ne peuvent pas se chevaucher.",
+      "banner_overlap": "Une autre annonce occupe déjà le bandeau sur cette période : modifiez les dates.",
+      "unsubscribe_link_invalid": "Ce lien de désabonnement n'est pas valide.",
+      "survey_locked": "Des réponses ont été reçues : les questions ne changent plus. Dupliquez le questionnaire.",
+      "survey_not_open": "Ce questionnaire n'est pas ouvert, ou vous n'y êtes pas invité.",
+      "survey_answered": "Vous avez déjà répondu à ce questionnaire.",
+      "survey_threshold": "Moins de 5 réponses : les résultats restent masqués pour préserver l'anonymat."
     },
     "form": {
       "errorSummary": "Le formulaire contient des erreurs :",

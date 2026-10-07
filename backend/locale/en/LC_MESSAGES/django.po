@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gestconf-backend\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-06 21:51+0000\n"
+"POT-Creation-Date: 2026-10-07 02:51+0000\n"
 "PO-Revision-Date: 2026-10-05 11:00+0000\n"
 "Last-Translator: GEST-CONF\n"
 "Language-Team: GEST-CONF\n"
@@ -25,7 +25,7 @@ msgid "actif"
 msgstr "active"
 
 #: apps/accounts/models.py:32 apps/accounts/models.py:373
-#: apps/communications/models.py:52 apps/submissions/models.py:81
+#: apps/communications/models.py:54 apps/submissions/models.py:81
 msgid "langue"
 msgstr "language"
 
@@ -63,7 +63,8 @@ msgstr "Mr"
 msgid "Mme"
 msgstr "Ms"
 
-#: apps/accounts/models.py:84 apps/submissions/models.py:82
+#: apps/accounts/models.py:84 apps/logistics/models.py:49
+#: apps/submissions/models.py:82
 msgid "titre"
 msgstr "title"
 
@@ -73,7 +74,7 @@ msgstr "first name"
 
 #: apps/accounts/models.py:87 apps/events/models.py:351
 #: apps/program/models.py:50 apps/reviews/models.py:45
-#: apps/submissions/models.py:144
+#: apps/sponsors/models.py:87 apps/submissions/models.py:144
 msgid "nom"
 msgstr "last name"
 
@@ -148,8 +149,10 @@ msgstr "account area"
 msgid "commande"
 msgstr "command"
 
-#: apps/accounts/models.py:184 apps/core/models.py:205 apps/portal/models.py:58
-#: apps/program/models.py:112
+#: apps/accounts/models.py:184 apps/core/models.py:205
+#: apps/logistics/models.py:135 apps/logistics/models.py:426
+#: apps/portal/models.py:58 apps/program/models.py:112
+#: apps/surveys/models.py:116
 msgid "type"
 msgstr "kind"
 
@@ -196,12 +199,16 @@ msgid "système"
 msgstr "system"
 
 #: apps/accounts/models.py:255 apps/accounts/models.py:345
-#: apps/communications/models.py:45 apps/conferences/models.py:175
+#: apps/communications/models.py:47 apps/communications/models.py:163
+#: apps/communications/models.py:270 apps/conferences/models.py:175
 #: apps/conferences/models.py:207 apps/conferences/models.py:251
 #: apps/conferences/models.py:338 apps/core/models.py:98
-#: apps/core/models.py:279 apps/events/models.py:30 apps/events/models.py:98
+#: apps/core/models.py:282 apps/events/models.py:30 apps/events/models.py:98
 #: apps/events/models.py:218 apps/events/models.py:277
 #: apps/events/models.py:332 apps/events/models.py:438
+#: apps/logistics/models.py:45 apps/logistics/models.py:208
+#: apps/logistics/models.py:292 apps/logistics/models.py:388
+#: apps/logistics/models.py:421 apps/logistics/models.py:452
 #: apps/payments/models.py:40 apps/payments/models.py:237
 #: apps/portal/models.py:54 apps/portal/models.py:132 apps/portal/models.py:213
 #: apps/portal/models.py:268 apps/program/models.py:46
@@ -210,7 +217,8 @@ msgstr "system"
 #: apps/registrations/models.py:160 apps/registrations/models.py:240
 #: apps/registrations/models.py:313 apps/registrations/models.py:396
 #: apps/reviews/models.py:32 apps/reviews/models.py:126
-#: apps/submissions/models.py:51
+#: apps/sponsors/models.py:32 apps/sponsors/models.py:83
+#: apps/submissions/models.py:51 apps/surveys/models.py:47
 msgid "édition"
 msgstr "edition"
 
@@ -224,11 +232,13 @@ msgid "fonction au CO"
 msgstr "organising committee function"
 
 #: apps/accounts/models.py:265 apps/accounts/models.py:356
-#: apps/communications/models.py:58 apps/conferences/models.py:133
-#: apps/core/models.py:208 apps/events/models.py:458
+#: apps/communications/models.py:62 apps/communications/models.py:185
+#: apps/conferences/models.py:133 apps/core/models.py:208
+#: apps/events/models.py:458 apps/logistics/models.py:52
 #: apps/payments/models.py:136 apps/registrations/models.py:413
 #: apps/reviews/models.py:178 apps/reviews/models.py:300
-#: apps/submissions/models.py:89
+#: apps/sponsors/models.py:115 apps/submissions/models.py:89
+#: apps/surveys/models.py:69
 msgid "statut"
 msgstr "status"
 
@@ -311,7 +321,7 @@ msgstr "sends"
 msgid "dernier envoi"
 msgstr "last sent at"
 
-#: apps/accounts/models.py:377
+#: apps/accounts/models.py:377 apps/surveys/models.py:149
 msgid "répondu le"
 msgstr "answered at"
 
@@ -355,11 +365,12 @@ msgstr "scientific committee chair"
 msgid "membre du comité scientifique"
 msgstr "scientific committee member"
 
-#: apps/accounts/roles.py:26 apps/submissions/models.py:152
+#: apps/accounts/roles.py:26 apps/logistics/models.py:114
+#: apps/submissions/models.py:152
 msgid "auteur"
 msgstr "author"
 
-#: apps/accounts/roles.py:27
+#: apps/accounts/roles.py:27 apps/logistics/models.py:298
 msgid "intervenant"
 msgstr "speaker"
 
@@ -371,11 +382,12 @@ msgstr "session chair"
 msgid "participant"
 msgstr "attendee"
 
-#: apps/accounts/roles.py:30
+#: apps/accounts/roles.py:30 apps/sponsors/models.py:141
+#: apps/sponsors/models.py:163
 msgid "partenaire"
 msgstr "sponsor"
 
-#: apps/accounts/roles.py:31
+#: apps/accounts/roles.py:31 apps/logistics/models.py:486
 msgid "bénévole"
 msgstr "volunteer"
 
@@ -401,7 +413,8 @@ msgid "logistique"
 msgstr "logistics"
 
 #: apps/accounts/roles.py:43 apps/events/models.py:345
-#: apps/program/models.py:182 apps/program/models.py:350
+#: apps/logistics/models.py:163 apps/program/models.py:182
+#: apps/program/models.py:350
 msgid "communication"
 msgstr "communication"
 
@@ -409,7 +422,7 @@ msgstr "communication"
 msgid "relations extérieures"
 msgstr "external relations"
 
-#: apps/accounts/roles.py:45
+#: apps/accounts/roles.py:45 apps/logistics/models.py:434
 msgid "bénévoles"
 msgstr "volunteers"
 
@@ -417,13 +430,33 @@ msgstr "volunteers"
 msgid "secrétariat"
 msgstr "secretariat"
 
-#: apps/accounts/services/account.py:66 apps/conferences/services.py:111
-#: apps/conferences/services.py:495 apps/events/services/certificates.py:97
-#: apps/payments/services/billing.py:77 apps/program/services/planning.py:137
-#: apps/program/services/planning.py:239 apps/program/services/planning.py:534
-#: apps/program/services/settings.py:38
+#: apps/accounts/segments.py:24
+msgid "Intervenants invités"
+msgstr "Invited speakers"
+
+#: apps/accounts/segments.py:29
+msgid "Comité scientifique"
+msgstr "Scientific committee"
+
+#: apps/accounts/segments.py:37
+msgid "Comité d'organisation"
+msgstr "Organising committee"
+
+#: apps/accounts/segments.py:42
+msgid "Bénévoles"
+msgstr "Volunteers"
+
+#: apps/accounts/services/account.py:66 apps/communications/announcements.py:99
+#: apps/conferences/services.py:111 apps/conferences/services.py:495
+#: apps/events/services/certificates.py:97
+#: apps/logistics/services/budget.py:178 apps/logistics/services/meals.py:52
+#: apps/logistics/services/shifts.py:52 apps/logistics/services/tasks.py:72
+#: apps/logistics/services/visits.py:72 apps/payments/services/billing.py:77
+#: apps/program/services/planning.py:137 apps/program/services/planning.py:239
+#: apps/program/services/planning.py:534 apps/program/services/settings.py:38
 #: apps/registrations/services/pricing.py:389
-#: apps/registrations/services/settings.py:120
+#: apps/registrations/services/settings.py:120 apps/sponsors/services.py:106
+#: apps/surveys/services.py:115 apps/surveys/services.py:326
 msgid "Champ non modifiable."
 msgstr "This field cannot be changed."
 
@@ -1013,150 +1046,466 @@ msgstr "A full https:// address is expected."
 msgid "Saisissez exactement l'adresse de votre compte."
 msgstr "Type exactly the email address of your account."
 
-#: apps/communications/models.py:17
+#: apps/communications/announcements.py:112
+#: apps/logistics/services/shifts.py:59 apps/logistics/services/visits.py:79
+#: apps/sponsors/services.py:89 apps/surveys/services.py:106
+#: apps/surveys/services.py:685
+#, python-format
+msgid "%(limit)s caractères au plus."
+msgstr "%(limit)s characters at most."
+
+#: apps/communications/announcements.py:115 apps/logistics/services/tasks.py:78
+#: apps/submissions/services.py:105 apps/surveys/services.py:127
+msgid "Titre obligatoire."
+msgstr "Title required."
+
+#: apps/communications/announcements.py:120
+#: apps/reviews/services/decisions.py:109
+#: apps/reviews/services/decisions.py:421
+msgid "Texte trop long."
+msgstr "Text too long."
+
+#: apps/communications/announcements.py:137
+#: apps/logistics/services/shifts.py:67 apps/logistics/services/visits.py:101
+#: apps/surveys/services.py:148
+msgid "Date et heure attendues."
+msgstr "A date and time are expected."
+
+#: apps/communications/announcements.py:187
+msgid "Message du bandeau obligatoire."
+msgstr "Banner message required."
+
+#: apps/communications/announcements.py:189
+msgid "Début du bandeau obligatoire."
+msgstr "Banner start required."
+
+#: apps/communications/announcements.py:191
+msgid "Fin du bandeau obligatoire."
+msgstr "Banner end required."
+
+#: apps/communications/announcements.py:195
+#: apps/logistics/services/shifts.py:97
+msgid "Fin après le début."
+msgstr "The end must come after the start."
+
+#: apps/communications/announcements.py:200
+msgid "Une autre annonce occupe déjà le bandeau sur cette période."
+msgstr "Another announcement already occupies the banner during this period."
+
+#: apps/communications/announcements.py:208
+msgid "Choisissez au moins un canal."
+msgstr "Choose at least one channel."
+
+#: apps/communications/announcements.py:210
+msgid "Texte obligatoire pour les actualités et l'e-mail."
+msgstr "Text is required for news and email."
+
+#: apps/communications/announcements.py:212
+msgid "Segment obligatoire pour la cloche et l'e-mail."
+msgstr "A segment is required for the bell and email."
+
+#: apps/communications/announcements.py:257
+msgid "Annonce retirée."
+msgstr "Announcement withdrawn."
+
+#: apps/communications/announcements.py:267
+msgid "Déjà envoyée : non modifiable."
+msgstr "Already sent: cannot be changed."
+
+#: apps/communications/announcements.py:305
+msgid "Seul un brouillon se supprime ; une annonce publiée se retire."
+msgstr "Only a draft can be deleted; a published announcement is withdrawn."
+
+#: apps/communications/announcements.py:328
+msgid "Annonce déjà publiée ou retirée."
+msgstr "Announcement already published or withdrawn."
+
+#: apps/communications/announcements.py:376
+msgid "Seule une annonce publiée se retire."
+msgstr "Only a published announcement can be withdrawn."
+
+#: apps/communications/announcements.py:398
+msgid "Aucun envoi en cours."
+msgstr "No sending in progress."
+
+#: apps/communications/announcements.py:435 apps/communications/segments.py:66
+msgid "Segment inconnu."
+msgstr "Unknown segment."
+
+#: apps/communications/announcements.py:489
+#, python-format
+msgid "Vous recevez ce message au titre de « %(segment)s » pour %(edition)s."
+msgstr ""
+"You are receiving this message as part of “%(segment)s” for %(edition)s."
+
+#: apps/communications/announcements.py:496
+msgid "Essai : ce message n'a été envoyé qu'à vous."
+msgstr "Test: this message was sent to you only."
+
+#: apps/communications/announcements.py:647
+msgid "Segment et texte nécessaires à l'essai."
+msgstr "A segment and a text are needed for the test."
+
+#: apps/communications/announcements.py:680
+msgid "Lien de désabonnement invalide."
+msgstr "Invalid unsubscribe link."
+
+#: apps/communications/models.py:19
 msgid "en file"
 msgstr "queued"
 
-#: apps/communications/models.py:18
+#: apps/communications/models.py:20
 msgid "en cours d'envoi"
 msgstr "sending"
 
-#: apps/communications/models.py:19
+#: apps/communications/models.py:21
 msgid "envoyé"
 msgstr "sent"
 
-#: apps/communications/models.py:20 apps/core/models.py:186
+#: apps/communications/models.py:22 apps/core/models.py:186
 msgid "en échec"
 msgstr "failed"
 
-#: apps/communications/models.py:21
+#: apps/communications/models.py:23 apps/communications/models.py:150
 msgid "annulé"
 msgstr "cancelled"
 
-#: apps/communications/models.py:34
+#: apps/communications/models.py:36 apps/communications/models.py:240
 msgid "destinataire"
 msgstr "recipient"
 
-#: apps/communications/models.py:37
+#: apps/communications/models.py:39
 msgid "compte destinataire"
 msgstr "recipient account"
 
-#: apps/communications/models.py:51
+#: apps/communications/models.py:53
 msgid "gabarit"
 msgstr "template"
 
-#: apps/communications/models.py:53
+#: apps/communications/models.py:55
 msgid "objet"
 msgstr "subject"
 
-#: apps/communications/models.py:54
+#: apps/communications/models.py:56
 msgid "corps (texte)"
 msgstr "body (text)"
 
-#: apps/communications/models.py:55
+#: apps/communications/models.py:57
 msgid "corps (HTML)"
 msgstr "body (HTML)"
 
-#: apps/communications/models.py:56
+#: apps/communications/models.py:58
 msgid "contient un lien à jeton"
 msgstr "contains a token link"
 
-#: apps/communications/models.py:60 apps/core/models.py:212
+#: apps/communications/models.py:60
+msgid "envoi groupé"
+msgstr "bulk sending"
+
+#: apps/communications/models.py:64 apps/core/models.py:212
 msgid "tentatives"
 msgstr "attempts"
 
-#: apps/communications/models.py:61 apps/core/models.py:217
+#: apps/communications/models.py:65 apps/core/models.py:217
 #: apps/core/models.py:250
 msgid "dernière erreur"
 msgstr "last error"
 
-#: apps/communications/models.py:62
+#: apps/communications/models.py:66
 msgid "programmé le"
 msgstr "scheduled at"
 
-#: apps/communications/models.py:63 apps/submissions/models.py:343
+#: apps/communications/models.py:67 apps/submissions/models.py:343
 msgid "envoyé le"
 msgstr "sent at"
 
-#: apps/communications/models.py:64
+#: apps/communications/models.py:68
 msgid "corps purgé le"
 msgstr "body purged at"
 
-#: apps/communications/models.py:66
+#: apps/communications/models.py:70
 msgid "identifiant chez le fournisseur"
 msgstr "provider message ID"
 
-#: apps/communications/models.py:70 apps/core/models.py:220
+#: apps/communications/models.py:74 apps/core/models.py:220
 #: apps/events/models.py:128
 msgid "clé d'idempotence"
 msgstr "idempotency key"
 
-#: apps/communications/models.py:74
+#: apps/communications/models.py:78
 msgid "e-mail envoyé"
 msgstr "sent email"
 
-#: apps/communications/models.py:75
+#: apps/communications/models.py:79
 msgid "e-mails envoyés"
 msgstr "sent emails"
 
-#: apps/communications/models.py:89
+#: apps/communications/models.py:94
 msgid "soumission reçue"
 msgstr "submission received"
 
-#: apps/communications/models.py:90
+#: apps/communications/models.py:95
 msgid "soumission retirée"
 msgstr "submission withdrawn"
 
-#: apps/communications/models.py:91
+#: apps/communications/models.py:96
 msgid "déclaré co-auteur"
 msgstr "listed as co-author"
 
-#: apps/communications/models.py:92
+#: apps/communications/models.py:97
 msgid "dérogation accordée"
 msgstr "extension granted"
 
-#: apps/communications/models.py:93
+#: apps/communications/models.py:98
 msgid "brouillon à soumettre"
 msgstr "draft to submit"
 
-#: apps/communications/models.py:94
+#: apps/communications/models.py:99
 msgid "soumission non recevable"
 msgstr "inadmissible submission"
 
-#: apps/communications/models.py:95
+#: apps/communications/models.py:100
 msgid "décision publiée"
 msgstr "decision published"
 
-#: apps/communications/models.py:96 apps/submissions/models.py:34
+#: apps/communications/models.py:101 apps/submissions/models.py:34
 msgid "version finale reçue"
 msgstr "camera-ready version received"
 
-#: apps/communications/models.py:109 apps/submissions/models.py:137
+#: apps/communications/models.py:102
+msgid "tâche confiée"
+msgstr "task assigned"
+
+#: apps/communications/models.py:103
+msgid "poste de bénévolat confié"
+msgstr "volunteer shift assigned"
+
+#: apps/communications/models.py:104
+msgid "poste de bénévolat retiré"
+msgstr "volunteer shift removed"
+
+#: apps/communications/models.py:105 apps/communications/models.py:211
+#: apps/communications/models.py:234
+msgid "annonce"
+msgstr "announcement"
+
+#: apps/communications/models.py:106
+msgid "questionnaire de satisfaction"
+msgstr "satisfaction survey"
+
+#: apps/communications/models.py:119 apps/communications/models.py:264
+#: apps/submissions/models.py:137
 msgid "compte"
 msgstr "account"
 
-#: apps/communications/models.py:113 apps/core/models.py:285
+#: apps/communications/models.py:123 apps/core/models.py:288
 #: apps/events/models.py:281 apps/events/models.py:342
-#: apps/payments/models.py:241 apps/reviews/models.py:235
-#: apps/submissions/models.py:177
+#: apps/logistics/models.py:212 apps/payments/models.py:241
+#: apps/reviews/models.py:235 apps/submissions/models.py:177
 msgid "nature"
 msgstr "kind"
 
-#: apps/communications/models.py:114 apps/core/models.py:206
+#: apps/communications/models.py:124 apps/core/models.py:206
 msgid "données"
 msgstr "payload"
 
-#: apps/communications/models.py:115
+#: apps/communications/models.py:125
 msgid "lue le"
 msgstr "read on"
 
-#: apps/communications/models.py:118
+#: apps/communications/models.py:128
 msgid "notification"
 msgstr "notification"
 
-#: apps/communications/models.py:119
+#: apps/communications/models.py:129
 msgid "notifications"
 msgstr "notifications"
+
+#: apps/communications/models.py:138 apps/conferences/models.py:63
+#: apps/reviews/models.py:274 apps/submissions/models.py:24
+#: apps/surveys/models.py:29
+msgid "brouillon"
+msgstr "draft"
+
+#: apps/communications/models.py:139 apps/conferences/models.py:64
+#: apps/portal/models.py:83 apps/portal/models.py:142 apps/portal/models.py:229
+msgid "publiée"
+msgstr "published"
+
+#: apps/communications/models.py:140 apps/submissions/models.py:39
+msgid "retirée"
+msgstr "withdrawn"
+
+#: apps/communications/models.py:147
+msgid "aucun envoi"
+msgstr "no sending"
+
+#: apps/communications/models.py:148
+msgid "mise en file"
+msgstr "queuing"
+
+#: apps/communications/models.py:149
+msgid "en file d'envoi"
+msgstr "queued for sending"
+
+#: apps/communications/models.py:167 apps/conferences/models.py:79
+#: apps/core/models.py:297 apps/events/models.py:282 apps/portal/models.py:59
+#: apps/portal/models.py:137 apps/program/models.py:113
+#: apps/surveys/models.py:62
+msgid "titre (FR)"
+msgstr "title (FR)"
+
+#: apps/communications/models.py:168 apps/conferences/models.py:80
+#: apps/core/models.py:298 apps/events/models.py:283 apps/portal/models.py:60
+#: apps/portal/models.py:138 apps/program/models.py:114
+#: apps/surveys/models.py:63
+msgid "titre (EN)"
+msgstr "title (EN)"
+
+#: apps/communications/models.py:169 apps/events/models.py:284
+msgid "texte (FR)"
+msgstr "text (FR)"
+
+#: apps/communications/models.py:170 apps/events/models.py:285
+msgid "texte (EN)"
+msgstr "text (EN)"
+
+#: apps/communications/models.py:171
+msgid "actualités"
+msgstr "news"
+
+#: apps/communications/models.py:172
+msgid "bandeau"
+msgstr "banner"
+
+#: apps/communications/models.py:173
+msgid "cloche"
+msgstr "bell"
+
+#: apps/communications/models.py:174
+msgid "e-mail"
+msgstr "email"
+
+#: apps/communications/models.py:175
+msgid "segment"
+msgstr "segment"
+
+#: apps/communications/models.py:177
+msgid "message du bandeau (FR)"
+msgstr "banner message (FR)"
+
+#: apps/communications/models.py:180
+msgid "message du bandeau (EN)"
+msgstr "banner message (EN)"
+
+#: apps/communications/models.py:182
+msgid "début du bandeau"
+msgstr "banner start"
+
+#: apps/communications/models.py:183
+msgid "fin du bandeau"
+msgstr "banner end"
+
+#: apps/communications/models.py:190 apps/conferences/models.py:135
+#: apps/program/models.py:304 apps/reviews/models.py:494
+msgid "publiée le"
+msgstr "published at"
+
+#: apps/communications/models.py:191 apps/submissions/models.py:95
+msgid "retirée le"
+msgstr "withdrawn on"
+
+#: apps/communications/models.py:193
+msgid "envoi"
+msgstr "sending"
+
+#: apps/communications/models.py:195
+msgid "destinataires comptés"
+msgstr "recipients counted"
+
+#: apps/communications/models.py:196
+msgid "destinataires traités"
+msgstr "recipients processed"
+
+#: apps/communications/models.py:197
+msgid "e-mails mis en file"
+msgstr "emails queued"
+
+#: apps/communications/models.py:198
+msgid "curseur de mise en file"
+msgstr "queuing cursor"
+
+#: apps/communications/models.py:199
+msgid "envoi commencé le"
+msgstr "sending started at"
+
+#: apps/communications/models.py:200
+msgid "envoi arrêté le"
+msgstr "sending stopped at"
+
+#: apps/communications/models.py:203 apps/logistics/models.py:71
+msgid "créée par"
+msgstr "created by"
+
+#: apps/communications/models.py:212
+msgid "annonces"
+msgstr "announcements"
+
+#: apps/communications/models.py:244
+msgid "e-mail mis en file"
+msgstr "email queued"
+
+#: apps/communications/models.py:245
+msgid "traité le"
+msgstr "processed at"
+
+#: apps/communications/models.py:248
+msgid "destinataire d'une annonce"
+msgstr "announcement recipient"
+
+#: apps/communications/models.py:249
+msgid "destinataires des annonces"
+msgstr "announcement recipients"
+
+#: apps/communications/models.py:274
+msgid "désabonné le"
+msgstr "unsubscribed at"
+
+#: apps/communications/models.py:277
+msgid "désabonnement des annonces"
+msgstr "announcement opt-out"
+
+#: apps/communications/models.py:278
+msgid "désabonnements des annonces"
+msgstr "announcement opt-outs"
+
+#: apps/communications/templates/communications/email/announcement_message.html:10
+msgid "Ne plus recevoir les annonces de cette édition"
+msgstr "Stop receiving announcements for this edition"
+
+#: apps/communications/templates/communications/email/announcement_message.html:11
+#: apps/communications/templates/communications/email/announcement_message.txt:10
+msgid ""
+"Les messages liés à votre compte, à vos soumissions ou à votre inscription "
+"restent envoyés."
+msgstr ""
+"Messages about your account, your submissions or your registration will "
+"still be sent."
+
+#: apps/communications/templates/communications/email/announcement_message.html:12
+#, python-format
+msgid "Cordialement,<br>L'équipe %(site_name)s"
+msgstr "Kind regards,<br>The %(site_name)s team"
+
+#: apps/communications/templates/communications/email/announcement_message.txt:9
+#, python-format
+msgid "Ne plus recevoir les annonces de cette édition : %(unsubscribe_url)s"
+msgstr "Stop receiving announcements for this edition: %(unsubscribe_url)s"
+
+#: apps/communications/templates/communications/email/announcement_subject.txt:1
+#, python-format
+msgid "[%(site_name)s] Annonce de la conférence"
+msgstr "[%(site_name)s] Conference announcement"
 
 #: apps/communications/templates/communications/email/test_message.txt:1
 #, python-format
@@ -1186,10 +1535,12 @@ msgid "identifiant"
 msgstr "identifier"
 
 #: apps/conferences/models.py:29 apps/conferences/models.py:210
+#: apps/sponsors/models.py:36
 msgid "nom (FR)"
 msgstr "name (FR)"
 
 #: apps/conferences/models.py:30 apps/conferences/models.py:211
+#: apps/sponsors/models.py:37
 msgid "nom (EN)"
 msgstr "name (EN)"
 
@@ -1212,22 +1563,13 @@ msgid "édition courante"
 msgstr "current edition"
 
 #: apps/conferences/models.py:46 apps/conferences/models.py:70
+#: apps/surveys/models.py:24
 msgid "conférence"
 msgstr "conference"
 
 #: apps/conferences/models.py:47
 msgid "conférences"
 msgstr "conferences"
-
-#: apps/conferences/models.py:63 apps/reviews/models.py:274
-#: apps/submissions/models.py:24
-msgid "brouillon"
-msgstr "draft"
-
-#: apps/conferences/models.py:64 apps/portal/models.py:83
-#: apps/portal/models.py:142 apps/portal/models.py:229
-msgid "publiée"
-msgstr "published"
 
 #: apps/conferences/models.py:65
 msgid "archivée"
@@ -1245,18 +1587,6 @@ msgstr "code"
 msgid "année"
 msgstr "year"
 
-#: apps/conferences/models.py:79 apps/core/models.py:294
-#: apps/events/models.py:282 apps/portal/models.py:59 apps/portal/models.py:137
-#: apps/program/models.py:113
-msgid "titre (FR)"
-msgstr "title (FR)"
-
-#: apps/conferences/models.py:80 apps/core/models.py:295
-#: apps/events/models.py:283 apps/portal/models.py:60 apps/portal/models.py:138
-#: apps/program/models.py:114
-msgid "titre (EN)"
-msgstr "title (EN)"
-
 #: apps/conferences/models.py:81
 msgid "thème (FR)"
 msgstr "theme (FR)"
@@ -1265,17 +1595,18 @@ msgstr "theme (FR)"
 msgid "thème (EN)"
 msgstr "theme (EN)"
 
-#: apps/conferences/models.py:83 apps/program/models.py:133
-#: apps/program/models.py:178
+#: apps/conferences/models.py:83 apps/logistics/models.py:459
+#: apps/program/models.py:133 apps/program/models.py:178
 msgid "début"
 msgstr "start"
 
-#: apps/conferences/models.py:84 apps/program/models.py:134
-#: apps/program/models.py:179
+#: apps/conferences/models.py:84 apps/logistics/models.py:460
+#: apps/program/models.py:134 apps/program/models.py:179
 msgid "fin"
 msgstr "end"
 
-#: apps/conferences/models.py:85
+#: apps/conferences/models.py:85 apps/logistics/models.py:159
+#: apps/logistics/models.py:458
 msgid "lieu"
 msgstr "venue"
 
@@ -1319,12 +1650,7 @@ msgstr "buffer between slots (minutes)"
 msgid "présentateur inscrit exigé (RG-11)"
 msgstr "registered presenter required (RG-11)"
 
-#: apps/conferences/models.py:135 apps/program/models.py:304
-#: apps/reviews/models.py:494
-msgid "publiée le"
-msgstr "published at"
-
-#: apps/conferences/models.py:136
+#: apps/conferences/models.py:136 apps/logistics/models.py:78
 msgid "archivée le"
 msgstr "archived at"
 
@@ -1337,10 +1663,12 @@ msgid "éditions"
 msgstr "editions"
 
 #: apps/conferences/models.py:214 apps/conferences/models.py:277
-#: apps/conferences/models.py:346 apps/core/models.py:296
-#: apps/portal/models.py:228 apps/program/models.py:59
-#: apps/program/models.py:174 apps/registrations/models.py:171
-#: apps/registrations/models.py:260 apps/reviews/models.py:97
+#: apps/conferences/models.py:346 apps/core/models.py:299
+#: apps/logistics/models.py:436 apps/portal/models.py:228
+#: apps/program/models.py:59 apps/program/models.py:174
+#: apps/registrations/models.py:171 apps/registrations/models.py:260
+#: apps/reviews/models.py:97 apps/sponsors/models.py:44
+#: apps/sponsors/models.py:108 apps/sponsors/models.py:167
 #: apps/submissions/models.py:134
 msgid "ordre"
 msgstr "order"
@@ -1369,18 +1697,21 @@ msgid "facultatif"
 msgstr "optional"
 
 #: apps/conferences/models.py:243 apps/reviews/models.py:98
+#: apps/surveys/models.py:120
 msgid "obligatoire"
 msgstr "required"
 
 #: apps/conferences/models.py:256 apps/conferences/models.py:343
-#: apps/portal/models.py:216 apps/registrations/models.py:165
-#: apps/registrations/models.py:245 apps/reviews/models.py:87
+#: apps/logistics/models.py:427 apps/portal/models.py:216
+#: apps/registrations/models.py:165 apps/registrations/models.py:245
+#: apps/reviews/models.py:87 apps/surveys/models.py:117
 msgid "libellé (FR)"
 msgstr "label (FR)"
 
 #: apps/conferences/models.py:257 apps/conferences/models.py:344
-#: apps/portal/models.py:217 apps/registrations/models.py:166
-#: apps/registrations/models.py:246 apps/reviews/models.py:88
+#: apps/logistics/models.py:428 apps/portal/models.py:217
+#: apps/registrations/models.py:166 apps/registrations/models.py:246
+#: apps/reviews/models.py:88 apps/surveys/models.py:118
 msgid "libellé (EN)"
 msgstr "label (EN)"
 
@@ -1498,7 +1829,8 @@ msgstr "At least one active submission type."
 msgid "Ouverture et clôture de l'appel obligatoires."
 msgstr "Call opening and closing dates are required."
 
-#: apps/conferences/services.py:291
+#: apps/conferences/services.py:291 apps/logistics/services/tasks.py:94
+#: apps/logistics/services/visits.py:114 apps/sponsors/services.py:241
 msgid "Statut inconnu."
 msgstr "Unknown status."
 
@@ -1560,27 +1892,27 @@ msgstr "Unknown time zone."
 msgid "Échec de la vérification CSRF : rechargez la page puis réessayez."
 msgstr "CSRF verification failed: reload the page and try again."
 
-#: apps/core/errors.py:122
+#: apps/core/errors.py:133
 msgid "Opération refusée."
 msgstr "Operation refused."
 
-#: apps/core/errors.py:151
+#: apps/core/errors.py:162
 msgid "Opération impossible dans l'état actuel."
 msgstr "This operation is not possible in the current state."
 
-#: apps/core/errors.py:158
+#: apps/core/errors.py:169
 msgid "Action non autorisée."
 msgstr "Action not allowed."
 
-#: apps/core/errors.py:165 apps/core/exceptions.py:110
+#: apps/core/errors.py:176 apps/core/exceptions.py:110
 msgid "Données invalides."
 msgstr "Invalid data."
 
-#: apps/core/errors.py:172
+#: apps/core/errors.py:183
 msgid "Modifié entre-temps (autre onglet ?) : rechargez avant d'enregistrer."
 msgstr "Changed in the meantime (another tab?): reload before saving."
 
-#: apps/core/errors.py:183
+#: apps/core/errors.py:194
 msgid "Quota atteint."
 msgstr "Quota reached."
 
@@ -1644,11 +1976,12 @@ msgstr "audit log entry"
 msgid "journal d'audit"
 msgstr "audit log"
 
-#: apps/core/models.py:184 apps/core/models.py:233 apps/payments/models.py:104
+#: apps/core/models.py:184 apps/core/models.py:233 apps/logistics/models.py:25
+#: apps/payments/models.py:104
 msgid "en cours"
 msgstr "running"
 
-#: apps/core/models.py:185
+#: apps/core/models.py:185 apps/logistics/models.py:26
 msgid "terminée"
 msgstr "succeeded"
 
@@ -1656,7 +1989,7 @@ msgstr "succeeded"
 msgid "urgente"
 msgstr "urgent"
 
-#: apps/core/models.py:194
+#: apps/core/models.py:194 apps/logistics/models.py:31
 msgid "normale"
 msgstr "normal"
 
@@ -1664,7 +1997,7 @@ msgstr "normal"
 msgid "envoi de masse"
 msgstr "bulk sending"
 
-#: apps/core/models.py:210
+#: apps/core/models.py:210 apps/logistics/models.py:55
 msgid "priorité"
 msgstr "priority"
 
@@ -1684,15 +2017,16 @@ msgstr "locked at"
 msgid "réservée par"
 msgstr "locked by"
 
-#: apps/core/models.py:216
+#: apps/core/models.py:216 apps/logistics/models.py:77
 msgid "terminée le"
 msgstr "finished at"
 
-#: apps/core/models.py:224
+#: apps/core/models.py:224 apps/logistics/models.py:93
+#: apps/logistics/models.py:110 apps/logistics/models.py:131
 msgid "tâche"
 msgstr "job"
 
-#: apps/core/models.py:225
+#: apps/core/models.py:225 apps/logistics/models.py:94
 msgid "tâches"
 msgstr "jobs"
 
@@ -1748,68 +2082,75 @@ msgstr "image"
 msgid "photo de profil"
 msgstr "profile photo"
 
-#: apps/core/models.py:276
+#: apps/core/models.py:266
+msgid "logo de partenaire"
+msgstr "sponsor logo"
+
+#: apps/core/models.py:279
 msgid "identifiant public"
 msgstr "public identifier"
 
-#: apps/core/models.py:286 apps/submissions/models.py:179
+#: apps/core/models.py:289 apps/logistics/models.py:133
+#: apps/submissions/models.py:179
 msgid "nom de stockage"
 msgstr "storage name"
 
-#: apps/core/models.py:287 apps/submissions/models.py:180
+#: apps/core/models.py:290 apps/submissions/models.py:180
 msgid "nom d'origine"
 msgstr "original name"
 
-#: apps/core/models.py:288
+#: apps/core/models.py:291
 msgid "extension"
 msgstr "extension"
 
-#: apps/core/models.py:289
+#: apps/core/models.py:292
 msgid "type de contenu"
 msgstr "content type"
 
-#: apps/core/models.py:290 apps/submissions/models.py:181
+#: apps/core/models.py:293 apps/logistics/models.py:136
+#: apps/submissions/models.py:181
 msgid "taille (octets)"
 msgstr "size (bytes)"
 
-#: apps/core/models.py:291 apps/payments/models.py:273
+#: apps/core/models.py:294 apps/payments/models.py:273
 #: apps/submissions/models.py:182
 msgid "empreinte SHA-256"
 msgstr "SHA-256 digest"
 
-#: apps/core/models.py:292
+#: apps/core/models.py:295
 msgid "largeur"
 msgstr "width"
 
-#: apps/core/models.py:293
+#: apps/core/models.py:296
 msgid "hauteur"
 msgstr "height"
 
-#: apps/core/models.py:297
+#: apps/core/models.py:300 apps/surveys/models.py:30
 msgid "publié"
 msgstr "published"
 
-#: apps/core/models.py:313
+#: apps/core/models.py:316
 msgid "fichier public"
 msgstr "public file"
 
-#: apps/core/models.py:314
+#: apps/core/models.py:317
 msgid "fichiers publics"
 msgstr "public files"
 
-#: apps/core/models.py:331 apps/registrations/models.py:321
+#: apps/core/models.py:334 apps/registrations/models.py:321
+#: apps/surveys/models.py:52
 msgid "portée"
 msgstr "scope"
 
-#: apps/core/models.py:332
+#: apps/core/models.py:335
 msgid "dernière valeur"
 msgstr "last value"
 
-#: apps/core/models.py:335
+#: apps/core/models.py:338
 msgid "compteur"
 msgstr "counter"
 
-#: apps/core/models.py:336
+#: apps/core/models.py:339
 msgid "compteurs"
 msgstr "counters"
 
@@ -1953,6 +2294,7 @@ msgstr "registration"
 
 #: apps/events/models.py:110 apps/program/models.py:149
 #: apps/program/models.py:172 apps/program/models.py:240
+#: apps/surveys/models.py:25 apps/surveys/models.py:56
 msgid "session"
 msgstr "session"
 
@@ -1961,6 +2303,7 @@ msgid "pointé le (appareil)"
 msgstr "checked in at (device)"
 
 #: apps/events/models.py:117 apps/payments/models.py:146
+#: apps/sponsors/models.py:119
 msgid "reçu le"
 msgstr "received on"
 
@@ -2073,14 +2416,6 @@ msgstr "certificate uploaded at"
 msgid "paramètres des attestations"
 msgstr "certificate settings"
 
-#: apps/events/models.py:284
-msgid "texte (FR)"
-msgstr "text (FR)"
-
-#: apps/events/models.py:285
-msgid "texte (EN)"
-msgstr "text (EN)"
-
 #: apps/events/models.py:286
 msgid "pied de page (FR)"
 msgstr "footer (FR)"
@@ -2184,11 +2519,11 @@ msgstr "passport number"
 msgid "numéro effacé le"
 msgstr "number erased at"
 
-#: apps/events/models.py:454
+#: apps/events/models.py:454 apps/logistics/models.py:304
 msgid "arrivée"
 msgstr "arrival"
 
-#: apps/events/models.py:455
+#: apps/events/models.py:455 apps/logistics/models.py:311
 msgid "départ"
 msgstr "departure"
 
@@ -2211,6 +2546,10 @@ msgstr "refusal reason"
 #: apps/events/models.py:505
 msgid "clé de la lettre active"
 msgstr "active letter key"
+
+#: apps/events/segments.py:23
+msgid "Présents à la conférence"
+msgstr "Attendees present at the conference"
 
 #: apps/events/serializers.py:182 apps/events/services/counter.py:57
 #: apps/program/services/planning.py:273
@@ -2237,7 +2576,8 @@ msgid "Le certificat de signature a expiré."
 msgstr "The signing certificate has expired."
 
 #: apps/events/services/certificates.py:292
-#: apps/events/services/certificates.py:802 apps/portal/services.py:595
+#: apps/events/services/certificates.py:802
+#: apps/logistics/services/budget.py:207 apps/portal/services.py:602
 msgid "Nature inconnue."
 msgstr "Unknown kind."
 
@@ -2327,19 +2667,20 @@ msgstr "200 check-ins at most per batch."
 msgid "Pointage déjà annulé."
 msgstr "Check-in already cancelled."
 
-#: apps/events/services/checkin.py:469 apps/payments/services/finance.py:118
+#: apps/events/services/checkin.py:469 apps/payments/services/finance.py:127
 #: apps/registrations/services/exports.py:25
 #: apps/reviews/services/decisions.py:499 apps/submissions/services.py:711
 msgid "Référence"
 msgstr "Reference"
 
-#: apps/events/services/checkin.py:470
-#: apps/registrations/services/exports.py:26
+#: apps/events/services/checkin.py:470 apps/logistics/services/dietary.py:129
+#: apps/registrations/services/exports.py:26 apps/sponsors/views.py:212
 msgid "Nom"
 msgstr "Name"
 
 #: apps/events/services/checkin.py:471
-#: apps/registrations/services/exports.py:29
+#: apps/registrations/services/exports.py:29 apps/reports/services.py:253
+#: apps/reports/services.py:311
 msgid "Catégorie"
 msgstr "Category"
 
@@ -2351,8 +2692,8 @@ msgstr "Checked in at (UTC)"
 msgid "Reçu le (UTC)"
 msgstr "Received at (UTC)"
 
-#: apps/events/services/checkin.py:474 apps/payments/services/finance.py:122
-#: apps/registrations/services/exports.py:33
+#: apps/events/services/checkin.py:474 apps/payments/services/finance.py:131
+#: apps/registrations/services/exports.py:33 apps/reports/services.py:302
 msgid "Moyen"
 msgstr "Method"
 
@@ -2482,13 +2823,17 @@ msgid ""
 "Bonjour,\n"
 "\n"
 "Votre lettre d'invitation pour %(edition_title)s est disponible."
-msgstr "Hello,\n\nYour letter of invitation for %(edition_title)s is available."
+msgstr ""
+"Hello,\n"
+"\n"
+"Your letter of invitation for %(edition_title)s is available."
 
 #: apps/events/templates/events/email/letter_issued_message.txt:7
 msgid ""
 "Elle porte un QR code qui permet à l'ambassade ou au consulat d'en vérifier "
 "l'authenticité."
-msgstr "It bears a QR code that lets the embassy or consulate check its authenticity."
+msgstr ""
+"It bears a QR code that lets the embassy or consulate check its authenticity."
 
 #: apps/events/templates/events/email/letter_issued_subject.txt:1
 #, python-format
@@ -2502,7 +2847,11 @@ msgid ""
 "\n"
 "Votre demande de lettre d'invitation pour %(edition_title)s n'a pas pu être "
 "acceptée."
-msgstr "Hello,\n\nYour request for a letter of invitation for %(edition_title)s could not be accepted."
+msgstr ""
+"Hello,\n"
+"\n"
+"Your request for a letter of invitation for %(edition_title)s could not be "
+"accepted."
 
 #: apps/events/templates/events/email/letter_refused_message.txt:7
 #, python-format
@@ -2526,6 +2875,714 @@ msgstr "Unknown variable: {%(field)s}. Allowed variables: %(allowed)s."
 #: apps/events/views.py:365
 msgid "Numéro de lot attendu (1, 2…)."
 msgstr "Batch number expected (1, 2…)."
+
+#: apps/logistics/models.py:24
+msgid "à faire"
+msgstr "to do"
+
+#: apps/logistics/models.py:30
+msgid "basse"
+msgstr "low"
+
+#: apps/logistics/models.py:32
+msgid "haute"
+msgstr "high"
+
+#: apps/logistics/models.py:50
+msgid "description"
+msgstr "description"
+
+#: apps/logistics/models.py:57
+msgid "étiquette"
+msgstr "label"
+
+#: apps/logistics/models.py:60
+msgid "responsable"
+msgstr "assignee"
+
+#: apps/logistics/models.py:66 apps/reviews/models.py:176
+msgid "échéance"
+msgstr "deadline"
+
+#: apps/logistics/models.py:67
+msgid "position dans la colonne"
+msgstr "position in the column"
+
+#: apps/logistics/models.py:68 apps/submissions/models.py:99
+msgid "révision"
+msgstr "revision"
+
+#: apps/logistics/models.py:80
+msgid "rappelée le"
+msgstr "reminded on"
+
+#: apps/logistics/models.py:118
+msgid "texte"
+msgstr "text"
+
+#: apps/logistics/models.py:121
+msgid "commentaire de tâche"
+msgstr "task comment"
+
+#: apps/logistics/models.py:122
+msgid "commentaires de tâche"
+msgstr "task comments"
+
+#: apps/logistics/models.py:134
+msgid "nom du fichier"
+msgstr "file name"
+
+#: apps/logistics/models.py:137
+msgid "empreinte"
+msgstr "fingerprint"
+
+#: apps/logistics/models.py:140
+msgid "déposée par"
+msgstr "uploaded by"
+
+#: apps/logistics/models.py:146
+msgid "pièce jointe de tâche"
+msgstr "task attachment"
+
+#: apps/logistics/models.py:147
+msgid "pièces jointes de tâche"
+msgstr "task attachments"
+
+#: apps/logistics/models.py:152
+msgid "dépense"
+msgstr "expense"
+
+#: apps/logistics/models.py:153
+msgid "recette"
+msgstr "income"
+
+#: apps/logistics/models.py:160
+msgid "restauration"
+msgstr "catering"
+
+#: apps/logistics/models.py:161
+msgid "voyages"
+msgstr "travel"
+
+#: apps/logistics/models.py:162
+msgid "hébergement"
+msgstr "accommodation"
+
+#: apps/logistics/models.py:164
+msgid "impression"
+msgstr "printing"
+
+#: apps/logistics/models.py:165
+msgid "matériel"
+msgstr "equipment"
+
+#: apps/logistics/models.py:166
+msgid "personnel"
+msgstr "staff"
+
+#: apps/logistics/models.py:167
+msgid "divers (dépense)"
+msgstr "other (expense)"
+
+#: apps/logistics/models.py:168 apps/registrations/models.py:475
+msgid "inscriptions"
+msgstr "registrations"
+
+#: apps/logistics/models.py:169
+msgid "partenariats"
+msgstr "sponsorship"
+
+#: apps/logistics/models.py:170
+msgid "subventions"
+msgstr "grants"
+
+#: apps/logistics/models.py:171
+msgid "divers (recette)"
+msgstr "other (income)"
+
+#: apps/logistics/models.py:193
+msgid "saisi"
+msgstr "entered"
+
+#: apps/logistics/models.py:194
+msgid "calculé : inscriptions"
+msgstr "computed: registrations"
+
+#: apps/logistics/models.py:195
+msgid "calculé : partenaires"
+msgstr "computed: sponsors"
+
+#: apps/logistics/models.py:213 apps/logistics/models.py:480
+msgid "poste"
+msgstr "budget item"
+
+#: apps/logistics/models.py:214
+msgid "libellé"
+msgstr "label"
+
+#: apps/logistics/models.py:215
+msgid "prévu"
+msgstr "planned"
+
+#: apps/logistics/models.py:216
+msgid "réalisé"
+msgstr "actual"
+
+#: apps/logistics/models.py:218
+msgid "origine du réalisé"
+msgstr "source of the actual amount"
+
+#: apps/logistics/models.py:226 apps/payments/models.py:155
+#: apps/reviews/models.py:357
+msgid "note"
+msgstr "score"
+
+#: apps/logistics/models.py:227 apps/portal/models.py:189
+#: apps/surveys/models.py:115
+msgid "position"
+msgstr "position"
+
+#: apps/logistics/models.py:229
+msgid "justificatif (nom de stockage)"
+msgstr "supporting document (storage name)"
+
+#: apps/logistics/models.py:231 apps/registrations/models.py:444
+msgid "justificatif"
+msgstr "proof"
+
+#: apps/logistics/models.py:232 apps/registrations/models.py:448
+msgid "type du justificatif"
+msgstr "proof type"
+
+#: apps/logistics/models.py:233 apps/registrations/models.py:449
+msgid "taille du justificatif"
+msgstr "proof size"
+
+#: apps/logistics/models.py:245
+msgid "ligne de budget"
+msgstr "budget line"
+
+#: apps/logistics/models.py:246
+msgid "lignes de budget"
+msgstr "budget lines"
+
+#: apps/logistics/models.py:268
+msgid "avion"
+msgstr "plane"
+
+#: apps/logistics/models.py:269
+msgid "train"
+msgstr "train"
+
+#: apps/logistics/models.py:270
+msgid "route"
+msgstr "road"
+
+#: apps/logistics/models.py:271 apps/logistics/models.py:378
+msgid "autre"
+msgstr "other"
+
+#: apps/logistics/models.py:277
+msgid "à organiser"
+msgstr "to arrange"
+
+#: apps/logistics/models.py:278
+msgid "réservée"
+msgstr "booked"
+
+#: apps/logistics/models.py:279 apps/registrations/models.py:371
+msgid "confirmée"
+msgstr "confirmed"
+
+#: apps/logistics/models.py:302
+msgid "besoins techniques"
+msgstr "technical needs"
+
+#: apps/logistics/models.py:303
+msgid "précisions techniques"
+msgstr "technical details"
+
+#: apps/logistics/models.py:306
+msgid "moyen d'arrivée"
+msgstr "arrival means"
+
+#: apps/logistics/models.py:309
+msgid "vol ou train (arrivée)"
+msgstr "flight or train (arrival)"
+
+#: apps/logistics/models.py:313
+msgid "moyen de départ"
+msgstr "departure means"
+
+#: apps/logistics/models.py:316
+msgid "vol ou train (départ)"
+msgstr "flight or train (departure)"
+
+#: apps/logistics/models.py:318
+msgid "hébergement demandé"
+msgstr "accommodation requested"
+
+#: apps/logistics/models.py:319
+msgid "transfert demandé"
+msgstr "transfer requested"
+
+#: apps/logistics/models.py:320
+msgid "demandes de l'intervenant"
+msgstr "speaker requests"
+
+#: apps/logistics/models.py:321
+msgid "hôtel"
+msgstr "hotel"
+
+#: apps/logistics/models.py:322
+msgid "arrivée à l'hôtel"
+msgstr "hotel check-in"
+
+#: apps/logistics/models.py:323
+msgid "départ de l'hôtel"
+msgstr "hotel check-out"
+
+#: apps/logistics/models.py:325
+msgid "prise en charge"
+msgstr "arrangement status"
+
+#: apps/logistics/models.py:330 apps/sponsors/models.py:120
+msgid "note interne"
+msgstr "internal note"
+
+#: apps/logistics/models.py:333
+msgid "mise à jour par"
+msgstr "updated by"
+
+#: apps/logistics/models.py:362
+msgid "fiche de venue"
+msgstr "visit sheet"
+
+#: apps/logistics/models.py:363
+msgid "fiches de venue"
+msgstr "visit sheets"
+
+#: apps/logistics/models.py:373
+msgid "végétarien"
+msgstr "vegetarian"
+
+#: apps/logistics/models.py:374
+msgid "végétalien"
+msgstr "vegan"
+
+#: apps/logistics/models.py:375
+msgid "sans porc"
+msgstr "no pork"
+
+#: apps/logistics/models.py:376
+msgid "sans gluten"
+msgstr "gluten-free"
+
+#: apps/logistics/models.py:377
+msgid "sans lactose"
+msgstr "lactose-free"
+
+#: apps/logistics/models.py:394 apps/program/models.py:244
+msgid "personne"
+msgstr "person"
+
+#: apps/logistics/models.py:398
+msgid "régimes"
+msgstr "diets"
+
+#: apps/logistics/models.py:399
+msgid "allergies"
+msgstr "allergies"
+
+#: apps/logistics/models.py:400
+msgid "consentement donné le"
+msgstr "consent given at"
+
+#: apps/logistics/models.py:403
+msgid "régime alimentaire"
+msgstr "dietary requirement"
+
+#: apps/logistics/models.py:404
+msgid "régimes alimentaires"
+msgstr "dietary requirements"
+
+#: apps/logistics/models.py:410
+msgid "pause café"
+msgstr "coffee break"
+
+#: apps/logistics/models.py:411
+msgid "déjeuner"
+msgstr "lunch"
+
+#: apps/logistics/models.py:412
+msgid "dîner"
+msgstr "dinner"
+
+#: apps/logistics/models.py:413
+msgid "cocktail"
+msgstr "cocktail"
+
+#: apps/logistics/models.py:425
+msgid "jour"
+msgstr "day"
+
+#: apps/logistics/models.py:430
+msgid "inscrits confirmés"
+msgstr "confirmed registrants"
+
+#: apps/logistics/models.py:431
+msgid "option requise"
+msgstr "required option"
+
+#: apps/logistics/models.py:432
+msgid "intervenants invités"
+msgstr "invited speakers"
+
+#: apps/logistics/models.py:433
+msgid "membres des comités"
+msgstr "committee members"
+
+#: apps/logistics/models.py:435
+msgid "marge (%)"
+msgstr "margin (%)"
+
+#: apps/logistics/models.py:439 apps/logistics/models.py:440
+#: apps/program/models.py:97
+msgid "repas"
+msgstr "meal"
+
+#: apps/logistics/models.py:456
+msgid "intitulé (FR)"
+msgstr "title (FR)"
+
+#: apps/logistics/models.py:457
+msgid "intitulé (EN)"
+msgstr "title (EN)"
+
+#: apps/logistics/models.py:461
+msgid "bénévoles nécessaires"
+msgstr "volunteers needed"
+
+#: apps/logistics/models.py:462 apps/program/models.py:135
+msgid "consignes"
+msgstr "instructions"
+
+#: apps/logistics/models.py:465
+msgid "poste de bénévolat"
+msgstr "volunteer shift"
+
+#: apps/logistics/models.py:466
+msgid "postes de bénévolat"
+msgstr "volunteer shifts"
+
+#: apps/logistics/models.py:492
+msgid "affecté par"
+msgstr "assigned by"
+
+#: apps/logistics/models.py:500
+msgid "affectation de bénévole"
+msgstr "volunteer assignment"
+
+#: apps/logistics/models.py:501
+msgid "affectations de bénévoles"
+msgstr "volunteer assignments"
+
+#: apps/logistics/notifications.py:43
+#, python-format
+msgid "%(title)s : en retard (échéance %(date)s)"
+msgstr "%(title)s: overdue (due %(date)s)"
+
+#: apps/logistics/notifications.py:48
+#, python-format
+msgid "%(title)s : échéance %(date)s"
+msgstr "%(title)s: due %(date)s"
+
+#: apps/logistics/services/budget.py:58
+msgid "Inscriptions (encaissé net)"
+msgstr "Registrations (net collected)"
+
+#: apps/logistics/services/budget.py:158 apps/logistics/services/budget.py:197
+#: apps/sponsors/services.py:70
+msgid "Montant attendu."
+msgstr "Amount expected."
+
+#: apps/logistics/services/budget.py:161
+#: apps/registrations/services/pricing.py:397 apps/sponsors/services.py:73
+msgid "Montant positif ou nul attendu."
+msgstr "A positive or zero amount is expected."
+
+#: apps/logistics/services/budget.py:163 apps/sponsors/services.py:75
+msgid "Montant trop élevé."
+msgstr "Amount too large."
+
+#: apps/logistics/services/budget.py:166
+#: apps/registrations/services/pricing.py:399 apps/sponsors/services.py:78
+#, python-format
+msgid "Trop de décimales pour la devise %(currency)s."
+msgstr "Too many decimals for the currency %(currency)s."
+
+#: apps/logistics/services/budget.py:184 apps/surveys/services.py:361
+#: apps/surveys/services.py:386
+msgid "Libellé obligatoire."
+msgstr "Label required."
+
+#: apps/logistics/services/budget.py:186 apps/logistics/services/dietary.py:83
+#: apps/logistics/services/tasks.py:80
+msgid "200 caractères au plus."
+msgstr "200 characters at most."
+
+#: apps/logistics/services/budget.py:191 apps/logistics/services/tasks.py:265
+msgid "2 000 caractères au plus."
+msgstr "2,000 characters at most."
+
+#: apps/logistics/services/budget.py:201 apps/logistics/services/meals.py:97
+#: apps/logistics/services/tasks.py:108 apps/sponsors/services.py:99
+#: apps/surveys/services.py:342
+msgid "Position positive ou nulle attendue."
+msgstr "Zero or positive position expected."
+
+#: apps/logistics/services/budget.py:209
+msgid "Poste inconnu."
+msgstr "Unknown budget item."
+
+#: apps/logistics/services/budget.py:211
+msgid "Poste d'une autre nature."
+msgstr "Budget item of another kind."
+
+#: apps/logistics/services/budget.py:263
+msgid "Ligne calculée : elle ne se supprime pas."
+msgstr "Computed line: it cannot be deleted."
+
+#: apps/logistics/services/budget.py:279
+#: apps/registrations/services/orders.py:436 apps/registrations/views.py:550
+msgid "Fichier de 5 Mo au plus."
+msgstr "File of 5 MB at most."
+
+#: apps/logistics/services/budget.py:282 apps/logistics/services/tasks.py:282
+#: apps/registrations/services/orders.py:439
+msgid "PDF, JPEG ou PNG attendu."
+msgstr "PDF, JPEG or PNG expected."
+
+#: apps/logistics/services/budget.py:335 apps/payments/services/finance.py:168
+#: apps/reports/services.py:440 apps/reports/services.py:464
+msgid "Nature"
+msgstr "Kind"
+
+#: apps/logistics/services/budget.py:336 apps/reports/services.py:463
+msgid "Poste"
+msgstr "Budget item"
+
+#: apps/logistics/services/budget.py:337 apps/logistics/services/meals.py:198
+#: apps/reports/services.py:99
+msgid "Libellé"
+msgstr "Label"
+
+#: apps/logistics/services/budget.py:338 apps/reports/services.py:440
+#: apps/reports/services.py:465
+msgid "Prévu"
+msgstr "Planned"
+
+#: apps/logistics/services/budget.py:339 apps/reports/services.py:440
+#: apps/reports/services.py:466
+msgid "Réalisé"
+msgstr "Actual"
+
+#: apps/logistics/services/budget.py:340 apps/reports/services.py:440
+#: apps/reports/services.py:467
+msgid "Écart"
+msgstr "Variance"
+
+#: apps/logistics/services/budget.py:341
+msgid "Origine du réalisé"
+msgstr "Source of the actual amount"
+
+#: apps/logistics/services/budget.py:342
+msgid "Note"
+msgstr "Note"
+
+#: apps/logistics/services/budget.py:343 apps/payments/services/finance.py:134
+#: apps/payments/services/finance.py:174
+#: apps/registrations/services/exports.py:35
+msgid "Devise"
+msgstr "Currency"
+
+#: apps/logistics/services/dietary.py:73
+msgid "Votre accord est nécessaire pour enregistrer un régime."
+msgstr "Your consent is required to record a dietary requirement."
+
+#: apps/logistics/services/dietary.py:76
+msgid "Inscription ou rôle dans l'édition nécessaire."
+msgstr "A registration or a role in the edition is required."
+
+#: apps/logistics/services/dietary.py:80
+msgid "Régime inconnu."
+msgstr "Unknown diet."
+
+#: apps/logistics/services/dietary.py:85
+msgid "Indiquez un régime ou une allergie, ou retirez la déclaration."
+msgstr "Indicate a diet or an allergy, or withdraw the declaration."
+
+#: apps/logistics/services/dietary.py:129
+msgid "Régimes"
+msgstr "Diets"
+
+#: apps/logistics/services/dietary.py:129 apps/logistics/services/meals.py:203
+msgid "Allergies"
+msgstr "Allergies"
+
+#: apps/logistics/services/meals.py:58 apps/logistics/services/tasks.py:103
+#: apps/logistics/services/visits.py:110 apps/sponsors/services.py:251
+msgid "Date attendue."
+msgstr "Date expected."
+
+#: apps/logistics/services/meals.py:64
+msgid "Jour en dehors des dates de l'édition."
+msgstr "Day outside the edition dates."
+
+#: apps/logistics/services/meals.py:68
+msgid "Type de repas inconnu."
+msgstr "Unknown meal type."
+
+#: apps/logistics/services/meals.py:74
+msgid "150 caractères au plus."
+msgstr "150 characters at most."
+
+#: apps/logistics/services/meals.py:87
+msgid "Option d'inscription inconnue."
+msgstr "Unknown registration option."
+
+#: apps/logistics/services/meals.py:92
+msgid "Marge de 0 à 50 %."
+msgstr "Margin from 0 to 50%."
+
+#: apps/logistics/services/meals.py:196 apps/reports/services.py:338
+msgid "Jour"
+msgstr "Day"
+
+#: apps/logistics/services/meals.py:197 apps/logistics/views.py:652
+msgid "Repas"
+msgstr "Meal"
+
+#: apps/logistics/services/meals.py:199
+msgid "Effectif"
+msgstr "Headcount"
+
+#: apps/logistics/services/meals.py:200
+msgid "Marge"
+msgstr "Margin"
+
+#: apps/logistics/services/meals.py:201
+#: apps/registrations/services/exports.py:34 apps/reports/services.py:517
+msgid "Total"
+msgstr "Total"
+
+#: apps/logistics/services/shifts.py:62
+msgid "Intitulé obligatoire."
+msgstr "Title required."
+
+#: apps/logistics/services/shifts.py:76
+msgid "De 1 à 100 bénévoles."
+msgstr "From 1 to 100 volunteers."
+
+#: apps/logistics/services/shifts.py:135
+msgid "Ce nouvel horaire chevaucherait un autre poste d'un bénévole affecté."
+msgstr "This new time would overlap another shift of an assigned volunteer."
+
+#: apps/logistics/services/shifts.py:179
+msgid "Bénévole de l'édition attendu."
+msgstr "A volunteer of the edition is expected."
+
+#: apps/logistics/services/shifts.py:186
+msgid "Ce bénévole est déjà affecté à un poste au même moment."
+msgstr "This volunteer is already assigned to a shift at the same time."
+
+#: apps/logistics/services/tasks.py:65
+msgid "Membre du comité d'organisation attendu."
+msgstr "Organising committee member expected."
+
+#: apps/logistics/services/tasks.py:85
+msgid "5 000 caractères au plus."
+msgstr "5,000 characters at most."
+
+#: apps/logistics/services/tasks.py:90
+msgid "50 caractères au plus."
+msgstr "50 characters at most."
+
+#: apps/logistics/services/tasks.py:98
+msgid "Priorité inconnue."
+msgstr "Unknown priority."
+
+#: apps/logistics/services/tasks.py:194
+msgid "Tâche archivée : restaurez-la d'abord."
+msgstr "Archived task: restore it first."
+
+#: apps/logistics/services/tasks.py:263
+msgid "Commentaire vide."
+msgstr "Empty comment."
+
+#: apps/logistics/services/tasks.py:277
+msgid "20 pièces jointes au plus par tâche."
+msgstr "20 attachments at most per task."
+
+#: apps/logistics/services/tasks.py:279 apps/logistics/views.py:102
+msgid "Fichier de 10 Mo au plus."
+msgstr "File of 10 MB at most."
+
+#: apps/logistics/services/visits.py:84 apps/program/services/planning.py:153
+msgid "Équipement inconnu."
+msgstr "Unknown equipment."
+
+#: apps/logistics/services/visits.py:90
+msgid "Moyen inconnu."
+msgstr "Unknown means of travel."
+
+#: apps/logistics/services/visits.py:124
+msgid "Départ après l'arrivée."
+msgstr "Departure must follow arrival."
+
+#: apps/logistics/services/visits.py:126
+msgid "Départ de l'hôtel après l'arrivée."
+msgstr "Hotel check-out must follow check-in."
+
+#: apps/logistics/services/visits.py:165
+msgid "Vous n'êtes pas intervenant invité de cette édition."
+msgstr "You are not an invited speaker of this edition."
+
+#: apps/logistics/services/visits.py:175
+msgid "Intervenant invité de l'édition attendu."
+msgstr "An invited speaker of the edition is expected."
+
+#: apps/logistics/templates/logistics/email/tasks_reminder_message.txt:1
+#, python-format
+msgid ""
+"Bonjour,\n"
+"\n"
+"Voici les tâches du comité d'organisation de %(edition_title)s qui vous sont "
+"confiées et arrivent à échéance :"
+msgstr ""
+"Hello,\n"
+"\n"
+"Here are the organising committee tasks of %(edition_title)s assigned to you "
+"that are due:"
+
+#: apps/logistics/templates/logistics/email/tasks_reminder_message.txt:7
+#, python-format
+msgid "Le tableau des tâches : %(link)s"
+msgstr "The task board: %(link)s"
+
+#: apps/logistics/templates/logistics/email/tasks_reminder_subject.txt:1
+#, python-format
+msgid "[%(site_name)s] Vos tâches à échéance"
+msgstr "[%(site_name)s] Your tasks due"
+
+#: apps/logistics/views.py:402 apps/logistics/views.py:785
+#: apps/sponsors/views.py:210 apps/surveys/views.py:217
+msgid "csv ou xlsx attendu."
+msgstr "csv or xlsx expected."
+
+#: apps/logistics/views.py:650
+msgid "Commande au traiteur"
+msgstr "Catering order"
 
 #: apps/payments/models.py:44
 msgid "raison sociale"
@@ -2639,10 +3696,6 @@ msgstr "last status check"
 #: apps/payments/models.py:149
 msgid "validé par"
 msgstr "validated by"
-
-#: apps/payments/models.py:155 apps/reviews/models.py:357
-msgid "note"
-msgstr "score"
 
 #: apps/payments/models.py:171 apps/payments/models.py:193
 #: apps/payments/models.py:261
@@ -2779,70 +3832,65 @@ msgstr "A pro forma is only for a registration awaiting payment."
 msgid "Montant de 0 à %(max)s."
 msgstr "Amount from 0 to %(max)s."
 
-#: apps/payments/services/finance.py:119 apps/payments/services/finance.py:161
+#: apps/payments/services/finance.py:128 apps/payments/services/finance.py:170
 msgid "Inscription"
 msgstr "Registration"
 
-#: apps/payments/services/finance.py:120
+#: apps/payments/services/finance.py:129
 msgid "Participant"
 msgstr "Attendee"
 
-#: apps/payments/services/finance.py:121
+#: apps/payments/services/finance.py:130
 msgid "Fournisseur"
 msgstr "Provider"
 
-#: apps/payments/services/finance.py:123
+#: apps/payments/services/finance.py:132
 msgid "Référence du fournisseur"
 msgstr "Provider reference"
 
-#: apps/payments/services/finance.py:124 apps/payments/services/finance.py:164
+#: apps/payments/services/finance.py:133 apps/payments/services/finance.py:173
+#: apps/reports/services.py:290 apps/reports/services.py:302
+#: apps/reports/services.py:311
 msgid "Montant"
 msgstr "Amount"
 
-#: apps/payments/services/finance.py:125 apps/payments/services/finance.py:165
-#: apps/registrations/services/exports.py:35
-msgid "Devise"
-msgstr "Currency"
-
-#: apps/payments/services/finance.py:126
-#: apps/registrations/services/exports.py:30
-#: apps/reviews/services/decisions.py:503 apps/submissions/services.py:712
+#: apps/payments/services/finance.py:135
+#: apps/registrations/services/exports.py:30 apps/reports/services.py:80
+#: apps/reports/services.py:230 apps/reports/services.py:494
+#: apps/reviews/services/decisions.py:503 apps/sponsors/views.py:214
+#: apps/submissions/services.py:712
 msgid "Statut"
 msgstr "Status"
 
-#: apps/payments/services/finance.py:127
+#: apps/payments/services/finance.py:136
 msgid "Créé le"
 msgstr "Created on"
 
-#: apps/payments/services/finance.py:128
+#: apps/payments/services/finance.py:137
 msgid "Terminé le"
 msgstr "Completed on"
 
-#: apps/payments/services/finance.py:129
+#: apps/payments/services/finance.py:138 apps/sponsors/views.py:217
 msgid "Reçu le"
 msgstr "Received on"
 
-#: apps/payments/services/finance.py:158
+#: apps/payments/services/finance.py:167
 msgid "Numéro"
 msgstr "Number"
 
-#: apps/payments/services/finance.py:159
-msgid "Nature"
-msgstr "Kind"
-
-#: apps/payments/services/finance.py:160
+#: apps/payments/services/finance.py:169
 msgid "Facture d'origine"
 msgstr "Original invoice"
 
-#: apps/payments/services/finance.py:162
+#: apps/payments/services/finance.py:171
 msgid "Client"
 msgstr "Customer"
 
-#: apps/payments/services/finance.py:163
+#: apps/payments/services/finance.py:172
 msgid "Organisme"
 msgstr "Organisation"
 
-#: apps/payments/services/finance.py:166
+#: apps/payments/services/finance.py:175
 msgid "Émise le"
 msgstr "Issued on"
 
@@ -2981,10 +4029,6 @@ msgstr "page"
 msgid "pages"
 msgstr "pages"
 
-#: apps/portal/models.py:189
-msgid "position"
-msgstr "position"
-
 #: apps/portal/models.py:192
 msgid "section posée"
 msgstr "placed section"
@@ -3031,108 +4075,108 @@ msgstr "portal release"
 msgid "mises en ligne du portail"
 msgstr "portal releases"
 
-#: apps/portal/services.py:165
+#: apps/portal/services.py:172
 msgid "Cette valeur est déjà utilisée."
 msgstr "This value is already in use."
 
-#: apps/portal/services.py:191
+#: apps/portal/services.py:198
 msgid "Adresse refusée : https:, mailto:, tel: ou chemin interne (/…)."
 msgstr "Address refused: https:, mailto:, tel: or internal path (/…)."
 
-#: apps/portal/services.py:207
+#: apps/portal/services.py:214
 #, python-format
 msgid "Texte trop long (%(max)s caractères au plus)."
 msgstr "Text too long (%(max)s characters at most)."
 
-#: apps/portal/services.py:218
+#: apps/portal/services.py:225
 msgid "Configuration invalide."
 msgstr "Invalid configuration."
 
-#: apps/portal/services.py:229
+#: apps/portal/services.py:236
 #, python-format
 msgid "Configuration invalide : %(names)s."
 msgstr "Invalid configuration: %(names)s."
 
-#: apps/portal/services.py:235
+#: apps/portal/services.py:242
 msgid "Seule une section « image et texte » porte une image."
 msgstr "Only an “image and text” section carries an image."
 
-#: apps/portal/services.py:237 apps/portal/services.py:667
+#: apps/portal/services.py:244 apps/portal/services.py:674
 msgid "Choisissez une image publique de l'édition."
 msgstr "Choose a public image of the edition."
 
-#: apps/portal/services.py:240
+#: apps/portal/services.py:247
 msgid ""
 "Une section de données n'a pas de corps : son contenu vient de l'édition."
 msgstr "A data section has no body: its content comes from the edition."
 
-#: apps/portal/services.py:264
+#: apps/portal/services.py:271
 msgid "Le type d'une section ne change pas."
 msgstr "The type of a section cannot change."
 
-#: apps/portal/services.py:299
+#: apps/portal/services.py:306
 #, python-format
 msgid "Section posée sur : %(pages)s. Retirez-la de ces pages d'abord."
 msgstr "Section placed on: %(pages)s. Remove it from these pages first."
 
-#: apps/portal/services.py:326
+#: apps/portal/services.py:333
 msgid "Identifiant réservé à une page du site."
 msgstr "Identifier reserved for a site page."
 
-#: apps/portal/services.py:348
+#: apps/portal/services.py:355
 msgid "Figé pour une page du site."
 msgstr "Fixed for a site page."
 
-#: apps/portal/services.py:375
+#: apps/portal/services.py:382
 msgid "Une page du site ne se supprime pas."
 msgstr "A site page cannot be deleted."
 
-#: apps/portal/services.py:378
+#: apps/portal/services.py:385
 msgid "Page présente dans un menu : retirez-la du menu d'abord."
 msgstr "Page used in a menu: remove it from the menu first."
 
-#: apps/portal/services.py:441
+#: apps/portal/services.py:448
 msgid "Section inconnue."
 msgstr "Unknown section."
 
-#: apps/portal/services.py:444
+#: apps/portal/services.py:451
 msgid "Section déjà posée sur cette page."
 msgstr "Section already placed on this page."
 
-#: apps/portal/services.py:458
+#: apps/portal/services.py:465
 msgid "Section absente de cette page."
 msgstr "Section not placed on this page."
 
-#: apps/portal/services.py:472
+#: apps/portal/services.py:479
 msgid "La liste doit contenir exactement les sections posées."
 msgstr "The list must contain exactly the placed sections."
 
-#: apps/portal/services.py:485
+#: apps/portal/services.py:492
 msgid "Choisissez une page ou une adresse, pas les deux."
 msgstr "Choose a page or an address, not both."
 
-#: apps/portal/services.py:487
+#: apps/portal/services.py:494
 msgid "Page inconnue."
 msgstr "Unknown page."
 
-#: apps/portal/services.py:548
+#: apps/portal/services.py:555
 msgid "Emplacement inconnu."
 msgstr "Unknown location."
 
-#: apps/portal/services.py:553
+#: apps/portal/services.py:560
 msgid "La liste doit contenir exactement les entrées de ce menu."
 msgstr "The list must contain exactly the items of this menu."
 
-#: apps/portal/services.py:634
+#: apps/portal/services.py:641
 msgid "affiche de l'édition"
 msgstr "edition poster"
 
-#: apps/portal/services.py:646
+#: apps/portal/services.py:653
 #, python-format
 msgid "Fichier utilisé (%(uses)s) : retirez-le d'abord."
 msgstr "File in use (%(uses)s): remove it first."
 
-#: apps/portal/services.py:915
+#: apps/portal/services.py:924
 msgid "Date de build invalide (avec fuseau, et pas dans le futur)."
 msgstr "Invalid build date (with time zone, and not in the future)."
 
@@ -3196,7 +4240,7 @@ msgstr "room"
 msgid "salles"
 msgstr "rooms"
 
-#: apps/program/models.py:88
+#: apps/program/models.py:88 apps/surveys/models.py:66
 msgid "ouverture"
 msgstr "opening"
 
@@ -3232,21 +4276,13 @@ msgstr "assembly or meeting"
 msgid "pause"
 msgstr "break"
 
-#: apps/program/models.py:97
-msgid "repas"
-msgstr "meal"
-
 #: apps/program/models.py:98
 msgid "activité sociale"
 msgstr "social event"
 
-#: apps/program/models.py:99
+#: apps/program/models.py:99 apps/surveys/models.py:67
 msgid "clôture"
 msgstr "closing"
-
-#: apps/program/models.py:135
-msgid "consignes"
-msgstr "instructions"
 
 #: apps/program/models.py:150
 msgid "sessions"
@@ -3291,10 +4327,6 @@ msgstr "moderator"
 #: apps/program/models.py:233
 msgid "panéliste"
 msgstr "panelist"
-
-#: apps/program/models.py:244
-msgid "personne"
-msgstr "person"
 
 #: apps/program/models.py:253
 msgid "rôle de séance"
@@ -3396,22 +4428,28 @@ msgstr "moderation"
 msgid "- {start} · {room} · {role} : {title}"
 msgstr "- {start} · {room} · {role}: {title}"
 
+#: apps/program/segments.py:36
+msgid "Présentateurs au programme"
+msgstr "Presenters in the programme"
+
+#: apps/program/segments.py:38
+msgid "Présidents de séance"
+msgstr "Session chairs"
+
 #: apps/program/serializers.py:270
 msgid "Une communication ou un titre libre, l'un ou l'autre."
 msgstr "Either a paper or a free title, not both."
 
 #: apps/program/services/planning.py:142 apps/program/services/planning.py:165
 #: apps/reviews/services/grids.py:179 apps/reviews/services/grids.py:226
+#: apps/sponsors/services.py:126 apps/sponsors/services.py:128
+#: apps/sponsors/services.py:212
 msgid "Nom obligatoire."
 msgstr "Name required."
 
 #: apps/program/services/planning.py:147
 msgid "Une salle porte déjà ce nom."
 msgstr "A room already has this name."
-
-#: apps/program/services/planning.py:153
-msgid "Équipement inconnu."
-msgstr "Unknown equipment."
 
 #: apps/program/services/planning.py:199
 msgid "Salle utilisée par une session : désactivez-la plutôt."
@@ -3826,10 +4864,6 @@ msgstr "promo code"
 msgid "codes promo"
 msgstr "promo codes"
 
-#: apps/registrations/models.py:371
-msgid "confirmée"
-msgstr "confirmed"
-
 #: apps/registrations/models.py:420
 msgid "moyen de paiement"
 msgstr "payment method"
@@ -3862,21 +4896,9 @@ msgstr "billing organisation"
 msgid "adresse de facturation"
 msgstr "billing address"
 
-#: apps/registrations/models.py:444
-msgid "justificatif"
-msgstr "proof"
-
 #: apps/registrations/models.py:446
 msgid "nom du justificatif"
 msgstr "proof file name"
-
-#: apps/registrations/models.py:448
-msgid "type du justificatif"
-msgstr "proof type"
-
-#: apps/registrations/models.py:449
-msgid "taille du justificatif"
-msgstr "proof size"
 
 #: apps/registrations/models.py:450
 msgid "justificatif déposé le"
@@ -3893,10 +4915,6 @@ msgstr "QR token"
 #: apps/registrations/models.py:455 apps/reviews/models.py:191
 msgid "clé d'unicité active"
 msgstr "active uniqueness key"
-
-#: apps/registrations/models.py:475
-msgid "inscriptions"
-msgstr "registrations"
 
 #: apps/registrations/models.py:528
 msgid "retiré le"
@@ -3938,11 +4956,20 @@ msgstr "registration history"
 msgid "historiques des inscriptions"
 msgstr "registration histories"
 
+#: apps/registrations/segments.py:24 apps/reports/services.py:338
+msgid "Inscrits confirmés"
+msgstr "Confirmed registrants"
+
+#: apps/registrations/segments.py:32
+msgid "Inscrits en attente de paiement"
+msgstr "Registrants awaiting payment"
+
 #: apps/registrations/services/exports.py:27
 msgid "Adresse électronique"
 msgstr "Email address"
 
-#: apps/registrations/services/exports.py:28
+#: apps/registrations/services/exports.py:28 apps/reports/services.py:140
+#: apps/reports/services.py:272
 msgid "Pays"
 msgstr "Country"
 
@@ -3950,13 +4977,9 @@ msgstr "Country"
 msgid "Période"
 msgstr "Period"
 
-#: apps/registrations/services/exports.py:32
+#: apps/registrations/services/exports.py:32 apps/reports/services.py:263
 msgid "Zone"
 msgstr "Zone"
-
-#: apps/registrations/services/exports.py:34
-msgid "Total"
-msgstr "Total"
 
 #: apps/registrations/services/exports.py:36
 msgid "Options"
@@ -4033,14 +5056,6 @@ msgstr "Invoice issued: the billing identity can no longer change."
 msgid "Aucun justificatif demandé pour cette catégorie."
 msgstr "No proof is required for this category."
 
-#: apps/registrations/services/orders.py:436 apps/registrations/views.py:550
-msgid "Fichier de 5 Mo au plus."
-msgstr "File of 5 MB at most."
-
-#: apps/registrations/services/orders.py:439
-msgid "PDF, JPEG ou PNG attendu."
-msgstr "PDF, JPEG or PNG expected."
-
 #: apps/registrations/services/pricing.py:165
 #: apps/registrations/services/pricing.py:418
 msgid "Catégorie inconnue."
@@ -4090,15 +5105,6 @@ msgstr "Category not offered for this period and zone."
 #, python-format
 msgid "Plus de place disponible pour cette option : %(code)s."
 msgstr "No place left for this option: %(code)s."
-
-#: apps/registrations/services/pricing.py:397
-msgid "Montant positif ou nul attendu."
-msgstr "A positive or zero amount is expected."
-
-#: apps/registrations/services/pricing.py:399
-#, python-format
-msgid "Trop de décimales pour la devise %(currency)s."
-msgstr "Too many decimals for the currency %(currency)s."
 
 #: apps/registrations/services/pricing.py:477
 msgid "Catégorie utilisée par des inscriptions : désactivez-la."
@@ -4275,6 +5281,275 @@ msgstr "Follow-up, pro forma and payment: %(link)s"
 msgid "[%(site_name)s] Inscription enregistrée"
 msgstr "[%(site_name)s] Registration recorded"
 
+#: apps/reports/services.py:79
+msgid "Soumissions par statut"
+msgstr "Submissions by status"
+
+#: apps/reports/services.py:80 apps/reports/services.py:230
+#: apps/reports/services.py:494 apps/surveys/services.py:798
+msgid "Nombre"
+msgstr "Count"
+
+#: apps/reports/services.py:99 apps/reports/services.py:140
+msgid "Envoyées"
+msgstr "Sent"
+
+#: apps/reports/services.py:99 apps/reports/services.py:140
+msgid "Acceptées"
+msgstr "Accepted"
+
+#: apps/reports/services.py:99 apps/reports/services.py:140
+#: apps/reports/services.py:338 apps/reports/services.py:389
+msgid "Taux (%)"
+msgstr "Rate (%)"
+
+#: apps/reports/services.py:113
+msgid "Par thématique"
+msgstr "By track"
+
+#: apps/reports/services.py:119
+msgid "Par type de communication"
+msgstr "By submission type"
+
+#: apps/reports/services.py:139
+msgid "Par pays du premier auteur"
+msgstr "By country of the first author"
+
+#: apps/reports/services.py:173
+msgid "Toutes thématiques"
+msgstr "All tracks"
+
+#: apps/reports/services.py:203
+msgid "Délais de relecture et retards"
+msgstr "Review delays and lateness"
+
+#: apps/reports/services.py:205 apps/reviews/services/decisions.py:501
+#: apps/submissions/services.py:714
+msgid "Thématique"
+msgstr "Track"
+
+#: apps/reports/services.py:206
+msgid "Affectations"
+msgstr "Assignments"
+
+#: apps/reports/services.py:207
+msgid "Évaluations envoyées"
+msgstr "Reviews sent"
+
+#: apps/reports/services.py:208
+msgid "En retard"
+msgstr "Late"
+
+#: apps/reports/services.py:209
+msgid "Délai moyen (jours)"
+msgstr "Average delay (days)"
+
+#: apps/reports/services.py:229
+msgid "Inscriptions par statut"
+msgstr "Registrations by status"
+
+#: apps/reports/services.py:241
+msgid "Inscriptions confirmées par semaine"
+msgstr "Confirmed registrations by week"
+
+#: apps/reports/services.py:242
+msgid "Semaine"
+msgstr "Week"
+
+#: apps/reports/services.py:242 apps/reports/services.py:253
+#: apps/reports/services.py:263 apps/reports/services.py:272
+#: apps/reports/services.py:311
+msgid "Confirmées"
+msgstr "Confirmed"
+
+#: apps/reports/services.py:252
+msgid "Par catégorie"
+msgstr "By category"
+
+#: apps/reports/services.py:262
+msgid "Par zone"
+msgstr "By zone"
+
+#: apps/reports/services.py:271
+msgid "Par pays"
+msgstr "By country"
+
+#: apps/reports/services.py:289
+#, python-format
+msgid "Recettes (%(currency)s)"
+msgstr "Revenue (%(currency)s)"
+
+#: apps/reports/services.py:290
+msgid "Indicateur"
+msgstr "Indicator"
+
+#: apps/reports/services.py:292
+msgid "Encaissé"
+msgstr "Collected"
+
+#: apps/reports/services.py:293
+msgid "Remboursé"
+msgstr "Refunded"
+
+#: apps/reports/services.py:294
+msgid "Net"
+msgstr "Net"
+
+#: apps/reports/services.py:295
+msgid "En attente de paiement"
+msgstr "Awaiting payment"
+
+#: apps/reports/services.py:301
+msgid "Encaissements par moyen"
+msgstr "Payments by method"
+
+#: apps/reports/services.py:302
+msgid "Paiements"
+msgstr "Payments"
+
+#: apps/reports/services.py:310
+msgid "Inscriptions confirmées par catégorie"
+msgstr "Confirmed registrations by category"
+
+#: apps/reports/services.py:337
+msgid "Présence par jour"
+msgstr "Attendance by day"
+
+#: apps/reports/services.py:338
+msgid "Présents"
+msgstr "Present"
+
+#: apps/reports/services.py:357
+msgid "Entrées par session"
+msgstr "Entries by session"
+
+#: apps/reports/services.py:359
+msgid "Session"
+msgstr "Session"
+
+#: apps/reports/services.py:360
+msgid "Début"
+msgstr "Start"
+
+#: apps/reports/services.py:361
+msgid "Entrées"
+msgstr "Entries"
+
+#: apps/reports/services.py:362
+msgid "Capacité de la salle"
+msgstr "Room capacity"
+
+#: apps/reports/services.py:363
+msgid "Remplissage (%)"
+msgstr "Occupancy (%)"
+
+#: apps/reports/services.py:388
+msgid "Taux de réponse"
+msgstr "Response rate"
+
+#: apps/reports/services.py:389 apps/reports/services.py:395
+msgid "Questionnaire"
+msgstr "Survey"
+
+#: apps/reports/services.py:389
+msgid "Invités"
+msgstr "Invited"
+
+#: apps/reports/services.py:389 apps/reports/services.py:397
+msgid "Réponses"
+msgstr "Answers"
+
+#: apps/reports/services.py:393
+msgid "Notes moyennes (à partir de 5 réponses)"
+msgstr "Average ratings (from 5 answers)"
+
+#: apps/reports/services.py:396 apps/surveys/services.py:798
+msgid "Question"
+msgstr "Question"
+
+#: apps/reports/services.py:398
+msgid "Moyenne sur 5"
+msgstr "Average out of 5"
+
+#: apps/reports/services.py:439
+#, python-format
+msgid "Budget (%(currency)s)"
+msgstr "Budget (%(currency)s)"
+
+#: apps/reports/services.py:452
+msgid "Solde"
+msgstr "Balance"
+
+#: apps/reports/services.py:461
+msgid "Par poste"
+msgstr "By item"
+
+#: apps/reports/services.py:493
+#, python-format
+msgid "Partenaires par statut (%(currency)s)"
+msgstr "Sponsors by status (%(currency)s)"
+
+#: apps/reports/services.py:506
+msgid "Par niveau (hors refus)"
+msgstr "By level (declined excluded)"
+
+#: apps/reports/services.py:507 apps/sponsors/views.py:213
+msgid "Niveau"
+msgstr "Level"
+
+#: apps/reports/services.py:507 apps/reports/services.py:530
+msgid "Partenaires"
+msgstr "Sponsors"
+
+#: apps/reports/services.py:507
+msgid "Convenu"
+msgstr "Agreed"
+
+#: apps/reports/services.py:507
+msgid "Reçu"
+msgstr "Received"
+
+#: apps/reports/services.py:523
+msgid "Soumissions"
+msgstr "Submissions"
+
+#: apps/reports/services.py:524
+msgid "Relecture"
+msgstr "Reviewing"
+
+#: apps/reports/services.py:525
+msgid "Inscriptions"
+msgstr "Registrations"
+
+#: apps/reports/services.py:526
+msgid "Recettes"
+msgstr "Revenue"
+
+#: apps/reports/services.py:527
+msgid "Présence"
+msgstr "Attendance"
+
+#: apps/reports/services.py:528
+msgid "Satisfaction"
+msgstr "Satisfaction"
+
+#: apps/reports/services.py:529
+msgid "Budget"
+msgstr "Budget"
+
+#: apps/reports/views.py:59
+msgid "Section réservée."
+msgstr "Restricted section."
+
+#: apps/reports/views.py:90
+msgid "csv, xlsx ou pdf attendu."
+msgstr "csv, xlsx or pdf expected."
+
+#: apps/reports/views.py:112
+#, python-format
+msgid "Produit le %(date)s (UTC)"
+msgstr "Produced on %(date)s (UTC)"
+
 #: apps/reviews/models.py:46
 msgid "note minimale"
 msgstr "minimum score"
@@ -4356,10 +5631,6 @@ msgstr "assigned by"
 #: apps/reviews/models.py:175
 msgid "affectée le"
 msgstr "assigned on"
-
-#: apps/reviews/models.py:176
-msgid "échéance"
-msgstr "deadline"
 
 #: apps/reviews/models.py:183
 msgid "motif (refus ou annulation)"
@@ -4590,6 +5861,14 @@ msgstr "camera-ready version"
 msgid "versions finales"
 msgstr "final versions"
 
+#: apps/reviews/segments.py:47
+msgid "Relecteurs"
+msgstr "Reviewers"
+
+#: apps/reviews/segments.py:51
+msgid "Relecteurs en retard"
+msgstr "Late reviewers"
+
 #: apps/reviews/services/assignments.py:80
 msgid "Le relecteur est auteur de la soumission."
 msgstr "The reviewer is an author of the submission."
@@ -4670,11 +5949,6 @@ msgstr "Decision already published."
 msgid "Décision possible une fois la soumission évaluée (RG-07)."
 msgstr "A decision is possible once the submission is reviewed (RG-07)."
 
-#: apps/reviews/services/decisions.py:109
-#: apps/reviews/services/decisions.py:421
-msgid "Texte trop long."
-msgstr "Text too long."
-
 #: apps/reviews/services/decisions.py:168
 msgid "Décisions refusées : rien n'a été enregistré."
 msgstr "Decisions refused: nothing was recorded."
@@ -4714,10 +5988,6 @@ msgstr "File too large."
 #: apps/reviews/services/decisions.py:500 apps/submissions/services.py:713
 msgid "Titre"
 msgstr "Title"
-
-#: apps/reviews/services/decisions.py:501 apps/submissions/services.py:714
-msgid "Thématique"
-msgstr "Track"
 
 #: apps/reviews/services/decisions.py:502 apps/submissions/services.py:715
 msgid "Type"
@@ -5038,6 +6308,182 @@ msgstr "Your review: %(link)s"
 msgid "[%(site_name)s] Rappel : évaluation attendue"
 msgstr "[%(site_name)s] Reminder: review expected"
 
+#: apps/sponsors/apps.py:22
+msgid "Partenariats (contributions reçues)"
+msgstr "Sponsorship (contributions received)"
+
+#: apps/sponsors/models.py:22
+msgid "petite"
+msgstr "small"
+
+#: apps/sponsors/models.py:23
+msgid "moyenne"
+msgstr "medium"
+
+#: apps/sponsors/models.py:24
+msgid "grande"
+msgstr "large"
+
+#: apps/sponsors/models.py:38
+msgid "montant indicatif"
+msgstr "indicative amount"
+
+#: apps/sponsors/models.py:39
+msgid "contreparties (FR)"
+msgstr "benefits (FR)"
+
+#: apps/sponsors/models.py:40
+msgid "contreparties (EN)"
+msgstr "benefits (EN)"
+
+#: apps/sponsors/models.py:42
+msgid "taille du logo"
+msgstr "logo size"
+
+#: apps/sponsors/models.py:57
+msgid "niveau de partenariat"
+msgstr "sponsorship level"
+
+#: apps/sponsors/models.py:58
+msgid "niveaux de partenariat"
+msgstr "sponsorship levels"
+
+#: apps/sponsors/models.py:71
+msgid "prospect"
+msgstr "prospect"
+
+#: apps/sponsors/models.py:72
+msgid "accord conclu"
+msgstr "agreed"
+
+#: apps/sponsors/models.py:73
+msgid "contribution reçue"
+msgstr "contribution received"
+
+#: apps/sponsors/models.py:74
+msgid "refus"
+msgstr "declined"
+
+#: apps/sponsors/models.py:90
+msgid "niveau"
+msgstr "level"
+
+#: apps/sponsors/models.py:98
+msgid "logo"
+msgstr "logo"
+
+#: apps/sponsors/models.py:104
+msgid "site"
+msgstr "website"
+
+#: apps/sponsors/models.py:105
+msgid "présentation (FR)"
+msgstr "description (FR)"
+
+#: apps/sponsors/models.py:106
+msgid "présentation (EN)"
+msgstr "description (EN)"
+
+#: apps/sponsors/models.py:107
+msgid "publié sur le portail"
+msgstr "published on the portal"
+
+#: apps/sponsors/models.py:109
+msgid "contact"
+msgstr "contact"
+
+#: apps/sponsors/models.py:110
+msgid "adresse du contact"
+msgstr "contact address"
+
+#: apps/sponsors/models.py:112
+msgid "téléphone du contact"
+msgstr "contact phone"
+
+#: apps/sponsors/models.py:117
+msgid "contribution convenue"
+msgstr "agreed contribution"
+
+#: apps/sponsors/models.py:118
+msgid "montant reçu"
+msgstr "amount received"
+
+#: apps/sponsors/models.py:142
+msgid "partenaires"
+msgstr "sponsors"
+
+#: apps/sponsors/models.py:165 apps/sponsors/models.py:170
+msgid "contrepartie"
+msgstr "benefit"
+
+#: apps/sponsors/models.py:166
+msgid "livrée le"
+msgstr "delivered on"
+
+#: apps/sponsors/models.py:171
+msgid "contreparties"
+msgstr "benefits"
+
+#: apps/sponsors/services.py:133
+msgid "Taille inconnue."
+msgstr "Unknown size."
+
+#: apps/sponsors/services.py:188
+msgid "Niveau attribué à des partenaires : changez-leur de niveau d'abord."
+msgstr "Level assigned to sponsors: change their level first."
+
+#: apps/sponsors/services.py:219
+msgid "Adresse web (http ou https) attendue."
+msgstr "Web address (http or https) expected."
+
+#: apps/sponsors/services.py:227
+msgid "Adresse e-mail invalide."
+msgstr "Invalid e-mail address."
+
+#: apps/sponsors/services.py:237
+msgid "Niveau d'une autre édition."
+msgstr "Level of another edition."
+
+#: apps/sponsors/services.py:260
+msgid "Montant reçu et date obligatoires."
+msgstr "Amount received and date required."
+
+#: apps/sponsors/services.py:409
+msgid "Contrepartie de 1 à 200 caractères."
+msgstr "Benefit of 1 to 200 characters."
+
+#: apps/sponsors/views.py:215
+msgid "Contribution convenue"
+msgstr "Agreed contribution"
+
+#: apps/sponsors/views.py:216
+msgid "Montant reçu"
+msgstr "Amount received"
+
+#: apps/sponsors/views.py:218
+msgid "Contact"
+msgstr "Contact"
+
+#: apps/sponsors/views.py:219
+msgid "Adresse"
+msgstr "Address"
+
+#: apps/sponsors/views.py:220
+msgid "Téléphone"
+msgstr "Phone"
+
+#: apps/sponsors/views.py:221
+msgid "Publié"
+msgstr "Published"
+
+#: apps/sponsors/views.py:234
+msgid "oui"
+msgstr "yes"
+
+#: apps/sponsors/views.py:234
+msgid "non"
+msgstr "no"
+
 #: apps/submissions/models.py:25
 msgid "soumise"
 msgstr "submitted"
@@ -5074,10 +6520,6 @@ msgstr "presented"
 msgid "publiée dans les actes"
 msgstr "published in the proceedings"
 
-#: apps/submissions/models.py:39
-msgid "retirée"
-msgstr "withdrawn"
-
 #: apps/submissions/models.py:61
 msgid "soumissionnaire"
 msgstr "submitter"
@@ -5098,17 +6540,9 @@ msgstr "keywords"
 msgid "soumise le"
 msgstr "submitted on"
 
-#: apps/submissions/models.py:95
-msgid "retirée le"
-msgstr "withdrawn on"
-
 #: apps/submissions/models.py:96
 msgid "motif du retrait"
 msgstr "withdrawal reason"
-
-#: apps/submissions/models.py:99
-msgid "révision"
-msgstr "revision"
 
 #: apps/submissions/models.py:101
 msgid "déclarations"
@@ -5251,9 +6685,13 @@ msgid ""
 msgstr ""
 "This PDF cannot be anonymised automatically: export it again and retry."
 
-#: apps/submissions/services.py:105
-msgid "Titre obligatoire."
-msgstr "Title required."
+#: apps/submissions/segments.py:48
+msgid "Auteurs (soumission envoyée)"
+msgstr "Authors (submission sent)"
+
+#: apps/submissions/segments.py:50
+msgid "Auteurs acceptés"
+msgstr "Accepted authors"
 
 #: apps/submissions/services.py:109
 msgid "Résumé obligatoire."
@@ -5651,3 +7089,270 @@ msgstr "Screening starts when the call (and any extensions) closes."
 #: apps/submissions/workflow.py:240
 msgid "Changement de statut non autorisé."
 msgstr "Status change not allowed."
+
+#: apps/surveys/models.py:34
+msgid "note de 1 à 5"
+msgstr "rating from 1 to 5"
+
+#: apps/surveys/models.py:35
+msgid "choix unique"
+msgstr "single choice"
+
+#: apps/surveys/models.py:36
+msgid "choix multiples"
+msgstr "multiple choice"
+
+#: apps/surveys/models.py:37
+msgid "texte libre"
+msgstr "free text"
+
+#: apps/surveys/models.py:64
+msgid "introduction (FR)"
+msgstr "introduction (FR)"
+
+#: apps/surveys/models.py:65
+msgid "introduction (EN)"
+msgstr "introduction (EN)"
+
+#: apps/surveys/models.py:71
+msgid "publié le"
+msgstr "published at"
+
+#: apps/surveys/models.py:72
+msgid "verrouillé le"
+msgstr "locked at"
+
+#: apps/surveys/models.py:73
+msgid "curseur des invitations"
+msgstr "invitation cursor"
+
+#: apps/surveys/models.py:74
+msgid "invitations envoyées"
+msgstr "invitations sent"
+
+#: apps/surveys/models.py:75
+msgid "curseur de la relance"
+msgstr "reminder cursor"
+
+#: apps/surveys/models.py:76
+msgid "relance envoyée"
+msgstr "reminder sent"
+
+#: apps/surveys/models.py:79
+msgid "créé par"
+msgstr "created by"
+
+#: apps/surveys/models.py:87 apps/surveys/models.py:113
+#: apps/surveys/models.py:137 apps/surveys/models.py:168
+msgid "questionnaire"
+msgstr "survey"
+
+#: apps/surveys/models.py:88
+msgid "questionnaires"
+msgstr "surveys"
+
+#: apps/surveys/models.py:119
+msgid "choix"
+msgstr "choices"
+
+#: apps/surveys/models.py:123
+msgid "question"
+msgstr "question"
+
+#: apps/surveys/models.py:124
+msgid "questions"
+msgstr "questions"
+
+#: apps/surveys/models.py:143
+msgid "personne invitée"
+msgstr "invited person"
+
+#: apps/surveys/models.py:147
+msgid "invitée le"
+msgstr "invited on"
+
+#: apps/surveys/models.py:148
+msgid "relancée le"
+msgstr "reminded on"
+
+#: apps/surveys/models.py:152
+msgid "invitation à un questionnaire"
+msgstr "survey invitation"
+
+#: apps/surveys/models.py:153
+msgid "invitations aux questionnaires"
+msgstr "survey invitations"
+
+#: apps/surveys/models.py:170
+msgid "réponses"
+msgstr "answers"
+
+#: apps/surveys/models.py:173
+msgid "réponse à un questionnaire"
+msgstr "survey response"
+
+#: apps/surveys/models.py:174
+msgid "réponses aux questionnaires"
+msgstr "survey responses"
+
+#: apps/surveys/services.py:131
+msgid "Portée inconnue."
+msgstr "Unknown scope."
+
+#: apps/surveys/services.py:140
+msgid "Session de l'édition attendue."
+msgstr "A session of the edition is expected."
+
+#: apps/surveys/services.py:162
+msgid "Choisissez la session."
+msgstr "Choose the session."
+
+#: apps/surveys/services.py:166
+msgid "Clôture après l'ouverture."
+msgstr "Closing must follow opening."
+
+#: apps/surveys/services.py:191
+msgid ""
+"Des réponses ont été reçues : les questions ne changent plus. Dupliquez le "
+"questionnaire."
+msgstr ""
+"Answers have been received: the questions can no longer change. Duplicate "
+"the survey."
+
+#: apps/surveys/services.py:232
+msgid "Questionnaire publié : non modifiable."
+msgstr "Published survey: cannot be changed."
+
+#: apps/surveys/services.py:258
+msgid "Seul un brouillon se supprime."
+msgstr "Only a draft can be deleted."
+
+#: apps/surveys/services.py:307
+msgid "De 2 à 12 choix."
+msgstr "From 2 to 12 choices."
+
+#: apps/surveys/services.py:312
+msgid "Choix mal formé."
+msgstr "Malformed choice."
+
+#: apps/surveys/services.py:317
+msgid "Chaque choix a un libellé (150 caractères au plus)."
+msgstr "Each choice has a label (150 characters at most)."
+
+#: apps/surveys/services.py:332
+msgid "Type de question inconnu."
+msgstr "Unknown question type."
+
+#: apps/surveys/services.py:424
+msgid "Questionnaire déjà publié."
+msgstr "Survey already published."
+
+#: apps/surveys/services.py:427
+msgid "Ouverture obligatoire."
+msgstr "Opening required."
+
+#: apps/surveys/services.py:429
+msgid "Clôture obligatoire."
+msgstr "Closing required."
+
+#: apps/surveys/services.py:431
+msgid "Clôture dans le passé."
+msgstr "Closing is in the past."
+
+#: apps/surveys/services.py:433
+msgid "Au moins une question."
+msgstr "At least one question."
+
+#: apps/surveys/services.py:655
+msgid "Question inconnue."
+msgstr "Unknown question."
+
+#: apps/surveys/services.py:663
+msgid "Réponse obligatoire."
+msgstr "Answer required."
+
+#: apps/surveys/services.py:668
+msgid "Note de 1 à 5."
+msgstr "Rating from 1 to 5."
+
+#: apps/surveys/services.py:673 apps/surveys/services.py:679
+msgid "Choix inconnu."
+msgstr "Unknown choice."
+
+#: apps/surveys/services.py:708
+msgid "Vous n'êtes pas invité à ce questionnaire."
+msgstr "You are not invited to this survey."
+
+#: apps/surveys/services.py:711
+msgid "Vous avez déjà répondu."
+msgstr "You have already answered."
+
+#: apps/surveys/services.py:713
+msgid "Ce questionnaire n'est pas ouvert."
+msgstr "This survey is not open."
+
+#: apps/surveys/services.py:795
+#, python-format
+msgid "Moins de %(threshold)s réponses : rien n'est exporté."
+msgstr "Fewer than %(threshold)s answers: nothing is exported."
+
+#: apps/surveys/services.py:798
+msgid "Réponse"
+msgstr "Answer"
+
+#: apps/surveys/services.py:798
+msgid "Moyenne"
+msgstr "Average"
+
+#: apps/surveys/templates/surveys/email/invitation_message.txt:1
+#, python-format
+msgid ""
+"Bonjour,\n"
+"\n"
+"Merci d'avoir participé à %(edition_title)s. Le comité d'organisation vous "
+"invite à donner votre avis : « %(survey_title)s ».\n"
+"\n"
+"Le questionnaire est ouvert jusqu'au %(closes)s (heure de l'édition) : "
+"%(link)s\n"
+"\n"
+"Vos réponses sont anonymes : elles sont enregistrées sans lien avec votre "
+"compte. Les commentaires libres seront lus par le comité."
+msgstr ""
+"Hello,\n"
+"\n"
+"Thank you for attending %(edition_title)s. The organising committee invites "
+"you to give your opinion: “%(survey_title)s”.\n"
+"\n"
+"The survey is open until %(closes)s (edition time): %(link)s\n"
+"\n"
+"Your answers are anonymous: they are recorded without any link to your "
+"account. Free comments will be read by the committee."
+
+#: apps/surveys/templates/surveys/email/invitation_subject.txt:1
+#, python-format
+msgid "[%(site_name)s] Votre avis sur la conférence"
+msgstr "[%(site_name)s] Your opinion on the conference"
+
+#: apps/surveys/templates/surveys/email/reminder_message.txt:1
+#, python-format
+msgid ""
+"Bonjour,\n"
+"\n"
+"Vous n'avez pas encore répondu au questionnaire « %(survey_title)s » de "
+"%(edition_title)s. Il reste ouvert jusqu'au %(closes)s (heure de "
+"l'édition) : %(link)s\n"
+"\n"
+"Vos réponses sont anonymes. Ce rappel est le seul."
+msgstr ""
+"Hello,\n"
+"\n"
+"You have not yet answered the survey “%(survey_title)s” of "
+"%(edition_title)s. It remains open until %(closes)s (edition time): "
+"%(link)s\n"
+"\n"
+"Your answers are anonymous. This is the only reminder."
+
+#: apps/surveys/templates/surveys/email/reminder_subject.txt:1
+#, python-format
+msgid "[%(site_name)s] Rappel : votre avis sur la conférence"
+msgstr "[%(site_name)s] Reminder: your opinion on the conference"

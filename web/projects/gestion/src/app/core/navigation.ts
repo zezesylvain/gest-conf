@@ -11,10 +11,15 @@ import type { Capability, Role } from '@gestconf/shared';
 
 export type NavGroupKey =
   | 'steering'
+  | 'organisation'
   | 'submissions'
   | 'reviewing'
   | 'program'
   | 'registrations'
+  | 'logistics'
+  | 'partners'
+  | 'communication'
+  | 'reports'
   | 'dayof'
   | 'documents'
   | 'settings'
@@ -71,10 +76,15 @@ export function screenAllowed(screen: ScreenDef, capabilities: readonly string[]
 
 export const GROUP_ORDER: readonly NavGroupKey[] = [
   'steering',
+  'organisation',
   'submissions',
   'reviewing',
   'program',
   'registrations',
+  'logistics',
+  'partners',
+  'communication',
+  'reports',
   'dayof',
   'documents',
   'settings',
@@ -92,6 +102,32 @@ export const SCREENS: readonly ScreenDef[] = [
     help: 'dashboard',
     group: 'steering',
     capability: 'edition.read',
+  },
+  // Organisation du CO (plan L8, N3, N4, N14) : tâches et activité pour tout le CO, budget
+  // pour le Chair et le CO « finances ».
+  {
+    key: 'tasks',
+    path: 'organisation/taches',
+    label: 'gestion.nav.tasks',
+    help: 'tasks',
+    group: 'organisation',
+    capability: 'tasks.read',
+  },
+  {
+    key: 'budget',
+    path: 'organisation/budget',
+    label: 'gestion.nav.budget',
+    help: 'budget',
+    group: 'organisation',
+    capability: 'budget.read',
+  },
+  {
+    key: 'activity',
+    path: 'organisation/activite',
+    label: 'gestion.nav.activity',
+    help: 'activity',
+    group: 'organisation',
+    capability: 'tasks.read',
   },
   {
     key: 'submissions',
@@ -200,6 +236,76 @@ export const SCREENS: readonly ScreenDef[] = [
     group: 'registrations',
     capability: 'finance.read',
   },
+  // Logistique (plan L8, N6 à N9) : intervenants invités et restauration (logistics.read),
+  // postes des bénévoles (volunteers.plan).
+  {
+    key: 'speakers',
+    path: 'logistique/intervenants',
+    label: 'gestion.nav.speakers',
+    help: 'speakers',
+    group: 'logistics',
+    capability: 'logistics.read',
+  },
+  {
+    key: 'catering',
+    path: 'logistique/restauration',
+    label: 'gestion.nav.catering',
+    help: 'catering',
+    group: 'logistics',
+    capability: 'logistics.read',
+  },
+  {
+    key: 'volunteerShifts',
+    path: 'logistique/benevoles',
+    label: 'gestion.nav.volunteerShifts',
+    help: 'volunteer-shifts',
+    group: 'logistics',
+    capability: 'volunteers.plan',
+  },
+  // Partenaires (plan L8, N5) : lecture sponsors.read, écriture revérifiée.
+  {
+    key: 'sponsors',
+    path: 'partenaires',
+    label: 'gestion.nav.sponsors',
+    help: 'sponsors',
+    group: 'partners',
+    capability: 'sponsors.read',
+  },
+  {
+    key: 'sponsorLevels',
+    path: 'partenaires/niveaux',
+    label: 'gestion.nav.sponsorLevels',
+    help: 'sponsor-levels',
+    group: 'partners',
+    capability: 'sponsors.read',
+  },
+  // Communication (plan L8, N10 à N12) : annonces (communications.send), questionnaires
+  // (surveys.manage).
+  {
+    key: 'announcements',
+    path: 'communication/annonces',
+    label: 'gestion.nav.announcements',
+    help: 'announcements',
+    group: 'communication',
+    capability: 'communications.send',
+  },
+  {
+    key: 'surveys',
+    path: 'communication/questionnaires',
+    label: 'gestion.nav.surveys',
+    help: 'surveys',
+    group: 'communication',
+    capability: 'surveys.manage',
+  },
+  // Rapports (plan L8, N13) : sections filtrées par le serveur selon les capacités.
+  {
+    key: 'reports',
+    path: 'rapports',
+    label: 'gestion.nav.reports',
+    help: 'reports',
+    group: 'reports',
+    capability: 'edition.read',
+  },
   // Jour J (plan L7, K15) : accueil (PWA), sessions du jour, présences, badges, comptoir.
   {
     key: 'reception',
@@ -240,6 +346,15 @@ export const SCREENS: readonly ScreenDef[] = [
     help: 'counter',
     group: 'dayof',
     capability: 'registrations.manage',
+  },
+  // « Mon planning » du bénévole (plan L8, N9).
+  {
+    key: 'myShifts',
+    path: 'jour-j/mon-planning',
+    label: 'gestion.nav.myShifts',
+    help: 'my-shifts',
+    group: 'dayof',
+    capability: 'shifts.own',
   },
   // Attestations et lettres (plan L7, K9 à K12, K18, K19).
   {
@@ -428,10 +543,15 @@ export const EXTRA_HELP_ROUTES: readonly { url: string; help: string }[] = [
 export const ROLE_GROUPS: Partial<Record<Role, readonly NavGroupKey[]>> = {
   ADMIN: [
     'steering',
+    'organisation',
     'submissions',
     'reviewing',
     'program',
     'registrations',
+    'logistics',
+    'partners',
+    'communication',
+    'reports',
     'dayof',
     'documents',
     'settings',
@@ -441,10 +561,15 @@ export const ROLE_GROUPS: Partial<Record<Role, readonly NavGroupKey[]>> = {
   ],
   CHAIR: [
     'steering',
+    'organisation',
     'submissions',
     'reviewing',
     'program',
     'registrations',
+    'logistics',
+    'partners',
+    'communication',
+    'reports',
     'dayof',
     'documents',
     'settings',
@@ -453,13 +578,27 @@ export const ROLE_GROUPS: Partial<Record<Role, readonly NavGroupKey[]>> = {
     'control',
   ],
   // Paramétrage pour les grilles d'évaluation (plan L4, H3) ; programme en lecture (L5, I1).
-  SC_CHAIR: ['steering', 'submissions', 'reviewing', 'program', 'settings', 'committees'],
+  // Rapports (plan L8, N13) : soumissions et relecture, sections de ses capacités.
+  SC_CHAIR: [
+    'steering',
+    'submissions',
+    'reviewing',
+    'program',
+    'reports',
+    'settings',
+    'committees',
+  ],
   // Comités : le CO « bénévoles » recrute les bénévoles (plan L7, K1).
   OC_MEMBER: [
     'steering',
+    'organisation',
     'submissions',
     'program',
     'registrations',
+    'logistics',
+    'partners',
+    'communication',
+    'reports',
     'dayof',
     'documents',
     'settings',

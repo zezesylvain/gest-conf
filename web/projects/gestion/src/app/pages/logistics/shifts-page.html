@@ -1,0 +1,155 @@
+<gc-page-header
+  [heading]="'gestion.shifts.title' | translate"
+  [lead]="'gestion.shifts.lead' | translate"
+/>
+<div aria-live="polite">
+  @if (status()) {
+    <p class="notice" role="status">{{ status() }}</p>
+  }
+</div>
+<gc-error-summary [messages]="errors()" />
+
+@if (loading()) {
+  <p role="status">{{ 'gestion.shifts.loading' | translate }}</p>
+} @else if (board(); as current) {
+  @if (!current.volunteers.length) {
+    <p class="notice">{{ 'gestion.shifts.noVolunteer' | translate }}</p>
+  }
+  @for (shift of current.shifts; track shift.id) {
+    <section class="card" [attr.aria-labelledby]="'shift-' + shift.id">
+      <h2 [id]="'shift-' + shift.id">{{ title(shift) }}</h2>
+      <p>
+        {{ local(shift.starts_local) }} → {{ local(shift.ends_local) }}
+        @if (shift.place) {
+          · {{ shift.place }}
+        }
+      </p>
+      <p>
+        {{
+          'gestion.shifts.staffing'
+            | translate: { count: shift.volunteers.length, needed: shift.needed }
+        }}
+        @if (shift.missing > 0) {
+          <span class="ko">{{
+            'gestion.shifts.missing' | translate: { count: shift.missing }
+          }}</span>
+        }
+      </p>
+      @if (shift.instructions) {
+        <p class="muted">{{ shift.instructions }}</p>
+      }
+      @if (shift.volunteers.length) {
+        <ul>
+          @for (person of shift.volunteers; track person.id) {
+            <li>
+              {{ person.name }}
+              <button
+                mat-button
+                type="button"
+                (click)="unassign(shift, person)"
+                [disabled]="busy()"
+                [attr.aria-label]="
+                  'gestion.shifts.unassignLabel'
+                    | translate: { name: person.name, title: title(shift) }
+                "
+              >
+                {{ 'gestion.shifts.unassign' | translate }}
+              </button>
+            </li>
+          }
+        </ul>
+      }
+      @if (available(shift).length) {
+        <div class="assign">
+          <label>
+            {{ 'gestion.shifts.volunteer' | translate }}
+            <select
+              #picker
+              [attr.aria-label]="'gestion.shifts.assignLabel' | translate: { title: title(shift) }"
+            >
+              @for (person of available(shift); track person.id) {
+                <option [value]="person.id">{{ person.name }}</option>
+              }
+            </select>
+          </label>
+          <button
+            mat-stroked-button
+            type="button"
+            (click)="assign(shift, picker)"
+            [disabled]="busy()"
+          >
+            {{ 'gestion.shifts.assign' | translate }}
+          </button>
+        </div>
+      }
+      <div class="actions">
+        <button
+          mat-button
+          type="button"
+          (click)="edit(shift)"
+          [attr.aria-label]="'gestion.shifts.editLabel' | translate: { title: title(shift) }"
+        >
+          {{ 'gestion.shifts.edit' | translate }}
+        </button>
+        <button
+          mat-button
+          type="button"
+          (click)="remove(shift)"
+          [disabled]="busy()"
+          [attr.aria-label]="'gestion.shifts.deleteLabel' | translate: { title: title(shift) }"
+        >
+          {{ 'gestion.shifts.delete.confirm' | translate }}
+        </button>
+      </div>
+    </section>
+  } @empty {
+    <p class="muted">{{ 'gestion.shifts.empty' | translate }}</p>
+  }
+
+  <section class="card" aria-labelledby="shift-form-title">
+    <h2 id="shift-form-title">
+      {{ (editing() ? 'gestion.shifts.editTitle' : 'gestion.shifts.newTitle') | translate }}
+    </h2>
+    <form [formGroup]="form" (ngSubmit)="submit()" class="grid-2">
+      <mat-form-field>
+        <mat-label>{{ 'gestion.shifts.fields.titleFr' | translate }}</mat-label>
+        <input matInput formControlName="title_fr" required maxlength="150" />
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>{{ 'gestion.shifts.fields.titleEn' | translate }}</mat-label>
+        <input matInput formControlName="title_en" maxlength="150" />
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>{{ 'gestion.shifts.fields.place' | translate }}</mat-label>
+        <input matInput formControlName="place" maxlength="150" />
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>{{ 'gestion.shifts.fields.needed' | translate }}</mat-label>
+        <input matInput type="number" min="1" max="100" formControlName="needed" />
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>{{ 'gestion.shifts.fields.starts' | translate }}</mat-label>
+        <input matInput type="datetime-local" formControlName="starts_local" required />
+        <mat-hint>{{ 'gestion.shifts.localHint' | translate }}</mat-hint>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>{{ 'gestion.shifts.fields.ends' | translate }}</mat-label>
+        <input matInput type="datetime-local" formControlName="ends_local" required />
+      </mat-form-field>
+      <mat-form-field class="wide">
+        <mat-label>{{ 'gestion.shifts.fields.instructions' | translate }}</mat-label>
+        <textarea matInput formControlName="instructions" rows="2" maxlength="1000"></textarea>
+      </mat-form-field>
+      <div class="actions">
+        <button mat-flat-button type="submit" [disabled]="busy()">
+          {{ (editing() ? 'gestion.shifts.save' : 'gestion.shifts.add') | translate }}
+        </button>
+        @if (editing()) {
+          <button mat-stroked-button type="button" (click)="cancelEdit()">
+            {{ 'gestion.shifts.cancel' | translate }}
+          </button>
+        }
+      </div>
+    </form>
+  </section>
+}

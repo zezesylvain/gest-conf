@@ -59,17 +59,33 @@ PRW, FIR = "pricing.write", "finance.read"
 # d'invitation (secrétariat, relations extérieures) ; signature (le signataire seul).
 CKS, CKM = "checkin.scan", "checkin.manage"
 CEM, LEM, SGM = "certificates.manage", "letters.manage", "signature.manage"
+# Plan L8 (N2) : tâches (CO, Chair), budget (finances ; Chair en lecture), partenaires
+# (relations extérieures ; finances, communication et Chair en lecture), logistique
+# (logistique ; secrétariat et Chair en lecture), planning des bénévoles (bénévoles,
+# logistique), le sien (bénévole), annonces et envois groupés (communication, Chair),
+# questionnaires (communication, secrétariat, Chair).
+TKR, TKW = "tasks.read", "tasks.write"
+BGR, BGW = "budget.read", "budget.write"
+SPR, SPW = "sponsors.read", "sponsors.write"
+LGR, LGW = "logistics.read", "logistics.write"
+VLP, SHO = "volunteers.plan", "shifts.own"
+CMS, SVM = "communications.send", "surveys.manage"
+L8_TEAM = {TKR, TKW}
 
 SPEC: dict[str, set[str]] = {
     # H19 : l'administrateur n'évalue pas et ne décide pas ; I1 : il ne publie pas le
     # programme. J1 : toutes les capacités des inscriptions et des finances.
     # K18 : il ne renseigne pas la signature d'un signataire.
     "ADMIN": {R, W, PUB, ARC, MR, MM, AR, PW, SR, SE, SX, RM, RA, GW, PGR, PGW, RGR, RGM}
-    | {PRW, FIR, CKS, CKM, CEM, LEM},
+    | {PRW, FIR, CKS, CKM, CEM, LEM}
+    | L8_TEAM
+    | {BGR, BGW, SPR, SPW, LGR, LGW, VLP, CMS, SVM},
     # I1 : le Chair lit et publie le programme, sans l'écrire. J1 : il lit les inscriptions
     # et les finances, sans les gérer. K1 : il émet les attestations, ne pointe pas.
     "CHAIR": {R, W, PUB, MR, MM, AR, PW, SR, SE, SX, RM, RA, DD, DP, GW, PGR, PGP, RGR, FIR}
-    | {CEM},
+    | {CEM}
+    | L8_TEAM
+    | {BGR, SPR, LGR, CMS, SVM},
     # D8 validée : lecture du paramétrage ; membres du CS seulement. F10, F8 (plan L3) :
     # soumissions (lecture, dérogations, export). H19 : évalue, pilote, décide, publie.
     # I1 : lit le programme. J1 : aucun accès aux inscriptions.
@@ -77,22 +93,22 @@ SPEC: dict[str, set[str]] = {
     # D8 : lecture seule (fonction « logistique ») ; F10 : soumissions ; I1 : programme lu ;
     # J1 : inscriptions lues. K1 (plan L7) : tout le CO pointe ; la logistique gère les
     # pointages.
-    "OC_MEMBER": {R, SR, PGR, RGR, CKS, CKM},
+    "OC_MEMBER": {R, SR, PGR, RGR, CKS, CKM} | L8_TEAM | {LGR, LGW, VLP},
     # E11 (plan L2) : le CO « communication » écrit le portail.
-    "OC_COMMUNICATION": {R, PW, SR, PGR, RGR, CKS},
+    "OC_COMMUNICATION": {R, PW, SR, PGR, RGR, CKS} | L8_TEAM | {SPR, CMS, SVM},
     # I1 (plan L5) : le CO « programme » écrit le programme.
-    "OC_PROGRAM": {R, SR, PGR, PGW, RGR, CKS},
+    "OC_PROGRAM": {R, SR, PGR, PGW, RGR, CKS} | L8_TEAM,
     # J1 (plan L6) : le CO « finances » gère inscriptions, tarifs et finances ; le
     # « secrétariat » gère les inscriptions, et en L7 (K1) le jour J, les attestations et les
     # lettres d'invitation.
-    "OC_FINANCE": {R, SR, PGR, RGR, RGM, PRW, FIR, CKS},
-    "OC_SECRETARIAT": {R, SR, PGR, RGR, RGM, CKS, CKM, CEM, LEM},
+    "OC_FINANCE": {R, SR, PGR, RGR, RGM, PRW, FIR, CKS} | L8_TEAM | {BGR, BGW, SPR},
+    "OC_SECRETARIAT": {R, SR, PGR, RGR, RGM, CKS, CKM, CEM, LEM} | L8_TEAM | {LGR, SVM},
     # K1 (plan L7) : le CO « bénévoles » gère les pointages et les bénévoles (eux seuls) ; les
     # « relations extérieures » instruisent les lettres d'invitation.
-    "OC_VOLUNTEERS": {R, SR, PGR, RGR, CKS, CKM, MR, MM},
-    "OC_EXTERNAL_RELATIONS": {R, SR, PGR, RGR, CKS, LEM},
+    "OC_VOLUNTEERS": {R, SR, PGR, RGR, CKS, CKM, MR, MM} | L8_TEAM | {VLP},
+    "OC_EXTERNAL_RELATIONS": {R, SR, PGR, RGR, CKS, LEM} | L8_TEAM | {SPR, SPW},
     "SC_MEMBER": {RW},  # F10 : pas les soumissions ; H19 : ses affectations seulement
-    "VOLUNTEER": {CKS},  # K1 (plan L7) : pointer, rien d'autre
+    "VOLUNTEER": {CKS, SHO},  # K1 (plan L7) : pointer ; N2 (plan L8) : son planning
     "SIGNATORY": {SGM},  # K18 (plan L7) : sa signature, rien d'autre
     "AUTHOR": set(),
 }
@@ -1362,6 +1378,428 @@ CASES = [
             "category": ids["reg_category_code"],
         },
     ),
+    # --- Organisation (plan L8, N3, N4) : tâches du CO, budget ---------------------------------
+    Case("manage-tasks", "GET", TKR, 200, "/v1/manage/editions/{e}/tasks"),
+    Case("manage-tasks", "POST", TKW, 201, "/v1/manage/editions/{e}/tasks", {"title": "Salle"}),
+    Case("manage-tasks-members", "GET", TKR, 200, "/v1/manage/editions/{e}/tasks/members"),
+    Case("manage-task", "GET", TKR, 200, "/v1/manage/editions/{e}/tasks/{task}"),
+    Case(
+        "manage-task",
+        "PATCH",
+        TKW,
+        200,
+        "/v1/manage/editions/{e}/tasks/{task}",
+        {"status": "doing"},
+    ),
+    Case("manage-task-archive", "POST", TKW, 200, "/v1/manage/editions/{e}/tasks/{task}/archive"),
+    Case("manage-task-restore", "POST", TKW, 200, "/v1/manage/editions/{e}/tasks/{task}/restore"),
+    Case(
+        "manage-task-comments",
+        "POST",
+        TKW,
+        201,
+        "/v1/manage/editions/{e}/tasks/{task}/comments",
+        {"body": "Devis reçu."},
+    ),
+    Case(
+        "manage-task-attachments",
+        "POST",
+        TKW,
+        201,
+        "/v1/manage/editions/{e}/tasks/{task}/attachments",
+        lambda ids: {"file": SimpleUploadedFile("devis.pdf", PDF, "application/pdf")},
+        format="multipart",
+    ),
+    Case(
+        "manage-task-attachment",
+        "GET",
+        TKR,
+        200,
+        "/v1/manage/editions/{e}/tasks/{task}/attachments/{task_attachment}",
+    ),
+    Case(
+        "manage-task-attachment",
+        "DELETE",
+        TKW,
+        200,
+        "/v1/manage/editions/{e}/tasks/{task}/attachments/{task_attachment}",
+    ),
+    Case("manage-budget", "GET", BGR, 200, "/v1/manage/editions/{e}/budget"),
+    Case(
+        "manage-budget-export",
+        "GET",
+        BGR,
+        200,
+        "/v1/manage/editions/{e}/budget/export?file_format=xlsx",
+        recent_auth=True,
+    ),
+    Case(
+        "manage-budget-lines",
+        "POST",
+        BGW,
+        201,
+        "/v1/manage/editions/{e}/budget/lines",
+        {"kind": "expense", "category": "venue", "label": "Location", "planned": "500000"},
+    ),
+    Case(
+        "manage-budget-line",
+        "PATCH",
+        BGW,
+        200,
+        "/v1/manage/editions/{e}/budget/lines/{budget_line}",
+        {"planned": "600000"},
+    ),
+    Case(
+        "manage-budget-line",
+        "DELETE",
+        BGW,
+        200,
+        "/v1/manage/editions/{e}/budget/lines/{budget_line}",
+    ),
+    Case(
+        "manage-budget-line-proof",
+        "GET",
+        BGR,
+        200,
+        "/v1/manage/editions/{e}/budget/lines/{budget_line}/proof",
+    ),
+    Case(
+        "manage-budget-line-proof",
+        "PUT",
+        BGW,
+        200,
+        "/v1/manage/editions/{e}/budget/lines/{budget_line}/proof",
+        lambda ids: {"file": SimpleUploadedFile("facture.pdf", PDF, "application/pdf")},
+        format="multipart",
+    ),
+    Case(
+        "manage-budget-line-proof",
+        "DELETE",
+        BGW,
+        200,
+        "/v1/manage/editions/{e}/budget/lines/{budget_line}/proof",
+    ),
+    # --- Partenaires (plan L8, N5) -------------------------------------------------------------
+    Case("manage-sponsors", "GET", SPR, 200, "/v1/manage/editions/{e}/sponsors"),
+    Case(
+        "manage-sponsors", "POST", SPW, 201, "/v1/manage/editions/{e}/sponsors", {"name": "Orange"}
+    ),
+    Case(
+        "manage-sponsors-export",
+        "GET",
+        SPR,
+        200,
+        "/v1/manage/editions/{e}/sponsors/export?file_format=csv",
+        recent_auth=True,
+    ),
+    Case("manage-sponsor", "GET", SPR, 200, "/v1/manage/editions/{e}/sponsors/{sponsor}"),
+    Case(
+        "manage-sponsor",
+        "PATCH",
+        SPW,
+        200,
+        "/v1/manage/editions/{e}/sponsors/{sponsor}",
+        {"status": "agreed"},
+    ),
+    Case("manage-sponsor", "DELETE", SPW, 204, "/v1/manage/editions/{e}/sponsors/{sponsor}"),
+    Case("manage-sponsor-logo", "GET", SPR, 200, "/v1/manage/editions/{e}/sponsors/{sponsor}/logo"),
+    Case(
+        "manage-sponsor-logo",
+        "PUT",
+        SPW,
+        200,
+        "/v1/manage/editions/{e}/sponsors/{sponsor}/logo",
+        lambda ids: {"file": SimpleUploadedFile("logo.png", _signature_png(), "image/png")},
+        format="multipart",
+    ),
+    Case(
+        "manage-sponsor-logo", "DELETE", SPW, 200, "/v1/manage/editions/{e}/sponsors/{sponsor}/logo"
+    ),
+    Case(
+        "manage-sponsor-benefits",
+        "POST",
+        SPW,
+        201,
+        "/v1/manage/editions/{e}/sponsors/{sponsor}/benefits",
+        {"label": "Logo sur les badges"},
+    ),
+    Case(
+        "manage-sponsor-benefit",
+        "PATCH",
+        SPW,
+        200,
+        "/v1/manage/editions/{e}/sponsors/{sponsor}/benefits/{benefit}",
+        lambda ids: {"delivered_on": ids["today"]},
+    ),
+    Case(
+        "manage-sponsor-benefit",
+        "DELETE",
+        SPW,
+        200,
+        "/v1/manage/editions/{e}/sponsors/{sponsor}/benefits/{benefit}",
+    ),
+    Case("manage-sponsor-levels", "GET", SPR, 200, "/v1/manage/editions/{e}/sponsor-levels"),
+    Case(
+        "manage-sponsor-levels",
+        "POST",
+        SPW,
+        201,
+        "/v1/manage/editions/{e}/sponsor-levels",
+        {"name_fr": "Or", "logo_size": "large"},
+    ),
+    Case(
+        "manage-sponsor-level",
+        "PATCH",
+        SPW,
+        200,
+        "/v1/manage/editions/{e}/sponsor-levels/{sponsor_level}",
+        {"position": 2},
+    ),
+    Case(
+        "manage-sponsor-level",
+        "DELETE",
+        SPW,
+        200,
+        "/v1/manage/editions/{e}/sponsor-levels/{free_sponsor_level}",
+    ),
+    # --- Logistique (plan L8, N6 à N9) ----------------------------------------------------------
+    Case("manage-visits", "GET", LGR, 200, "/v1/manage/editions/{e}/logistics/visits"),
+    Case("manage-visit", "GET", LGR, 200, "/v1/manage/editions/{e}/logistics/visits/{speaker}"),
+    Case(
+        "manage-visit",
+        "PATCH",
+        LGW,
+        200,
+        "/v1/manage/editions/{e}/logistics/visits/{speaker}",
+        {"hotel": "Hôtel Ivoire", "status": "booked"},
+    ),
+    Case("manage-dietary", "GET", LGR, 200, "/v1/manage/editions/{e}/logistics/dietary"),
+    Case(
+        "manage-dietary-export",
+        "GET",
+        LGR,
+        200,
+        "/v1/manage/editions/{e}/logistics/dietary/export",
+        recent_auth=True,
+    ),
+    Case("manage-meals", "GET", LGR, 200, "/v1/manage/editions/{e}/logistics/meals"),
+    Case(
+        "manage-meals",
+        "POST",
+        LGW,
+        201,
+        "/v1/manage/editions/{e}/logistics/meals",
+        lambda ids: {"day": ids["meal_day"], "kind": "lunch"},
+    ),
+    Case("manage-meals-export", "GET", LGR, 200, "/v1/manage/editions/{e}/logistics/meals/export"),
+    Case(
+        "manage-meal",
+        "PATCH",
+        LGW,
+        200,
+        "/v1/manage/editions/{e}/logistics/meals/{meal}",
+        {"margin_percent": 10},
+    ),
+    Case("manage-meal", "DELETE", LGW, 200, "/v1/manage/editions/{e}/logistics/meals/{meal}"),
+    Case("manage-shifts", "GET", VLP, 200, "/v1/manage/editions/{e}/logistics/shifts"),
+    Case(
+        "manage-shifts",
+        "POST",
+        VLP,
+        201,
+        "/v1/manage/editions/{e}/logistics/shifts",
+        {
+            "title_fr": "Vestiaire",
+            "starts_local": "2027-06-02T14:00",
+            "ends_local": "2027-06-02T18:00",
+        },
+    ),
+    Case(
+        "manage-shift",
+        "PATCH",
+        VLP,
+        200,
+        "/v1/manage/editions/{e}/logistics/shifts/{shift}",
+        {"needed": 3},
+    ),
+    Case("manage-shift", "DELETE", VLP, 200, "/v1/manage/editions/{e}/logistics/shifts/{shift}"),
+    Case(
+        "manage-shift-assignments",
+        "POST",
+        VLP,
+        201,
+        "/v1/manage/editions/{e}/logistics/shifts/{shift}/assignments",
+        lambda ids: {"volunteer": ids["volunteer"]},
+    ),
+    Case(
+        "manage-shift-assignment",
+        "DELETE",
+        VLP,
+        200,
+        "/v1/manage/editions/{e}/logistics/shifts/{shift}/assignments/{volunteer}",
+    ),
+    Case("manage-my-shifts", "GET", SHO, 200, "/v1/manage/editions/{e}/me/shifts"),
+    Case(
+        "manage-my-shifts-calendar", "GET", SHO, 200, "/v1/manage/editions/{e}/me/shifts/calendar"
+    ),
+    # --- Annonces et envois groupés (plan L8, N10 et N11) -------------------------------------
+    Case("manage-segments", "GET", CMS, 200, "/v1/manage/editions/{e}/segments"),
+    Case("manage-announcements", "GET", CMS, 200, "/v1/manage/editions/{e}/announcements"),
+    Case(
+        "manage-announcements",
+        "POST",
+        CMS,
+        201,
+        "/v1/manage/editions/{e}/announcements",
+        {"title_fr": "Programme en ligne", "on_news": True, "body_fr": "<p>Voir.</p>"},
+    ),
+    Case(
+        "manage-announcement",
+        "GET",
+        CMS,
+        200,
+        "/v1/manage/editions/{e}/announcements/{announcement}",
+    ),
+    Case(
+        "manage-announcement",
+        "PATCH",
+        CMS,
+        200,
+        "/v1/manage/editions/{e}/announcements/{announcement}",
+        {"title_fr": "Salle changée"},
+    ),
+    Case(
+        "manage-announcement",
+        "DELETE",
+        CMS,
+        204,
+        "/v1/manage/editions/{e}/announcements/{announcement}",
+    ),
+    Case(
+        "manage-announcement-preview",
+        "GET",
+        CMS,
+        200,
+        "/v1/manage/editions/{e}/announcements/{announcement}/preview",
+    ),
+    Case(
+        "manage-announcement-test",
+        "POST",
+        CMS,
+        202,
+        "/v1/manage/editions/{e}/announcements/{announcement}/test",
+    ),
+    Case(
+        "manage-announcement-publish",
+        "POST",
+        CMS,
+        200,
+        "/v1/manage/editions/{e}/announcements/{announcement}/publish",
+        recent_auth=True,
+    ),
+    Case(
+        "manage-announcement-withdraw",
+        "POST",
+        CMS,
+        200,
+        "/v1/manage/editions/{e}/announcements/{published_announcement}/withdraw",
+    ),
+    Case(
+        "manage-announcement-cancel",
+        "POST",
+        CMS,
+        200,
+        "/v1/manage/editions/{e}/announcements/{sending_announcement}/cancel",
+    ),
+    # --- Questionnaires de satisfaction (plan L8, N12) -------------------------------------
+    Case("manage-surveys", "GET", SVM, 200, "/v1/manage/editions/{e}/surveys"),
+    Case(
+        "manage-surveys",
+        "POST",
+        SVM,
+        201,
+        "/v1/manage/editions/{e}/surveys",
+        {"title_fr": "Votre avis"},
+    ),
+    Case("manage-survey", "GET", SVM, 200, "/v1/manage/editions/{e}/surveys/{survey}"),
+    Case(
+        "manage-survey",
+        "PATCH",
+        SVM,
+        200,
+        "/v1/manage/editions/{e}/surveys/{survey}",
+        {"title_fr": "Votre avis sur la conférence"},
+    ),
+    Case("manage-survey", "DELETE", SVM, 204, "/v1/manage/editions/{e}/surveys/{survey}"),
+    Case(
+        "manage-survey-publish",
+        "POST",
+        SVM,
+        200,
+        "/v1/manage/editions/{e}/surveys/{survey}/publish",
+        recent_auth=True,
+    ),
+    Case(
+        "manage-survey-duplicate",
+        "POST",
+        SVM,
+        201,
+        "/v1/manage/editions/{e}/surveys/{published_survey}/duplicate",
+    ),
+    Case(
+        "manage-survey-questions",
+        "POST",
+        SVM,
+        201,
+        "/v1/manage/editions/{e}/surveys/{survey}/questions",
+        {"kind": "text", "label_fr": "Une remarque ?"},
+    ),
+    Case(
+        "manage-survey-question",
+        "PATCH",
+        SVM,
+        200,
+        "/v1/manage/editions/{e}/surveys/{survey}/questions/{survey_question}",
+        {"required": True},
+    ),
+    Case(
+        "manage-survey-question",
+        "DELETE",
+        SVM,
+        204,
+        "/v1/manage/editions/{e}/surveys/{survey}/questions/{survey_question}",
+    ),
+    Case(
+        "manage-survey-results",
+        "GET",
+        SVM,
+        200,
+        "/v1/manage/editions/{e}/surveys/{published_survey}/results",
+    ),
+    Case(
+        "manage-survey-export",
+        "GET",
+        SVM,
+        200,
+        "/v1/manage/editions/{e}/surveys/{published_survey}/export",
+    ),
+    # --- Rapports et fil d'activité (plan L8, N13 et N14) ------------------------------------
+    Case("manage-reports", "GET", R, 200, "/v1/manage/editions/{e}/reports"),
+    Case("manage-report", "GET", SR, 200, "/v1/manage/editions/{e}/reports/submissions"),
+    Case("manage-report", "GET", RM, 200, "/v1/manage/editions/{e}/reports/reviews"),
+    Case("manage-report", "GET", RGR, 200, "/v1/manage/editions/{e}/reports/attendance"),
+    Case("manage-report", "GET", FIR, 200, "/v1/manage/editions/{e}/reports/finance"),
+    Case("manage-report", "GET", SVM, 200, "/v1/manage/editions/{e}/reports/satisfaction"),
+    Case("manage-report", "GET", BGR, 200, "/v1/manage/editions/{e}/reports/budget"),
+    Case("manage-report", "GET", SPR, 200, "/v1/manage/editions/{e}/reports/sponsors"),
+    Case(
+        "manage-report-export",
+        "GET",
+        RGR,
+        200,
+        "/v1/manage/editions/{e}/reports/registrations/export?file_format=pdf",
+    ),
+    Case("manage-activity", "GET", TKR, 200, "/v1/manage/editions/{e}/activity"),
     Case("manage-portal-poster", "GET", R, 200, "/v1/manage/editions/{e}/portal/poster"),
     Case(
         "manage-portal-poster",
@@ -1511,6 +1949,7 @@ def world():
         # leurs PDF coûtant cher à produire pour chacun des cas. Programme publié du jour J
         # (plan L7) : à part, pour que les cas de publication du programme restent valables.
         loaders=(
+            lambda: _organisation_objects(edition, users),
             lambda: _registration_objects(edition),
             lambda: _day_objects(edition),
             lambda: _certificate_objects(edition, users),
@@ -1518,6 +1957,116 @@ def world():
         ),
     )
     return edition, users, ids
+
+
+def _organisation_objects(edition, users) -> dict:
+    """Plan L8 (N3, N4) : une tâche avec sa pièce jointe ; une ligne de budget justifiée."""
+    from apps.logistics.models import BudgetLine, Task, TaskAttachment
+    from apps.logistics.services.budget import PROOFS
+    from apps.logistics.services.tasks import ATTACHMENTS
+
+    task = Task.objects.create(edition=edition, title="Réserver le traiteur")
+    storage, digest = ATTACHMENTS.write(PDF)
+    attachment = TaskAttachment.objects.create(
+        task=task,
+        storage_name=storage,
+        name="devis.pdf",
+        kind="pdf",
+        size=len(PDF),
+        sha256=digest,
+        uploaded_by=users["ADMIN"],
+    )
+    proof, _digest = PROOFS.write(PDF)
+    line = BudgetLine.objects.create(
+        edition=edition,
+        kind="expense",
+        category="catering",
+        label="Traiteur",
+        planned=1000,
+        proof_storage_name=proof,
+        proof_name="facture.pdf",
+        proof_kind="pdf",
+        proof_size=len(PDF),
+    )
+    from apps.sponsors.models import Sponsor, SponsorBenefit, SponsorLevel
+
+    level = SponsorLevel.objects.create(edition=edition, name_fr="Platine", position=0)
+    free = SponsorLevel.objects.create(edition=edition, name_fr="Bronze", position=1)
+    logo = public_files.store(
+        data=_png(), name="logo.png", kind=PublicFileKind.LOGO, edition=edition
+    )
+    sponsor = Sponsor.objects.create(
+        edition=edition, name="Banque Atlantique", level=level, logo=logo
+    )
+    benefit = SponsorBenefit.objects.create(sponsor=sponsor, label="Stand")
+    from apps.logistics.models import Meal, ShiftAssignment, VolunteerShift
+
+    speaker = make_member(edition, Role.SPEAKER)
+    day = edition.start_date or timezone.localdate()
+    meal = Meal.objects.create(edition=edition, day=day, kind="lunch")
+    start = dt.datetime(2027, 6, 2, 8, tzinfo=dt.UTC)
+    shift = VolunteerShift.objects.create(
+        edition=edition, title_fr="Accueil", starts_at=start, ends_at=start + dt.timedelta(hours=4)
+    )
+    ShiftAssignment.objects.create(shift=shift, volunteer=users["VOLUNTEER"])
+    from apps.communications import announcements
+    from apps.core.actor import Actor
+
+    command = Actor.command("cli:matrice")
+    capabilities = {"communications.send"}
+    found = {}
+    for key, fields in (
+        ("announcement", {"on_bell": True}),
+        ("published_announcement", {"on_news": True}),
+        ("sending_announcement", {"on_bell": True}),
+    ):
+        found[key] = announcements.create_announcement(
+            edition,
+            {
+                "title_fr": "Changement de salle",
+                "body_fr": "<p>Salle A.</p>",
+                "segment": "volunteers",
+                **fields,
+            },
+            capabilities=capabilities,
+            actor=command,
+        )
+    for key in ("published_announcement", "sending_announcement"):
+        announcements.publish(found[key], capabilities=capabilities, actor=command)
+    from apps.surveys import services as surveys
+    from apps.surveys.models import SurveyResponse
+
+    soon = (timezone.now() + dt.timedelta(days=1)).astimezone(dt.UTC).replace(tzinfo=None)
+    survey_dates = {"opens_local": soon, "closes_local": soon + dt.timedelta(days=9)}
+    survey = surveys.create_survey(
+        edition, {"title_fr": "Votre avis", **survey_dates}, actor=command
+    )
+    published_survey = surveys.create_survey(
+        edition, {"title_fr": "Bilan", **survey_dates}, actor=command
+    )
+    surveys.publish(published_survey, actor=command)
+    # Cinq réponses : au-delà du seuil, les résultats et l'export sont servis (N12).
+    SurveyResponse.objects.bulk_create(
+        SurveyResponse(survey=published_survey, answers={}) for _index in range(5)
+    )
+    return {
+        **{key: announcement.pk for key, announcement in found.items()},
+        "survey": survey.pk,
+        "survey_question": survey.questions.first().pk,
+        "published_survey": published_survey.pk,
+        "speaker": speaker.pk,
+        "meal_day": day.isoformat(),
+        "meal": meal.pk,
+        "shift": shift.pk,
+        "volunteer": users["VOLUNTEER"].pk,
+        "task": task.pk,
+        "task_attachment": attachment.pk,
+        "budget_line": line.pk,
+        "sponsor": sponsor.pk,
+        "benefit": benefit.pk,
+        "sponsor_level": level.pk,
+        "free_sponsor_level": free.pk,
+    }
 
 
 @functools.cache

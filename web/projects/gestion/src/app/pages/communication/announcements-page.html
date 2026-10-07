@@ -1,0 +1,87 @@
+<gc-page-header
+  [heading]="'gestion.announcements.title' | translate"
+  [lead]="'gestion.announcements.lead' | translate"
+/>
+<gc-error-summary [messages]="errors()" />
+
+<section class="card" aria-labelledby="new-announcement-title">
+  <h2 id="new-announcement-title">{{ 'gestion.announcements.new' | translate }}</h2>
+  <form [formGroup]="form" (ngSubmit)="create()" class="grid-2">
+    <mat-form-field>
+      <mat-label>{{ 'gestion.announcements.fields.titleFr' | translate }}</mat-label>
+      <input matInput formControlName="title_fr" required maxlength="150" />
+      @if (form.controls.title_fr.hasError('required')) {
+        <mat-error>{{ 'gestion.announcements.errors.title' | translate }}</mat-error>
+      }
+    </mat-form-field>
+    <div class="actions">
+      <button mat-flat-button type="submit" [disabled]="busy()">
+        {{ 'gestion.announcements.create' | translate }}
+      </button>
+    </div>
+  </form>
+</section>
+
+@if (loading()) {
+  <p role="status">{{ 'gestion.announcements.loading' | translate }}</p>
+} @else if (announcements().length) {
+  <div class="table-wrap">
+    <table>
+      <caption class="visually-hidden">
+        {{
+          'gestion.announcements.title' | translate
+        }}
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">{{ 'gestion.announcements.fields.title' | translate }}</th>
+          <th scope="col">{{ 'gestion.announcements.channelsTitle' | translate }}</th>
+          <th scope="col">{{ 'gestion.announcements.fields.segment' | translate }}</th>
+          <th scope="col">{{ 'gestion.announcements.statusTitle' | translate }}</th>
+          <th scope="col">{{ 'gestion.announcements.sendingTitle' | translate }}</th>
+          <th scope="col">{{ 'gestion.announcements.createdAt' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of announcements(); track item.id) {
+          <tr>
+            <td>
+              <a [routerLink]="['/editions', editionId(), 'communication', 'annonces', item.id]">{{
+                title(item)
+              }}</a>
+            </td>
+            <td>
+              @for (channel of channels; track channel) {
+                @if (item[channel]) {
+                  <span class="badge">{{
+                    'gestion.announcements.channels.' + channel | translate
+                  }}</span>
+                }
+              }
+            </td>
+            <td>{{ segmentLabel(item.segment) }}</td>
+            <td>
+              <span class="badge">{{
+                'gestion.announcements.status.' + item.status | translate
+              }}</span>
+            </td>
+            <td>
+              @if (item.sending_status !== 'none') {
+                {{ 'gestion.announcements.sending.' + item.sending_status | translate }}
+                <br /><span class="muted">{{
+                  'gestion.announcements.recipientsCount'
+                    | translate: { recipients: item.recipients_count, emails: item.emails_count }
+                }}</span>
+              } @else {
+                <span class="muted">—</span>
+              }
+            </td>
+            <td>{{ date(item.created_at) }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+} @else {
+  <p class="muted">{{ 'gestion.announcements.empty' | translate }}</p>
+}

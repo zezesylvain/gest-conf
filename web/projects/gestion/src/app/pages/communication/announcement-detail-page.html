@@ -1,0 +1,220 @@
+<p>
+  <a [routerLink]="['/editions', editionId(), 'communication', 'annonces']">{{
+    'gestion.announcements.detail.back' | translate
+  }}</a>
+</p>
+<gc-page-header
+  [heading]="announcement()?.title_fr || ('gestion.announcements.detail.title' | translate)"
+  [lead]="'gestion.announcements.detail.lead' | translate"
+/>
+<div aria-live="polite">
+  @if (status()) {
+    <p class="notice" role="status">{{ status() }}</p>
+  }
+</div>
+<gc-error-summary [messages]="errors()" />
+
+@if (loading()) {
+  <p role="status">{{ 'gestion.announcements.loading' | translate }}</p>
+} @else if (announcement(); as current) {
+  <section class="card" aria-labelledby="announcement-state">
+    <h2 id="announcement-state">{{ 'gestion.announcements.detail.state' | translate }}</h2>
+    <p>
+      <span class="badge">{{ 'gestion.announcements.status.' + current.status | translate }}</span>
+      @if (current.published_at) {
+        {{
+          'gestion.announcements.detail.publishedAt'
+            | translate: { date: date(current.published_at) }
+        }}
+      }
+      @if (current.withdrawn_at) {
+        ·
+        {{
+          'gestion.announcements.detail.withdrawnAt'
+            | translate: { date: date(current.withdrawn_at) }
+        }}
+      }
+    </p>
+    @if (current.sending_status !== 'none') {
+      <dl class="figures">
+        <div>
+          <dt>{{ 'gestion.announcements.stats.recipients' | translate }}</dt>
+          <dd>{{ current.sending.recipients }}</dd>
+        </div>
+        <div>
+          <dt>{{ 'gestion.announcements.stats.delivered' | translate }}</dt>
+          <dd>{{ current.sending.delivered }}</dd>
+        </div>
+        <div>
+          <dt>{{ 'gestion.announcements.stats.sent' | translate }}</dt>
+          <dd>{{ current.sending.sent }} / {{ current.sending.emails }}</dd>
+        </div>
+        <div>
+          <dt>{{ 'gestion.announcements.stats.queued' | translate }}</dt>
+          <dd>{{ current.sending.queued }}</dd>
+        </div>
+        <div>
+          <dt>{{ 'gestion.announcements.stats.failed' | translate }}</dt>
+          <dd>{{ current.sending.failed }}</dd>
+        </div>
+        <div>
+          <dt>{{ 'gestion.announcements.stats.cancelled' | translate }}</dt>
+          <dd>{{ current.sending.cancelled }}</dd>
+        </div>
+      </dl>
+      <p>
+        {{ 'gestion.announcements.sending.' + current.sending_status | translate }}
+        @if (current.sending.remaining_hours > 0) {
+          ·
+          {{
+            'gestion.announcements.detail.remaining'
+              | translate: { hours: current.sending.remaining_hours }
+          }}
+        }
+      </p>
+    }
+    <div class="actions">
+      @if (current.status === 'draft') {
+        <button mat-flat-button type="button" (click)="publish()" [disabled]="busy()">
+          {{ 'gestion.announcements.detail.publish.confirm' | translate }}
+        </button>
+        <button mat-button type="button" (click)="remove()" [disabled]="busy()">
+          {{ 'gestion.announcements.delete.confirm' | translate }}
+        </button>
+      }
+      @if (current.status === 'published') {
+        <button mat-stroked-button type="button" (click)="withdraw()" [disabled]="busy()">
+          {{ 'gestion.announcements.detail.withdraw.confirm' | translate }}
+        </button>
+      }
+      @if (current.sending_status === 'queuing' || current.sending_status === 'queued') {
+        <button mat-stroked-button type="button" (click)="cancelSending()" [disabled]="busy()">
+          {{ 'gestion.announcements.detail.cancel.confirm' | translate }}
+        </button>
+      }
+    </div>
+  </section>
+
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <section class="card" aria-labelledby="announcement-texts">
+      <h2 id="announcement-texts">{{ 'gestion.announcements.detail.texts' | translate }}</h2>
+      <div class="grid-2">
+        <mat-form-field>
+          <mat-label>{{ 'gestion.announcements.fields.titleFr' | translate }}</mat-label>
+          <input matInput formControlName="title_fr" required maxlength="150" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>{{ 'gestion.announcements.fields.titleEn' | translate }}</mat-label>
+          <input matInput formControlName="title_en" maxlength="150" />
+        </mat-form-field>
+        <mat-form-field class="wide">
+          <mat-label>{{ 'gestion.announcements.fields.bodyFr' | translate }}</mat-label>
+          <textarea matInput formControlName="body_fr" rows="8"></textarea>
+          <mat-hint>{{ 'gestion.announcements.detail.htmlHint' | translate }}</mat-hint>
+        </mat-form-field>
+        <mat-form-field class="wide">
+          <mat-label>{{ 'gestion.announcements.fields.bodyEn' | translate }}</mat-label>
+          <textarea matInput formControlName="body_en" rows="8"></textarea>
+          <mat-hint>{{ 'gestion.announcements.detail.englishHint' | translate }}</mat-hint>
+        </mat-form-field>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="announcement-channels">
+      <h2 id="announcement-channels">{{ 'gestion.announcements.channelsTitle' | translate }}</h2>
+      <div class="checks">
+        <mat-checkbox formControlName="on_news">{{
+          'gestion.announcements.channels.on_news' | translate
+        }}</mat-checkbox>
+        <mat-checkbox formControlName="on_banner">{{
+          'gestion.announcements.channels.on_banner' | translate
+        }}</mat-checkbox>
+        <mat-checkbox formControlName="on_bell">{{
+          'gestion.announcements.channels.on_bell' | translate
+        }}</mat-checkbox>
+        <mat-checkbox formControlName="by_email">{{
+          'gestion.announcements.channels.by_email' | translate
+        }}</mat-checkbox>
+      </div>
+      @if (form.controls.on_bell.value || form.controls.by_email.value) {
+        <mat-form-field class="wide">
+          <mat-label>{{ 'gestion.announcements.fields.segment' | translate }}</mat-label>
+          <mat-select formControlName="segment">
+            <mat-option value="">—</mat-option>
+            @for (segment of segments(); track segment.code) {
+              <mat-option [value]="segment.code">{{ segmentOption(segment) }}</mat-option>
+            }
+          </mat-select>
+          <mat-hint>{{ 'gestion.announcements.detail.segmentHint' | translate }}</mat-hint>
+        </mat-form-field>
+      }
+      @if (form.controls.on_banner.value) {
+        <div class="grid-2">
+          <mat-form-field class="wide">
+            <mat-label>{{ 'gestion.announcements.fields.bannerFr' | translate }}</mat-label>
+            <input matInput formControlName="banner_message_fr" maxlength="280" />
+          </mat-form-field>
+          <mat-form-field class="wide">
+            <mat-label>{{ 'gestion.announcements.fields.bannerEn' | translate }}</mat-label>
+            <input matInput formControlName="banner_message_en" maxlength="280" />
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>{{ 'gestion.announcements.fields.bannerStarts' | translate }}</mat-label>
+            <input matInput type="datetime-local" formControlName="banner_starts_local" />
+            <mat-hint>{{ 'gestion.announcements.detail.localHint' | translate }}</mat-hint>
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>{{ 'gestion.announcements.fields.bannerEnds' | translate }}</mat-label>
+            <input matInput type="datetime-local" formControlName="banner_ends_local" />
+          </mat-form-field>
+        </div>
+      }
+    </section>
+    @if (current.status !== 'withdrawn') {
+      <div class="actions">
+        <button mat-flat-button type="submit" [disabled]="busy()">
+          {{ 'gestion.announcements.detail.save' | translate }}
+        </button>
+      </div>
+    }
+  </form>
+
+  @if (current.status === 'draft' && (current.on_bell || current.by_email)) {
+    <section class="card" aria-labelledby="announcement-preview">
+      <h2 id="announcement-preview">
+        {{ 'gestion.announcements.detail.previewTitle' | translate }}
+      </h2>
+      <p class="muted">{{ 'gestion.announcements.detail.previewHint' | translate }}</p>
+      <div class="actions">
+        <button mat-stroked-button type="button" (click)="showPreview('fr')">
+          {{ 'gestion.announcements.detail.previewFr' | translate }}
+        </button>
+        <button mat-stroked-button type="button" (click)="showPreview('en')">
+          {{ 'gestion.announcements.detail.previewEn' | translate }}
+        </button>
+        <button mat-button type="button" (click)="sendTest()" [disabled]="busy()">
+          {{ 'gestion.announcements.detail.test' | translate }}
+        </button>
+      </div>
+      @if (preview(); as shown) {
+        <p>
+          {{
+            'gestion.announcements.detail.previewFigures'
+              | translate
+                : {
+                    recipients: shown.recipients,
+                    optedOut: shown.opted_out,
+                    emails: shown.emails,
+                    hours: shown.estimated_hours,
+                  }
+          }}
+        </p>
+        <p>
+          <strong>{{ 'gestion.announcements.detail.subject' | translate }}</strong>
+          {{ shown.subject }}
+        </p>
+        <pre>{{ shown.body_text }}</pre>
+      }
+    </section>
+  }
+}

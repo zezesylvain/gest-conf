@@ -33,6 +33,18 @@
  * * `letters.manage` - letters.manage
  * * `signature.manage` - signature.manage
  * * `sessions.chair` - sessions.chair
+ * * `tasks.read` - tasks.read
+ * * `tasks.write` - tasks.write
+ * * `budget.read` - budget.read
+ * * `budget.write` - budget.write
+ * * `sponsors.read` - sponsors.read
+ * * `sponsors.write` - sponsors.write
+ * * `logistics.read` - logistics.read
+ * * `logistics.write` - logistics.write
+ * * `volunteers.plan` - volunteers.plan
+ * * `shifts.own` - shifts.own
+ * * `communications.send` - communications.send
+ * * `surveys.manage` - surveys.manage
  */
-export type Capability = 'edition.read' | 'edition.write' | 'edition.publish' | 'edition.archive' | 'members.read' | 'members.manage' | 'audit.read' | 'portal.write' | 'submissions.read' | 'submissions.extend' | 'submissions.export' | 'reviews.write' | 'reviews.manage' | 'reviews.read_all' | 'decisions.decide' | 'decisions.publish' | 'grids.write' | 'program.read' | 'program.write' | 'program.publish' | 'registrations.read' | 'registrations.manage' | 'pricing.write' | 'finance.read' | 'checkin.scan' | 'checkin.manage' | 'certificates.manage' | 'letters.manage' | 'signature.manage' | 'sessions.chair';
+export type Capability = 'edition.read' | 'edition.write' | 'edition.publish' | 'edition.archive' | 'members.read' | 'members.manage' | 'audit.read' | 'portal.write' | 'submissions.read' | 'submissions.extend' | 'submissions.export' | 'reviews.write' | 'reviews.manage' | 'reviews.read_all' | 'decisions.decide' | 'decisions.publish' | 'grids.write' | 'program.read' | 'program.write' | 'program.publish' | 'registrations.read' | 'registrations.manage' | 'pricing.write' | 'finance.read' | 'checkin.scan' | 'checkin.manage' | 'certificates.manage' | 'letters.manage' | 'signature.manage' | 'sessions.chair' | 'tasks.read' | 'tasks.write' | 'budget.read' | 'budget.write' | 'sponsors.read' | 'sponsors.write' | 'logistics.read' | 'logistics.write' | 'volunteers.plan' | 'shifts.own' | 'communications.send' | 'surveys.manage';
 

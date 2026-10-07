@@ -1,0 +1,143 @@
+<p>
+  <a [routerLink]="['/editions', editionId(), 'logistique', 'intervenants']">{{
+    'gestion.speakers.detail.back' | translate
+  }}</a>
+</p>
+<gc-page-header
+  [heading]="visit()?.speaker?.name || ('gestion.speakers.detail.title' | translate)"
+  [lead]="'gestion.speakers.detail.lead' | translate"
+/>
+<div aria-live="polite">
+  @if (status()) {
+    <p class="notice" role="status">{{ status() }}</p>
+  }
+</div>
+<gc-error-summary [messages]="errors()" />
+
+@if (loading()) {
+  <p role="status">{{ 'gestion.speakers.loading' | translate }}</p>
+} @else if (visit(); as current) {
+  @if (current.missing_equipment.length) {
+    <p class="notice ko">{{ 'gestion.speakers.detail.missingNotice' | translate }}</p>
+  }
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <section class="card" aria-labelledby="speaker-part">
+      <h2 id="speaker-part">{{ 'gestion.speakers.detail.speakerPart' | translate }}</h2>
+      <fieldset>
+        <legend>{{ 'gestion.speakers.fields.technicalNeeds' | translate }}</legend>
+        <div class="checks">
+          @for (item of equipmentList; track item) {
+            <mat-checkbox
+              [checked]="needs().includes(item)"
+              [disabled]="!canWrite()"
+              (change)="toggleNeed(item, $event.checked)"
+            >
+              {{ 'gestion.speakers.equipment.' + item | translate }}
+              @if (missing(item)) {
+                <span class="ko">({{ 'gestion.speakers.detail.missingShort' | translate }})</span>
+              }
+            </mat-checkbox>
+          }
+        </div>
+      </fieldset>
+      <div class="grid-2">
+        <mat-form-field class="wide">
+          <mat-label>{{ 'gestion.speakers.fields.technicalNote' | translate }}</mat-label>
+          <input matInput formControlName="technical_note" maxlength="500" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>{{ 'gestion.speakers.fields.arrivalLocal' | translate }}</mat-label>
+          <input matInput type="datetime-local" formControlName="arrival_local" />
+          <mat-hint>{{ 'gestion.speakers.localHint' | translate }}</mat-hint>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>{{ 'gestion.speakers.fields.arrivalMeans' | translate }}</mat-label>
+          <mat-select formControlName="arrival_means">
+            <mat-option value="">—</mat-option>
+            @for (item of means; track item) {
+              <mat-option [value]="item">{{
+                'gestion.speakers.means.' + item | translate
+              }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>{{ 'gestion.speakers.fields.arrivalReference' | translate }}</mat-label>
+          <input matInput formControlName="arrival_reference" maxlength="60" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>{{ 'gestion.speakers.fields.departureLocal' | translate }}</mat-label>
+          <input matInput type="datetime-local" formControlName="departure_local" />
+          <mat-hint>{{ 'gestion.speakers.localHint' | translate }}</mat-hint>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>{{ 'gestion.speakers.fields.departureMeans' | translate }}</mat-label>
+          <mat-select formControlName="departure_means">
+            <mat-option value="">—</mat-option>
+            @for (item of means; track item) {
+              <mat-option [value]="item">{{
+                'gestion.speakers.means.' + item | translate
+              }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>{{ 'gestion.speakers.fields.departureReference' | translate }}</mat-label>
+          <input matInput formControlName="departure_reference" maxlength="60" />
+        </mat-form-field>
+      </div>
+      <div class="checks">
+        <mat-checkbox formControlName="accommodation_needed">{{
+          'gestion.speakers.fields.accommodationNeeded' | translate
+        }}</mat-checkbox>
+        <mat-checkbox formControlName="transfer_needed">{{
+          'gestion.speakers.fields.transferNeeded' | translate
+        }}</mat-checkbox>
+      </div>
+      <mat-form-field class="wide">
+        <mat-label>{{ 'gestion.speakers.fields.speakerNote' | translate }}</mat-label>
+        <textarea matInput formControlName="speaker_note" rows="3" maxlength="1000"></textarea>
+      </mat-form-field>
+    </section>
+
+    <section class="card" aria-labelledby="staff-part">
+      <h2 id="staff-part">{{ 'gestion.speakers.detail.staffPart' | translate }}</h2>
+      <div class="grid-2">
+        <mat-form-field>
+          <mat-label>{{ 'gestion.speakers.fields.status' | translate }}</mat-label>
+          <mat-select formControlName="status">
+            @for (item of statuses; track item) {
+              <mat-option [value]="item">{{
+                'gestion.speakers.status.' + item | translate
+              }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>{{ 'gestion.speakers.fields.hotel' | translate }}</mat-label>
+          <input matInput formControlName="hotel" maxlength="150" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>{{ 'gestion.speakers.fields.checkIn' | translate }}</mat-label>
+          <input matInput type="date" formControlName="check_in" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>{{ 'gestion.speakers.fields.checkOut' | translate }}</mat-label>
+          <input matInput type="date" formControlName="check_out" />
+        </mat-form-field>
+        <mat-form-field class="wide">
+          <mat-label>{{ 'gestion.speakers.fields.internalNote' | translate }}</mat-label>
+          <textarea matInput formControlName="internal_note" rows="3" maxlength="2000"></textarea>
+          <mat-hint>{{ 'gestion.speakers.internalHint' | translate }}</mat-hint>
+        </mat-form-field>
+      </div>
+    </section>
+    @if (canWrite()) {
+      <div class="actions">
+        <button mat-flat-button type="submit" [disabled]="busy()">
+          {{ 'gestion.speakers.detail.save' | translate }}
+        </button>
+      </div>
+    }
+  </form>
+}

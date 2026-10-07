@@ -267,6 +267,91 @@
     </section>
   }
 
+  @if (hasOrganisation()) {
+    <section class="card" aria-labelledby="organisation-title">
+      <h2 id="organisation-title">{{ 'gestion.dashboard.organisation.title' | translate }}</h2>
+      <ul>
+        @if (myTasks(); as tasks) {
+          <li>
+            <a [routerLink]="['/editions', current.id, 'organisation', 'taches']">{{
+              'gestion.dashboard.organisation.tasks' | translate: { count: tasks.open }
+            }}</a>
+            @if (tasks.overdue) {
+              <span class="ko">{{
+                'gestion.dashboard.organisation.overdue' | translate: { count: tasks.overdue }
+              }}</span>
+            }
+            @if (tasks.dueSoon) {
+              <span>{{
+                'gestion.dashboard.organisation.dueSoon' | translate: { count: tasks.dueSoon }
+              }}</span>
+            }
+          </li>
+        }
+        @if (budget(); as figures) {
+          <li>
+            <a [routerLink]="['/editions', current.id, 'organisation', 'budget']">{{
+              'gestion.dashboard.organisation.budget'
+                | translate
+                  : {
+                      planned: amount(figures.balance_planned, figures.currency),
+                      actual: amount(figures.balance_actual, figures.currency),
+                    }
+            }}</a>
+          </li>
+        }
+        @if (sponsorTotals(); as totals) {
+          <li>
+            <a [routerLink]="['/editions', current.id, 'partenaires']">{{
+              'gestion.dashboard.organisation.sponsors'
+                | translate
+                  : {
+                      received: amount(totals.received, totals.currency),
+                      agreed: amount(totals.agreed, totals.currency),
+                    }
+            }}</a>
+          </li>
+        }
+        @if (visits(); as counts) {
+          <li>
+            <a [routerLink]="['/editions', current.id, 'logistique', 'intervenants']">{{
+              'gestion.dashboard.organisation.visits' | translate: { count: counts.toArrange }
+            }}</a>
+            @if (counts.missing) {
+              <span class="ko">{{
+                'gestion.dashboard.organisation.equipment' | translate: { count: counts.missing }
+              }}</span>
+            }
+          </li>
+        }
+        @if (banner() !== null) {
+          <li>
+            <a [routerLink]="['/editions', current.id, 'communication', 'annonces']">{{
+              banner()
+                ? ('gestion.dashboard.organisation.banner' | translate: { title: banner() })
+                : ('gestion.dashboard.organisation.noBanner' | translate)
+            }}</a>
+          </li>
+        }
+        @if (surveyRate(); as rate) {
+          <li>
+            <a [routerLink]="['/editions', current.id, 'communication', 'questionnaires']">{{
+              'gestion.dashboard.organisation.surveys'
+                | translate: { answered: rate.answered, invited: rate.invited }
+            }}</a>
+          </li>
+        }
+        @if (placesToFill() !== null) {
+          <li>
+            <a [routerLink]="['/editions', current.id, 'logistique', 'benevoles']">{{
+              'gestion.dashboard.organisation.places' | translate: { count: placesToFill() }
+            }}</a>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+
   @if (pendingInvitations() !== null) {
     <section class="card" aria-labelledby="invitations-title">
       <h2 id="invitations-title">{{ 'gestion.nav.invitations' | translate }}</h2>
