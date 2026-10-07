@@ -261,6 +261,37 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/sponsors/sponsor-detail-page').then((m) => m.SponsorDetailPage),
       },
+      // Communication (plan L8, N10 à N12) : annonces et envois groupés, questionnaires.
+      {
+        path: 'communication/annonces',
+        title: 'gestion.announcements.title',
+        canActivate: [capabilityGuard('communications.send')],
+        loadComponent: () =>
+          import('./pages/communication/announcements-page').then((m) => m.AnnouncementsPage),
+      },
+      {
+        path: 'communication/annonces/:announcementId',
+        title: 'gestion.announcements.detail.title',
+        canActivate: [capabilityGuard('communications.send')],
+        loadComponent: () =>
+          import('./pages/communication/announcement-detail-page').then(
+            (m) => m.AnnouncementDetailPage,
+          ),
+      },
+      {
+        path: 'communication/questionnaires',
+        title: 'gestion.surveys.title',
+        canActivate: [capabilityGuard('surveys.manage')],
+        loadComponent: () =>
+          import('./pages/communication/surveys-page').then((m) => m.SurveysPage),
+      },
+      {
+        path: 'communication/questionnaires/:surveyId',
+        title: 'gestion.surveys.detail.title',
+        canActivate: [capabilityGuard('surveys.manage')],
+        loadComponent: () =>
+          import('./pages/communication/survey-detail-page').then((m) => m.SurveyDetailPage),
+      },
       // Attestations, lettres d'invitation et signature (plan L7, K9 à K12, K18, K19).
       {
         path: 'attestations',

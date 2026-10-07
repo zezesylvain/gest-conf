@@ -48,6 +48,8 @@ const EVERYTHING = [
   'volunteers.plan',
   'shifts.own',
   'sponsors.read',
+  'communications.send',
+  'surveys.manage',
 ];
 
 /** Catalogue « traduit » minimal : la clé tient lieu de libellé. */
@@ -302,6 +304,23 @@ describe('Table de navigation de la gestion (plan L2 §2.3)', () => {
     // leur propre fiche.
     expect(helpForUrl('/editions/3/partenaires/8')).toBe('sponsors');
     expect(helpForUrl('/editions/3/partenaires/niveaux')).toBe('sponsor-levels');
+  });
+
+  it('communication (plan L8, N16) : annonces et questionnaires selon la capacité', () => {
+    const secretariat = buildNavigation(3, ['edition.read', 'surveys.manage'], 'OC_MEMBER');
+    expect(
+      secretariat.find((group) => group.key === 'communication')!.entries.map((e) => e.key),
+    ).toEqual(['surveys']);
+    const communication = buildNavigation(
+      3,
+      ['edition.read', 'communications.send', 'surveys.manage'],
+      'OC_MEMBER',
+    );
+    expect(
+      communication.find((group) => group.key === 'communication')!.entries.map((e) => e.key),
+    ).toEqual(['announcements', 'surveys']);
+    expect(helpForUrl('/editions/3/communication/annonces/4')).toBe('announcements');
+    expect(helpForUrl('/editions/3/communication/questionnaires/6')).toBe('surveys');
   });
 
   it('aucune capacité dans l’édition : rail vide (pas d’aide seule)', () => {

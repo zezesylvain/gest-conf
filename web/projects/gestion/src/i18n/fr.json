@@ -35,7 +35,8 @@
         "documents": "Attestations et lettres",
         "organisation": "Organisation",
         "logistics": "Logistique",
-        "partners": "Partenaires"
+        "partners": "Partenaires",
+        "communication": "Communication"
       },
       "keywords": {
         "dashboard": "accueil, statut, publier, publication, archiver, état, résumé",
@@ -86,7 +87,9 @@
         "volunteerShifts": "bénévoles, postes, affectation, planning des bénévoles",
         "myShifts": "mes postes, mon planning, bénévolat, iCal",
         "sponsors": "sponsors, mécènes, contribution, contreparties, logo",
-        "sponsorLevels": "or, argent, bronze, paliers, offre de partenariat"
+        "sponsorLevels": "or, argent, bronze, paliers, offre de partenariat",
+        "announcements": "actualités, bandeau, envoi groupé, e-mailing, segment, cloche",
+        "surveys": "satisfaction, enquête, sondage, avis des participants"
       },
       "portalSections": "Sections",
       "portalPages": "Pages",
@@ -126,7 +129,9 @@
       "volunteerShifts": "Postes des bénévoles",
       "myShifts": "Mon planning",
       "sponsors": "Partenaires",
-      "sponsorLevels": "Niveaux de partenariat"
+      "sponsorLevels": "Niveaux de partenariat",
+      "announcements": "Annonces",
+      "surveys": "Questionnaires"
     },
     "status": {
       "draft": "brouillon",
@@ -1360,6 +1365,48 @@
           "copyText": "Attribuer un niveau à un partenaire ajoute à sa fiche les contreparties du niveau ; celles déjà présentes sont gardées.",
           "deleteTitle": "Niveau attribué",
           "deleteText": "Un niveau attribué à un partenaire ne se supprime pas : changez d'abord le niveau des partenaires concernés."
+        },
+        "announcements": {
+          "title": "Annonces",
+          "summary": "Actualités, bandeau, cloche et envois groupés.",
+          "path": "Communication › Annonces",
+          "intro": "Une annonce se rédige une fois et part sur les canaux cochés : actualités du portail, bandeau de dernière minute, cloche et e-mail des destinataires choisis.",
+          "writeTitle": "Rédiger",
+          "writeBody": "Titre et texte en français, et en anglais si possible ; le texte accepte paragraphes, listes, liens et gras.",
+          "channelsTitle": "Choisir les canaux",
+          "channelsBody": "La cloche et l'e-mail demandent des destinataires (un segment : auteurs, inscrits, présents, comités…) ; le bandeau, un message court et une fenêtre d'affichage.",
+          "checkTitle": "Vérifier",
+          "checkBody": "L'aperçu montre l'e-mail et compte les destinataires, les désabonnés et la durée d'envoi ; « M'envoyer un essai » vous l'envoie, à vous seul.",
+          "publishTitle": "Publier",
+          "publishBody": "La publication demande de confirmer votre mot de passe ; l'envoi part aussitôt, par lots.",
+          "bannerTitle": "Bandeau",
+          "bannerText": "Une seule annonce au bandeau à la fois : deux fenêtres qui se chevauchent sont refusées. Le bandeau paraît aussitôt, sans publication du portail ; les actualités, elles, à la prochaine publication du portail.",
+          "sentTitle": "Après la publication",
+          "sentText": "La cloche, l'e-mail et les destinataires ne changent plus : l'envoi est parti. Les textes se corrigent ; « Retirer » enlève l'annonce et annule les e-mails pas encore partis.",
+          "paceTitle": "Envoi étalé",
+          "paceText": "Les envois groupés n'utilisent que la moitié du plafond horaire d'e-mails de l'hébergement, pour laisser passer les e-mails de service ; un grand envoi prend donc plusieurs heures.",
+          "unsubscribeTitle": "Désabonnement",
+          "unsubscribeText": "Chaque e-mail dit pourquoi la personne le reçoit et porte un lien de désabonnement ; un désabonné garde la cloche et les e-mails de service."
+        },
+        "surveys": {
+          "title": "Questionnaires",
+          "summary": "Les questionnaires de satisfaction et leurs résultats.",
+          "path": "Communication › Questionnaires",
+          "intro": "Un questionnaire porte sur toute la conférence ou sur une session ; il est proposé aux seules personnes présentes, par la cloche et par e-mail, à son ouverture.",
+          "createTitle": "Créer",
+          "createBody": "Titre, portée et, au besoin, le modèle de questions ; réglez ensuite l'ouverture et la clôture, à l'heure du lieu.",
+          "questionsTitle": "Questions",
+          "questionsBody": "Note de 1 à 5, choix unique, choix multiples (2 à 12 choix) ou texte libre ; chacune obligatoire ou non.",
+          "publishTitle": "Publier",
+          "publishBody": "La publication demande de confirmer votre mot de passe et programme les invitations.",
+          "resultsTitle": "Lire les résultats",
+          "resultsBody": "Moyennes et répartitions s'affichent à partir de 5 réponses ; les commentaires se lisent dans l'export.",
+          "anonymityTitle": "Anonymat",
+          "anonymityText": "Une réponse n'est liée à personne ; rien ne permet de savoir qui a répondu quoi, pas même le journal.",
+          "lockedTitle": "Questions verrouillées",
+          "lockedText": "Dès la première réponse, les questions ne changent plus : dupliquez le questionnaire pour en préparer une autre version.",
+          "reminderTitle": "Relance",
+          "reminderText": "Une seule relance part à mi-chemin entre l'ouverture et la clôture, aux personnes qui n'ont pas répondu."
         }
       }
     },
@@ -3276,6 +3323,205 @@
         "title": "Supprimer ce niveau ?",
         "message": "Le niveau « {{name}} » sera supprimé.",
         "confirm": "Supprimer"
+      }
+    },
+    "announcements": {
+      "title": "Annonces",
+      "lead": "Actualités, bandeau de dernière minute, cloche et envois groupés par e-mail.",
+      "loading": "Chargement des annonces…",
+      "new": "Nouvelle annonce",
+      "create": "Créer et ouvrir l'annonce",
+      "errors": {
+        "title": "Le titre est obligatoire."
+      },
+      "empty": "Aucune annonce pour l'instant.",
+      "channelsTitle": "Canaux",
+      "statusTitle": "État",
+      "sendingTitle": "Envoi",
+      "createdAt": "Créée le",
+      "recipientsCount": "{{recipients}} destinataire(s), {{emails}} e-mail(s)",
+      "segmentOption": "{{label}} ({{count}})",
+      "fields": {
+        "title": "Titre",
+        "titleFr": "Titre (français)",
+        "titleEn": "Titre (anglais)",
+        "bodyFr": "Texte (français)",
+        "bodyEn": "Texte (anglais)",
+        "segment": "Destinataires",
+        "bannerFr": "Message du bandeau (français)",
+        "bannerEn": "Message du bandeau (anglais)",
+        "bannerStarts": "Bandeau à partir du",
+        "bannerEnds": "Bandeau jusqu'au"
+      },
+      "channels": {
+        "on_news": "Actualités",
+        "on_banner": "Bandeau",
+        "on_bell": "Cloche",
+        "by_email": "E-mail"
+      },
+      "status": {
+        "draft": "Brouillon",
+        "published": "Publiée",
+        "withdrawn": "Retirée"
+      },
+      "sending": {
+        "none": "Aucun envoi",
+        "queuing": "Mise en file en cours",
+        "queued": "Mise en file terminée",
+        "cancelled": "Envoi annulé"
+      },
+      "stats": {
+        "recipients": "Destinataires",
+        "delivered": "Traités",
+        "sent": "E-mails partis",
+        "queued": "En file",
+        "failed": "En échec",
+        "cancelled": "Annulés"
+      },
+      "delete": {
+        "title": "Supprimer ce brouillon ?",
+        "message": "Le brouillon « {{title}} » sera supprimé.",
+        "confirm": "Supprimer le brouillon"
+      },
+      "detail": {
+        "back": "Retour aux annonces",
+        "title": "Annonce",
+        "lead": "Textes, canaux et destinataires ; vérifiez l'aperçu avant de publier.",
+        "state": "État",
+        "publishedAt": "publiée le {{date}}",
+        "withdrawnAt": "retirée le {{date}}",
+        "remaining": "environ {{hours}} heure(s) avant le dernier e-mail",
+        "texts": "Textes",
+        "htmlHint": "Paragraphes, listes, liens et gras ; le reste est retiré par le serveur.",
+        "englishHint": "Vide : le texte français est repris.",
+        "segmentHint": "Le nombre entre parenthèses compte les destinataires aujourd'hui.",
+        "localHint": "Heure locale de l'édition.",
+        "save": "Enregistrer",
+        "saved": "Annonce enregistrée.",
+        "previewTitle": "Avant l'envoi",
+        "previewHint": "L'aperçu montre l'e-mail tel qu'il partira ; l'essai vous l'envoie, à vous seul.",
+        "previewFr": "Aperçu en français",
+        "previewEn": "Aperçu en anglais",
+        "test": "M'envoyer un essai",
+        "testSent": "Essai envoyé à votre adresse.",
+        "previewFigures": "{{recipients}} destinataire(s) dont {{optedOut}} désabonné(s) : {{emails}} e-mail(s), environ {{hours}} heure(s) d'envoi.",
+        "subject": "Objet :",
+        "publish": {
+          "title": "Publier cette annonce ?",
+          "message": "« {{title}} » paraîtra aussitôt sur les canaux cochés.",
+          "confirm": "Publier"
+        },
+        "publishSend": {
+          "title": "Publier et envoyer ?",
+          "message": "« {{title}} » partira à {{count}} destinataire(s) ; la cloche, l'e-mail et les destinataires ne pourront plus changer.",
+          "confirm": "Publier"
+        },
+        "published": "Annonce publiée.",
+        "withdraw": {
+          "title": "Retirer cette annonce ?",
+          "message": "« {{title}} » quittera les actualités et le bandeau ; les e-mails pas encore partis sont annulés.",
+          "confirm": "Retirer"
+        },
+        "withdrawn": "Annonce retirée.",
+        "cancel": {
+          "title": "Annuler l'envoi ?",
+          "message": "Les e-mails pas encore partis sont annulés ; ceux déjà partis restent comptés.",
+          "confirm": "Annuler l'envoi"
+        },
+        "cancelled": "{{count}} e-mail(s) annulé(s)."
+      }
+    },
+    "surveys": {
+      "title": "Questionnaires",
+      "lead": "Questionnaires de satisfaction, anonymes, envoyés aux personnes présentes.",
+      "loading": "Chargement des questionnaires…",
+      "new": "Nouveau questionnaire",
+      "create": "Créer et ouvrir le questionnaire",
+      "defaultQuestions": "Partir du modèle (organisation, programme, lieu, accueil, recommandation, commentaire)",
+      "errors": {
+        "title": "Le titre est obligatoire."
+      },
+      "empty": "Aucun questionnaire pour l'instant.",
+      "statusTitle": "État",
+      "open": "Ouvert",
+      "window": "Ouverture et clôture",
+      "participation": "Participation",
+      "participationCount": "{{answered}} réponse(s) sur {{invited}} invité(s)",
+      "fields": {
+        "title": "Titre",
+        "titleFr": "Titre (français)",
+        "titleEn": "Titre (anglais)",
+        "introFr": "Introduction (français)",
+        "introEn": "Introduction (anglais)",
+        "opens": "Ouverture",
+        "closes": "Clôture",
+        "scope": "Portée",
+        "session": "Session",
+        "kind": "Type de question",
+        "labelFr": "Question (français)",
+        "labelEn": "Question (anglais)",
+        "required": "Réponse obligatoire",
+        "choicesFr": "Choix (français)",
+        "choicesEn": "Choix (anglais)"
+      },
+      "scope": {
+        "global": "Toute la conférence",
+        "session": "Une session"
+      },
+      "status": {
+        "draft": "Brouillon",
+        "published": "Publié"
+      },
+      "kind": {
+        "rating": "Note de 1 à 5",
+        "single": "Choix unique",
+        "multiple": "Choix multiples",
+        "text": "Texte libre"
+      },
+      "delete": {
+        "title": "Supprimer ce brouillon ?",
+        "message": "Le questionnaire « {{title}} » sera supprimé.",
+        "confirm": "Supprimer le brouillon"
+      },
+      "detail": {
+        "back": "Retour aux questionnaires",
+        "title": "Questionnaire",
+        "lead": "Réglages, questions et résultats ; les réponses sont anonymes.",
+        "state": "État",
+        "figures": "{{invited}} invité(s), {{answered}} ont répondu ({{responses}} réponse(s) enregistrée(s)).",
+        "publish": {
+          "title": "Publier ce questionnaire ?",
+          "message": "« {{title}} » sera proposé aux personnes présentes à son ouverture, avec une relance à mi-chemin.",
+          "confirm": "Publier"
+        },
+        "published": "Questionnaire publié.",
+        "duplicate": "Dupliquer",
+        "settings": "Réglages",
+        "publishedHint": "Publié : seuls les titres, l'introduction et la clôture changent encore.",
+        "localHint": "Heure locale de l'édition.",
+        "save": "Enregistrer",
+        "saved": "Questionnaire enregistré.",
+        "questions": "Questions",
+        "lockedNotice": "Des réponses ont été reçues : les questions ne changent plus. Dupliquez le questionnaire pour en préparer une autre version.",
+        "deleteQuestion": "Retirer",
+        "deleteQuestionLabel": "Retirer la question « {{label}} »",
+        "noQuestion": "Aucune question.",
+        "newQuestion": "Nouvelle question",
+        "choicesHint": "Un choix par ligne, de 2 à 12 ; les lignes anglaises suivent le même ordre.",
+        "addQuestion": "Ajouter la question",
+        "questionAdded": "Question ajoutée.",
+        "questionUpdated": "Question mise à jour.",
+        "questionDeleted": "Question retirée.",
+        "results": "Résultats",
+        "belowThreshold": "{{responses}} réponse(s) : les résultats s'affichent à partir de {{threshold}}, pour qu'aucune réponse ne soit reconnaissable.",
+        "textAnswers": "{{count}} commentaire(s), à lire dans l'export, où ils sont mélangés.",
+        "average": "Moyenne : {{average}} sur 5",
+        "answer": "Réponse",
+        "count": "Nombre",
+        "share": "Part",
+        "exportHint": "L'export est inscrit au journal ; les commentaires y figurent dans un ordre aléatoire.",
+        "exportCsv": "Exporter (CSV)",
+        "exportXlsx": "Exporter (XLSX)"
       }
     }
   }

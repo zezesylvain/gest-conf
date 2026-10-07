@@ -35,7 +35,8 @@
         "documents": "Certificates and letters",
         "organisation": "Organisation",
         "logistics": "Logistics",
-        "partners": "Partners"
+        "partners": "Partners",
+        "communication": "Communication"
       },
       "keywords": {
         "dashboard": "home, status, publish, publication, archive, state, summary",
@@ -86,7 +87,9 @@
         "volunteerShifts": "volunteers, shifts, assignment, volunteer schedule",
         "myShifts": "my shifts, my schedule, volunteering, iCal",
         "sponsors": "sponsors, patrons, contribution, benefits, logo",
-        "sponsorLevels": "gold, silver, bronze, tiers, partnership offer"
+        "sponsorLevels": "gold, silver, bronze, tiers, partnership offer",
+        "announcements": "news, banner, bulk email, mailing, segment, bell",
+        "surveys": "satisfaction, feedback, poll, participant opinion"
       },
       "portalSections": "Sections",
       "portalPages": "Pages",
@@ -126,7 +129,9 @@
       "volunteerShifts": "Volunteer shifts",
       "myShifts": "My schedule",
       "sponsors": "Partners",
-      "sponsorLevels": "Partnership levels"
+      "sponsorLevels": "Partnership levels",
+      "announcements": "Announcements",
+      "surveys": "Surveys"
     },
     "status": {
       "draft": "draft",
@@ -1360,6 +1365,48 @@
           "copyText": "Assigning a level to a partner adds the level's benefits to their record; those already present are kept.",
           "deleteTitle": "Level in use",
           "deleteText": "A level assigned to a partner cannot be deleted: first change the level of the partners concerned."
+        },
+        "announcements": {
+          "title": "Announcements",
+          "summary": "News, banner, bell and bulk email.",
+          "path": "Communication › Announcements",
+          "intro": "An announcement is written once and goes out on the ticked channels: portal news, last-minute banner, bell and email to the chosen recipients.",
+          "writeTitle": "Write",
+          "writeBody": "Title and text in French, and in English if possible; the text accepts paragraphs, lists, links and bold.",
+          "channelsTitle": "Choose the channels",
+          "channelsBody": "The bell and email need recipients (a segment: authors, registrants, attendees, committees…); the banner, a short message and a display window.",
+          "checkTitle": "Check",
+          "checkBody": "The preview shows the email and counts recipients, unsubscribed people and sending time; \"Send me a test\" sends it to you only.",
+          "publishTitle": "Publish",
+          "publishBody": "Publishing requires you to confirm your password; sending starts at once, in batches.",
+          "bannerTitle": "Banner",
+          "bannerText": "Only one announcement on the banner at a time: overlapping windows are refused. The banner appears at once, without a portal publication; news appear at the next portal publication.",
+          "sentTitle": "After publishing",
+          "sentText": "The bell, email and recipients no longer change: the sending has started. Texts can be corrected; \"Withdraw\" removes the announcement and cancels emails not yet sent.",
+          "paceTitle": "Spread sending",
+          "paceText": "Bulk sending only uses half of the host's hourly email cap, to let service emails through; a large sending therefore takes several hours.",
+          "unsubscribeTitle": "Unsubscribing",
+          "unsubscribeText": "Each email says why the person receives it and carries an unsubscribe link; an unsubscribed person keeps the bell and service emails."
+        },
+        "surveys": {
+          "title": "Surveys",
+          "summary": "Satisfaction surveys and their results.",
+          "path": "Communication › Surveys",
+          "intro": "A survey covers the whole conference or one session; it is offered only to the people who attended, by bell and email, when it opens.",
+          "createTitle": "Create",
+          "createBody": "Title, scope and, if wanted, the question template; then set the opening and closing, in venue time.",
+          "questionsTitle": "Questions",
+          "questionsBody": "Rating from 1 to 5, single choice, multiple choice (2 to 12 choices) or free text; each required or not.",
+          "publishTitle": "Publish",
+          "publishBody": "Publishing requires you to confirm your password and schedules the invitations.",
+          "resultsTitle": "Read the results",
+          "resultsBody": "Averages and distributions are shown from 5 responses; comments are read in the export.",
+          "anonymityTitle": "Anonymity",
+          "anonymityText": "A response is linked to no one; nothing tells who answered what, not even the log.",
+          "lockedTitle": "Locked questions",
+          "lockedText": "From the first response, the questions no longer change: duplicate the survey to prepare another version.",
+          "reminderTitle": "Reminder",
+          "reminderText": "A single reminder goes out halfway between opening and closing, to the people who have not answered."
         }
       }
     },
@@ -3276,6 +3323,205 @@
         "title": "Delete this level?",
         "message": "The level \"{{name}}\" will be deleted.",
         "confirm": "Delete"
+      }
+    },
+    "announcements": {
+      "title": "Announcements",
+      "lead": "News, last-minute banner, bell and bulk email.",
+      "loading": "Loading announcements…",
+      "new": "New announcement",
+      "create": "Create and open the announcement",
+      "errors": {
+        "title": "The title is required."
+      },
+      "empty": "No announcement yet.",
+      "channelsTitle": "Channels",
+      "statusTitle": "State",
+      "sendingTitle": "Sending",
+      "createdAt": "Created on",
+      "recipientsCount": "{{recipients}} recipient(s), {{emails}} email(s)",
+      "segmentOption": "{{label}} ({{count}})",
+      "fields": {
+        "title": "Title",
+        "titleFr": "Title (French)",
+        "titleEn": "Title (English)",
+        "bodyFr": "Text (French)",
+        "bodyEn": "Text (English)",
+        "segment": "Recipients",
+        "bannerFr": "Banner message (French)",
+        "bannerEn": "Banner message (English)",
+        "bannerStarts": "Banner from",
+        "bannerEnds": "Banner until"
+      },
+      "channels": {
+        "on_news": "News",
+        "on_banner": "Banner",
+        "on_bell": "Bell",
+        "by_email": "Email"
+      },
+      "status": {
+        "draft": "Draft",
+        "published": "Published",
+        "withdrawn": "Withdrawn"
+      },
+      "sending": {
+        "none": "No sending",
+        "queuing": "Queuing in progress",
+        "queued": "Queuing complete",
+        "cancelled": "Sending cancelled"
+      },
+      "stats": {
+        "recipients": "Recipients",
+        "delivered": "Processed",
+        "sent": "Emails sent",
+        "queued": "Queued",
+        "failed": "Failed",
+        "cancelled": "Cancelled"
+      },
+      "delete": {
+        "title": "Delete this draft?",
+        "message": "The draft \"{{title}}\" will be deleted.",
+        "confirm": "Delete draft"
+      },
+      "detail": {
+        "back": "Back to announcements",
+        "title": "Announcement",
+        "lead": "Texts, channels and recipients; check the preview before publishing.",
+        "state": "State",
+        "publishedAt": "published on {{date}}",
+        "withdrawnAt": "withdrawn on {{date}}",
+        "remaining": "about {{hours}} hour(s) before the last email",
+        "texts": "Texts",
+        "htmlHint": "Paragraphs, lists, links and bold; anything else is removed by the server.",
+        "englishHint": "Empty: the French text is used.",
+        "segmentHint": "The number in brackets counts today's recipients.",
+        "localHint": "Edition local time.",
+        "save": "Save",
+        "saved": "Announcement saved.",
+        "previewTitle": "Before sending",
+        "previewHint": "The preview shows the email as it will be sent; the test sends it to you only.",
+        "previewFr": "Preview in French",
+        "previewEn": "Preview in English",
+        "test": "Send me a test",
+        "testSent": "Test sent to your address.",
+        "previewFigures": "{{recipients}} recipient(s) including {{optedOut}} unsubscribed: {{emails}} email(s), about {{hours}} hour(s) of sending.",
+        "subject": "Subject:",
+        "publish": {
+          "title": "Publish this announcement?",
+          "message": "\"{{title}}\" will appear at once on the ticked channels.",
+          "confirm": "Publish"
+        },
+        "publishSend": {
+          "title": "Publish and send?",
+          "message": "\"{{title}}\" will go to {{count}} recipient(s); the bell, the email and the recipients can no longer change.",
+          "confirm": "Publish"
+        },
+        "published": "Announcement published.",
+        "withdraw": {
+          "title": "Withdraw this announcement?",
+          "message": "\"{{title}}\" will leave the news and the banner; emails not yet sent are cancelled.",
+          "confirm": "Withdraw"
+        },
+        "withdrawn": "Announcement withdrawn.",
+        "cancel": {
+          "title": "Cancel sending?",
+          "message": "Emails not yet sent are cancelled; those already sent remain counted.",
+          "confirm": "Cancel sending"
+        },
+        "cancelled": "{{count}} email(s) cancelled."
+      }
+    },
+    "surveys": {
+      "title": "Surveys",
+      "lead": "Anonymous satisfaction surveys, sent to the people who attended.",
+      "loading": "Loading surveys…",
+      "new": "New survey",
+      "create": "Create and open the survey",
+      "defaultQuestions": "Start from the template (organisation, programme, venue, welcome, recommendation, comment)",
+      "errors": {
+        "title": "The title is required."
+      },
+      "empty": "No survey yet.",
+      "statusTitle": "State",
+      "open": "Open",
+      "window": "Opening and closing",
+      "participation": "Participation",
+      "participationCount": "{{answered}} answer(s) out of {{invited}} invited",
+      "fields": {
+        "title": "Title",
+        "titleFr": "Title (French)",
+        "titleEn": "Title (English)",
+        "introFr": "Introduction (French)",
+        "introEn": "Introduction (English)",
+        "opens": "Opening",
+        "closes": "Closing",
+        "scope": "Scope",
+        "session": "Session",
+        "kind": "Question type",
+        "labelFr": "Question (French)",
+        "labelEn": "Question (English)",
+        "required": "Answer required",
+        "choicesFr": "Choices (French)",
+        "choicesEn": "Choices (English)"
+      },
+      "scope": {
+        "global": "Whole conference",
+        "session": "One session"
+      },
+      "status": {
+        "draft": "Draft",
+        "published": "Published"
+      },
+      "kind": {
+        "rating": "Rating from 1 to 5",
+        "single": "Single choice",
+        "multiple": "Multiple choice",
+        "text": "Free text"
+      },
+      "delete": {
+        "title": "Delete this draft?",
+        "message": "The survey \"{{title}}\" will be deleted.",
+        "confirm": "Delete draft"
+      },
+      "detail": {
+        "back": "Back to surveys",
+        "title": "Survey",
+        "lead": "Settings, questions and results; answers are anonymous.",
+        "state": "State",
+        "figures": "{{invited}} invited, {{answered}} answered ({{responses}} response(s) recorded).",
+        "publish": {
+          "title": "Publish this survey?",
+          "message": "\"{{title}}\" will be offered to the people who attended when it opens, with a reminder halfway.",
+          "confirm": "Publish"
+        },
+        "published": "Survey published.",
+        "duplicate": "Duplicate",
+        "settings": "Settings",
+        "publishedHint": "Published: only the titles, the introduction and the closing can still change.",
+        "localHint": "Edition local time.",
+        "save": "Save",
+        "saved": "Survey saved.",
+        "questions": "Questions",
+        "lockedNotice": "Responses have been received: the questions no longer change. Duplicate the survey to prepare another version.",
+        "deleteQuestion": "Remove",
+        "deleteQuestionLabel": "Remove question \"{{label}}\"",
+        "noQuestion": "No question.",
+        "newQuestion": "New question",
+        "choicesHint": "One choice per line, 2 to 12; English lines follow the same order.",
+        "addQuestion": "Add question",
+        "questionAdded": "Question added.",
+        "questionUpdated": "Question updated.",
+        "questionDeleted": "Question removed.",
+        "results": "Results",
+        "belowThreshold": "{{responses}} response(s): results are shown from {{threshold}}, so that no answer can be recognised.",
+        "textAnswers": "{{count}} comment(s), to read in the export, where they are shuffled.",
+        "average": "Average: {{average}} out of 5",
+        "answer": "Answer",
+        "count": "Count",
+        "share": "Share",
+        "exportHint": "The export is logged; comments appear in a random order.",
+        "exportCsv": "Export (CSV)",
+        "exportXlsx": "Export (XLSX)"
       }
     }
   }

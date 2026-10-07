@@ -1013,3 +1013,31 @@ sortie du lint, pas ses dernières lignes, qui ne montraient que le dernier proj
 suppression, lecture seule, niveaux), 1 de navigation ; `sponsors` : aperçu du logo publié ou
 non, refusé sans `sponsors.read` ; matrice des droits : lecture du logo ; schéma et client
 régénérés.
+
+### L8.8d — Communication
+
+- rubrique **« Communication »** (après « Partenaires ») : « Annonces »
+  (`communications.send`) et « Questionnaires » (`surveys.manage`) ; `ROLE_GROUPS` l'ouvre à
+  l'administrateur, au Chair et au CO ;
+- **annonces** : liste (canaux, destinataires nommés par leur segment, état, avancement de
+  l'envoi), création d'un brouillon par son titre puis fiche ; textes FR et EN (HTML assaini
+  par le serveur), canaux, segment avec le nombre de destinataires du jour, bandeau et sa
+  fenêtre à l'heure de l'édition ; **aperçu** de l'e-mail en français ou en anglais (objet,
+  version texte, destinataires, désabonnés, e-mails, durée estimée), **essai** à soi-même ;
+  publication confirmée (avec le nombre de destinataires quand elle envoie), retrait,
+  annulation de l'envoi, suppression d'un brouillon ; après publication, la cloche,
+  l'e-mail et le segment sont figés à l'écran et ne sont plus envoyés ;
+- **questionnaires** : liste (portée, état, fenêtre, participation), création (modèle par
+  défaut au choix, session prise dans le programme) puis fiche ; réglages (après
+  publication : titres, introduction, clôture seulement), questions (note, choix unique ou
+  multiple saisis une ligne par choix, texte), verrouillées dès la première réponse avec
+  l'invitation à dupliquer ; publication confirmée, duplication, suppression d'un
+  brouillon ; **résultats** sous le seuil : le nombre de réponses et le seuil, sans rien
+  d'autre ; au-dessus : moyennes, répartitions en barres doublées de leurs nombres,
+  commentaires comptés seulement ; export CSV ou XLSX ;
+- deux fiches d'aide (`announcements`, `surveys`).
+
+**Tests** : 7 tests de pages (liste et création d'annonce, aperçu, essai, publication et
+champs figés, fenêtre du bandeau et annulation de l'envoi, saisie des choix, création d'un
+questionnaire de session, question ajoutée et publication, questionnaire verrouillé avec
+résultats et export), 1 de navigation.

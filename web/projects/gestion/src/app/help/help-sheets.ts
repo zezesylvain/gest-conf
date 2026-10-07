@@ -84,6 +84,9 @@ const VOLUNTEERS: readonly Role[] = ['VOLUNTEER'];
 // Partenaires (plan L8, N2) : lecture pour le Chair et le CO « relations extérieures »,
 // « finances » ou « communication » ; écriture par les relations extérieures.
 const PARTNERS: readonly Role[] = ['OC_MEMBER', 'ADMIN', 'CHAIR'];
+// Communication (plan L8, N2) : annonces par le Chair, le CO « communication » et
+// l'administrateur ; questionnaires aussi par le CO « secrétariat ».
+const COMMUNICATORS: readonly Role[] = ['OC_MEMBER', 'ADMIN', 'CHAIR'];
 
 /** Constructeur : les clés d'une fiche sont toutes sous `gestion.help.sheets.<id>`. */
 function sheet(
@@ -430,6 +433,21 @@ export const HELP_SHEETS: readonly HelpSheet[] = [
     list(k('names'), k('amount'), k('benefits'), k('size')),
     callout('info', k, 'copy'),
     callout('warning', k, 'delete'),
+  ]),
+  sheet('announcements', COMMUNICATORS, (k) => [
+    text(k('intro')),
+    steps(k, 'write', 'channels', 'check', 'publish'),
+    callout('info', k, 'banner'),
+    callout('warning', k, 'sent'),
+    callout('info', k, 'pace'),
+    callout('tip', k, 'unsubscribe'),
+  ]),
+  sheet('surveys', COMMUNICATORS, (k) => [
+    text(k('intro')),
+    steps(k, 'create', 'questions', 'publish', 'results'),
+    callout('info', k, 'anonymity'),
+    callout('warning', k, 'locked'),
+    callout('info', k, 'reminder'),
   ]),
   sheet('audit', SETTINGS_WRITERS, (k) => [
     text(k('intro')),

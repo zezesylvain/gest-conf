@@ -1,0 +1,108 @@
+<gc-page-header
+  [heading]="'gestion.surveys.title' | translate"
+  [lead]="'gestion.surveys.lead' | translate"
+/>
+<gc-error-summary [messages]="errors()" />
+
+<section class="card" aria-labelledby="new-survey-title">
+  <h2 id="new-survey-title">{{ 'gestion.surveys.new' | translate }}</h2>
+  <form [formGroup]="form" (ngSubmit)="create()" class="grid-2">
+    <mat-form-field>
+      <mat-label>{{ 'gestion.surveys.fields.titleFr' | translate }}</mat-label>
+      <input matInput formControlName="title_fr" required maxlength="150" />
+      @if (form.controls.title_fr.hasError('required')) {
+        <mat-error>{{ 'gestion.surveys.errors.title' | translate }}</mat-error>
+      }
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>{{ 'gestion.surveys.fields.scope' | translate }}</mat-label>
+      <mat-select formControlName="scope">
+        @for (scope of scopes; track scope) {
+          <mat-option [value]="scope">{{
+            'gestion.surveys.scope.' + scope | translate
+          }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    @if (form.controls.scope.value === 'session') {
+      <mat-form-field>
+        <mat-label>{{ 'gestion.surveys.fields.session' | translate }}</mat-label>
+        <mat-select formControlName="session">
+          @for (session of sessions(); track session.id) {
+            <mat-option [value]="session.id">{{ title(session) }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    }
+    <mat-checkbox formControlName="default_questions">{{
+      'gestion.surveys.defaultQuestions' | translate
+    }}</mat-checkbox>
+    <div class="actions">
+      <button mat-flat-button type="submit" [disabled]="busy()">
+        {{ 'gestion.surveys.create' | translate }}
+      </button>
+    </div>
+  </form>
+</section>
+
+@if (loading()) {
+  <p role="status">{{ 'gestion.surveys.loading' | translate }}</p>
+} @else if (surveys().length) {
+  <div class="table-wrap">
+    <table>
+      <caption class="visually-hidden">
+        {{
+          'gestion.surveys.title' | translate
+        }}
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">{{ 'gestion.surveys.fields.title' | translate }}</th>
+          <th scope="col">{{ 'gestion.surveys.fields.scope' | translate }}</th>
+          <th scope="col">{{ 'gestion.surveys.statusTitle' | translate }}</th>
+          <th scope="col">{{ 'gestion.surveys.window' | translate }}</th>
+          <th scope="col">{{ 'gestion.surveys.participation' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of surveys(); track item.id) {
+          <tr>
+            <td>
+              <a
+                [routerLink]="[
+                  '/editions',
+                  editionId(),
+                  'communication',
+                  'questionnaires',
+                  item.id,
+                ]"
+                >{{ title(item) }}</a
+              >
+            </td>
+            <td>
+              {{ 'gestion.surveys.scope.' + item.scope | translate }}
+              @if (item.session_title) {
+                <br /><span class="muted">{{ item.session_title }}</span>
+              }
+            </td>
+            <td>
+              <span class="badge">{{ 'gestion.surveys.status.' + item.status | translate }}</span>
+              @if (item.is_open) {
+                <span class="badge">{{ 'gestion.surveys.open' | translate }}</span>
+              }
+            </td>
+            <td>{{ local(item.opens_local) }} → {{ local(item.closes_local) }}</td>
+            <td>
+              {{
+                'gestion.surveys.participationCount'
+                  | translate: { answered: item.stats.answered, invited: item.stats.invited }
+              }}
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+} @else {
+  <p class="muted">{{ 'gestion.surveys.empty' | translate }}</p>
+}

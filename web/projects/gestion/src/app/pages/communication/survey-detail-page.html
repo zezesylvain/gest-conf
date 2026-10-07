@@ -1,0 +1,271 @@
+<p>
+  <a [routerLink]="['/editions', editionId(), 'communication', 'questionnaires']">{{
+    'gestion.surveys.detail.back' | translate
+  }}</a>
+</p>
+<gc-page-header
+  [heading]="survey()?.title_fr || ('gestion.surveys.detail.title' | translate)"
+  [lead]="'gestion.surveys.detail.lead' | translate"
+/>
+<div aria-live="polite">
+  @if (status()) {
+    <p class="notice" role="status">{{ status() }}</p>
+  }
+</div>
+<gc-error-summary [messages]="errors()" />
+
+@if (loading()) {
+  <p role="status">{{ 'gestion.surveys.loading' | translate }}</p>
+} @else if (survey(); as current) {
+  <section class="card" aria-labelledby="survey-state">
+    <h2 id="survey-state">{{ 'gestion.surveys.detail.state' | translate }}</h2>
+    <p>
+      <span class="badge">{{ 'gestion.surveys.status.' + current.status | translate }}</span>
+      @if (current.is_open) {
+        <span class="badge">{{ 'gestion.surveys.open' | translate }}</span>
+      }
+      {{
+        'gestion.surveys.detail.figures'
+          | translate
+            : {
+                invited: current.stats.invited,
+                answered: current.stats.answered,
+                responses: current.stats.responses,
+              }
+      }}
+    </p>
+    <div class="actions">
+      @if (current.status === 'draft') {
+        <button mat-flat-button type="button" (click)="publish()" [disabled]="busy()">
+          {{ 'gestion.surveys.detail.publish.confirm' | translate }}
+        </button>
+        <button mat-button type="button" (click)="remove()" [disabled]="busy()">
+          {{ 'gestion.surveys.delete.confirm' | translate }}
+        </button>
+      }
+      <button mat-stroked-button type="button" (click)="duplicate()" [disabled]="busy()">
+        {{ 'gestion.surveys.detail.duplicate' | translate }}
+      </button>
+    </div>
+  </section>
+
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <section class="card" aria-labelledby="survey-settings">
+      <h2 id="survey-settings">{{ 'gestion.surveys.detail.settings' | translate }}</h2>
+      @if (current.status !== 'draft') {
+        <p class="muted">{{ 'gestion.surveys.detail.publishedHint' | translate }}</p>
+      }
+      <div class="grid-2">
+        <mat-form-field>
+          <mat-label>{{ 'gestion.surveys.fields.titleFr' | translate }}</mat-label>
+          <input matInput formControlName="title_fr" required maxlength="150" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>{{ 'gestion.surveys.fields.titleEn' | translate }}</mat-label>
+          <input matInput formControlName="title_en" maxlength="150" />
+        </mat-form-field>
+        <mat-form-field class="wide">
+          <mat-label>{{ 'gestion.surveys.fields.introFr' | translate }}</mat-label>
+          <textarea matInput formControlName="intro_fr" rows="3" maxlength="2000"></textarea>
+        </mat-form-field>
+        <mat-form-field class="wide">
+          <mat-label>{{ 'gestion.surveys.fields.introEn' | translate }}</mat-label>
+          <textarea matInput formControlName="intro_en" rows="3" maxlength="2000"></textarea>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>{{ 'gestion.surveys.fields.opens' | translate }}</mat-label>
+          <input matInput type="datetime-local" formControlName="opens_local" />
+          <mat-hint>{{ 'gestion.surveys.detail.localHint' | translate }}</mat-hint>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>{{ 'gestion.surveys.fields.closes' | translate }}</mat-label>
+          <input matInput type="datetime-local" formControlName="closes_local" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>{{ 'gestion.surveys.fields.scope' | translate }}</mat-label>
+          <mat-select formControlName="scope">
+            @for (scope of scopes; track scope) {
+              <mat-option [value]="scope">{{
+                'gestion.surveys.scope.' + scope | translate
+              }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        @if (form.controls.scope.value === 'session') {
+          <mat-form-field>
+            <mat-label>{{ 'gestion.surveys.fields.session' | translate }}</mat-label>
+            <mat-select formControlName="session">
+              @for (session of sessions(); track session.id) {
+                <mat-option [value]="session.id">{{ sessionTitle(session) }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        }
+      </div>
+      <div class="actions">
+        <button mat-flat-button type="submit" [disabled]="busy()">
+          {{ 'gestion.surveys.detail.save' | translate }}
+        </button>
+      </div>
+    </section>
+  </form>
+
+  <section class="card" aria-labelledby="survey-questions">
+    <h2 id="survey-questions">{{ 'gestion.surveys.detail.questions' | translate }}</h2>
+    @if (current.locked) {
+      <p class="notice">{{ 'gestion.surveys.detail.lockedNotice' | translate }}</p>
+    }
+    @if (current.questions.length) {
+      <ol class="questions">
+        @for (question of current.questions; track question.id) {
+          <li>
+            <strong>{{ text(question) }}</strong>
+            <span class="badge">{{ 'gestion.surveys.kind.' + question.kind | translate }}</span>
+            @if (question.choices.length) {
+              <br /><span class="muted">{{ choices(question) }}</span>
+            }
+            <br />
+            <mat-checkbox
+              [checked]="question.required"
+              [disabled]="current.locked || busy()"
+              (change)="toggleRequired(question, $event.checked)"
+              >{{ 'gestion.surveys.fields.required' | translate }}</mat-checkbox
+            >
+            @if (!current.locked) {
+              <button
+                mat-button
+                type="button"
+                (click)="deleteQuestion(question)"
+                [disabled]="busy()"
+                [attr.aria-label]="
+                  'gestion.surveys.detail.deleteQuestionLabel'
+                    | translate: { label: text(question) }
+                "
+              >
+                {{ 'gestion.surveys.detail.deleteQuestion' | translate }}
+              </button>
+            }
+          </li>
+        }
+      </ol>
+    } @else {
+      <p class="muted">{{ 'gestion.surveys.detail.noQuestion' | translate }}</p>
+    }
+    @if (!current.locked) {
+      <h3>{{ 'gestion.surveys.detail.newQuestion' | translate }}</h3>
+      <form [formGroup]="questionForm" (ngSubmit)="addQuestion()" class="grid-2">
+        <mat-form-field>
+          <mat-label>{{ 'gestion.surveys.fields.kind' | translate }}</mat-label>
+          <mat-select formControlName="kind">
+            @for (kind of kinds; track kind) {
+              <mat-option [value]="kind">{{
+                'gestion.surveys.kind.' + kind | translate
+              }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-checkbox formControlName="required">{{
+          'gestion.surveys.fields.required' | translate
+        }}</mat-checkbox>
+        <mat-form-field>
+          <mat-label>{{ 'gestion.surveys.fields.labelFr' | translate }}</mat-label>
+          <input matInput formControlName="label_fr" required maxlength="300" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>{{ 'gestion.surveys.fields.labelEn' | translate }}</mat-label>
+          <input matInput formControlName="label_en" maxlength="300" />
+        </mat-form-field>
+        @if (
+          questionForm.controls.kind.value === 'single' ||
+          questionForm.controls.kind.value === 'multiple'
+        ) {
+          <mat-form-field>
+            <mat-label>{{ 'gestion.surveys.fields.choicesFr' | translate }}</mat-label>
+            <textarea matInput formControlName="choices_fr" rows="4"></textarea>
+            <mat-hint>{{ 'gestion.surveys.detail.choicesHint' | translate }}</mat-hint>
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>{{ 'gestion.surveys.fields.choicesEn' | translate }}</mat-label>
+            <textarea matInput formControlName="choices_en" rows="4"></textarea>
+          </mat-form-field>
+        }
+        <div class="actions">
+          <button mat-stroked-button type="submit" [disabled]="busy()">
+            {{ 'gestion.surveys.detail.addQuestion' | translate }}
+          </button>
+        </div>
+      </form>
+    }
+  </section>
+
+  <section class="card" aria-labelledby="survey-results">
+    <h2 id="survey-results">{{ 'gestion.surveys.detail.results' | translate }}</h2>
+    @if (results(); as shown) {
+      @if (shown.responses < shown.threshold) {
+        <p class="muted">
+          {{
+            'gestion.surveys.detail.belowThreshold'
+              | translate: { responses: shown.responses, threshold: shown.threshold }
+          }}
+        </p>
+      } @else {
+        @for (result of shown.questions; track result.id) {
+          <h3>{{ text(result) }}</h3>
+          @if (result.kind === 'text') {
+            <p>{{ 'gestion.surveys.detail.textAnswers' | translate: { count: result.answers } }}</p>
+          } @else {
+            @if (result.average) {
+              <p>{{ 'gestion.surveys.detail.average' | translate: { average: result.average } }}</p>
+            }
+            <div class="table-wrap">
+              <table>
+                <caption class="visually-hidden">
+                  {{
+                    text(result)
+                  }}
+                </caption>
+                <thead>
+                  <tr>
+                    <th scope="col">{{ 'gestion.surveys.detail.answer' | translate }}</th>
+                    <th scope="col" class="number">
+                      {{ 'gestion.surveys.detail.count' | translate }}
+                    </th>
+                    <th scope="col">
+                      <span class="visually-hidden">{{
+                        'gestion.surveys.detail.share' | translate
+                      }}</span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (item of result.counts; track item.value) {
+                    <tr>
+                      <td>{{ text(item) }}</td>
+                      <td class="number">{{ item.count }}</td>
+                      <td>
+                        <span
+                          class="bar"
+                          aria-hidden="true"
+                          [style.width.%]="share(result, item.count)"
+                        ></span>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        }
+        <p class="muted">{{ 'gestion.surveys.detail.exportHint' | translate }}</p>
+        <div class="actions">
+          <button mat-stroked-button type="button" (click)="export('csv')" [disabled]="busy()">
+            {{ 'gestion.surveys.detail.exportCsv' | translate }}
+          </button>
+          <button mat-stroked-button type="button" (click)="export('xlsx')" [disabled]="busy()">
+            {{ 'gestion.surveys.detail.exportXlsx' | translate }}
+          </button>
+        </div>
+      }
+    }
+  </section>
+}
