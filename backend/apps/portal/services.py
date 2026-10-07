@@ -108,8 +108,10 @@ PORTAL_AFFECTING_ACTIONS = (
     # l'entrée porte « public » (voir ``pending_changes``).
     "sponsor_level.",
 )
-# Préfixe des actions des partenaires comptées quand elles portent ``after.public`` vrai.
-PUBLIC_FLAGGED_PREFIXES = ("sponsor.",)
+# Préfixes des actions comptées quand elles portent ``after.public`` vrai : partenaires
+# (N5) et annonces qui touchent les actualités (N10 ; le bandeau, lu dans le navigateur, ne
+# change pas le pré-rendu).
+PUBLIC_FLAGGED_PREFIXES = ("sponsor.", "announcement.")
 
 # Actions sur un compte (sans édition) qui changent la fiche publique d'un membre de comité.
 COMMITTEE_MEMBER_ACTIONS = (

@@ -45,3 +45,7 @@ class EventsConfig(AppConfig):
             signatures.IMAGES.purge_task(signatures.known_images),
             security=True,
         )
+        # Segments des envois groupés (plan L8, N11), déclarés auprès de communications.
+        from apps.events.segments import register_events_segments
+
+        register_events_segments()

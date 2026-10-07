@@ -1641,6 +1641,75 @@ CASES = [
     Case(
         "manage-my-shifts-calendar", "GET", SHO, 200, "/v1/manage/editions/{e}/me/shifts/calendar"
     ),
+    # --- Annonces et envois groupés (plan L8, N10 et N11) -------------------------------------
+    Case("manage-segments", "GET", CMS, 200, "/v1/manage/editions/{e}/segments"),
+    Case("manage-announcements", "GET", CMS, 200, "/v1/manage/editions/{e}/announcements"),
+    Case(
+        "manage-announcements",
+        "POST",
+        CMS,
+        201,
+        "/v1/manage/editions/{e}/announcements",
+        {"title_fr": "Programme en ligne", "on_news": True, "body_fr": "<p>Voir.</p>"},
+    ),
+    Case(
+        "manage-announcement",
+        "GET",
+        CMS,
+        200,
+        "/v1/manage/editions/{e}/announcements/{announcement}",
+    ),
+    Case(
+        "manage-announcement",
+        "PATCH",
+        CMS,
+        200,
+        "/v1/manage/editions/{e}/announcements/{announcement}",
+        {"title_fr": "Salle changée"},
+    ),
+    Case(
+        "manage-announcement",
+        "DELETE",
+        CMS,
+        204,
+        "/v1/manage/editions/{e}/announcements/{announcement}",
+    ),
+    Case(
+        "manage-announcement-preview",
+        "GET",
+        CMS,
+        200,
+        "/v1/manage/editions/{e}/announcements/{announcement}/preview",
+    ),
+    Case(
+        "manage-announcement-test",
+        "POST",
+        CMS,
+        202,
+        "/v1/manage/editions/{e}/announcements/{announcement}/test",
+    ),
+    Case(
+        "manage-announcement-publish",
+        "POST",
+        CMS,
+        200,
+        "/v1/manage/editions/{e}/announcements/{announcement}/publish",
+        recent_auth=True,
+    ),
+    Case(
+        "manage-announcement-withdraw",
+        "POST",
+        CMS,
+        200,
+        "/v1/manage/editions/{e}/announcements/{published_announcement}/withdraw",
+    ),
+    Case(
+        "manage-announcement-cancel",
+        "POST",
+        CMS,
+        200,
+        "/v1/manage/editions/{e}/announcements/{sending_announcement}/cancel",
+    ),
     Case("manage-portal-poster", "GET", R, 200, "/v1/manage/editions/{e}/portal/poster"),
     Case(
         "manage-portal-poster",
@@ -1845,7 +1914,32 @@ def _organisation_objects(edition, users) -> dict:
         edition=edition, title_fr="Accueil", starts_at=start, ends_at=start + dt.timedelta(hours=4)
     )
     ShiftAssignment.objects.create(shift=shift, volunteer=users["VOLUNTEER"])
+    from apps.communications import announcements
+    from apps.core.actor import Actor
+
+    command = Actor.command("cli:matrice")
+    capabilities = {"communications.send"}
+    found = {}
+    for key, fields in (
+        ("announcement", {"on_bell": True}),
+        ("published_announcement", {"on_news": True}),
+        ("sending_announcement", {"on_bell": True}),
+    ):
+        found[key] = announcements.create_announcement(
+            edition,
+            {
+                "title_fr": "Changement de salle",
+                "body_fr": "<p>Salle A.</p>",
+                "segment": "volunteers",
+                **fields,
+            },
+            capabilities=capabilities,
+            actor=command,
+        )
+    for key in ("published_announcement", "sending_announcement"):
+        announcements.publish(found[key], capabilities=capabilities, actor=command)
     return {
+        **{key: announcement.pk for key, announcement in found.items()},
         "speaker": speaker.pk,
         "meal_day": day.isoformat(),
         "meal": meal.pk,

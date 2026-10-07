@@ -21,3 +21,7 @@ class ReviewsConfig(AppConfig):
         workflow.register_guard(assignments.guard_review_steps)
         workflow.register_guard(decisions.guard_decisions)
         workflow.register_effect(assignments.on_transition)
+        # Segments des envois groupés (plan L8, N11), déclarés auprès de communications.
+        from apps.reviews.segments import register_reviews_segments
+
+        register_reviews_segments()

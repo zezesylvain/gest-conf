@@ -58,5 +58,7 @@ export const ERROR_CODE: ErrorCode[] = [
   'payment_unavailable',
   'signing_unavailable',
   'signatory_missing',
-  'shift_overlap'
+  'shift_overlap',
+  'banner_overlap',
+  'unsubscribe_link_invalid'
 ];

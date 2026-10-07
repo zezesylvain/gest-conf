@@ -10,7 +10,12 @@ from typing import Any
 from django.db.models import Q
 from django.utils import timezone
 
-from apps.communications.models import OutboxEmail, OutboxStatus
+from apps.communications.models import (
+    AnnouncementDelivery,
+    AnnouncementOptOut,
+    OutboxEmail,
+    OutboxStatus,
+)
 from apps.core.personal_data import AnonymizationContext
 
 ANONYMIZED_SUBJECT = "[anonymisé]"
@@ -80,3 +85,35 @@ def purge_old_metadata(dry_run: bool, now: datetime) -> int:
         return old.count()
     deleted, _per_model = old.delete()
     return deleted
+
+
+def export_announcements(user: Any) -> dict[str, Any]:
+    """Annonces reçues (N11) et désabonnements ; les annonces rédigées sont celles de
+    l'édition, pas des données de leur auteur au-delà de la mention « créée par »."""
+    deliveries = (
+        AnnouncementDelivery.objects.filter(user=user)
+        .select_related("announcement__edition")
+        .order_by("delivered_at", "id")
+    )
+    opt_outs = AnnouncementOptOut.objects.filter(user=user).select_related("edition")
+    return {
+        "announcements_received": [
+            {
+                "edition": row.announcement.edition.code,
+                "title": row.announcement.title_fr,
+                "emailed": row.emailed,
+                "at": row.delivered_at.isoformat(),
+            }
+            for row in deliveries
+        ],
+        "announcement_opt_outs": [
+            {"edition": row.edition.code, "at": row.created_at.isoformat()}
+            for row in opt_outs.order_by("created_at", "id")
+        ],
+    }
+
+
+def anonymize_announcements(user: Any, context: AnonymizationContext) -> None:
+    """Les livraisons restent rattachées au compte anonymisé (comptes de l'envoi) ; le
+    désabonnement n'a plus d'objet."""
+    AnnouncementOptOut.objects.filter(user=user).delete()

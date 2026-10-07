@@ -334,6 +334,10 @@ REST_FRAMEWORK = {
         "signature_upload": "20/hour",
         # Vérification publique des attestations (K10), par adresse IP.
         "certificate_verify": "30/min",
+        # Annonces (plan L8, N10 et N11) : bandeau lu par le portail et lien de désabonnement,
+        # par adresse IP.
+        "portal_banner": "60/min",
+        "announcement_unsubscribe": "30/hour",
     },
     "NUM_PROXIES": GESTCONF_TRUSTED_PROXY_COUNT,
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
@@ -401,6 +405,8 @@ SPECTACULAR_SETTINGS = {
         "VisitStatus": "apps.logistics.models.VisitStatus",
         "Diet": "apps.logistics.models.Diet",
         "MealKind": "apps.logistics.models.MealKind",
+        "AnnouncementStatus": "apps.communications.models.AnnouncementStatus",
+        "SendingStatus": "apps.communications.models.SendingStatus",
         "InvitableRole": "apps.accounts.roles.InvitableRole",
         "OcFunction": "apps.accounts.roles.OcFunction",
         "UserRoleStatus": "apps.accounts.models.UserRoleStatus",

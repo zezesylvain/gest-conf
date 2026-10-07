@@ -250,6 +250,15 @@ ANONYMOUS_VIEWS = {
     "apps.payments.views.FakeCheckoutView": "page du fournisseur factice, hors production (L6)",
     "apps.events.views.PublicCertificateView": "vérification publique d'une attestation (L7, K10)",
     "apps.sponsors.views.PublicSponsorsView": "partenaires publiés, page du portail (L8, N5)",
+    "apps.communications.announcement_views.PublicBannerView": (
+        "bandeau de dernière minute, lu par le portail (L8, N10)"
+    ),
+    "apps.communications.announcement_views.PublicNewsView": (
+        "actualités publiées, page du portail (L8, N10)"
+    ),
+    "apps.communications.announcement_views.UnsubscribeView": (
+        "désabonnement des annonces par jeton signé, CSRF imposé (L8, N11)"
+    ),
 }
 
 # Seule vue de ``v1/manage/`` hors ``ManageViewSet`` : sélecteur d'édition.

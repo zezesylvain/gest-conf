@@ -17,5 +17,6 @@ export const NOTIFICATION_KIND: NotificationKind[] = [
   'final_version_received',
   'task_assigned',
   'shift_assigned',
-  'shift_removed'
+  'shift_removed',
+  'announcement'
 ];

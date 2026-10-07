@@ -110,6 +110,9 @@ class ErrorCode(models.TextChoices):
     SIGNATORY_MISSING = "signatory_missing"
     # Lot L8 : un bénévole ne peut tenir deux postes au même moment (N9).
     SHIFT_OVERLAP = "shift_overlap"
+    # Une seule annonce au bandeau à la fois (N10) ; lien de désabonnement altéré (N11).
+    BANNER_OVERLAP = "banner_overlap"
+    UNSUBSCRIBE_LINK_INVALID = "unsubscribe_link_invalid"
 
 
 class DomainError(Exception):

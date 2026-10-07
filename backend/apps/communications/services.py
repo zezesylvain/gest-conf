@@ -30,7 +30,7 @@ from contextvars import ContextVar
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from functools import partial
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from django.conf import settings
 from django.db import transaction
@@ -182,11 +182,17 @@ def queue_email(
     to_user: AbstractBaseUser | None = None,
     locale: str | None = None,
     idempotency_key: str | None = None,
+    edition: Any = None,
+    bulk: bool = False,
+    run_at: datetime | None = None,
 ) -> OutboxEmail:
     """Rend et met en file un e-mail ; à appeler dans la transaction du service métier.
 
     Langue : ``locale`` si fournie (par exemple ``RoleInvitation.locale``), sinon
     celle du compte destinataire, sinon celle de la requête en cours.
+
+    ``bulk`` (envoi groupé, plan L8 N11) : file ``BULK``, jamais de voie rapide, et la
+    moitié du plafond horaire seulement (``send_email``) ; ``run_at`` étale l'envoi.
     """
     template = email_template(template_code)
     if idempotency_key is not None:
@@ -195,26 +201,29 @@ def queue_email(
             return existing
     resolved_locale = resolve_locale(locale, to_user)
     subject, body_text, body_html = render_email(template_code, context or {}, resolved_locale)
-    now = timezone.now()
+    scheduled_at = run_at or timezone.now()
     email = OutboxEmail.objects.create(
         to_email=to_email,
         to_user=to_user,
+        edition=edition,
         template_code=template_code,
         locale=resolved_locale,
         subject=subject,
         body_text=body_text,
         body_html=body_html,
         is_sensitive=template.sensitive,
-        scheduled_at=now,
+        is_bulk=bulk,
+        scheduled_at=scheduled_at,
         idempotency_key=idempotency_key,
     )
     job = jobs.enqueue(
         SEND_EMAIL_JOB,
         {"outbox_id": email.pk},
-        priority=template.priority,
+        run_at=scheduled_at,
+        priority=JobPriority.BULK if bulk else template.priority,
         dedup_key=f"email:{email.pk}",
     )
-    if template.fast_path and _take_fast_path_slot():
+    if template.fast_path and not bulk and _take_fast_path_slot():
         # Après la validation de la transaction (immédiatement hors transaction) ;
         # en cas d'échec, le job reste en file et le cron prend le relais.
         transaction.on_commit(partial(jobs.try_run_now, job.pk))
@@ -224,14 +233,37 @@ def queue_email(
 # --- Plafond horaire, purges, reprise -----------------------------------------------------
 
 
-def hourly_limit_reached(now: datetime) -> datetime | None:
-    """Si le plafond horaire global est atteint, date à partir de laquelle réessayer."""
+def hourly_limit_reached(now: datetime, *, bulk: bool = False) -> datetime | None:
+    """Si le plafond horaire est atteint, date à partir de laquelle réessayer.
+
+    Le plafond global vaut pour tous les e-mails ; un envoi groupé (``bulk``) s'arrête en
+    outre à la moitié du plafond, comptée sur les seuls envois groupés de l'heure écoulée :
+    l'autre moitié reste aux e-mails de compte et de service (plan L8, N11).
+    """
     window_start = now - timedelta(hours=1)
-    recent = OutboxEmail.objects.filter(sent_at__gte=window_start)
-    if recent.count() < settings.GESTCONF_EMAIL_MAX_PER_HOUR:
-        return None
-    oldest = recent.order_by("sent_at").values_list("sent_at", flat=True).first()
-    return (oldest or now) + timedelta(hours=1)
+    limits = [
+        (
+            OutboxEmail.objects.filter(sent_at__gte=window_start),
+            settings.GESTCONF_EMAIL_MAX_PER_HOUR,
+        )
+    ]
+    if bulk:
+        limits.append(
+            (
+                OutboxEmail.objects.filter(sent_at__gte=window_start, is_bulk=True),
+                bulk_hourly_limit(),
+            )
+        )
+    for recent, limit in limits:
+        if recent.count() >= limit:
+            oldest = recent.order_by("sent_at").values_list("sent_at", flat=True).first()
+            return (oldest or now) + timedelta(hours=1)
+    return None
+
+
+def bulk_hourly_limit() -> int:
+    """Part du plafond horaire laissée aux envois groupés : la moitié (bilan de L8.0)."""
+    return max(1, settings.GESTCONF_EMAIL_MAX_PER_HOUR // 2)
 
 
 def purge_unsent_sensitive_bodies(dry_run: bool, now: datetime) -> int:

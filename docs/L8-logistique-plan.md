@@ -666,3 +666,105 @@ fiches de venue et ses déclarations ; registre à jour.
 - `ruff`, `locale/check.sh`, schéma validé sous MariaDB (énumérations `TravelMeans`,
   `VisitStatus`, `Diet`, `MealKind` nommées), client TypeScript régénéré, vérification des
   types des trois projets du front.
+
+## 16. Bilan de L8.5 (7 octobre 2026)
+
+**Annonces** (N10 ; `communications.Announcement`, `apps/communications/announcements.py`) :
+
+- titre et texte FR et EN, texte en HTML **assaini** par la liste blanche de L2 ; l'anglais
+  vide retombe sur le français ;
+- canaux cochés : actualités, bandeau, cloche, e-mail ; la cloche et l'e-mail exigent un
+  **segment**, les actualités et l'e-mail un texte ;
+- brouillon, publication, retrait ; seul un brouillon se supprime ; une fois publiée, la
+  cloche, l'e-mail et le segment ne changent plus (l'envoi est parti), le reste se corrige ;
+- journal `announcement.*` (création, modification, publication, envoi, essai, retrait,
+  annulation, désabonnement), textes libres masqués (`mask_emails`).
+
+**Bandeau de dernière minute** :
+
+- texte seul (titre, message de 280 caractères, lien vers l'actualité quand l'annonce en
+  est une), entre un début et une fin **saisis en heure locale de l'édition** (D13) ;
+- **une seule annonce au bandeau à la fois** : deux fenêtres qui se chevauchent sont
+  refusées à la publication (nouveau code `banner_overlap`, 409) ;
+- `GET /v1/public/portal/banner` (édition publique courante, bilan de L8.0) : réponse par
+  liste blanche, `{"banner": null}` sinon, cache de 60 s, limité à 60 lectures par minute et
+  par adresse IP ; visible **aussitôt**, sans publication du portail.
+
+**Actualités** : `GET /v1/public/news` (cache de 5 min), lu au build du portail ; une
+actualité publiée, modifiée ou retirée compte dans les **modifications non publiées** du
+portail (`announcement.*` portant `public: true`) ; une annonce sans actualité ne compte pas
+(test).
+
+**Envois groupés** (N11, **RG-22**) :
+
+- **segments** déclarés par les applications (`register_segment` dans leur `ready()`) :
+  auteurs (soumission envoyée, acceptés), présentateurs et présidents de séance (lus dans le
+  **programme publié**, jamais dans le brouillon), relecteurs (affectation active) et
+  relecteurs en retard (**réservé à `reviews.manage`**), inscrits (confirmés, en attente de
+  paiement), présents (pointage non annulé), intervenants invités, comité scientifique,
+  comité d'organisation, bénévoles ;
+- « acceptés » ne lit que des statuts posés à la **publication** des décisions (RG-09) ;
+- avant l'envoi : `…/segments` (catalogue autorisé et nombre de destinataires) ;
+  `…/announcements/{id}/preview` (e-mail rendu, destinataires, désabonnés, e-mails, durée
+  estimée) ; `…/announcements/{id}/test` (le message, marqué « Essai », à la seule personne
+  qui le demande) ;
+- **publication** : réauthentification récente exigée ; destinataires comptés ; journal
+  `announcement.sent` (segment, nombre : action de masse, RG-17) ; job
+  `communications.fan_out` ;
+- **mise en file par lots de 200** (bilan de L8.0) : une ligne `AnnouncementDelivery` par
+  destinataire (unique), une cloche, un e-mail de clé `announcement:<id>:<compte>` ; un lot
+  rejoué ne renotifie ni ne réenvoie (test) ; le lot suivant est remis en file tant qu'il
+  reste des destinataires ;
+- **un e-mail par personne**, jamais de copie, dans la langue du compte, avec la raison de
+  l'envoi (« au titre de … pour … ») et le lien de désabonnement ; les liens internes du
+  texte sont rendus absolus ; version texte par le convertisseur
+  (`apps/communications/text.py`) qui garde les liens, les puces, les numéros et les
+  citations ;
+- **plafond** : marque `is_bulk` sur l'e-mail (`OutboxEmail`, champ ajouté), file `BULK` ;
+  un e-mail groupé attend dès que les e-mails groupés de l'heure écoulée atteignent **la
+  moitié** de `GESTCONF_EMAIL_MAX_PER_HOUR` ; le plafond global reste appliqué à tous ;
+  les e-mails d'un envoi sont **étalés** dès leur création (un lot égal à la moitié du
+  plafond par heure), d'où la durée estimée ;
+- **annulation** de ce qui n'est pas encore parti (`…/cancel`, et au retrait de
+  l'annonce) : mise en file arrêtée, e-mails en file annulés, ceux partis restent comptés ;
+- avancement : destinataires, traités, e-mails mis en file, partis, en file, en échec,
+  annulés, heures restantes.
+
+**Précisions de N11** :
+
+- l'**objet** de l'e-mail est générique (« [site] Annonce de la conférence ») : la règle de
+  L1 (§8.3, testée) n'admet dans un objet que le nom du site, l'objet survivant à la purge
+  des corps ; le titre ouvre le corps du message ;
+- **toute** publication exige une réauthentification, et pas seulement celle qui envoie :
+  le bandeau s'affiche aussitôt, et la vérification ne dépend plus des canaux cochés ;
+- pas d'en-tête `List-Unsubscribe` : le registre d'envoi ne stocke pas d'en-têtes ; à
+  envisager si le volume dépasse les seuils des messageries (**non vérifié**).
+
+**Désabonnement** :
+
+- jeton **signé** (`django.core.signing`, sel propre) portant le compte et l'édition, sans
+  expiration ; lien `/desabonnement/<jeton>` du portail (page en L8.9) ;
+- `POST /v1/public/announcements/unsubscribe` : public, **CSRF imposé**, limité à 30
+  par heure et par adresse IP ; rejouer le lien est sans effet ; jeton altéré : 400
+  `unsubscribe_link_invalid` ;
+- dans le compte : `GET/PUT /v1/me/editions/{id}/announcements` (abonné ou non) ;
+- un désabonné reçoit encore la cloche de l'annonce, plus son e-mail ; les e-mails de
+  service restent envoyés.
+
+**Données personnelles** : export « annonces reçues » et « désabonnements » ;
+l'anonymisation efface les désabonnements, les livraisons restent rattachées au compte
+anonymisé ; registre à jour (`communications.announcements`).
+
+**Tests** :
+
+- `communications` : 17 tests d'annonces (assainissement et canaux, version texte, RG-22 :
+  un e-mail par personne dans sa langue avec raison et lien, désabonné sans e-mail, journal
+  de masse ; lots idempotents et étalement ; moitié du plafond ; annulation et retrait ;
+  segment réservé ; réauthentification, aperçu et essai ; bandeau minimal et unique ;
+  actualités et portail ; désabonnement ; segments déclarés ; auteurs ; inscrits ;
+  relecteurs en retard et présents ; programme publié ; export des données) ;
+- matrice des droits : 11 cas d'annonces et de segments (édition archivée et
+  réauthentification comprises) ; liste blanche des vues anonymes et CSRF des vues
+  publiques à jour ;
+- `ruff`, `locale/check.sh`, schéma validé sous MariaDB, client TypeScript régénéré,
+  vérification des types des trois projets du front.

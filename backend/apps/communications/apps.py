@@ -46,3 +46,20 @@ class CommunicationsConfig(AppConfig):
         )
         # E-mail de contrôle de la chaîne d'envoi (manage.py send_test_email, jalon J-tech).
         register_email_template("communications/email/test")
+        # Annonces envoyées à un segment (plan L8, N11) ; ni sensible ni voie rapide.
+        register_email_template("communications/email/announcement")
+        from apps.communications.personal_data import (
+            anonymize_announcements,
+            export_announcements,
+        )
+
+        register_personal_data(
+            "communications.announcements",
+            models=(
+                "communications.Announcement",
+                "communications.AnnouncementDelivery",
+                "communications.AnnouncementOptOut",
+            ),
+            export=export_announcements,
+            anonymize=anonymize_announcements,
+        )

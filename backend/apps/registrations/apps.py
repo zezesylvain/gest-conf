@@ -25,3 +25,7 @@ class RegistrationsConfig(AppConfig):
         register_integrity_check("registrations.reservations", integrity.check_reservations)
         # RG-11 (J10) : le planificateur reconnaît les présentateurs inscrits.
         register_registered_people(orders.registered_people)
+        # Segments des envois groupés (plan L8, N11), déclarés auprès de communications.
+        from apps.registrations.segments import register_registrations_segments
+
+        register_registrations_segments()
