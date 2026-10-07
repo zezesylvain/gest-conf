@@ -1,0 +1,31 @@
+<gc-page-header
+  [heading]="'gestion.activity.title' | translate"
+  [lead]="'gestion.activity.lead' | translate"
+/>
+<gc-error-summary [messages]="errors()" />
+
+@if (loading()) {
+  <p role="status">{{ 'gestion.activity.loading' | translate }}</p>
+} @else if (entries().length) {
+  <ol class="checklist">
+    @for (entry of entries(); track $index) {
+      <li class="card">
+        <p class="muted">
+          {{ date(entry.at) }} · {{ entry.actor || ('gestion.activity.system' | translate) }}
+        </p>
+        <p>
+          {{ action(entry) }}
+          @if (isTask(entry)) {
+            —
+            <a
+              [routerLink]="['/editions', editionId(), 'organisation', 'taches', entry.object_id]"
+              >{{ 'gestion.activity.openTask' | translate }}</a
+            >
+          }
+        </p>
+      </li>
+    }
+  </ol>
+} @else {
+  <p class="muted">{{ 'gestion.activity.empty' | translate }}</p>
+}

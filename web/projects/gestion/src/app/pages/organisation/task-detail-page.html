@@ -1,0 +1,161 @@
+<p>
+  <a [routerLink]="['/editions', editionId(), 'organisation', 'taches']">{{
+    'gestion.tasks.detail.back' | translate
+  }}</a>
+</p>
+<gc-page-header
+  [heading]="task()?.title || ('gestion.tasks.detail.title' | translate)"
+  [lead]="'gestion.tasks.detail.lead' | translate"
+/>
+<div aria-live="polite">
+  @if (status()) {
+    <p class="notice" role="status">{{ status() }}</p>
+  }
+</div>
+<gc-error-summary [messages]="errors()" />
+
+@if (loading()) {
+  <p role="status">{{ 'gestion.tasks.loading' | translate }}</p>
+} @else if (task(); as current) {
+  @if (current.archived_at) {
+    <p class="notice">
+      {{ 'gestion.tasks.detail.isArchived' | translate: { date: date(current.archived_at) } }}
+    </p>
+  }
+  <section class="card" aria-labelledby="task-fields-title">
+    <h2 id="task-fields-title">{{ 'gestion.tasks.detail.fields' | translate }}</h2>
+    <form [formGroup]="form" (ngSubmit)="save()" class="grid-2">
+      <mat-form-field>
+        <mat-label>{{ 'gestion.tasks.fields.title' | translate }}</mat-label>
+        <input matInput formControlName="title" required maxlength="200" />
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>{{ 'gestion.tasks.fields.status' | translate }}</mat-label>
+        <mat-select formControlName="status">
+          @for (item of statuses; track item) {
+            <mat-option [value]="item">{{ 'gestion.tasks.status.' + item | translate }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>{{ 'gestion.tasks.fields.assignee' | translate }}</mat-label>
+        <mat-select formControlName="assignee">
+          <mat-option [value]="null">{{ 'gestion.tasks.unassigned' | translate }}</mat-option>
+          @for (member of members(); track member.id) {
+            <mat-option [value]="member.id">{{ member.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>{{ 'gestion.tasks.fields.dueDate' | translate }}</mat-label>
+        <input matInput type="date" formControlName="due_date" />
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>{{ 'gestion.tasks.fields.priority' | translate }}</mat-label>
+        <mat-select formControlName="priority">
+          @for (priority of priorities; track priority) {
+            <mat-option [value]="priority">{{
+              'gestion.tasks.priority.' + priority | translate
+            }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>{{ 'gestion.tasks.fields.label' | translate }}</mat-label>
+        <input matInput formControlName="label" maxlength="50" />
+      </mat-form-field>
+      <mat-form-field class="wide">
+        <mat-label>{{ 'gestion.tasks.fields.description' | translate }}</mat-label>
+        <textarea matInput formControlName="description" rows="5" maxlength="5000"></textarea>
+      </mat-form-field>
+      @if (canWrite()) {
+        <div class="actions">
+          @if (!current.archived_at) {
+            <button mat-flat-button type="submit" [disabled]="busy()">
+              {{ 'gestion.tasks.detail.save' | translate }}
+            </button>
+            <button mat-stroked-button type="button" (click)="archive()" [disabled]="busy()">
+              {{ 'gestion.tasks.detail.archive.confirm' | translate }}
+            </button>
+          } @else {
+            <button mat-stroked-button type="button" (click)="restore()" [disabled]="busy()">
+              {{ 'gestion.tasks.detail.restore' | translate }}
+            </button>
+          }
+        </div>
+      }
+    </form>
+  </section>
+
+  <section class="card" aria-labelledby="task-attachments-title">
+    <h2 id="task-attachments-title">{{ 'gestion.tasks.detail.attachments' | translate }}</h2>
+    @if (current.attachments.length) {
+      <ul>
+        @for (attachment of current.attachments; track attachment.id) {
+          <li>
+            <button mat-button type="button" (click)="download(attachment)">
+              {{ attachment.name }}
+            </button>
+            <span class="muted">
+              {{ size(attachment.size) }} · {{ attachment.uploaded_by?.name }} ·
+              {{ date(attachment.created_at) }}
+            </span>
+            @if (canWrite() && !current.archived_at) {
+              <button
+                mat-button
+                type="button"
+                (click)="removeAttachment(attachment)"
+                [disabled]="busy()"
+                [attr.aria-label]="
+                  'gestion.tasks.detail.removeLabel' | translate: { name: attachment.name }
+                "
+              >
+                {{ 'gestion.tasks.detail.remove' | translate }}
+              </button>
+            }
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="muted">{{ 'gestion.tasks.detail.noAttachment' | translate }}</p>
+    }
+    @if (canWrite() && !current.archived_at) {
+      <p>
+        <label>
+          {{ 'gestion.tasks.detail.upload' | translate }}
+          <input type="file" [accept]="accept" (change)="upload($event)" [disabled]="busy()" />
+        </label>
+      </p>
+      <p class="muted">{{ 'gestion.tasks.detail.uploadHint' | translate }}</p>
+    }
+  </section>
+
+  <section class="card" aria-labelledby="task-comments-title">
+    <h2 id="task-comments-title">{{ 'gestion.tasks.detail.comments' | translate }}</h2>
+    @if (current.comments.length) {
+      <ol>
+        @for (comment of current.comments; track comment.id) {
+          <li>
+            <p class="muted">{{ comment.author?.name }} · {{ date(comment.created_at) }}</p>
+            <p>{{ comment.body }}</p>
+          </li>
+        }
+      </ol>
+    } @else {
+      <p class="muted">{{ 'gestion.tasks.detail.noComment' | translate }}</p>
+    }
+    @if (canWrite() && !current.archived_at) {
+      <form [formGroup]="commentForm" (ngSubmit)="addComment()">
+        <mat-form-field class="wide">
+          <mat-label>{{ 'gestion.tasks.detail.comment' | translate }}</mat-label>
+          <textarea matInput formControlName="body" rows="3" maxlength="2000" required></textarea>
+        </mat-form-field>
+        <div class="actions">
+          <button mat-stroked-button type="submit" [disabled]="busy()">
+            {{ 'gestion.tasks.detail.addComment' | translate }}
+          </button>
+        </div>
+      </form>
+    }
+  </section>
+}

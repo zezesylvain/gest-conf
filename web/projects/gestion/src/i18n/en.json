@@ -32,7 +32,8 @@
         "program": "Programme",
         "registrations": "Registration",
         "dayof": "Event day",
-        "documents": "Certificates and letters"
+        "documents": "Certificates and letters",
+        "organisation": "Organisation"
       },
       "keywords": {
         "dashboard": "home, status, publish, publication, archive, state, summary",
@@ -74,7 +75,10 @@
         "certificates": "certificates, issuance, revocation, attendance, presentation, reviewing",
         "certificateSettings": "template, header, signatory, signature, pades, certificate, preview, texts",
         "letters": "invitation letters, visa, passport, embassy, consulate, request",
-        "signature": "signature, signatory, name, position, image"
+        "signature": "signature, signatory, name, position, image",
+        "tasks": "kanban, board, to do, assignee, deadline, OC",
+        "budget": "expenses, income, planned, actual, receipt, balance",
+        "activity": "feed, history, latest actions, OC"
       },
       "portalSections": "Sections",
       "portalPages": "Pages",
@@ -105,7 +109,10 @@
       "certificates": "Certificates",
       "certificateSettings": "Certificate template",
       "letters": "Invitation letters",
-      "signature": "My signature"
+      "signature": "My signature",
+      "tasks": "Tasks",
+      "budget": "Budget",
+      "activity": "Activity"
     },
     "status": {
       "draft": "draft",
@@ -1211,6 +1218,46 @@
           "onlyText": "Nobody else, not even the administrator, can upload or replace your signature.",
           "frozenTitle": "Issued documents",
           "frozenText": "An issued document keeps the name, position and image of the time; a change only applies to the next ones."
+        },
+        "tasks": {
+          "title": "Tasks",
+          "summary": "The organising committee's task board.",
+          "path": "Organisation › Tasks",
+          "intro": "Each organising committee member creates, assigns and advances the edition's tasks: to do, in progress, done. The assignee is notified when a task is assigned to them.",
+          "createTitle": "Create",
+          "createBody": "Title, assignee, due date, priority and label; complete the description in the task's page.",
+          "moveTitle": "Advance",
+          "moveBody": "On each card, the “Move to” list changes the task's column.",
+          "detailTitle": "Follow up",
+          "detailBody": "The task page gathers comments and attachments (PDF, PNG or JPEG); archive a finished task.",
+          "keyboardTitle": "With the keyboard",
+          "keyboardText": "The board works without a mouse: the “Move to” list replaces drag and drop and the change is announced.",
+          "staleTitle": "Changed in the meantime",
+          "staleText": "If someone changed the task since you read it, your save is refused and the task reloaded: redo your change.",
+          "reminderTitle": "Daily reminder",
+          "reminderText": "Each morning, assignees receive by email the list of their overdue or soon-due tasks."
+        },
+        "budget": {
+          "title": "Budget",
+          "summary": "Planned and actual, by item.",
+          "path": "Organisation › Budget",
+          "intro": "The budget separates expenses and income; each line has an item from the catalogue, a planned amount and, once committed, an actual amount.",
+          "planned": "Planned: the line's estimated amount.",
+          "actual": "Actual: the committed amount, with its receipt (PDF, PNG or JPEG).",
+          "computed": "Computed lines: registrations collected and sponsorship received, kept up to date by the platform.",
+          "proof": "Receipts are private and only open to people who read the budget.",
+          "computedLinesTitle": "Computed lines",
+          "computedLinesText": "They cannot be deleted; only their label, planned amount and note can change.",
+          "exportTitle": "Export",
+          "exportText": "The CSV or XLSX export asks you to confirm your password; it is recorded in the audit log."
+        },
+        "activity": {
+          "title": "Activity feed",
+          "summary": "The organising committee's latest actions.",
+          "path": "Organisation › Activity",
+          "intro": "The feed shows the latest 50 organisation actions: tasks, volunteer shifts, meals, announcements, publications.",
+          "whitelistTitle": "What it leaves out",
+          "whitelistText": "No decision, author identity, amount or changed value: only the action, its date and who did it."
         }
       }
     },
@@ -2638,6 +2685,184 @@
         "replace": "Replace the image",
         "uploaded": "Image saved.",
         "missing": "Choose a PNG or JPEG file."
+      }
+    },
+    "tasks": {
+      "title": "Tasks",
+      "lead": "The organising committee's task board: to do, in progress, done.",
+      "mine": "My tasks only",
+      "archived": "Archived tasks",
+      "activityLink": "Activity feed",
+      "new": "New task",
+      "create": "Create the task",
+      "created": "Task “{{title}}” created.",
+      "moved": "Task “{{title}}” moved to “{{column}}”.",
+      "stale": "This task was changed in the meantime (another tab or member): it has been reloaded, redo your change.",
+      "loading": "Loading tasks…",
+      "unassigned": "Unassigned",
+      "fields": {
+        "title": "Title",
+        "assignee": "Assignee",
+        "dueDate": "Due date",
+        "priority": "Priority",
+        "label": "Label",
+        "status": "Column",
+        "description": "Description"
+      },
+      "errors": {
+        "title": "The title is required."
+      },
+      "status": {
+        "todo": "To do",
+        "doing": "In progress",
+        "done": "Done"
+      },
+      "priority": {
+        "low": "Low",
+        "normal": "Normal",
+        "high": "High"
+      },
+      "due": "Due: {{date}}",
+      "overdue": "overdue",
+      "counts": "{{comments}} comment(s), {{attachments}} attachment(s)",
+      "moveTo": "Move to",
+      "moveLabel": "Move the task “{{title}}” to another column",
+      "empty": "No task.",
+      "detail": {
+        "back": "Back to the board",
+        "title": "Task",
+        "lead": "The task's fields, attachments and comments.",
+        "isArchived": "Task archived on {{date}}: it can no longer be changed, restore it first.",
+        "fields": "Task description",
+        "save": "Save",
+        "saved": "Task saved.",
+        "archive": {
+          "title": "Archive the task?",
+          "message": "“{{title}}” will leave the board; it remains visible among archived tasks.",
+          "confirm": "Archive"
+        },
+        "archived": "Task archived.",
+        "restore": "Restore",
+        "restored": "Task restored.",
+        "attachments": "Attachments",
+        "remove": "Remove",
+        "removeLabel": "Remove the attachment {{name}}",
+        "noAttachment": "No attachment.",
+        "upload": "Attach a file",
+        "uploadHint": "PDF, PNG or JPEG, 10 MB at most, 20 files per task. Attach office documents as PDF.",
+        "comments": "Comments",
+        "noComment": "No comment.",
+        "comment": "Your comment",
+        "addComment": "Comment",
+        "commented": "Comment added.",
+        "tooLarge": "File too large: 10 MB at most.",
+        "uploaded": "File attached.",
+        "removeAttachment": {
+          "title": "Remove the attachment?",
+          "message": "The file “{{name}}” will be deleted.",
+          "confirm": "Remove"
+        },
+        "removed": "Attachment removed."
+      }
+    },
+    "budget": {
+      "title": "Budget",
+      "lead": "The edition's planned and actual budget, by item; registration and sponsorship income is computed.",
+      "loading": "Loading the budget…",
+      "totals": "Summary",
+      "expensePlanned": "Planned expenses",
+      "expenseActual": "Actual expenses",
+      "incomePlanned": "Planned income",
+      "incomeActual": "Actual income",
+      "balancePlanned": "Planned balance",
+      "balanceActual": "Actual balance",
+      "exportCsv": "Export (CSV)",
+      "exportXlsx": "Export (XLSX)",
+      "kind": {
+        "expense": "Expenses",
+        "income": "Income"
+      },
+      "fields": {
+        "category": "Item",
+        "label": "Label",
+        "planned": "Planned",
+        "actual": "Actual",
+        "kind": "Type",
+        "note": "Note"
+      },
+      "variance": "Variance",
+      "proof": "Receipt",
+      "actions": "Actions",
+      "category": {
+        "venue": "Venue",
+        "catering": "Catering",
+        "travel": "Travel",
+        "accommodation": "Accommodation",
+        "communication": "Communication",
+        "printing": "Printing",
+        "equipment": "Equipment",
+        "staff": "Staff",
+        "other_expense": "Other (expense)",
+        "registrations": "Registrations",
+        "sponsorship": "Sponsorship",
+        "grants": "Grants",
+        "other_income": "Other (income)"
+      },
+      "computed": "computed",
+      "removeProof": "Remove",
+      "removeProofLabel": "Remove the receipt of “{{label}}”",
+      "uploadProofLabel": "Upload a receipt for “{{label}}”",
+      "edit": "Edit",
+      "editLabel": "Edit the line “{{label}}”",
+      "deleteLabel": "Delete the line “{{label}}”",
+      "delete": {
+        "title": "Delete the line?",
+        "message": "The line “{{label}}” and its receipt will be deleted.",
+        "confirm": "Delete"
+      },
+      "empty": "No line.",
+      "newTitle": "New line",
+      "editTitle": "Edit the line",
+      "computedHint": "Computed line: its actual amount comes from registrations or sponsorship; only the label, the planned amount and the note can change.",
+      "actualHint": "Leave empty until something is committed.",
+      "save": "Save",
+      "add": "Add the line",
+      "cancel": "Cancel",
+      "created": "Line added.",
+      "updated": "Line saved.",
+      "deleted": "Line deleted.",
+      "proofUploaded": "Receipt uploaded.",
+      "proofRemoved": "Receipt removed."
+    },
+    "activity": {
+      "title": "Activity feed",
+      "lead": "The organising committee's latest actions on the edition.",
+      "loading": "Loading the feed…",
+      "system": "System",
+      "openTask": "open the task",
+      "empty": "No recent activity.",
+      "actions": {
+        "task_created": "Task created",
+        "task_updated": "Task changed",
+        "task_commented": "Task commented",
+        "task_archived": "Task archived",
+        "task_restored": "Task restored",
+        "task_attachment_added": "Attachment added to a task",
+        "task_attachment_removed": "Attachment removed from a task",
+        "shift_created": "Volunteer shift created",
+        "shift_updated": "Volunteer shift changed",
+        "shift_deleted": "Volunteer shift deleted",
+        "shift_assigned": "Volunteer assigned to a shift",
+        "shift_unassigned": "Volunteer removed from a shift",
+        "meal_created": "Meal created",
+        "meal_updated": "Meal changed",
+        "meal_deleted": "Meal deleted",
+        "announcement_published": "Announcement published",
+        "announcement_withdrawn": "Announcement withdrawn",
+        "survey_published": "Survey published",
+        "program_published": "Programme published",
+        "portal_published": "Portal published",
+        "edition_status_changed": "Edition status changed"
       }
     }
   }

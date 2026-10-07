@@ -102,3 +102,8 @@ td {
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+
+// Champ sur toute la largeur d'une grille (texte long : description, note).
+.wide {
+  grid-column: 1 / -1;
+}

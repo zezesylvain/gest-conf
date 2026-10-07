@@ -1,0 +1,232 @@
+<gc-page-header
+  [heading]="'gestion.budget.title' | translate"
+  [lead]="'gestion.budget.lead' | translate"
+/>
+<div aria-live="polite">
+  @if (status()) {
+    <p class="notice" role="status">{{ status() }}</p>
+  }
+</div>
+<gc-error-summary [messages]="errors()" />
+
+@if (loading()) {
+  <p role="status">{{ 'gestion.budget.loading' | translate }}</p>
+} @else if (budget(); as current) {
+  <section class="card" aria-labelledby="budget-totals-title">
+    <h2 id="budget-totals-title">{{ 'gestion.budget.totals' | translate }}</h2>
+    <dl class="figures">
+      <div>
+        <dt>{{ 'gestion.budget.expensePlanned' | translate }}</dt>
+        <dd>{{ amount(current.expense.planned) }}</dd>
+      </div>
+      <div>
+        <dt>{{ 'gestion.budget.expenseActual' | translate }}</dt>
+        <dd>{{ amount(current.expense.actual) }}</dd>
+      </div>
+      <div>
+        <dt>{{ 'gestion.budget.incomePlanned' | translate }}</dt>
+        <dd>{{ amount(current.income.planned) }}</dd>
+      </div>
+      <div>
+        <dt>{{ 'gestion.budget.incomeActual' | translate }}</dt>
+        <dd>{{ amount(current.income.actual) }}</dd>
+      </div>
+      <div>
+        <dt>{{ 'gestion.budget.balancePlanned' | translate }}</dt>
+        <dd [class.negative]="isNegative(current.balance_planned)">
+          {{ amount(current.balance_planned) }}
+        </dd>
+      </div>
+      <div>
+        <dt>{{ 'gestion.budget.balanceActual' | translate }}</dt>
+        <dd [class.negative]="isNegative(current.balance_actual)">
+          {{ amount(current.balance_actual) }}
+        </dd>
+      </div>
+    </dl>
+    <div class="actions">
+      <button mat-stroked-button type="button" (click)="export('csv')" [disabled]="busy()">
+        {{ 'gestion.budget.exportCsv' | translate }}
+      </button>
+      <button mat-stroked-button type="button" (click)="export('xlsx')" [disabled]="busy()">
+        {{ 'gestion.budget.exportXlsx' | translate }}
+      </button>
+    </div>
+  </section>
+
+  @for (group of linesByKind(); track group.kind) {
+    <section class="card" [attr.aria-labelledby]="'budget-' + group.kind">
+      <h2 [id]="'budget-' + group.kind">{{ 'gestion.budget.kind.' + group.kind | translate }}</h2>
+      @if (group.lines.length) {
+        <div class="table-wrap">
+          <table>
+            <caption class="visually-hidden">
+              {{
+                'gestion.budget.kind.' + group.kind | translate
+              }}
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">{{ 'gestion.budget.fields.category' | translate }}</th>
+                <th scope="col">{{ 'gestion.budget.fields.label' | translate }}</th>
+                <th scope="col" class="amount">
+                  {{ 'gestion.budget.fields.planned' | translate }}
+                </th>
+                <th scope="col" class="amount">{{ 'gestion.budget.fields.actual' | translate }}</th>
+                <th scope="col" class="amount">{{ 'gestion.budget.variance' | translate }}</th>
+                <th scope="col">{{ 'gestion.budget.proof' | translate }}</th>
+                @if (canWrite()) {
+                  <th scope="col">{{ 'gestion.budget.actions' | translate }}</th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (line of group.lines; track line.id) {
+                <tr>
+                  <td>{{ 'gestion.budget.category.' + line.category | translate }}</td>
+                  <td>
+                    {{ line.label }}
+                    @if (line.computed) {
+                      <span class="badge">{{ 'gestion.budget.computed' | translate }}</span>
+                    }
+                    @if (line.note) {
+                      <br /><span class="muted">{{ line.note }}</span>
+                    }
+                  </td>
+                  <td class="amount">{{ amount(line.planned) }}</td>
+                  <td class="amount">{{ amount(line.actual) }}</td>
+                  <td class="amount" [class.negative]="isNegative(line.variance)">
+                    {{ amount(line.variance) }}
+                  </td>
+                  <td>
+                    @if (line.proof) {
+                      <button mat-button type="button" (click)="downloadProof(line)">
+                        {{ line.proof.name }}
+                      </button>
+                      @if (canWrite()) {
+                        <button
+                          mat-button
+                          type="button"
+                          (click)="removeProof(line)"
+                          [disabled]="busy()"
+                          [attr.aria-label]="
+                            'gestion.budget.removeProofLabel' | translate: { label: line.label }
+                          "
+                        >
+                          {{ 'gestion.budget.removeProof' | translate }}
+                        </button>
+                      }
+                    } @else if (canWrite() && !line.computed) {
+                      <label>
+                        <span class="visually-hidden">{{
+                          'gestion.budget.uploadProofLabel' | translate: { label: line.label }
+                        }}</span>
+                        <input
+                          type="file"
+                          [accept]="accept"
+                          (change)="uploadProof(line, $event)"
+                          [disabled]="busy()"
+                        />
+                      </label>
+                    } @else {
+                      <span class="muted">—</span>
+                    }
+                  </td>
+                  @if (canWrite()) {
+                    <td>
+                      <button
+                        mat-button
+                        type="button"
+                        (click)="edit(line)"
+                        [attr.aria-label]="
+                          'gestion.budget.editLabel' | translate: { label: line.label }
+                        "
+                      >
+                        {{ 'gestion.budget.edit' | translate }}
+                      </button>
+                      @if (!line.computed) {
+                        <button
+                          mat-button
+                          type="button"
+                          (click)="remove(line)"
+                          [disabled]="busy()"
+                          [attr.aria-label]="
+                            'gestion.budget.deleteLabel' | translate: { label: line.label }
+                          "
+                        >
+                          {{ 'gestion.budget.delete.confirm' | translate }}
+                        </button>
+                      }
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <p class="muted">{{ 'gestion.budget.empty' | translate }}</p>
+      }
+    </section>
+  }
+
+  @if (canWrite()) {
+    <section class="card" aria-labelledby="budget-form-title">
+      <h2 id="budget-form-title">
+        {{ (editing() ? 'gestion.budget.editTitle' : 'gestion.budget.newTitle') | translate }}
+      </h2>
+      @if (editing()?.computed) {
+        <p class="notice">{{ 'gestion.budget.computedHint' | translate }}</p>
+      }
+      <form [formGroup]="form" (ngSubmit)="submit()" class="grid-2">
+        <mat-form-field>
+          <mat-label>{{ 'gestion.budget.fields.kind' | translate }}</mat-label>
+          <mat-select formControlName="kind">
+            @for (kind of kinds; track kind) {
+              <mat-option [value]="kind">{{
+                'gestion.budget.kind.' + kind | translate
+              }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>{{ 'gestion.budget.fields.category' | translate }}</mat-label>
+          <mat-select formControlName="category">
+            @for (category of categories(); track category) {
+              <mat-option [value]="category">{{
+                'gestion.budget.category.' + category | translate
+              }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>{{ 'gestion.budget.fields.label' | translate }}</mat-label>
+          <input matInput formControlName="label" required maxlength="200" />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>{{ 'gestion.budget.fields.planned' | translate }}</mat-label>
+          <input matInput formControlName="planned" inputmode="decimal" required />
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>{{ 'gestion.budget.fields.actual' | translate }}</mat-label>
+          <input matInput formControlName="actual" inputmode="decimal" />
+          <mat-hint>{{ 'gestion.budget.actualHint' | translate }}</mat-hint>
+        </mat-form-field>
+        <mat-form-field class="wide">
+          <mat-label>{{ 'gestion.budget.fields.note' | translate }}</mat-label>
+          <textarea matInput formControlName="note" rows="2" maxlength="2000"></textarea>
+        </mat-form-field>
+        <div class="actions">
+          <button mat-flat-button type="submit" [disabled]="busy()">
+            {{ (editing() ? 'gestion.budget.save' : 'gestion.budget.add') | translate }}
+          </button>
+          @if (editing()) {
+            <button mat-stroked-button type="button" (click)="cancelEdit()">
+              {{ 'gestion.budget.cancel' | translate }}
+            </button>
+          }
+        </div>
+      </form>
+    </section>
+  }
+}

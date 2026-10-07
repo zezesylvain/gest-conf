@@ -32,7 +32,8 @@
         "program": "Programme",
         "registrations": "Inscriptions",
         "dayof": "Jour J",
-        "documents": "Attestations et lettres"
+        "documents": "Attestations et lettres",
+        "organisation": "Organisation"
       },
       "keywords": {
         "dashboard": "accueil, statut, publier, publication, archiver, état, résumé",
@@ -74,7 +75,10 @@
         "certificates": "attestations, certificats, émission, révocation, participation, communication, évaluation",
         "certificateSettings": "modèle, gabarit, en-tête, signataire, signature, pades, certificat, aperçu, textes",
         "letters": "lettres d'invitation, visa, passeport, ambassade, consulat, demande",
-        "signature": "signature, signataire, nom, fonction, image"
+        "signature": "signature, signataire, nom, fonction, image",
+        "tasks": "kanban, tableau, à faire, responsable, date limite, CO",
+        "budget": "dépenses, recettes, prévisionnel, réalisé, justificatif, solde",
+        "activity": "fil, historique, dernières actions, CO"
       },
       "portalSections": "Sections",
       "portalPages": "Pages",
@@ -105,7 +109,10 @@
       "certificates": "Attestations",
       "certificateSettings": "Modèle des attestations",
       "letters": "Lettres d'invitation",
-      "signature": "Ma signature"
+      "signature": "Ma signature",
+      "tasks": "Tâches",
+      "budget": "Budget",
+      "activity": "Activité"
     },
     "status": {
       "draft": "brouillon",
@@ -1211,6 +1218,46 @@
           "onlyText": "Personne d'autre, ni l'administrateur, ne peut déposer ou remplacer votre signature.",
           "frozenTitle": "Pièces émises",
           "frozenText": "Une pièce émise garde le nom, la fonction et l'image du moment ; une modification ne vaut que pour les suivantes."
+        },
+        "tasks": {
+          "title": "Tâches",
+          "summary": "Le tableau des tâches du comité d'organisation.",
+          "path": "Organisation › Tâches",
+          "intro": "Chaque membre du CO crée, confie et fait avancer les tâches de l'édition : à faire, en cours, terminées. Le responsable reçoit une notification quand une tâche lui est confiée.",
+          "createTitle": "Créer",
+          "createBody": "Titre, responsable, échéance, priorité et étiquette ; la description se complète dans la fiche de la tâche.",
+          "moveTitle": "Faire avancer",
+          "moveBody": "Sur chaque carte, la liste « Déplacer vers » change la colonne de la tâche.",
+          "detailTitle": "Suivre",
+          "detailBody": "La fiche réunit les commentaires et les pièces jointes (PDF, PNG ou JPEG) ; une tâche finie s'archive.",
+          "keyboardTitle": "Au clavier",
+          "keyboardText": "Le tableau se manie sans souris : la liste « Déplacer vers » remplace le glisser-déposer et le changement est annoncé.",
+          "staleTitle": "Modifiée entre-temps",
+          "staleText": "Si quelqu'un a modifié la tâche depuis votre lecture, votre enregistrement est refusé et la tâche rechargée : refaites votre modification.",
+          "reminderTitle": "Rappel quotidien",
+          "reminderText": "Chaque matin, les responsables reçoivent par e-mail la liste de leurs tâches en retard ou à échéance proche."
+        },
+        "budget": {
+          "title": "Budget",
+          "summary": "Prévisionnel et réalisé, par poste.",
+          "path": "Organisation › Budget",
+          "intro": "Le budget distingue dépenses et recettes ; chaque ligne porte un poste du catalogue, un montant prévu et, une fois engagé, un réalisé.",
+          "planned": "Prévu : le montant estimé de la ligne.",
+          "actual": "Réalisé : le montant engagé, avec son justificatif (PDF, PNG ou JPEG).",
+          "computed": "Lignes calculées : inscriptions encaissées et partenariats reçus, tenus à jour par la plateforme.",
+          "proof": "Les justificatifs sont privés et ne s'ouvrent qu'aux personnes qui lisent le budget.",
+          "computedLinesTitle": "Lignes calculées",
+          "computedLinesText": "Elles ne se suppriment pas ; seuls leur libellé, leur prévu et leur note se modifient.",
+          "exportTitle": "Export",
+          "exportText": "L'export CSV ou XLSX demande de confirmer votre mot de passe ; il est inscrit au journal."
+        },
+        "activity": {
+          "title": "Fil d'activité",
+          "summary": "Les dernières actions du comité d'organisation.",
+          "path": "Organisation › Activité",
+          "intro": "Le fil montre les 50 dernières actions de l'organisation : tâches, postes de bénévolat, repas, annonces, publications.",
+          "whitelistTitle": "Ce qui n'y figure pas",
+          "whitelistText": "Ni décision, ni identité d'auteur, ni montant, ni valeur modifiée : seulement l'action, sa date et qui l'a faite."
         }
       }
     },
@@ -2638,6 +2685,184 @@
         "replace": "Remplacer l'image",
         "uploaded": "Image enregistrée.",
         "missing": "Choisissez un fichier PNG ou JPEG."
+      }
+    },
+    "tasks": {
+      "title": "Tâches",
+      "lead": "Le tableau des tâches du comité d'organisation : à faire, en cours, terminées.",
+      "mine": "Mes tâches seulement",
+      "archived": "Tâches archivées",
+      "activityLink": "Fil d'activité",
+      "new": "Nouvelle tâche",
+      "create": "Créer la tâche",
+      "created": "Tâche « {{title}} » créée.",
+      "moved": "Tâche « {{title}} » déplacée vers « {{column}} ».",
+      "stale": "Cette tâche a été modifiée entre-temps (autre onglet ou autre membre) : elle a été rechargée, refaites votre modification.",
+      "loading": "Chargement des tâches…",
+      "unassigned": "Sans responsable",
+      "fields": {
+        "title": "Titre",
+        "assignee": "Responsable",
+        "dueDate": "Échéance",
+        "priority": "Priorité",
+        "label": "Étiquette",
+        "status": "Colonne",
+        "description": "Description"
+      },
+      "errors": {
+        "title": "Le titre est obligatoire."
+      },
+      "status": {
+        "todo": "À faire",
+        "doing": "En cours",
+        "done": "Terminées"
+      },
+      "priority": {
+        "low": "Basse",
+        "normal": "Normale",
+        "high": "Haute"
+      },
+      "due": "Échéance : {{date}}",
+      "overdue": "en retard",
+      "counts": "{{comments}} commentaire(s), {{attachments}} pièce(s) jointe(s)",
+      "moveTo": "Déplacer vers",
+      "moveLabel": "Déplacer la tâche « {{title}} » vers une autre colonne",
+      "empty": "Aucune tâche.",
+      "detail": {
+        "back": "Retour au tableau",
+        "title": "Tâche",
+        "lead": "Champs, pièces jointes et commentaires de la tâche.",
+        "isArchived": "Tâche archivée le {{date}} : elle ne se modifie plus, restaurez-la d'abord.",
+        "fields": "Description de la tâche",
+        "save": "Enregistrer",
+        "saved": "Tâche enregistrée.",
+        "archive": {
+          "title": "Archiver la tâche ?",
+          "message": "« {{title}} » quittera le tableau ; elle reste consultable parmi les tâches archivées.",
+          "confirm": "Archiver"
+        },
+        "archived": "Tâche archivée.",
+        "restore": "Restaurer",
+        "restored": "Tâche restaurée.",
+        "attachments": "Pièces jointes",
+        "remove": "Retirer",
+        "removeLabel": "Retirer la pièce jointe {{name}}",
+        "noAttachment": "Aucune pièce jointe.",
+        "upload": "Joindre un fichier",
+        "uploadHint": "PDF, PNG ou JPEG, 10 Mo au plus, 20 fichiers par tâche. Un document de bureautique se joint en PDF.",
+        "comments": "Commentaires",
+        "noComment": "Aucun commentaire.",
+        "comment": "Votre commentaire",
+        "addComment": "Commenter",
+        "commented": "Commentaire ajouté.",
+        "tooLarge": "Fichier trop volumineux : 10 Mo au plus.",
+        "uploaded": "Fichier joint.",
+        "removeAttachment": {
+          "title": "Retirer la pièce jointe ?",
+          "message": "Le fichier « {{name}} » sera supprimé.",
+          "confirm": "Retirer"
+        },
+        "removed": "Pièce jointe retirée."
+      }
+    },
+    "budget": {
+      "title": "Budget",
+      "lead": "Budget prévisionnel et réalisé de l'édition, par poste ; recettes d'inscription et de partenariat calculées.",
+      "loading": "Chargement du budget…",
+      "totals": "Synthèse",
+      "expensePlanned": "Dépenses prévues",
+      "expenseActual": "Dépenses réalisées",
+      "incomePlanned": "Recettes prévues",
+      "incomeActual": "Recettes réalisées",
+      "balancePlanned": "Solde prévu",
+      "balanceActual": "Solde réalisé",
+      "exportCsv": "Exporter (CSV)",
+      "exportXlsx": "Exporter (XLSX)",
+      "kind": {
+        "expense": "Dépenses",
+        "income": "Recettes"
+      },
+      "fields": {
+        "category": "Poste",
+        "label": "Libellé",
+        "planned": "Prévu",
+        "actual": "Réalisé",
+        "kind": "Nature",
+        "note": "Note"
+      },
+      "variance": "Écart",
+      "proof": "Justificatif",
+      "actions": "Actions",
+      "category": {
+        "venue": "Lieu",
+        "catering": "Restauration",
+        "travel": "Voyages",
+        "accommodation": "Hébergement",
+        "communication": "Communication",
+        "printing": "Impression",
+        "equipment": "Matériel",
+        "staff": "Personnel",
+        "other_expense": "Divers (dépense)",
+        "registrations": "Inscriptions",
+        "sponsorship": "Partenariats",
+        "grants": "Subventions",
+        "other_income": "Divers (recette)"
+      },
+      "computed": "calculé",
+      "removeProof": "Retirer",
+      "removeProofLabel": "Retirer le justificatif de « {{label}} »",
+      "uploadProofLabel": "Déposer un justificatif pour « {{label}} »",
+      "edit": "Modifier",
+      "editLabel": "Modifier la ligne « {{label}} »",
+      "deleteLabel": "Supprimer la ligne « {{label}} »",
+      "delete": {
+        "title": "Supprimer la ligne ?",
+        "message": "La ligne « {{label}} » et son justificatif seront supprimés.",
+        "confirm": "Supprimer"
+      },
+      "empty": "Aucune ligne.",
+      "newTitle": "Nouvelle ligne",
+      "editTitle": "Modifier la ligne",
+      "computedHint": "Ligne calculée : son réalisé vient des inscriptions ou des partenariats ; seuls le libellé, le prévu et la note se modifient.",
+      "actualHint": "Laisser vide tant que rien n'est engagé.",
+      "save": "Enregistrer",
+      "add": "Ajouter la ligne",
+      "cancel": "Annuler",
+      "created": "Ligne ajoutée.",
+      "updated": "Ligne enregistrée.",
+      "deleted": "Ligne supprimée.",
+      "proofUploaded": "Justificatif déposé.",
+      "proofRemoved": "Justificatif retiré."
+    },
+    "activity": {
+      "title": "Fil d'activité",
+      "lead": "Les dernières actions du comité d'organisation sur l'édition.",
+      "loading": "Chargement du fil…",
+      "system": "Système",
+      "openTask": "ouvrir la tâche",
+      "empty": "Aucune activité récente.",
+      "actions": {
+        "task_created": "Tâche créée",
+        "task_updated": "Tâche modifiée",
+        "task_commented": "Tâche commentée",
+        "task_archived": "Tâche archivée",
+        "task_restored": "Tâche restaurée",
+        "task_attachment_added": "Pièce jointe ajoutée à une tâche",
+        "task_attachment_removed": "Pièce jointe retirée d'une tâche",
+        "shift_created": "Poste de bénévolat créé",
+        "shift_updated": "Poste de bénévolat modifié",
+        "shift_deleted": "Poste de bénévolat supprimé",
+        "shift_assigned": "Bénévole affecté à un poste",
+        "shift_unassigned": "Bénévole retiré d'un poste",
+        "meal_created": "Repas créé",
+        "meal_updated": "Repas modifié",
+        "meal_deleted": "Repas supprimé",
+        "announcement_published": "Annonce publiée",
+        "announcement_withdrawn": "Annonce retirée",
+        "survey_published": "Questionnaire publié",
+        "program_published": "Programme publié",
+        "portal_published": "Portail publié",
+        "edition_status_changed": "Statut de l'édition changé"
       }
     }
   }

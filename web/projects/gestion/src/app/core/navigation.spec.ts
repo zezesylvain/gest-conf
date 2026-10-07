@@ -42,6 +42,8 @@ const EVERYTHING = [
   'registrations.manage',
   'letters.manage',
   'signature.manage',
+  'tasks.read',
+  'budget.read',
 ];
 
 /** Catalogue « traduit » minimal : la clé tient lieu de libellé. */
@@ -248,6 +250,19 @@ describe('Table de navigation de la gestion (plan L2 §2.3)', () => {
     expect(helpForUrl('/editions/3/attestations/modele')).toBe('certificate-settings');
     expect(helpForUrl('/editions/3/lettres/12')).toBe('letters');
     expect(helpForUrl('/editions/3/jour-j/presences')).toBe('attendance');
+  });
+
+  it('organisation (plan L8, N16) : tâches et activité pour le CO, budget avec budget.read', () => {
+    const team = buildNavigation(3, ['edition.read', 'tasks.read', 'tasks.write']);
+    expect(team.find((group) => group.key === 'organisation')!.entries.map((e) => e.key)).toEqual([
+      'tasks',
+      'activity',
+    ]);
+    const finance = buildNavigation(3, ['edition.read', 'tasks.read', 'budget.read'], 'OC_MEMBER');
+    expect(finance.map((group) => group.key)).toContain('organisation');
+    expect(catalogue(finance).map((entry) => entry.url)).toContain(
+      '/editions/3/organisation/budget',
+    );
   });
 
   it('aucune capacité dans l’édition : rail vide (pas d’aide seule)', () => {

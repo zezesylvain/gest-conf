@@ -178,6 +178,33 @@ export const routes: Routes = [
         canActivate: [capabilityGuard('registrations.manage')],
         loadComponent: () => import('./pages/events/counter-page').then((m) => m.CounterPage),
       },
+      // Organisation du CO (plan L8, N3, N4, N14) : tâches, budget, fil d'activité.
+      {
+        path: 'organisation/taches',
+        title: 'gestion.tasks.title',
+        canActivate: [capabilityGuard('tasks.read')],
+        loadComponent: () => import('./pages/organisation/tasks-page').then((m) => m.TasksPage),
+      },
+      {
+        path: 'organisation/taches/:taskId',
+        title: 'gestion.tasks.detail.title',
+        canActivate: [capabilityGuard('tasks.read')],
+        loadComponent: () =>
+          import('./pages/organisation/task-detail-page').then((m) => m.TaskDetailPage),
+      },
+      {
+        path: 'organisation/budget',
+        title: 'gestion.budget.title',
+        canActivate: [capabilityGuard('budget.read')],
+        loadComponent: () => import('./pages/organisation/budget-page').then((m) => m.BudgetPage),
+      },
+      {
+        path: 'organisation/activite',
+        title: 'gestion.activity.title',
+        canActivate: [capabilityGuard('tasks.read')],
+        loadComponent: () =>
+          import('./pages/organisation/activity-page').then((m) => m.ActivityPage),
+      },
       // Attestations, lettres d'invitation et signature (plan L7, K9 à K12, K18, K19).
       {
         path: 'attestations',

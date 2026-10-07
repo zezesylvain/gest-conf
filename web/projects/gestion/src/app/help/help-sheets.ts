@@ -72,6 +72,9 @@ const DAY_MANAGERS: readonly Role[] = ['OC_MEMBER', 'ADMIN'];
 const DOCUMENT_MANAGERS: readonly Role[] = ['OC_MEMBER', 'ADMIN', 'CHAIR'];
 const LETTER_MANAGERS: readonly Role[] = ['OC_MEMBER', 'ADMIN'];
 const SIGNATORIES: readonly Role[] = ['SIGNATORY'];
+// Organisation (plan L8, N2) : tâches et activité pour tout le CO, l'administrateur et le
+// Chair ; budget pour le Chair, le CO « finances » et l'administrateur.
+const ORGANISERS: readonly Role[] = ['OC_MEMBER', 'ADMIN', 'CHAIR'];
 
 /** Constructeur : les clés d'une fiche sont toutes sous `gestion.help.sheets.<id>`. */
 function sheet(
@@ -372,6 +375,21 @@ export const HELP_SHEETS: readonly HelpSheet[] = [
     callout('info', k, 'only'),
     callout('warning', k, 'frozen'),
   ]),
+  // Organisation du CO (plan L8, N3, N4, N14).
+  sheet('tasks', ORGANISERS, (k) => [
+    text(k('intro')),
+    steps(k, 'create', 'move', 'detail'),
+    callout('info', k, 'keyboard'),
+    callout('warning', k, 'stale'),
+    callout('tip', k, 'reminder'),
+  ]),
+  sheet('budget', ORGANISERS, (k) => [
+    text(k('intro')),
+    list(k('planned'), k('actual'), k('computed'), k('proof')),
+    callout('info', k, 'computedLines'),
+    callout('warning', k, 'export'),
+  ]),
+  sheet('activity', ORGANISERS, (k) => [text(k('intro')), callout('info', k, 'whitelist')]),
   sheet('audit', SETTINGS_WRITERS, (k) => [
     text(k('intro')),
     list(k('action'), k('filters'), k('actor')),

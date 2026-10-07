@@ -11,6 +11,7 @@ import type { Capability, Role } from '@gestconf/shared';
 
 export type NavGroupKey =
   | 'steering'
+  | 'organisation'
   | 'submissions'
   | 'reviewing'
   | 'program'
@@ -71,6 +72,7 @@ export function screenAllowed(screen: ScreenDef, capabilities: readonly string[]
 
 export const GROUP_ORDER: readonly NavGroupKey[] = [
   'steering',
+  'organisation',
   'submissions',
   'reviewing',
   'program',
@@ -92,6 +94,32 @@ export const SCREENS: readonly ScreenDef[] = [
     help: 'dashboard',
     group: 'steering',
     capability: 'edition.read',
+  },
+  // Organisation du CO (plan L8, N3, N4, N14) : tâches et activité pour tout le CO, budget
+  // pour le Chair et le CO « finances ».
+  {
+    key: 'tasks',
+    path: 'organisation/taches',
+    label: 'gestion.nav.tasks',
+    help: 'tasks',
+    group: 'organisation',
+    capability: 'tasks.read',
+  },
+  {
+    key: 'budget',
+    path: 'organisation/budget',
+    label: 'gestion.nav.budget',
+    help: 'budget',
+    group: 'organisation',
+    capability: 'budget.read',
+  },
+  {
+    key: 'activity',
+    path: 'organisation/activite',
+    label: 'gestion.nav.activity',
+    help: 'activity',
+    group: 'organisation',
+    capability: 'tasks.read',
   },
   {
     key: 'submissions',
@@ -428,6 +456,7 @@ export const EXTRA_HELP_ROUTES: readonly { url: string; help: string }[] = [
 export const ROLE_GROUPS: Partial<Record<Role, readonly NavGroupKey[]>> = {
   ADMIN: [
     'steering',
+    'organisation',
     'submissions',
     'reviewing',
     'program',
@@ -441,6 +470,7 @@ export const ROLE_GROUPS: Partial<Record<Role, readonly NavGroupKey[]>> = {
   ],
   CHAIR: [
     'steering',
+    'organisation',
     'submissions',
     'reviewing',
     'program',
@@ -457,6 +487,7 @@ export const ROLE_GROUPS: Partial<Record<Role, readonly NavGroupKey[]>> = {
   // Comités : le CO « bénévoles » recrute les bénévoles (plan L7, K1).
   OC_MEMBER: [
     'steering',
+    'organisation',
     'submissions',
     'program',
     'registrations',
