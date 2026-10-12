@@ -66,7 +66,7 @@ le portail (`/compte/…`), et la page « Aide » du portail leur est destinée
   `DEMO`, un compte fictif par rôle en `@fictif.invalid`, aucun e-mail reçu) ; voir
   [`formation.md`](formation.md).
 - **Exploitation** (déploiement, cron, sauvegarde, mise en ligne du portail, commandes
-  `manage.py` de l'exploitant) : guide d'exploitation prévu par S11 et
+  `manage.py` de l'exploitant) : [`docs/exploitation.md`](../exploitation.md) et
   [`deploy/README.md`](../../deploy/README.md). Les guides par rôle n'en reprennent que ce
   qu'il faut pour savoir à qui s'adresser.
 

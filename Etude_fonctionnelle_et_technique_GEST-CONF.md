@@ -3,8 +3,8 @@
 
 | | |
 |---|---|
-| **Version** | 1.8 – document de cadrage, mis à jour après les lots L1 (§17), L2 (§18), L3 (§19), L4 (§20), L5 (§21), L6 (§22), L7 (§23) et L8 (§24) |
-| **Date** | 7 octobre 2026 |
+| **Version** | 1.9 – document de cadrage, mis à jour après les lots L1 (§17), L2 (§18), L3 (§19), L4 (§20), L5 (§21), L6 (§22), L7 (§23), L8 (§24) et L9 (§25, volet du dépôt) |
+| **Date** | 12 octobre 2026 |
 | **Auteur** | Étude réalisée pour ZDS |
 | **Statut** | Pour validation |
 | **Stack imposée** | Django (sans admin) · Angular · MariaDB · o2switch (mono-domaine) |
@@ -1842,6 +1842,75 @@ Les décisions N1 à N19 du plan [`docs/L8-logistique-plan.md`](docs/L8-logistiq
 - **À vérifier sur o2switch** : plafond d'e-mails réel et délai d'un envoi groupé ; bandeau et pages pré-rendues en production ; ouverture des XLSX par Excel et LibreOffice.
 - **À trancher** (plan L8, §10, hypothèses en vigueur) : ordre des lots L8 et L9 ; niveaux et montants des partenaires ; régimes pour tous ou pour les intervenants seuls ; réservations des voyages ; questionnaire anonyme et par session ; fournisseur d'e-mails de production et volume horaire (D10) ; postes du budget ; indicateurs prioritaires. Toujours ouverts : Q7, Q8, Q14, Q17 ; `ACCEPTED_MINOR → WITHDRAWN` ; seuil d'avertissement du bundle initial du portail (369,8 kB pour 365 kB ; gestion : 389,3 kB).
 - **Reporté** : espace partenaire en libre-service et factures des partenaires (Q8) ; réservation de voyages et d'hôtels ; indisponibilités des intervenants dans le planificateur ; suivi des repas servis ; inventaire du matériel ; SMS et WhatsApp (P3) ; « Mon programme » du participant (J15).
+
+
+## 25. Mises à jour issues du lot L9 (version 1.9)
+
+Les décisions S1 à S16 du plan [`docs/L9-recette-plan.md`](docs/L9-recette-plan.md) ont été validées le 12 octobre 2026 (« terminer tout ce qui reste ») ; les questions du §10 du plan sont restées sans réponse : ses propositions s'appliquent comme **hypothèses révisables** (plan, §2.1). Le lot a deux volets (S1) : **le dépôt** (L9.0 à L9.7, livré : outils, tests, documents) et **l'hébergement** (L9.8 : runbook exécuté sur o2switch par un opérateur du commanditaire, **pas encore fait** ; cette session n'a pas accès à l'hébergement). Cette section reporte le volet du dépôt dans l'étude ; **en cas de divergence avec les sections précédentes (§17 à §24 compris), elle prévaut**. Le détail est dans le plan, §2.1 et §11 à §18 ; le bilan du lot dans [`docs/L9-recette.md`](docs/L9-recette.md).
+
+### 25.1 Hypothèses retenues (plan, §10 sans réponse)
+
+- **Reprise** (§11.6) : perte maximale de 24 heures, rétablissement sous 4 heures ; copie hors hébergement **tirée** par l'opérateur (`pull-backups.sh`), sans clé de stockage sur le serveur ; pas de chiffrement propre à la copie (disque chiffré conseillé).
+- **Recette et charge sur la production avant toute donnée réelle** (pas de sous-domaine de recette supposé), puis retour à une base propre par restauration ; **200 utilisateurs simultanés**, o2switch prévenu avant le test et l'analyse ZAP.
+- **Sécurité** : revue interne (OWASP Top 10, ASVS niveau 2, ZAP passif), sans test d'intrusion tiers ; erreurs par **e-mail minimal** aux opérateurs (D17), pas de Sentry ; pas d'anti-robots (limites de débit existantes) ; absence d'antivirus acceptée si o2switch n'en fournit pas.
+- **Formation** par guides écrits et ateliers ; **déploiement** par `deploy.sh` lancé à la main ; **pages légales** : trame proposée, texte définitif au commanditaire ; seuil d'avertissement du bundle initial du portail porté à **375 ko**.
+
+### 25.2 Sauvegarde, copie et restauration (S2, S3)
+
+- **`backup_db`** (cron quotidien à 2 h 07, verrouillé, battement de cœur, alerte en cas d'échec) : `mariadb-dump --single-transaction` compressé en flux, identifiants dans un fichier d'options temporaire en 0600 (**jamais sur la ligne de commande**), écrit sous un nom temporaire puis renommé, en 0600 dans `GESTCONF_BACKUP_DIR` (défaut `var/backups`, 0700, hors racine web) ; **manifeste** JSON (empreinte SHA-256 du dump, migrations appliquées, inventaire des fichiers déposés) ; rotation 7 quotidiennes, 4 hebdomadaires, 3 mensuelles ; sessions sauvegardées vides, tables du cache exclues.
+- **`deploy.sh` sauvegarde avant `migrate`** et s'arrête si la sauvegarde échoue ; `var/` (fichiers et sauvegardes) est exclu de la synchronisation du déploiement (défaut trouvé : il les aurait effacés).
+- **`deploy/pull-backups.sh`** (poste de l'opérateur) : dumps et manifestes copiés sans jamais rien supprimer, fichiers déposés en **instantanés datés** liés (`--link-dest`), empreinte et inventaire vérifiés ; installation neuve tolérée.
+- **`restore_db`** et **`deploy/restore.sh`** : restauration dans une base **vide** (refus sinon) et des dossiers vides, empreinte vérifiée, fichiers comparés au manifeste, tables du cache recréées, migrations en attente signalées, puis `check_integrity` ; **échec** sur toute anomalie de données (les contrôles de l'environnement, âge de la sauvegarde et disque, n'en font pas échouer la restauration). Mesuré au volume de l'étude (MariaDB locale) : sauvegarde en 2 s, restauration complète en 6 s.
+
+### 25.3 Supervision et tests de fumée (S4)
+
+- `/v1/health` gagne **`backup`** (`ok`, `late` au-delà de `GESTCONF_BACKUP_MAX_AGE_HOURS`, `unknown`), sans autre détail ; `check_integrity` alerte sur une sauvegarde absente ou en retard et sur un espace disque sous `GESTCONF_DISK_FREE_MIN_MB`.
+- Tests de fumée : en-têtes de sécurité (`nosniff`, `X-Frame-Options`, `Referrer-Policy`, HSTS), redirection HTTP vers HTTPS (par **cPanel**, seule voie retenue), état de la sauvegarde. **Écart** de S7 : pas de `default-src` dans l'en-tête CSP, qui bloquerait les scripts autorisés par empreintes dans la balise `<meta>` ; l'en-tête énumère chaque autre directive (test).
+- Surveillance externe de la disponibilité (`/` et `/api/v1/health`) : à configurer par l'opérateur (runbook).
+
+### 25.4 Données fictives, volume et performances (S6, S10)
+
+- **`seed_volume`** : conférence fictive (`gestconf-fictif`), éditions `FICTIFEVAL` (600 soumissions en évaluation, 100 relecteurs, 1 200 affectations, 800 évaluations) et `FICTIFAPPEL` (300 brouillons, 1 500 inscrits dont 1 000 payés, pièces émises) ; **`seed_demo`** : édition `DEMO`, publiée et courante, un compte fictif par rôle et par fonction du CO (20 comptes), 2FA prête. Tout passe par les services métier (statuts écrits par les workflows) ; comptes en `@fictif.invalid` (domaine réservé) : **aucun e-mail ne part** vers eux.
+- **Garde-fous** : `--confirm-fictitious` exigé ; refus dès que la base contient un compte, une soumission ou une inscription réels ; journalisés. **Écart** de S6 : **pas de `purge_volume`** (elle supprimerait des pièces numérotées en ajout seul, RG-14) : on restaure la sauvegarde prise juste avant.
+- **Nombre de requêtes** : constant sur les listes chaudes (tests). **N+1 corrigés** : classement (trois requêtes par soumission ; au volume, 436 ms → 102 ms), export des évaluations, tableau du planificateur ; rapport de relecture restreint aux colonnes utiles (170 → 79 ms).
+
+### 25.5 Test de charge (S5)
+
+- **Locust** 2.46.7 (environnement séparé, verrouillé à empreintes, jamais sur l'hébergement) ; scénarios visiteurs, auteurs, relecteurs, participants, nouveaux inscrits, comité ; **verdict** à la fin (p95 < 500 ms et moins de 1 % d'erreurs, hors requêtes qui émettent un PDF, rapportées à part).
+- **Sessions pré-établies** (`loadtest_sessions`) pour les comptes fictifs, 2FA validée et jeton CSRF compris : le test ne se connecte jamais (limites de débit de la connexion par adresse IP) ; fichier en 0600, révocable.
+- Essai local : scénarios sans erreur à 200 utilisateurs ; la mesure de référence est celle de l'hébergement (L9.8). **Correctif** : le **bandeau** passe de 60 à **600 lectures par minute et par adresse** (le Wi-Fi du lieu de la conférence sort par une seule adresse). La CI joue un essai court des scénarios.
+
+### 25.6 Sécurité (S7)
+
+- Revue écrite [`docs/L9-revue-securite.md`](docs/L9-revue-securite.md) : OWASP Top 10 et ASVS niveau 2, preuve par contrôle ; 18 constats, aucun critique ni élevé : 9 corrigés, 7 acceptés par écrit, 2 à vérifier sur l'hébergement.
+- **Correctifs** : corps de requête borné (**413** avant lecture au-delà de `GESTCONF_MAX_REQUEST_MB`, 55 Mio) ; `Cache-Control: no-store` par défaut sur l'API ; attestations et lettres servies seulement si leur **empreinte** est intacte (comme les factures) ; l'effacement du numéro de passeport (K14) et l'anonymisation suppriment aussi le **PDF de la lettre** qui le porte ; rotation des clés de signature (`rotate_signing_keys`) et de `DJANGO_SECRET_KEY` (`DJANGO_SECRET_KEY_FALLBACKS`) ; procédure de rotation de chaque secret.
+- **Acceptés** : actions de la CI par version majeure, pas de Dependabot (proposé au commanditaire), jeton du QR en clair (par conception, K2), numéro de passeport en clair (masqué, effacé), HSTS sans sous-domaines, `style-src 'unsafe-inline'`, pas d'antivirus.
+- ZAP : essai local passif (une alerte faible, propre au serveur de développement) ; analyse **passive seulement** de l'hébergement par l'opérateur (`deploy/zap/baseline.yaml`).
+
+### 25.7 Accessibilité et couverture (S8, S9)
+
+- **axe-core** dans le parcours de bout en bout : 25 points d'audit, échec sur toute violation grave ou critique (WCAG 2.0 et 2.1, A et AA). Trois constats corrigés : contraste du **bandeau** (texte blanc sur orange), ARIA du **questionnaire** (groupes radio), **tableaux défilants** de la gestion atteignables au clavier et nommés (directive partagée). La revue manuelle (clavier, lecteur d'écran) reste à faire pendant la recette.
+- **Couverture** : 80 % au moins **par module** en CI pour `reviews`, `submissions`, `program`, `registrations`, `payments` (mesurée de 93 à 96 %).
+
+### 25.8 Recette, formation et documentation (S10 à S14)
+
+- **Cahier de recette** [`docs/L9-cahier-de-recette.md`](docs/L9-cahier-de-recette.md) : démos A à I en 107 scénarios (préalable, étapes, résultat attendu, règle vérifiée, OK/KO) ; une anomalie = une ligne ; une anomalie bloquante suspend l'ouverture.
+- **Guides** (`docs/guides/`) par public, texte proposé de la page « Aide » du portail (FR, EN), déroulé des ateliers ; **guide d'exploitation** [`docs/exploitation.md`](docs/exploitation.md) ; **runbook** [`docs/L9-runbook-o2switch.md`](docs/L9-runbook-o2switch.md) en douze étapes ; **check-list de mise en production** [`docs/L9-mise-en-production.md`](docs/L9-mise-en-production.md) (A5) ; **trame des pages légales** [`docs/pages-legales-trame.md`](docs/pages-legales-trame.md).
+- **Ordre du runbook** (précision de S12) : vérifications, déploiement, cron surveillé 48 heures, sauvegarde et **restauration chronométrée**, borne de taille des envois, **test de charge puis retour à la sauvegarde**, ZAP, **recette** sur l'édition de démonstration, **retour à une base propre**, surveillance externe, check-list ; chaque phase repart de la sauvegarde prise juste avant ; aucune donnée réelle avant une restauration testée (D18). L'**ouverture de l'appel** reste la décision du commanditaire.
+
+### 25.9 Exploitation
+
+- **Cron** : une ligne nouvelle, **`backup_db`** (quotidienne, 2 h 07).
+- **Variables d'environnement** nouvelles : `GESTCONF_BACKUP_DIR`, `GESTCONF_BACKUP_KEEP_DAILY`, `…_WEEKLY`, `…_MONTHLY`, `GESTCONF_BACKUP_MAX_AGE_HOURS`, `GESTCONF_STORAGE_MONITORING`, `GESTCONF_DISK_FREE_MIN_MB`, `GESTCONF_MAX_REQUEST_MB`, `DJANGO_SECRET_KEY_FALLBACKS`.
+- **Commandes** nouvelles : `backup_db`, `restore_db`, `rotate_signing_keys`, `seed_volume`, `seed_demo`, `loadtest_sessions` ; scripts `deploy/pull-backups.sh`, `deploy/restore.sh`. L'hébergement doit fournir `mariadb-dump` (ou `mysqldump`) et le client `mariadb` (V18, non vérifié).
+- **Application** `qa` (données fictives) ; aucun modèle nouveau, aucune migration.
+
+### 25.10 Tests, planning et points ouverts
+
+- 6 750 tests backend environ (requêtes, garde-fous, sauvegarde et restauration réelles sous MariaDB, sessions de charge, constats de sécurité) ; tests front ; **parcours de bout en bout** (19 étapes) avec les audits d'accessibilité ; essai des scénarios de charge en CI.
+- **Reste à faire sur o2switch** (L9.8, opérateur) : tout le runbook, dont la restauration chronométrée, le test de charge et la recette ; les démos A à I n'y ont toujours pas été jouées.
+- **À trancher** (plan, §10, hypothèses en vigueur) et **questions nées du lot** : catégories tarifaires réservées (une catégorie à 0 est choisissable par tous) ; désabonnement des annonces appliqué ou non aux invitations des questionnaires (RG-22) ; ouverture de l'écran « Sessions du jour » à la présidence désignée dans le programme ; Dependabot. Toujours ouverts : Q7, Q8, Q14, Q17 ; `ACCEPTED_MINOR → WITHDRAWN`.
+- **Sans écran aujourd'hui** (écarts constatés avec l'étude) : page « Contact », « Mon programme » du participant (J15), indisponibilités des intervenants, connexion ORCID (P2), accès des co-auteurs à la soumission.
 
 ---
 

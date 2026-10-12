@@ -693,3 +693,25 @@ deux éditions existent, et non si la conférence existe).
 recette par le commanditaire.
 
 **Critère de fin** (« Documents remis, `seed_demo` testé ») : atteint.
+
+## 19. Bilan de L9.9 (12 octobre 2026) et état de L9.8
+
+**Clôture du volet du dépôt** : bilan [`docs/L9-recette.md`](L9-recette.md) ; étude, §25
+« Mises à jour issues du lot L9 » (Markdown et HTML, version 1.9) ; `CLAUDE.md` (état
+d'avancement, décisions du lot, structure, commandes, sauvegarde).
+
+**Défaut trouvé à la vérification finale** : le message de la borne de taille des requêtes
+(« Requête trop volumineuse. », L9.5) manquait au catalogue anglais, ce que le contrôle des
+traductions de la CI aurait refusé ; traduit (« Request too large. ») et recompilé. Le schéma
+OpenAPI, régénéré sous MariaDB, est inchangé (aucune API nouvelle dans le lot, hors
+`Health.backup` en L9.2).
+
+**Vérification finale** : suite backend complète **6 743 tests verts** (11 ignorés : MariaDB
+seule) ; `ruff`, `shellcheck`, traductions et migrations à jour ; tests unitaires du front verts
+(shared 83, gestion 263, portail 173), lint et formatage verts, build vert (portail 369,8 ko) ;
+parcours de bout en bout **19 sur 19**, avec ses 25 audits d'accessibilité.
+
+**L9.8 (sur l'hébergement)** : **non commencé**. Il attend la désignation d'un opérateur par le
+commanditaire (question 1) et suit [`docs/L9-runbook-o2switch.md`](L9-runbook-o2switch.md) ; ses
+résultats (fiche o2switch, durées, verdict du test de charge, analyse ZAP, recette) viendront
+compléter ce plan et le bilan du lot.
