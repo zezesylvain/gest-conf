@@ -58,6 +58,14 @@ mkdir -p "$partial"
 pull_tree() {
   local remote="$1" name="$2"
   local link=()
+  # Installation neuve : aucun fichier encore déposé, le dossier distant n'existe pas. On
+  # garde un dossier vide dans l'instantané (restore.sh attend files/), sans échouer.
+  # shellcheck disable=SC2029  # chemin distant développé côté poste, à dessein
+  if ! ssh "${PULL_SSH}" "test -d '$remote'"; then
+    printf 'Dossier distant absent (%s) : instantané vide pour %s.\n' "$remote" "$name"
+    mkdir -p "$partial/$name"
+    return
+  fi
   if [[ -d "$PULL_DEST/files/latest/$name" ]]; then
     link=(--link-dest="$(cd "$PULL_DEST/files/latest/$name" && pwd -P)")
   fi

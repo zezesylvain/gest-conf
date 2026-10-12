@@ -27,3 +27,6 @@ deploy/backups/
 # Éditeurs et systèmes
 .idea/
 .DS_Store
+
+# Résultats locaux du test de charge (loadtest/README.md : à écrire hors du dépôt).
+loadtest/resultats/

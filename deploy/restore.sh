@@ -44,7 +44,19 @@ if [[ -n "$files" ]]; then
   arguments+=(--files-from "$files")
 fi
 python manage.py restore_db "${arguments[@]}"
-python manage.py check_integrity
+# check_integrity rend 0 même avec des anomalies (il alerte les opérateurs) : la restauration
+# échoue ici si une ligne en compte au moins une (constat du runbook, L9.7). Sauf les
+# contrôles de l'environnement : juste après une restauration, la sauvegarde est forcément
+# « absente ou en retard » (son battement n'est pas dans le dump) et le disque est celui du
+# poste où l'on restaure.
+integrity_log="$(mktemp)"
+trap 'rm -f "$integrity_log"' EXIT
+python manage.py check_integrity | tee "$integrity_log"
 elapsed=$(($(date +%s) - started))
 printf '\nRestauration terminée en %d min %02d s (objectif : moins de 4 h).\n' \
   $((elapsed / 60)) $((elapsed % 60))
+if grep -E -- '-> [1-9][0-9]* anomalie' "$integrity_log" |
+  grep -Evq 'core\.(backup_age|disk_space) '; then
+  printf "Anomalies d'intégrité après restauration : voir les lignes ci-dessus.\n" >&2
+  exit 1
+fi

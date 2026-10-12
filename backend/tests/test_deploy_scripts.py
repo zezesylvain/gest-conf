@@ -286,6 +286,8 @@ def test_pull_backups_keeps_dated_snapshots_and_verifies_the_copy():
     assert 'ln -sfn "$stamp" "$PULL_DEST/files/latest"' in code
     assert "hashlib.sha256()" in code and 'manifest["database"]["sha256"]' in code
     assert "umask 077" in code
+    # Installation neuve : dossier distant des fichiers absent, instantané vide (L9.7).
+    assert "test -d '$remote'" in code and 'mkdir -p "$partial/$name"' in code
     assert PULL_SCRIPT.stat().st_mode & 0o111
 
 
@@ -293,6 +295,8 @@ def test_restore_script_restores_then_checks_integrity():
     code = shell_code(RESTORE_SCRIPT)
     assert code.index("manage.py restore_db") < code.index("manage.py check_integrity")
     assert "--files-from" in code
+    # check_integrity rend 0 avec des anomalies : le script les cherche dans la sortie (L9.7).
+    assert "'-> [1-9][0-9]* anomalie'" in code
     assert RESTORE_SCRIPT.stat().st_mode & 0o111
 
 

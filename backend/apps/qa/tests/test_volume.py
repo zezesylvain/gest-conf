@@ -85,5 +85,5 @@ def test_s6_seed_volume_runs_once_and_is_audited():
     from apps.conferences.models import Conference
 
     assert Conference.objects.filter(slug=FICTITIOUS_CONFERENCE).exists()
-    with pytest.raises(CommandError, match="existe déjà"):
+    with pytest.raises(CommandError, match="existent déjà"):
         seed()

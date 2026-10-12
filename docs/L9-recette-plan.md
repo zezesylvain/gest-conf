@@ -615,3 +615,81 @@ de `pyproject.toml`, qui mêlerait la logique critique au reste.
 verts, E2E 19 sur 19 avec les audits.
 
 **Critère de fin** (« Aucune violation grave ; seuil de couverture en CI ») : atteint.
+
+## 18. Bilan de L9.7 (12 octobre 2026)
+
+**Édition de démonstration** (S10, commande `seed_demo`) : édition `DEMO` de la conférence
+fictive, publiée et courante (le portail la sert), appel ouvert 30 jours, évaluation et
+version finale datées, inscriptions ouvertes (virement et sur place ; en ligne si un
+fournisseur est configuré), deux thématiques, un type de communication, grille, catégorie
+« Chercheur » et ses tarifs, mentions de facturation, deux salles ; **20 comptes fictifs**
+(`<nom>@fictif.invalid`) : administrateur, présidence, présidence du CS, trois relecteurs, un
+CO par fonction (sept), bénévole, signataire, intervenant, deux auteurs, deux participants ;
+mot de passe et secret TOTP communs tirés au hasard, affichés une seule fois ; 2FA prête pour
+chaque rôle qui l'exige. Mêmes garde-fous que `seed_volume`, journalisée (`qa.demo_seeded`).
+Tests : un compte par rôle et par fonction, 2FA exactement pour les rôles qui l'exigent,
+écrans atteints, refus (confirmation, données réelles, édition existante), coexistence avec
+les données de volume (conférence fictive partagée ; `seed_volume` refuse désormais si ses
+deux éditions existent, et non si la conférence existe).
+
+**Documentation** (S10, S11, S12, S13, S14) :
+
+- `docs/L9-cahier-de-recette.md` : démos A à I en **107 scénarios** numérotés (préalable,
+  étapes, résultat attendu, règle vérifiée, case OK/KO), boîtes aux lettres réelles des
+  testeurs là où un e-mail se lit, tableau des anomalies ;
+- `docs/guides/` : présidence et administration, comité scientifique, relecteur, comité
+  d'organisation (une section par fonction), bénévole et accueil ; **texte proposé de la page
+  « Aide » du portail** (FR et EN, HTML de la liste blanche du CMS) ; déroulé des ateliers de
+  formation sur l'édition de démonstration ;
+- `docs/exploitation.md` : guide d'exploitation (architecture, déploiement, publication du
+  portail, cron, sauvegardes, supervision, incidents, secrets, 35 commandes d'exploitation,
+  demandes sur les données personnelles) ;
+- `docs/L9-runbook-o2switch.md` : douze étapes pour l'opérateur, chacune avec ses commandes,
+  son critère de passage et sa conduite en cas d'échec ;
+- `docs/L9-mise-en-production.md` : check-list A5, preuve et responsable par ligne ;
+  l'ouverture de l'appel reste la décision du commanditaire ;
+- `docs/pages-legales-trame.md` : trame des mentions légales, de la politique de
+  confidentialité et de la page cookies, fondée sur ce que la plateforme traite réellement.
+
+**Défauts trouvés en rédigeant, corrigés** :
+
+- `deploy/pull-backups.sh` échouait sur une installation neuve (dossier distant des fichiers
+  absent) : instantané vide, sans échec ;
+- `deploy/restore.sh` réussissait malgré des anomalies (`check_integrity` rend 0) : il échoue
+  désormais si un contrôle de données en compte une ; les contrôles de l'environnement (âge de
+  la sauvegarde, disque) n'en font pas échouer la restauration (vérifié au volume : la
+  sauvegarde est forcément « absente » juste après) ;
+- fiche d'aide et écran « Comptoir » : « tarif sur place » corrigé en « tarif de la période en
+  cours (sur place après la clôture des inscriptions) », ce que fait le code (J2) ;
+- résultats du test de charge et rapports ZAP écrits hors du dépôt (`deploy.sh` refuse un
+  arbre non suivi) ; `loadtest/resultats/` ignoré ;
+- `backend/.env.example` : variables de L9 (sauvegardes, supervision, taille des requêtes).
+
+**Précisions du plan** :
+
+- **S10** : le cahier de recette est `docs/L9-cahier-de-recette.md` ; `docs/L9-recette.md`
+  reste le bilan du lot (convention des lots) ;
+- **S12, ordre du runbook** : le **test de charge précède la recette**, car `seed_volume`
+  refuse une base qui contient un compte réel, et les testeurs de la recette en créent ;
+  chaque phase repart de la sauvegarde prise juste avant ;
+- **S6, §4** : pas de `purge_volume` (bilan de L9.3) ;
+- premier déploiement sur une base vide : la publication du portail échoue tant qu'aucune
+  édition n'est courante ; le runbook déploie d'abord sans elle (`SKIP_PORTAL=1`).
+
+**Questions nées de la rédaction, pour le commanditaire** (non tranchées) :
+
+1. une catégorie tarifaire à 0 est choisissable par tout participant (pas de restriction par
+   rôle) : faut-il des catégories réservées (invités, comité) ?
+2. les invitations aux questionnaires partent en envoi groupé sans tenir compte du
+   désabonnement aux annonces : RG-22 doit-elle s'y appliquer ?
+3. l'écran « Sessions du jour » exige le rôle de président de séance, alors que le serveur
+   accepte la présidence désignée dans le programme : faut-il ouvrir l'écran à cette
+   désignation ?
+4. écarts entre l'étude et les écrans (sans écran aujourd'hui) : page « Contact », « Mon
+   programme » des participants, indisponibilités des intervenants, connexion ORCID (P2),
+   accès des co-auteurs à la soumission.
+
+**Restent pour l'hébergement** (L9.8) : captures d'écran des guides, exécution du runbook,
+recette par le commanditaire.
+
+**Critère de fin** (« Documents remis, `seed_demo` testé ») : atteint.

@@ -37,9 +37,11 @@ from apps.accounts.services.roles import grant_role
 from apps.conferences import services as conferences
 from apps.conferences.models import Conference, Edition, KeyDate
 from apps.core.actor import Actor, ActorKind
-from apps.qa.fictitious import FICTITIOUS_CONFERENCE, fictitious_email
+from apps.qa.demo import fictitious_conference
+from apps.qa.fictitious import fictitious_email
 
 ZONE = "Africa/Abidjan"
+VOLUME_EDITIONS = ("FICTIFEVAL", "FICTIFAPPEL")
 COUNTRIES = ("CI", "SN", "BF", "ML", "CM", "FR", "BE", "CA")
 INSTITUTIONS = (
     "Université fictive A",
@@ -209,14 +211,10 @@ def seed_volume(
     report = VolumeReport(password=secrets.token_urlsafe(18), totp_secret=_base32_secret())
     password_hash = make_password(report.password)
     with transaction.atomic():
-        conference = conferences.create_conference(
-            slug=FICTITIOUS_CONFERENCE,
-            name_fr="Conférence fictive (recette et charge)",
-            name_en="Fictitious conference (acceptance and load)",
-            actor=actor,
-        )
-        evaluation = _edition(conference, "FICTIFEVAL", "Édition en évaluation", actor)
-        call = _edition(conference, "FICTIFAPPEL", "Édition en appel", actor)
+        conference = fictitious_conference(actor)
+        evaluation_code, call_code = VOLUME_EDITIONS
+        evaluation = _edition(conference, evaluation_code, "Édition en évaluation", actor)
+        call = _edition(conference, call_code, "Édition en appel", actor)
         report.editions = {"evaluation": evaluation.pk, "call": call.pk}
         now = _local_now()
         _key_dates(

@@ -49,10 +49,11 @@ Montée progressive puis palier de 10 minutes à 200 utilisateurs :
 
 ```bash
 cd loadtest
+mkdir -p ~/gestconf-charge   # résultats hors du dépôt (deploy.sh refuse un arbre non suivi)
 GESTCONF_SESSIONS=~/gestconf-sessions.json ~/gestconf-loadtest/bin/locust \
   --headless --host https://conference.exemple.org \
   --users 200 --spawn-rate 2 --run-time 12m \
-  --csv resultats/charge --html resultats/charge.html
+  --csv ~/gestconf-charge/charge --html ~/gestconf-charge/charge.html
 ```
 
 Variables facultatives :
@@ -74,14 +75,15 @@ IP du poste, comme les participants derrière le Wi-Fi du lieu : le bandeau est 
 - Dernière ligne : `Verdict : OBJECTIF ATTEINT` ou `OBJECTIF NON ATTEINT`, avec le p95 et le
   taux d'erreurs **hors requêtes marquées « (PDF) »** (commande d'inscription, qui émet la pro
   forma), rapportées à part comme l'étude §12 le prévoit.
-- `resultats/charge_stats.csv` : une ligne par requête nommée (colonne `95%`) ; une requête
+- `~/gestconf-charge/charge_stats.csv` : une ligne par requête nommée (colonne `95%`) ; une requête
   lente se lit ici, pas dans la moyenne globale.
-- `resultats/charge.html` : courbes du débit, des temps et des utilisateurs.
+- `~/gestconf-charge/charge.html` : courbes du débit, des temps et des utilisateurs.
 - Coller dans le bilan du lot : la ligne du verdict, le tableau des requêtes les plus lentes,
   le nombre d'utilisateurs atteint et les erreurs (`charge_failures.csv`).
 
 Le coût du hachage du mot de passe à la connexion (R14) se mesure **à part** : quelques
-connexions réelles chronométrées depuis le navigateur (étape 3 du runbook).
+connexions réelles chronométrées depuis le navigateur (étape 7.6 de
+`docs/L9-runbook-o2switch.md`).
 
 ## 5. Après le test (sur l'hébergement)
 

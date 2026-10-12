@@ -12,11 +12,11 @@ from typing import Any
 
 from django.core.management.base import BaseCommand, CommandError, CommandParser
 
-from apps.conferences.models import Conference
+from apps.conferences.models import Edition
 from apps.core.audit import record
 from apps.core.management.base import command_actor
 from apps.qa.fictitious import CONFIRM_OPTION, FICTITIOUS_CONFERENCE, ensure_fictitious_only
-from apps.qa.volume import seed_volume
+from apps.qa.volume import VOLUME_EDITIONS, seed_volume
 
 
 class Command(BaseCommand):
@@ -31,8 +31,10 @@ class Command(BaseCommand):
 
     def handle(self, *args: Any, **options: Any) -> None:
         ensure_fictitious_only(confirmed=options["confirmed"])
-        if Conference.objects.filter(slug=FICTITIOUS_CONFERENCE).exists():
-            raise CommandError("La conférence fictive existe déjà : restaurer la sauvegarde.")
+        if Edition.objects.filter(
+            conference__slug=FICTITIOUS_CONFERENCE, code__in=VOLUME_EDITIONS
+        ).exists():
+            raise CommandError("Les données de volume existent déjà : restaurer la sauvegarde.")
         started = time.monotonic()
         report = seed_volume(
             submissions=options["submissions"],

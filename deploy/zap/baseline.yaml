@@ -5,7 +5,7 @@
 # et analyse des réponses ; aucune attaque, aucune écriture. Ne PAS y ajouter de job
 # « activeScan » ni « openapi » (ce dernier enverrait des POST, PUT et DELETE).
 #
-#   GESTCONF_ZAP_TARGET=https://conference.exemple.org GESTCONF_ZAP_REPORTS="$PWD/zap" \
+#   GESTCONF_ZAP_TARGET=https://conference.exemple.org GESTCONF_ZAP_REPORTS="$HOME/gestconf-zap" \
 #     zap.sh -cmd -autorun deploy/zap/baseline.yaml     # paquet multiplateforme (Java 17+)
 #
 # Variante : docker run --rm -v "$PWD:/zap/wrk" -t zaproxy/zap-stable \
