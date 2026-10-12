@@ -115,6 +115,9 @@
       "usePassword": "Use my password instead",
       "submit": "Confirm",
       "cancel": "Cancel"
+    },
+    "table": {
+      "scrollRegion": "Table: scroll horizontally with the arrow keys"
     }
   }
 }

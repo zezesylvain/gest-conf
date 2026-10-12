@@ -6,6 +6,7 @@ import {
   LanguageService,
   PageHeader,
   ReviewerAssignment,
+  ScrollRegion,
 } from '@gestconf/shared';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -18,7 +19,7 @@ import { ReviewsApi } from '../../core/reviews-api';
  */
 @Component({
   selector: 'gestion-my-reviews-page',
-  imports: [RouterLink, TranslatePipe, PageHeader, ErrorSummary],
+  imports: [ScrollRegion, RouterLink, TranslatePipe, PageHeader, ErrorSummary],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: '../page.scss',
   template: `

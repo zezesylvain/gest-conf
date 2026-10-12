@@ -20,6 +20,7 @@ import {
   PageHeader,
   PortalFileKind,
   PublicFile,
+  ScrollRegion,
 } from '@gestconf/shared';
 import { TranslatePipe } from '@ngx-translate/core';
 
@@ -42,6 +43,7 @@ const ACCEPT: Record<PortalFileKind, string> = {
 @Component({
   selector: 'gestion-portal-files-page',
   imports: [
+    ScrollRegion,
     ReactiveFormsModule,
     TranslatePipe,
     MatButtonModule,

@@ -19,6 +19,7 @@ import {
   PageHeader,
   ReviewProgress,
   ReviewSubmission,
+  ScrollRegion,
   SubmissionStatus,
 } from '@gestconf/shared';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -49,6 +50,7 @@ export const FOLLOW_UP_STATUSES: readonly SubmissionStatus[] = [
 @Component({
   selector: 'gestion-follow-up-page',
   imports: [
+    ScrollRegion,
     ReactiveFormsModule,
     RouterLink,
     TranslatePipe,

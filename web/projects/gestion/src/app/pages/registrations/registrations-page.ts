@@ -27,6 +27,7 @@ import {
   Option,
   OrderMethod,
   PageHeader,
+  ScrollRegion,
 } from '@gestconf/shared';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -59,6 +60,7 @@ const PAGE_SIZE = 25;
 @Component({
   selector: 'gestion-registrations-page',
   imports: [
+    ScrollRegion,
     ReactiveFormsModule,
     RouterLink,
     TranslatePipe,

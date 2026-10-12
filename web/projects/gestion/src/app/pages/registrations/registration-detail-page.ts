@@ -28,6 +28,7 @@ import {
   ManualPaymentMethod,
   MeStore,
   PageHeader,
+  ScrollRegion,
 } from '@gestconf/shared';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
@@ -54,6 +55,7 @@ const AMOUNT = /^\d{1,10}(\.\d{1,2})?$/;
 @Component({
   selector: 'gestion-registration-detail-page',
   imports: [
+    ScrollRegion,
     ReactiveFormsModule,
     RouterLink,
     TranslatePipe,

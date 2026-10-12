@@ -10,6 +10,7 @@ import {
   ErrorSummary,
   LanguageService,
   PageHeader,
+  ScrollRegion,
   Session,
   Survey,
   SurveyScope,
@@ -29,6 +30,7 @@ import { SURVEY_SCOPES } from './communication-support';
 @Component({
   selector: 'gestion-surveys-page',
   imports: [
+    ScrollRegion,
     ReactiveFormsModule,
     RouterLink,
     TranslatePipe,

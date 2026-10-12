@@ -24,6 +24,7 @@ import {
   MenuLocation,
   Page,
   PageHeader,
+  ScrollRegion,
 } from '@gestconf/shared';
 import { TranslatePipe } from '@ngx-translate/core';
 
@@ -42,6 +43,7 @@ export const MENU_LOCATIONS: readonly MenuLocation[] = ['header', 'footer'];
 @Component({
   selector: 'gestion-portal-menus-page',
   imports: [
+    ScrollRegion,
     ReactiveFormsModule,
     TranslatePipe,
     MatButtonModule,

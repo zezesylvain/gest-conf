@@ -22,6 +22,7 @@ import {
   LanguageService,
   MeStore,
   PageHeader,
+  ScrollRegion,
 } from '@gestconf/shared';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -43,6 +44,7 @@ const KINDS: readonly BudgetKind[] = ['expense', 'income'];
 @Component({
   selector: 'gestion-budget-page',
   imports: [
+    ScrollRegion,
     ReactiveFormsModule,
     TranslatePipe,
     MatButtonModule,

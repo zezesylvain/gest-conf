@@ -1,6 +1,12 @@
 import { ChangeDetectionStrategy, Component, inject, input, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { ErrorSummary, LanguageService, ManageVisit, PageHeader } from '@gestconf/shared';
+import {
+  ErrorSummary,
+  LanguageService,
+  ManageVisit,
+  PageHeader,
+  ScrollRegion,
+} from '@gestconf/shared';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { LogisticsApi } from '../../core/logistics-api';
@@ -14,7 +20,7 @@ import { localLabel } from './logistics-support';
  */
 @Component({
   selector: 'gestion-speakers-page',
-  imports: [RouterLink, TranslatePipe, ErrorSummary, PageHeader],
+  imports: [ScrollRegion, RouterLink, TranslatePipe, ErrorSummary, PageHeader],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './speakers-page.html',
   styleUrl: '../page.scss',

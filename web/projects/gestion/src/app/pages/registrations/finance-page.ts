@@ -15,6 +15,7 @@ import {
   LanguageService,
   MeStore,
   PageHeader,
+  ScrollRegion,
 } from '@gestconf/shared';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -31,7 +32,7 @@ import { label } from './registrations-support';
  */
 @Component({
   selector: 'gestion-finance-page',
-  imports: [RouterLink, TranslatePipe, MatButtonModule, ErrorSummary, PageHeader],
+  imports: [ScrollRegion, RouterLink, TranslatePipe, MatButtonModule, ErrorSummary, PageHeader],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './finance-page.html',
   styleUrl: '../page.scss',

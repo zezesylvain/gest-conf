@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 
 import { Browser, BrowserContextOptions, chromium, expect, Page, test } from '@playwright/test';
 
+import { expectAccessible } from '../axe';
 import { command, literal, python } from '../django';
 import { freshTotpCode } from '../totp';
 
@@ -125,6 +126,7 @@ async function review(page: Page, recommendation: string, comment: string): Prom
   await page.getByRole('link', { name: new RegExp(reference) }).click();
   const scores = page.locator('input[id^="score-"]');
   await expect(scores.first()).toBeVisible();
+  await expectAccessible(page, 'gestion : évaluation');
   // RG-04 : ni nom, ni adresse, ni institution des auteurs.
   for (const identity of ['Koné', 'Traoré', EMAIL, 'Houphouët']) {
     await expect(page.locator('main')).not.toContainText(identity);
@@ -149,6 +151,8 @@ test('parcours auteur : de l’inscription à la recevabilité', async ({ page }
 
   // Inscription ; le lien de vérification part en console : sa clé est recalculée.
   await page.goto('/compte/inscription');
+  await expect(page.getByLabel('Adresse e-mail')).toBeVisible();
+  await expectAccessible(page, 'portail : création de compte');
   await page.getByLabel('Adresse e-mail').fill(EMAIL);
   await page.getByLabel('Mot de passe', { exact: true }).fill(PASSWORD);
   await page.getByLabel('Confirmer le mot de passe').fill(PASSWORD);
@@ -162,6 +166,7 @@ test('parcours auteur : de l’inscription à la recevabilité', async ({ page }
   await page.goto('about:blank');
   await page.goto(`/compte/verifier-email#${key}`);
   await expect(page.getByText('Votre adresse est vérifiée.')).toBeVisible();
+  await expectAccessible(page, 'portail : adresse vérifiée');
 
   // Connexion, profil complet (prérequis de la soumission).
   await page.goto('/compte/connexion');
@@ -177,6 +182,7 @@ test('parcours auteur : de l’inscription à la recevabilité', async ({ page }
   await page.getByRole('option', { name: /^Côte d.Ivoire$/ }).click(); // apostrophe d'Intl
   await page.getByRole('button', { name: 'Enregistrer' }).click();
   await expect(page.getByRole('status').filter({ hasText: 'Enregistré' })).toBeVisible();
+  await expectAccessible(page, 'portail : profil');
 
   // Brouillon : informations en sauvegarde automatique.
   await page.goto('/compte/soumissions');
@@ -194,6 +200,7 @@ test('parcours auteur : de l’inscription à la recevabilité', async ({ page }
   await page.getByRole('option', { name: 'Français' }).click();
   await saved;
   await expect(page.getByText(/Enregistré à/)).toBeVisible();
+  await expectAccessible(page, 'portail : brouillon de soumission');
 
   // Co-auteur.
   await page.getByRole('button', { name: '2. Auteurs' }).click();
@@ -228,6 +235,7 @@ test('parcours auteur : de l’inscription à la recevabilité', async ({ page }
   // Soumission : référence et accusé de réception.
   await page.getByRole('button', { name: '5. Récapitulatif' }).click();
   await expect(page.getByText('Votre soumission est complète')).toBeVisible();
+  await expectAccessible(page, 'portail : récapitulatif de la soumission');
   await page.getByRole('button', { name: 'Soumettre' }).click();
   await expect(page.getByRole('heading', { name: `Soumission ${reference}` })).toBeVisible();
   const emails = python(
@@ -275,6 +283,7 @@ test('comité : affectation, recevabilité, évaluations (RG-04, RG-07), décisi
   await chair.goto(`${GESTION}/editions/${seed.edition}/pilotage`);
   await chair.getByRole('link', { name: reference }).first().click();
   await expect(chair.getByRole('heading', { name: 'Relecteurs disponibles' })).toBeVisible();
+  await expectAccessible(chair, 'gestion : affectations');
   for (const name of ['Aminata Diallo', 'Serge Ekra']) {
     const row = chair.locator('tr', { hasText: name });
     await row.getByRole('button', { name: 'Affecter…' }).click();
@@ -310,6 +319,7 @@ test('comité : affectation, recevabilité, évaluations (RG-04, RG-07), décisi
   await chair.getByRole('button', { name: /Publier les résultats/ }).click();
   await chair.getByRole('dialog').getByRole('button', { name: 'Publier' }).click();
   await expect(chair.getByText('1 décision(s) publiée(s).')).toBeVisible();
+  await expectAccessible(chair, 'gestion : classement');
   expect(submissionStatus()).toBe('accepted_minor');
   expect(outbox(EMAIL)).toContain('submission/email/decision');
 });
@@ -325,6 +335,7 @@ test('auteur : décision sous pseudonymes (RG-10), puis version finale (H18)', a
   const row = page.locator('tbody tr', { hasText: reference });
   await expect(row).toContainText('Acceptée sous réserve de corrections');
   await expect(row).toContainText('version finale avant le');
+  await expectAccessible(page, 'portail : mes soumissions');
   await row.getByRole('link').click();
 
   // Décision, message du comité, commentaires sous pseudonymes ; rien de confidentiel.
@@ -461,6 +472,7 @@ test('auteure : « Mon passage », fichier iCal (I8) et programme public (I7)', 
   // Programme public (rendu dans le navigateur en E2E ; pré-rendu au build en production).
   await page.goto('/fr/programme/');
   await expect(page.getByRole('link', { name: 'Santé et IA' })).toBeVisible();
+  await expectAccessible(page, 'portail : programme public');
   await page.getByRole('link', { name: 'Santé et IA' }).click();
   await expect(page.locator('h1')).toHaveText('Santé et IA');
   await expect(page.locator('main')).toContainText('Awa Koné');
@@ -487,6 +499,7 @@ test('inscriptions, côté comité : RG-11 exigée, mentions de facturation', as
   await expect(planner.getByText('Modifications enregistrées.')).toBeVisible();
   await planner.goto(`${base}/programme`);
   await expect(planner.locator('#conflicts')).toContainText('aucun présentateur inscrit');
+  await expectAccessible(planner, 'gestion : planificateur');
   await expect(planner.locator('li.slot', { hasText: reference })).toContainText(
     'Présentateur non inscrit',
   );
@@ -494,6 +507,7 @@ test('inscriptions, côté comité : RG-11 exigée, mentions de facturation', as
   // Mentions de facturation (Q8) : sans elles, aucune facture ne s'émet.
   await finance.goto(`${base}/parametrage/facturation`);
   await expect(finance.locator('main')).toContainText('aucune facture ne s');
+  await expectAccessible(finance, 'gestion : mentions de facturation');
   await finance.getByLabel('Raison sociale').fill('Association Colloque E2E');
   await finance.getByLabel('Adresse', { exact: true }).fill('BP 1234, Abidjan, Côte d’Ivoire');
   await finance.getByLabel('Mention sans TVA').fill('TVA non applicable');
@@ -516,6 +530,7 @@ test('auteure : inscription, paiement en ligne factice (RG-15), facture et QR', 
   await page.goto('/fr/inscription/');
   await expect(page.locator('tbody tr', { hasText: 'Chercheur' })).toContainText(/40\s000/);
   await expect(page.locator('main')).toContainText('Dîner de gala');
+  await expectAccessible(page, 'portail : page Inscription');
   await page.getByRole('link', { name: "S'inscrire" }).click();
   await expect(page).toHaveURL(/\/compte\/mon-inscription$/);
 
@@ -565,6 +580,7 @@ test('CO « finances » : virement reçu, annulation, remboursement et avoir (J7
   // Saisie pour un compte existant (J1) : Sénégal, tarif international préférentiel.
   await finance.goto(`${base}/inscriptions`);
   await expect(finance.locator('tbody')).toContainText('Awa Koné');
+  await expectAccessible(finance, 'gestion : inscriptions');
   await finance.getByRole('button', { name: 'Saisir une inscription' }).click();
   const order = finance.locator('form', { hasText: 'Enregistrer la commande' });
   await order.getByLabel('Adresse e-mail du compte').fill(seed.participant);
@@ -600,6 +616,7 @@ test('CO « finances » : virement reçu, annulation, remboursement et avoir (J7
   // Pièces et tableau de bord financier.
   await finance.goto(`${base}/inscriptions/factures`);
   await expect(finance.locator('tbody')).toContainText(/sur la facture F-E2E27-\d{4}-00002/);
+  await expectAccessible(finance, 'gestion : pièces');
   await finance.goto(`${base}/inscriptions/finances`);
   await expect(finance.locator('main')).toContainText('Remboursé');
   await expect(finance.locator('main')).toContainText(/150\s000/); // 50 000 + 100 000 encaissés
@@ -737,6 +754,7 @@ test('accueil : badge, scan sans réseau, synchronisation, mode session (K4 à K
     // Accueil de l'édition pour un bénévole : l'écran d'accueil.
     await volunteer.goto(`${GESTION}/editions/${seed.edition}`);
     await expect(volunteer).toHaveURL(/\/accueil$/);
+    await expectAccessible(volunteer, 'gestion : accueil du jour J');
     await volunteer.getByRole('button', { name: 'Télécharger la liste hors ligne' }).click();
     await expect(volunteer.getByText(/Liste de 1 participant\(s\)/).first()).toBeVisible();
 
@@ -816,6 +834,7 @@ test('sessions du jour : « présentée » (K8) ; comptoir : personne sans compt
   // Présences : l'auteure pointée à l'accueil.
   await secretariat.goto(`${GESTION}/editions/${seed.edition}/jour-j/presences`);
   await expect(secretariat.locator('tbody')).toContainText('Awa Koné');
+  await expectAccessible(secretariat, 'gestion : présences');
 });
 
 test('attestations : émission en file, RG-16, téléchargement et vérification publique', async ({
@@ -848,6 +867,7 @@ test('attestations : émission en file, RG-16, téléchargement et vérification
   await page.goto('/compte/mes-documents');
   await expect(page.locator('main')).toContainText('Attestation de participation');
   await expect(page.locator('main')).toContainText('Attestation de communication');
+  await expectAccessible(page, 'portail : mes documents');
   const pdf = page.getByRole('link', { name: 'Télécharger (PDF)' }).first();
   const response = await page.request.get((await pdf.getAttribute('href'))!);
   expect(response.status()).toBe(200);
@@ -859,6 +879,7 @@ test('attestations : émission en file, RG-16, téléchargement et vérification
   const code = new URL(link!).pathname.split('/').pop()!;
   await page.goto(`/verification/${code}`);
   await expect(page.locator('h2')).toHaveText('Attestation authentique');
+  await expectAccessible(page, 'portail : vérification publique');
   await expect(page.locator('main')).toContainText('Awa Koné');
   await page.goto('/verification/CODEINCONNU');
   await expect(page.getByRole('alert')).toContainText('Aucun document ne correspond à ce code');
@@ -889,6 +910,7 @@ test('organisation du CO : tâche, budget, partenaire publié', async ({ browser
   await finance.goto(`${base}/organisation/budget`);
   const income = finance.getByRole('region', { name: 'Recettes' });
   await expect(income).toContainText('calculé');
+  await expectAccessible(finance, 'gestion : budget');
 
   // Partenaire créé et publié par le CO « relations extérieures ».
   const relations = await committeeLogin(browser, seed.relations);
@@ -956,6 +978,7 @@ test('logistique : venue de l’intervenant, régime, repas, poste de bénévole
   const volunteer = await committeeLogin(browser, seed.volunteer);
   await volunteer.goto(`${base}/jour-j/mon-planning`);
   await expect(volunteer.locator('main')).toContainText('Accueil des participants');
+  await expectAccessible(volunteer, 'gestion : mon planning');
 });
 
 test('communication : bandeau, envoi groupé, questionnaire, rapport', async ({ page, browser }) => {
@@ -985,6 +1008,7 @@ test('communication : bandeau, envoi groupé, questionnaire, rapport', async ({ 
   // Le bandeau paraît aussitôt sur le portail, sans publication du portail.
   await page.goto('/fr/');
   await expect(page.getByRole('status').filter({ hasText: 'Changement de salle' })).toBeVisible();
+  await expectAccessible(page, 'portail : accueil et bandeau');
   // L'envoi groupé part par la file : un e-mail par personne du segment.
   command('run_jobs');
   expect(outbox(seed.finance)).toContain('communications/email/announcement');
@@ -1009,6 +1033,7 @@ test('communication : bandeau, envoi groupé, questionnaire, rapport', async ({ 
   await page.goto('/compte/questionnaires');
   await page.getByRole('link', { name: 'Répondre' }).click();
   await expect(page.locator('main')).toContainText('Votre réponse est anonyme');
+  await expectAccessible(page, 'portail : questionnaire');
   for (const radio of await page.locator('input[type="radio"][value="5"]').all()) {
     await radio.check();
   }
@@ -1030,11 +1055,13 @@ test('communication : bandeau, envoi groupé, questionnaire, rapport', async ({ 
   );
   await communication.goto(surveyUrl);
   await expect(communication.locator('main')).toContainText('Moyenne : 4.20 sur 5');
+  await expectAccessible(communication, 'gestion : résultats du questionnaire');
 
   // Rapport de la section « Satisfaction » exporté en PDF.
   await communication.goto(`${base}/rapports`);
   await communication.getByRole('button', { name: 'Satisfaction' }).click();
   await expect(communication.locator('main')).toContainText('Taux de réponse');
+  await expectAccessible(communication, 'gestion : rapports');
   const download = communication.waitForResponse((response) =>
     response.url().includes('/reports/satisfaction/export'),
   );

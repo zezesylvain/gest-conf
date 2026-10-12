@@ -75,6 +75,21 @@ jobs:
           GESTCONF_REQUIRE_MARIADB: "1"
         run: pytest -rs --cov --cov-report=term
 
+      - name: Couverture de la logique critique (80 % au moins par module)
+        # Plan L9 (S9 ; CLAUDE.md, « Tests ») : notation et décisions (reviews), workflow des
+        # soumissions, planification et conflits (program), tarifs et workflow des
+        # inscriptions, paiements ; chaque module séparément, sur la mesure de l'étape
+        # précédente (MariaDB).
+        run: |
+          for module in reviews submissions program registrations payments; do
+            coverage report --include="apps/$module/*" --format=total --fail-under=80 \
+              > /dev/null || {
+                echo "apps/$module : couverture sous 80 %"
+                coverage report --include="apps/$module/*" | tail -n 1
+                exit 1
+              }
+          done
+
       - name: Tests (pytest, SQLite)
         # Plan L1 §11 et §13 : pytest sur SQLite ET sur MariaDB. SQLite est le moteur par
         # défaut du poste de développement (CLAUDE.md) ; les tests marqués « mariadb »

@@ -30,6 +30,7 @@ import {
   LanguageService,
   MeStore,
   PageHeader,
+  ScrollRegion,
   SubmissionManageDetail,
 } from '@gestconf/shared';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -48,6 +49,7 @@ import { fileUrl, SubmissionsApi } from '../../core/submissions-api';
 @Component({
   selector: 'gestion-submission-detail-page',
   imports: [
+    ScrollRegion,
     ReactiveFormsModule,
     RouterLink,
     TranslatePipe,

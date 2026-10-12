@@ -566,3 +566,52 @@ Dependabot (proposé au commanditaire : il ouvrirait des PR automatiques), jeton
 `style-src 'unsafe-inline'`, pas d'antivirus (question 9).
 
 **Critère de fin** (« Revue écrite, constats traités ») : atteint pour le volet du dépôt.
+
+## 17. Bilan de L9.6 (12 octobre 2026)
+
+**Audit d'accessibilité** (S8) : `@axe-core/playwright` 4.13.0 (dépendance de développement,
+jamais livrée) ; assistant `web/e2e/axe.ts` : règles WCAG 2.0 et 2.1 A et AA, échec sur toute
+violation **grave ou critique**, les autres listées sans échec. **25 points d'audit** dans le
+parcours de bout en bout, aux écrans où il passe : création de compte, profil, brouillon et
+récapitulatif de soumission, évaluation (deux fois), affectations, classement, mes
+soumissions, programme public, planificateur, mentions de facturation, page « Inscription »,
+inscriptions, pièces, accueil du jour J, présences, mes documents, vérification publique,
+budget, mon planning, accueil du portail avec le bandeau, questionnaire, résultats du
+questionnaire, rapports. Vérifié : l'assistant échoue bien sur une page piégée (image sans
+texte, bouton sans nom).
+
+**Constats et correctifs** (trois, tous corrigés ; le parcours passe ensuite 19 sur 19) :
+
+- **bandeau du portail** : texte foncé sur orange, contraste 3,0:1 (WCAG 1.4.3 exige 4,5:1) ;
+  texte blanc (5,0:1, jeton `--gc-on-warning`), lien souligné de la même couleur ;
+- **questionnaire** : `aria-required` sur des `fieldset` (attribut interdit sur un groupe,
+  WCAG 4.1.2) ; groupes de boutons radio en `role="radiogroup"` (seul rôle de groupe qui le
+  porte), `aria-required` sur le champ libre, mention « obligatoire » de la légende ailleurs ;
+  test unitaire ;
+- **tableaux défilants** de la gestion (48 `.table-wrap` dans 40 écrans) : zone de défilement
+  inatteignable au clavier (WCAG 2.1.1) ; directive partagée `ScrollRegion`, qui s'applique à
+  la classe : `tabindex="0"`, `role="region"`, nom traduit ; test unitaire.
+
+En passant : les fiches d'aide « Premiers pas » et « Sécurité » manquaient au profil des
+relecteurs, à qui la 2FA est imposée (constat de la rédaction des guides, L9.7) ; ajoutées.
+
+**Limite** : un audit automatique n'attrape que la part mécanique (environ un tiers des
+critères WCAG) ; la revue manuelle (clavier, lecteur d'écran, zoom à 200 %) reste à faire
+pendant la recette (cahier de recette, L9.7).
+
+**Couverture** (S9) : mesurée sous SQLite (la CI la mesure sur MariaDB), avec les tests des
+cinq modules critiques et les tests transverses (5 909 tests ; la suite complète ne peut que
+l'augmenter) : `reviews` 96 %, `submissions` 93 %, `program` 93 %,
+`registrations` 94 %, `payments` 93 % ; aucun module sous le seuil, aucun test ciblé à écrire.
+**Seuil en CI** : 80 % par module sur ces cinq modules, après les tests MariaDB
+(`coverage report --include … --fail-under=80`), boucle vérifiée localement (y compris
+l'échec sous le seuil). **Précision de S9** : seuil par module plutôt que `fail_under` global
+de `pyproject.toml`, qui mêlerait la logique critique au reste.
+
+**Budget du portail** (hypothèse 13) : seuil d'avertissement du bundle initial porté de 365 à
+375 ko (erreur inchangée à 380 ko) ; build vert à 369,8 ko, sans avertissement.
+
+**Tests** : unitaires du front verts (shared 83, gestion 263, portail 173), lint et formatage
+verts, E2E 19 sur 19 avec les audits.
+
+**Critère de fin** (« Aucune violation grave ; seuil de couverture en CI ») : atteint.

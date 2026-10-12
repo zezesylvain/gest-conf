@@ -18,6 +18,7 @@ import {
   LanguageService,
   MeStore,
   PageHeader,
+  ScrollRegion,
   Sponsor,
   SponsorLevel,
   Sponsors,
@@ -39,6 +40,7 @@ import { levelName, SPONSOR_STATUSES } from './sponsors-support';
 @Component({
   selector: 'gestion-sponsors-page',
   imports: [
+    ScrollRegion,
     ReactiveFormsModule,
     RouterLink,
     TranslatePipe,

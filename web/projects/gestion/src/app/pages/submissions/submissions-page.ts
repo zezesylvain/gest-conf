@@ -20,6 +20,7 @@ import {
   LanguageService,
   MeStore,
   PageHeader,
+  ScrollRegion,
   SubmissionManage,
   SubmissionStatus,
   SubmissionType,
@@ -70,6 +71,7 @@ export const ORDERINGS: readonly Ordering[] = [
 @Component({
   selector: 'gestion-submissions-page',
   imports: [
+    ScrollRegion,
     ReactiveFormsModule,
     RouterLink,
     TranslatePipe,
