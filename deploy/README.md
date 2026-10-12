@@ -275,8 +275,31 @@ maximale 24 h, rétablissement sous 4 h (à valider par le commanditaire).
   racine web) ; le mot de passe n'est jamais gardé.
 - **Perte de la clé** : le certificat déposé devient indéchiffrable ; le CO le redépose
   (ou revient à l'image seule). Les attestations déjà émises, signées, restent valides.
-- **Rotation** : nouvelle clé en tête de la liste, ancienne derrière (virgule) ; le CO
-  redépose le certificat ; retirer ensuite l'ancienne clé.
+- **Rotation** (revue de sécurité L9.5, vérifiée par test) : nouvelle clé en tête de la
+  liste, ancienne derrière (virgule), redémarrer ; `python manage.py rotate_signing_keys
+  --dry-run`, puis `python manage.py rotate_signing_keys` (chaque certificat déposé est
+  rechiffré dans un nouveau fichier, l'ancien supprimé ; audit
+  `certificates.signing_keys_rotated`) ; retirer l'ancienne clé, redémarrer.
+
+### Clé secrète de Django (`DJANGO_SECRET_KEY`)
+
+- Elle signe les sessions, les jetons CSRF, les liens de désabonnement et d'invitation ; elle
+  ne chiffre aucune donnée stockée (la 2FA et les certificats ont leurs propres clés).
+- **Rotation** (revue de sécurité L9.5) : nouvelle valeur dans `DJANGO_SECRET_KEY`, ancienne
+  dans `DJANGO_SECRET_KEY_FALLBACKS` (`SECRET_KEY_FALLBACKS` : encore acceptée en
+  vérification, plus jamais en signature), redémarrer ; retirer l'ancienne une fois ses
+  sessions (12 h) et ses liens expirés. **Sans** cette étape, tout le monde est déconnecté et
+  les liens déjà envoyés cessent de fonctionner. En cas de **fuite**, ne pas la mettre en
+  repli : la remplacer directement.
+
+### Autres secrets
+
+- `DATABASE_URL` (mot de passe MariaDB) : changé dans cPanel puis dans `.env`, redémarrer.
+- Clés du prestataire de paiement (`CINETPAY_API_KEY`, `CINETPAY_API_PASSWORD`) et du
+  fournisseur d'e-mails (`BREVO_API_KEY` ou `MAILJET_*`) : régénérées dans leur console,
+  remplacées dans `.env`, redémarrer, puis vérifier par les tests de fumée et un e-mail réel.
+- Aucun secret ne transite par le dépôt ni par la CI (règle n° 11) ; `.env` est en 0600 hors
+  de `public_html` (à vérifier par l'opérateur : `chmod 600 .env`).
 
 ## 3. Tests de fumée
 

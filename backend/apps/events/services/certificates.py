@@ -792,7 +792,8 @@ def revoke(certificate: Certificate, *, reason: str, actor: Actor) -> Certificat
 
 
 def pdf_bytes(certificate: Certificate) -> bytes:
-    return PDFS.read(certificate.storage_name)
+    """PDF figé, empreinte contrôlée à chaque lecture (``FileIntegrityError`` sinon)."""
+    return PDFS.read_verified(certificate.storage_name, certificate.sha256)
 
 
 def preview(edition: Edition, nature: str) -> bytes:
@@ -882,6 +883,40 @@ def known_headers() -> list[str]:
         CertificateSettings.objects.exclude(header_storage_name="").values_list(
             "header_storage_name", flat=True
         )
+    )
+
+
+def rotate_signing_keys(*, dry_run: bool = False) -> int:
+    """Rechiffre chaque certificat PAdES déposé avec la première clé de
+    ``GESTCONF_SIGNING_ENCRYPTION_KEYS`` (``MultiFernet.rotate``, revue de sécurité L9.5).
+
+    À lancer après avoir placé la nouvelle clé en tête de la liste (l'ancienne restant
+    derrière) ; l'ancienne peut ensuite être retirée. Nouveau fichier écrit, l'ancien
+    supprimé après validation. Idempotent au sens où chaque passage rechiffre avec la clé
+    courante. Renvoie le nombre de certificats traités (lus et déchiffrés en simulation).
+    """
+    rotated = 0
+    for settings_id in known_settings_with_key():
+        with transaction.atomic():
+            current = CertificateSettings.objects.select_for_update().get(pk=settings_id)
+            if not current.key_storage_name:
+                continue
+            data = signing.cipher().rotate(KEYS.read(current.key_storage_name))
+            rotated += 1
+            if dry_run:
+                continue
+            previous = current.key_storage_name
+            current.key_storage_name, _digest = KEYS.write(data)
+            current.save(update_fields=["key_storage_name", "updated_at"])
+            KEYS.remove_after_commit(previous)
+    return rotated
+
+
+def known_settings_with_key() -> list[int]:
+    return list(
+        CertificateSettings.objects.exclude(key_storage_name="")
+        .order_by("pk")
+        .values_list("pk", flat=True)
     )
 
 

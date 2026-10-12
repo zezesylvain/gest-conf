@@ -526,3 +526,43 @@ mesure rien). Les scénarios ne peuvent plus pourrir sans bruit (§7).
 
 **Critère de fin** (« Essai local concluant ») : atteint ; la mesure de référence reste celle
 de l'hébergement (L9.8, runbook).
+
+## 16. Bilan de L9.5 (12 octobre 2026)
+
+**Revue** : `docs/L9-revue-securite.md` : OWASP Top 10 (2021) et ASVS 4.0 niveau 2 (sélection),
+preuve par contrôle, **18 constats** (aucun critique ni élevé) : 9 corrigés dans le lot,
+7 acceptés par écrit, 2 à vérifier sur l'hébergement (runbook).
+
+**Correctifs** :
+
+- **taille des requêtes** : `RequestSizeLimitMiddleware` refuse (413) un corps annoncé de plus
+  de `GESTCONF_MAX_REQUEST_MB` (55 Mio) avant toute lecture ; la mise en tampon par Passenger
+  reste à vérifier sur l'hébergement ;
+- **cache** : `DefaultNoStoreMiddleware` pose `Cache-Control: no-store` sur toute réponse qui
+  n'en fixe pas (les vues publiques et les fichiers gardent le leur) ;
+- **PDF figés** : attestations et lettres servies seulement si leur empreinte est intacte
+  (`PrivateStore.read_verified`, 404 sinon), comme les factures ;
+- **passeport** : l'effacement de K14 et l'anonymisation suppriment aussi le PDF émis de la
+  lettre, qui porte le numéro ; la lettre reste vérifiable par son code ;
+- **rotation des secrets** : commande `rotate_signing_keys` ; `DJANGO_SECRET_KEY_FALLBACKS` ;
+  procédures pour chaque secret dans `deploy/README.md` ;
+- tests ajoutés : longueur minimale du mot de passe, objet d'e-mail sans retour à la ligne,
+  PDF falsifié ou absent refusé, effacement du PDF de la lettre, rotation des clés, borne de
+  taille, `no-store` ;
+- rappel de L9.4 : bandeau à 600 requêtes par minute et par adresse (disponibilité).
+
+**ZAP** : paquet multiplateforme 2.16.1 (Java 21, empreinte SHA-256 `e90ca63b…071415`),
+essai local contre l'API en réglages de production (import OpenAPI de 359 adresses,
+exploration, analyse passive) : une seule alerte faible, l'en-tête `Server` du serveur de
+développement. Plan de l'opérateur, **passif seulement** : `deploy/zap/baseline.yaml`
+(vérifié : il s'exécute ; dossier des rapports explicite, sans quoi ils s'écrivaient à côté du
+plan, dans le dépôt). **Précision de S7** : Apache n'a pas pu servir le portail localement
+(il refuse de tourner en root, et l'espace de travail ne lui est pas lisible) ; les en-têtes
+du `.htaccess` restent couverts par les tests de fumée et par l'analyse de l'opérateur.
+
+**Acceptés par écrit** (R10 à R15, R17) : actions de la CI par version majeure, pas de
+Dependabot (proposé au commanditaire : il ouvrirait des PR automatiques), jeton du QR en clair
+(par conception), numéro de passeport en clair (masqué, effacé), HSTS sans sous-domaines, CSP
+`style-src 'unsafe-inline'`, pas d'antivirus (question 9).
+
+**Critère de fin** (« Revue écrite, constats traités ») : atteint pour le volet du dépôt.

@@ -13,6 +13,10 @@ from .base import *
 DEBUG = False
 
 SECRET_KEY = env.str("DJANGO_SECRET_KEY")
+# Rotation de la clé (revue de sécurité L9.5, deploy/README.md) : l'ancienne clé, placée ici
+# le temps que les sessions et les liens signés qu'elle a produits expirent, est encore
+# acceptée en vérification ; elle ne signe plus rien.
+SECRET_KEY_FALLBACKS = env.list("DJANGO_SECRET_KEY_FALLBACKS", default=[])
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS")
 # Ex. https://conference.exemple.org (nécessaire si Passenger ne signale pas
 # correctement HTTPS à Django : la vérification de l'en-tête Origin échouerait).

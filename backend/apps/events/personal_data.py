@@ -98,9 +98,9 @@ def _anonymize(user, context: AnonymizationContext) -> None:
     rows = Signature.objects.filter(user=user)
     for name in rows.exclude(image_storage_name="").values_list("image_storage_name", flat=True):
         IMAGES.remove_after_commit(name)
-    InvitationLetter.objects.filter(registration__user=user).exclude(passport_number="").update(
-        passport_number="", passport_erased_at=timezone.now()
-    )
+    from apps.events.services.letters import erase_passport_data
+
+    erase_passport_data(InvitationLetter.objects.filter(registration__user=user), timezone.now())
     rows.update(
         display_name="",
         title_fr="",

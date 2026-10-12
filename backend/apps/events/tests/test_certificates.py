@@ -409,3 +409,29 @@ def test_header_upload_is_used_in_documents(edition):
     assert service.preview(edition, "participation").startswith(b"%PDF")
     current = service.delete_header(edition, actor=COMMAND)
     assert not current.header_storage_name
+
+
+def test_signing_keys_rotation(edition, settings, django_capture_on_commit_callbacks):
+    """Revue de sécurité L9.5 : nouvelle clé en tête, rotation, puis l'ancienne retirée ;
+    le certificat déposé reste utilisable, l'ancien fichier est supprimé."""
+    from cryptography.fernet import Fernet
+    from django.core.management import call_command
+
+    from apps.events import signing
+
+    data, _certificate = pkcs12_file()
+    current = service.upload_signing_key(edition, data=data, password=TEST_PASSWORD, actor=COMMAND)
+    old_path = service.KEYS.path(current.key_storage_name)
+    old_key = settings.GESTCONF_SIGNING_ENCRYPTION_KEYS[0]
+    new_key = Fernet.generate_key().decode()
+    settings.GESTCONF_SIGNING_ENCRYPTION_KEYS = [new_key, old_key]
+    out = io.StringIO()
+    call_command("rotate_signing_keys", "--dry-run", stdout=out)
+    assert "1 certificat(s) déchiffrable(s)" in out.getvalue()
+    with django_capture_on_commit_callbacks(execute=True):
+        call_command("rotate_signing_keys", stdout=io.StringIO())
+    current.refresh_from_db()
+    assert not old_path.exists()
+    settings.GESTCONF_SIGNING_ENCRYPTION_KEYS = [new_key]
+    signing.check_key(service.KEYS.read(current.key_storage_name))
+    assert AuditLog.objects.filter(action="certificates.signing_keys_rotated").exists()

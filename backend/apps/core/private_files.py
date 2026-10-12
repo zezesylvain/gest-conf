@@ -23,6 +23,10 @@ from django.conf import settings
 from django.db import transaction
 
 
+class FileIntegrityError(FileNotFoundError):
+    """Fichier absent ou différent de son empreinte : jamais servi (plan L9, revue A08)."""
+
+
 @dataclass(frozen=True, slots=True)
 class PrivateStore:
     folder: str
@@ -52,6 +56,17 @@ class PrivateStore:
 
     def read(self, storage_name: str) -> bytes:
         return self.path(storage_name).read_bytes()
+
+    def read_verified(self, storage_name: str, sha256: str) -> bytes:
+        """Contenu dont l'empreinte est celle enregistrée à l'écriture ; sinon
+        ``FileIntegrityError`` (un fichier figé modifié sur le disque n'est jamais servi)."""
+        try:
+            data = self.read(storage_name)
+        except (FileNotFoundError, ValueError) as error:
+            raise FileIntegrityError(storage_name) from error
+        if hashlib.sha256(data).hexdigest() != sha256:
+            raise FileIntegrityError(storage_name)
+        return data
 
     def remove_after_commit(self, storage_name: str) -> None:
         """Supprime le fichier après la validation de la transaction qui retire sa ligne."""

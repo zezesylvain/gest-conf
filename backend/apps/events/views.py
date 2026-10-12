@@ -14,6 +14,8 @@ Participant : ``GET /v1/registrations/{id}/badge``, son badge, dès la confirmat
 
 from __future__ import annotations
 
+from collections.abc import Callable
+
 from django.http import Http404, HttpResponse
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -357,6 +359,14 @@ def pdf_response(content: bytes, filename: str) -> HttpResponse:
     # Le badge porte un titre d'accès : jamais en cache (K3).
     response["Cache-Control"] = "private, no-store"
     return response
+
+
+def stored_pdf(read: Callable[[], bytes], filename: str) -> HttpResponse:
+    """PDF figé (attestation, lettre) : 404 s'il est absent ou si son empreinte diffère."""
+    try:
+        return pdf_response(read(), filename)
+    except FileNotFoundError as error:  # dont FileIntegrityError
+        raise Http404 from error
 
 
 def _batch(request: Request) -> int:
@@ -890,8 +900,8 @@ class CertificateViewSet(_CertificatesBase):
     )
     def pdf(self, request: Request, edition_id: int, certificate_id: int) -> HttpResponse:
         certificate = self.certificate(certificate_id)
-        return pdf_response(
-            certificates.pdf_bytes(certificate), f"attestation-{certificate.pk}.pdf"
+        return stored_pdf(
+            lambda: certificates.pdf_bytes(certificate), f"attestation-{certificate.pk}.pdf"
         )
 
     @extend_schema(
@@ -945,7 +955,7 @@ class MyCertificatePdfView(APIView):
         ).first()
         if found is None:
             raise Http404
-        return pdf_response(certificates.pdf_bytes(found), f"attestation-{found.pk}.pdf")
+        return stored_pdf(lambda: certificates.pdf_bytes(found), f"attestation-{found.pk}.pdf")
 
 
 class PublicCertificateView(APIView):
@@ -1031,7 +1041,7 @@ class MyLetterPdfView(_MyLetterBase):
         letter = letters.current_letter(self.registration(request, registration_id))
         if letter is None or letter.status != LetterStatus.ISSUED:
             raise Http404
-        return pdf_response(letters.pdf_bytes(letter), f"lettre-invitation-{letter.pk}.pdf")
+        return stored_pdf(lambda: letters.pdf_bytes(letter), f"lettre-invitation-{letter.pk}.pdf")
 
 
 class LetterViewSet(ManageViewSet):
@@ -1153,7 +1163,7 @@ class LetterViewSet(ManageViewSet):
         letter = self.letter(letter_id)
         if not letter.storage_name:
             raise Http404
-        return pdf_response(letters.pdf_bytes(letter), f"lettre-invitation-{letter.pk}.pdf")
+        return stored_pdf(lambda: letters.pdf_bytes(letter), f"lettre-invitation-{letter.pk}.pdf")
 
 
 # --- Comptoir (K13) ----------------------------------------------------------------------------

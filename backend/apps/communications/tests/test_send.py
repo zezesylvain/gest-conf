@@ -140,3 +140,14 @@ def test_old_bodies_purged_only_when_applied():
     email.refresh_from_db()
     assert email.body_text == ""
     assert email.purged_at is not None
+
+
+def test_subject_never_carries_a_line_break(settings):
+    """Revue de sécurité L9.5 (A03) : aucune injection d'en-tête par l'objet, même si une
+    valeur du contexte contient un retour à la ligne (Django refuse aussi l'en-tête)."""
+    from apps.communications.services import render_email
+
+    settings.GESTCONF_SITE_NAME = "Site\r\nBcc: intrus@exemple.org\nX: y"
+    subject, _text, _html = render_email("communications/email/announcement", {}, "fr")
+    assert "\r" not in subject and "\n" not in subject
+    assert subject.startswith("[Site Bcc: intrus@exemple.org X: y]")

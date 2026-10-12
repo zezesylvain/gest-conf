@@ -69,6 +69,9 @@ MIDDLEWARE = [
     # celles produites par les middlewares suivants (refus CSRF, par exemple).
     "apps.core.middleware.RequestIdMiddleware",
     "apps.core.middleware.RobotsTagMiddleware",
+    # Revue de sécurité L9.5 : cache interdit par défaut ; corps trop gros refusé avant lecture.
+    "apps.core.middleware.DefaultNoStoreMiddleware",
+    "apps.core.middleware.RequestSizeLimitMiddleware",
     # Plafond des envois immédiats d'e-mails par requête (voie rapide, plan L1 §8.3).
     "apps.communications.middleware.EmailFastPathMiddleware",
     "django.middleware.security.SecurityMiddleware",
@@ -529,6 +532,9 @@ GESTCONF_BACKUP_MAX_AGE_HOURS = env.int("GESTCONF_BACKUP_MAX_AGE_HOURS", default
 # Désactivée dans les réglages de test, sauf dans les tests qui la concernent.
 GESTCONF_STORAGE_MONITORING = env.bool("GESTCONF_STORAGE_MONITORING", default=True)
 GESTCONF_DISK_FREE_MIN_MB = env.int("GESTCONF_DISK_FREE_MIN_MB", default=1024)
+# Taille maximale du corps d'une requête (revue de sécurité L9.5) : au-delà, 413 avant
+# lecture. Couvre le plus gros dépôt permis (PDF de 50 Mio, plan L3) et l'enveloppe multipart.
+GESTCONF_MAX_REQUEST_MB = env.int("GESTCONF_MAX_REQUEST_MB", default=55)
 # Durées de conservation de D15 : simulation seule tant qu'elles ne sont pas validées
 # par le commanditaire (les purges imposées par la sécurité s'appliquent toujours).
 GESTCONF_RETENTION_ENFORCED = env.bool("GESTCONF_RETENTION_ENFORCED", default=False)

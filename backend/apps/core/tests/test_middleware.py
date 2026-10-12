@@ -52,3 +52,30 @@ def test_request_id_is_available_on_request(rf):
 
     response = RequestIdMiddleware(view)(rf.get("/"))
     assert response["X-Request-ID"] == seen["id"]
+
+
+@pytest.mark.django_db
+def test_oversized_body_is_refused_before_reading(client, settings):
+    """Revue de sécurité L9.5 (ASVS V12.1) : 413 sur la longueur annoncée, corps jamais lu."""
+    settings.GESTCONF_MAX_REQUEST_MB = 1
+    response = client.generic(
+        "POST",
+        "/v1/submissions",
+        b"x" * 10,
+        content_type="application/octet-stream",
+        CONTENT_LENGTH=str(1024 * 1024 + 1),
+    )
+    assert response.status_code == 413
+    assert response.json()["code"] == "bad_request"
+    assert response["Cache-Control"] == "no-store"
+    small = client.post("/v1/submissions", {}, content_type="application/json")
+    assert small.status_code != 413
+
+
+@pytest.mark.django_db
+def test_api_responses_are_not_cached_unless_the_view_says_so(client):
+    """Revue de sécurité L9.5 (ASVS V8.2.1) : no-store par défaut, en-tête d'une vue gardé."""
+    assert client.get("/v1/me").headers["Cache-Control"] == "no-store"  # 401
+    assert client.get("/v1/inconnue").headers["Cache-Control"] == "no-store"
+    response = client.get("/v1/public/portal/banner")
+    assert response.headers["Cache-Control"] == "public, max-age=60"
