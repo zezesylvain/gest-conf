@@ -1,7 +1,8 @@
 # Lot L9 — Recette, sécurité, charge : plan d'implémentation
 
-> **Statut : proposé le 7 octobre 2026, à valider** (décisions S1 à S16, questions du §10).
-> L8 est livré en code et testé en local (bilan : `docs/L8-logistique.md`). Les décisions de
+> **Statut : validé le 12 octobre 2026, en cours** (décisions S1 à S16 telles que proposées ;
+> les questions du §10 restent sans réponse : les propositions valent hypothèses, §2.1).
+> L8 est livré et fusionné (PR #13 ; bilan : `docs/L8-logistique.md`). Les décisions de
 > ce lot sont numérotées S : O se confond avec zéro, et P, Q et R désignent déjà les
 > priorités, les questions et les risques.
 >
@@ -61,7 +62,7 @@
 - Lighthouse : mesure ponctuelle des pages publiques, consignée dans le bilan, pas en CI ;
 - la charge du lot dépasse l'estimation de l'étude, comme les lots précédents (§8).
 
-## 2. Décisions (proposées)
+## 2. Décisions (validées)
 
 | # | Sujet | Proposition |
 |---|---|---|
@@ -81,6 +82,28 @@
 | S14 | Pages légales | Mentions légales, politique de confidentialité, cookies : pages du CMS (L2). Je propose une **trame** fondée sur ce que la plateforme traite réellement (registre des traitements de L1, durées de conservation, sous-traitants : hébergeur, e-mails, paiement) ; le texte définitif revient au commanditaire (loi n° 2013-450, ARTCI ; RGPD si des participants européens sont concernés). |
 | S15 | Correctifs | Les défauts trouvés par la recette, la revue, l'audit ou la charge sont corrigés dans le lot, chacun avec un test. Aucune fonction nouvelle n'entre en L9 ; une demande de fonction issue de la recette est notée pour un lot ultérieur. |
 | S16 | Ordre | L9.0 vérifications ; L9.1 sauvegarde et restauration ; L9.2 supervision et en-têtes ; L9.3 données de volume et requêtes ; L9.4 test de charge ; L9.5 revue de sécurité ; L9.6 accessibilité et couverture ; L9.7 recette, démonstration et documentation ; L9.8 sur l'hébergement (runbook) ; L9.9 bilan, étude §25, `CLAUDE.md`. |
+
+### 2.1 Validation (12 octobre 2026) et hypothèses retenues
+
+Le commanditaire a demandé de « terminer tout ce qui reste », sans répondre aux questions du
+§10. Le plan est donc validé tel que proposé, et ses propositions s'appliquent comme
+hypothèses révisables :
+
+| Question (§10) | Hypothèse retenue |
+|---|---|
+| 1. Opérateur | Inconnu : le volet du dépôt avance seul ; L9.8 attend un opérateur désigné |
+| 2. Copie hors hébergement | Rapatriement par `pull-backups.sh` chez l'opérateur ; pas de chiffrement propre à la copie (disque chiffré conseillé) |
+| 3. Reprise | Perte maximale 24 h, rétablissement sous 4 h |
+| 4. Recette | Sur la production avant toute donnée réelle, puis base réinitialisée |
+| 5. Charge | 200 utilisateurs simultanés ; o2switch prévenu avant le test et ZAP |
+| 6. Sécurité | Revue interne (OWASP Top 10, ASVS, ZAP passif) |
+| 7. Erreurs | E-mail minimal aux opérateurs (D17), pas de Sentry |
+| 8. Anti-robots | Non : limites de débit existantes |
+| 9. Antivirus | Absence acceptée si o2switch n'en fournit pas (à vérifier sur place) |
+| 10. Formation | Guides écrits et déroulé d'atelier ; dates et publics à fixer par le commanditaire |
+| 11. Déploiement continu | Non : `deploy.sh` lancé à la main |
+| 12. Pages légales | Trame proposée ; texte définitif au commanditaire |
+| 13. Bundle du portail | Seuil d'avertissement relevé à 375 ko, l'écart venant de fonctions voulues |
 
 ## 3. Modèle de données
 
@@ -210,3 +233,58 @@ poussées, et L9.8 reste ouverte.
     convient-elle comme point de départ ?
 13. **Bundle du portail** : 369,8 ko pour un avertissement à 365 ko depuis L5 ; relever le
     seuil à 375 ko (proposé, l'écart venant de fonctions voulues), ou chercher à réduire ?
+
+## 11. Bilan de L9.0 (12 octobre 2026)
+
+**Validation** : consignée au §2.1 (demande du commanditaire du 12 octobre 2026 ; questions du
+§10 sans réponse, propositions retenues comme hypothèses).
+
+**Sauvegarde par `mariadb-dump`** (MariaDB 10.11.14 locale) :
+
+- vérifiée avec un compte **limité à sa base** (aucun privilège global, comme sur un
+  hébergement mutualisé) : `--single-transaction --quick --hex-blob --no-tablespaces
+  --skip-lock-tables --default-character-set=utf8mb4` passe sans `PROCESS` ni `LOCK TABLES` ;
+- identifiants dans un fichier d'options passé par `--defaults-extra-file` (toujours la
+  **première** option), jamais sur la ligne de commande ;
+- restauration dans une base vide par le client `mariadb`, puis `migrate --check` : conforme ;
+  `createcachetable` recrée les deux tables du cache, exclues du dump ;
+- la ligne finale `-- Dump completed` permet de reconnaître un dump tronqué ;
+- **piège vérifié** : `mariadb-dump` récent (10.5.25, 10.6.18, 10.11.8 et suivants) écrit en
+  première ligne `/*M!999999\- enable the sandbox mode */`, qu'un client plus ancien ou celui
+  de MySQL refuse : restaurer avec un client `mariadb` récent ;
+- **piège vérifié** : le `mysqldump` de MySQL 8 (celui des runners Ubuntu de la CI)
+  interroge `COLUMN_STATISTICS`, absente de MariaDB : `--column-statistics=0` quand l'outil
+  n'est pas celui de MariaDB ; la CI installe le client MariaDB pour le test de sauvegarde
+  réelle ;
+- durées locales sur la base de développement (98 tables) : dump 0,7 s, restauration 0,5 s ;
+  mesures au volume de l'étude (§12) avec `seed_volume` (L9.3).
+
+**Locust** : 2.46.7, licence MIT, 40 paquets en roues seules pour Python 3.12 (dont
+`gevent`). **Précision de S5** : fichier verrouillé à part (`requirements/loadtest.in` et
+`.txt`), installé dans un environnement séparé par l'opérateur ; ni la CI du backend ni
+l'hébergement n'en dépendent.
+
+**axe** : `@axe-core/playwright` 4.13.0 (licence MPL-2.0, dépendance de développement du
+front, jamais livrée), compatible avec Playwright 1.63 du dépôt.
+
+**`ruff`, règles `S` (bandit)** : **déjà actives depuis L1** (correction de S7 et du §8,
+qui les annonçaient comme nouvelles) ; aucun constat ouvert. Exceptions hors tests, toutes
+justifiées sur leur ligne : deux noms de clé pris pour des mots de passe (`S105`), deux
+requêtes sur un nom de table cité par `quote_name` (`S608`), la clé de test des réglages de
+test. Les appels de `subprocess` ajoutés en L9.1 suivent la même règle.
+
+**Couverture** : mesurée par module avec la suite complète ; résultats et seuil en L9.6
+(**précision** : la mesure rejoint l'étape qui pose le seuil).
+
+**ZAP** : pas de démon Docker dans cet environnement ; Java 21 est présent. **Précision de
+S7** : essai du paquet multiplateforme de ZAP avec un plan d'automatisation passif en L9.5 ;
+sur le poste de l'opérateur, l'image `zaproxy/zap-stable` et `zap-baseline.py` suffisent.
+
+**CSP, `default-src`** : **écarté** (précision de S7). L'en-tête du `.htaccess` ne porte pas
+`script-src`, que la balise `<meta>` de chaque page fixe par empreintes (`inject-csp.mjs`) ;
+avec `default-src 'self'` dans l'en-tête, le navigateur l'appliquerait aussi aux scripts et
+bloquerait les scripts en ligne autorisés par la balise : tout le portail cesserait de
+fonctionner. L'en-tête énumère déjà chaque autre directive de chargement ; un test le
+vérifiera (L9.2).
+
+**Critère de fin** (« Choix consignés ») : atteint.
