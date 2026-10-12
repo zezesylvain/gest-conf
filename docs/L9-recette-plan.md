@@ -470,3 +470,59 @@ hors ligne de l'accueil (1 000 inscrits confirmés) 227 ms. Mesures locales, **n
 transposables** à l'hébergement : le test de charge (L9.4, L9.8) fait foi.
 
 **Critère de fin** (« Tests au vert ») : atteint.
+
+## 15. Bilan de L9.4 (12 octobre 2026)
+
+**Scénarios** (`loadtest/locustfile.py`, S5) : visiteurs (pages pré-rendues, bandeau et
+édition courante gardés le temps de leur cache, comme un navigateur ; tarifs), auteurs
+(liste, sauvegarde automatique, dépôt d'un PDF valide, vérification puis envoi), relecteurs
+(affectations, brouillon d'une évaluation non envoyée, parfois l'envoi), participants (« Mon
+inscription », devis), nouveaux inscrits (devis puis commande par virement), comité (une page
+au hasard des 600 soumissions et des 1 500 inscriptions, évaluations par soumission,
+avancement, classement, statistiques, rapports, tableau de bord financier). **Verdict** à la
+fin, code de sortie non nul si l'objectif n'est pas atteint : p95 et taux d'erreurs sur
+toutes les requêtes hors « (PDF) » (commande, qui émet la pro forma), rapportées à part.
+
+**Sessions pré-établies** (commande `loadtest_sessions`) : une session par compte fictif,
+telle qu'une connexion réussie la laisse (2FA validée pour le comité et les relecteurs),
+jeton CSRF compris ; fichier JSON en 0600, jamais écrasé ; `--revoke` supprime les sessions
+qu'il liste ; mêmes garde-fous que `seed_volume` ; journalisée. Tests : sessions utilisables
+sur une route soumise à la 2FA, écriture protégée par le CSRF, refus sans confirmation ou
+sans données de volume, révocation.
+
+**Dépendance** : `locust==2.46.7` verrouillé à empreintes dans
+`backend/requirements/loadtest.txt` (37 paquets, compilé sous Linux et Python 3.12), installé
+dans un environnement séparé ; ni l'hébergement ni la CI du backend n'en dépendent. **Limite**
+: sous Windows, `pywin32` manque au verrou (WSL conseillé). `ruff` vérifie `loadtest/`
+(exception `S311` justifiée : tirages non cryptographiques).
+
+**Essai local** (MariaDB 10.11, base au volume de l'étude, serveur de développement) :
+
+- 50 utilisateurs, 2 minutes : deux défauts révélés et corrigés : le **bandeau** était limité
+  à 60 requêtes par minute et par adresse IP (55 % de refus) ; un relecteur ne peut pas
+  enregistrer de brouillon sur une évaluation **déjà envoyée** (RG-06 : on la renvoie), le
+  scénario le faisait ;
+- 200 utilisateurs, 3 minutes : **0 erreur** sur 4 548 requêtes ; p95 de 3 s, le serveur de
+  développement (un seul processus) plafonnant vers 25 requêtes par seconde : **aucune valeur
+  de mesure**, le test sur l'hébergement fait foi (L9.8) ;
+- essai identique au job de CI (base neuve réduite, 30 utilisateurs, 90 s) : objectif atteint,
+  0 erreur, après correction d'un troisième défaut du scénario (pages tirées au-delà de la
+  liste quand le volume est réduit : le comité lit d'abord le nombre de lignes).
+
+**Correctifs** :
+
+- **bandeau** : 600 requêtes par minute et par adresse IP (au lieu de 60) : au lieu de la
+  conférence, des centaines de participants sortent par la même adresse et chaque navigateur
+  relit le bandeau au plus une fois par minute ; à 60, il aurait disparu au moment où il sert
+  le plus ;
+- **rapport de relecture** : lecture restreinte aux colonnes utiles (1 200 affectations sans
+  les résumés ni les commentaires) : **170 ms → 79 ms** au volume ; test du contenu de la
+  section ajouté (aucun ne le vérifiait).
+
+**CI** : job « Scénarios de charge (essai court) » : base MariaDB neuve, `seed_volume` réduit,
+`loadtest_sessions`, serveur de développement, 30 utilisateurs pendant 90 s ; il échoue au
+moindre taux d'erreurs de 1 % (cible du p95 relâchée à 5 s : le serveur de développement ne
+mesure rien). Les scénarios ne peuvent plus pourrir sans bruit (§7).
+
+**Critère de fin** (« Essai local concluant ») : atteint ; la mesure de référence reste celle
+de l'hébergement (L9.8, runbook).

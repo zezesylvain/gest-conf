@@ -1,0 +1,6 @@
+# Mêmes règles que le backend. Le tirage des données simulées n'a rien de cryptographique
+# (S311 : choix d'une page, d'une note, d'une affectation).
+extend = "../backend/pyproject.toml"
+
+[lint.per-file-ignores]
+"locustfile.py" = ["S311"]

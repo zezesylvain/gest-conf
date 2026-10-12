@@ -1,0 +1,4 @@
+# Test de charge (plan L9, S5) : environnement séparé, sur le poste de l'opérateur, jamais
+# sur l'hébergement ni dans la CI du backend. Indépendant de base.txt (aucune contrainte).
+# Voir loadtest/README.md.
+locust==2.46.7

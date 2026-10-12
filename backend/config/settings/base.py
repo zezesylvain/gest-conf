@@ -339,8 +339,11 @@ REST_FRAMEWORK = {
         # Vérification publique des attestations (K10), par adresse IP.
         "certificate_verify": "30/min",
         # Annonces (plan L8, N10 et N11) : bandeau lu par le portail et lien de désabonnement,
-        # par adresse IP.
-        "portal_banner": "60/min",
+        # par adresse IP. Bandeau : 600/min (plan L9.4) ; le Wi-Fi du lieu de la conférence
+        # sort par une seule adresse pour des centaines de participants, chaque navigateur le
+        # relisant au plus une fois par minute (cache de 60 s) : à 60/min, il disparaissait
+        # au moment où il sert le plus.
+        "portal_banner": "600/min",
         "announcement_unsubscribe": "30/hour",
     },
     "NUM_PROXIES": GESTCONF_TRUSTED_PROXY_COUNT,

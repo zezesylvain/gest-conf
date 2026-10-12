@@ -52,8 +52,8 @@ jobs:
 
       - name: Lint et formatage (ruff)
         run: |
-          ruff check . ../deploy ../web/e2e
-          ruff format --check . ../deploy ../web/e2e
+          ruff check . ../deploy ../web/e2e ../loadtest
+          ruff format --check . ../deploy ../web/e2e ../loadtest
 
       - name: Migrations à jour
         run: python manage.py makemigrations --check --dry-run
@@ -236,6 +236,58 @@ jobs:
           name: playwright-report
           path: web/e2e/playwright-report/
           retention-days: 14
+
+  loadtest:
+    # Plan L9 (S5, §7) : essai court des scénarios de charge contre la pile locale, pour
+    # qu'ils ne pourrissent pas (routes, formes des réponses, sessions pré-établies, CSRF).
+    # Serveur de développement : la tenue en charge se mesure sur l'hébergement (L9.8) ;
+    # ici, seul le taux d'erreurs compte (cible du p95 relâchée).
+    name: Scénarios de charge (essai court)
+    runs-on: ubuntu-24.04
+    services:
+      mariadb:
+        image: mariadb:10.11
+        env:
+          MARIADB_ROOT_PASSWORD: root
+          MARIADB_DATABASE: gestconf
+        ports: ["3306:3306"]
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+    env:
+      DATABASE_URL: mysql://root:root@127.0.0.1:3306/gestconf
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements/*.txt
+      - name: Dépendances (backend et Locust, environnements séparés, verrouillés)
+        run: |
+          pip install --require-hashes -r requirements/dev.txt
+          python -m venv /tmp/loadtest
+          /tmp/loadtest/bin/pip install --require-hashes -r requirements/loadtest.txt
+      - name: Base, données fictives réduites et sessions pré-établies
+        run: |
+          python manage.py migrate --verbosity 0
+          python manage.py createcachetable
+          python manage.py seed_volume --confirm-fictitious --submissions 60 --reviewers 10 --participants 80 --drafts 40
+          python manage.py loadtest_sessions --confirm-fictitious --output /tmp/sessions.json --reviewers 10 --authors 40 --participants 40 --newcomers 40
+      - name: Essai de 90 secondes, 30 utilisateurs
+        run: |
+          python manage.py runserver 127.0.0.1:8000 --noreload > /tmp/runserver.log 2>&1 &
+          for _ in $(seq 60); do curl -fsS http://127.0.0.1:8000/api/v1/health >/dev/null && break; sleep 1; done
+          cd ../loadtest
+          GESTCONF_PAGES= GESTCONF_SESSIONS=/tmp/sessions.json GESTCONF_P95_MS=5000 \
+            /tmp/loadtest/bin/locust --headless --host http://127.0.0.1:8000 \
+            --users 30 --spawn-rate 5 --run-time 90s --only-summary
+      - name: Journal du serveur (en cas d'échec)
+        if: failure()
+        run: tail -n 200 /tmp/runserver.log
 
   shell:
     name: Scripts de déploiement
