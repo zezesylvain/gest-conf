@@ -58,6 +58,15 @@ jobs:
       - name: Migrations à jour
         run: python manage.py makemigrations --check --dry-run
 
+      - name: Client MariaDB (mariadb-dump, mariadb) pour les tests de sauvegarde
+        # Plan L9, S2 : backup_db et restore_db appellent mariadb-dump et mariadb. Le
+        # mysqldump de MySQL 8 livré avec le runner interroge COLUMN_STATISTICS, absente de
+        # MariaDB : le test de sauvegarde réelle (mariadb_only) utilise le client MariaDB.
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q --no-install-recommends mariadb-client
+          mariadb-dump --version
+
       - name: Tests (pytest, MariaDB) et couverture
         # GESTCONF_REQUIRE_MARIADB : la suite refuse de démarrer si la base de test n'est
         # pas MariaDB (conftest.py), au lieu de passer en silence sur SQLite en ignorant

@@ -182,7 +182,7 @@ def test_cron_script_only_runs_scheduled_commands():
     scheduled = (
         r"^\s*run_jobs \| close_call \| remind_drafts \| remind_reviewers \| "
         r"remind_presentations \| cleanup \| \\\n\s*check_integrity \| "
-        r"expire_registrations \| sync_payments \| remind_tasks\)"
+        r"expire_registrations \| sync_payments \| remind_tasks \| backup_db\)"
     )
     assert re.search(scheduled, code, re.M)
     assert "config.settings.prod" in code
@@ -252,3 +252,45 @@ def test_smoke_test_checks_the_prerendered_portal_and_public_files():
     assert '"$BASE_URL/sitemap.xml"' in code
     assert 'data-gc-rendered="en:call"' in code
     assert "/api/v1/public/files/00000000-0000-0000-0000-000000000000/x.pdf" in code
+
+
+PULL_SCRIPT = REPO_DIR / "deploy" / "pull-backups.sh"
+RESTORE_SCRIPT = REPO_DIR / "deploy" / "restore.sh"
+
+
+def test_deploy_backs_up_before_migrating():
+    """Plan L9, S3 : sauvegarde fraîche avant migrate, obligatoire (--required)."""
+    code = shell_code(DEPLOY_SCRIPT)
+    backup = code.index("python manage.py backup_db --required")
+    assert backup < code.index("python manage.py migrate --noinput")
+    assert code.index("check --database default") < backup
+
+
+def test_deploy_never_deletes_uploaded_files_nor_backups():
+    """var/ (fichiers déposés et sauvegardes par défaut) est ignoré par git : sans exclusion,
+    le rsync --delete du déploiement l'effacerait (défaut trouvé en L9.1)."""
+    code = shell_code(DEPLOY_SCRIPT)
+    assert "--exclude '/var/'" in code
+    gitignore = (REPO_DIR / ".gitignore").read_text(encoding="utf-8")
+    assert "backend/var/" in gitignore
+    assert 'show "$RELEASE:deploy/restore.sh"' in code
+
+
+def test_pull_backups_keeps_dated_snapshots_and_verifies_the_copy():
+    """Copie hors hébergement tirée par l'opérateur : jamais de --delete (un effacement sur
+    le serveur ne gagne pas la copie), instantanés liés (--link-dest), empreinte vérifiée."""
+    code = shell_code(PULL_SCRIPT)
+    assert "--delete" not in code
+    assert "--link-dest=" in code
+    assert 'mv "$partial" "$snapshot"' in code
+    assert 'ln -sfn "$stamp" "$PULL_DEST/files/latest"' in code
+    assert "hashlib.sha256()" in code and 'manifest["database"]["sha256"]' in code
+    assert "umask 077" in code
+    assert PULL_SCRIPT.stat().st_mode & 0o111
+
+
+def test_restore_script_restores_then_checks_integrity():
+    code = shell_code(RESTORE_SCRIPT)
+    assert code.index("manage.py restore_db") < code.index("manage.py check_integrity")
+    assert "--files-from" in code
+    assert RESTORE_SCRIPT.stat().st_mode & 0o111

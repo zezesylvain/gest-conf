@@ -510,6 +510,16 @@ GESTCONF_FILES_DIR = Path(env.str("GESTCONF_FILES_DIR", default=str(BASE_DIR / "
 GESTCONF_PRIVATE_FILES_DIR = Path(
     env.str("GESTCONF_PRIVATE_FILES_DIR", default=str(GESTCONF_FILES_DIR / "private"))
 )
+# Sauvegardes (plan L9, S2) : dumps compressés et manifestes, HORS de la racine web, en 0700.
+# Rotation : 7 quotidiennes, 4 hebdomadaires, 3 mensuelles (étude §11.6). /health et
+# check_integrity signalent une sauvegarde plus vieille que GESTCONF_BACKUP_MAX_AGE_HOURS.
+GESTCONF_BACKUP_DIR = Path(
+    env.str("GESTCONF_BACKUP_DIR", default=str(BASE_DIR / "var" / "backups"))
+)
+GESTCONF_BACKUP_KEEP_DAILY = env.int("GESTCONF_BACKUP_KEEP_DAILY", default=7)
+GESTCONF_BACKUP_KEEP_WEEKLY = env.int("GESTCONF_BACKUP_KEEP_WEEKLY", default=4)
+GESTCONF_BACKUP_KEEP_MONTHLY = env.int("GESTCONF_BACKUP_KEEP_MONTHLY", default=3)
+GESTCONF_BACKUP_MAX_AGE_HOURS = env.int("GESTCONF_BACKUP_MAX_AGE_HOURS", default=26)
 # Durées de conservation de D15 : simulation seule tant qu'elles ne sont pas validées
 # par le commanditaire (les purges imposées par la sécurité s'appliquent toujours).
 GESTCONF_RETENTION_ENFORCED = env.bool("GESTCONF_RETENTION_ENFORCED", default=False)

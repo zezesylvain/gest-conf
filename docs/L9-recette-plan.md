@@ -288,3 +288,78 @@ fonctionner. L'en-tête énumère déjà chaque autre directive de chargement ; 
 vérifiera (L9.2).
 
 **Critère de fin** (« Choix consignés ») : atteint.
+
+## 12. Bilan de L9.1 (12 octobre 2026)
+
+**Sauvegarde** (S2 ; `apps/core/backups.py`, commande `backup_db`) :
+
+- `LockedCommand` (verrou, battement de cœur, alerte aux opérateurs en cas d'échec) ; cron
+  quotidien à 2 h 07 (`deploy/cron.sh`, liste fermée étendue) ;
+- dump MariaDB en flux compressé, sous un nom temporaire puis renommé, en 0600, dans
+  `GESTCONF_BACKUP_DIR` (défaut `var/backups`, créé en 0700) ; outil détecté (`mariadb-dump`,
+  sinon `mysqldump`, avec `--column-statistics=0` si ce n'est pas celui de MariaDB) ;
+- tables du cache exclues ; **précision de S2** : `django_session` est sauvegardée **sans ses
+  lignes** (second appel en `--no-data`) : une session est un titre d'accès, une sauvegarde
+  volée n'en livre aucune, et la table existe après restauration ;
+- dump refusé s'il échoue ou s'il est tronqué (ligne finale absente) : aucun fichier laissé ;
+- **manifeste** : date, version, dernière migration de chaque application, taille et
+  empreinte SHA-256 du dump, tables exclues, inventaire des fichiers déposés. **Précision de
+  S2** : l'inventaire liste les fichiers présents sur le disque (chemin relatif, taille), sans
+  empreinte : en calculer chaque nuit sur des gigaoctets coûterait cher, et la cohérence
+  entre la base et les fichiers (empreintes comprises, quand le modèle en garde une) est déjà
+  contrôlée par `check_integrity` après restauration ;
+- rotation : 7 quotidiennes, 4 hebdomadaires, 3 mensuelles (`GESTCONF_BACKUP_KEEP_*`),
+  restes d'une exécution interrompue supprimés, autres fichiers du dossier jamais touchés ;
+- SQLite (développement) : dump SQL par `iterdump()`. **Défaut évité** : l'API `backup()` de
+  `sqlite3` attendait sans fin, dans les tests, le verrou d'une base en mémoire à cache
+  partagé tenue par la transaction du test ;
+- premier déploiement : base vide, `backup_db` ne fait rien et le dit ;
+- journal `backup.created`.
+
+**Restauration** (S3 ; commande `restore_db`, script `deploy/restore.sh`) :
+
+- empreinte du dump comparée au manifeste (copie altérée refusée) ; base cible **vide**
+  exigée (refus sinon, vérifié par une connexion PyMySQL) ; chargement par le client
+  `mariadb` ;
+- fichiers rapatriés recopiés dans des dossiers vides, puis comparés au manifeste (absents,
+  tailles différentes) ; tables du cache recréées ; migrations en attente **signalées**, jamais
+  appliquées d'office ; journal `backup.restored` ; puis `check_integrity` ;
+- `restore.sh` fonctionne sur le poste de l'opérateur (dépôt) comme sur l'hébergement (livré
+  par `deploy.sh`) et affiche la durée, à comparer aux 4 heures de l'étude.
+
+**Copie hors hébergement** (`deploy/pull-backups.sh`, chez l'opérateur) : dumps copiés sans
+suppression ; fichiers en instantanés datés liés par `--link-dest` (un effacement sur le
+serveur n'atteint pas les copies prises), le dernier désigné par `latest` ; conservation
+locale de 30 jours ; empreinte du dernier dump et complétude de l'instantané vérifiées.
+Essayé en local avec un `ssh` simulé (`RSYNC_RSH`) : deux passages, mêmes inodes d'un
+instantané à l'autre, vérification conforme ; puis `restore.sh` à partir de cette copie :
+base et fichiers restaurés, `check_integrity` sans anomalie, en 4 secondes.
+
+**Déploiement** : `backup_db --required` avant `migrate` (promis en L1, jamais fait) : si une
+sauvegarde du cron tourne au même moment, le déploiement s'arrête au lieu de migrer sans
+sauvegarde fraîche (point d'extension `lock_busy` ajouté à `LockedCommand`).
+
+**Défaut trouvé, antérieur à L9 et grave** : `backend/var/` est ignoré par git, donc absent de
+l'archive envoyée ; le `rsync --delete` de `deploy.sh` l'aurait **effacé à chaque
+déploiement**, emportant les fichiers déposés (emplacement par défaut de
+`GESTCONF_FILES_DIR`) et désormais les sauvegardes. Aucune donnée réelle n'existait encore.
+`--exclude '/var/'` ajouté, avec un test.
+
+**CI** : le job du backend installe le client MariaDB (`mariadb-dump`, `mariadb`) pour le test
+de sauvegarde réelle, qui charge le dump dans une base neuve et vérifie une ligne témoin et
+la table des sessions vide.
+
+**Exploitation** : `deploy/README.md`, section « Sauvegarde et restauration » (cron, copie,
+restauration, test documenté, données personnelles des copies), et retour arrière après une
+migration fautive.
+
+**Tests** : `apps/core/tests/test_backups.py` (13 tests : rotation, nettoyage, fichier
+d'options, arguments du dump sans mot de passe, sessions en structure seule, client MySQL,
+dump en échec ou tronqué, sauvegarde SQLite avec manifeste, battement de cœur et journal,
+`--required`, manifeste altéré, recopie et vérification des fichiers, refus hors MariaDB, base
+vide ; sous MariaDB, dump réel puis chargement dans une base neuve et refus d'une base non
+vide) ; `tests/test_deploy_scripts.py` (sauvegarde avant `migrate`, `var/` protégé, copie
+sans suppression et à instantanés, restauration puis contrôle d'intégrité, cron) ;
+`shellcheck` des scripts.
+
+**Critère de fin** (« Tests au vert, restauration locale chronométrée ») : atteint.

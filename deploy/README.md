@@ -107,6 +107,12 @@ la cause et relancer `deploy.sh` (toutes les étapes sont idempotentes), ou red�
 commit (`git checkout <ancien commit>` puis `deploy.sh`). Les contrôles passent avant `migrate`
 pour qu'un avertissement n'arrête jamais le déploiement entre deux migrations appliquées.
 
+**Sauvegarde avant `migrate`** (plan L9, S3) : `deploy.sh` lance `backup_db --required` juste
+avant `migrate` ; si une sauvegarde du cron tourne au même moment, le déploiement s'arrête
+(relancer). Pour revenir en arrière après une migration fautive : redéployer l'ancien commit,
+puis restaurer cette sauvegarde dans une base neuve (voir « Sauvegarde et restauration ») et y
+pointer `DATABASE_URL`. Le premier déploiement, sur une base vide, ne sauvegarde rien.
+
 ### Le `.htaccess` racine
 
 cPanel écrit ses directives Passenger dans un `.htaccess`. Le script ne remplace
@@ -132,6 +138,7 @@ dossier de l'application et y écrit le chemin du venv (`VENV_ACTIVATE`) : le cr
 23 * * * *   $HOME/gestconf-app/deploy/cron.sh remind_presentations
 37 * * * *   $HOME/gestconf-app/deploy/cron.sh expire_registrations
 41 * * * *   $HOME/gestconf-app/deploy/cron.sh sync_payments
+7 2 * * *    $HOME/gestconf-app/deploy/cron.sh backup_db
 17 3 * * *   $HOME/gestconf-app/deploy/cron.sh cleanup
 47 3 * * *   $HOME/gestconf-app/deploy/cron.sh check_integrity
 53 6 * * *   $HOME/gestconf-app/deploy/cron.sh remind_tasks
@@ -206,6 +213,39 @@ dossier de l'application et y écrit le chemin du venv (`VENV_ACTIVATE`) : le cr
 - **Pillow** : roue binaire vérifiée par V28 (`deploy/check-o2switch.sh`). En cas d'échec, le
   repli de E4 s'applique sans changement de code (images non redimensionnées, JPEG portant un
   EXIF refusés) : retirer Pillow de `requirements/base.in`, recompiler, redéployer.
+
+### Sauvegarde et restauration (plan L9, S2 et S3 ; étude §11.6)
+
+**Aucune donnée réelle avant une restauration testée** (D18). Objectifs indicatifs : perte
+maximale 24 h, rétablissement sous 4 h (à valider par le commanditaire).
+
+- **Sauvegarde** : `backup_db`, cron quotidien (2 h 07). Dump MariaDB compressé et manifeste
+  (`gestconf-<date>.sql.gz` et `.json`) dans `GESTCONF_BACKUP_DIR` (défaut :
+  `var/backups` dans le dossier de l'application, 0700, hors de `public_html`). Identifiants
+  dans un fichier d'options temporaire en 0600, jamais sur la ligne de commande. Tables du
+  cache exclues ; sessions sauvegardées vides (une session est un titre d'accès). Rotation :
+  7 quotidiennes, 4 hebdomadaires, 3 mensuelles (`GESTCONF_BACKUP_KEEP_*`). Le manifeste
+  porte l'empreinte du dump, la dernière migration de chaque application et l'inventaire des
+  fichiers déposés. Échec : alerte e-mail aux opérateurs, battement de cœur en erreur.
+  Outil requis : `mariadb-dump` (ou `mysqldump`), contrôle V18.
+- **Copie hors hébergement** : `deploy/pull-backups.sh`, lancé par le cron **du poste ou du
+  serveur de l'opérateur** (jamais par l'hébergement), vers 2 h 40, après la sauvegarde et
+  avant `cleanup`. Dumps copiés sans suppression ; fichiers déposés en instantanés datés,
+  liés par `--link-dest` (un effacement sur l'hébergement n'atteint pas les copies prises) ;
+  conservation locale `PULL_KEEP_DAYS` (30 jours) ; empreinte et complétude vérifiées à
+  chaque passage. Les copies contiennent des données personnelles : dossier en 0700, disque
+  chiffré conseillé, mêmes durées de conservation que la plateforme.
+- **Restauration** : `deploy/restore.sh <dump> [<instantané>]`, sur le poste de l'opérateur
+  (dépôt, `backend/.venv`) ou sur l'hébergement (livré par `deploy.sh`), avec un
+  `DATABASE_URL` qui désigne une base **neuve** et des dossiers de fichiers **vides** :
+  `restore_db` refuse une base qui contient des tables, vérifie l'empreinte, recopie les
+  fichiers, les compare au manifeste, recrée les tables du cache et signale les migrations en
+  attente (sans les appliquer) ; puis `check_integrity`. La durée s'affiche à la fin.
+- **Test de restauration documenté** : avant l'ouverture de l'appel, puis avant la
+  conférence (étude §11.6) ; consigner la date, le dump, la durée et le résultat dans le
+  bilan du lot L9 et la fiche `docs/L1-verifications-o2switch.md`.
+- `var/` est exclu du `rsync --delete` du déploiement : sans cela, fichiers déposés et
+  sauvegardes par défaut seraient effacés à chaque déploiement (défaut trouvé en L9.1).
 
 ### Clés de la 2FA (plan L1 §4.10)
 
