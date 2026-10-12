@@ -44,7 +44,7 @@ from apps.reviews.models import (
     ReviewStatus,
 )
 from apps.reviews.services.assignments import lock_submission
-from apps.reviews.services.reviews import summary
+from apps.reviews.services.reviews import summaries, summarize
 from apps.submissions import workflow
 from apps.submissions.models import Submission, SubmissionFile, SubmissionFileKind
 from apps.submissions.models import SubmissionStatus as S
@@ -328,15 +328,19 @@ def ranking(
         Submission.objects.filter(edition=edition)
         .filter(status__in=(S.UNDER_REVIEW, S.REVIEWED, *OUTCOME_STATUS.values(), *FINAL_STATUSES))
         .exclude(status=S.REJECTED, decision__isnull=True)  # rejet de recevabilité
-        .select_related("edition", "track", "submission_type", "decision__assigned_type")
+        .select_related("track", "submission_type", "decision__assigned_type")
+        # Colonnes lues par le classement seulement (plan L9, S6 : 600 soumissions).
+        .defer("abstract", "keywords", "declarations", "withdraw_reason")
     )
     if track:
         submissions = submissions.filter(track__code=track)
     if submission_type:
         submissions = submissions.filter(submission_type__code=submission_type)
+    submissions = list(submissions)
+    states = summaries(submissions, edition=edition, detailed=False)
     rows = []
     for submission in submissions:
-        state = summary(submission)
+        state = states[submission.pk]
         rows.append(
             RankedSubmission(
                 submission=submission,
@@ -491,7 +495,11 @@ def export_reviews_csv(edition: Edition, *, actor: Actor) -> str:
         .order_by("assignment__submission__reference", "assignment__pseudonym_rank", "id")
     )
     codes = sorted({score.criterion.code for review in reviews for score in review.scores.all()})
-    finals: dict[int, Decimal | None] = {}
+    by_submission: dict[int, list[Review]] = {}
+    for review in reviews:
+        by_submission.setdefault(review.assignment.submission_id, []).append(review)
+    # Notes finales calculées sur les évaluations déjà chargées (aucune requête par ligne).
+    finals = {pk: summarize(items, edition).final for pk, items in by_submission.items()}
     output = io.StringIO()
     writer = csv.writer(output, delimiter=";", lineterminator="\r\n")
     writer.writerow(
@@ -520,8 +528,6 @@ def export_reviews_csv(edition: Edition, *, actor: Actor) -> str:
     )
     for review in reviews:
         submission = review.assignment.submission
-        if submission.pk not in finals:
-            finals[submission.pk] = summary(submission).final
         decision = getattr(submission, "decision", None)
         scores = {score.criterion.code: score.value for score in review.scores.all()}
         submitted = review.submitted_at.astimezone(zone).strftime("%Y-%m-%d %H:%M")

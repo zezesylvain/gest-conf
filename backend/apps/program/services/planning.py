@@ -732,7 +732,7 @@ def program_sessions(edition: Edition):
     nombre constant)."""
     return (
         Session.objects.filter(edition=edition)
-        .select_related("room", "track")
+        .select_related("edition", "room", "track")
         .prefetch_related(
             Prefetch("roles", queryset=SessionRole.objects.select_related("user__profile")),
             Prefetch(
@@ -740,6 +740,7 @@ def program_sessions(edition: Edition):
                 queryset=Slot.objects.select_related(
                     "speaker__profile",
                     "submission__submission_type",
+                    "submission__track",
                     "submission__presentation_confirmation",
                 ).prefetch_related("submission__authors"),
             ),

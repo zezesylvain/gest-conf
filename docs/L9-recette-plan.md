@@ -405,3 +405,68 @@ surveillance désactivée ; espace disque bas sur un dossier encore absent) ;
 dans les tests de fumée, directives de la CSP) ; `shellcheck`.
 
 **Critère de fin** (« Tests au vert ») : atteint.
+
+## 14. Bilan de L9.3 (12 octobre 2026)
+
+**Données de volume** (S6 ; application `apps/qa`, commande `seed_volume`) :
+
+- une conférence fictive dédiée (`gestconf-fictif`) et deux éditions : `FICTIFEVAL` (appel
+  clos, 600 soumissions en évaluation, 100 relecteurs, 1 200 affectations, 800 évaluations
+  envoyées) et `FICTIFAPPEL` (appel ouvert, 300 brouillons, 1 500 inscrits dont 1 000 payés
+  par virement enregistré, factures et pro forma émises), édition courante de l'API publique
+  pendant le test ;
+- **tout passe par les services métier** : statuts écrits par les workflows (règle n° 4),
+  règles de gestion appliquées, pièces numérotées ; seuls les comptes sont créés en masse,
+  avec un hachage de mot de passe unique ; mot de passe et secret TOTP tirés au hasard et
+  affichés une seule fois ; commande journalisée (`qa.volume_seeded`) ;
+- **aucun e-mail** : adresses en `@fictif.invalid` (domaine réservé, RFC 2606) ; la tâche
+  d'envoi annule tout message vers `.invalid` (test) ;
+- **garde-fous** : `--confirm-fictitious` exigé ; refus dès que la base contient un compte
+  hors du domaine fictif, une soumission ou une inscription hors de la conférence fictive
+  (les opérateurs n'ont pas besoin de compte, D1) ; refus si la conférence fictive existe ;
+- durée au volume de l'étude, MariaDB 10.11 locale : **528 s** (dont la génération des
+  2 500 pièces PDF ; 179 s sans elles) ; base de 29 Mio, 2 500 fichiers privés (60 Mio).
+
+**Précisions de S6** :
+
+- **pas de `purge_volume`** : une purge supprimerait des pièces comptables numérotées sans
+  trou et en ajout seul (RG-14) et des entrées du journal, et se heurterait aux clés
+  `RESTRICT`. Le retour à l'état antérieur se fait par la **sauvegarde prise juste avant**
+  (`backup_db`), restaurée dans une base neuve (`deploy/restore.sh`), ou par une base
+  réinstallée ; le runbook (L9.7) le décrit ;
+- les éditions sont repérées par leur conférence dédiée et non par un indicateur en base :
+  **aucun modèle nouveau** (§3).
+
+**Sauvegarde et restauration au volume** (S2, S3) : `backup_db` en **2,0 s** (dump compressé
+de 1,2 Mio, manifeste de 2 500 fichiers) ; `deploy/restore.sh` (dump, fichiers, comparaison
+au manifeste, tables du cache, `check_integrity`) en **6 s** dans une base vide, sans
+anomalie. L'objectif de rétablissement de 4 heures (§11.6) est loin ; la mesure sur
+l'hébergement reste à faire (L9.8).
+
+**Nombre de requêtes** (`tests/test_query_counts.py`, données de `seed_volume` à petite
+échelle) : les listes paginées (soumissions, évaluations par soumission, inscriptions,
+paiements, pièces) font le même nombre de requêtes pour 2 et pour 100 lignes ; les vues non
+paginées (affectations du relecteur, avancement, classement, statistiques, rapports,
+tableau de bord financier, liste hors ligne de l'accueil) restent sous un plafond inférieur
+au nombre de lignes lues ; le tableau du planificateur garde le même nombre de requêtes
+quand le programme triple (`apps/program/tests/test_api.py`).
+
+**Correctifs N+1** :
+
+- **classement** (`ranking`) : trois requêtes par soumission (77 pour 24 soumissions ;
+  1 800 au volume de l'étude) ; notes désormais calculées en une fois (`summaries`), sans
+  profil des relecteurs ni notes par critère, et sans les colonnes longues de la
+  soumission : **6 requêtes**, et au volume **436 ms → 102 ms** ;
+- **export des évaluations** : même calcul par soumission, remplacé par les évaluations déjà
+  chargées ;
+- **tableau du planificateur** : édition de chaque session et thématique de chaque
+  communication placée lues une à une (`program_sessions`) ; jointes à la requête.
+
+**Temps de réponse au volume** (MariaDB locale, réglages de développement, médiane de cinq
+appels) : soumissions (page de 100) 55 ms ; évaluations par soumission 42 ms ; avancement
+41 ms ; classement 102 ms ; rapport de relecture 170 ms ; affectations d'un relecteur 23 ms ;
+inscriptions (page de 100) 57 ms ; pièces 55 ms ; tableau de bord financier 37 ms ; liste
+hors ligne de l'accueil (1 000 inscrits confirmés) 227 ms. Mesures locales, **non
+transposables** à l'hébergement : le test de charge (L9.4, L9.8) fait foi.
+
+**Critère de fin** (« Tests au vert ») : atteint.

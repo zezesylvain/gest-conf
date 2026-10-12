@@ -15,7 +15,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
@@ -127,18 +127,8 @@ class Summary:
     divergent: bool
 
 
-def summary(submission: Submission) -> Summary:
-    edition = submission.edition
-    reviews = list(
-        Review.objects.filter(
-            assignment__submission=submission,
-            assignment__status=AssignmentStatus.ACTIVE,
-            status=ReviewStatus.SUBMITTED,
-        )
-        .select_related("assignment__reviewer__profile", "suggested_type")
-        .prefetch_related("scores__criterion")
-        .order_by("assignment__pseudonym_rank", "id")
-    )
+def summarize(reviews: list[Review], edition: Edition) -> Summary:
+    """Note finale, écart et divergence d'évaluations envoyées déjà chargées."""
     scored = [r for r in reviews if r.weighted_score is not None]
     spread = divergence(r.weighted_score for r in scored)
     return Summary(
@@ -150,6 +140,47 @@ def summary(submission: Submission) -> Summary:
         spread=spread,
         divergent=len(scored) > 1 and spread > edition.divergence_threshold,
     )
+
+
+def summaries(
+    submissions: Iterable[Submission], *, edition: Edition | None = None, detailed: bool = True
+) -> dict[int, Summary]:
+    """Notes de plusieurs soumissions en un nombre constant de requêtes (plan L9, S6 : le
+    classement en faisait trois par soumission). ``detailed=False`` (classement) : ni
+    relecteur, ni notes par critère, seulement la note pondérée, la confiance et la
+    recommandation ; ``edition`` évite de lire l'édition de chaque soumission."""
+    submissions = list(submissions)
+    by_submission: dict[int, list[Review]] = {submission.pk: [] for submission in submissions}
+    reviews = Review.objects.filter(
+        assignment__submission__in=submissions,
+        assignment__status=AssignmentStatus.ACTIVE,
+        status=ReviewStatus.SUBMITTED,
+    ).order_by("assignment__pseudonym_rank", "id")
+    if detailed:
+        reviews = reviews.select_related(
+            "assignment__reviewer__profile", "suggested_type"
+        ).prefetch_related("scores__criterion")
+    else:
+        reviews = reviews.select_related("assignment").only(
+            "id",
+            "status",
+            "weighted_score",
+            "confidence",
+            "recommendation",
+            "assignment__id",
+            "assignment__submission",
+            "assignment__pseudonym_rank",
+        )
+    for review in reviews:
+        by_submission[review.assignment.submission_id].append(review)
+    return {
+        submission.pk: summarize(by_submission[submission.pk], edition or submission.edition)
+        for submission in submissions
+    }
+
+
+def summary(submission: Submission) -> Summary:
+    return summaries([submission])[submission.pk]
 
 
 # --- Écriture d'une évaluation ------------------------------------------------------------

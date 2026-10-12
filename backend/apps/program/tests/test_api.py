@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import pytest
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 
 from apps.accounts.models import Profile
 from apps.accounts.roles import Role
@@ -208,3 +210,30 @@ def test_chair_reads_but_does_not_write_the_programme(world):
     chair = client_for(make_member(current, Role.CHAIR))
     assert chair.get(base(current)).status_code == 200
     assert chair.post(f"{base(current)}/rooms", {"name": "Salle C"}).status_code == 403
+
+
+def test_board_query_count_does_not_grow_with_sessions_and_slots(world):
+    """Plan L9, S6 : le tableau du planificateur (sessions, créneaux, présentateurs, à
+    placer, conflits) garde le même nombre de requêtes quand le programme grandit."""
+    current, client, room = world
+
+    def grow(day: int) -> None:
+        other = planning.create_room(current, {"name": f"Salle {day}"}, actor=COMMAND)
+        for index, place in enumerate((room, other)):
+            item = session(
+                current, local(day, 9 + 2 * index), local(day, 10 + 2 * index), room=place
+            )
+            for _ in range(2):
+                planning.place_submission(item, confirmed(current, duration=20), actor=COMMAND)
+        confirmed(current, duration=20)  # reste à placer
+
+    grow(1)
+    client.get(base(current))
+    with CaptureQueriesContext(connection) as few:
+        assert client.get(base(current)).status_code == 200
+    grow(2)
+    grow(3)
+    with CaptureQueriesContext(connection) as many:
+        board = client.get(base(current)).json()
+    assert sum(len(item["slots"]) for item in board["sessions"]) == 12
+    assert len(many) == len(few)

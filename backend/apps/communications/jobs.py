@@ -17,6 +17,9 @@ from apps.core.models import Job
 
 logger = logging.getLogger(__name__)
 
+# Domaine réservé (RFC 2606) des comptes fictifs (apps.qa) : jamais d'envoi.
+RESERVED_TEST_DOMAIN = ".invalid"
+
 
 def message_id(email: OutboxEmail) -> str:
     """``Message-ID`` dérivé de l'identifiant : un doublon d'envoi reste repérable."""
@@ -58,6 +61,13 @@ def send_email(job: Job) -> None:
     """
     email = OutboxEmail.objects.filter(pk=job.payload["outbox_id"]).first()
     if email is None or email.status in (OutboxStatus.SENT, OutboxStatus.CANCELLED):
+        return
+    if email.to_email.lower().endswith(RESERVED_TEST_DOMAIN):
+        # Données fictives du test de charge et de la recette (plan L9, S6) : domaine réservé
+        # (RFC 2606), aucun envoi ; l'e-mail reste au registre, annulé.
+        OutboxEmail.objects.filter(pk=email.pk).update(
+            status=OutboxStatus.CANCELLED, last_error="domaine réservé .invalid"
+        )
         return
     if email.purged_at is not None:
         # Corps sensible purgé avant tout envoi (cron arrêté plus de 24 h) : rien à envoyer.
