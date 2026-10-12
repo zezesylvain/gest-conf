@@ -52,7 +52,8 @@ SECURE_HSTS_SECONDS = env.int("DJANGO_SECURE_HSTS_SECONDS", default=31536000)
 # Les sous-domaines de l'offre ne sont pas connus (étude §11.2) : désactivé par défaut.
 SECURE_HSTS_INCLUDE_SUBDOMAINS = env.bool("DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS", default=False)
 
-# La redirection HTTP -> HTTPS est faite par Apache (.htaccess). L'activer aussi
+# La redirection HTTP -> HTTPS est faite par cPanel (« Forcer la redirection HTTPS »,
+# deploy/README.md), vérifiée par deploy/smoke-test.sh. L'activer aussi
 # dans Django n'est sûr que si Passenger transmet bien le schéma HTTPS :
 # à vérifier avec le champ « secure » de /api/v1/health avant de l'activer.
 SECURE_SSL_REDIRECT = env.bool("DJANGO_SECURE_SSL_REDIRECT", default=False)
@@ -60,7 +61,7 @@ SECURE_SSL_REDIRECT = env.bool("DJANGO_SECURE_SSL_REDIRECT", default=False)
 SILENCED_SYSTEM_CHECKS = [
     # W005 : includeSubDomains, cf. ci-dessus (choix explicite, configurable).
     "security.W005",
-    # W008 : redirection HTTPS assurée par Apache, cf. ci-dessus.
+    # W008 : redirection HTTPS assurée par cPanel, cf. ci-dessus.
     "security.W008",
     # W021 : le préchargement HSTS engage durablement le domaine et ses
     # sous-domaines ; décision à prendre avec le commanditaire.

@@ -5,6 +5,7 @@ import { HealthStatus } from '../models/health-status';
 import { JobsStatus } from '../models/jobs-status';
 import { ServiceStatus } from '../models/service-status';
 export interface Health {
+  backup: JobsStatus;
   cache: ServiceStatus;
   database: ServiceStatus;
   jobs: JobsStatus;

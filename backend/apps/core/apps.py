@@ -10,7 +10,9 @@ class CoreConfig(AppConfig):
         # Enregistre les extensions drf-spectacular (authentification par session).
         from apps.core import schema  # noqa: F401
         from apps.core.integrity import (
+            check_backup_age,
             check_cache_size,
+            check_disk_space,
             check_failed_jobs,
             register_integrity_check,
         )
@@ -32,6 +34,8 @@ class CoreConfig(AppConfig):
         register_integrity_check("core.cache_size", check_cache_size)
         register_integrity_check("core.failed_jobs", check_failed_jobs)
         register_integrity_check("core.public_files_missing", check_missing_files)
+        register_integrity_check("core.backup_age", check_backup_age)
+        register_integrity_check("core.disk_space", check_disk_space)
         register_personal_data(
             "core.audit",
             models=("core.AuditLog",),

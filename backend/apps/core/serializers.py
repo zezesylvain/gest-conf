@@ -39,6 +39,8 @@ class HealthSerializer(serializers.Serializer):
     cache = serializers.ChoiceField(choices=ServiceStatus.choices)
     # Sans effet sur « status » : un cron arrêté n'empêche pas l'API de répondre.
     jobs = serializers.ChoiceField(choices=JobsStatus.choices)
+    # Dernière sauvegarde réussie (backup_db, plan L9, S4) ; mêmes états que la file.
+    backup = serializers.ChoiceField(choices=JobsStatus.choices)
     secure = serializers.BooleanField(
         help_text="Vrai si Django voit la requête comme HTTPS (contrôle du déploiement)."
     )

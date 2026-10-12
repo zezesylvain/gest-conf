@@ -121,6 +121,21 @@ def jobs_status() -> JobsStatus:
     return JobsStatus.LATE if timezone.now() - last_success > late_after else JobsStatus.OK
 
 
+def backup_status() -> JobsStatus:
+    """État de la sauvegarde d'après le battement de cœur de ``backup_db`` (plan L9, S4)."""
+    from apps.core.backups import latest_backup_success
+
+    try:
+        last_success = latest_backup_success()
+    except DatabaseError:
+        logger.exception("Battement de cœur de backup_db illisible")
+        return JobsStatus.UNKNOWN
+    if last_success is None:
+        return JobsStatus.UNKNOWN
+    late_after = timedelta(hours=settings.GESTCONF_BACKUP_MAX_AGE_HOURS)
+    return JobsStatus.LATE if timezone.now() - last_success > late_after else JobsStatus.OK
+
+
 class HealthView(APIView):
     """Sonde de disponibilité (supervision externe et tests de fumée du déploiement)."""
 
@@ -141,6 +156,7 @@ class HealthView(APIView):
             "database": ServiceStatus.OK if db_ok else ServiceStatus.ERROR,
             "cache": ServiceStatus.OK if cache_ok else ServiceStatus.ERROR,
             "jobs": jobs_status() if db_ok else JobsStatus.UNKNOWN,
+            "backup": backup_status() if db_ok else JobsStatus.UNKNOWN,
             "secure": request.is_secure(),
             "release": settings.GESTCONF_RELEASE,
         }

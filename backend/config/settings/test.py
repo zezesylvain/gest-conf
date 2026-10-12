@@ -24,6 +24,8 @@ PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
 EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
 DEFAULT_FROM_EMAIL = "GEST-CONF <no-reply@conference.test>"
 GESTCONF_CRON_INTERVAL_SECONDS = 300
+# Contrôles du stockage (sauvegarde, disque) : activés par les tests qui les concernent.
+GESTCONF_STORAGE_MONITORING = False
 ADMINS = []
 
 # Gabarits d'e-mails propres aux tests (tests/templates).

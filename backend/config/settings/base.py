@@ -520,6 +520,11 @@ GESTCONF_BACKUP_KEEP_DAILY = env.int("GESTCONF_BACKUP_KEEP_DAILY", default=7)
 GESTCONF_BACKUP_KEEP_WEEKLY = env.int("GESTCONF_BACKUP_KEEP_WEEKLY", default=4)
 GESTCONF_BACKUP_KEEP_MONTHLY = env.int("GESTCONF_BACKUP_KEEP_MONTHLY", default=3)
 GESTCONF_BACKUP_MAX_AGE_HOURS = env.int("GESTCONF_BACKUP_MAX_AGE_HOURS", default=26)
+# Surveillance du stockage par check_integrity (plan L9, S4) : sauvegarde en retard, espace
+# disque libre sous le seuil (en Mio) sur les disques des fichiers et des sauvegardes.
+# Désactivée dans les réglages de test, sauf dans les tests qui la concernent.
+GESTCONF_STORAGE_MONITORING = env.bool("GESTCONF_STORAGE_MONITORING", default=True)
+GESTCONF_DISK_FREE_MIN_MB = env.int("GESTCONF_DISK_FREE_MIN_MB", default=1024)
 # Durées de conservation de D15 : simulation seule tant qu'elles ne sont pas validées
 # par le commanditaire (les purges imposées par la sécurité s'appliquent toujours).
 GESTCONF_RETENTION_ENFORCED = env.bool("GESTCONF_RETENTION_ENFORCED", default=False)

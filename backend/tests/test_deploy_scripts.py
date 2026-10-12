@@ -294,3 +294,43 @@ def test_restore_script_restores_then_checks_integrity():
     assert code.index("manage.py restore_db") < code.index("manage.py check_integrity")
     assert "--files-from" in code
     assert RESTORE_SCRIPT.stat().st_mode & 0o111
+
+
+SMOKE_SCRIPT = REPO_DIR / "deploy" / "smoke-test.sh"
+PORTAL_HTACCESS = REPO_DIR / "deploy" / "apache" / "public_html.htaccess"
+
+
+def test_smoke_test_checks_security_headers_and_https_redirect():
+    """Plan L9, S7 : les en-têtes du .htaccess sont dans <IfModule mod_headers.c> et
+    disparaîtraient sans bruit si le module manquait ; la redirection HTTPS (cPanel) aussi."""
+    code = shell_code(SMOKE_SCRIPT)
+    for header in ("x-content-type-options", "x-frame-options", "referrer-policy"):
+        assert f'has_header "$headers" {header}' in code
+    assert "strict-transport-security 'max-age=[1-9]'" in code
+    assert '"http://${BASE_URL#https://}/fr/"' in code
+    assert "(301|308)" in code
+    assert 'json_has "$health" backup \'"ok"\'' in code
+
+
+def test_portal_csp_header_lists_every_fetch_directive_but_scripts():
+    """Plan L9, bilan de L9.0 : pas de default-src dans l'en-tête, qui s'appliquerait aux
+    scripts et bloquerait les scripts en ligne autorisés par la CSP à empreintes de chaque
+    page (<meta>) ; chaque autre directive de chargement y est donc explicite."""
+    text = PORTAL_HTACCESS.read_text(encoding="utf-8")
+    policy = re.search(r'Content-Security-Policy "([^"]+)"', text).group(1)
+    directives = {part.split()[0] for part in policy.split(";") if part.strip()}
+    assert "default-src" not in directives and "script-src" not in directives
+    fetch = {
+        "object-src",
+        "frame-src",
+        "img-src",
+        "font-src",
+        "style-src",
+        "connect-src",
+        "media-src",
+        "manifest-src",
+        "worker-src",
+    }
+    assert fetch <= directives
+    assert {"base-uri", "form-action", "frame-ancestors"} <= directives
+    assert "frame-ancestors 'none'" in policy and "object-src 'none'" in policy

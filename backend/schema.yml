@@ -13153,12 +13153,15 @@ components:
           $ref: '#/components/schemas/ServiceStatus'
         jobs:
           $ref: '#/components/schemas/JobsStatus'
+        backup:
+          $ref: '#/components/schemas/JobsStatus'
         secure:
           type: boolean
           description: Vrai si Django voit la requête comme HTTPS (contrôle du déploiement).
         release:
           type: string
       required:
+      - backup
       - cache
       - database
       - jobs

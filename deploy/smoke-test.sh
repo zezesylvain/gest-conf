@@ -49,6 +49,21 @@ check "portail : CSP à empreintes en <meta> sur /fr/" "$(has_meta_csp "$body" &
 
 headers=$("${CURL[@]}" -D - -o /dev/null "$BASE_URL/fr/")
 check "portail : en-tête CSP présent" "$(has_header "$headers" content-security-policy 'frame-ancestors' && echo 1)"
+# En-têtes de sécurité du .htaccess (plan L9, S7) : ils sont dans <IfModule mod_headers.c>
+# et disparaîtraient sans bruit si le module manquait.
+check "portail : nosniff, X-Frame-Options, Referrer-Policy" \
+  "$(has_header "$headers" x-content-type-options 'nosniff' \
+    && has_header "$headers" x-frame-options 'DENY' \
+    && has_header "$headers" referrer-policy 'same-origin' && echo 1)"
+if [[ "$BASE_URL" == https://* ]]; then
+  check "portail : HSTS (Strict-Transport-Security)" \
+    "$(has_header "$headers" strict-transport-security 'max-age=[1-9]' && echo 1)"
+  # Redirection HTTP -> HTTPS : faite par cPanel (« Forcer la redirection HTTPS »).
+  redirect=$("${CURL[@]}" -D - -o /dev/null "http://${BASE_URL#https://}/fr/")
+  check "HTTPS : http:// redirige vers https:// (301 ou 308)" \
+    "$(grep -Eq '^HTTP/[0-9.]+ (301|308)' <<<"$redirect" \
+      && has_header "$redirect" location 'https://' && echo 1)"
+fi
 
 # Portail pré-rendu (deploy.sh, E9) : page complète, référencement, plan du site. Un portail
 # rendu dans le navigateur (SKIP_PORTAL=1, pas encore de --portal-only) est signalé, pas
@@ -116,6 +131,13 @@ check "API : health -> cache OK (table créée par createcachetable)" "$(json_ha
 # File de tâches : le cron run_jobs est passé avec succès récemment (deploy/cron.sh, crontab).
 # « unknown » au tout premier déploiement, tant que la crontab n'a pas tourné une fois.
 check "API : health -> jobs OK (cron run_jobs actif)" "$(json_has "$health" jobs '"ok"' && echo 1)"
+# Sauvegarde (plan L9, S4) : « late » = plus de GESTCONF_BACKUP_MAX_AGE_HOURS sans backup_db
+# réussi ; « unknown » (aucune encore, premier déploiement) n'est qu'une information.
+if json_has "$health" backup '"unknown"'; then
+  printf '  INFO    %s\n' "API : aucune sauvegarde encore (cron backup_db, deploy/README.md)"
+else
+  check "API : health -> sauvegarde récente (cron backup_db)" "$(json_has "$health" backup '"ok"' && echo 1)"
+fi
 check "API : en-tête X-Robots-Tag noindex sur /api/" "$(has_header "$health" x-robots-tag 'noindex' && echo 1)"
 if [[ "$BASE_URL" == https://* ]]; then
   check "API : Django voit la requête en HTTPS (secure=true)" "$(json_has "$health" secure true && echo 1)"

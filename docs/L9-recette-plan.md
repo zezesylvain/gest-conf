@@ -363,3 +363,45 @@ sans suppression et à instantanés, restauration puis contrôle d'intégrité, 
 `shellcheck` des scripts.
 
 **Critère de fin** (« Tests au vert, restauration locale chronométrée ») : atteint.
+
+## 13. Bilan de L9.2 (12 octobre 2026)
+
+**Supervision** (S4) :
+
+- `/v1/health` gagne `backup` (`ok`, `late`, `unknown`), lu dans le battement de cœur de
+  `backup_db` : `late` au-delà de `GESTCONF_BACKUP_MAX_AGE_HOURS` (26 h). Comme `jobs`, il ne
+  rend pas l'API indisponible ; aucune autre information n'est exposée ;
+- `check_integrity` signale par e-mail aux opérateurs (D17) une sauvegarde absente ou en
+  retard (`core.backup_age`) et un espace libre sous `GESTCONF_DISK_FREE_MIN_MB` (1 024 Mio)
+  sur le disque des fichiers ou des sauvegardes (`core.disk_space`). **Limite** : la mesure
+  est celle du système de fichiers ; un quota propre au compte (CloudLinux) n'y apparaît pas
+  (**non vérifié**, M07) ;
+- ces deux contrôles dépendent de `GESTCONF_STORAGE_MONITORING` (actif par défaut, désactivé
+  dans les réglages de test sauf pour leurs propres tests) ;
+- la surveillance externe (disponibilité de `/` et de `/api/v1/health`) reste à configurer par
+  l'opérateur (runbook, L9.7).
+
+**Tests de fumée** (S7) :
+
+- en-têtes `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy` et, en HTTPS,
+  `Strict-Transport-Security` : ils sont dans `<IfModule mod_headers.c>` et disparaîtraient
+  sans bruit si le module manquait ;
+- redirection `http://` vers `https://` (301 ou 308) ;
+- état de la sauvegarde : `ok` exigé, `unknown` signalé sans échec (premier déploiement).
+
+**Redirection HTTPS** : une seule voie, **cPanel** (« Forcer la redirection HTTPS »), comme le
+dit le README ; le commentaire de `config/settings/prod.py`, qui parlait du `.htaccess`, est
+corrigé.
+
+**CSP** : `default-src` écarté (bilan de L9.0) ; un test vérifie que l'en-tête du portail
+énumère chaque directive de chargement hors scripts, sans `default-src` ni `script-src`.
+
+**Schéma et client** : `Health.backup` (énumération `JobsStatus`), schéma validé sous
+MariaDB, client TypeScript régénéré ; vérification des types des trois projets du front.
+
+**Tests** : `apps/core/tests/test_monitoring.py` (sauvegarde absente, en retard, à jour,
+surveillance désactivée ; espace disque bas sur un dossier encore absent) ;
+`test_health.py` (état de la sauvegarde) ; `test_deploy_scripts.py` (en-têtes et redirection
+dans les tests de fumée, directives de la CSP) ; `shellcheck`.
+
+**Critère de fin** (« Tests au vert ») : atteint.
