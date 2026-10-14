@@ -46,7 +46,10 @@ class MeEditionSerializer(serializers.Serializer):
     roles = EditionRoleSerializer(many=True)
     capabilities = serializers.ListField(child=serializers.ChoiceField(choices=CAPABILITY_CHOICES))
     mfa_required = serializers.BooleanField(
-        help_text="Un rôle de l'édition impose la 2FA pour les routes de gestion (D3)."
+        help_text=(
+            "La 2FA est imposée pour les routes de gestion de l'édition : rôle de gestion "
+            "(D3) et plateforme qui l'impose (T1). Faux quand elle est optionnelle."
+        )
     )
 
 

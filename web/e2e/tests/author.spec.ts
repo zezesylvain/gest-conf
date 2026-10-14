@@ -43,7 +43,9 @@ import { freshTotpCode } from '../totp';
  *     la liste, repas et régime compté sans nom, poste de bénévole et « Mon planning » ;
  * 16. communication : annonce au bandeau (visible aussitôt sur le portail) et envoi groupé
  *     (RG-22), questionnaire publié, réponse anonyme (RG-21), résultats sous le seuil puis
- *     au-dessus, rapport exporté.
+ *     au-dessus, rapport exporté ;
+ * 17. 2FA optionnelle (décision T1) : un CO sans 2FA se connecte sans code et ouvre la
+ *     gestion, qui la lui recommande.
  */
 test.describe.configure({ mode: 'serial' });
 
@@ -65,6 +67,7 @@ let seed: {
   conference_chair: string;
   finance: string;
   participant: string;
+  volunteers_lead: string;
   volunteer: string;
   secretariat: string;
   signatory: string;
@@ -96,7 +99,8 @@ function submissionStatus(): string {
   );
 }
 
-/** Connexion d'un membre du comité : mot de passe, puis code TOTP (2FA imposée, D3, H2). */
+/** Connexion d'un membre du comité : mot de passe, puis code TOTP (2FA activée sur ces
+ * comptes ; optionnelle depuis T1, elle est alors demandée à chaque connexion). */
 async function committeeLogin(
   browser: Browser,
   email: string,
@@ -1067,4 +1071,28 @@ test('communication : bandeau, envoi groupé, questionnaire, rapport', async ({ 
   );
   await communication.getByRole('button', { name: 'Exporter (PDF)' }).click();
   expect((await download).status()).toBe(200);
+});
+
+test('2FA optionnelle (T1) : un CO sans 2FA ouvre la gestion sans code', async ({ browser }) => {
+  const context = await browser.newContext({
+    baseURL: 'http://localhost:4200',
+    locale: 'fr-FR',
+    viewport: { width: 1280, height: 900 },
+  });
+  const page = await context.newPage();
+  await page.goto('/compte/connexion');
+  await page.getByLabel('Adresse e-mail').fill(seed.volunteers_lead);
+  await page.getByLabel('Mot de passe').fill(seed.password);
+  await page.getByRole('button', { name: 'Se connecter' }).click();
+  // Pas d'étape « double authentification » : le compte ne l'a pas activée.
+  await expect(page).toHaveURL(/\/compte$/);
+
+  const base = `${GESTION}/editions/${seed.edition}`;
+  await page.goto(base);
+  await expect(page.locator('main')).toContainText('Elle est facultative, mais recommandée');
+  await expectAccessible(page, 'gestion : tableau de bord sans 2FA');
+  // Les routes de gestion répondent : aucun renvoi vers l'activation de la 2FA.
+  await page.goto(`${base}/logistique/benevoles`);
+  await expect(page.locator('main')).toContainText('Accueil des participants');
+  await expect(page).toHaveURL(/logistique\/benevoles/);
 });

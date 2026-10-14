@@ -367,10 +367,7 @@
   <section class="card" aria-labelledby="mfa-title">
     <h2 id="mfa-title">{{ 'gestion.dashboard.mfaTitle' | translate }}</h2>
     <p>
-      {{
-        (mfaEnabled() ? 'gestion.dashboard.mfaEnabled' : 'gestion.dashboard.mfaDisabled')
-          | translate
-      }}
+      {{ mfaStatusKey() | translate }}
       <a href="/compte/securite">{{ 'gestion.dashboard.manageSecurity' | translate }}</a>
     </p>
   </section>

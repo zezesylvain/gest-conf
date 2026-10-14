@@ -22,11 +22,13 @@ comité scientifique », `SC_MEMBER`) ; il vaut aussi pour le président du comi
 
 1. Ouvrir le lien de l'e-mail d'invitation (valable 14 jours) ; se connecter, ou créer son
    compte, **avec l'adresse invitée** ; « Accepter l'invitation ».
-2. **Activer la double authentification**, obligatoire : portail, `/compte/securite` ›
+2. **Activer la double authentification**, facultative mais vivement recommandée (vous lisez
+   des travaux inédits ; obligatoire si l'exploitant l'impose) : portail, `/compte/securite` ›
    « Activer la double authentification » ; scanner le QR code avec une application
    (FreeOTP, Aegis, Google Authenticator…), saisir le code, **conserver les codes de
    secours**.
-3. Ensuite, à chaque connexion : `/compte/connexion`, mot de passe, puis code à 6 chiffres ;
+3. Ensuite, à chaque connexion : `/compte/connexion`, mot de passe, puis, si elle est
+   activée, code à 6 chiffres ;
    « Accéder à l'espace de gestion » (ou `/gestion/`).
 4. **Évaluation › Mes expertises** (`expertises`) : cochez vos thématiques de compétence,
    « Enregistrer ». Elles guident le président dans les affectations.

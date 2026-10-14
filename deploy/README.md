@@ -249,6 +249,11 @@ maximale 24 h, rétablissement sous 4 h (à valider par le commanditaire).
 
 ### Clés de la 2FA (plan L1 §4.10)
 
+- **2FA optionnelle ou imposée** (décision T1) : par défaut, la 2FA est optionnelle ; elle est
+  demandée à chaque connexion des comptes qui l'ont activée. `GESTCONF_MFA_ENFORCED=true` dans
+  le `.env`, puis redémarrage de Passenger, l'impose aux rôles de gestion ; revenir à `false`
+  la rend de nouveau optionnelle. Aucune donnée ne change : seul le contrôle d'accès varie. La
+  clé ci-dessous reste obligatoire dans les deux cas.
 - **Génération** : `python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"`.
 - **Sauvegarde** : la clé est conservée **hors de l'hébergement, séparément des sauvegardes de
   la base** (sinon le vol d'une sauvegarde livre aussi la clé). Sa perte rend toutes les 2FA

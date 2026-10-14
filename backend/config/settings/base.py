@@ -207,13 +207,18 @@ HEADLESS_FRONTEND_URLS = {
     "account_signup": f"{GESTCONF_PUBLIC_URL}/compte/inscription",
 }
 
-# --- 2FA : allauth.mfa (décisions D2, D3 ; plan L1 §4.2, §4.4, §4.10) ---------------------
+# --- 2FA : allauth.mfa (décisions D2, D3, T1 ; plan L1 §4.2, §4.4, §4.10) -----------------
 # TOTP et codes de secours seulement (ni WebAuthn ni « appareil de confiance »).
 MFA_ADAPTER = "apps.accounts.adapters.MFAAdapter"
 MFA_SUPPORTED_TYPES = ["totp", "recovery_codes"]
 MFA_TRUST_ENABLED = False
 # Garde conservée : pas de 2FA avec une adresse non vérifiée (409 « unverified_email »).
 MFA_ALLOW_UNVERIFIED_EMAIL = False
+# Décision T1 (2FA optionnelle, à la demande du commanditaire, 14 octobre 2026) : chacun
+# active la 2FA s'il le souhaite (« Sécurité ») ; une fois activée sur un compte, elle est
+# demandée à la connexion et vérifiée sur les routes de gestion. ``true`` l'impose de nouveau
+# aux rôles de MFA_REQUIRED_ROLES (D3, H2, K1, K18) : 403 ``mfa_enrollment_required``.
+GESTCONF_MFA_ENFORCED = env.bool("GESTCONF_MFA_ENFORCED", default=False)
 # Clés Fernet (base64 urlsafe, 32 octets) chiffrant le secret TOTP et la graine des codes
 # de secours, séparées par des virgules : la première chiffre, toutes déchiffrent
 # (MultiFernet). Obligatoire en production (prod.py) ; rotation : rotate_mfa_keys.

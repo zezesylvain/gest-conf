@@ -11,7 +11,8 @@ Adresses relatives à `/gestion/editions/<n°>/` ; conventions dans le [README](
   expertises, Pilotage de l'évaluation, Classement et décisions), Programme (lecture),
   Rapports, Paramétrage (lecture, sauf les grilles), Comités (membres du comité
   scientifique seulement).
-- Double authentification obligatoire ; certaines opérations redemandent votre mot de
+- Double authentification facultative mais recommandée (obligatoire si l'exploitant
+  l'impose) ; certaines opérations redemandent votre mot de
   passe (voir [presidence-administration.md](presidence-administration.md), § 2).
 - Vous voyez l'**identité des auteurs** (Soumissions, fiche complète), nécessaire pour juger
   des conflits d'intérêts. Les relecteurs ne la reçoivent jamais en double aveugle (RG-04) :

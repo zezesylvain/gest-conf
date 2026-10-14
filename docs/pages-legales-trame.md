@@ -189,7 +189,8 @@ durées validées par le commanditaire ; ne publier que celles-là.]
 ### 2.8 Sécurité
 
 Résumé à publier (sans détail exploitable) : connexions chiffrées (HTTPS), mots de passe
-hachés, double authentification obligatoire pour les rôles de gestion, secrets de double
+hachés, double authentification proposée à tous et recommandée pour les rôles de gestion
+(obligatoire si l'exploitant l'impose : adapter le texte au réglage retenu), secrets de double
 authentification chiffrés, droits vérifiés par le serveur pour chaque rôle et chaque édition,
 évaluation en double aveugle garantie par le serveur, fichiers stockés hors de l'espace
 public et servis après contrôle d'accès, journal des actions sensibles, sauvegardes

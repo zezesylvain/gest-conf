@@ -12,7 +12,7 @@ Plateforme de gestion de conférences scientifiques : portail public, espace de 
 | Frontend | Angular (version stable courante), composants autonomes, signaux — workspace avec 2 applications (`portail`, `gestion`) + bibliothèque `shared` |
 | Base de données | MariaDB, InnoDB, `utf8mb4` |
 | Hébergement | o2switch mutualisé, **un seul domaine** : `/` portail, `/gestion/` back-office, `/api/` Django via Passenger |
-| Auth | `django-allauth` en mode *headless* (client `browser` seul) + sessions + CSRF (pas de JWT dans le navigateur), 2FA TOTP par `allauth.mfa` (décision D2 ; `django-otp` abandonné, faute d'intégration headless) imposée côté serveur aux rôles de gestion, ORCID (P2) |
+| Auth | `django-allauth` en mode *headless* (client `browser` seul) + sessions + CSRF (pas de JWT dans le navigateur), 2FA TOTP par `allauth.mfa` (décision D2 ; `django-otp` abandonné, faute d'intégration headless), **optionnelle** depuis T1 et imposable côté serveur aux rôles de gestion (`GESTCONF_MFA_ENFORCED`), ORCID (P2) |
 | API | REST `/api/v1/`, OpenAPI via `drf-spectacular`, client TypeScript généré pour Angular. Authentification : endpoints allauth tels quels sous `/api/_allauth/browser/v1/`, consommés par une façade TypeScript écrite à la main et couverte par des tests de contrat (décision D4) |
 
 ## Règles non négociables
@@ -131,6 +131,7 @@ Les URL Django sont déclarées **sans** le préfixe `/api` (`v1/...`) : `config
 | L7 — Jour J et attestations | **Livré en code et testé en local** (L7.0 à L7.8, E2E compris) ; bilan [`docs/L7-jour-j.md`](docs/L7-jour-j.md). L7.0 à L7.7 fusionnés dans `main` (PR #12), L7.8 et le correctif du test RG-16 (PR #13). Ouverts : Q17 (prestataire de signature qualifiée), nom complet du pays sur les badges, démo H sur téléphones réels |
 | L8 — Logistique, partenaires, communication et reporting | **Livré en code, testé en local et en CI** (L8.0 à L8.10, E2E compris ; PR #13, fusionnée) ; bilan [`docs/L8-logistique.md`](docs/L8-logistique.md). Ouverts : questions du §10 du plan (hypothèses retenues), plafond d'e-mails réel sur o2switch, en-tête `List-Unsubscribe` |
 | L9 — Recette, sécurité, charge | **Volet du dépôt livré et testé en local** (L9.0 à L9.7 et L9.9, E2E et audit d'accessibilité compris) ; bilan [`docs/L9-recette.md`](docs/L9-recette.md). **Volet de l'hébergement (L9.8) à faire** : runbook [`docs/L9-runbook-o2switch.md`](docs/L9-runbook-o2switch.md) exécuté sur o2switch par un opérateur du commanditaire (cette session n'y a pas accès), dont la restauration chronométrée, le test de charge et la recette des démos A à I. Pas de PR ouverte pour L9 (poussé sur la branche) |
+| T1 — 2FA optionnelle | **Livrée en code et testée en local** (demande du commanditaire du 14 octobre 2026, E2E compris) ; [`docs/T1-2fa-optionnelle.md`](docs/T1-2fa-optionnelle.md). Ouvert : choix de `GESTCONF_MFA_ENFORCED` en production (P-11) |
 | L10 et suivants | Non commencés |
 
 ## Décisions du lot L1
@@ -166,7 +167,7 @@ Bilan du lot : [`docs/L3-soumission.md`](docs/L3-soumission.md).
 
 Les décisions H1 à H19 du plan [`docs/L4-evaluation-plan.md`](docs/L4-evaluation-plan.md) ont été validées le 5 octobre 2026. Elles sont reportées dans l'étude, **§20 « Mises à jour issues du lot L4 »**, qui prévaut sur les sections antérieures (§17 à §19 compris). Points à retenir :
 
-- espace évaluateur dans la gestion (rubrique « Évaluations »), 2FA imposée à `SC_MEMBER` ; capacités `reviews.*`, `decisions.*`, `grids.write` ; le CO n'a aucun accès aux évaluations ;
+- espace évaluateur dans la gestion (rubrique « Évaluations »), 2FA imposée à `SC_MEMBER` (optionnelle depuis T1, sauf `GESTCONF_MFA_ENFORCED`) ; capacités `reviews.*`, `decisions.*`, `grids.write` ; le CO n'a aucun accès aux évaluations ;
 - RG-04 : tout sérialiseur relecteur dérive de `ReviewerSerializer` ou `ReviewerModelSerializer` (`apps/reviews/anonymity.py`, liste blanche contrôlée par méta-test) ; toute route `reviewer-…` doit figurer dans `LEAK_TESTED_ROUTES` (`apps/reviews/tests/test_anonymity.py`) avec son test de fuite (`test_leaks.py`), sous peine d'échec de la suite ;
 - note pondérée calculée par le serveur seul (`apps/reviews/services/scoring.py`, `Decimal`) ; grille verrouillée à la première évaluation (RG-05) ;
 - décisions provisoires invisibles des auteurs, transitions et e-mails à la publication seulement (RG-09) ; côté auteur, commentaires sous pseudonymes « Relecteur N », jamais de note ni de commentaire au comité (RG-10) ; `REVISION_REQUESTED` non utilisé (`accepted_minor`) ;
@@ -210,7 +211,7 @@ Bilan du lot : [`docs/L6-inscriptions.md`](docs/L6-inscriptions.md).
 
 Les décisions K1 à K17 du plan [`docs/L7-jour-j-plan.md`](docs/L7-jour-j-plan.md) ont été validées le 6 octobre 2026, avec K18 (rôle signataire, Q11) et K19 (modèle officiel et signature électronique, Q14) issues des réponses du commanditaire. Elles sont reportées dans l'étude, **§23 « Mises à jour issues du lot L7 »**, qui prévaut sur les sections antérieures (§17 à §22 compris). Points à retenir :
 
-- application `events` (pointages, signatures, modèles, attestations, lettres) ; rôles `VOLUNTEER` (invitable dès L7, 2FA) et `SIGNATORY` (12ᵉ rôle, 2FA, seul à déposer sa signature) ; capacités `checkin.scan`, `checkin.manage`, `certificates.manage`, `letters.manage`, `signature.manage`, `sessions.chair` (présidence vérifiée session par session) ;
+- application `events` (pointages, signatures, modèles, attestations, lettres) ; rôles `VOLUNTEER` (invitable dès L7, 2FA, optionnelle depuis T1) et `SIGNATORY` (12ᵉ rôle, 2FA, optionnelle depuis T1, seul à déposer sa signature) ; capacités `checkin.scan`, `checkin.manage`, `certificates.manage`, `letters.manage`, `signature.manage`, `sessions.chair` (présidence vérifiée session par session) ;
 - **QR du badge = titre d'accès** : le serveur n'accepte que le jeton, jamais son empreinte ; badges PDF `fpdf2` générés à la demande, jamais stockés ; badge perdu = nouveau jeton ; une inscription en attente de paiement est refusée à l'accueil ;
 - **accueil hors ligne** (PWA sous `/gestion/accueil`, service worker ajouté par cet écran seul) : liste d'empreintes valable 48 heures, file de pointages revérifiée par le serveur (lots de 200, clé d'idempotence), effacées à la déconnexion ; 504 du service worker = serveur injoignable ; `npm run build` régénère `ngsw.json` après la CSP (`scripts/check-ngsw.mjs`) ; décodeur du QR (`jsQR`) préparé dès l'ouverture de l'écran ;
 - `SCHEDULED → PRESENTED` par le président de séance (délégation `register_actor_grant` déclarée par `events`), le CO « programme » ou l'administrateur ; correction motivée ;
@@ -253,6 +254,18 @@ Les décisions S1 à S16 du plan [`docs/L9-recette-plan.md`](docs/L9-recette-pla
 - **ordre sur l'hébergement** (runbook) : vérifications, déploiement, cron 48 h, restauration chronométrée, borne des envois, **charge puis restauration**, ZAP, **recette** (`seed_demo`, cahier `docs/L9-cahier-de-recette.md`), base propre, surveillance externe, check-list `docs/L9-mise-en-production.md` ; l'ouverture de l'appel est la décision du commanditaire.
 
 Bilan du lot (volet du dépôt) : [`docs/L9-recette.md`](docs/L9-recette.md).
+
+## Décision postérieure au lot L9 : 2FA optionnelle (T1)
+
+À la demande du commanditaire, validée le 14 octobre 2026 ; reportée dans l'étude, **§26** (version 1.10), qui prévaut pour la 2FA sur D2, D3, H2, K1 et K18. Points à retenir :
+
+- 2FA **optionnelle par défaut** pour tous les rôles ; `GESTCONF_MFA_ENFORCED=true` l'impose de nouveau aux rôles de `MFA_REQUIRED_ROLES`, à l'identique d'avant (choix du commanditaire, check-list P-11) ;
+- un compte qui a activé la 2FA la voit demandée à chaque connexion, et `MfaVerified` exige une session validée par elle sur ses routes de gestion (`mfa_required`), dans les deux modes ; `EditionAccess.mfa_protected` (rôle concerné) et `mfa_required` (imposée) sont distincts ;
+- `/v1/me` : `editions[].mfa_required` vrai seulement en mode imposé ; les écrans disent « obligatoire » ou « facultative, mais recommandée » selon ce drapeau ;
+- tests : le mode imposé par `override_settings(GESTCONF_MFA_ENFORCED=True)` ; le mode optionnel par `test_t1_two_factor_authentication_is_optional_by_default` ; E2E : un CO « bénévoles » sans 2FA ;
+- revue de sécurité : constat R18, accepté ; recommandation d'imposer la 2FA avant l'évaluation et le jour J.
+
+Décision et bilan : [`docs/T1-2fa-optionnelle.md`](docs/T1-2fa-optionnelle.md).
 
 ## Questions ouvertes (étude §15, à ne pas trancher seul)
 

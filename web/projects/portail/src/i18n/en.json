@@ -157,6 +157,7 @@
         "mfaEnabled": "Two-factor authentication is enabled on your account.",
         "mfaDisabled": "Two-factor authentication is not enabled on your account.",
         "mfaRequiredHint": "It is mandatory for management roles: administration, chairs, organising and scientific committees.",
+        "mfaRecommendedHint": "It is optional, but recommended for management roles: administration, chairs, organising and scientific committees, volunteers and signatories. Once enabled, the code is asked at every sign-in.",
         "enable": "Enable two-factor authentication",
         "scanLead": "Scan this QR code with your authenticator app (FreeOTP, Aegis, Google Authenticator…), then enter the code it shows.",
         "qrAlt": "Two-factor authentication setup QR code",
@@ -221,6 +222,7 @@
         "declined": "Invitation declined.",
         "accepted": "Welcome! You now have the role “{{role}}”.",
         "mfaReminder": "Management roles require two-factor authentication: enable it under “Security” if you have not already.",
+        "mfaRecommendedReminder": "Two-factor authentication is optional, but recommended for management roles: you can enable it under “Security”.",
         "notPending": {
           "pending": "Pending.",
           "accepted": "This invitation has already been accepted.",

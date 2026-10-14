@@ -65,6 +65,16 @@ export class InvitationPage implements OnInit {
   protected readonly state = signal<InvitationState>('loading');
   protected readonly invitation = signal<InvitationLookup | null>(null);
   protected readonly accepted = signal<AcceptedRole | null>(null);
+  /** Rappel de la 2FA : obligatoire si la plateforme l'impose dans l'édition (T1). */
+  protected readonly mfaReminderKey = computed(() => {
+    const editionId = this.accepted()?.edition_id;
+    const required = this.meStore
+      .me()
+      ?.editions.some((edition) => edition.id === editionId && edition.mfa_required);
+    return required
+      ? 'portail.account.invitation.mfaReminder'
+      : 'portail.account.invitation.mfaRecommendedReminder';
+  });
   protected readonly offerLink = signal(false);
   protected readonly busy = signal(false);
   protected readonly errors = signal<string[]>([]);

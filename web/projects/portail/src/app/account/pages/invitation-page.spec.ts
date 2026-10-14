@@ -41,7 +41,7 @@ describe('InvitationPage', () => {
         ...provideAccountTesting(),
         { provide: AccountService, useValue: account },
         { provide: SessionStore, useValue: { authenticated } },
-        { provide: MeStore, useValue: { load: vi.fn().mockResolvedValue({}) } },
+        { provide: MeStore, useValue: { me: () => null, load: vi.fn().mockResolvedValue({}) } },
       ],
     });
     await useTestLanguage('fr');
@@ -77,6 +77,8 @@ describe('InvitationPage', () => {
     await click(fixture, "Accepter l'invitation");
     expect(account['acceptInvitation']).toHaveBeenCalledWith('jeton-secret');
     expect(fixture.nativeElement.textContent).toContain('Bienvenue');
+    // T1 : 2FA facultative par défaut, recommandée.
+    expect(fixture.nativeElement.textContent).toContain('facultative, mais recommandée');
   });
 
   it('compte sans l’adresse invitée : lien de confirmation proposé (RG-20)', async () => {

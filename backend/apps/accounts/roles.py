@@ -228,9 +228,11 @@ CAPABILITIES: Mapping[str, frozenset[Capability]] = {
     Role.SIGNATORY: frozenset({C.SIGNATURE_MANAGE}),
 }
 
-# 2FA imposée côté serveur à l'accès aux routes de gestion d'une édition (D3). SC_MEMBER
+# Rôles dont les routes de gestion d'une édition sont placées sous la 2FA (D3). SC_MEMBER
 # depuis L4 (H2) : un relecteur lit des travaux inédits. VOLUNTEER et SIGNATORY depuis L7
 # (K1, K18) : le bénévole lit la liste des participants, le signataire signe pour l'édition.
+# Décision T1 : la 2FA n'y est **imposée** que si ``GESTCONF_MFA_ENFORCED`` est vrai ; sinon
+# elle est optionnelle, et vérifiée seulement pour les comptes qui l'ont activée.
 MFA_REQUIRED_ROLES: frozenset[str] = frozenset(
     {
         Role.ADMIN,

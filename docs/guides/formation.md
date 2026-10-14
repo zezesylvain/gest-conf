@@ -73,8 +73,9 @@ python manage.py seed_demo --confirm-fictitious    # édition DEMO, courante sur
 
 ## 3. Points à souligner dans chaque atelier
 
-- **Double authentification** : obligatoire pour la gestion, vérifiée par le serveur ; codes
-  de secours à conserver ; téléphone perdu sans code de secours = l'exploitant.
+- **Double authentification** : facultative mais recommandée pour la gestion (l'exploitant
+  peut l'imposer) ; une fois activée, demandée à chaque connexion et vérifiée par le serveur ;
+  codes de secours à conserver ; téléphone perdu sans code de secours = l'exploitant.
 - **Réauthentification** : fenêtre « Confirmez votre identité » sur les opérations sensibles
   (publications, exports, paiements, rôles) ; ce n'est pas une panne.
 - **Droits par édition** : le rail ne montre que ce que vos rôles permettent ; « Rôle actif »

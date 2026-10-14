@@ -3,8 +3,8 @@
 
 | | |
 |---|---|
-| **Version** | 1.9 – document de cadrage, mis à jour après les lots L1 (§17), L2 (§18), L3 (§19), L4 (§20), L5 (§21), L6 (§22), L7 (§23), L8 (§24) et L9 (§25, volet du dépôt) |
-| **Date** | 12 octobre 2026 |
+| **Version** | 1.10 – document de cadrage, mis à jour après les lots L1 (§17), L2 (§18), L3 (§19), L4 (§20), L5 (§21), L6 (§22), L7 (§23), L8 (§24) et L9 (§25, volet du dépôt), puis 2FA optionnelle (§26) |
+| **Date** | 14 octobre 2026 |
 | **Auteur** | Étude réalisée pour ZDS |
 | **Statut** | Pour validation |
 | **Stack imposée** | Django (sans admin) · Angular · MariaDB · o2switch (mono-domaine) |
@@ -1911,6 +1911,37 @@ Les décisions S1 à S16 du plan [`docs/L9-recette-plan.md`](docs/L9-recette-pla
 - **Reste à faire sur o2switch** (L9.8, opérateur) : tout le runbook, dont la restauration chronométrée, le test de charge et la recette ; les démos A à I n'y ont toujours pas été jouées.
 - **À trancher** (plan, §10, hypothèses en vigueur) et **questions nées du lot** : catégories tarifaires réservées (une catégorie à 0 est choisissable par tous) ; désabonnement des annonces appliqué ou non aux invitations des questionnaires (RG-22) ; ouverture de l'écran « Sessions du jour » à la présidence désignée dans le programme ; Dependabot. Toujours ouverts : Q7, Q8, Q14, Q17 ; `ACCEPTED_MINOR → WITHDRAWN`.
 - **Sans écran aujourd'hui** (écarts constatés avec l'étude) : page « Contact », « Mon programme » du participant (J15), indisponibilités des intervenants, connexion ORCID (P2), accès des co-auteurs à la soumission.
+
+## 26. Double authentification optionnelle (version 1.10)
+
+À la demande du commanditaire (14 octobre 2026), la double authentification devient **optionnelle** : décision **T1**, option retenue « optionnelle par défaut, pour tous les rôles », réversible par un paramètre de l'hébergement. **Pour la 2FA, cette section prévaut sur les sections précédentes**, notamment D2 et D3 (§17), H2 (§20), K1 et K18 (§23). Détail : [`docs/T1-2fa-optionnelle.md`](docs/T1-2fa-optionnelle.md).
+
+### 26.1 Décision T1
+
+- La 2FA (TOTP d'`allauth.mfa`, codes de secours) reste **proposée à tous** dans « Mon compte › Sécurité » ; elle n'est plus **imposée** aux rôles de gestion.
+- `GESTCONF_MFA_ENFORCED` (variable d'environnement, **faux par défaut**) l'impose de nouveau, à l'identique de D3, H2, K1 et K18, aux rôles `ADMIN`, `CHAIR`, `SC_CHAIR`, `OC_MEMBER`, `SC_MEMBER`, `VOLUNTEER` et `SIGNATORY` (`MFA_REQUIRED_ROLES`). Le choix revient au commanditaire (check-list de mise en production, P-11).
+- Inchangés : chiffrement des secrets (`GESTCONF_MFA_ENCRYPTION_KEYS`, toujours obligatoire en production), `reset_mfa`, `rotate_mfa_keys`, réauthentification des opérations sensibles (D12). Aucun modèle, aucune migration.
+
+### 26.2 Comportement
+
+- **Compte sans 2FA** : connexion par mot de passe seul ; la gestion s'ouvre selon les capacités du compte, sans renvoi vers l'activation.
+- **Compte avec 2FA** : le code est demandé à chaque connexion ; sur les routes de gestion des rôles concernés, `MfaVerified` exige toujours une session validée par la 2FA (403 `mfa_required`, puis code) : un compte qui l'a choisie en bénéficie pleinement.
+- **Mode imposé** : comportement de D3 inchangé (403 `mfa_enrollment_required` sans 2FA, puis `mfa_required`).
+- `/v1/me` : `editions[].mfa_required` n'est vrai que si la 2FA est imposée.
+- **Écrans** : tableau de bord de la gestion, page « Sécurité », invitation acceptée et fiche d'aide « Double authentification » disent « obligatoire » ou « facultative, mais recommandée » selon le mode.
+- `seed_demo` et le parcours de bout en bout gardent la 2FA activée sur les comptes du comité (la recette joue la connexion en deux étapes) ; le seed du parcours ajoute un CO « bénévoles » sans 2FA.
+
+### 26.3 Sécurité
+
+- Revue de sécurité : constat **R18** (gravité moyenne), **accepté par le commanditaire** : un compte de gestion sans 2FA n'est protégé que par son mot de passe, alors que relecteurs, bénévoles, signataire et administrateurs accèdent à des données sensibles ; le contrôle ASVS 4.3.1 n'est conforme qu'en mode imposé.
+- Atténuations : 2FA recommandée dans les écrans, vérifiée pour tout compte qui l'a activée, mots de passe de 12 caractères, limitation des échecs de connexion, réauthentification des opérations sensibles.
+- **Recommandation** : l'imposer (`GESTCONF_MFA_ENFORCED=true`) au moins avant l'ouverture de l'évaluation et du jour J.
+
+### 26.4 Tests
+
+- `apps/accounts/tests/test_mfa.py` : mode optionnel (accès sans 2FA, step-up pour un compte qui l'a activée, désactivation) et mode imposé (`override_settings`).
+- Matrice des droits : `test_t1_two_factor_authentication_is_optional_by_default`, pour chaque rôle concerné ; les cas de D3, H2, K1 et K18 tournent en mode imposé.
+- Parcours de bout en bout : étape 17, un CO sans 2FA se connecte sans code et ouvre la gestion (20 tests).
 
 ---
 

@@ -22,8 +22,10 @@ participants, ne laissez traîner ni planches ni fichiers de badges.
 ## 2. Avant le jour J (bénévole)
 
 1. Accepter l'invitation (lien de l'e-mail, valable 14 jours), avec l'adresse invitée.
-2. **Activer la double authentification**, obligatoire : portail, `/compte/securite` ›
-   « Activer la double authentification » ; conserver les codes de secours.
+2. **Activer la double authentification**, facultative mais recommandée (l'accueil lit la
+   liste des participants ; obligatoire si l'exploitant l'impose) : portail,
+   `/compte/securite` › « Activer la double authentification » ; conserver les codes de
+   secours.
 3. **Jour J › Mon planning** (`jour-j/mon-planning`) : vos postes, lieux, horaires à l'heure
    du lieu et consignes ; « Télécharger mon planning (iCal) », à retélécharger après un
    changement. Chaque affectation ou retrait vous est notifié.

@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { AuthApi, AuthResult, MeStore } from '@gestconf/shared';
+import { AuthApi, AuthResult, Me, MeStore } from '@gestconf/shared';
 import { TEST_ME, useTestLanguage } from '@gestconf/shared/testing';
 
 import { AccountService } from '../../account.service';
@@ -28,8 +28,10 @@ const RECOVERY = {
 
 describe('MfaSection', () => {
   let api: Record<string, ReturnType<typeof vi.fn>>;
+  let me: Me;
 
   beforeEach(async () => {
+    me = TEST_ME;
     api = {
       authenticators: vi.fn().mockResolvedValue([]),
       totpSetup: vi.fn(),
@@ -49,7 +51,7 @@ describe('MfaSection', () => {
         },
         {
           provide: MeStore,
-          useValue: { me: () => TEST_ME, load: vi.fn().mockResolvedValue(TEST_ME) },
+          useValue: { me: () => me, load: vi.fn().mockResolvedValue(TEST_ME) },
         },
       ],
     });
@@ -97,6 +99,29 @@ describe('MfaSection', () => {
     expect(api['activateTotp']).toHaveBeenCalledWith('123456');
     expect(root.textContent).toContain('11112222');
     expect(root.textContent).toContain('est activée');
+  });
+
+  it('T1 : 2FA facultative par défaut, obligatoire si la plateforme l’impose', async () => {
+    let fixture = await render();
+    expect(fixture.nativeElement.textContent).toContain('facultative, mais recommandée');
+    me = {
+      ...TEST_ME,
+      editions: [
+        {
+          id: 1,
+          code: 'TEST',
+          title_fr: 'Test',
+          title_en: 'Test',
+          year: 2026,
+          status: 'published',
+          roles: [{ role: 'CHAIR', oc_function: '' }],
+          capabilities: [],
+          mfa_required: true,
+        },
+      ],
+    };
+    fixture = await render();
+    expect(fixture.nativeElement.textContent).toContain('Elle est obligatoire');
   });
 
   it('adresse non vérifiée : activation impossible, message explicite', async () => {

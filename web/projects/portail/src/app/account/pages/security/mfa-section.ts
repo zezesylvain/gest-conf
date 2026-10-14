@@ -66,7 +66,14 @@ type MfaStep = 'loading' | 'disabled' | 'setup' | 'enabled';
         }
         @case ('disabled') {
           <p>{{ 'portail.account.security.mfaDisabled' | translate }}</p>
-          <p class="hint">{{ 'portail.account.security.mfaRequiredHint' | translate }}</p>
+          <p class="hint">
+            {{
+              (mfaRequired()
+                ? 'portail.account.security.mfaRequiredHint'
+                : 'portail.account.security.mfaRecommendedHint'
+              ) | translate
+            }}
+          </p>
           <button mat-flat-button type="button" (click)="startSetup()" [disabled]="busy()">
             {{ 'portail.account.security.enable' | translate }}
           </button>
@@ -199,6 +206,10 @@ export class MfaSection implements OnInit {
   });
   /** 2FA active mais session pas encore validée par un code (gestion refusée). */
   protected readonly needsStepUp = computed(() => this.meStore.me()?.mfa_verified === false);
+  /** La plateforme impose la 2FA dans l'une des éditions du compte (T1 : optionnelle sinon). */
+  protected readonly mfaRequired = computed(
+    () => this.meStore.me()?.editions.some((edition) => edition.mfa_required) === true,
+  );
 
   async ngOnInit(): Promise<void> {
     await this.refresh();

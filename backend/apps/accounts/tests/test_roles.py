@@ -52,7 +52,9 @@ def test_capabilities_table_covers_every_role():
 
 def test_mfa_required_roles_match_d3_h2_and_k1_k18():
     """D3, et H2 (plan L4) : la 2FA s'impose aussi aux relecteurs (SC_MEMBER) ; K1 et K18
-    (plan L7) : aux bénévoles, qui lisent la liste des participants, et aux signataires."""
+    (plan L7) : aux bénévoles, qui lisent la liste des participants, et aux signataires.
+    T1 : ces rôles ne sont soumis à la 2FA que si la plateforme l'impose, ou si le compte l'a
+    activée."""
     assert {
         Role.ADMIN,
         Role.CHAIR,

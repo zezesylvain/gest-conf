@@ -71,8 +71,9 @@
   défaut, une catégorie d'inscription « Chercheur » avec ses tarifs, les mentions de
   facturation, deux salles ;
 - un compte par rôle (§1.4), adresses `<nom>@fictif.invalid` : domaine réservé, **aucun e-mail
-  ne leur parvient** ; un mot de passe commun et un secret TOTP commun (tous les comptes à rôle
-  de gestion, 2FA obligatoire), affichés **une seule fois** ;
+  ne leur parvient** ; un mot de passe commun et un secret TOTP commun (2FA activée sur tous
+  les comptes à rôle de gestion : facultative depuis T1, elle est alors demandée à chaque
+  connexion), affichés **une seule fois** ;
 - refus si la base contient un compte, une soumission ou une inscription réels, ou si l'édition
   `DEMO` existe déjà ; commande journalisée (`qa.demo_seeded`).
 
@@ -190,8 +191,8 @@ elle-même n'est pas rejouable (une édition publiée ne revient pas en brouillo
 | B1 | `admin` | 1. Se connecter ; saisir un code TOTP faux, puis le bon.<br>2. Ouvrir la gestion. | « Code incorrect. », puis gestion ouverte sur « Pilotage › Tableau de bord » de `DEMO` ; « Double authentification : Activée sur votre compte. » | D2, D3 | ☐ OK ☐ KO |
 | B2 | B1 | 1. « Paramétrage › Informations générales » : thème FR et EN, lieu, ville ; « Enregistrer ».<br>2. « Paramétrage › Calendrier » : lire l'heure de l'édition et « Votre heure ».<br>3. Ouvrir `https://<domaine>/api/v1/public/editions/current`. | « Modifications enregistrées. » ; heures saisies et affichées dans le fuseau de l'édition ; l'API publique renvoie `DEMO`, publiée, avec les textes FR et EN modifiés | D13, D14 | ☐ OK ☐ KO |
 | B3 | B1 ; R2 sans compte | 1. « Comités › Invitations » : inviter R2, rôle « président du comité scientifique », langue, message.<br>2. R2 : ouvrir le lien de l'e-mail, créer un compte, vérifier l'adresse, rouvrir le lien, « Accepter l'invitation ». | Invitation « En attente », puis acceptée ; « Bienvenue ! Vous avez maintenant le rôle … » | RG-20, D6 | ☐ OK ☐ KO |
-| B4 | B3 | 1. R2 : « Accéder à l'espace de gestion ».<br>2. « Sécurité » : « Activer la double authentification », scanner le QR, saisir le code, noter les codes de secours.<br>3. Rouvrir la gestion. | Avant : « Activez la double authentification pour accéder à l'espace de gestion. » ; après : tableau de bord, paramétrage en lecture seule | D3, D8 | ☐ OK ☐ KO |
-| B5 | B4 ; R3 sans compte ; R1 | 1. R2 : « Comités › Invitations », inviter R3 (« membre du comité scientifique »).<br>2. Ouvrir le lien d'abord connecté avec R1.<br>3. R3 : créer son compte depuis le lien, accepter, activer la 2FA. | R2 ne peut inviter que des membres du CS et « Membres » ne montre que le CS ; avec R1 : « Votre compte ne contrôle pas l'adresse invitée… » ; R3 arrive sur « Évaluation › Mes évaluations » (vide) | RG-20, H1, H2 | ☐ OK ☐ KO |
+| B4 | B3 | 1. R2 : « Accéder à l'espace de gestion ».<br>2. « Sécurité » : « Activer la double authentification », scanner le QR, saisir le code, noter les codes de secours.<br>3. Se déconnecter, se reconnecter, rouvrir la gestion. | 2FA optionnelle (réglage par défaut, T1) : avant, tableau de bord ouvert, paramétrage en lecture seule, « Non activée. Elle est facultative, mais recommandée… » ; après, le code est demandé à la connexion, puis « Activée sur votre compte. ». Si l'exploitant l'impose (`GESTCONF_MFA_ENFORCED=true`) : avant, « Activez la double authentification pour accéder à l'espace de gestion. » | D3, D8, T1 | ☐ OK ☐ KO |
+| B5 | B4 ; R3 sans compte ; R1 | 1. R2 : « Comités › Invitations », inviter R3 (« membre du comité scientifique »).<br>2. Ouvrir le lien d'abord connecté avec R1.<br>3. R3 : créer son compte depuis le lien, accepter, activer la 2FA (recommandée). | R2 ne peut inviter que des membres du CS et « Membres » ne montre que le CS ; avec R1 : « Votre compte ne contrôle pas l'adresse invitée… » ; R3 arrive sur « Évaluation › Mes évaluations » (vide) | RG-20, H1, H2 | ☐ OK ☐ KO |
 | B6 | B5 ; `relecteur1` | R3 (puis `relecteur1`) : saisir `/gestion/editions/<id>/parametrage/general` ; facultatif : outils de développement, onglet Réseau. | Aucun écran de paramétrage dans le rail ; page « Accès refusé » ; l'API répond 403 | D8, règle n° 2 | ☐ OK ☐ KO |
 | B7 | B1 à B6 | `admin` : « Contrôle › Journal », filtrer `invitation.`, `role.`, puis `edition.updated`. | Chaque étape (invitation créée, acceptée, rôle attribué, édition modifiée) avec acteur, date, avant et après ; adresses masquées | RG-17 | ☐ OK ☐ KO |
 

@@ -418,4 +418,5 @@ def test_me_lists_pending_invitations_and_roles(edition, chair):
     assert me_chair["editions"][0]["id"] == edition.pk
     assert me_chair["editions"][0]["roles"] == [{"role": "CHAIR", "oc_function": ""}]
     assert "edition.publish" in me_chair["editions"][0]["capabilities"]
-    assert me_chair["editions"][0]["mfa_required"] is True
+    # T1 : 2FA optionnelle par défaut (imposée seulement par GESTCONF_MFA_ENFORCED).
+    assert me_chair["editions"][0]["mfa_required"] is False

@@ -14,7 +14,9 @@ from collections.abc import Callable
 from dataclasses import dataclass
 
 import pytest
+from allauth.mfa.models import Authenticator
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import override_settings
 from django.urls import URLPattern, URLResolver, get_resolver
 from django.utils import timezone
 from rest_framework.test import APIClient
@@ -23,7 +25,7 @@ from apps.accounts.models import InvitationStatus, RoleInvitation, UserRole, Use
 from apps.accounts.roles import Role
 from apps.accounts.services.invitations import pending_key, token_hash
 from apps.accounts.tests.factories import VerifiedUserFactory
-from apps.accounts.tests.roles_helpers import client_for, make_member
+from apps.accounts.tests.roles_helpers import client_for, enable_totp, make_member
 from apps.conferences.models import EditionStatus
 from apps.conferences.tests.factories import (
     EditionFactory,
@@ -36,6 +38,9 @@ from apps.core.models import PublicFileKind
 from apps.portal.models import MenuItem, Page, PageSection, Section
 
 pytestmark = pytest.mark.django_db
+
+# Décision T1 : 2FA optionnelle par défaut ; les cas du mode imposé portent ce décorateur.
+ENFORCED = override_settings(GESTCONF_MFA_ENFORCED=True)
 
 # --- Spécification (§5.2), recopiée à la main --------------------------------------------
 
@@ -2600,6 +2605,7 @@ def test_matrix_archived_edition_is_read_only(world):
             assert response.json()["code"] == "edition_archived"
 
 
+@ENFORCED
 def test_manage_response_order_401_404_403_mfa():
     """D5, §4.4 : l'ordre des contrôles ne révèle pas l'existence d'une édition, et la 2FA
     n'est demandée qu'à un membre qui détient la capacité (401 → 404 → 403 → 403 mfa)."""
@@ -2713,8 +2719,10 @@ def test_every_manage_route_is_in_matrix():
     assert missing == []
 
 
+@ENFORCED
 def test_h2_reviewer_routes_require_two_factor_authentication(world):
-    """H2 (plan L4) : la 2FA est imposée aux relecteurs (SC_MEMBER) sur leurs routes."""
+    """H2 (plan L4) : la 2FA est imposée aux relecteurs (SC_MEMBER) sur leurs routes, quand
+    la plateforme l'impose (T1)."""
     _edition, users, ids = world
     path = f"/v1/manage/editions/{ids['e']}/reviews/assignments"
     response = client_for(users["SC_MEMBER"], mfa=False).get(path)
@@ -2757,9 +2765,10 @@ def test_k1_volunteers_committee_sees_and_manages_volunteers_only(world):
 @pytest.mark.parametrize(
     ("profile", "route"), [("VOLUNTEER", "checkin/summary"), ("SIGNATORY", "signature")]
 )
+@ENFORCED
 def test_k1_k18_volunteer_and_signatory_require_two_factor_authentication(world, profile, route):
     """K1 et K18 (plan L7) : 2FA imposée aux bénévoles et aux signataires, annoncée par
-    ``/v1/me`` et exigée sur leurs routes."""
+    ``/v1/me`` et exigée sur leurs routes (quand la plateforme l'impose, T1)."""
     edition, users, ids = world
     client = client_for(users[profile], mfa=False)
     mine = next(
@@ -2768,3 +2777,34 @@ def test_k1_k18_volunteer_and_signatory_require_two_factor_authentication(world,
     assert mine["mfa_required"] is True
     response = client.get(f"/v1/manage/editions/{ids['e']}/{route}")
     assert (response.status_code, response.json()["code"]) == (403, "mfa_enrollment_required")
+
+
+@pytest.mark.parametrize(
+    ("profile", "route"),
+    [
+        ("ADMIN", ""),
+        ("CHAIR", ""),
+        ("SC_CHAIR", "reviews/assignments"),
+        ("SC_MEMBER", "reviews/assignments"),
+        ("OC_FINANCE", "registrations"),
+        ("VOLUNTEER", "checkin/summary"),
+        ("SIGNATORY", "signature"),
+    ],
+)
+def test_t1_two_factor_authentication_is_optional_by_default(world, profile, route):
+    """T1 : 2FA optionnelle par défaut pour chaque rôle de ``MFA_REQUIRED_ROLES`` ; sans 2FA,
+    la route répond et ``/v1/me`` ne l'annonce pas ; une fois activée sur le compte, une
+    session non validée par elle reçoit ``mfa_required``."""
+    edition, users, ids = world
+    user = users[profile]
+    Authenticator.objects.filter(user=user).delete()
+    client = client_for(user, mfa=False)
+    mine = next(
+        item for item in client.get("/v1/me").json()["editions"] if item["id"] == edition.pk
+    )
+    assert mine["mfa_required"] is False
+    path = f"/v1/manage/editions/{ids['e']}/{route}".rstrip("/")
+    assert client.get(path).status_code == 200
+    enable_totp(user)
+    response = client.get(path)
+    assert (response.status_code, response.json()["code"]) == (403, "mfa_required")

@@ -44,6 +44,7 @@ cette revue ne le remplace pas.
 | R15 | CSP : `style-src 'unsafe-inline'` | A05 | Info | **Accepté** : styles des composants Angular ; `script-src` à empreintes (`inject-csp.mjs`), aucun gestionnaire en ligne |
 | R16 | En-tête `Server` avec version (vu par ZAP sur le serveur de développement) | A05 | Info | **À vérifier** sur l'hébergement (ZAP de l'opérateur) ; hors de portée du `.htaccess` |
 | R17 | Pas d'antivirus des PDF déposés | V12.4 | Faible | **Question 9 du plan** (hypothèse : accepté) : type vérifié par le contenu, PDF chiffré refusé, réécrit en double aveugle, téléchargement authentifié |
+| R18 | 2FA optionnelle (décision T1 du 14 octobre 2026, à la demande du commanditaire) : un compte de gestion sans 2FA n'est protégé que par son mot de passe ; or ces comptes lisent des travaux inédits (relecteurs), la liste des participants (bénévoles), signent (signataire) ou administrent | A07, V4.3.1 | Moyenne | **Accepté par le commanditaire**, réversible : `GESTCONF_MFA_ENFORCED=true` rétablit D3 sans autre changement ; atténuations : 2FA proposée et recommandée dans les écrans, vérifiée pour tout compte qui l'a activée, mot de passe de 12 caractères, limitation des échecs de connexion, réauthentification des opérations sensibles. Recommandation : l'imposer au moins avant l'ouverture de l'évaluation et du jour J (check-list, P-11) |
 
 Aucun constat critique ou élevé.
 
@@ -54,7 +55,7 @@ Aucun constat critique ou élevé.
 - Capacités par rôle et par édition (`apps/accounts/roles.py`), vérifiées par le serveur :
   `HasCapability` refuse toute action non déclarée ; `EditionScopedViewMixin` lit l'édition dans
   l'URL, renvoie 404 aux non-membres et filtre les querysets par édition ;
-  `ManageViewSet` = authentification + capacité + 2FA.
+  `ManageViewSet` = authentification + capacité + 2FA (imposée, ou activée par le compte : T1).
 - **Matrice des droits** : 281 couples route × méthode × 19 profils
   (`tests/test_matrix.py::test_matrix`, `::test_matrix_stale_reauthentication`,
   `::test_matrix_archived_edition_is_read_only`, `::test_every_manage_route_is_in_matrix`,
@@ -112,12 +113,14 @@ Aucun constat critique ou élevé.
 - Dépendances verrouillées à empreintes, installées avec `--require-hashes` (CI et
   `deploy.sh`) ; `pip-audit` et `npm audit` en CI.
 
-### A07 — Identification et authentification : **conforme après R8**
+### A07 — Identification et authentification : **conforme après R8 ; R18 accepté (2FA optionnelle)**
 
 - allauth headless : connexion par e-mail, vérification obligatoire, prévention de
   l'énumération (`test_no_timing_oracle_on_signup`, `…_on_password_request`).
 - Mots de passe de 12 caractères au moins, communs et numériques refusés (R8).
-- 2FA imposée aux rôles de gestion (`MFA_REQUIRED_ROLES`), code non rejouable ; session de 12 h
+- 2FA des rôles de gestion (`MFA_REQUIRED_ROLES`) : **optionnelle depuis la décision T1**
+  (R18), imposée si `GESTCONF_MFA_ENFORCED=true` ; une fois activée sur un compte, demandée à la
+  connexion et vérifiée sur chaque route de gestion ; code non rejouable ; session de 12 h
   absolues ; clé de session renouvelée à la connexion ; autres sessions fermées au changement de
   mot de passe.
 
@@ -144,7 +147,7 @@ Aucun constat critique ou élevé.
 |---|---|---|---|
 | V2 Authentification | 2.1.1 longueur ≥ 12 ; 2.2.1 anti-automatisation ; 2.8 TOTP | R8 ; `test_too_many_failed_logins_are_throttled` ; `test_same_code_cannot_be_replayed` | Conforme |
 | V3 Sessions | 3.2.1 nouvelle clé à la connexion ; 3.3.1 déconnexion ; 3.3.2 durée absolue ; 3.4 cookies | `test_session_key_is_renewed_at_login` ; `test_absolute_session_timeout` ; `HttpOnly`, `Secure`, `SameSite=Lax` | Conforme |
-| V4 Contrôle d'accès | 4.1.1 côté serveur ; 4.2.1 objets d'autrui ; 4.3.1 2FA d'administration | matrice des droits ; tests 404 ; `MfaVerified` | Conforme |
+| V4 Contrôle d'accès | 4.1.1 côté serveur ; 4.2.1 objets d'autrui ; 4.3.1 2FA d'administration | matrice des droits ; tests 404 ; `MfaVerified` ; `test_t1_two_factor_authentication_is_optional_by_default` | Conforme pour 4.1.1 et 4.2.1 ; 4.3.1 conforme seulement avec `GESTCONF_MFA_ENFORCED=true` (R18) |
 | V5 Validation | 5.1 entrées ; 5.2.1 HTML assaini ; 5.3.3 encodage de sortie | sérialiseurs DRF ; assainisseur ; Angular | Conforme |
 | V7 Erreurs et journaux | 7.1 pas de secret au journal ; 7.4 erreurs génériques | `test_rg17_forbidden_keys_refused_at_any_depth` ; gestionnaire d'exceptions | Conforme |
 | V8 Données | 8.2.1 pas de cache ; 8.3.4 effacement | R2 ; R4, `cleanup`, anonymisation (RG-18) | Conforme après correctifs |
@@ -195,3 +198,5 @@ les sels des liens de désabonnement et d'invitation sont des constantes, pas de
 3. Tests de fumée : en-têtes de sécurité, HSTS, redirection HTTPS (L9.2).
 4. Droits du fichier `.env` (0600) et des dossiers privés et de sauvegarde (0700).
 5. Absence de `phpinfo`, d'index de dossier et de fichiers de développement sous `public_html`.
+6. Valeur de `GESTCONF_MFA_ENFORCED` conforme à la décision écrite du commanditaire (R18,
+   check-list P-11).

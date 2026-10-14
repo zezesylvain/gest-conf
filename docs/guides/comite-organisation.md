@@ -8,7 +8,8 @@ d'écriture ; une section par fonction ci-dessous. Adresses relatives à
 
 ## 1. Commun à tout le CO
 
-- **Accès** : invitation, double authentification obligatoire, réauthentification pour les
+- **Accès** : invitation, double authentification recommandée (obligatoire si l'exploitant
+  l'impose), réauthentification pour les
   opérations sensibles (voir [presidence-administration.md](presidence-administration.md),
   § 2). « Rôle actif » filtre le rail ; Ctrl+K cherche un écran ; « ? » ouvre la fiche.
 - **Lecture pour tous** : Tableau de bord ; Soumissions (auteurs compris) ; Programme

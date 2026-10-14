@@ -251,6 +251,8 @@ def seed_demo() -> DemoReport:
                 "country": country,
             },
         )
+        # 2FA activée pour les rôles de gestion (optionnelle mais recommandée, T1) : la
+        # recette joue la connexion en deux étapes, le portail permet de la désactiver.
         if role in MFA_REQUIRED_ROLES:
             Authenticator.objects.create(
                 user=user,

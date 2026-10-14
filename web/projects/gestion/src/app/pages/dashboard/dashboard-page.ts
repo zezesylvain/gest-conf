@@ -158,6 +158,19 @@ export class DashboardPage implements OnInit {
     editionCapabilities(this.meStore, this.editionId()),
   );
   protected readonly mfaEnabled = computed(() => this.meStore.me()?.mfa_enabled === true);
+  /** 2FA imposée par la plateforme dans cette édition (T1 : optionnelle par défaut). */
+  protected readonly mfaRequired = computed(
+    () =>
+      this.meStore.me()?.editions.find((edition) => edition.id === Number(this.editionId()))
+        ?.mfa_required === true,
+  );
+  protected readonly mfaStatusKey = computed(() =>
+    this.mfaEnabled()
+      ? 'gestion.dashboard.mfaEnabled'
+      : this.mfaRequired()
+        ? 'gestion.dashboard.mfaDisabled'
+        : 'gestion.dashboard.mfaRecommended',
+  );
 
   async ngOnInit(): Promise<void> {
     await this.load();

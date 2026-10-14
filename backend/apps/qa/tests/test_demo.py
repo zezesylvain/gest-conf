@@ -49,7 +49,7 @@ def test_s10_demo_edition_has_one_account_per_role():
         "external_relations",
         "volunteers",
     }
-    # 2FA prête pour chaque rôle qui l'exige, et pour eux seulement.
+    # 2FA activée pour chaque rôle de gestion (recommandée, T1), et pour eux seulement.
     managed = set(
         UserRole.objects.filter(edition=edition, role__in=MFA_REQUIRED_ROLES).values_list(
             "user_id", flat=True

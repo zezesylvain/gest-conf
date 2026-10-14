@@ -21,11 +21,13 @@ gestion relatives à `/gestion/editions/<n°>/` ; conventions dans le [README](R
 1. **Accepter l'invitation** : ouvrir le lien de l'e-mail (valable 14 jours), se connecter
    ou créer son compte avec l'adresse invitée, vérifiée (RG-20), puis « Accepter
    l'invitation ».
-2. **Activer la double authentification**, obligatoire pour la gestion : portail,
-   `/compte/securite` › « Activer la double authentification » ; scanner le QR code avec une
-   application (FreeOTP, Aegis, Google Authenticator…), saisir le code, noter les **codes de
-   secours**. Sans elle, la gestion vous ramène sur cette page.
-3. **Se connecter** : `/compte/connexion`, puis le code à 6 chiffres ; la gestion est sous
+2. **Activer la double authentification**, facultative mais vivement recommandée pour la
+   gestion : portail, `/compte/securite` › « Activer la double authentification » ; scanner
+   le QR code avec une application (FreeOTP, Aegis, Google Authenticator…), saisir le code,
+   noter les **codes de secours**. Si l'exploitant l'impose (`GESTCONF_MFA_ENFORCED`), la
+   gestion vous ramène sur cette page tant qu'elle n'est pas activée.
+3. **Se connecter** : `/compte/connexion`, puis, si elle est activée, le code à 6 chiffres ;
+   la gestion est sous
    `/gestion/`. Une session dure 12 heures au plus.
 4. **Se repérer** : sélecteur « Édition » en haut ; « Rôle actif » réduit le rail aux
    rubriques d'un rôle (filtre d'affichage, pas un droit) ; Ctrl+K pour chercher un écran ;

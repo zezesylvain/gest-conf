@@ -1,7 +1,8 @@
 """Cadre de permissions par édition (plan L1 §5.1, §5.3, §4.4, §4.5 ; règles n° 2 et 5).
 
 Ordre des contrôles, fixé et testé (D5) : anonyme → 401 ; non-membre → 404 ; membre sans
-capacité → 403 ; rôle sensible sans 2FA → 403 ``mfa_*``. Pour le garantir,
+capacité → 403 ; rôle sensible sans 2FA imposée (T1), ou activée mais non validée dans la
+session → 403 ``mfa_*``. Pour le garantir,
 l'édition et les droits sont chargés dans ``check_permissions``, que DRF appelle dans
 ``initial()``, après l'authentification et avant ``get_queryset()``.
 """
@@ -82,21 +83,26 @@ def session_has_mfa(request: Request) -> bool:
 
 
 class MfaVerified(BasePermission):
-    """2FA imposée aux rôles de ``MFA_REQUIRED_ROLES`` dans l'édition du chemin (D3, §4.4).
+    """2FA des rôles de ``MFA_REQUIRED_ROLES`` dans l'édition du chemin (D3, §4.4, T1).
 
     Vérifiée à chaque requête (*step-up*), après la capacité :
-    1. 2FA non activée sur le compte → 403 ``mfa_enrollment_required`` ;
-    2. session non validée par la 2FA → 403 ``mfa_required`` ;
-    3. sinon, accès accordé. Un rôle non concerné (relecteur, auteur) passe toujours.
+    1. 2FA non activée sur le compte : accès accordé quand elle est optionnelle (T1, défaut) ;
+       403 ``mfa_enrollment_required`` quand la plateforme l'impose
+       (``GESTCONF_MFA_ENFORCED``) ;
+    2. 2FA activée mais session non validée par elle → 403 ``mfa_required`` : un compte qui
+       l'a choisie en bénéficie, même quand elle est optionnelle ;
+    3. sinon, accès accordé. Un rôle non concerné (intervenant, auteur) passe toujours.
     """
 
     def has_permission(self, request: Request, view: Any) -> bool:
         from allauth.mfa.utils import is_mfa_enabled
 
         access: EditionAccess | None = getattr(view, "access", None)
-        if access is None or not access.mfa_required:
+        if access is None or not access.mfa_protected:
             return True
         if not is_mfa_enabled(request.user):
+            if not access.mfa_required:
+                return True
             self.message = _("Activez la double authentification pour accéder à la gestion.")
             self.code = ErrorCode.MFA_ENROLLMENT_REQUIRED.value
             return False
