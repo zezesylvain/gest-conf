@@ -126,8 +126,14 @@ def test_k12_cancelled_registration_blocks_issuance(edition):
         letters.issue_letter(letter, actor=COMMAND)
 
 
-def test_k14_passport_numbers_are_erased_after_the_edition(edition):
-    letter = requested(edition)
+def test_k14_passport_numbers_are_erased_after_the_edition(
+    edition, django_capture_on_commit_callbacks
+):
+    """Le numéro et le PDF émis, qui le porte (revue L9.5), sont effacés."""
+    signatory(edition)
+    letter = letters.issue_letter(requested(edition), actor=COMMAND)
+    path = letters.PDFS.path(letter.storage_name)
+    assert path.exists()
     now = timezone.now()
     assert letters.erase_passport_numbers(True, now) == 0
     edition.start_date = (now - dt.timedelta(days=33)).date()
@@ -136,12 +142,16 @@ def test_k14_passport_numbers_are_erased_after_the_edition(edition):
     assert letters.erase_passport_numbers(True, now) == 1  # simulation : rien n'est effacé
     letter.refresh_from_db()
     assert letter.passport_number == "A12345678"
-    assert letters.erase_passport_numbers(False, now) == 1
+    with django_capture_on_commit_callbacks(execute=True):
+        assert letters.erase_passport_numbers(False, now) == 1
     letter.refresh_from_db()
     assert (letter.passport_number, letter.passport_erased_at) == ("", now)
+    assert letter.storage_name == "" and not path.exists()
+    assert letters.verify(letter.verification_code) is not None  # toujours vérifiable
+    assert letters.erase_passport_numbers(True, now) == 0
 
 
-def test_k14_export_and_anonymization(edition):
+def test_k14_export_and_anonymization(edition, django_capture_on_commit_callbacks):
     signatory(edition)
     letter = letters.issue_letter(requested(edition), actor=COMMAND)
     user = letter.registration.user
@@ -151,9 +161,12 @@ def test_k14_export_and_anonymization(edition):
     edition.save()
     registration = letter.registration
     registration_workflow.transition(registration, RegistrationStatus.EXPIRED, actor=COMMAND)
-    anonymize_user(user, actor=COMMAND, reason="Demande")
+    path = letters.PDFS.path(letter.storage_name)
+    with django_capture_on_commit_callbacks(execute=True):
+        anonymize_user(user, actor=COMMAND, reason="Demande")
     letter.refresh_from_db()
     assert letter.passport_number == "" and letter.passport_name == "DIALLO Awa"
+    assert letter.storage_name == "" and not path.exists()  # le PDF portait le passeport
     assert certificates.verify(letter.verification_code)["name"] is None
 
 
@@ -283,3 +296,17 @@ def test_k13_counter_refuses_deactivated_accounts_and_missing_names(edition):
     assert response.status_code == 400
     assert set(response.json()["fields"]) == {"first_name", "last_name"}
     assert not User.objects.filter(email="x@example.org").exists()
+
+
+def test_k12_tampered_letter_pdf_is_never_served(edition):
+    """Revue de sécurité L9.5 (A08) : empreinte de la lettre contrôlée à chaque lecture."""
+    signatory(edition)
+    letter = requested(edition)
+    letters.issue_letter(letter, actor=COMMAND)
+    letter.refresh_from_db()
+    manager = client_for(make_member(edition, Role.OC_MEMBER, oc_function="external_relations"))
+    url = f"/v1/manage/editions/{edition.pk}/invitation-letters/{letter.pk}/pdf"
+    assert manager.get(url).status_code == 200
+    path = letters.PDFS.path(letter.storage_name)
+    path.write_bytes(b"%PDF-1.4 falsifie")
+    assert manager.get(url).status_code == 404

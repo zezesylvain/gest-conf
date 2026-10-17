@@ -119,13 +119,13 @@ const callout = (tone: CalloutTone, key: (name: string) => string, name: string)
 });
 
 export const HELP_SHEETS: readonly HelpSheet[] = [
-  sheet('first-steps', [...ALL, 'VOLUNTEER', 'SESSION_CHAIR', 'SIGNATORY'], (k) => [
+  sheet('first-steps', [...ALL, 'SC_MEMBER', 'VOLUNTEER', 'SESSION_CHAIR', 'SIGNATORY'], (k) => [
     text(k('intro')),
     steps(k, 'choose', 'rail', 'search', 'help'),
     callout('info', k, 'activeRole'),
     callout('tip', k, 'versioned'),
   ]),
-  sheet('security', [...ALL, 'VOLUNTEER', 'SIGNATORY'], (k) => [
+  sheet('security', [...ALL, 'SC_MEMBER', 'VOLUNTEER', 'SIGNATORY'], (k) => [
     text(k('intro')),
     steps(k, 'enable', 'stepUp'),
     callout('warning', k, 'reauth'),

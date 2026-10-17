@@ -151,3 +151,23 @@ def test_n8_meal_order_exports_as_pdf_without_names(edition):
     )
     assert response.status_code == 200 and response.content.startswith(b"%PDF")
     assert AuditLog.objects.get(action="meal.exported").after["format"] == "pdf"
+
+
+def test_n13_review_report_counts_assignments_reviews_and_delays():
+    """Affectations actives, évaluations envoyées et délai moyen, au total et par thématique
+    (requête restreinte aux colonnes utiles, plan L9.4)."""
+    from apps.conferences.models import Edition
+    from apps.qa.volume import seed_volume
+    from apps.reviews.models import Review, ReviewAssignment
+
+    seed_volume(submissions=8, reviewers=3, participants=1, drafts=1)
+    edition = Edition.objects.get(code="FICTIFEVAL")
+    (delays,) = services.reviews_section(edition)
+    rows = {row[0]: row for row in delays.rows}
+    total = rows.pop("Toutes thématiques")
+    assert total[1] == ReviewAssignment.objects.filter(submission__edition=edition).count() == 16
+    assert total[2] == Review.objects.filter(submitted_at__isnull=False).count() > 0
+    assert total[3] == 0  # échéance à venir
+    assert total[4] == Decimal("0.0")  # envoyées dans la minute
+    assert sum(row[1] for row in rows.values()) == 16
+    assert sum(row[2] for row in rows.values()) == total[2]

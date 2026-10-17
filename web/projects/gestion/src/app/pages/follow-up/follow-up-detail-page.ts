@@ -27,6 +27,7 @@ import {
   MeStore,
   PageHeader,
   ReviewSubmissionDetail,
+  ScrollRegion,
   SubmissionReviews,
   SubmissionType,
 } from '@gestconf/shared';
@@ -49,6 +50,7 @@ const ASSIGNABLE = ['screening', 'under_review', 'reviewed'];
 @Component({
   selector: 'gestion-follow-up-detail-page',
   imports: [
+    ScrollRegion,
     ReactiveFormsModule,
     RouterLink,
     TranslatePipe,

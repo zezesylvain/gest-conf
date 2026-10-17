@@ -18,14 +18,15 @@ import {
   focusFirstInvalid,
   PageHeader,
   PersonSearch,
+  ScrollRegion,
   Session,
   SessionKind,
   SessionRole,
   SessionRoleKind,
   SessionWriteRequest,
   Slot,
-  Track,
   toDateTimeLocalValue,
+  Track,
 } from '@gestconf/shared';
 import { TranslatePipe } from '@ngx-translate/core';
 
@@ -53,6 +54,7 @@ import {
 @Component({
   selector: 'gestion-sessions-page',
   imports: [
+    ScrollRegion,
     ReactiveFormsModule,
     RouterLink,
     TranslatePipe,

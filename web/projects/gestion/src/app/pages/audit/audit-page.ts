@@ -18,6 +18,7 @@ import {
   LanguageService,
   ManageAuditList$Params,
   PageHeader,
+  ScrollRegion,
 } from '@gestconf/shared';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -34,6 +35,7 @@ const PAGE_SIZE = 25;
 @Component({
   selector: 'gestion-audit-page',
   imports: [
+    ScrollRegion,
     ReactiveFormsModule,
     TranslatePipe,
     MatFormFieldModule,

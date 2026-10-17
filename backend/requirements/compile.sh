@@ -21,6 +21,7 @@ fi
 export CUSTOM_COMPILE_COMMAND="requirements/compile.sh"
 options=(--quiet --generate-hashes --strip-extras --allow-unsafe "$@")
 
-for name in base prod dev; do
+# loadtest : environnement séparé du test de charge (plan L9, S5), sans contrainte de base.txt.
+for name in base prod dev loadtest; do
     pip-compile "${options[@]}" --output-file "requirements/${name}.txt" "requirements/${name}.in"
 done

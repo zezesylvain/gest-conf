@@ -1,7 +1,13 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { RouterLink } from '@angular/router';
-import { ErrorSummary, formatInZone, PageHeader, Publication } from '@gestconf/shared';
+import {
+  ErrorSummary,
+  formatInZone,
+  PageHeader,
+  Publication,
+  ScrollRegion,
+} from '@gestconf/shared';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { errorMessages } from '../../core/page-support';
@@ -21,7 +27,7 @@ interface PublicationSummary {
  */
 @Component({
   selector: 'gestion-publication-page',
-  imports: [RouterLink, TranslatePipe, MatButtonModule, ErrorSummary, PageHeader],
+  imports: [ScrollRegion, RouterLink, TranslatePipe, MatButtonModule, ErrorSummary, PageHeader],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './publication-page.html',
   styleUrl: '../page.scss',

@@ -16,6 +16,7 @@ import {
   ErrorSummary,
   fieldErrorMessage,
   PageHeader,
+  ScrollRegion,
   Section,
   SectionType,
 } from '@gestconf/shared';
@@ -32,6 +33,7 @@ import { PortalScreen, SECTION_TYPES, SLUG_PATTERN } from './portal-support';
 @Component({
   selector: 'gestion-portal-sections-page',
   imports: [
+    ScrollRegion,
     ReactiveFormsModule,
     RouterLink,
     TranslatePipe,

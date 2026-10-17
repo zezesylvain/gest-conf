@@ -11,6 +11,7 @@ import {
   KeyDateWriteRequest,
   LanguageService,
   PageHeader,
+  ScrollRegion,
   toDateTimeLocalValue,
 } from '@gestconf/shared';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -51,6 +52,7 @@ function keyDateForm(builder: NonNullableFormBuilder) {
 @Component({
   selector: 'gestion-calendar-page',
   imports: [
+    ScrollRegion,
     ReactiveFormsModule,
     TranslatePipe,
     MatFormFieldModule,

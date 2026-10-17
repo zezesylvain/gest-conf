@@ -25,6 +25,7 @@ import {
   PageHeader,
   Ranking,
   RankingRow,
+  ScrollRegion,
 } from '@gestconf/shared';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
@@ -41,6 +42,7 @@ import { OUTCOMES, RankingFilters, ReviewsApi, saveText } from '../../core/revie
 @Component({
   selector: 'gestion-ranking-page',
   imports: [
+    ScrollRegion,
     ReactiveFormsModule,
     RouterLink,
     TranslatePipe,

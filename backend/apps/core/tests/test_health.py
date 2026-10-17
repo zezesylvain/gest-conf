@@ -21,6 +21,7 @@ def test_health_ok_without_authentication(client):
         "database": "ok",
         "cache": "ok",
         "jobs": "unknown",
+        "backup": "unknown",
         "secure": False,
         "release": "dev",
     }
@@ -50,6 +51,7 @@ def test_health_degraded_when_cache_is_down(client, monkeypatch):
         "database": "ok",
         "cache": "error",
         "jobs": "unknown",
+        "backup": "unknown",
         "secure": False,
         "release": "dev",
     }
@@ -169,3 +171,24 @@ def test_health_jobs_late_after_three_intervals(client, settings):
 def test_health_jobs_unknown_without_success(client):
     _beat(last_status="error")
     assert client.get(reverse("core:health")).json()["jobs"] == "unknown"
+
+
+def test_s4_health_reports_the_age_of_the_last_backup(client, settings):
+    """Plan L9, S4 : « late » au-delà de GESTCONF_BACKUP_MAX_AGE_HOURS sans backup_db réussi ;
+    une sauvegarde en retard ne rend pas l'API indisponible."""
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    from apps.core.models import CronHeartbeat
+
+    settings.GESTCONF_BACKUP_MAX_AGE_HOURS = 26
+    beat = CronHeartbeat.objects.create(
+        name="backup_db", last_success_at=timezone.now() - timedelta(hours=25)
+    )
+    assert client.get(reverse("core:health")).json()["backup"] == "ok"
+    beat.last_success_at = timezone.now() - timedelta(hours=27)
+    beat.save()
+    response = client.get(reverse("core:health"))
+    assert response.status_code == 200
+    assert response.json()["backup"] == "late"

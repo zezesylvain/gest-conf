@@ -162,13 +162,18 @@ git -C "$ROOT" archive --format=tar "$RELEASE" backend | tar -x -C "$STAGING"
 # Script des commandes planifiées (crontab cPanel), versionné lui aussi : extrait du commit.
 mkdir -p "$STAGING/backend/deploy"
 git -C "$ROOT" show "$RELEASE:deploy/cron.sh" >"$STAGING/backend/deploy/cron.sh"
-chmod 755 "$STAGING/backend/deploy/cron.sh"
+# Restauration d'une sauvegarde sur l'hébergement, dans une base neuve (plan L9, S3).
+git -C "$ROOT" show "$RELEASE:deploy/restore.sh" >"$STAGING/backend/deploy/restore.sh"
+chmod 755 "$STAGING/backend/deploy/cron.sh" "$STAGING/backend/deploy/restore.sh"
 # --delete évite qu'une migration supprimée du dépôt reste sur le serveur ; les
-# exclusions protègent ce qui n'appartient qu'au serveur (.env, journaux, fichiers cPanel).
+# exclusions protègent ce qui n'appartient qu'au serveur (.env, journaux, fichiers cPanel)
+# et, surtout, var/ : fichiers déposés et sauvegardes par défaut (GESTCONF_FILES_DIR,
+# GESTCONF_BACKUP_DIR). Absent du dépôt, var/ serait sinon effacé à chaque déploiement.
 rsync -az --delete \
   --exclude '.venv/' --exclude '__pycache__/' --exclude '.pytest_cache/' --exclude '.ruff_cache/' \
   --exclude '/.env' --exclude '/db.sqlite3' --exclude '/tmp/' --exclude '/RELEASE' \
   --exclude '/VENV_ACTIVATE' --exclude '/logs/' --exclude '/public/' --exclude '*.log' \
+  --exclude '/var/' \
   "$STAGING/backend/" "$DEPLOY_SSH:$DEPLOY_APP_DIR/"
 
 step "Dépendances, migrations, table de cache, contrôles, redémarrage de Passenger"
@@ -197,6 +202,11 @@ pip install --quiet --require-hashes --only-binary=:all: -r requirements/prod.tx
 # - base de données seulement (--tag database) : connexion et mode strict (mysql.W002).
 python manage.py check --deploy --fail-level WARNING
 python manage.py check --database default --tag database --fail-level WARNING
+# Sauvegarde AVANT migrate (plan L9, S3) : point de retour si une migration échoue ou se
+# révèle fausse (redéployer le commit précédent, puis restore_db dans une base neuve).
+# --required : si la sauvegarde du cron tourne au même moment, le déploiement s'arrête au
+# lieu de migrer sans sauvegarde fraîche.
+python manage.py backup_db --required
 python manage.py migrate --noinput
 # Tables du cache partagé (DatabaseCache : gestconf_cache et gestconf_throttle_cache).
 # Elles ne sont pas créées par une migration ; la commande est sans effet si elles existent.

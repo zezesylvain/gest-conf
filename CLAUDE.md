@@ -12,7 +12,7 @@ Plateforme de gestion de conférences scientifiques : portail public, espace de 
 | Frontend | Angular (version stable courante), composants autonomes, signaux — workspace avec 2 applications (`portail`, `gestion`) + bibliothèque `shared` |
 | Base de données | MariaDB, InnoDB, `utf8mb4` |
 | Hébergement | o2switch mutualisé, **un seul domaine** : `/` portail, `/gestion/` back-office, `/api/` Django via Passenger |
-| Auth | `django-allauth` en mode *headless* (client `browser` seul) + sessions + CSRF (pas de JWT dans le navigateur), 2FA TOTP par `allauth.mfa` (décision D2 ; `django-otp` abandonné, faute d'intégration headless) imposée côté serveur aux rôles de gestion, ORCID (P2) |
+| Auth | `django-allauth` en mode *headless* (client `browser` seul) + sessions + CSRF (pas de JWT dans le navigateur), 2FA TOTP par `allauth.mfa` (décision D2 ; `django-otp` abandonné, faute d'intégration headless), **optionnelle** depuis T1 et imposable côté serveur aux rôles de gestion (`GESTCONF_MFA_ENFORCED`), ORCID (P2) |
 | API | REST `/api/v1/`, OpenAPI via `drf-spectacular`, client TypeScript généré pour Angular. Authentification : endpoints allauth tels quels sous `/api/_allauth/browser/v1/`, consommés par une façade TypeScript écrite à la main et couverte par des tests de contrat (décision D4) |
 
 ## Règles non négociables
@@ -35,20 +35,23 @@ Plateforme de gestion de conférences scientifiques : portail public, espace de 
 GEST-CONF/
 ├── CLAUDE.md, README.md
 ├── Etude_fonctionnelle_et_technique_GEST-CONF.md / .html   # étude (Markdown et HTML tenus à jour ensemble)
-├── docs/                    # plans de lot (Lx-…-plan.md) et bilans (Lx-….md), fiche o2switch
-├── deploy/                  # deploy.sh, smoke-test.sh, cron.sh, check-o2switch.sh, README.md
+├── docs/                    # plans de lot (Lx-…-plan.md) et bilans (Lx-….md), fiche o2switch,
+│                            # runbook, exploitation, recette, revue de sécurité ; guides/ par rôle
+├── deploy/                  # deploy.sh, smoke-test.sh, cron.sh, check-o2switch.sh, pull-backups.sh,
+│                            # restore.sh, zap/ (analyse passive), README.md
+├── loadtest/                # test de charge Locust (environnement séparé, README)
 ├── backend/                 # Django
 │   ├── config/settings/ (base, dev, prod, test) ; urls.py (API uniquement) ; mount.py ; passenger_wsgi.py
 │   ├── apps/ core, accounts, conferences, portal, communications, submissions, reviews,
 │   │         program, registrations, payments, events, logistics, sponsors, surveys,
-│   │         reports
+│   │         reports, qa (données fictives : seed_volume, seed_demo, loadtest_sessions)
 │   ├── tests/               # tests transverses : matrice des droits, schéma, règles de plateforme
 │   ├── locale/              # traductions du backend (FR/EN)
 │   ├── schema.yml           # schéma OpenAPI versionné
-│   └── requirements/ (base, prod, dev : fichiers .in compilés en .txt à empreintes)
+│   └── requirements/ (base, prod, dev, loadtest : fichiers .in compilés en .txt à empreintes)
 └── web/                     # Angular
     ├── projects/ portail, gestion, shared (client d'API généré, auth, ui-kit, i18n)
-    ├── e2e/                 # Playwright : playwright.config.ts, seed.py, django.ts, totp.ts, tests/
+    ├── e2e/                 # Playwright : playwright.config.ts, seed.py, django.ts, totp.ts, axe.ts, tests/
     └── scripts/             # api-barrel, check-prerender, inject-csp (et leurs tests)
 ```
 
@@ -74,7 +77,7 @@ cd backend && python3.12 -m venv .venv && source .venv/bin/activate
 pip install -r requirements/dev.txt
 python manage.py migrate && python manage.py runserver   # http://localhost:8000/api/v1/health
 pytest                      # SQLite par défaut ; DATABASE_URL=mysql://... pour MariaDB (fait foi en CI)
-ruff check . ../deploy ../web/e2e && ruff format --check . ../deploy ../web/e2e
+ruff check . ../deploy ../web/e2e ../loadtest && ruff format --check . ../deploy ../web/e2e ../loadtest
 DATABASE_URL=mysql://... python manage.py spectacular --file schema.yml --validate   # schéma OpenAPI (versionné), généré sur MariaDB comme en CI (bornes des entiers)
 
 # Frontend (Node >= 22.22.3 ou >= 24.15, exigence d'Angular 22)
@@ -86,7 +89,9 @@ npm run api:generate        # régénérer le client TypeScript après chaque é
 GESTCONF_E2E_PYTHON=../backend/.venv/bin/python npm run e2e   # Playwright lance Django, le portail et la gestion (ports 8000, 4200, 4201 libres) ; GESTCONF_E2E_CHROMIUM=<chemin> pour un Chromium déjà installé
 
 # Déploiement : deploy/deploy.sh puis deploy/smoke-test.sh (voir deploy/README.md)
-# Cron (deploy/cron.sh) : run_jobs (toutes les 5 min), close_call, remind_drafts, remind_reviewers, remind_presentations, expire_registrations et sync_payments (horaires), remind_tasks, cleanup et check_integrity (quotidiennes)
+# Cron (deploy/cron.sh) : run_jobs (toutes les 5 min), close_call, remind_drafts, remind_reviewers, remind_presentations, expire_registrations et sync_payments (horaires), backup_db (2 h 07), remind_tasks, cleanup et check_integrity (quotidiennes)
+# Sauvegarde : backup_db ; copie hors hébergement : deploy/pull-backups.sh (poste de l'opérateur) ; restauration : deploy/restore.sh (base vide)
+# Données fictives (jamais sur une base réelle) : seed_volume, seed_demo, loadtest_sessions --confirm-fictitious ; charge : loadtest/README.md
 ```
 
 Les URL Django sont déclarées **sans** le préfixe `/api` (`v1/...`) : `config/mount.py` gère le montage.
@@ -104,7 +109,8 @@ Les URL Django sont déclarées **sans** le préfixe `/api` (`v1/...`) : `config
 - Python via cPanel « Setup Python App » (Passenger/WSGI) ; application **hors racine du domaine** ; URL de l'app = `/api`. Les règles de repli SPA du `.htaccess` ne doivent ni écraser le bloc Passenger ni intercepter `/api/`.
 - Déploiement : build Angular en CI → rsync/SSH vers `public_html/` et `public_html/gestion/` → `pip install` → `migrate` → redémarrage Passenger (`tmp/restart.txt`) → tests de fumée.
 - **Non vérifié, à confirmer avant de s'appuyer dessus** : version de MariaDB, fréquence minimale du cron, limites de ressources, sous-domaines autorisés, antivirus, compilation de `mysqlclient` (`PyMySQL` est le pilote retenu). Ne pas affirmer ces points sans vérification. Aucune ligne de la fiche [`docs/L1-verifications-o2switch.md`](docs/L1-verifications-o2switch.md) n'est encore remplie : elle se remplit avec `deploy/check-o2switch.sh` (lecture seule, en SSH) et les contrôles manuels qu'elle décrit.
-- Sauvegarde quotidienne base + fichiers, copie hors hébergement, restauration testée : **rien de cela n'existe encore** (ni `backup_db`, ni script de restauration, ni sauvegarde avant `migrate` dans `deploy.sh`) ; prévu au plan L9 (S2, S3). Aucune donnée réelle avant une restauration testée (D18).
+- Sauvegarde quotidienne (`backup_db`), copie hors hébergement (`pull-backups.sh`), restauration (`restore.sh`) et sauvegarde avant `migrate` dans `deploy.sh` : **livrées et testées en local (L9)**, **pas encore éprouvées sur o2switch** (runbook, étape 5). Aucune donnée réelle avant une restauration testée sur l'hébergement (D18).
+- Exécution sur l'hébergement : [`docs/L9-runbook-o2switch.md`](docs/L9-runbook-o2switch.md) (douze étapes, opérateur du commanditaire) ; exploitation courante : [`docs/exploitation.md`](docs/exploitation.md).
 
 ## Méthode de travail attendue
 
@@ -122,9 +128,10 @@ Les URL Django sont déclarées **sans** le préfixe `/api` (`v1/...`) : `config
 | L0 à L4 (MVP : squelette, socle, portail, soumission, évaluation et décision) | Livrés en code, testés en local et en CI ; bilans dans `docs/`. **Aucune démo sur o2switch** encore faite |
 | L5 — Programme | **Livré en code, testé en local et en CI** (L5.0 à L5.7, E2E compris ; PR #8 et #9, fusionnées) ; bilan [`docs/L5-programme.md`](docs/L5-programme.md). Ouverts : Q14, `ACCEPTED_MINOR → WITHDRAWN`, seuil d'avertissement du bundle du portail |
 | L6 — Inscriptions et paiements | **Livré en code et testé en local** (L6.0 à L6.7, E2E compris) ; bilan [`docs/L6-inscriptions.md`](docs/L6-inscriptions.md). Fusionné dans `main` (PR #12). Ouverts : Q7 (tarifs ; carte bancaire absente de l'API v1 de CinetPay), Q8 (entité de facturation, conservation, format du numéro), J15 reportée |
-| L7 — Jour J et attestations | **Livré en code et testé en local** (L7.0 à L7.8, E2E compris) ; bilan [`docs/L7-jour-j.md`](docs/L7-jour-j.md). L7.0 à L7.7 fusionnés dans `main` (PR #12) ; L7.8 et le correctif du test RG-16 dans la PR #13 (CI verte, en attente de fusion). Ouverts : Q17 (prestataire de signature qualifiée), nom complet du pays sur les badges, démo H sur téléphones réels |
-| L8 — Logistique, partenaires, communication et reporting | **Livré en code, testé en local et en CI** (L8.0 à L8.10, E2E compris ; PR #13, CI verte sur `87cf3a7`, en attente de fusion) ; bilan [`docs/L8-logistique.md`](docs/L8-logistique.md). Ouverts : questions du §10 du plan (hypothèses retenues), plafond d'e-mails réel sur o2switch, en-tête `List-Unsubscribe` |
-| L9 — Recette, sécurité, charge | **Plan proposé, à valider** : [`docs/L9-recette-plan.md`](docs/L9-recette-plan.md) (S1 à S16, questions du §10). Deux volets : outils et tests dans le dépôt, puis runbook exécuté sur o2switch par un opérateur du commanditaire (cette session n'a pas accès à l'hébergement) ; ne pas commencer L9.0 avant la validation |
+| L7 — Jour J et attestations | **Livré en code et testé en local** (L7.0 à L7.8, E2E compris) ; bilan [`docs/L7-jour-j.md`](docs/L7-jour-j.md). L7.0 à L7.7 fusionnés dans `main` (PR #12), L7.8 et le correctif du test RG-16 (PR #13). Ouverts : Q17 (prestataire de signature qualifiée), nom complet du pays sur les badges, démo H sur téléphones réels |
+| L8 — Logistique, partenaires, communication et reporting | **Livré en code, testé en local et en CI** (L8.0 à L8.10, E2E compris ; PR #13, fusionnée) ; bilan [`docs/L8-logistique.md`](docs/L8-logistique.md). Ouverts : questions du §10 du plan (hypothèses retenues), plafond d'e-mails réel sur o2switch, en-tête `List-Unsubscribe` |
+| L9 — Recette, sécurité, charge | **Volet du dépôt livré et testé en local** (L9.0 à L9.7 et L9.9, E2E et audit d'accessibilité compris) ; bilan [`docs/L9-recette.md`](docs/L9-recette.md). **Volet de l'hébergement (L9.8) à faire** : runbook [`docs/L9-runbook-o2switch.md`](docs/L9-runbook-o2switch.md) exécuté sur o2switch par un opérateur du commanditaire (cette session n'y a pas accès), dont la restauration chronométrée, le test de charge et la recette des démos A à I. Pas de PR ouverte pour L9 (poussé sur la branche) |
+| T1 — 2FA optionnelle | **Livrée en code et testée en local** (demande du commanditaire du 14 octobre 2026, E2E compris) ; [`docs/T1-2fa-optionnelle.md`](docs/T1-2fa-optionnelle.md). Ouvert : choix de `GESTCONF_MFA_ENFORCED` en production (P-11) |
 | L10 et suivants | Non commencés |
 
 ## Décisions du lot L1
@@ -160,7 +167,7 @@ Bilan du lot : [`docs/L3-soumission.md`](docs/L3-soumission.md).
 
 Les décisions H1 à H19 du plan [`docs/L4-evaluation-plan.md`](docs/L4-evaluation-plan.md) ont été validées le 5 octobre 2026. Elles sont reportées dans l'étude, **§20 « Mises à jour issues du lot L4 »**, qui prévaut sur les sections antérieures (§17 à §19 compris). Points à retenir :
 
-- espace évaluateur dans la gestion (rubrique « Évaluations »), 2FA imposée à `SC_MEMBER` ; capacités `reviews.*`, `decisions.*`, `grids.write` ; le CO n'a aucun accès aux évaluations ;
+- espace évaluateur dans la gestion (rubrique « Évaluations »), 2FA imposée à `SC_MEMBER` (optionnelle depuis T1, sauf `GESTCONF_MFA_ENFORCED`) ; capacités `reviews.*`, `decisions.*`, `grids.write` ; le CO n'a aucun accès aux évaluations ;
 - RG-04 : tout sérialiseur relecteur dérive de `ReviewerSerializer` ou `ReviewerModelSerializer` (`apps/reviews/anonymity.py`, liste blanche contrôlée par méta-test) ; toute route `reviewer-…` doit figurer dans `LEAK_TESTED_ROUTES` (`apps/reviews/tests/test_anonymity.py`) avec son test de fuite (`test_leaks.py`), sous peine d'échec de la suite ;
 - note pondérée calculée par le serveur seul (`apps/reviews/services/scoring.py`, `Decimal`) ; grille verrouillée à la première évaluation (RG-05) ;
 - décisions provisoires invisibles des auteurs, transitions et e-mails à la publication seulement (RG-09) ; côté auteur, commentaires sous pseudonymes « Relecteur N », jamais de note ni de commentaire au comité (RG-10) ; `REVISION_REQUESTED` non utilisé (`accepted_minor`) ;
@@ -204,7 +211,7 @@ Bilan du lot : [`docs/L6-inscriptions.md`](docs/L6-inscriptions.md).
 
 Les décisions K1 à K17 du plan [`docs/L7-jour-j-plan.md`](docs/L7-jour-j-plan.md) ont été validées le 6 octobre 2026, avec K18 (rôle signataire, Q11) et K19 (modèle officiel et signature électronique, Q14) issues des réponses du commanditaire. Elles sont reportées dans l'étude, **§23 « Mises à jour issues du lot L7 »**, qui prévaut sur les sections antérieures (§17 à §22 compris). Points à retenir :
 
-- application `events` (pointages, signatures, modèles, attestations, lettres) ; rôles `VOLUNTEER` (invitable dès L7, 2FA) et `SIGNATORY` (12ᵉ rôle, 2FA, seul à déposer sa signature) ; capacités `checkin.scan`, `checkin.manage`, `certificates.manage`, `letters.manage`, `signature.manage`, `sessions.chair` (présidence vérifiée session par session) ;
+- application `events` (pointages, signatures, modèles, attestations, lettres) ; rôles `VOLUNTEER` (invitable dès L7, 2FA, optionnelle depuis T1) et `SIGNATORY` (12ᵉ rôle, 2FA, optionnelle depuis T1, seul à déposer sa signature) ; capacités `checkin.scan`, `checkin.manage`, `certificates.manage`, `letters.manage`, `signature.manage`, `sessions.chair` (présidence vérifiée session par session) ;
 - **QR du badge = titre d'accès** : le serveur n'accepte que le jeton, jamais son empreinte ; badges PDF `fpdf2` générés à la demande, jamais stockés ; badge perdu = nouveau jeton ; une inscription en attente de paiement est refusée à l'accueil ;
 - **accueil hors ligne** (PWA sous `/gestion/accueil`, service worker ajouté par cet écran seul) : liste d'empreintes valable 48 heures, file de pointages revérifiée par le serveur (lots de 200, clé d'idempotence), effacées à la déconnexion ; 504 du service worker = serveur injoignable ; `npm run build` régénère `ngsw.json` après la CSP (`scripts/check-ngsw.mjs`) ; décodeur du QR (`jsQR`) préparé dès l'ouverture de l'écran ;
 - `SCHEDULED → PRESENTED` par le président de séance (délégation `register_actor_grant` déclarée par `events`), le CO « programme » ou l'administrateur ; correction motivée ;
@@ -234,6 +241,32 @@ Les décisions N1 à N19 du plan [`docs/L8-logistique-plan.md`](docs/L8-logistiq
 
 Bilan du lot : [`docs/L8-logistique.md`](docs/L8-logistique.md).
 
+## Décisions du lot L9
+
+Les décisions S1 à S16 du plan [`docs/L9-recette-plan.md`](docs/L9-recette-plan.md) ont été validées le 12 octobre 2026 ; les questions de son §10 étant restées sans réponse, ses propositions s'appliquent comme hypothèses révisables (§2.1). Elles sont reportées dans l'étude, **§25 « Mises à jour issues du lot L9 »** (version 1.9), qui prévaut sur les sections antérieures (§17 à §24 compris). Points à retenir :
+
+- **sauvegarde** : `backup_db` (cron 2 h 07, `LockedCommand`, manifeste à empreinte, rotation 7/4/3, identifiants dans un fichier d'options 0600, jamais sur la ligne de commande) ; `deploy.sh` sauvegarde avant `migrate` et exclut `var/` du `rsync --delete` ; copie **tirée** par l'opérateur (`pull-backups.sh`, instantanés liés) ; `restore_db` / `restore.sh` dans une base **vide**, échec sur anomalie de données ; `/v1/health` expose `backup` ;
+- **données fictives** (`apps/qa`) : `seed_volume`, `seed_demo`, `loadtest_sessions` exigent `--confirm-fictitious` et refusent toute base contenant un compte, une soumission ou une inscription réels ; comptes en `@fictif.invalid`, aucun e-mail ne part vers `.invalid` ; **pas de purge** : on restaure la sauvegarde prise juste avant ;
+- **performances** : listes chaudes en nombre de requêtes constant (`tests/test_query_counts.py`) ; toute nouvelle liste s'y ajoute ;
+- **sécurité** : revue `docs/L9-revue-securite.md` ; corps de requête borné (`GESTCONF_MAX_REQUEST_MB`, 413 avant lecture) ; `Cache-Control: no-store` par défaut sur l'API (une vue publique fixe le sien) ; fichiers figés servis par `PrivateStore.read_verified` (empreinte contrôlée) ; rotation de chaque secret documentée (`rotate_mfa_keys`, `rotate_signing_keys`, `DJANGO_SECRET_KEY_FALLBACKS`) ; ZAP **passif** seulement contre l'hébergement ;
+- **accessibilité** : `expectAccessible` (`web/e2e/axe.ts`) dans le parcours de bout en bout, échec sur toute violation grave ou critique ; tout tableau défilant de la gestion porte la classe `table-wrap` et importe `ScrollRegion` ; couleur sur `--gc-warning` : `--gc-on-warning` ;
+- **CI** : couverture de 80 % au moins par module critique (`reviews`, `submissions`, `program`, `registrations`, `payments`) ; essai court des scénarios Locust ; `ruff` vérifie aussi `loadtest/` ;
+- **ordre sur l'hébergement** (runbook) : vérifications, déploiement, cron 48 h, restauration chronométrée, borne des envois, **charge puis restauration**, ZAP, **recette** (`seed_demo`, cahier `docs/L9-cahier-de-recette.md`), base propre, surveillance externe, check-list `docs/L9-mise-en-production.md` ; l'ouverture de l'appel est la décision du commanditaire.
+
+Bilan du lot (volet du dépôt) : [`docs/L9-recette.md`](docs/L9-recette.md).
+
+## Décision postérieure au lot L9 : 2FA optionnelle (T1)
+
+À la demande du commanditaire, validée le 14 octobre 2026 ; reportée dans l'étude, **§26** (version 1.10), qui prévaut pour la 2FA sur D2, D3, H2, K1 et K18. Points à retenir :
+
+- 2FA **optionnelle par défaut** pour tous les rôles ; `GESTCONF_MFA_ENFORCED=true` l'impose de nouveau aux rôles de `MFA_REQUIRED_ROLES`, à l'identique d'avant (choix du commanditaire, check-list P-11) ;
+- un compte qui a activé la 2FA la voit demandée à chaque connexion, et `MfaVerified` exige une session validée par elle sur ses routes de gestion (`mfa_required`), dans les deux modes ; `EditionAccess.mfa_protected` (rôle concerné) et `mfa_required` (imposée) sont distincts ;
+- `/v1/me` : `editions[].mfa_required` vrai seulement en mode imposé ; les écrans disent « obligatoire » ou « facultative, mais recommandée » selon ce drapeau ;
+- tests : le mode imposé par `override_settings(GESTCONF_MFA_ENFORCED=True)` ; le mode optionnel par `test_t1_two_factor_authentication_is_optional_by_default` ; E2E : un CO « bénévoles » sans 2FA ;
+- revue de sécurité : constat R18, accepté ; recommandation d'imposer la 2FA avant l'évaluation et le jour J.
+
+Décision et bilan : [`docs/T1-2fa-optionnelle.md`](docs/T1-2fa-optionnelle.md).
+
 ## Questions ouvertes (étude §15, à ne pas trancher seul)
 
-Date de la conférence, mono- ou multi-conférences, niveau de double aveugle, grille et pondérations définitives, résumé seul ou article complet, tarifs et agrégateur de paiement, entité de facturation, actes (DOI/ISBN), sessions hybrides, noms des auteurs au programme public (Q14), prestataire de signature qualifiée (Q17) ; questions du §10 du plan L8 (hypothèses retenues : niveaux des partenaires, régimes, questionnaire, fournisseur d'e-mails et volume, postes du budget, indicateurs). (L'emplacement de l'espace évaluateur est tranché : application `gestion`, décision H1 ; les lettres d'invitation par K12 ; le signataire des attestations par K18.)
+Date de la conférence, mono- ou multi-conférences, niveau de double aveugle, grille et pondérations définitives, résumé seul ou article complet, tarifs et agrégateur de paiement, entité de facturation, actes (DOI/ISBN), sessions hybrides, noms des auteurs au programme public (Q14), prestataire de signature qualifiée (Q17) ; questions du §10 du plan L8 (hypothèses retenues : niveaux des partenaires, régimes, questionnaire, fournisseur d'e-mails et volume, postes du budget, indicateurs) ; questions du §10 du plan L9 (hypothèses retenues : opérateur, copie hors hébergement, reprise 24 h / 4 h, recette sur la production avant données réelles, 200 utilisateurs, revue interne, pas de Sentry, pas d'anti-robots, antivirus, formation, déploiement manuel, pages légales) et questions nées du lot L9 (catégories tarifaires réservées, RG-22 et questionnaires, écran « Sessions du jour », Dependabot). (L'emplacement de l'espace évaluateur est tranché : application `gestion`, décision H1 ; les lettres d'invitation par K12 ; le signataire des attestations par K18.)

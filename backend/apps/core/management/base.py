@@ -52,9 +52,13 @@ class LockedCommand(BaseCommand):
         name = self.get_lock_name()
         with command_lock(name) as acquired:
             if not acquired:
-                self.stdout.write(f"{name} : une autre exécution est en cours, rien à faire.")
+                self.lock_busy(name, **options)
                 return
             self._run_with_heartbeat(name, *args, **options)
+
+    def lock_busy(self, name: str, **options: Any) -> None:
+        """Une autre exécution tient le verrou : par défaut, sortie sans erreur (code 0)."""
+        self.stdout.write(f"{name} : une autre exécution est en cours, rien à faire.")
 
     def _run_with_heartbeat(self, name: str, *args: Any, **options: Any) -> None:
         started = timezone.now()

@@ -223,3 +223,21 @@ def test_k10_public_verification_is_throttled(edition, settings):
 
         ScopedRateThrottle.THROTTLE_RATES = django_settings.REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"]
     assert codes == [404, 404, 429]
+
+
+def test_k15_tampered_or_missing_certificate_pdf_is_never_served(edition):
+    """Revue de sécurité L9.5 (A08) : PDF figé contrôlé à chaque lecture, comme les factures."""
+    signatory(edition)
+    registration = present(edition)
+    service.issue_batch(edition, "participation")
+    certificate = Certificate.objects.get()
+    client = client_for(registration.user, mfa=False)
+    url = f"/v1/me/certificates/{certificate.pk}/pdf"
+    assert client.get(url).status_code == 200
+    path = service.PDFS.path(certificate.storage_name)
+    path.write_bytes(path.read_bytes() + b"%modifie")
+    assert client.get(url).status_code == 404
+    manager = client_for(make_member(edition, Role.ADMIN))
+    assert manager.get(f"{base(edition)}/{certificate.pk}/pdf").status_code == 404
+    path.unlink()
+    assert client.get(url).status_code == 404

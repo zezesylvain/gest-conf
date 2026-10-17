@@ -267,7 +267,8 @@ def revoke_letter(letter: InvitationLetter, *, reason: str, actor: Actor) -> Inv
 
 
 def pdf_bytes(letter: InvitationLetter) -> bytes:
-    return PDFS.read(letter.storage_name)
+    """PDF figé, empreinte contrôlée à chaque lecture (``FileIntegrityError`` sinon)."""
+    return PDFS.read_verified(letter.storage_name, letter.sha256)
 
 
 def verify(code: str) -> dict[str, Any] | None:
@@ -301,15 +302,25 @@ def masked_number(number: str) -> str:
     return "•" * max(0, len(number) - 3) + number[-3:]
 
 
+def erase_passport_data(rows, now) -> None:
+    """Efface le numéro de passeport **et** le PDF émis, qui le porte (revue de sécurité
+    L9.5) : la lettre reste vérifiable par son code, elle n'est plus téléchargeable."""
+    for name in rows.exclude(storage_name="").values_list("storage_name", flat=True):
+        PDFS.remove_after_commit(name)
+    rows.filter(passport_erased_at__isnull=True).update(passport_erased_at=now)
+    rows.update(passport_number="", storage_name="")
+
+
 def erase_passport_numbers(dry_run: bool, now) -> int:
-    """Tâche de conservation (K14) : numéros des éditions archivées ou finies depuis 30 jours."""
+    """Tâche de conservation (K14) : numéros et PDF des éditions archivées ou finies depuis
+    30 jours."""
     limit = (now - PASSPORT_RETENTION).date()
-    rows = InvitationLetter.objects.exclude(passport_number="").filter(
+    rows = InvitationLetter.objects.filter(
         Q(edition__status=EditionStatus.ARCHIVED) | Q(edition__end_date__lt=limit)
-    )
+    ).filter(~Q(passport_number="") | ~Q(storage_name=""))
     count = rows.count()
     if not dry_run and count:
-        rows.update(passport_number="", passport_erased_at=now)
+        erase_passport_data(rows, now)
     return count
 
 

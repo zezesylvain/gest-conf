@@ -76,7 +76,8 @@ def totp_qr_data_url(request: HttpRequest) -> str | None:
 def reset_mfa(user: User, *, actor: Actor, reason: str) -> int:
     """Supprime la 2FA d'un compte (perte de l'appareil, identité vérifiée hors bande).
 
-    Les rôles de gestion exigeront un nouvel enrôlement (``MfaVerified``). Audit
+    Si la plateforme impose la 2FA (T1), les rôles de gestion exigeront un nouvel
+    enrôlement (``MfaVerified``). Audit
     ``mfa.reset`` avec motif ; e-mail à l'adresse principale. Renvoie le nombre
     d'authentificateurs supprimés.
     """

@@ -1,7 +1,8 @@
 # Lot L9 — Recette, sécurité, charge : plan d'implémentation
 
-> **Statut : proposé le 7 octobre 2026, à valider** (décisions S1 à S16, questions du §10).
-> L8 est livré en code et testé en local (bilan : `docs/L8-logistique.md`). Les décisions de
+> **Statut : validé le 12 octobre 2026, en cours** (décisions S1 à S16 telles que proposées ;
+> les questions du §10 restent sans réponse : les propositions valent hypothèses, §2.1).
+> L8 est livré et fusionné (PR #13 ; bilan : `docs/L8-logistique.md`). Les décisions de
 > ce lot sont numérotées S : O se confond avec zéro, et P, Q et R désignent déjà les
 > priorités, les questions et les risques.
 >
@@ -61,7 +62,7 @@
 - Lighthouse : mesure ponctuelle des pages publiques, consignée dans le bilan, pas en CI ;
 - la charge du lot dépasse l'estimation de l'étude, comme les lots précédents (§8).
 
-## 2. Décisions (proposées)
+## 2. Décisions (validées)
 
 | # | Sujet | Proposition |
 |---|---|---|
@@ -81,6 +82,28 @@
 | S14 | Pages légales | Mentions légales, politique de confidentialité, cookies : pages du CMS (L2). Je propose une **trame** fondée sur ce que la plateforme traite réellement (registre des traitements de L1, durées de conservation, sous-traitants : hébergeur, e-mails, paiement) ; le texte définitif revient au commanditaire (loi n° 2013-450, ARTCI ; RGPD si des participants européens sont concernés). |
 | S15 | Correctifs | Les défauts trouvés par la recette, la revue, l'audit ou la charge sont corrigés dans le lot, chacun avec un test. Aucune fonction nouvelle n'entre en L9 ; une demande de fonction issue de la recette est notée pour un lot ultérieur. |
 | S16 | Ordre | L9.0 vérifications ; L9.1 sauvegarde et restauration ; L9.2 supervision et en-têtes ; L9.3 données de volume et requêtes ; L9.4 test de charge ; L9.5 revue de sécurité ; L9.6 accessibilité et couverture ; L9.7 recette, démonstration et documentation ; L9.8 sur l'hébergement (runbook) ; L9.9 bilan, étude §25, `CLAUDE.md`. |
+
+### 2.1 Validation (12 octobre 2026) et hypothèses retenues
+
+Le commanditaire a demandé de « terminer tout ce qui reste », sans répondre aux questions du
+§10. Le plan est donc validé tel que proposé, et ses propositions s'appliquent comme
+hypothèses révisables :
+
+| Question (§10) | Hypothèse retenue |
+|---|---|
+| 1. Opérateur | Inconnu : le volet du dépôt avance seul ; L9.8 attend un opérateur désigné |
+| 2. Copie hors hébergement | Rapatriement par `pull-backups.sh` chez l'opérateur ; pas de chiffrement propre à la copie (disque chiffré conseillé) |
+| 3. Reprise | Perte maximale 24 h, rétablissement sous 4 h |
+| 4. Recette | Sur la production avant toute donnée réelle, puis base réinitialisée |
+| 5. Charge | 200 utilisateurs simultanés ; o2switch prévenu avant le test et ZAP |
+| 6. Sécurité | Revue interne (OWASP Top 10, ASVS, ZAP passif) |
+| 7. Erreurs | E-mail minimal aux opérateurs (D17), pas de Sentry |
+| 8. Anti-robots | Non : limites de débit existantes |
+| 9. Antivirus | Absence acceptée si o2switch n'en fournit pas (à vérifier sur place) |
+| 10. Formation | Guides écrits et déroulé d'atelier ; dates et publics à fixer par le commanditaire |
+| 11. Déploiement continu | Non : `deploy.sh` lancé à la main |
+| 12. Pages légales | Trame proposée ; texte définitif au commanditaire |
+| 13. Bundle du portail | Seuil d'avertissement relevé à 375 ko, l'écart venant de fonctions voulues |
 
 ## 3. Modèle de données
 
@@ -210,3 +233,485 @@ poussées, et L9.8 reste ouverte.
     convient-elle comme point de départ ?
 13. **Bundle du portail** : 369,8 ko pour un avertissement à 365 ko depuis L5 ; relever le
     seuil à 375 ko (proposé, l'écart venant de fonctions voulues), ou chercher à réduire ?
+
+## 11. Bilan de L9.0 (12 octobre 2026)
+
+**Validation** : consignée au §2.1 (demande du commanditaire du 12 octobre 2026 ; questions du
+§10 sans réponse, propositions retenues comme hypothèses).
+
+**Sauvegarde par `mariadb-dump`** (MariaDB 10.11.14 locale) :
+
+- vérifiée avec un compte **limité à sa base** (aucun privilège global, comme sur un
+  hébergement mutualisé) : `--single-transaction --quick --hex-blob --no-tablespaces
+  --skip-lock-tables --default-character-set=utf8mb4` passe sans `PROCESS` ni `LOCK TABLES` ;
+- identifiants dans un fichier d'options passé par `--defaults-extra-file` (toujours la
+  **première** option), jamais sur la ligne de commande ;
+- restauration dans une base vide par le client `mariadb`, puis `migrate --check` : conforme ;
+  `createcachetable` recrée les deux tables du cache, exclues du dump ;
+- la ligne finale `-- Dump completed` permet de reconnaître un dump tronqué ;
+- **piège vérifié** : `mariadb-dump` récent (10.5.25, 10.6.18, 10.11.8 et suivants) écrit en
+  première ligne `/*M!999999\- enable the sandbox mode */`, qu'un client plus ancien ou celui
+  de MySQL refuse : restaurer avec un client `mariadb` récent ;
+- **piège vérifié** : le `mysqldump` de MySQL 8 (celui des runners Ubuntu de la CI)
+  interroge `COLUMN_STATISTICS`, absente de MariaDB : `--column-statistics=0` quand l'outil
+  n'est pas celui de MariaDB ; la CI installe le client MariaDB pour le test de sauvegarde
+  réelle ;
+- durées locales sur la base de développement (98 tables) : dump 0,7 s, restauration 0,5 s ;
+  mesures au volume de l'étude (§12) avec `seed_volume` (L9.3).
+
+**Locust** : 2.46.7, licence MIT, 40 paquets en roues seules pour Python 3.12 (dont
+`gevent`). **Précision de S5** : fichier verrouillé à part (`requirements/loadtest.in` et
+`.txt`), installé dans un environnement séparé par l'opérateur ; ni la CI du backend ni
+l'hébergement n'en dépendent.
+
+**axe** : `@axe-core/playwright` 4.13.0 (licence MPL-2.0, dépendance de développement du
+front, jamais livrée), compatible avec Playwright 1.63 du dépôt.
+
+**`ruff`, règles `S` (bandit)** : **déjà actives depuis L1** (correction de S7 et du §8,
+qui les annonçaient comme nouvelles) ; aucun constat ouvert. Exceptions hors tests, toutes
+justifiées sur leur ligne : deux noms de clé pris pour des mots de passe (`S105`), deux
+requêtes sur un nom de table cité par `quote_name` (`S608`), la clé de test des réglages de
+test. Les appels de `subprocess` ajoutés en L9.1 suivent la même règle.
+
+**Couverture** : mesurée par module avec la suite complète ; résultats et seuil en L9.6
+(**précision** : la mesure rejoint l'étape qui pose le seuil).
+
+**ZAP** : pas de démon Docker dans cet environnement ; Java 21 est présent. **Précision de
+S7** : essai du paquet multiplateforme de ZAP avec un plan d'automatisation passif en L9.5 ;
+sur le poste de l'opérateur, l'image `zaproxy/zap-stable` et `zap-baseline.py` suffisent.
+
+**CSP, `default-src`** : **écarté** (précision de S7). L'en-tête du `.htaccess` ne porte pas
+`script-src`, que la balise `<meta>` de chaque page fixe par empreintes (`inject-csp.mjs`) ;
+avec `default-src 'self'` dans l'en-tête, le navigateur l'appliquerait aussi aux scripts et
+bloquerait les scripts en ligne autorisés par la balise : tout le portail cesserait de
+fonctionner. L'en-tête énumère déjà chaque autre directive de chargement ; un test le
+vérifiera (L9.2).
+
+**Critère de fin** (« Choix consignés ») : atteint.
+
+## 12. Bilan de L9.1 (12 octobre 2026)
+
+**Sauvegarde** (S2 ; `apps/core/backups.py`, commande `backup_db`) :
+
+- `LockedCommand` (verrou, battement de cœur, alerte aux opérateurs en cas d'échec) ; cron
+  quotidien à 2 h 07 (`deploy/cron.sh`, liste fermée étendue) ;
+- dump MariaDB en flux compressé, sous un nom temporaire puis renommé, en 0600, dans
+  `GESTCONF_BACKUP_DIR` (défaut `var/backups`, créé en 0700) ; outil détecté (`mariadb-dump`,
+  sinon `mysqldump`, avec `--column-statistics=0` si ce n'est pas celui de MariaDB) ;
+- tables du cache exclues ; **précision de S2** : `django_session` est sauvegardée **sans ses
+  lignes** (second appel en `--no-data`) : une session est un titre d'accès, une sauvegarde
+  volée n'en livre aucune, et la table existe après restauration ;
+- dump refusé s'il échoue ou s'il est tronqué (ligne finale absente) : aucun fichier laissé ;
+- **manifeste** : date, version, dernière migration de chaque application, taille et
+  empreinte SHA-256 du dump, tables exclues, inventaire des fichiers déposés. **Précision de
+  S2** : l'inventaire liste les fichiers présents sur le disque (chemin relatif, taille), sans
+  empreinte : en calculer chaque nuit sur des gigaoctets coûterait cher, et la cohérence
+  entre la base et les fichiers (empreintes comprises, quand le modèle en garde une) est déjà
+  contrôlée par `check_integrity` après restauration ;
+- rotation : 7 quotidiennes, 4 hebdomadaires, 3 mensuelles (`GESTCONF_BACKUP_KEEP_*`),
+  restes d'une exécution interrompue supprimés, autres fichiers du dossier jamais touchés ;
+- SQLite (développement) : dump SQL par `iterdump()`. **Défaut évité** : l'API `backup()` de
+  `sqlite3` attendait sans fin, dans les tests, le verrou d'une base en mémoire à cache
+  partagé tenue par la transaction du test ;
+- premier déploiement : base vide, `backup_db` ne fait rien et le dit ;
+- journal `backup.created`.
+
+**Restauration** (S3 ; commande `restore_db`, script `deploy/restore.sh`) :
+
+- empreinte du dump comparée au manifeste (copie altérée refusée) ; base cible **vide**
+  exigée (refus sinon, vérifié par une connexion PyMySQL) ; chargement par le client
+  `mariadb` ;
+- fichiers rapatriés recopiés dans des dossiers vides, puis comparés au manifeste (absents,
+  tailles différentes) ; tables du cache recréées ; migrations en attente **signalées**, jamais
+  appliquées d'office ; journal `backup.restored` ; puis `check_integrity` ;
+- `restore.sh` fonctionne sur le poste de l'opérateur (dépôt) comme sur l'hébergement (livré
+  par `deploy.sh`) et affiche la durée, à comparer aux 4 heures de l'étude.
+
+**Copie hors hébergement** (`deploy/pull-backups.sh`, chez l'opérateur) : dumps copiés sans
+suppression ; fichiers en instantanés datés liés par `--link-dest` (un effacement sur le
+serveur n'atteint pas les copies prises), le dernier désigné par `latest` ; conservation
+locale de 30 jours ; empreinte du dernier dump et complétude de l'instantané vérifiées.
+Essayé en local avec un `ssh` simulé (`RSYNC_RSH`) : deux passages, mêmes inodes d'un
+instantané à l'autre, vérification conforme ; puis `restore.sh` à partir de cette copie :
+base et fichiers restaurés, `check_integrity` sans anomalie, en 4 secondes.
+
+**Déploiement** : `backup_db --required` avant `migrate` (promis en L1, jamais fait) : si une
+sauvegarde du cron tourne au même moment, le déploiement s'arrête au lieu de migrer sans
+sauvegarde fraîche (point d'extension `lock_busy` ajouté à `LockedCommand`).
+
+**Défaut trouvé, antérieur à L9 et grave** : `backend/var/` est ignoré par git, donc absent de
+l'archive envoyée ; le `rsync --delete` de `deploy.sh` l'aurait **effacé à chaque
+déploiement**, emportant les fichiers déposés (emplacement par défaut de
+`GESTCONF_FILES_DIR`) et désormais les sauvegardes. Aucune donnée réelle n'existait encore.
+`--exclude '/var/'` ajouté, avec un test.
+
+**CI** : le job du backend installe le client MariaDB (`mariadb-dump`, `mariadb`) pour le test
+de sauvegarde réelle, qui charge le dump dans une base neuve et vérifie une ligne témoin et
+la table des sessions vide.
+
+**Exploitation** : `deploy/README.md`, section « Sauvegarde et restauration » (cron, copie,
+restauration, test documenté, données personnelles des copies), et retour arrière après une
+migration fautive.
+
+**Tests** : `apps/core/tests/test_backups.py` (13 tests : rotation, nettoyage, fichier
+d'options, arguments du dump sans mot de passe, sessions en structure seule, client MySQL,
+dump en échec ou tronqué, sauvegarde SQLite avec manifeste, battement de cœur et journal,
+`--required`, manifeste altéré, recopie et vérification des fichiers, refus hors MariaDB, base
+vide ; sous MariaDB, dump réel puis chargement dans une base neuve et refus d'une base non
+vide) ; `tests/test_deploy_scripts.py` (sauvegarde avant `migrate`, `var/` protégé, copie
+sans suppression et à instantanés, restauration puis contrôle d'intégrité, cron) ;
+`shellcheck` des scripts.
+
+**Critère de fin** (« Tests au vert, restauration locale chronométrée ») : atteint.
+
+## 13. Bilan de L9.2 (12 octobre 2026)
+
+**Supervision** (S4) :
+
+- `/v1/health` gagne `backup` (`ok`, `late`, `unknown`), lu dans le battement de cœur de
+  `backup_db` : `late` au-delà de `GESTCONF_BACKUP_MAX_AGE_HOURS` (26 h). Comme `jobs`, il ne
+  rend pas l'API indisponible ; aucune autre information n'est exposée ;
+- `check_integrity` signale par e-mail aux opérateurs (D17) une sauvegarde absente ou en
+  retard (`core.backup_age`) et un espace libre sous `GESTCONF_DISK_FREE_MIN_MB` (1 024 Mio)
+  sur le disque des fichiers ou des sauvegardes (`core.disk_space`). **Limite** : la mesure
+  est celle du système de fichiers ; un quota propre au compte (CloudLinux) n'y apparaît pas
+  (**non vérifié**, M07) ;
+- ces deux contrôles dépendent de `GESTCONF_STORAGE_MONITORING` (actif par défaut, désactivé
+  dans les réglages de test sauf pour leurs propres tests) ;
+- la surveillance externe (disponibilité de `/` et de `/api/v1/health`) reste à configurer par
+  l'opérateur (runbook, L9.7).
+
+**Tests de fumée** (S7) :
+
+- en-têtes `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy` et, en HTTPS,
+  `Strict-Transport-Security` : ils sont dans `<IfModule mod_headers.c>` et disparaîtraient
+  sans bruit si le module manquait ;
+- redirection `http://` vers `https://` (301 ou 308) ;
+- état de la sauvegarde : `ok` exigé, `unknown` signalé sans échec (premier déploiement).
+
+**Redirection HTTPS** : une seule voie, **cPanel** (« Forcer la redirection HTTPS »), comme le
+dit le README ; le commentaire de `config/settings/prod.py`, qui parlait du `.htaccess`, est
+corrigé.
+
+**CSP** : `default-src` écarté (bilan de L9.0) ; un test vérifie que l'en-tête du portail
+énumère chaque directive de chargement hors scripts, sans `default-src` ni `script-src`.
+
+**Schéma et client** : `Health.backup` (énumération `JobsStatus`), schéma validé sous
+MariaDB, client TypeScript régénéré ; vérification des types des trois projets du front.
+
+**Tests** : `apps/core/tests/test_monitoring.py` (sauvegarde absente, en retard, à jour,
+surveillance désactivée ; espace disque bas sur un dossier encore absent) ;
+`test_health.py` (état de la sauvegarde) ; `test_deploy_scripts.py` (en-têtes et redirection
+dans les tests de fumée, directives de la CSP) ; `shellcheck`.
+
+**Critère de fin** (« Tests au vert ») : atteint.
+
+## 14. Bilan de L9.3 (12 octobre 2026)
+
+**Données de volume** (S6 ; application `apps/qa`, commande `seed_volume`) :
+
+- une conférence fictive dédiée (`gestconf-fictif`) et deux éditions : `FICTIFEVAL` (appel
+  clos, 600 soumissions en évaluation, 100 relecteurs, 1 200 affectations, 800 évaluations
+  envoyées) et `FICTIFAPPEL` (appel ouvert, 300 brouillons, 1 500 inscrits dont 1 000 payés
+  par virement enregistré, factures et pro forma émises), édition courante de l'API publique
+  pendant le test ;
+- **tout passe par les services métier** : statuts écrits par les workflows (règle n° 4),
+  règles de gestion appliquées, pièces numérotées ; seuls les comptes sont créés en masse,
+  avec un hachage de mot de passe unique ; mot de passe et secret TOTP tirés au hasard et
+  affichés une seule fois ; commande journalisée (`qa.volume_seeded`) ;
+- **aucun e-mail** : adresses en `@fictif.invalid` (domaine réservé, RFC 2606) ; la tâche
+  d'envoi annule tout message vers `.invalid` (test) ;
+- **garde-fous** : `--confirm-fictitious` exigé ; refus dès que la base contient un compte
+  hors du domaine fictif, une soumission ou une inscription hors de la conférence fictive
+  (les opérateurs n'ont pas besoin de compte, D1) ; refus si la conférence fictive existe ;
+- durée au volume de l'étude, MariaDB 10.11 locale : **528 s** (dont la génération des
+  2 500 pièces PDF ; 179 s sans elles) ; base de 29 Mio, 2 500 fichiers privés (60 Mio).
+
+**Précisions de S6** :
+
+- **pas de `purge_volume`** : une purge supprimerait des pièces comptables numérotées sans
+  trou et en ajout seul (RG-14) et des entrées du journal, et se heurterait aux clés
+  `RESTRICT`. Le retour à l'état antérieur se fait par la **sauvegarde prise juste avant**
+  (`backup_db`), restaurée dans une base neuve (`deploy/restore.sh`), ou par une base
+  réinstallée ; le runbook (L9.7) le décrit ;
+- les éditions sont repérées par leur conférence dédiée et non par un indicateur en base :
+  **aucun modèle nouveau** (§3).
+
+**Sauvegarde et restauration au volume** (S2, S3) : `backup_db` en **2,0 s** (dump compressé
+de 1,2 Mio, manifeste de 2 500 fichiers) ; `deploy/restore.sh` (dump, fichiers, comparaison
+au manifeste, tables du cache, `check_integrity`) en **6 s** dans une base vide, sans
+anomalie. L'objectif de rétablissement de 4 heures (§11.6) est loin ; la mesure sur
+l'hébergement reste à faire (L9.8).
+
+**Nombre de requêtes** (`tests/test_query_counts.py`, données de `seed_volume` à petite
+échelle) : les listes paginées (soumissions, évaluations par soumission, inscriptions,
+paiements, pièces) font le même nombre de requêtes pour 2 et pour 100 lignes ; les vues non
+paginées (affectations du relecteur, avancement, classement, statistiques, rapports,
+tableau de bord financier, liste hors ligne de l'accueil) restent sous un plafond inférieur
+au nombre de lignes lues ; le tableau du planificateur garde le même nombre de requêtes
+quand le programme triple (`apps/program/tests/test_api.py`).
+
+**Correctifs N+1** :
+
+- **classement** (`ranking`) : trois requêtes par soumission (77 pour 24 soumissions ;
+  1 800 au volume de l'étude) ; notes désormais calculées en une fois (`summaries`), sans
+  profil des relecteurs ni notes par critère, et sans les colonnes longues de la
+  soumission : **6 requêtes**, et au volume **436 ms → 102 ms** ;
+- **export des évaluations** : même calcul par soumission, remplacé par les évaluations déjà
+  chargées ;
+- **tableau du planificateur** : édition de chaque session et thématique de chaque
+  communication placée lues une à une (`program_sessions`) ; jointes à la requête.
+
+**Temps de réponse au volume** (MariaDB locale, réglages de développement, médiane de cinq
+appels) : soumissions (page de 100) 55 ms ; évaluations par soumission 42 ms ; avancement
+41 ms ; classement 102 ms ; rapport de relecture 170 ms ; affectations d'un relecteur 23 ms ;
+inscriptions (page de 100) 57 ms ; pièces 55 ms ; tableau de bord financier 37 ms ; liste
+hors ligne de l'accueil (1 000 inscrits confirmés) 227 ms. Mesures locales, **non
+transposables** à l'hébergement : le test de charge (L9.4, L9.8) fait foi.
+
+**Critère de fin** (« Tests au vert ») : atteint.
+
+## 15. Bilan de L9.4 (12 octobre 2026)
+
+**Scénarios** (`loadtest/locustfile.py`, S5) : visiteurs (pages pré-rendues, bandeau et
+édition courante gardés le temps de leur cache, comme un navigateur ; tarifs), auteurs
+(liste, sauvegarde automatique, dépôt d'un PDF valide, vérification puis envoi), relecteurs
+(affectations, brouillon d'une évaluation non envoyée, parfois l'envoi), participants (« Mon
+inscription », devis), nouveaux inscrits (devis puis commande par virement), comité (une page
+au hasard des 600 soumissions et des 1 500 inscriptions, évaluations par soumission,
+avancement, classement, statistiques, rapports, tableau de bord financier). **Verdict** à la
+fin, code de sortie non nul si l'objectif n'est pas atteint : p95 et taux d'erreurs sur
+toutes les requêtes hors « (PDF) » (commande, qui émet la pro forma), rapportées à part.
+
+**Sessions pré-établies** (commande `loadtest_sessions`) : une session par compte fictif,
+telle qu'une connexion réussie la laisse (2FA validée pour le comité et les relecteurs),
+jeton CSRF compris ; fichier JSON en 0600, jamais écrasé ; `--revoke` supprime les sessions
+qu'il liste ; mêmes garde-fous que `seed_volume` ; journalisée. Tests : sessions utilisables
+sur une route soumise à la 2FA, écriture protégée par le CSRF, refus sans confirmation ou
+sans données de volume, révocation.
+
+**Dépendance** : `locust==2.46.7` verrouillé à empreintes dans
+`backend/requirements/loadtest.txt` (37 paquets, compilé sous Linux et Python 3.12), installé
+dans un environnement séparé ; ni l'hébergement ni la CI du backend n'en dépendent. **Limite**
+: sous Windows, `pywin32` manque au verrou (WSL conseillé). `ruff` vérifie `loadtest/`
+(exception `S311` justifiée : tirages non cryptographiques).
+
+**Essai local** (MariaDB 10.11, base au volume de l'étude, serveur de développement) :
+
+- 50 utilisateurs, 2 minutes : deux défauts révélés et corrigés : le **bandeau** était limité
+  à 60 requêtes par minute et par adresse IP (55 % de refus) ; un relecteur ne peut pas
+  enregistrer de brouillon sur une évaluation **déjà envoyée** (RG-06 : on la renvoie), le
+  scénario le faisait ;
+- 200 utilisateurs, 3 minutes : **0 erreur** sur 4 548 requêtes ; p95 de 3 s, le serveur de
+  développement (un seul processus) plafonnant vers 25 requêtes par seconde : **aucune valeur
+  de mesure**, le test sur l'hébergement fait foi (L9.8) ;
+- essai identique au job de CI (base neuve réduite, 30 utilisateurs, 90 s) : objectif atteint,
+  0 erreur, après correction d'un troisième défaut du scénario (pages tirées au-delà de la
+  liste quand le volume est réduit : le comité lit d'abord le nombre de lignes).
+
+**Correctifs** :
+
+- **bandeau** : 600 requêtes par minute et par adresse IP (au lieu de 60) : au lieu de la
+  conférence, des centaines de participants sortent par la même adresse et chaque navigateur
+  relit le bandeau au plus une fois par minute ; à 60, il aurait disparu au moment où il sert
+  le plus ;
+- **rapport de relecture** : lecture restreinte aux colonnes utiles (1 200 affectations sans
+  les résumés ni les commentaires) : **170 ms → 79 ms** au volume ; test du contenu de la
+  section ajouté (aucun ne le vérifiait).
+
+**CI** : job « Scénarios de charge (essai court) » : base MariaDB neuve, `seed_volume` réduit,
+`loadtest_sessions`, serveur de développement, 30 utilisateurs pendant 90 s ; il échoue au
+moindre taux d'erreurs de 1 % (cible du p95 relâchée à 5 s : le serveur de développement ne
+mesure rien). Les scénarios ne peuvent plus pourrir sans bruit (§7).
+
+**Critère de fin** (« Essai local concluant ») : atteint ; la mesure de référence reste celle
+de l'hébergement (L9.8, runbook).
+
+## 16. Bilan de L9.5 (12 octobre 2026)
+
+**Revue** : `docs/L9-revue-securite.md` : OWASP Top 10 (2021) et ASVS 4.0 niveau 2 (sélection),
+preuve par contrôle, **18 constats** (aucun critique ni élevé) : 9 corrigés dans le lot,
+7 acceptés par écrit, 2 à vérifier sur l'hébergement (runbook).
+
+**Correctifs** :
+
+- **taille des requêtes** : `RequestSizeLimitMiddleware` refuse (413) un corps annoncé de plus
+  de `GESTCONF_MAX_REQUEST_MB` (55 Mio) avant toute lecture ; la mise en tampon par Passenger
+  reste à vérifier sur l'hébergement ;
+- **cache** : `DefaultNoStoreMiddleware` pose `Cache-Control: no-store` sur toute réponse qui
+  n'en fixe pas (les vues publiques et les fichiers gardent le leur) ;
+- **PDF figés** : attestations et lettres servies seulement si leur empreinte est intacte
+  (`PrivateStore.read_verified`, 404 sinon), comme les factures ;
+- **passeport** : l'effacement de K14 et l'anonymisation suppriment aussi le PDF émis de la
+  lettre, qui porte le numéro ; la lettre reste vérifiable par son code ;
+- **rotation des secrets** : commande `rotate_signing_keys` ; `DJANGO_SECRET_KEY_FALLBACKS` ;
+  procédures pour chaque secret dans `deploy/README.md` ;
+- tests ajoutés : longueur minimale du mot de passe, objet d'e-mail sans retour à la ligne,
+  PDF falsifié ou absent refusé, effacement du PDF de la lettre, rotation des clés, borne de
+  taille, `no-store` ;
+- rappel de L9.4 : bandeau à 600 requêtes par minute et par adresse (disponibilité).
+
+**ZAP** : paquet multiplateforme 2.16.1 (Java 21, empreinte SHA-256 `e90ca63b…071415`),
+essai local contre l'API en réglages de production (import OpenAPI de 359 adresses,
+exploration, analyse passive) : une seule alerte faible, l'en-tête `Server` du serveur de
+développement. Plan de l'opérateur, **passif seulement** : `deploy/zap/baseline.yaml`
+(vérifié : il s'exécute ; dossier des rapports explicite, sans quoi ils s'écrivaient à côté du
+plan, dans le dépôt). **Précision de S7** : Apache n'a pas pu servir le portail localement
+(il refuse de tourner en root, et l'espace de travail ne lui est pas lisible) ; les en-têtes
+du `.htaccess` restent couverts par les tests de fumée et par l'analyse de l'opérateur.
+
+**Acceptés par écrit** (R10 à R15, R17) : actions de la CI par version majeure, pas de
+Dependabot (proposé au commanditaire : il ouvrirait des PR automatiques), jeton du QR en clair
+(par conception), numéro de passeport en clair (masqué, effacé), HSTS sans sous-domaines, CSP
+`style-src 'unsafe-inline'`, pas d'antivirus (question 9).
+
+**Critère de fin** (« Revue écrite, constats traités ») : atteint pour le volet du dépôt.
+
+## 17. Bilan de L9.6 (12 octobre 2026)
+
+**Audit d'accessibilité** (S8) : `@axe-core/playwright` 4.13.0 (dépendance de développement,
+jamais livrée) ; assistant `web/e2e/axe.ts` : règles WCAG 2.0 et 2.1 A et AA, échec sur toute
+violation **grave ou critique**, les autres listées sans échec. **25 points d'audit** dans le
+parcours de bout en bout, aux écrans où il passe : création de compte, profil, brouillon et
+récapitulatif de soumission, évaluation (deux fois), affectations, classement, mes
+soumissions, programme public, planificateur, mentions de facturation, page « Inscription »,
+inscriptions, pièces, accueil du jour J, présences, mes documents, vérification publique,
+budget, mon planning, accueil du portail avec le bandeau, questionnaire, résultats du
+questionnaire, rapports. Vérifié : l'assistant échoue bien sur une page piégée (image sans
+texte, bouton sans nom).
+
+**Constats et correctifs** (trois, tous corrigés ; le parcours passe ensuite 19 sur 19) :
+
+- **bandeau du portail** : texte foncé sur orange, contraste 3,0:1 (WCAG 1.4.3 exige 4,5:1) ;
+  texte blanc (5,0:1, jeton `--gc-on-warning`), lien souligné de la même couleur ;
+- **questionnaire** : `aria-required` sur des `fieldset` (attribut interdit sur un groupe,
+  WCAG 4.1.2) ; groupes de boutons radio en `role="radiogroup"` (seul rôle de groupe qui le
+  porte), `aria-required` sur le champ libre, mention « obligatoire » de la légende ailleurs ;
+  test unitaire ;
+- **tableaux défilants** de la gestion (48 `.table-wrap` dans 40 écrans) : zone de défilement
+  inatteignable au clavier (WCAG 2.1.1) ; directive partagée `ScrollRegion`, qui s'applique à
+  la classe : `tabindex="0"`, `role="region"`, nom traduit ; test unitaire.
+
+En passant : les fiches d'aide « Premiers pas » et « Sécurité » manquaient au profil des
+relecteurs, à qui la 2FA est imposée (constat de la rédaction des guides, L9.7) ; ajoutées.
+
+**Limite** : un audit automatique n'attrape que la part mécanique (environ un tiers des
+critères WCAG) ; la revue manuelle (clavier, lecteur d'écran, zoom à 200 %) reste à faire
+pendant la recette (cahier de recette, L9.7).
+
+**Couverture** (S9) : mesurée sous SQLite (la CI la mesure sur MariaDB), avec les tests des
+cinq modules critiques et les tests transverses (5 909 tests ; la suite complète ne peut que
+l'augmenter) : `reviews` 96 %, `submissions` 93 %, `program` 93 %,
+`registrations` 94 %, `payments` 93 % ; aucun module sous le seuil, aucun test ciblé à écrire.
+**Seuil en CI** : 80 % par module sur ces cinq modules, après les tests MariaDB
+(`coverage report --include … --fail-under=80`), boucle vérifiée localement (y compris
+l'échec sous le seuil). **Précision de S9** : seuil par module plutôt que `fail_under` global
+de `pyproject.toml`, qui mêlerait la logique critique au reste.
+
+**Budget du portail** (hypothèse 13) : seuil d'avertissement du bundle initial porté de 365 à
+375 ko (erreur inchangée à 380 ko) ; build vert à 369,8 ko, sans avertissement.
+
+**Tests** : unitaires du front verts (shared 83, gestion 263, portail 173), lint et formatage
+verts, E2E 19 sur 19 avec les audits.
+
+**Critère de fin** (« Aucune violation grave ; seuil de couverture en CI ») : atteint.
+
+## 18. Bilan de L9.7 (12 octobre 2026)
+
+**Édition de démonstration** (S10, commande `seed_demo`) : édition `DEMO` de la conférence
+fictive, publiée et courante (le portail la sert), appel ouvert 30 jours, évaluation et
+version finale datées, inscriptions ouvertes (virement et sur place ; en ligne si un
+fournisseur est configuré), deux thématiques, un type de communication, grille, catégorie
+« Chercheur » et ses tarifs, mentions de facturation, deux salles ; **20 comptes fictifs**
+(`<nom>@fictif.invalid`) : administrateur, présidence, présidence du CS, trois relecteurs, un
+CO par fonction (sept), bénévole, signataire, intervenant, deux auteurs, deux participants ;
+mot de passe et secret TOTP communs tirés au hasard, affichés une seule fois ; 2FA prête pour
+chaque rôle qui l'exige. Mêmes garde-fous que `seed_volume`, journalisée (`qa.demo_seeded`).
+Tests : un compte par rôle et par fonction, 2FA exactement pour les rôles qui l'exigent,
+écrans atteints, refus (confirmation, données réelles, édition existante), coexistence avec
+les données de volume (conférence fictive partagée ; `seed_volume` refuse désormais si ses
+deux éditions existent, et non si la conférence existe).
+
+**Documentation** (S10, S11, S12, S13, S14) :
+
+- `docs/L9-cahier-de-recette.md` : démos A à I en **107 scénarios** numérotés (préalable,
+  étapes, résultat attendu, règle vérifiée, case OK/KO), boîtes aux lettres réelles des
+  testeurs là où un e-mail se lit, tableau des anomalies ;
+- `docs/guides/` : présidence et administration, comité scientifique, relecteur, comité
+  d'organisation (une section par fonction), bénévole et accueil ; **texte proposé de la page
+  « Aide » du portail** (FR et EN, HTML de la liste blanche du CMS) ; déroulé des ateliers de
+  formation sur l'édition de démonstration ;
+- `docs/exploitation.md` : guide d'exploitation (architecture, déploiement, publication du
+  portail, cron, sauvegardes, supervision, incidents, secrets, 35 commandes d'exploitation,
+  demandes sur les données personnelles) ;
+- `docs/L9-runbook-o2switch.md` : douze étapes pour l'opérateur, chacune avec ses commandes,
+  son critère de passage et sa conduite en cas d'échec ;
+- `docs/L9-mise-en-production.md` : check-list A5, preuve et responsable par ligne ;
+  l'ouverture de l'appel reste la décision du commanditaire ;
+- `docs/pages-legales-trame.md` : trame des mentions légales, de la politique de
+  confidentialité et de la page cookies, fondée sur ce que la plateforme traite réellement.
+
+**Défauts trouvés en rédigeant, corrigés** :
+
+- `deploy/pull-backups.sh` échouait sur une installation neuve (dossier distant des fichiers
+  absent) : instantané vide, sans échec ;
+- `deploy/restore.sh` réussissait malgré des anomalies (`check_integrity` rend 0) : il échoue
+  désormais si un contrôle de données en compte une ; les contrôles de l'environnement (âge de
+  la sauvegarde, disque) n'en font pas échouer la restauration (vérifié au volume : la
+  sauvegarde est forcément « absente » juste après) ;
+- fiche d'aide et écran « Comptoir » : « tarif sur place » corrigé en « tarif de la période en
+  cours (sur place après la clôture des inscriptions) », ce que fait le code (J2) ;
+- résultats du test de charge et rapports ZAP écrits hors du dépôt (`deploy.sh` refuse un
+  arbre non suivi) ; `loadtest/resultats/` ignoré ;
+- `backend/.env.example` : variables de L9 (sauvegardes, supervision, taille des requêtes).
+
+**Précisions du plan** :
+
+- **S10** : le cahier de recette est `docs/L9-cahier-de-recette.md` ; `docs/L9-recette.md`
+  reste le bilan du lot (convention des lots) ;
+- **S12, ordre du runbook** : le **test de charge précède la recette**, car `seed_volume`
+  refuse une base qui contient un compte réel, et les testeurs de la recette en créent ;
+  chaque phase repart de la sauvegarde prise juste avant ;
+- **S6, §4** : pas de `purge_volume` (bilan de L9.3) ;
+- premier déploiement sur une base vide : la publication du portail échoue tant qu'aucune
+  édition n'est courante ; le runbook déploie d'abord sans elle (`SKIP_PORTAL=1`).
+
+**Questions nées de la rédaction, pour le commanditaire** (non tranchées) :
+
+1. une catégorie tarifaire à 0 est choisissable par tout participant (pas de restriction par
+   rôle) : faut-il des catégories réservées (invités, comité) ?
+2. les invitations aux questionnaires partent en envoi groupé sans tenir compte du
+   désabonnement aux annonces : RG-22 doit-elle s'y appliquer ?
+3. l'écran « Sessions du jour » exige le rôle de président de séance, alors que le serveur
+   accepte la présidence désignée dans le programme : faut-il ouvrir l'écran à cette
+   désignation ?
+4. écarts entre l'étude et les écrans (sans écran aujourd'hui) : page « Contact », « Mon
+   programme » des participants, indisponibilités des intervenants, connexion ORCID (P2),
+   accès des co-auteurs à la soumission.
+
+**Restent pour l'hébergement** (L9.8) : captures d'écran des guides, exécution du runbook,
+recette par le commanditaire.
+
+**Critère de fin** (« Documents remis, `seed_demo` testé ») : atteint.
+
+## 19. Bilan de L9.9 (12 octobre 2026) et état de L9.8
+
+**Clôture du volet du dépôt** : bilan [`docs/L9-recette.md`](L9-recette.md) ; étude, §25
+« Mises à jour issues du lot L9 » (Markdown et HTML, version 1.9) ; `CLAUDE.md` (état
+d'avancement, décisions du lot, structure, commandes, sauvegarde).
+
+**Défaut trouvé à la vérification finale** : le message de la borne de taille des requêtes
+(« Requête trop volumineuse. », L9.5) manquait au catalogue anglais, ce que le contrôle des
+traductions de la CI aurait refusé ; traduit (« Request too large. ») et recompilé. Le schéma
+OpenAPI, régénéré sous MariaDB, est inchangé (aucune API nouvelle dans le lot, hors
+`Health.backup` en L9.2).
+
+**Vérification finale** : suite backend complète **6 743 tests verts** (11 ignorés : MariaDB
+seule) ; `ruff`, `shellcheck`, traductions et migrations à jour ; tests unitaires du front verts
+(shared 83, gestion 263, portail 173), lint et formatage verts, build vert (portail 369,8 ko) ;
+parcours de bout en bout **19 sur 19**, avec ses 25 audits d'accessibilité.
+
+**L9.8 (sur l'hébergement)** : **non commencé**. Il attend la désignation d'un opérateur par le
+commanditaire (question 1) et suit [`docs/L9-runbook-o2switch.md`](L9-runbook-o2switch.md) ; ses
+résultats (fiche o2switch, durées, verdict du test de charge, analyse ZAP, recette) viendront
+compléter ce plan et le bilan du lot.

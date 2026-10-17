@@ -19,6 +19,7 @@ import {
   MemberWithEmail,
   MeStore,
   PageHeader,
+  ScrollRegion,
 } from '@gestconf/shared';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
@@ -34,7 +35,7 @@ import { editionCapabilities, errorMessages } from '../../core/page-support';
  */
 @Component({
   selector: 'gestion-members-page',
-  imports: [TranslatePipe, MatButtonModule, ErrorSummary, PageHeader],
+  imports: [ScrollRegion, TranslatePipe, MatButtonModule, ErrorSummary, PageHeader],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './members-page.html',
   styleUrl: '../page.scss',

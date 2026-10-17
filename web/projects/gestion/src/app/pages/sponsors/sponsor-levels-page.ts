@@ -20,6 +20,7 @@ import {
   LogoSize,
   MeStore,
   PageHeader,
+  ScrollRegion,
   SponsorLevel,
 } from '@gestconf/shared';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -39,6 +40,7 @@ import { levelName, LOGO_SIZES } from './sponsors-support';
 @Component({
   selector: 'gestion-sponsor-levels-page',
   imports: [
+    ScrollRegion,
     ReactiveFormsModule,
     RouterLink,
     TranslatePipe,

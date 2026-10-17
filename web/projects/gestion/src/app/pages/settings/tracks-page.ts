@@ -4,7 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { ErrorSummary, PageHeader, Track, TrackRequest } from '@gestconf/shared';
+import { ErrorSummary, PageHeader, ScrollRegion, Track, TrackRequest } from '@gestconf/shared';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { ItemListPage } from './item-list';
@@ -27,6 +27,7 @@ function trackForm(builder: NonNullableFormBuilder) {
 @Component({
   selector: 'gestion-tracks-page',
   imports: [
+    ScrollRegion,
     ReactiveFormsModule,
     TranslatePipe,
     MatFormFieldModule,

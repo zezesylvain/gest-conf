@@ -5,6 +5,7 @@ import {
   PageHeader,
   ReportSection,
   ReportTable,
+  ScrollRegion,
   SectionSummary,
 } from '@gestconf/shared';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -47,7 +48,7 @@ export function withBars(table: ReportTable): ShownTable {
  */
 @Component({
   selector: 'gestion-reports-page',
-  imports: [TranslatePipe, MatButtonModule, ErrorSummary, PageHeader],
+  imports: [ScrollRegion, TranslatePipe, MatButtonModule, ErrorSummary, PageHeader],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './reports-page.html',
   styleUrl: '../page.scss',

@@ -43,7 +43,14 @@ const RATINGS = [1, 2, 3, 4, 5] as const;
       } @else {
         <form (submit)="$event.preventDefault(); submit()">
           @for (question of current.questions; track question.id; let index = $index) {
-            <fieldset class="question" [attr.aria-required]="question.required">
+            <!-- Choix unique : groupe de boutons radio, seul rôle de groupe qui porte
+                 aria-required (WCAG 4.1.2, constat de l'audit axe de L9.6) ; ailleurs, la
+                 mention « obligatoire » de la légende suffit. -->
+            <fieldset
+              class="question"
+              [attr.role]="radio(question) ? 'radiogroup' : null"
+              [attr.aria-required]="radio(question) && question.required ? true : null"
+            >
               <legend>
                 {{ index + 1 }}. {{ text(question, 'label') }}
                 @if (question.required) {
@@ -103,6 +110,7 @@ const RATINGS = [1, 2, 3, 4, 5] as const;
                     rows="4"
                     [attr.maxlength]="textMax"
                     [attr.aria-label]="text(question, 'label')"
+                    [attr.aria-required]="question.required || null"
                     (input)="set(question, $any($event.target).value)"
                   ></textarea>
                   <p class="muted">{{ 'portail.community.surveys.textHint' | translate }}</p>
@@ -170,6 +178,11 @@ export class SurveyPage implements OnInit {
     const record = item as Record<string, unknown>;
     const value = record[`${field}_${this.language.current()}`];
     return (typeof value === 'string' && value) || String(record[`${field}_fr`] ?? '');
+  }
+
+  /** Question à choix unique (échelle ou choix) : groupe de boutons radio. */
+  protected radio(question: Question): boolean {
+    return question.kind === 'rating' || question.kind === 'single';
   }
 
   protected set(question: Question, value: unknown): void {

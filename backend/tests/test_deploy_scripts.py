@@ -182,7 +182,7 @@ def test_cron_script_only_runs_scheduled_commands():
     scheduled = (
         r"^\s*run_jobs \| close_call \| remind_drafts \| remind_reviewers \| "
         r"remind_presentations \| cleanup \| \\\n\s*check_integrity \| "
-        r"expire_registrations \| sync_payments \| remind_tasks\)"
+        r"expire_registrations \| sync_payments \| remind_tasks \| backup_db\)"
     )
     assert re.search(scheduled, code, re.M)
     assert "config.settings.prod" in code
@@ -252,3 +252,89 @@ def test_smoke_test_checks_the_prerendered_portal_and_public_files():
     assert '"$BASE_URL/sitemap.xml"' in code
     assert 'data-gc-rendered="en:call"' in code
     assert "/api/v1/public/files/00000000-0000-0000-0000-000000000000/x.pdf" in code
+
+
+PULL_SCRIPT = REPO_DIR / "deploy" / "pull-backups.sh"
+RESTORE_SCRIPT = REPO_DIR / "deploy" / "restore.sh"
+
+
+def test_deploy_backs_up_before_migrating():
+    """Plan L9, S3 : sauvegarde fraîche avant migrate, obligatoire (--required)."""
+    code = shell_code(DEPLOY_SCRIPT)
+    backup = code.index("python manage.py backup_db --required")
+    assert backup < code.index("python manage.py migrate --noinput")
+    assert code.index("check --database default") < backup
+
+
+def test_deploy_never_deletes_uploaded_files_nor_backups():
+    """var/ (fichiers déposés et sauvegardes par défaut) est ignoré par git : sans exclusion,
+    le rsync --delete du déploiement l'effacerait (défaut trouvé en L9.1)."""
+    code = shell_code(DEPLOY_SCRIPT)
+    assert "--exclude '/var/'" in code
+    gitignore = (REPO_DIR / ".gitignore").read_text(encoding="utf-8")
+    assert "backend/var/" in gitignore
+    assert 'show "$RELEASE:deploy/restore.sh"' in code
+
+
+def test_pull_backups_keeps_dated_snapshots_and_verifies_the_copy():
+    """Copie hors hébergement tirée par l'opérateur : jamais de --delete (un effacement sur
+    le serveur ne gagne pas la copie), instantanés liés (--link-dest), empreinte vérifiée."""
+    code = shell_code(PULL_SCRIPT)
+    assert "--delete" not in code
+    assert "--link-dest=" in code
+    assert 'mv "$partial" "$snapshot"' in code
+    assert 'ln -sfn "$stamp" "$PULL_DEST/files/latest"' in code
+    assert "hashlib.sha256()" in code and 'manifest["database"]["sha256"]' in code
+    assert "umask 077" in code
+    # Installation neuve : dossier distant des fichiers absent, instantané vide (L9.7).
+    assert "test -d '$remote'" in code and 'mkdir -p "$partial/$name"' in code
+    assert PULL_SCRIPT.stat().st_mode & 0o111
+
+
+def test_restore_script_restores_then_checks_integrity():
+    code = shell_code(RESTORE_SCRIPT)
+    assert code.index("manage.py restore_db") < code.index("manage.py check_integrity")
+    assert "--files-from" in code
+    # check_integrity rend 0 avec des anomalies : le script les cherche dans la sortie (L9.7).
+    assert "'-> [1-9][0-9]* anomalie'" in code
+    assert RESTORE_SCRIPT.stat().st_mode & 0o111
+
+
+SMOKE_SCRIPT = REPO_DIR / "deploy" / "smoke-test.sh"
+PORTAL_HTACCESS = REPO_DIR / "deploy" / "apache" / "public_html.htaccess"
+
+
+def test_smoke_test_checks_security_headers_and_https_redirect():
+    """Plan L9, S7 : les en-têtes du .htaccess sont dans <IfModule mod_headers.c> et
+    disparaîtraient sans bruit si le module manquait ; la redirection HTTPS (cPanel) aussi."""
+    code = shell_code(SMOKE_SCRIPT)
+    for header in ("x-content-type-options", "x-frame-options", "referrer-policy"):
+        assert f'has_header "$headers" {header}' in code
+    assert "strict-transport-security 'max-age=[1-9]'" in code
+    assert '"http://${BASE_URL#https://}/fr/"' in code
+    assert "(301|308)" in code
+    assert 'json_has "$health" backup \'"ok"\'' in code
+
+
+def test_portal_csp_header_lists_every_fetch_directive_but_scripts():
+    """Plan L9, bilan de L9.0 : pas de default-src dans l'en-tête, qui s'appliquerait aux
+    scripts et bloquerait les scripts en ligne autorisés par la CSP à empreintes de chaque
+    page (<meta>) ; chaque autre directive de chargement y est donc explicite."""
+    text = PORTAL_HTACCESS.read_text(encoding="utf-8")
+    policy = re.search(r'Content-Security-Policy "([^"]+)"', text).group(1)
+    directives = {part.split()[0] for part in policy.split(";") if part.strip()}
+    assert "default-src" not in directives and "script-src" not in directives
+    fetch = {
+        "object-src",
+        "frame-src",
+        "img-src",
+        "font-src",
+        "style-src",
+        "connect-src",
+        "media-src",
+        "manifest-src",
+        "worker-src",
+    }
+    assert fetch <= directives
+    assert {"base-uri", "form-action", "frame-ancestors"} <= directives
+    assert "frame-ancestors 'none'" in policy and "object-src 'none'" in policy

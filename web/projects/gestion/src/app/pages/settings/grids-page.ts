@@ -31,6 +31,7 @@ import {
   Grid,
   MeStore,
   PageHeader,
+  ScrollRegion,
   SubmissionType,
 } from '@gestconf/shared';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -57,6 +58,7 @@ type CriterionForm = FormGroup<{
 @Component({
   selector: 'gestion-grids-page',
   imports: [
+    ScrollRegion,
     ReactiveFormsModule,
     TranslatePipe,
     MatButtonModule,

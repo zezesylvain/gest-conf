@@ -56,10 +56,14 @@ const DISMISSED = 'gc-banner-dismissed';
       justify-content: space-between;
       padding: 0.5rem 1rem;
       background: var(--gc-warning);
-      color: var(--gc-text);
+      color: var(--gc-on-warning);
     }
     .site-banner p {
       margin: 0;
+    }
+    .site-banner a {
+      color: inherit;
+      text-decoration: underline;
     }
     button {
       font: inherit;

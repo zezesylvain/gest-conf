@@ -9,7 +9,7 @@ sur place ; pays local : CI), une catégorie et sa grille, une option à quota ;
 « finances » ; un second participant (Sénégal, tarif international) sans rôle. Pour le jour J
 (L7) : un bénévole, un CO « secrétariat » et un signataire (2FA), et une image de signature.
 Pour le lot L8 : CO « logistique », « communication » et « relations extérieures », et un
-intervenant invité.
+intervenant invité. Décision T1 (2FA optionnelle) : un CO « bénévoles » sans 2FA.
 
 Lu sur l'entrée standard de ``manage.py shell`` par ``e2e/django.ts`` ; imprime du JSON.
 """
@@ -134,7 +134,8 @@ writer.add_metadata({"/Author": "Awa Koné", "/Title": "Article de test"})
 with tempfile.NamedTemporaryFile(prefix="gestconf-e2e-", suffix=".pdf", delete=False) as handle:
     writer.write(handle)
 
-# Comité scientifique : comptes vérifiés, profils complets, 2FA (imposée aux rôles SC_*).
+# Comité : comptes vérifiés, profils complets, 2FA activée (optionnelle depuis T1, mais
+# activée ici : le parcours joue la connexion en deux étapes).
 # Identifiants de test, connus du navigateur de test, sur une base jetable : pas des secrets.
 PASSWORD = "Une-phrase-assez-longue-2026"  # noqa: S105
 TOTP_SECRET = "JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP"  # noqa: S105
@@ -256,6 +257,30 @@ for email, first_name, last_name, institution, role in committee.values():
         }.get(email, ""),
     )
 
+# Décision T1 (2FA optionnelle) : CO « bénévoles » sans 2FA, qui ouvre la gestion sans code.
+VOLUNTEERS_LEAD = "co.benevoles@e2e.example.org"
+volunteers_lead = User.objects.create_user(email=VOLUNTEERS_LEAD, password=PASSWORD)
+EmailAddress.objects.create(
+    user=volunteers_lead, email=VOLUNTEERS_LEAD, primary=True, verified=True
+)
+Profile.objects.update_or_create(
+    user=volunteers_lead,
+    defaults={
+        "first_name": "Rokia",
+        "last_name": "Coulibaly",
+        "institution": "Université FHB",
+        "country": "CI",
+    },
+)
+grant_role(
+    user=volunteers_lead,
+    edition=edition,
+    role=Role.OC_MEMBER,
+    actor=actor,
+    source=RoleSource.COMMAND,
+    oc_function="volunteers",
+)
+
 # Second participant (plan L6) : compte vérifié, profil complet au Sénégal, sans rôle.
 PARTICIPANT = "participant@e2e.example.org"
 participant = User.objects.create_user(email=PARTICIPANT, password=PASSWORD)
@@ -286,6 +311,7 @@ print(
             "password": PASSWORD,
             "totp": TOTP_SECRET,
             "participant": PARTICIPANT,
+            "volunteers_lead": VOLUNTEERS_LEAD,
             "signature": image.name,
             **{key: value[0] for key, value in committee.items()},
         }

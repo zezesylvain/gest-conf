@@ -1,4 +1,4 @@
-"""Double authentification (plan L1 §4.4, §4.10, §10.2, §12.2 « 2FA (L1.6) » ; D2, D3)."""
+"""Double authentification (plan L1 §4.4, §4.10, §10.2, §12.2 « 2FA (L1.6) » ; D2, D3, T1)."""
 
 from __future__ import annotations
 
@@ -52,15 +52,57 @@ def manage_url(edition) -> str:
 
 # --- MfaVerified (§4.4) ---------------------------------------------------------------------
 
+# Décision T1 : la 2FA est optionnelle par défaut ; ``GESTCONF_MFA_ENFORCED`` l'impose de
+# nouveau aux rôles de gestion (D3). Les tests du mode imposé portent ce décorateur.
+enforced = override_settings(GESTCONF_MFA_ENFORCED=True)
 
+
+@enforced
 def test_chair_without_mfa_gets_enrollment_required():
     edition = EditionFactory()
     client = client_for(make_member(edition, Role.CHAIR), mfa=False)
     response = client.get(manage_url(edition))
     assert response.status_code == 403
     assert response.json()["code"] == "mfa_enrollment_required"
+    assert client.get("/v1/me").json()["editions"][0]["mfa_required"] is True
 
 
+def test_t1_chair_without_mfa_has_access_when_optional():
+    """T1 : 2FA optionnelle par défaut ; un rôle de gestion sans 2FA accède à la gestion,
+    et ``/v1/me`` ne l'annonce pas comme obligatoire."""
+    edition = EditionFactory()
+    client = client_for(make_member(edition, Role.CHAIR), mfa=False)
+    assert client.get(manage_url(edition)).status_code == 200
+    me = client.get("/v1/me").json()
+    assert (me["mfa_enabled"], me["editions"][0]["mfa_required"]) == (False, False)
+
+
+def test_t1_enrolled_account_validates_its_session_even_when_optional():
+    """T1 : un compte qui a activé la 2FA en bénéficie aussi quand elle est optionnelle :
+    une session non validée par elle reçoit ``mfa_required``, puis 200 après le code."""
+    edition = EditionFactory()
+    chair = make_member(edition, Role.CHAIR)
+    client = client_for(chair, mfa=False)
+    assert client.get(manage_url(edition)).status_code == 200
+    enable_totp(chair)
+    response = client.get(manage_url(edition))
+    assert (response.status_code, response.json()["code"]) == (403, "mfa_required")
+    reauth = post(client, "auth/2fa/reauthenticate", {"code": totp_code(TEST_TOTP_SECRET)})
+    assert reauth.status_code == 200, reauth.json()
+    assert client.get(manage_url(edition)).status_code == 200
+
+
+def test_t1_deleting_totp_when_optional_keeps_access_and_is_audited():
+    edition = EditionFactory()
+    client = client_for(make_member(edition, Role.CHAIR))
+    response = client.delete(f"{AUTH}/account/authenticators/totp")
+    assert response.status_code == 200, response.json()
+    assert client.get(manage_url(edition)).status_code == 200
+    assert AuditLog.objects.filter(action="mfa.disabled").exists()
+    assert OutboxEmail.objects.filter(template_code="mfa/email/totp_deactivated").exists()
+
+
+@enforced
 def test_enrolled_chair_without_mfa_session_gets_mfa_required_then_200():
     """§13, critère de L1.6 : ``mfa_enrollment_required`` → ``mfa_required`` → 200."""
     edition = EditionFactory()
@@ -103,6 +145,7 @@ def test_reviewer_and_author_not_concerned():
     assert chair_client.get("/v1/manage/editions").status_code == 200
 
 
+@enforced
 def test_capability_checked_before_mfa():
     """Ordre 401 → 404 → 403 capacité → 403 ``mfa_*`` : un ``OC_MEMBER`` (2FA imposée) sans
     la capacité d'écriture reçoit ``permission_denied``, pas une invitation à la 2FA."""
@@ -113,6 +156,7 @@ def test_capability_checked_before_mfa():
     assert client.get(manage_url(edition)).json()["code"] == "mfa_enrollment_required"
 
 
+@enforced
 def test_deleting_totp_requires_reenrollment():
     edition = EditionFactory()
     client = client_for(make_member(edition, Role.CHAIR))
@@ -222,6 +266,7 @@ def test_rotate_command_is_audited():
 # --- reset_mfa (§4.3, §9.4) ------------------------------------------------------------------
 
 
+@enforced
 def test_reset_mfa_command():
     edition = EditionFactory()
     chair = make_member(edition, Role.CHAIR)

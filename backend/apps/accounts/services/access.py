@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from django.conf import settings
 from django.http import Http404
 
 from apps.accounts.models import UserRole, UserRoleStatus
@@ -40,8 +41,15 @@ class EditionAccess:
         return capability in self.capabilities
 
     @property
-    def mfa_required(self) -> bool:
+    def mfa_protected(self) -> bool:
+        """Un rôle de l'édition place ses routes de gestion sous la 2FA (D3)."""
         return bool(self.role_names & MFA_REQUIRED_ROLES)
+
+    @property
+    def mfa_required(self) -> bool:
+        """La 2FA est **imposée** dans l'édition : rôle concerné et plateforme qui l'impose
+        (``GESTCONF_MFA_ENFORCED``, décision T1). Faux quand elle est optionnelle."""
+        return self.mfa_protected and settings.GESTCONF_MFA_ENFORCED
 
     @property
     def manageable_roles(self) -> frozenset[str]:

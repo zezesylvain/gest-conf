@@ -34,7 +34,7 @@ import { label } from '../registrations/registrations-support';
 /**
  * Inscription au comptoir (plan L7, K13) d'une personne sans compte : compte créé sans mot
  * de passe (adresse non vérifiée, un lien de définition lui est envoyé), ou rattachement au
- * compte existant ; tarif « sur place » ; paiement reçu enregistré si coché ; badge à
+ * compte existant ; tarif de la période en cours (« sur place » après la clôture) ; paiement reçu enregistré si coché ; badge à
  * imprimer aussitôt. `registrations.manage`, revérifié par le serveur.
  */
 @Component({

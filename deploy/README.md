@@ -107,6 +107,12 @@ la cause et relancer `deploy.sh` (toutes les étapes sont idempotentes), ou red�
 commit (`git checkout <ancien commit>` puis `deploy.sh`). Les contrôles passent avant `migrate`
 pour qu'un avertissement n'arrête jamais le déploiement entre deux migrations appliquées.
 
+**Sauvegarde avant `migrate`** (plan L9, S3) : `deploy.sh` lance `backup_db --required` juste
+avant `migrate` ; si une sauvegarde du cron tourne au même moment, le déploiement s'arrête
+(relancer). Pour revenir en arrière après une migration fautive : redéployer l'ancien commit,
+puis restaurer cette sauvegarde dans une base neuve (voir « Sauvegarde et restauration ») et y
+pointer `DATABASE_URL`. Le premier déploiement, sur une base vide, ne sauvegarde rien.
+
 ### Le `.htaccess` racine
 
 cPanel écrit ses directives Passenger dans un `.htaccess`. Le script ne remplace
@@ -132,6 +138,7 @@ dossier de l'application et y écrit le chemin du venv (`VENV_ACTIVATE`) : le cr
 23 * * * *   $HOME/gestconf-app/deploy/cron.sh remind_presentations
 37 * * * *   $HOME/gestconf-app/deploy/cron.sh expire_registrations
 41 * * * *   $HOME/gestconf-app/deploy/cron.sh sync_payments
+7 2 * * *    $HOME/gestconf-app/deploy/cron.sh backup_db
 17 3 * * *   $HOME/gestconf-app/deploy/cron.sh cleanup
 47 3 * * *   $HOME/gestconf-app/deploy/cron.sh check_integrity
 53 6 * * *   $HOME/gestconf-app/deploy/cron.sh remind_tasks
@@ -207,8 +214,46 @@ dossier de l'application et y écrit le chemin du venv (`VENV_ACTIVATE`) : le cr
   repli de E4 s'applique sans changement de code (images non redimensionnées, JPEG portant un
   EXIF refusés) : retirer Pillow de `requirements/base.in`, recompiler, redéployer.
 
+### Sauvegarde et restauration (plan L9, S2 et S3 ; étude §11.6)
+
+**Aucune donnée réelle avant une restauration testée** (D18). Objectifs indicatifs : perte
+maximale 24 h, rétablissement sous 4 h (à valider par le commanditaire).
+
+- **Sauvegarde** : `backup_db`, cron quotidien (2 h 07). Dump MariaDB compressé et manifeste
+  (`gestconf-<date>.sql.gz` et `.json`) dans `GESTCONF_BACKUP_DIR` (défaut :
+  `var/backups` dans le dossier de l'application, 0700, hors de `public_html`). Identifiants
+  dans un fichier d'options temporaire en 0600, jamais sur la ligne de commande. Tables du
+  cache exclues ; sessions sauvegardées vides (une session est un titre d'accès). Rotation :
+  7 quotidiennes, 4 hebdomadaires, 3 mensuelles (`GESTCONF_BACKUP_KEEP_*`). Le manifeste
+  porte l'empreinte du dump, la dernière migration de chaque application et l'inventaire des
+  fichiers déposés. Échec : alerte e-mail aux opérateurs, battement de cœur en erreur.
+  Outil requis : `mariadb-dump` (ou `mysqldump`), contrôle V18.
+- **Copie hors hébergement** : `deploy/pull-backups.sh`, lancé par le cron **du poste ou du
+  serveur de l'opérateur** (jamais par l'hébergement), vers 2 h 40, après la sauvegarde et
+  avant `cleanup`. Dumps copiés sans suppression ; fichiers déposés en instantanés datés,
+  liés par `--link-dest` (un effacement sur l'hébergement n'atteint pas les copies prises) ;
+  conservation locale `PULL_KEEP_DAYS` (30 jours) ; empreinte et complétude vérifiées à
+  chaque passage. Les copies contiennent des données personnelles : dossier en 0700, disque
+  chiffré conseillé, mêmes durées de conservation que la plateforme.
+- **Restauration** : `deploy/restore.sh <dump> [<instantané>]`, sur le poste de l'opérateur
+  (dépôt, `backend/.venv`) ou sur l'hébergement (livré par `deploy.sh`), avec un
+  `DATABASE_URL` qui désigne une base **neuve** et des dossiers de fichiers **vides** :
+  `restore_db` refuse une base qui contient des tables, vérifie l'empreinte, recopie les
+  fichiers, les compare au manifeste, recrée les tables du cache et signale les migrations en
+  attente (sans les appliquer) ; puis `check_integrity`. La durée s'affiche à la fin.
+- **Test de restauration documenté** : avant l'ouverture de l'appel, puis avant la
+  conférence (étude §11.6) ; consigner la date, le dump, la durée et le résultat dans le
+  bilan du lot L9 et la fiche `docs/L1-verifications-o2switch.md`.
+- `var/` est exclu du `rsync --delete` du déploiement : sans cela, fichiers déposés et
+  sauvegardes par défaut seraient effacés à chaque déploiement (défaut trouvé en L9.1).
+
 ### Clés de la 2FA (plan L1 §4.10)
 
+- **2FA optionnelle ou imposée** (décision T1) : par défaut, la 2FA est optionnelle ; elle est
+  demandée à chaque connexion des comptes qui l'ont activée. `GESTCONF_MFA_ENFORCED=true` dans
+  le `.env`, puis redémarrage de Passenger, l'impose aux rôles de gestion ; revenir à `false`
+  la rend de nouveau optionnelle. Aucune donnée ne change : seul le contrôle d'accès varie. La
+  clé ci-dessous reste obligatoire dans les deux cas.
 - **Génération** : `python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"`.
 - **Sauvegarde** : la clé est conservée **hors de l'hébergement, séparément des sauvegardes de
   la base** (sinon le vol d'une sauvegarde livre aussi la clé). Sa perte rend toutes les 2FA
@@ -235,8 +280,31 @@ dossier de l'application et y écrit le chemin du venv (`VENV_ACTIVATE`) : le cr
   racine web) ; le mot de passe n'est jamais gardé.
 - **Perte de la clé** : le certificat déposé devient indéchiffrable ; le CO le redépose
   (ou revient à l'image seule). Les attestations déjà émises, signées, restent valides.
-- **Rotation** : nouvelle clé en tête de la liste, ancienne derrière (virgule) ; le CO
-  redépose le certificat ; retirer ensuite l'ancienne clé.
+- **Rotation** (revue de sécurité L9.5, vérifiée par test) : nouvelle clé en tête de la
+  liste, ancienne derrière (virgule), redémarrer ; `python manage.py rotate_signing_keys
+  --dry-run`, puis `python manage.py rotate_signing_keys` (chaque certificat déposé est
+  rechiffré dans un nouveau fichier, l'ancien supprimé ; audit
+  `certificates.signing_keys_rotated`) ; retirer l'ancienne clé, redémarrer.
+
+### Clé secrète de Django (`DJANGO_SECRET_KEY`)
+
+- Elle signe les sessions, les jetons CSRF, les liens de désabonnement et d'invitation ; elle
+  ne chiffre aucune donnée stockée (la 2FA et les certificats ont leurs propres clés).
+- **Rotation** (revue de sécurité L9.5) : nouvelle valeur dans `DJANGO_SECRET_KEY`, ancienne
+  dans `DJANGO_SECRET_KEY_FALLBACKS` (`SECRET_KEY_FALLBACKS` : encore acceptée en
+  vérification, plus jamais en signature), redémarrer ; retirer l'ancienne une fois ses
+  sessions (12 h) et ses liens expirés. **Sans** cette étape, tout le monde est déconnecté et
+  les liens déjà envoyés cessent de fonctionner. En cas de **fuite**, ne pas la mettre en
+  repli : la remplacer directement.
+
+### Autres secrets
+
+- `DATABASE_URL` (mot de passe MariaDB) : changé dans cPanel puis dans `.env`, redémarrer.
+- Clés du prestataire de paiement (`CINETPAY_API_KEY`, `CINETPAY_API_PASSWORD`) et du
+  fournisseur d'e-mails (`BREVO_API_KEY` ou `MAILJET_*`) : régénérées dans leur console,
+  remplacées dans `.env`, redémarrer, puis vérifier par les tests de fumée et un e-mail réel.
+- Aucun secret ne transite par le dépôt ni par la CI (règle n° 11) ; `.env` est en 0600 hors
+  de `public_html` (à vérifier par l'opérateur : `chmod 600 .env`).
 
 ## 3. Tests de fumée
 

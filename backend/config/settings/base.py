@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     "apps.sponsors",
     "apps.surveys",
     "apps.reports",
+    "apps.qa",
     # Après les applications du projet : leurs gabarits d'e-mails (account/email/*) priment.
     "allauth",
     "allauth.account",
@@ -68,6 +69,9 @@ MIDDLEWARE = [
     # celles produites par les middlewares suivants (refus CSRF, par exemple).
     "apps.core.middleware.RequestIdMiddleware",
     "apps.core.middleware.RobotsTagMiddleware",
+    # Revue de sécurité L9.5 : cache interdit par défaut ; corps trop gros refusé avant lecture.
+    "apps.core.middleware.DefaultNoStoreMiddleware",
+    "apps.core.middleware.RequestSizeLimitMiddleware",
     # Plafond des envois immédiats d'e-mails par requête (voie rapide, plan L1 §8.3).
     "apps.communications.middleware.EmailFastPathMiddleware",
     "django.middleware.security.SecurityMiddleware",
@@ -203,13 +207,18 @@ HEADLESS_FRONTEND_URLS = {
     "account_signup": f"{GESTCONF_PUBLIC_URL}/compte/inscription",
 }
 
-# --- 2FA : allauth.mfa (décisions D2, D3 ; plan L1 §4.2, §4.4, §4.10) ---------------------
+# --- 2FA : allauth.mfa (décisions D2, D3, T1 ; plan L1 §4.2, §4.4, §4.10) -----------------
 # TOTP et codes de secours seulement (ni WebAuthn ni « appareil de confiance »).
 MFA_ADAPTER = "apps.accounts.adapters.MFAAdapter"
 MFA_SUPPORTED_TYPES = ["totp", "recovery_codes"]
 MFA_TRUST_ENABLED = False
 # Garde conservée : pas de 2FA avec une adresse non vérifiée (409 « unverified_email »).
 MFA_ALLOW_UNVERIFIED_EMAIL = False
+# Décision T1 (2FA optionnelle, à la demande du commanditaire, 14 octobre 2026) : chacun
+# active la 2FA s'il le souhaite (« Sécurité ») ; une fois activée sur un compte, elle est
+# demandée à la connexion et vérifiée sur les routes de gestion. ``true`` l'impose de nouveau
+# aux rôles de MFA_REQUIRED_ROLES (D3, H2, K1, K18) : 403 ``mfa_enrollment_required``.
+GESTCONF_MFA_ENFORCED = env.bool("GESTCONF_MFA_ENFORCED", default=False)
 # Clés Fernet (base64 urlsafe, 32 octets) chiffrant le secret TOTP et la graine des codes
 # de secours, séparées par des virgules : la première chiffre, toutes déchiffrent
 # (MultiFernet). Obligatoire en production (prod.py) ; rotation : rotate_mfa_keys.
@@ -338,8 +347,11 @@ REST_FRAMEWORK = {
         # Vérification publique des attestations (K10), par adresse IP.
         "certificate_verify": "30/min",
         # Annonces (plan L8, N10 et N11) : bandeau lu par le portail et lien de désabonnement,
-        # par adresse IP.
-        "portal_banner": "60/min",
+        # par adresse IP. Bandeau : 600/min (plan L9.4) ; le Wi-Fi du lieu de la conférence
+        # sort par une seule adresse pour des centaines de participants, chaque navigateur le
+        # relisant au plus une fois par minute (cache de 60 s) : à 60/min, il disparaissait
+        # au moment où il sert le plus.
+        "portal_banner": "600/min",
         "announcement_unsubscribe": "30/hour",
     },
     "NUM_PROXIES": GESTCONF_TRUSTED_PROXY_COUNT,
@@ -510,6 +522,24 @@ GESTCONF_FILES_DIR = Path(env.str("GESTCONF_FILES_DIR", default=str(BASE_DIR / "
 GESTCONF_PRIVATE_FILES_DIR = Path(
     env.str("GESTCONF_PRIVATE_FILES_DIR", default=str(GESTCONF_FILES_DIR / "private"))
 )
+# Sauvegardes (plan L9, S2) : dumps compressés et manifestes, HORS de la racine web, en 0700.
+# Rotation : 7 quotidiennes, 4 hebdomadaires, 3 mensuelles (étude §11.6). /health et
+# check_integrity signalent une sauvegarde plus vieille que GESTCONF_BACKUP_MAX_AGE_HOURS.
+GESTCONF_BACKUP_DIR = Path(
+    env.str("GESTCONF_BACKUP_DIR", default=str(BASE_DIR / "var" / "backups"))
+)
+GESTCONF_BACKUP_KEEP_DAILY = env.int("GESTCONF_BACKUP_KEEP_DAILY", default=7)
+GESTCONF_BACKUP_KEEP_WEEKLY = env.int("GESTCONF_BACKUP_KEEP_WEEKLY", default=4)
+GESTCONF_BACKUP_KEEP_MONTHLY = env.int("GESTCONF_BACKUP_KEEP_MONTHLY", default=3)
+GESTCONF_BACKUP_MAX_AGE_HOURS = env.int("GESTCONF_BACKUP_MAX_AGE_HOURS", default=26)
+# Surveillance du stockage par check_integrity (plan L9, S4) : sauvegarde en retard, espace
+# disque libre sous le seuil (en Mio) sur les disques des fichiers et des sauvegardes.
+# Désactivée dans les réglages de test, sauf dans les tests qui la concernent.
+GESTCONF_STORAGE_MONITORING = env.bool("GESTCONF_STORAGE_MONITORING", default=True)
+GESTCONF_DISK_FREE_MIN_MB = env.int("GESTCONF_DISK_FREE_MIN_MB", default=1024)
+# Taille maximale du corps d'une requête (revue de sécurité L9.5) : au-delà, 413 avant
+# lecture. Couvre le plus gros dépôt permis (PDF de 50 Mio, plan L3) et l'enveloppe multipart.
+GESTCONF_MAX_REQUEST_MB = env.int("GESTCONF_MAX_REQUEST_MB", default=55)
 # Durées de conservation de D15 : simulation seule tant qu'elles ne sont pas validées
 # par le commanditaire (les purges imposées par la sécurité s'appliquent toujours).
 GESTCONF_RETENTION_ENFORCED = env.bool("GESTCONF_RETENTION_ENFORCED", default=False)

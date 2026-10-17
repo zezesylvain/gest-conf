@@ -9,6 +9,7 @@ import {
   ErrorSummary,
   FilePolicy,
   PageHeader,
+  ScrollRegion,
   SubmissionType,
   SubmissionTypeRequest,
 } from '@gestconf/shared';
@@ -41,6 +42,7 @@ function typeForm(builder: NonNullableFormBuilder) {
 @Component({
   selector: 'gestion-submission-types-page',
   imports: [
+    ScrollRegion,
     ReactiveFormsModule,
     TranslatePipe,
     MatFormFieldModule,

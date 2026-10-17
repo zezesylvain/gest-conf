@@ -19,6 +19,7 @@ import {
   LanguageService,
   MeStore,
   PageHeader,
+  ScrollRegion,
 } from '@gestconf/shared';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -43,7 +44,7 @@ const ATTENDANCE_PAGE = 100;
  */
 @Component({
   selector: 'gestion-day-sessions-page',
-  imports: [RouterLink, TranslatePipe, MatButtonModule, ErrorSummary, PageHeader],
+  imports: [ScrollRegion, RouterLink, TranslatePipe, MatButtonModule, ErrorSummary, PageHeader],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './day-sessions-page.html',
   styleUrl: '../page.scss',

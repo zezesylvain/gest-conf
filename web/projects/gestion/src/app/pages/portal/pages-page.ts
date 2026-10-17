@@ -13,7 +13,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { NgTemplateOutlet } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
-import { ErrorSummary, fieldErrorMessage, Page, PageHeader } from '@gestconf/shared';
+import { ErrorSummary, fieldErrorMessage, Page, PageHeader, ScrollRegion } from '@gestconf/shared';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { errorMessages } from '../../core/page-support';
@@ -27,6 +27,7 @@ import { PortalScreen, SLUG_PATTERN } from './portal-support';
 @Component({
   selector: 'gestion-portal-pages-page',
   imports: [
+    ScrollRegion,
     NgTemplateOutlet,
     ReactiveFormsModule,
     RouterLink,

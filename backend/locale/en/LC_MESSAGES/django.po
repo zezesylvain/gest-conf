@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gestconf-backend\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-07 02:51+0000\n"
+"POT-Creation-Date: 2026-10-12 12:38+0000\n"
 "PO-Revision-Date: 2026-10-05 11:00+0000\n"
 "Last-Translator: GEST-CONF\n"
 "Language-Team: GEST-CONF\n"
@@ -477,7 +477,7 @@ msgstr "Acknowledging the notice cannot be withdrawn."
 #: apps/registrations/services/orders.py:308
 #: apps/registrations/services/orders.py:351
 #: apps/reviews/services/assignments.py:287
-#: apps/reviews/services/conflicts.py:178 apps/reviews/services/reviews.py:430
+#: apps/reviews/services/conflicts.py:178 apps/reviews/services/reviews.py:461
 #: apps/submissions/services.py:611 apps/submissions/workflow.py:207
 #: apps/submissions/workflow.py:210 apps/submissions/workflow.py:213
 msgid "Motif obligatoire."
@@ -1061,7 +1061,7 @@ msgstr "Title required."
 
 #: apps/communications/announcements.py:120
 #: apps/reviews/services/decisions.py:109
-#: apps/reviews/services/decisions.py:421
+#: apps/reviews/services/decisions.py:425
 msgid "Texte trop long."
 msgstr "Text too long."
 
@@ -1916,6 +1916,10 @@ msgstr "Changed in the meantime (another tab?): reload before saving."
 msgid "Quota atteint."
 msgstr "Quota reached."
 
+#: apps/core/middleware.py:66
+msgid "Requête trop volumineuse."
+msgstr "Request too large."
+
 #: apps/core/models.py:85 apps/reviews/models.py:377 apps/reviews/models.py:446
 #: apps/submissions/models.py:217 apps/submissions/models.py:274
 msgid "date"
@@ -2219,23 +2223,23 @@ msgstr "Empty file."
 msgid "Fichier trop volumineux (%(max)s Mio au plus)."
 msgstr "File too large (%(max)s MiB at most)."
 
-#: apps/core/views.py:165
+#: apps/core/views.py:181
 msgid "Méthode non autorisée."
 msgstr "Method not allowed."
 
-#: apps/core/views.py:187
+#: apps/core/views.py:203
 msgid "Requête invalide."
 msgstr "Bad request."
 
-#: apps/core/views.py:191
+#: apps/core/views.py:207
 msgid "Accès refusé."
 msgstr "Access denied."
 
-#: apps/core/views.py:195
+#: apps/core/views.py:211
 msgid "Ressource introuvable."
 msgstr "Resource not found."
 
-#: apps/core/views.py:200
+#: apps/core/views.py:216
 msgid "Erreur interne du serveur."
 msgstr "Internal server error."
 
@@ -2576,7 +2580,7 @@ msgid "Le certificat de signature a expiré."
 msgstr "The signing certificate has expired."
 
 #: apps/events/services/certificates.py:292
-#: apps/events/services/certificates.py:802
+#: apps/events/services/certificates.py:803
 #: apps/logistics/services/budget.py:207 apps/portal/services.py:602
 msgid "Nature inconnue."
 msgstr "Unknown kind."
@@ -2669,18 +2673,18 @@ msgstr "Check-in already cancelled."
 
 #: apps/events/services/checkin.py:469 apps/payments/services/finance.py:127
 #: apps/registrations/services/exports.py:25
-#: apps/reviews/services/decisions.py:499 apps/submissions/services.py:711
+#: apps/reviews/services/decisions.py:507 apps/submissions/services.py:711
 msgid "Référence"
 msgstr "Reference"
 
 #: apps/events/services/checkin.py:470 apps/logistics/services/dietary.py:129
-#: apps/registrations/services/exports.py:26 apps/sponsors/views.py:212
+#: apps/registrations/services/exports.py:26 apps/sponsors/views.py:215
 msgid "Nom"
 msgstr "Name"
 
 #: apps/events/services/checkin.py:471
-#: apps/registrations/services/exports.py:29 apps/reports/services.py:253
-#: apps/reports/services.py:311
+#: apps/registrations/services/exports.py:29 apps/reports/services.py:266
+#: apps/reports/services.py:324
 msgid "Catégorie"
 msgstr "Category"
 
@@ -2693,7 +2697,7 @@ msgid "Reçu le (UTC)"
 msgstr "Received at (UTC)"
 
 #: apps/events/services/checkin.py:474 apps/payments/services/finance.py:131
-#: apps/registrations/services/exports.py:33 apps/reports/services.py:302
+#: apps/registrations/services/exports.py:33 apps/reports/services.py:315
 msgid "Moyen"
 msgstr "Method"
 
@@ -2872,7 +2876,7 @@ msgstr "Unclosed brace: double it ({{ or }}) to display it."
 msgid "Variable inconnue : {%(field)s}. Variables permises : %(allowed)s."
 msgstr "Unknown variable: {%(field)s}. Allowed variables: %(allowed)s."
 
-#: apps/events/views.py:365
+#: apps/events/views.py:375
 msgid "Numéro de lot attendu (1, 2…)."
 msgstr "Batch number expected (1, 2…)."
 
@@ -3364,11 +3368,11 @@ msgid "PDF, JPEG ou PNG attendu."
 msgstr "PDF, JPEG or PNG expected."
 
 #: apps/logistics/services/budget.py:335 apps/payments/services/finance.py:168
-#: apps/reports/services.py:440 apps/reports/services.py:464
+#: apps/reports/services.py:453 apps/reports/services.py:477
 msgid "Nature"
 msgstr "Kind"
 
-#: apps/logistics/services/budget.py:336 apps/reports/services.py:463
+#: apps/logistics/services/budget.py:336 apps/reports/services.py:476
 msgid "Poste"
 msgstr "Budget item"
 
@@ -3377,18 +3381,18 @@ msgstr "Budget item"
 msgid "Libellé"
 msgstr "Label"
 
-#: apps/logistics/services/budget.py:338 apps/reports/services.py:440
-#: apps/reports/services.py:465
+#: apps/logistics/services/budget.py:338 apps/reports/services.py:453
+#: apps/reports/services.py:478
 msgid "Prévu"
 msgstr "Planned"
 
-#: apps/logistics/services/budget.py:339 apps/reports/services.py:440
-#: apps/reports/services.py:466
+#: apps/logistics/services/budget.py:339 apps/reports/services.py:453
+#: apps/reports/services.py:479
 msgid "Réalisé"
 msgstr "Actual"
 
-#: apps/logistics/services/budget.py:340 apps/reports/services.py:440
-#: apps/reports/services.py:467
+#: apps/logistics/services/budget.py:340 apps/reports/services.py:453
+#: apps/reports/services.py:480
 msgid "Écart"
 msgstr "Variance"
 
@@ -3455,7 +3459,7 @@ msgstr "Unknown registration option."
 msgid "Marge de 0 à 50 %."
 msgstr "Margin from 0 to 50%."
 
-#: apps/logistics/services/meals.py:196 apps/reports/services.py:338
+#: apps/logistics/services/meals.py:196 apps/reports/services.py:351
 msgid "Jour"
 msgstr "Day"
 
@@ -3472,7 +3476,7 @@ msgid "Marge"
 msgstr "Margin"
 
 #: apps/logistics/services/meals.py:201
-#: apps/registrations/services/exports.py:34 apps/reports/services.py:517
+#: apps/registrations/services/exports.py:34 apps/reports/services.py:530
 msgid "Total"
 msgstr "Total"
 
@@ -3575,8 +3579,8 @@ msgstr "The task board: %(link)s"
 msgid "[%(site_name)s] Vos tâches à échéance"
 msgstr "[%(site_name)s] Your tasks due"
 
-#: apps/logistics/views.py:402 apps/logistics/views.py:785
-#: apps/sponsors/views.py:210 apps/surveys/views.py:217
+#: apps/logistics/views.py:402 apps/logistics/views.py:787
+#: apps/sponsors/views.py:213 apps/surveys/views.py:217
 msgid "csv ou xlsx attendu."
 msgstr "csv or xlsx expected."
 
@@ -3849,15 +3853,15 @@ msgid "Référence du fournisseur"
 msgstr "Provider reference"
 
 #: apps/payments/services/finance.py:133 apps/payments/services/finance.py:173
-#: apps/reports/services.py:290 apps/reports/services.py:302
-#: apps/reports/services.py:311
+#: apps/reports/services.py:303 apps/reports/services.py:315
+#: apps/reports/services.py:324
 msgid "Montant"
 msgstr "Amount"
 
 #: apps/payments/services/finance.py:135
 #: apps/registrations/services/exports.py:30 apps/reports/services.py:80
-#: apps/reports/services.py:230 apps/reports/services.py:494
-#: apps/reviews/services/decisions.py:503 apps/sponsors/views.py:214
+#: apps/reports/services.py:243 apps/reports/services.py:507
+#: apps/reviews/services/decisions.py:511 apps/sponsors/views.py:217
 #: apps/submissions/services.py:712
 msgid "Statut"
 msgstr "Status"
@@ -3870,7 +3874,7 @@ msgstr "Created on"
 msgid "Terminé le"
 msgstr "Completed on"
 
-#: apps/payments/services/finance.py:138 apps/sponsors/views.py:217
+#: apps/payments/services/finance.py:138 apps/sponsors/views.py:220
 msgid "Reçu le"
 msgstr "Received on"
 
@@ -4956,7 +4960,7 @@ msgstr "registration history"
 msgid "historiques des inscriptions"
 msgstr "registration histories"
 
-#: apps/registrations/segments.py:24 apps/reports/services.py:338
+#: apps/registrations/segments.py:24 apps/reports/services.py:351
 msgid "Inscrits confirmés"
 msgstr "Confirmed registrants"
 
@@ -4969,7 +4973,7 @@ msgid "Adresse électronique"
 msgstr "Email address"
 
 #: apps/registrations/services/exports.py:28 apps/reports/services.py:140
-#: apps/reports/services.py:272
+#: apps/reports/services.py:285
 msgid "Pays"
 msgstr "Country"
 
@@ -4977,7 +4981,7 @@ msgstr "Country"
 msgid "Période"
 msgstr "Period"
 
-#: apps/registrations/services/exports.py:32 apps/reports/services.py:263
+#: apps/registrations/services/exports.py:32 apps/reports/services.py:276
 msgid "Zone"
 msgstr "Zone"
 
@@ -5285,8 +5289,8 @@ msgstr "[%(site_name)s] Registration recorded"
 msgid "Soumissions par statut"
 msgstr "Submissions by status"
 
-#: apps/reports/services.py:80 apps/reports/services.py:230
-#: apps/reports/services.py:494 apps/surveys/services.py:798
+#: apps/reports/services.py:80 apps/reports/services.py:243
+#: apps/reports/services.py:507 apps/surveys/services.py:798
 msgid "Nombre"
 msgstr "Count"
 
@@ -5299,7 +5303,7 @@ msgid "Acceptées"
 msgstr "Accepted"
 
 #: apps/reports/services.py:99 apps/reports/services.py:140
-#: apps/reports/services.py:338 apps/reports/services.py:389
+#: apps/reports/services.py:351 apps/reports/services.py:402
 msgid "Taux (%)"
 msgstr "Rate (%)"
 
@@ -5315,225 +5319,225 @@ msgstr "By submission type"
 msgid "Par pays du premier auteur"
 msgstr "By country of the first author"
 
-#: apps/reports/services.py:173
+#: apps/reports/services.py:186
 msgid "Toutes thématiques"
 msgstr "All tracks"
 
-#: apps/reports/services.py:203
+#: apps/reports/services.py:216
 msgid "Délais de relecture et retards"
 msgstr "Review delays and lateness"
 
-#: apps/reports/services.py:205 apps/reviews/services/decisions.py:501
+#: apps/reports/services.py:218 apps/reviews/services/decisions.py:509
 #: apps/submissions/services.py:714
 msgid "Thématique"
 msgstr "Track"
 
-#: apps/reports/services.py:206
+#: apps/reports/services.py:219
 msgid "Affectations"
 msgstr "Assignments"
 
-#: apps/reports/services.py:207
+#: apps/reports/services.py:220
 msgid "Évaluations envoyées"
 msgstr "Reviews sent"
 
-#: apps/reports/services.py:208
+#: apps/reports/services.py:221
 msgid "En retard"
 msgstr "Late"
 
-#: apps/reports/services.py:209
+#: apps/reports/services.py:222
 msgid "Délai moyen (jours)"
 msgstr "Average delay (days)"
 
-#: apps/reports/services.py:229
+#: apps/reports/services.py:242
 msgid "Inscriptions par statut"
 msgstr "Registrations by status"
 
-#: apps/reports/services.py:241
+#: apps/reports/services.py:254
 msgid "Inscriptions confirmées par semaine"
 msgstr "Confirmed registrations by week"
 
-#: apps/reports/services.py:242
+#: apps/reports/services.py:255
 msgid "Semaine"
 msgstr "Week"
 
-#: apps/reports/services.py:242 apps/reports/services.py:253
-#: apps/reports/services.py:263 apps/reports/services.py:272
-#: apps/reports/services.py:311
+#: apps/reports/services.py:255 apps/reports/services.py:266
+#: apps/reports/services.py:276 apps/reports/services.py:285
+#: apps/reports/services.py:324
 msgid "Confirmées"
 msgstr "Confirmed"
 
-#: apps/reports/services.py:252
+#: apps/reports/services.py:265
 msgid "Par catégorie"
 msgstr "By category"
 
-#: apps/reports/services.py:262
+#: apps/reports/services.py:275
 msgid "Par zone"
 msgstr "By zone"
 
-#: apps/reports/services.py:271
+#: apps/reports/services.py:284
 msgid "Par pays"
 msgstr "By country"
 
-#: apps/reports/services.py:289
+#: apps/reports/services.py:302
 #, python-format
 msgid "Recettes (%(currency)s)"
 msgstr "Revenue (%(currency)s)"
 
-#: apps/reports/services.py:290
+#: apps/reports/services.py:303
 msgid "Indicateur"
 msgstr "Indicator"
 
-#: apps/reports/services.py:292
+#: apps/reports/services.py:305
 msgid "Encaissé"
 msgstr "Collected"
 
-#: apps/reports/services.py:293
+#: apps/reports/services.py:306
 msgid "Remboursé"
 msgstr "Refunded"
 
-#: apps/reports/services.py:294
+#: apps/reports/services.py:307
 msgid "Net"
 msgstr "Net"
 
-#: apps/reports/services.py:295
+#: apps/reports/services.py:308
 msgid "En attente de paiement"
 msgstr "Awaiting payment"
 
-#: apps/reports/services.py:301
+#: apps/reports/services.py:314
 msgid "Encaissements par moyen"
 msgstr "Payments by method"
 
-#: apps/reports/services.py:302
+#: apps/reports/services.py:315
 msgid "Paiements"
 msgstr "Payments"
 
-#: apps/reports/services.py:310
+#: apps/reports/services.py:323
 msgid "Inscriptions confirmées par catégorie"
 msgstr "Confirmed registrations by category"
 
-#: apps/reports/services.py:337
+#: apps/reports/services.py:350
 msgid "Présence par jour"
 msgstr "Attendance by day"
 
-#: apps/reports/services.py:338
+#: apps/reports/services.py:351
 msgid "Présents"
 msgstr "Present"
 
-#: apps/reports/services.py:357
+#: apps/reports/services.py:370
 msgid "Entrées par session"
 msgstr "Entries by session"
 
-#: apps/reports/services.py:359
+#: apps/reports/services.py:372
 msgid "Session"
 msgstr "Session"
 
-#: apps/reports/services.py:360
+#: apps/reports/services.py:373
 msgid "Début"
 msgstr "Start"
 
-#: apps/reports/services.py:361
+#: apps/reports/services.py:374
 msgid "Entrées"
 msgstr "Entries"
 
-#: apps/reports/services.py:362
+#: apps/reports/services.py:375
 msgid "Capacité de la salle"
 msgstr "Room capacity"
 
-#: apps/reports/services.py:363
+#: apps/reports/services.py:376
 msgid "Remplissage (%)"
 msgstr "Occupancy (%)"
 
-#: apps/reports/services.py:388
+#: apps/reports/services.py:401
 msgid "Taux de réponse"
 msgstr "Response rate"
 
-#: apps/reports/services.py:389 apps/reports/services.py:395
+#: apps/reports/services.py:402 apps/reports/services.py:408
 msgid "Questionnaire"
 msgstr "Survey"
 
-#: apps/reports/services.py:389
+#: apps/reports/services.py:402
 msgid "Invités"
 msgstr "Invited"
 
-#: apps/reports/services.py:389 apps/reports/services.py:397
+#: apps/reports/services.py:402 apps/reports/services.py:410
 msgid "Réponses"
 msgstr "Answers"
 
-#: apps/reports/services.py:393
+#: apps/reports/services.py:406
 msgid "Notes moyennes (à partir de 5 réponses)"
 msgstr "Average ratings (from 5 answers)"
 
-#: apps/reports/services.py:396 apps/surveys/services.py:798
+#: apps/reports/services.py:409 apps/surveys/services.py:798
 msgid "Question"
 msgstr "Question"
 
-#: apps/reports/services.py:398
+#: apps/reports/services.py:411
 msgid "Moyenne sur 5"
 msgstr "Average out of 5"
 
-#: apps/reports/services.py:439
+#: apps/reports/services.py:452
 #, python-format
 msgid "Budget (%(currency)s)"
 msgstr "Budget (%(currency)s)"
 
-#: apps/reports/services.py:452
+#: apps/reports/services.py:465
 msgid "Solde"
 msgstr "Balance"
 
-#: apps/reports/services.py:461
+#: apps/reports/services.py:474
 msgid "Par poste"
 msgstr "By item"
 
-#: apps/reports/services.py:493
+#: apps/reports/services.py:506
 #, python-format
 msgid "Partenaires par statut (%(currency)s)"
 msgstr "Sponsors by status (%(currency)s)"
 
-#: apps/reports/services.py:506
+#: apps/reports/services.py:519
 msgid "Par niveau (hors refus)"
 msgstr "By level (declined excluded)"
 
-#: apps/reports/services.py:507 apps/sponsors/views.py:213
+#: apps/reports/services.py:520 apps/sponsors/views.py:216
 msgid "Niveau"
 msgstr "Level"
 
-#: apps/reports/services.py:507 apps/reports/services.py:530
+#: apps/reports/services.py:520 apps/reports/services.py:543
 msgid "Partenaires"
 msgstr "Sponsors"
 
-#: apps/reports/services.py:507
+#: apps/reports/services.py:520
 msgid "Convenu"
 msgstr "Agreed"
 
-#: apps/reports/services.py:507
+#: apps/reports/services.py:520
 msgid "Reçu"
 msgstr "Received"
 
-#: apps/reports/services.py:523
+#: apps/reports/services.py:536
 msgid "Soumissions"
 msgstr "Submissions"
 
-#: apps/reports/services.py:524
+#: apps/reports/services.py:537
 msgid "Relecture"
 msgstr "Reviewing"
 
-#: apps/reports/services.py:525
+#: apps/reports/services.py:538
 msgid "Inscriptions"
 msgstr "Registrations"
 
-#: apps/reports/services.py:526
+#: apps/reports/services.py:539
 msgid "Recettes"
 msgstr "Revenue"
 
-#: apps/reports/services.py:527
+#: apps/reports/services.py:540
 msgid "Présence"
 msgstr "Attendance"
 
-#: apps/reports/services.py:528
+#: apps/reports/services.py:541
 msgid "Satisfaction"
 msgstr "Satisfaction"
 
-#: apps/reports/services.py:529
+#: apps/reports/services.py:542
 msgid "Budget"
 msgstr "Budget"
 
@@ -5932,7 +5936,7 @@ msgstr "Not enough submitted reviews (RG-07)."
 msgid "Soumission non recevable."
 msgstr "Inadmissible submission."
 
-#: apps/reviews/services/decisions.py:77 apps/reviews/services/reviews.py:250
+#: apps/reviews/services/decisions.py:77 apps/reviews/services/reviews.py:281
 msgid "Type de communication inconnu."
 msgstr "Unknown presentation type."
 
@@ -5965,87 +5969,87 @@ msgstr "No matching decision."
 msgid "Version finale absente."
 msgstr "Final version missing."
 
-#: apps/reviews/services/decisions.py:410
+#: apps/reviews/services/decisions.py:414
 msgid "Version finale attendue pour une soumission acceptée."
 msgstr "A final version is expected for an accepted submission."
 
-#: apps/reviews/services/decisions.py:416
+#: apps/reviews/services/decisions.py:420
 msgid "La date limite de la version finale est passée."
 msgstr "The final version deadline has passed."
 
-#: apps/reviews/services/decisions.py:424
+#: apps/reviews/services/decisions.py:428
 msgid "Lettre de réponse aux relecteurs obligatoire."
 msgstr "Response letter to the reviewers required."
 
-#: apps/reviews/services/decisions.py:427 apps/submissions/services.py:490
+#: apps/reviews/services/decisions.py:431 apps/submissions/services.py:490
 msgid "Fichier PDF attendu (.pdf)."
 msgstr "A PDF file (.pdf) is expected."
 
-#: apps/reviews/services/decisions.py:431
+#: apps/reviews/services/decisions.py:435
 msgid "Fichier trop volumineux."
 msgstr "File too large."
 
-#: apps/reviews/services/decisions.py:500 apps/submissions/services.py:713
+#: apps/reviews/services/decisions.py:508 apps/submissions/services.py:713
 msgid "Titre"
 msgstr "Title"
 
-#: apps/reviews/services/decisions.py:502 apps/submissions/services.py:715
+#: apps/reviews/services/decisions.py:510 apps/submissions/services.py:715
 msgid "Type"
 msgstr "Type"
 
-#: apps/reviews/services/decisions.py:504
+#: apps/reviews/services/decisions.py:512
 msgid "Note finale"
 msgstr "Final score"
 
-#: apps/reviews/services/decisions.py:505
+#: apps/reviews/services/decisions.py:513
 msgid "Décision"
 msgstr "Decision"
 
-#: apps/reviews/services/decisions.py:506
+#: apps/reviews/services/decisions.py:514
 msgid "Relecteur"
 msgstr "Reviewer"
 
-#: apps/reviews/services/decisions.py:507
+#: apps/reviews/services/decisions.py:515
 msgid "Pseudonyme"
 msgstr "Pseudonym"
 
-#: apps/reviews/services/decisions.py:508
+#: apps/reviews/services/decisions.py:516
 msgid "Note pondérée"
 msgstr "Weighted score"
 
-#: apps/reviews/services/decisions.py:509
+#: apps/reviews/services/decisions.py:517
 msgid "Recommandation"
 msgstr "Recommendation"
 
-#: apps/reviews/services/decisions.py:510
+#: apps/reviews/services/decisions.py:518
 msgid "Confiance"
 msgstr "Confidence"
 
-#: apps/reviews/services/decisions.py:511
+#: apps/reviews/services/decisions.py:519
 msgid "Éthique"
 msgstr "Ethics"
 
-#: apps/reviews/services/decisions.py:512
+#: apps/reviews/services/decisions.py:520
 msgid "Plagiat"
 msgstr "Plagiarism"
 
-#: apps/reviews/services/decisions.py:513
+#: apps/reviews/services/decisions.py:521
 msgid "Format suggéré"
 msgstr "Suggested format"
 
-#: apps/reviews/services/decisions.py:514
+#: apps/reviews/services/decisions.py:522
 msgid "Commentaire aux auteurs"
 msgstr "Comment to the authors"
 
-#: apps/reviews/services/decisions.py:515
+#: apps/reviews/services/decisions.py:523
 msgid "Commentaire au comité"
 msgstr "Comment to the committee"
 
-#: apps/reviews/services/decisions.py:516
+#: apps/reviews/services/decisions.py:524
 msgid "Envoyée le"
 msgstr "Submitted on"
 
-#: apps/reviews/services/decisions.py:517
+#: apps/reviews/services/decisions.py:525
 msgid "Version"
 msgstr "Version"
 
@@ -6091,81 +6095,81 @@ msgstr "The weights must add up to 100 (currently %(total)s)."
 msgid "Type d'une autre édition."
 msgstr "Type from another edition."
 
-#: apps/reviews/services/reviews.py:178
+#: apps/reviews/services/reviews.py:209
 msgid "Cette évaluation n'est plus modifiable."
 msgstr "This review can no longer be changed."
 
-#: apps/reviews/services/reviews.py:199
+#: apps/reviews/services/reviews.py:230
 msgid "Notes attendues par code de critère."
 msgstr "Scores expected by criterion code."
 
-#: apps/reviews/services/reviews.py:203
+#: apps/reviews/services/reviews.py:234
 #, python-format
 msgid "Critère inconnu : %(code)s."
 msgstr "Unknown criterion: %(code)s."
 
-#: apps/reviews/services/reviews.py:211
+#: apps/reviews/services/reviews.py:242
 #, python-format
 msgid "Note invalide : %(code)s."
 msgstr "Invalid score: %(code)s."
 
-#: apps/reviews/services/reviews.py:218
+#: apps/reviews/services/reviews.py:249
 #, python-format
 msgid "Note de %(code)s entre %(min)s et %(max)s, une décimale au plus."
 msgstr "Score for %(code)s between %(min)s and %(max)s, at most one decimal."
 
-#: apps/reviews/services/reviews.py:226
+#: apps/reviews/services/reviews.py:257
 msgid "Recommandation inconnue."
 msgstr "Unknown recommendation."
 
-#: apps/reviews/services/reviews.py:234
+#: apps/reviews/services/reviews.py:265
 msgid "Confiance de 1 à 5."
 msgstr "Confidence from 1 to 5."
 
-#: apps/reviews/services/reviews.py:240
+#: apps/reviews/services/reviews.py:271
 #, python-format
 msgid "Texte de %(max)s caractères au plus."
 msgstr "Text of at most %(max)s characters."
 
-#: apps/reviews/services/reviews.py:262
+#: apps/reviews/services/reviews.py:293
 #, python-format
 msgid "Critères à noter : %(codes)s."
 msgstr "Criteria to score: %(codes)s."
 
-#: apps/reviews/services/reviews.py:264
+#: apps/reviews/services/reviews.py:295
 msgid "Recommandation obligatoire."
 msgstr "Recommendation required."
 
-#: apps/reviews/services/reviews.py:266
+#: apps/reviews/services/reviews.py:297
 msgid "Confiance obligatoire."
 msgstr "Confidence required."
 
-#: apps/reviews/services/reviews.py:268
+#: apps/reviews/services/reviews.py:299
 msgid "Commentaire aux auteurs obligatoire."
 msgstr "Comment to the authors required."
 
-#: apps/reviews/services/reviews.py:279
+#: apps/reviews/services/reviews.py:310
 msgid ""
 "Aucune grille d'évaluation : prévenez le président du comité scientifique."
 msgstr "No evaluation grid: notify the scientific committee chair."
 
-#: apps/reviews/services/reviews.py:320
+#: apps/reviews/services/reviews.py:351
 msgid "Évaluation envoyée : renvoyez-la pour la modifier."
 msgstr "Review submitted: submit it again to change it."
 
-#: apps/reviews/services/reviews.py:355
+#: apps/reviews/services/reviews.py:386
 msgid "Évaluation vide."
 msgstr "Empty review."
 
-#: apps/reviews/services/reviews.py:359
+#: apps/reviews/services/reviews.py:390
 msgid "Évaluation incomplète."
 msgstr "Incomplete review."
 
-#: apps/reviews/services/reviews.py:434
+#: apps/reviews/services/reviews.py:465
 msgid "Évaluation déjà envoyée : demandez au président de l'écarter."
 msgstr "Review already submitted: ask the chair to set it aside."
 
-#: apps/reviews/services/reviews.py:511
+#: apps/reviews/services/reviews.py:542
 #, python-format
 msgid "Message de 1 à %(max)s caractères."
 msgstr "Message of 1 to %(max)s characters."
@@ -6452,35 +6456,35 @@ msgstr "Amount received and date required."
 msgid "Contrepartie de 1 à 200 caractères."
 msgstr "Benefit of 1 to 200 characters."
 
-#: apps/sponsors/views.py:215
+#: apps/sponsors/views.py:218
 msgid "Contribution convenue"
 msgstr "Agreed contribution"
 
-#: apps/sponsors/views.py:216
+#: apps/sponsors/views.py:219
 msgid "Montant reçu"
 msgstr "Amount received"
 
-#: apps/sponsors/views.py:218
+#: apps/sponsors/views.py:221
 msgid "Contact"
 msgstr "Contact"
 
-#: apps/sponsors/views.py:219
+#: apps/sponsors/views.py:222
 msgid "Adresse"
 msgstr "Address"
 
-#: apps/sponsors/views.py:220
+#: apps/sponsors/views.py:223
 msgid "Téléphone"
 msgstr "Phone"
 
-#: apps/sponsors/views.py:221
+#: apps/sponsors/views.py:224
 msgid "Publié"
 msgstr "Published"
 
-#: apps/sponsors/views.py:234
+#: apps/sponsors/views.py:237
 msgid "oui"
 msgstr "yes"
 
-#: apps/sponsors/views.py:234
+#: apps/sponsors/views.py:237
 msgid "non"
 msgstr "no"
 

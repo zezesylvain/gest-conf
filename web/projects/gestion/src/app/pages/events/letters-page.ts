@@ -19,6 +19,7 @@ import {
   LanguageService,
   ManageLetter,
   PageHeader,
+  ScrollRegion,
 } from '@gestconf/shared';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -37,6 +38,7 @@ const PAGE_SIZE = 25;
 @Component({
   selector: 'gestion-letters-page',
   imports: [
+    ScrollRegion,
     ReactiveFormsModule,
     RouterLink,
     TranslatePipe,

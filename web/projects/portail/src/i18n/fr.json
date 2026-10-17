@@ -157,6 +157,7 @@
         "mfaEnabled": "La double authentification est activée sur votre compte.",
         "mfaDisabled": "La double authentification n'est pas activée sur votre compte.",
         "mfaRequiredHint": "Elle est obligatoire pour les rôles de gestion : administration, présidence, comités d'organisation et scientifique.",
+        "mfaRecommendedHint": "Elle est facultative, mais recommandée pour les rôles de gestion : administration, présidence, comités d'organisation et scientifique, bénévoles et signataires. Une fois activée, le code est demandé à chaque connexion.",
         "enable": "Activer la double authentification",
         "scanLead": "Scannez ce QR code avec votre application d'authentification (FreeOTP, Aegis, Google Authenticator…), puis saisissez le code qu'elle affiche.",
         "qrAlt": "QR code de configuration de la double authentification",
@@ -221,6 +222,7 @@
         "declined": "Invitation refusée.",
         "accepted": "Bienvenue ! Vous avez maintenant le rôle « {{role}} ».",
         "mfaReminder": "Les rôles de gestion exigent la double authentification : activez-la dans « Sécurité » si ce n'est pas déjà fait.",
+        "mfaRecommendedReminder": "La double authentification est facultative, mais recommandée pour les rôles de gestion : vous pouvez l'activer dans « Sécurité ».",
         "notPending": {
           "pending": "En attente.",
           "accepted": "Cette invitation a déjà été acceptée.",

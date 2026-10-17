@@ -30,6 +30,7 @@ import {
   MeStore,
   OcFunction,
   PageHeader,
+  ScrollRegion,
   SkippedInvitation,
 } from '@gestconf/shared';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -64,6 +65,7 @@ export function parseEmails(text: string): string[] {
 @Component({
   selector: 'gestion-invitations-page',
   imports: [
+    ScrollRegion,
     ReactiveFormsModule,
     TranslatePipe,
     MatFormFieldModule,

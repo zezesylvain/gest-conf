@@ -1,0 +1,55 @@
+# Analyse ZAP passive de la plateforme (plan L9, S7 ; docs/L9-revue-securite.md).
+#
+# Lancée par l'OPÉRATEUR depuis son poste, sur une plateforme SANS DONNÉE RÉELLE, après
+# accord d'o2switch (question 5 du plan L9). Passive : exploration des pages (GET seulement)
+# et analyse des réponses ; aucune attaque, aucune écriture. Ne PAS y ajouter de job
+# « activeScan » ni « openapi » (ce dernier enverrait des POST, PUT et DELETE).
+#
+#   GESTCONF_ZAP_TARGET=https://conference.exemple.org GESTCONF_ZAP_REPORTS="$HOME/gestconf-zap" \
+#     zap.sh -cmd -autorun deploy/zap/baseline.yaml     # paquet multiplateforme (Java 17+)
+#
+# Variante : docker run --rm -v "$PWD:/zap/wrk" -t zaproxy/zap-stable \
+#   zap-baseline.py -t https://conference.exemple.org -r zap-baseline.html
+#
+# Rapports : zap-baseline.html et zap-baseline.json dans GESTCONF_ZAP_REPORTS (chemin
+# absolu, hors du dépôt : un chemin relatif part du dossier de ce fichier) ; coller la
+# synthèse dans le bilan du lot et traiter chaque alerte (corriger ou accepter par écrit).
+env:
+  contexts:
+    - name: gestconf
+      urls:
+        - ${GESTCONF_ZAP_TARGET}/fr/
+        - ${GESTCONF_ZAP_TARGET}/en/
+        - ${GESTCONF_ZAP_TARGET}/gestion/
+        - ${GESTCONF_ZAP_TARGET}/api/v1/health
+      includePaths:
+        - ${GESTCONF_ZAP_TARGET}/.*
+      excludePaths:
+        # Déconnexion et liens à usage unique : jamais suivis.
+        - ${GESTCONF_ZAP_TARGET}/api/_allauth/.*
+        - ${GESTCONF_ZAP_TARGET}/desabonnement/.*
+  parameters:
+    failOnError: true
+    progressToStdout: true
+jobs:
+  - type: passiveScan-config
+    parameters:
+      maxAlertsPerRule: 10
+  - type: spider
+    parameters:
+      context: gestconf
+      maxDuration: 5
+      maxChildren: 50
+  - type: passiveScan-wait
+    parameters:
+      maxDuration: 10
+  - type: report
+    parameters:
+      template: traditional-html
+      reportDir: ${GESTCONF_ZAP_REPORTS}
+      reportFile: zap-baseline.html
+  - type: report
+    parameters:
+      template: traditional-json
+      reportDir: ${GESTCONF_ZAP_REPORTS}
+      reportFile: zap-baseline.json

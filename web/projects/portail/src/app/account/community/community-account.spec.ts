@@ -299,6 +299,20 @@ describe('Questionnaire (plan L8, N12, RG-21)', () => {
     expect(service['answer']).toHaveBeenCalledWith(6, { 1: 4, 2: ['2'], 3: 'Très bien' });
     expect(text(root)).toContain('Merci, votre réponse est enregistrée.');
   });
+
+  it('obligatoire annoncé aux technologies d’assistance sans ARIA interdit (audit axe, L9.6)', async () => {
+    const { root } = await render(SurveyPage, { params: { surveyId: '6' } }, (mocks) =>
+      mocks['survey'].mockResolvedValue(SURVEY),
+    );
+    const groups = Array.from(root.querySelectorAll<HTMLFieldSetElement>('fieldset.question'));
+    // aria-required n'est permis que sur un groupe de boutons radio.
+    for (const group of groups) {
+      if (group.hasAttribute('aria-required')) {
+        expect(group.getAttribute('role')).toBe('radiogroup');
+      }
+    }
+    expect(groups.some((group) => group.getAttribute('role') === 'radiogroup')).toBe(true);
+  });
 });
 
 describe('Désabonnement par lien (plan L8, N11)', () => {

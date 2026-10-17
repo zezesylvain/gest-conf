@@ -17,6 +17,7 @@ import {
   PublicCategory,
   PublicOption,
   PublicRegistration,
+  ScrollRegion,
   Zone,
 } from '@gestconf/shared';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -37,7 +38,7 @@ export const MY_REGISTRATION_PATH = '/compte/mon-inscription';
  */
 @Component({
   selector: 'portail-registration-overview',
-  imports: [RouterLink, TranslatePipe],
+  imports: [ScrollRegion, RouterLink, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './registration-overview.html',
   styleUrls: ['../site.scss', './registration.scss'],

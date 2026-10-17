@@ -13,6 +13,10 @@ from .base import *
 DEBUG = False
 
 SECRET_KEY = env.str("DJANGO_SECRET_KEY")
+# Rotation de la clé (revue de sécurité L9.5, deploy/README.md) : l'ancienne clé, placée ici
+# le temps que les sessions et les liens signés qu'elle a produits expirent, est encore
+# acceptée en vérification ; elle ne signe plus rien.
+SECRET_KEY_FALLBACKS = env.list("DJANGO_SECRET_KEY_FALLBACKS", default=[])
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS")
 # Ex. https://conference.exemple.org (nécessaire si Passenger ne signale pas
 # correctement HTTPS à Django : la vérification de l'en-tête Origin échouerait).
@@ -52,7 +56,8 @@ SECURE_HSTS_SECONDS = env.int("DJANGO_SECURE_HSTS_SECONDS", default=31536000)
 # Les sous-domaines de l'offre ne sont pas connus (étude §11.2) : désactivé par défaut.
 SECURE_HSTS_INCLUDE_SUBDOMAINS = env.bool("DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS", default=False)
 
-# La redirection HTTP -> HTTPS est faite par Apache (.htaccess). L'activer aussi
+# La redirection HTTP -> HTTPS est faite par cPanel (« Forcer la redirection HTTPS »,
+# deploy/README.md), vérifiée par deploy/smoke-test.sh. L'activer aussi
 # dans Django n'est sûr que si Passenger transmet bien le schéma HTTPS :
 # à vérifier avec le champ « secure » de /api/v1/health avant de l'activer.
 SECURE_SSL_REDIRECT = env.bool("DJANGO_SECURE_SSL_REDIRECT", default=False)
@@ -60,7 +65,7 @@ SECURE_SSL_REDIRECT = env.bool("DJANGO_SECURE_SSL_REDIRECT", default=False)
 SILENCED_SYSTEM_CHECKS = [
     # W005 : includeSubDomains, cf. ci-dessus (choix explicite, configurable).
     "security.W005",
-    # W008 : redirection HTTPS assurée par Apache, cf. ci-dessus.
+    # W008 : redirection HTTPS assurée par cPanel, cf. ci-dessus.
     "security.W008",
     # W021 : le préchargement HSTS engage durablement le domaine et ses
     # sous-domaines ; décision à prendre avec le commanditaire.

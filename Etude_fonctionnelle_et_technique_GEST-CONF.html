@@ -233,6 +233,26 @@ hr{border:0;border-top:1px solid var(--line);margin:2em 0}
 <li><a href="#24-11-tests-planning-et-points-ouverts">24.11 Tests, planning et points ouverts</a></li>
 </ul>
 </li>
+<li><a href="#25-mises-a-jour-issues-du-lot-l9">25. Mises à jour issues du lot L9 (version 1.9)</a><ul>
+<li><a href="#25-1-hypotheses-retenues-plan-10-sans-reponse">25.1 Hypothèses retenues (plan, §10 sans réponse)</a></li>
+<li><a href="#25-2-sauvegarde-copie-et-restauration-s2-s3">25.2 Sauvegarde, copie et restauration (S2, S3)</a></li>
+<li><a href="#25-3-supervision-et-tests-de-fumee-s4">25.3 Supervision et tests de fumée (S4)</a></li>
+<li><a href="#25-4-donnees-fictives-volume-et-performances-s6-s10">25.4 Données fictives, volume et performances (S6, S10)</a></li>
+<li><a href="#25-5-test-de-charge-s5">25.5 Test de charge (S5)</a></li>
+<li><a href="#25-6-securite-s7">25.6 Sécurité (S7)</a></li>
+<li><a href="#25-7-accessibilite-et-couverture-s8-s9">25.7 Accessibilité et couverture (S8, S9)</a></li>
+<li><a href="#25-8-recette-formation-et-documentation-s10-a-s14">25.8 Recette, formation et documentation (S10 à S14)</a></li>
+<li><a href="#25-9-exploitation">25.9 Exploitation</a></li>
+<li><a href="#25-10-tests-planning-et-points-ouverts">25.10 Tests, planning et points ouverts</a></li>
+</ul>
+</li>
+<li><a href="#26-double-authentification-optionnelle">26. Double authentification optionnelle (version 1.10)</a><ul>
+<li><a href="#26-1-decision-t1">26.1 Décision T1</a></li>
+<li><a href="#26-2-comportement">26.2 Comportement</a></li>
+<li><a href="#26-3-securite">26.3 Sécurité</a></li>
+<li><a href="#26-4-tests">26.4 Tests</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </nav><main><h1 id="etude-fonctionnelle-et-technique">Étude fonctionnelle et technique</h1>
@@ -247,11 +267,11 @@ hr{border:0;border-top:1px solid var(--line);margin:2em 0}
 <tbody>
 <tr>
 <td><strong>Version</strong></td>
-<td>1.8 – document de cadrage, mis à jour après les lots L1 (§17), L2 (§18), L3 (§19), L4 (§20), L5 (§21), L6 (§22), L7 (§23) et L8 (§24)</td>
+<td>1.10 – document de cadrage, mis à jour après les lots L1 (§17), L2 (§18), L3 (§19), L4 (§20), L5 (§21), L6 (§22), L7 (§23), L8 (§24) et L9 (§25, volet du dépôt), puis 2FA optionnelle (§26)</td>
 </tr>
 <tr>
 <td><strong>Date</strong></td>
-<td>7 octobre 2026</td>
+<td>14 octobre 2026</td>
 </tr>
 <tr>
 <td><strong>Auteur</strong></td>
@@ -3677,6 +3697,101 @@ def weighted_score(scores, criteria, scale_min, scale_max):
 <li><strong>À vérifier sur o2switch</strong> : plafond d'e-mails réel et délai d'un envoi groupé ; bandeau et pages pré-rendues en production ; ouverture des XLSX par Excel et LibreOffice.</li>
 <li><strong>À trancher</strong> (plan L8, §10, hypothèses en vigueur) : ordre des lots L8 et L9 ; niveaux et montants des partenaires ; régimes pour tous ou pour les intervenants seuls ; réservations des voyages ; questionnaire anonyme et par session ; fournisseur d'e-mails de production et volume horaire (D10) ; postes du budget ; indicateurs prioritaires. Toujours ouverts : Q7, Q8, Q14, Q17 ; <code>ACCEPTED_MINOR → WITHDRAWN</code> ; seuil d'avertissement du bundle initial du portail (369,8 kB pour 365 kB ; gestion : 389,3 kB).</li>
 <li><strong>Reporté</strong> : espace partenaire en libre-service et factures des partenaires (Q8) ; réservation de voyages et d'hôtels ; indisponibilités des intervenants dans le planificateur ; suivi des repas servis ; inventaire du matériel ; SMS et WhatsApp (P3) ; « Mon programme » du participant (J15).</li>
+</ul>
+<h2 id="25-mises-a-jour-issues-du-lot-l9">25. Mises à jour issues du lot L9 (version 1.9)</h2>
+<p>Les décisions S1 à S16 du plan <a href="docs/L9-recette-plan.md"><code>docs/L9-recette-plan.md</code></a> ont été validées le 12 octobre 2026 (« terminer tout ce qui reste ») ; les questions du §10 du plan sont restées sans réponse : ses propositions s'appliquent comme <strong>hypothèses révisables</strong> (plan, §2.1). Le lot a deux volets (S1) : <strong>le dépôt</strong> (L9.0 à L9.7, livré : outils, tests, documents) et <strong>l'hébergement</strong> (L9.8 : runbook exécuté sur o2switch par un opérateur du commanditaire, <strong>pas encore fait</strong> ; cette session n'a pas accès à l'hébergement). Cette section reporte le volet du dépôt dans l'étude ; <strong>en cas de divergence avec les sections précédentes (§17 à §24 compris), elle prévaut</strong>. Le détail est dans le plan, §2.1 et §11 à §18 ; le bilan du lot dans <a href="docs/L9-recette.md"><code>docs/L9-recette.md</code></a>.</p>
+<h3 id="25-1-hypotheses-retenues-plan-10-sans-reponse">25.1 Hypothèses retenues (plan, §10 sans réponse)</h3>
+<ul>
+<li><strong>Reprise</strong> (§11.6) : perte maximale de 24 heures, rétablissement sous 4 heures ; copie hors hébergement <strong>tirée</strong> par l'opérateur (<code>pull-backups.sh</code>), sans clé de stockage sur le serveur ; pas de chiffrement propre à la copie (disque chiffré conseillé).</li>
+<li><strong>Recette et charge sur la production avant toute donnée réelle</strong> (pas de sous-domaine de recette supposé), puis retour à une base propre par restauration ; <strong>200 utilisateurs simultanés</strong>, o2switch prévenu avant le test et l'analyse ZAP.</li>
+<li><strong>Sécurité</strong> : revue interne (OWASP Top 10, ASVS niveau 2, ZAP passif), sans test d'intrusion tiers ; erreurs par <strong>e-mail minimal</strong> aux opérateurs (D17), pas de Sentry ; pas d'anti-robots (limites de débit existantes) ; absence d'antivirus acceptée si o2switch n'en fournit pas.</li>
+<li><strong>Formation</strong> par guides écrits et ateliers ; <strong>déploiement</strong> par <code>deploy.sh</code> lancé à la main ; <strong>pages légales</strong> : trame proposée, texte définitif au commanditaire ; seuil d'avertissement du bundle initial du portail porté à <strong>375 ko</strong>.</li>
+</ul>
+<h3 id="25-2-sauvegarde-copie-et-restauration-s2-s3">25.2 Sauvegarde, copie et restauration (S2, S3)</h3>
+<ul>
+<li>**<code>backup_db</code>** (cron quotidien à 2 h 07, verrouillé, battement de cœur, alerte en cas d'échec) : <code>mariadb-dump --single-transaction</code> compressé en flux, identifiants dans un fichier d'options temporaire en 0600 (<strong>jamais sur la ligne de commande</strong>), écrit sous un nom temporaire puis renommé, en 0600 dans <code>GESTCONF_BACKUP_DIR</code> (défaut <code>var/backups</code>, 0700, hors racine web) ; <strong>manifeste</strong> JSON (empreinte SHA-256 du dump, migrations appliquées, inventaire des fichiers déposés) ; rotation 7 quotidiennes, 4 hebdomadaires, 3 mensuelles ; sessions sauvegardées vides, tables du cache exclues.</li>
+<li>**<code>deploy.sh</code> sauvegarde avant <code>migrate</code>** et s'arrête si la sauvegarde échoue ; <code>var/</code> (fichiers et sauvegardes) est exclu de la synchronisation du déploiement (défaut trouvé : il les aurait effacés).</li>
+<li>**<code>deploy/pull-backups.sh</code><strong> (poste de l'opérateur) : dumps et manifestes copiés sans jamais rien supprimer, fichiers déposés en </strong>instantanés datés** liés (<code>--link-dest</code>), empreinte et inventaire vérifiés ; installation neuve tolérée.</li>
+<li>**<code>restore_db</code><strong> et </strong><code>deploy/restore.sh</code><strong> : restauration dans une base </strong>vide** (refus sinon) et des dossiers vides, empreinte vérifiée, fichiers comparés au manifeste, tables du cache recréées, migrations en attente signalées, puis <code>check_integrity</code> ; <strong>échec</strong> sur toute anomalie de données (les contrôles de l'environnement, âge de la sauvegarde et disque, n'en font pas échouer la restauration). Mesuré au volume de l'étude (MariaDB locale) : sauvegarde en 2 s, restauration complète en 6 s.</li>
+</ul>
+<h3 id="25-3-supervision-et-tests-de-fumee-s4">25.3 Supervision et tests de fumée (S4)</h3>
+<ul>
+<li><code>/v1/health</code> gagne **<code>backup</code>** (<code>ok</code>, <code>late</code> au-delà de <code>GESTCONF_BACKUP_MAX_AGE_HOURS</code>, <code>unknown</code>), sans autre détail ; <code>check_integrity</code> alerte sur une sauvegarde absente ou en retard et sur un espace disque sous <code>GESTCONF_DISK_FREE_MIN_MB</code>.</li>
+<li>Tests de fumée : en-têtes de sécurité (<code>nosniff</code>, <code>X-Frame-Options</code>, <code>Referrer-Policy</code>, HSTS), redirection HTTP vers HTTPS (par <strong>cPanel</strong>, seule voie retenue), état de la sauvegarde. <strong>Écart</strong> de S7 : pas de <code>default-src</code> dans l'en-tête CSP, qui bloquerait les scripts autorisés par empreintes dans la balise <code>&lt;meta&gt;</code> ; l'en-tête énumère chaque autre directive (test).</li>
+<li>Surveillance externe de la disponibilité (<code>/</code> et <code>/api/v1/health</code>) : à configurer par l'opérateur (runbook).</li>
+</ul>
+<h3 id="25-4-donnees-fictives-volume-et-performances-s6-s10">25.4 Données fictives, volume et performances (S6, S10)</h3>
+<ul>
+<li>**<code>seed_volume</code>** : conférence fictive (<code>gestconf-fictif</code>), éditions <code>FICTIFEVAL</code> (600 soumissions en évaluation, 100 relecteurs, 1 200 affectations, 800 évaluations) et <code>FICTIFAPPEL</code> (300 brouillons, 1 500 inscrits dont 1 000 payés, pièces émises) ; **<code>seed_demo</code>** : édition <code>DEMO</code>, publiée et courante, un compte fictif par rôle et par fonction du CO (20 comptes), 2FA prête. Tout passe par les services métier (statuts écrits par les workflows) ; comptes en <code>@fictif.invalid</code> (domaine réservé) : <strong>aucun e-mail ne part</strong> vers eux.</li>
+<li><strong>Garde-fous</strong> : <code>--confirm-fictitious</code> exigé ; refus dès que la base contient un compte, une soumission ou une inscription réels ; journalisés. <strong>Écart</strong> de S6 : **pas de <code>purge_volume</code>** (elle supprimerait des pièces numérotées en ajout seul, RG-14) : on restaure la sauvegarde prise juste avant.</li>
+<li><strong>Nombre de requêtes</strong> : constant sur les listes chaudes (tests). <strong>N+1 corrigés</strong> : classement (trois requêtes par soumission ; au volume, 436 ms → 102 ms), export des évaluations, tableau du planificateur ; rapport de relecture restreint aux colonnes utiles (170 → 79 ms).</li>
+</ul>
+<h3 id="25-5-test-de-charge-s5">25.5 Test de charge (S5)</h3>
+<ul>
+<li><strong>Locust</strong> 2.46.7 (environnement séparé, verrouillé à empreintes, jamais sur l'hébergement) ; scénarios visiteurs, auteurs, relecteurs, participants, nouveaux inscrits, comité ; <strong>verdict</strong> à la fin (p95 &lt; 500 ms et moins de 1 % d'erreurs, hors requêtes qui émettent un PDF, rapportées à part).</li>
+<li><strong>Sessions pré-établies</strong> (<code>loadtest_sessions</code>) pour les comptes fictifs, 2FA validée et jeton CSRF compris : le test ne se connecte jamais (limites de débit de la connexion par adresse IP) ; fichier en 0600, révocable.</li>
+<li>Essai local : scénarios sans erreur à 200 utilisateurs ; la mesure de référence est celle de l'hébergement (L9.8). <strong>Correctif</strong> : le <strong>bandeau</strong> passe de 60 à <strong>600 lectures par minute et par adresse</strong> (le Wi-Fi du lieu de la conférence sort par une seule adresse). La CI joue un essai court des scénarios.</li>
+</ul>
+<h3 id="25-6-securite-s7">25.6 Sécurité (S7)</h3>
+<ul>
+<li>Revue écrite <a href="docs/L9-revue-securite.md"><code>docs/L9-revue-securite.md</code></a> : OWASP Top 10 et ASVS niveau 2, preuve par contrôle ; 18 constats, aucun critique ni élevé : 9 corrigés, 7 acceptés par écrit, 2 à vérifier sur l'hébergement.</li>
+<li><strong>Correctifs</strong> : corps de requête borné (<strong>413</strong> avant lecture au-delà de <code>GESTCONF_MAX_REQUEST_MB</code>, 55 Mio) ; <code>Cache-Control: no-store</code> par défaut sur l'API ; attestations et lettres servies seulement si leur <strong>empreinte</strong> est intacte (comme les factures) ; l'effacement du numéro de passeport (K14) et l'anonymisation suppriment aussi le <strong>PDF de la lettre</strong> qui le porte ; rotation des clés de signature (<code>rotate_signing_keys</code>) et de <code>DJANGO_SECRET_KEY</code> (<code>DJANGO_SECRET_KEY_FALLBACKS</code>) ; procédure de rotation de chaque secret.</li>
+<li><strong>Acceptés</strong> : actions de la CI par version majeure, pas de Dependabot (proposé au commanditaire), jeton du QR en clair (par conception, K2), numéro de passeport en clair (masqué, effacé), HSTS sans sous-domaines, <code>style-src 'unsafe-inline'</code>, pas d'antivirus.</li>
+<li>ZAP : essai local passif (une alerte faible, propre au serveur de développement) ; analyse <strong>passive seulement</strong> de l'hébergement par l'opérateur (<code>deploy/zap/baseline.yaml</code>).</li>
+</ul>
+<h3 id="25-7-accessibilite-et-couverture-s8-s9">25.7 Accessibilité et couverture (S8, S9)</h3>
+<ul>
+<li><strong>axe-core</strong> dans le parcours de bout en bout : 25 points d'audit, échec sur toute violation grave ou critique (WCAG 2.0 et 2.1, A et AA). Trois constats corrigés : contraste du <strong>bandeau</strong> (texte blanc sur orange), ARIA du <strong>questionnaire</strong> (groupes radio), <strong>tableaux défilants</strong> de la gestion atteignables au clavier et nommés (directive partagée). La revue manuelle (clavier, lecteur d'écran) reste à faire pendant la recette.</li>
+<li><strong>Couverture</strong> : 80 % au moins <strong>par module</strong> en CI pour <code>reviews</code>, <code>submissions</code>, <code>program</code>, <code>registrations</code>, <code>payments</code> (mesurée de 93 à 96 %).</li>
+</ul>
+<h3 id="25-8-recette-formation-et-documentation-s10-a-s14">25.8 Recette, formation et documentation (S10 à S14)</h3>
+<ul>
+<li><strong>Cahier de recette</strong> <a href="docs/L9-cahier-de-recette.md"><code>docs/L9-cahier-de-recette.md</code></a> : démos A à I en 107 scénarios (préalable, étapes, résultat attendu, règle vérifiée, OK/KO) ; une anomalie = une ligne ; une anomalie bloquante suspend l'ouverture.</li>
+<li><strong>Guides</strong> (<code>docs/guides/</code>) par public, texte proposé de la page « Aide » du portail (FR, EN), déroulé des ateliers ; <strong>guide d'exploitation</strong> <a href="docs/exploitation.md"><code>docs/exploitation.md</code></a> ; <strong>runbook</strong> <a href="docs/L9-runbook-o2switch.md"><code>docs/L9-runbook-o2switch.md</code></a> en douze étapes ; <strong>check-list de mise en production</strong> <a href="docs/L9-mise-en-production.md"><code>docs/L9-mise-en-production.md</code></a> (A5) ; <strong>trame des pages légales</strong> <a href="docs/pages-legales-trame.md"><code>docs/pages-legales-trame.md</code></a>.</li>
+<li><strong>Ordre du runbook</strong> (précision de S12) : vérifications, déploiement, cron surveillé 48 heures, sauvegarde et <strong>restauration chronométrée</strong>, borne de taille des envois, <strong>test de charge puis retour à la sauvegarde</strong>, ZAP, <strong>recette</strong> sur l'édition de démonstration, <strong>retour à une base propre</strong>, surveillance externe, check-list ; chaque phase repart de la sauvegarde prise juste avant ; aucune donnée réelle avant une restauration testée (D18). L'<strong>ouverture de l'appel</strong> reste la décision du commanditaire.</li>
+</ul>
+<h3 id="25-9-exploitation">25.9 Exploitation</h3>
+<ul>
+<li><strong>Cron</strong> : une ligne nouvelle, **<code>backup_db</code>** (quotidienne, 2 h 07).</li>
+<li><strong>Variables d'environnement</strong> nouvelles : <code>GESTCONF_BACKUP_DIR</code>, <code>GESTCONF_BACKUP_KEEP_DAILY</code>, <code>…_WEEKLY</code>, <code>…_MONTHLY</code>, <code>GESTCONF_BACKUP_MAX_AGE_HOURS</code>, <code>GESTCONF_STORAGE_MONITORING</code>, <code>GESTCONF_DISK_FREE_MIN_MB</code>, <code>GESTCONF_MAX_REQUEST_MB</code>, <code>DJANGO_SECRET_KEY_FALLBACKS</code>.</li>
+<li><strong>Commandes</strong> nouvelles : <code>backup_db</code>, <code>restore_db</code>, <code>rotate_signing_keys</code>, <code>seed_volume</code>, <code>seed_demo</code>, <code>loadtest_sessions</code> ; scripts <code>deploy/pull-backups.sh</code>, <code>deploy/restore.sh</code>. L'hébergement doit fournir <code>mariadb-dump</code> (ou <code>mysqldump</code>) et le client <code>mariadb</code> (V18, non vérifié).</li>
+<li><strong>Application</strong> <code>qa</code> (données fictives) ; aucun modèle nouveau, aucune migration.</li>
+</ul>
+<h3 id="25-10-tests-planning-et-points-ouverts">25.10 Tests, planning et points ouverts</h3>
+<ul>
+<li>6 750 tests backend environ (requêtes, garde-fous, sauvegarde et restauration réelles sous MariaDB, sessions de charge, constats de sécurité) ; tests front ; <strong>parcours de bout en bout</strong> (19 étapes) avec les audits d'accessibilité ; essai des scénarios de charge en CI.</li>
+<li><strong>Reste à faire sur o2switch</strong> (L9.8, opérateur) : tout le runbook, dont la restauration chronométrée, le test de charge et la recette ; les démos A à I n'y ont toujours pas été jouées.</li>
+<li><strong>À trancher</strong> (plan, §10, hypothèses en vigueur) et <strong>questions nées du lot</strong> : catégories tarifaires réservées (une catégorie à 0 est choisissable par tous) ; désabonnement des annonces appliqué ou non aux invitations des questionnaires (RG-22) ; ouverture de l'écran « Sessions du jour » à la présidence désignée dans le programme ; Dependabot. Toujours ouverts : Q7, Q8, Q14, Q17 ; <code>ACCEPTED_MINOR → WITHDRAWN</code>.</li>
+<li><strong>Sans écran aujourd'hui</strong> (écarts constatés avec l'étude) : page « Contact », « Mon programme » du participant (J15), indisponibilités des intervenants, connexion ORCID (P2), accès des co-auteurs à la soumission.</li>
+</ul>
+<h2 id="26-double-authentification-optionnelle">26. Double authentification optionnelle (version 1.10)</h2>
+<p>À la demande du commanditaire (14 octobre 2026), la double authentification devient <strong>optionnelle</strong> : décision <strong>T1</strong>, option retenue « optionnelle par défaut, pour tous les rôles », réversible par un paramètre de l'hébergement. <strong>Pour la 2FA, cette section prévaut sur les sections précédentes</strong>, notamment D2 et D3 (§17), H2 (§20), K1 et K18 (§23). Détail : <a href="docs/T1-2fa-optionnelle.md"><code>docs/T1-2fa-optionnelle.md</code></a>.</p>
+<h3 id="26-1-decision-t1">26.1 Décision T1</h3>
+<ul>
+<li>La 2FA (TOTP d'<code>allauth.mfa</code>, codes de secours) reste <strong>proposée à tous</strong> dans « Mon compte › Sécurité » ; elle n'est plus <strong>imposée</strong> aux rôles de gestion.</li>
+<li><code>GESTCONF_MFA_ENFORCED</code> (variable d'environnement, <strong>faux par défaut</strong>) l'impose de nouveau, à l'identique de D3, H2, K1 et K18, aux rôles <code>ADMIN</code>, <code>CHAIR</code>, <code>SC_CHAIR</code>, <code>OC_MEMBER</code>, <code>SC_MEMBER</code>, <code>VOLUNTEER</code> et <code>SIGNATORY</code> (<code>MFA_REQUIRED_ROLES</code>). Le choix revient au commanditaire (check-list de mise en production, P-11).</li>
+<li>Inchangés : chiffrement des secrets (<code>GESTCONF_MFA_ENCRYPTION_KEYS</code>, toujours obligatoire en production), <code>reset_mfa</code>, <code>rotate_mfa_keys</code>, réauthentification des opérations sensibles (D12). Aucun modèle, aucune migration.</li>
+</ul>
+<h3 id="26-2-comportement">26.2 Comportement</h3>
+<ul>
+<li><strong>Compte sans 2FA</strong> : connexion par mot de passe seul ; la gestion s'ouvre selon les capacités du compte, sans renvoi vers l'activation.</li>
+<li><strong>Compte avec 2FA</strong> : le code est demandé à chaque connexion ; sur les routes de gestion des rôles concernés, <code>MfaVerified</code> exige toujours une session validée par la 2FA (403 <code>mfa_required</code>, puis code) : un compte qui l'a choisie en bénéficie pleinement.</li>
+<li><strong>Mode imposé</strong> : comportement de D3 inchangé (403 <code>mfa_enrollment_required</code> sans 2FA, puis <code>mfa_required</code>).</li>
+<li><code>/v1/me</code> : <code>editions[].mfa_required</code> n'est vrai que si la 2FA est imposée.</li>
+<li><strong>Écrans</strong> : tableau de bord de la gestion, page « Sécurité », invitation acceptée et fiche d'aide « Double authentification » disent « obligatoire » ou « facultative, mais recommandée » selon le mode.</li>
+<li><code>seed_demo</code> et le parcours de bout en bout gardent la 2FA activée sur les comptes du comité (la recette joue la connexion en deux étapes) ; le seed du parcours ajoute un CO « bénévoles » sans 2FA.</li>
+</ul>
+<h3 id="26-3-securite">26.3 Sécurité</h3>
+<ul>
+<li>Revue de sécurité : constat <strong>R18</strong> (gravité moyenne), <strong>accepté par le commanditaire</strong> : un compte de gestion sans 2FA n'est protégé que par son mot de passe, alors que relecteurs, bénévoles, signataire et administrateurs accèdent à des données sensibles ; le contrôle ASVS 4.3.1 n'est conforme qu'en mode imposé.</li>
+<li>Atténuations : 2FA recommandée dans les écrans, vérifiée pour tout compte qui l'a activée, mots de passe de 12 caractères, limitation des échecs de connexion, réauthentification des opérations sensibles.</li>
+<li><strong>Recommandation</strong> : l'imposer (<code>GESTCONF_MFA_ENFORCED=true</code>) au moins avant l'ouverture de l'évaluation et du jour J.</li>
+</ul>
+<h3 id="26-4-tests">26.4 Tests</h3>
+<ul>
+<li><code>apps/accounts/tests/test_mfa.py</code> : mode optionnel (accès sans 2FA, step-up pour un compte qui l'a activée, désactivation) et mode imposé (<code>override_settings</code>).</li>
+<li>Matrice des droits : <code>test_t1_two_factor_authentication_is_optional_by_default</code>, pour chaque rôle concerné ; les cas de D3, H2, K1 et K18 tournent en mode imposé.</li>
+<li>Parcours de bout en bout : étape 17, un CO sans 2FA se connecte sans code et ouvre la gestion (20 tests).</li>
 </ul>
 <hr />
 <p><em>Fin du document.</em></p></main></div>

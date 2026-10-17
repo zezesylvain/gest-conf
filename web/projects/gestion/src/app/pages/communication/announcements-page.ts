@@ -10,6 +10,7 @@ import {
   formatInZone,
   LanguageService,
   PageHeader,
+  ScrollRegion,
   Segment,
 } from '@gestconf/shared';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -25,6 +26,7 @@ import { CHANNELS } from './communication-support';
 @Component({
   selector: 'gestion-announcements-page',
   imports: [
+    ScrollRegion,
     ReactiveFormsModule,
     RouterLink,
     TranslatePipe,

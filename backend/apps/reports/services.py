@@ -161,9 +161,22 @@ def reviews_section(edition: Edition) -> list[Table]:
     from apps.reviews.services.assignments import REVIEWABLE
 
     now = timezone.now()
-    active = ReviewAssignment.objects.filter(
-        submission__edition=edition, status=AssignmentStatus.ACTIVE
-    ).select_related("submission__track", "review")
+    # Colonnes utiles seulement (plan L9.4 : 1 200 affectations au volume de l'étude, sans
+    # les résumés des soumissions ni les commentaires des évaluations).
+    active = (
+        ReviewAssignment.objects.filter(submission__edition=edition, status=AssignmentStatus.ACTIVE)
+        .select_related("submission__track", "review")
+        .only(
+            "assigned_at",
+            "due_at",
+            "submission__status",
+            "submission__track__name_fr",
+            "submission__track__name_en",
+            "review__assignment",
+            "review__status",
+            "review__submitted_at",
+        )
+    )
     groups: dict[str, dict[str, Any]] = defaultdict(
         lambda: {"assigned": 0, "submitted": 0, "late": 0, "delays": []}
     )

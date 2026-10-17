@@ -23,6 +23,7 @@ import {
   MeStore,
   Option,
   PageHeader,
+  ScrollRegion,
 } from '@gestconf/shared';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -42,6 +43,7 @@ import { DIETS, MEAL_KINDS } from './logistics-support';
 @Component({
   selector: 'gestion-catering-page',
   imports: [
+    ScrollRegion,
     ReactiveFormsModule,
     TranslatePipe,
     MatButtonModule,

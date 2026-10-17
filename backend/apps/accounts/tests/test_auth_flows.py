@@ -359,3 +359,13 @@ def test_phone_routes_are_disabled(client, route):
     ):
         assert response.status_code == 404
         assert response.json()["code"] == "not_found"
+
+
+def test_password_must_have_at_least_12_characters(client):
+    """Revue de sécurité L9.5 (ASVS V2.1.1) : 12 caractères au moins (AUTH_PASSWORD_VALIDATORS)."""
+    response = signup(client, "court@univ.ci", password="Kq7#mZ2!pW9")  # 11 caractères
+    assert response.status_code == 400
+    assert not User.objects.filter(email="court@univ.ci").exists()
+    response = signup(client, "long@univ.ci", password="Kq7#mZ2!pW9x")  # 12 caractères
+    assert response.status_code == 401  # compte créé, e-mail à vérifier
+    assert User.objects.filter(email="long@univ.ci").exists()

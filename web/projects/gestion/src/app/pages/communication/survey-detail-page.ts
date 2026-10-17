@@ -22,6 +22,7 @@ import {
   Question,
   QuestionKind,
   QuestionResult,
+  ScrollRegion,
   Session,
   SurveyDetail,
   SurveyResults,
@@ -46,6 +47,7 @@ import { choicesFrom, QUESTION_KINDS, SURVEY_SCOPES } from './communication-supp
 @Component({
   selector: 'gestion-survey-detail-page',
   imports: [
+    ScrollRegion,
     ReactiveFormsModule,
     RouterLink,
     TranslatePipe,

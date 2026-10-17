@@ -35,6 +35,7 @@ import {
   Period,
   PromoCode,
   RegistrationSettings,
+  ScrollRegion,
   toDateTimeLocalValue,
   Zone,
 } from '@gestconf/shared';
@@ -91,6 +92,7 @@ type Editing = number | null;
 @Component({
   selector: 'gestion-pricing-page',
   imports: [
+    ScrollRegion,
     ReactiveFormsModule,
     TranslatePipe,
     MatButtonModule,

@@ -12,6 +12,7 @@ import {
   PageHeader,
   Room,
   RoomWriteRequest,
+  ScrollRegion,
 } from '@gestconf/shared';
 import { TranslatePipe } from '@ngx-translate/core';
 
@@ -25,6 +26,7 @@ import { EQUIPMENT_KINDS } from './program-support';
 @Component({
   selector: 'gestion-rooms-page',
   imports: [
+    ScrollRegion,
     ReactiveFormsModule,
     TranslatePipe,
     MatButtonModule,
