@@ -338,3 +338,11 @@ def test_portal_csp_header_lists_every_fetch_directive_but_scripts():
     assert fetch <= directives
     assert {"base-uri", "form-action", "frame-ancestors"} <= directives
     assert "frame-ancestors 'none'" in policy and "object-src 'none'" in policy
+
+
+def test_scripts_run_on_the_host_avoid_process_substitution():
+    """Relevé du 17 octobre 2026 : « < <(…) » échoue sur l'hébergement (/dev/fd absent sous
+    CageFS) ; les scripts exécutés sur o2switch passent par des fichiers temporaires."""
+    for script in ("check-o2switch.sh", "cron.sh", "restore.sh"):
+        code = shell_code(REPO_DIR / "deploy" / script)
+        assert "<(" not in code, script
