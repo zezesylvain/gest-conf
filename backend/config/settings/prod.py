@@ -27,6 +27,15 @@ DATABASES = {"default": database_from_env()}
 # E-mails : fournisseur obligatoire (D10), jamais le backend « console » par défaut.
 EMAIL_BACKEND = env.str("GESTCONF_EMAIL_BACKEND")
 DEFAULT_FROM_EMAIL = env.str("DEFAULT_FROM_EMAIL")
+SMTP_EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+if EMAIL_BACKEND == SMTP_EMAIL_BACKEND:
+    # SMTP de l'hébergement (D10 amendée) : envoi authentifié et chiffré seulement.
+    if not (EMAIL_HOST_USER and EMAIL_HOST_PASSWORD) or EMAIL_HOST == "localhost":
+        raise ImproperlyConfigured(
+            "SMTP : EMAIL_HOST, EMAIL_HOST_USER et EMAIL_HOST_PASSWORD sont obligatoires."
+        )
+    if EMAIL_USE_SSL == EMAIL_USE_TLS:
+        raise ImproperlyConfigured("SMTP : EMAIL_USE_SSL (465) ou EMAIL_USE_TLS (587), un seul.")
 
 # Liens des e-mails (vérification, réinitialisation) : domaine officiel en HTTPS,
 # obligatoire (lu par base.py, qui construit HEADLESS_FRONTEND_URLS).

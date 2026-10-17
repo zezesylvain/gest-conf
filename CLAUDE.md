@@ -130,8 +130,9 @@ Les URL Django sont déclarées **sans** le préfixe `/api` (`v1/...`) : `config
 | L6 — Inscriptions et paiements | **Livré en code et testé en local** (L6.0 à L6.7, E2E compris) ; bilan [`docs/L6-inscriptions.md`](docs/L6-inscriptions.md). Fusionné dans `main` (PR #12). Ouverts : Q7 (tarifs ; carte bancaire absente de l'API v1 de CinetPay), Q8 (entité de facturation, conservation, format du numéro), J15 reportée |
 | L7 — Jour J et attestations | **Livré en code et testé en local** (L7.0 à L7.8, E2E compris) ; bilan [`docs/L7-jour-j.md`](docs/L7-jour-j.md). L7.0 à L7.7 fusionnés dans `main` (PR #12), L7.8 et le correctif du test RG-16 (PR #13). Ouverts : Q17 (prestataire de signature qualifiée), nom complet du pays sur les badges, démo H sur téléphones réels |
 | L8 — Logistique, partenaires, communication et reporting | **Livré en code, testé en local et en CI** (L8.0 à L8.10, E2E compris ; PR #13, fusionnée) ; bilan [`docs/L8-logistique.md`](docs/L8-logistique.md). Ouverts : questions du §10 du plan (hypothèses retenues), plafond d'e-mails réel sur o2switch, en-tête `List-Unsubscribe` |
-| L9 — Recette, sécurité, charge | **Volet du dépôt livré et testé en local** (L9.0 à L9.7 et L9.9, E2E et audit d'accessibilité compris) ; bilan [`docs/L9-recette.md`](docs/L9-recette.md). **Volet de l'hébergement (L9.8) à faire** : runbook [`docs/L9-runbook-o2switch.md`](docs/L9-runbook-o2switch.md) exécuté sur o2switch par un opérateur du commanditaire (cette session n'y a pas accès), dont la restauration chronométrée, le test de charge et la recette des démos A à I. Pas de PR ouverte pour L9 (poussé sur la branche) |
-| T1 — 2FA optionnelle | **Livrée en code et testée en local** (demande du commanditaire du 14 octobre 2026, E2E compris) ; [`docs/T1-2fa-optionnelle.md`](docs/T1-2fa-optionnelle.md). Ouvert : choix de `GESTCONF_MFA_ENFORCED` en production (P-11) |
+| L9 — Recette, sécurité, charge | **Volet du dépôt livré et testé en local** (L9.0 à L9.7 et L9.9, E2E et audit d'accessibilité compris) ; bilan [`docs/L9-recette.md`](docs/L9-recette.md). **Volet de l'hébergement (L9.8) à faire** : runbook [`docs/L9-runbook-o2switch.md`](docs/L9-runbook-o2switch.md) exécuté sur o2switch par un opérateur du commanditaire (cette session n'y a pas accès), dont la restauration chronométrée, le test de charge et la recette des démos A à I. Fusionné dans `main` (PR #14) |
+| T1 — 2FA optionnelle | **Livrée en code et testée en local** (demande du commanditaire du 14 octobre 2026, E2E compris) ; [`docs/T1-2fa-optionnelle.md`](docs/T1-2fa-optionnelle.md), fusionnée dans `main` (PR #14). Ouvert : choix de `GESTCONF_MFA_ENFORCED` en production (P-11) |
+| T2 — E-mails par le SMTP de l'hébergement | Réglages `EMAIL_*` lus dans l'environnement, refus de démarrer sans SMTP authentifié et chiffré (décision du 17 octobre 2026, amende D10) ; étude §27. Ouverts : plafond horaire d'o2switch, délivrabilité |
 | L10 et suivants | Non commencés |
 
 ## Décisions du lot L1
@@ -266,6 +267,14 @@ Bilan du lot (volet du dépôt) : [`docs/L9-recette.md`](docs/L9-recette.md).
 - revue de sécurité : constat R18, accepté ; recommandation d'imposer la 2FA avant l'évaluation et le jour J.
 
 Décision et bilan : [`docs/T1-2fa-optionnelle.md`](docs/T1-2fa-optionnelle.md).
+
+## Décision postérieure au lot L9 : e-mails par SMTP (T2)
+
+Pour la mise en ligne sur o2switch, le 17 octobre 2026 ; reportée dans l'étude, **§27** (version 1.11), qui amende D10. Points à retenir :
+
+- `GESTCONF_EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend` et `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, `EMAIL_USE_SSL` ou `EMAIL_USE_TLS`, `EMAIL_TIMEOUT` (10 s) ; anymail reste disponible sans changement de code ;
+- en production, refus de démarrer sans identifiants, sur `localhost`, sans chiffrement ou avec SSL et TLS (`tests/test_email_settings.py`) ;
+- un mot de passe du `.env` ne commence jamais par « $ » (django-environ le lirait comme une référence à une autre variable).
 
 ## Questions ouvertes (étude §15, à ne pas trancher seul)
 

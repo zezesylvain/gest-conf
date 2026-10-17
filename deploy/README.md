@@ -25,7 +25,8 @@ Topologie (étude §11.3) : un seul domaine, Angular en fichiers statiques dans
 3. **Fichier `.env`** de production dans `~/gestconf-app/.env` (droits `600`), à
    partir de `backend/.env.example` : `DJANGO_SECRET_KEY`, `DATABASE_URL`,
    `DJANGO_ALLOWED_HOSTS`, `DJANGO_CSRF_TRUSTED_ORIGINS`, `GESTCONF_EMAIL_BACKEND`,
-   `DEFAULT_FROM_EMAIL` et la clé du fournisseur d'e-mails (D10), `GESTCONF_PUBLIC_URL`
+   `DEFAULT_FROM_EMAIL` et la clé du fournisseur d'e-mails (D10) ou les réglages `EMAIL_*`
+   du SMTP de l'hébergement (T2, étude §27), `GESTCONF_PUBLIC_URL`
    (URL publique en `https://`, base des liens envoyés par e-mail), `GESTCONF_OPERATORS`
    (alertes, D17), `GESTCONF_CRON_INTERVAL_SECONDS`, `GESTCONF_MFA_ENCRYPTION_KEYS` (clé
    Fernet chiffrant les secrets de la 2FA, voir « Clés de la 2FA » ci-dessous) et, si les
