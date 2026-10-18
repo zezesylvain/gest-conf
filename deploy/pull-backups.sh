@@ -69,7 +69,7 @@ pull_tree() {
   if [[ -d "$PULL_DEST/files/latest/$name" ]]; then
     link=(--link-dest="$(cd "$PULL_DEST/files/latest/$name" && pwd -P)")
   fi
-  rsync -a --partial "${link[@]}" "$PULL_SSH:$remote/" "$partial/$name/"
+  rsync -a --partial ${link[@]+"${link[@]}"} "$PULL_SSH:$remote/" "$partial/$name/"
 }
 
 step "Fichiers déposés ($PULL_SSH:$PULL_FILES_DIR), instantané $stamp"

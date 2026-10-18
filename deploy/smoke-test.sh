@@ -9,7 +9,9 @@ BASE_URL="${1:?Usage : $0 URL_DE_BASE [version_attendue]}"
 BASE_URL="${BASE_URL%/}"
 EXPECTED_RELEASE="${2:-}"
 read -r -a extra_opts <<<"${SMOKE_CURL_OPTS:-}"  # ex. SMOKE_CURL_OPTS="--insecure"
-CURL=(curl --silent --show-error --max-time 15 "${extra_opts[@]}")
+# « ${tableau[@]+…} » : un tableau vide sous « set -u » est une erreur avec le bash 3.2 de
+# macOS (poste de l'opérateur), constaté le 18 octobre 2026.
+CURL=(curl --silent --show-error --max-time 15 ${extra_opts[@]+"${extra_opts[@]}"})
 failures=0
 
 check() {
