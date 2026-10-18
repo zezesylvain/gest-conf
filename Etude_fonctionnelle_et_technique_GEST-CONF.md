@@ -3,7 +3,7 @@
 
 | | |
 |---|---|
-| **Version** | 1.10 – document de cadrage, mis à jour après les lots L1 (§17), L2 (§18), L3 (§19), L4 (§20), L5 (§21), L6 (§22), L7 (§23), L8 (§24) et L9 (§25, volet du dépôt), puis 2FA optionnelle (§26) |
+| **Version** | 1.11 – document de cadrage, mis à jour après les lots L1 (§17), L2 (§18), L3 (§19), L4 (§20), L5 (§21), L6 (§22), L7 (§23), L8 (§24) et L9 (§25, volet du dépôt), puis 2FA optionnelle (§26) et envoi des e-mails par SMTP (§27) |
 | **Date** | 14 octobre 2026 |
 | **Auteur** | Étude réalisée pour ZDS |
 | **Statut** | Pour validation |
@@ -1942,6 +1942,27 @@ Les décisions S1 à S16 du plan [`docs/L9-recette-plan.md`](docs/L9-recette-pla
 - `apps/accounts/tests/test_mfa.py` : mode optionnel (accès sans 2FA, step-up pour un compte qui l'a activée, désactivation) et mode imposé (`override_settings`).
 - Matrice des droits : `test_t1_two_factor_authentication_is_optional_by_default`, pour chaque rôle concerné ; les cas de D3, H2, K1 et K18 tournent en mode imposé.
 - Parcours de bout en bout : étape 17, un CO sans 2FA se connecte sans code et ouvre la gestion (20 tests).
+
+## 27. Envoi des e-mails par le SMTP de l'hébergement (version 1.11)
+
+Pour la mise en ligne sur o2switch (17 octobre 2026), le commanditaire retient l'envoi par le **SMTP de l'hébergement** (boîte e-mail cPanel) plutôt qu'un fournisseur par API : décision **T2**, qui **amende D10** (§17). Brevo et Mailjet restent possibles sans changement de code (django-anymail inchangé).
+
+### 27.1 Décision T2
+
+- Backend natif de Django `django.core.mail.backends.smtp.EmailBackend`, choisi par `GESTCONF_EMAIL_BACKEND` ; serveur, port, identifiants et chiffrement lus dans l'environnement : `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, `EMAIL_USE_SSL` (465) ou `EMAIL_USE_TLS` (587), `EMAIL_TIMEOUT` (10 secondes par défaut).
+- En production, l'application **refuse de démarrer** sans identifiant, sans mot de passe, sur `localhost`, sans chiffrement ou avec SSL **et** TLS.
+- Délai borné : la voie rapide envoie pendant la requête HTTP, au plus 3 fois (§17) ; un serveur muet retarde la réponse de 30 secondes au pire.
+
+### 27.2 Points à vérifier sur l'hébergement
+
+- **Plafond d'envoi horaire** du compte o2switch : non vérifié ; `GESTCONF_EMAIL_MAX_PER_HOUR` doit lui rester inférieur (les envois groupés en prennent la moitié, RG-22).
+- **SPF, DKIM, DMARC** du domaine d'expédition : outil de délivrabilité de cPanel (check-list P-03).
+- **Délivrabilité** : adresse IP mutualisée, risque de classement en indésirables ; à réévaluer avant les annonces de masse (fournisseur par API possible sans changement de code).
+- V19 et V20 du script de vérification (Brevo, Mailjet) ne sont pas bloquants avec le SMTP ; le critère est l'e-mail de test (`send_test_email`) reçu après le passage du cron.
+
+### 27.3 Tests
+
+- `tests/test_email_settings.py` : réglages lus dans l'environnement, refus de démarrer dans les cinq cas ci-dessus, fournisseur par API sans réglage SMTP.
 
 ---
 

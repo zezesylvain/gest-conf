@@ -477,6 +477,18 @@ MFA_TOTP_ISSUER = GESTCONF_SITE_NAME
 EMAIL_BACKEND = env.str(
     "GESTCONF_EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend"
 )
+# SMTP (backend natif « django.core.mail.backends.smtp.EmailBackend ») : serveur d'envoi de
+# l'hébergement, par exemple une boîte cPanel d'o2switch (D10 amendée, mise en ligne). Port
+# 465 avec EMAIL_USE_SSL, ou 587 avec EMAIL_USE_TLS (jamais les deux). Délai borné : la voie
+# rapide envoie pendant la requête HTTP, au plus 3 fois (plan L1 §8.3) ; sans délai, Django
+# attendrait indéfiniment un serveur muet.
+EMAIL_HOST = env.str("EMAIL_HOST", default="localhost")
+EMAIL_PORT = env.int("EMAIL_PORT", default=25)
+EMAIL_HOST_USER = env.str("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = env.str("EMAIL_HOST_PASSWORD", default="")
+EMAIL_USE_SSL = env.bool("EMAIL_USE_SSL", default=False)
+EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=False)
+EMAIL_TIMEOUT = env.float("EMAIL_TIMEOUT", default=10.0)
 DEFAULT_FROM_EMAIL = env.str("DEFAULT_FROM_EMAIL", default="GEST-CONF <no-reply@localhost>")
 SERVER_EMAIL = env.str("SERVER_EMAIL", default=DEFAULT_FROM_EMAIL)
 # Clés du fournisseur : seules celles définies sont transmises à anymail, qui refuse de

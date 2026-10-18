@@ -150,7 +150,8 @@ rm ~/gestconf-prod.env
 Valeurs : `DJANGO_SECRET_KEY` ; `DATABASE_URL` ; `DJANGO_ALLOWED_HOSTS=<domaine>` ;
 `DJANGO_CSRF_TRUSTED_ORIGINS=https://<domaine>` ; `GESTCONF_PUBLIC_URL=https://<domaine>` ;
 `GESTCONF_EMAIL_BACKEND`, `DEFAULT_FROM_EMAIL` et la clé du fournisseur (D10, compte ouvert
-par le commanditaire) ; `GESTCONF_MFA_ENCRYPTION_KEYS` ; `GESTCONF_OPERATORS` (adresses de
+par le commanditaire), ou les réglages `EMAIL_*` du SMTP de l'hébergement (T2, étude §27 :
+boîte cPanel, port 465 et `EMAIL_USE_SSL=true`) ; `GESTCONF_MFA_ENCRYPTION_KEYS` ; `GESTCONF_OPERATORS` (adresses de
 l'opérateur) ; `GESTCONF_CRON_INTERVAL_SECONDS=300` (ajusté à l'étape 2) ;
 `GESTCONF_TRUSTED_PROXY_COUNT=0` (mesuré à l'étape 3). **Laisser absents** :
 `GESTCONF_DIAGNOSTICS`, `GESTCONF_RETENTION_ENFORCED`, `GESTCONF_ALLOW_FAKE_PAYMENTS` ;
@@ -187,7 +188,8 @@ echo "code ${PIPESTATUS[0]}"
 
 Attendu : récapitulatif final trié V00 à V29 ; **aucun `ÉCHEC`** sur les contrôles bloquants
 ou structurants : V01, V02, V03, V05, V06, V09, V10, V11, V18, V21, V27, V28 ; V12 **ou** V15
-OK (verrou) ; V19 **ou** V20 OK, selon le fournisseur retenu ; V23 OK. V29 en échec n'est pas
+OK (verrou) ; V19 **ou** V20 OK, selon le fournisseur retenu (ni l'un ni l'autre avec le SMTP de
+l'hébergement, T2) ; V23 OK. V29 en échec n'est pas
 bloquant pour le déploiement (paiement manuel seul) mais l'est pour le paiement en ligne.
 V04, V22, V24 et V25 dépendent du code déployé : leur état définitif se relève à l'étape 3.
 
