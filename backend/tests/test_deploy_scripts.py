@@ -338,3 +338,25 @@ def test_portal_csp_header_lists_every_fetch_directive_but_scripts():
     assert fetch <= directives
     assert {"base-uri", "form-action", "frame-ancestors"} <= directives
     assert "frame-ancestors 'none'" in policy and "object-src 'none'" in policy
+
+
+def test_operator_scripts_guard_possibly_empty_arrays_for_macos_bash():
+    """Premier déploiement (18 octobre 2026) : le bash 3.2 de macOS rejette « "${t[@]}" » sur un
+    tableau vide sous « set -u » ; les scripts lancés depuis le poste de l'opérateur gardent leurs
+    tableaux facultatifs par « ${t[@]+"${t[@]}"} »."""
+    for script, name in (("smoke-test.sh", "extra_opts"), ("pull-backups.sh", "link")):
+        code = shell_code(REPO_DIR / "deploy" / script)
+        guarded = f'${{{name}[@]+"${{{name}[@]}}"}}'
+        assert guarded in code, script
+        assert code.count(f'"${{{name}[@]}}"') == code.count(guarded), script
+
+
+def test_deploy_publishes_readable_files():
+    """Premier déploiement (18 octobre 2026) : rsync -a recopiait des droits 700/600 et Apache
+    répondait 403 (« Server unable to read htaccess file ») ; dossiers 755 et fichiers 644."""
+    code = shell_code(DEPLOY_SCRIPT)
+    normalize = 'chmod -R u=rwX,go=rX "$STAGING/public"'
+    assert normalize in code
+    assert code.index(normalize) < code.index('"$STAGING/public/" "$DEPLOY_SSH:')
+    assert 'chmod 644 "$STAGING/htaccess.new"' in code
+    assert 'chmod -R u=rwX,go=rX "$ROOT/web/dist/portail/browser"' in code
