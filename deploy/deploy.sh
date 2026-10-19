@@ -89,6 +89,8 @@ publish_portal() {
   }
 
   step "Envoi du portail vers ~/$DEPLOY_PUBLIC_DIR (gestion/ et api/ intacts)"
+  # Mêmes droits publiés que le déploiement complet (dossiers 755, fichiers 644).
+  chmod -R u=rwX,go=rX "$ROOT/web/dist/portail/browser"
   rsync -az --delete \
     --exclude '/.htaccess' --exclude '/api/' --exclude '/gestion/' --exclude '/.well-known/' \
     --exclude '/cgi-bin/' \
@@ -152,6 +154,10 @@ mkdir -p "$STAGING/public/gestion"
 cp -a "$ROOT/web/dist/portail/browser/." "$STAGING/public/"
 cp -a "$ROOT/web/dist/gestion/browser/." "$STAGING/public/gestion/"
 cp "$ROOT/deploy/apache/gestion.htaccess" "$STAGING/public/gestion/.htaccess"
+# Droits publiés : rsync -a recopie ceux du poste. Un dossier temporaire (mktemp : 700) ou
+# des fichiers en 600 rendraient la racine web illisible par Apache (403 « Server unable to
+# read htaccess file », premier déploiement du 18 octobre 2026). Dossiers 755, fichiers 644.
+chmod -R u=rwX,go=rX "$STAGING/public"
 
 # --- 2. Backend Django ---------------------------------------------------------------
 step "Envoi du code Django vers ~/$DEPLOY_APP_DIR (version $RELEASE)"
@@ -233,6 +239,7 @@ mkdir -p "$ROOT/deploy/backups"
 cp "$STAGING/htaccess.current" "$ROOT/deploy/backups/htaccess-$(date +%Y%m%d-%H%M%S)"
 python3 "$ROOT/deploy/htaccess_merge.py" "$STAGING/htaccess.current" \
   "$ROOT/deploy/apache/public_html.htaccess" > "$STAGING/htaccess.new"
+chmod 644 "$STAGING/htaccess.new"
 rsync -az "$STAGING/htaccess.new" "$DEPLOY_SSH:$DEPLOY_PUBLIC_DIR/.htaccess"
 
 # --- 4. Portail pré-rendu (backend de cette version désormais en ligne) ---------------
