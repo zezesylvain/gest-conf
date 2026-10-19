@@ -133,6 +133,7 @@ Les URL Django sont déclarées **sans** le préfixe `/api` (`v1/...`) : `config
 | L9 — Recette, sécurité, charge | **Volet du dépôt livré et testé en local** (L9.0 à L9.7 et L9.9, E2E et audit d'accessibilité compris) ; bilan [`docs/L9-recette.md`](docs/L9-recette.md). **Volet de l'hébergement (L9.8) à faire** : runbook [`docs/L9-runbook-o2switch.md`](docs/L9-runbook-o2switch.md) exécuté sur o2switch par un opérateur du commanditaire (cette session n'y a pas accès), dont la restauration chronométrée, le test de charge et la recette des démos A à I. Fusionné dans `main` (PR #14) |
 | T1 — 2FA optionnelle | **Livrée en code et testée en local** (demande du commanditaire du 14 octobre 2026, E2E compris) ; [`docs/T1-2fa-optionnelle.md`](docs/T1-2fa-optionnelle.md), fusionnée dans `main` (PR #14). Ouvert : choix de `GESTCONF_MFA_ENFORCED` en production (P-11) |
 | T2 — E-mails par le SMTP de l'hébergement | Réglages `EMAIL_*` lus dans l'environnement, refus de démarrer sans SMTP authentifié et chiffré (décision du 17 octobre 2026, amende D10) ; étude §27. Ouverts : plafond horaire d'o2switch, délivrabilité |
+| T3 — Chargement d'une édition réelle | Commande `load_edition` et dossier versionné `backend/data/editions/<nom>/` (pas de migration de données) ; première édition : `icha-2027` (analyse harmonique 2027, d'après l'affiche) ; étude §28 |
 | L10 et suivants | Non commencés |
 
 ## Décisions du lot L1
@@ -275,6 +276,14 @@ Pour la mise en ligne sur o2switch, le 17 octobre 2026 ; reportée dans l'étude
 - `GESTCONF_EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend` et `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, `EMAIL_USE_SSL` ou `EMAIL_USE_TLS`, `EMAIL_TIMEOUT` (10 s) ; anymail reste disponible sans changement de code ;
 - en production, refus de démarrer sans identifiants, sur `localhost`, sans chiffrement ou avec SSL et TLS (`tests/test_email_settings.py`) ;
 - un mot de passe du `.env` ne commence jamais par « $ » (django-environ le lirait comme une référence à une autre variable).
+
+## Décision postérieure au lot L9 : chargement d'une édition réelle (T3)
+
+Le 19 octobre 2026 ; reportée dans l'étude, **§28** (version 1.12). Points à retenir :
+
+- une édition réelle se décrit dans `backend/data/editions/<nom>/edition.json` (et ses fichiers) et se charge par `load_edition <dossier> [--admin-email …] [--draft]`, **jamais par une migration** ;
+- le chargement passe par les services métier, dans une transaction, et refuse une édition déjà présente ; il sème le portail (sections posées sur les pages du site), publie et rend courante l'édition sauf `--draft` ;
+- `ICHA2027` : sans double aveugle, XOF (équivalents en euros en texte), comités et programme en texte en attendant les comptes consentants et le programme publié (`apps/conferences/tests/test_loader.py`).
 
 ## Questions ouvertes (étude §15, à ne pas trancher seul)
 

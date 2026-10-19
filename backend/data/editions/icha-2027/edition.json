@@ -1,0 +1,234 @@
+{
+  "source": "Affiche « Affiche_Conference_Analyse_Harmonique_2027_MAJ.pdf » (GAHAA / LMA), chargée le 19 octobre 2026.",
+  "conference": {
+    "slug": "icha",
+    "name_fr": "Conférence internationale sur l'analyse harmonique",
+    "name_en": "International Conference on Harmonic Analysis"
+  },
+  "edition": {
+    "code": "ICHA2027",
+    "slug": "2027",
+    "year": 2027,
+    "title_fr": "Conférence internationale sur l'analyse harmonique 2027",
+    "title_en": "International Conference on Harmonic Analysis 2027",
+    "theme_fr": "Analyse harmonique : EDP, géométrie, probabilités et applications interdisciplinaires",
+    "theme_en": "Harmonic analysis: PDEs, geometry, probabilities and interdisciplinary applications",
+    "start_date": "2027-05-31",
+    "end_date": "2027-06-04",
+    "venue": "UFR Mathématiques et Informatique (UFRMI), Université Félix Houphouët-Boigny",
+    "city": "Abidjan",
+    "country": "CI",
+    "timezone": "Africa/Abidjan",
+    "double_blind": false,
+    "submission_languages": ["en", "fr"]
+  },
+  "tracks": [
+    {
+      "code": "edp",
+      "name_fr": "Analyse harmonique et EDP",
+      "name_en": "Harmonic analysis and PDEs",
+      "description_fr": "Théorie de Calderón-Zygmund, opérateurs intégraux singuliers, diffusion et propagation.",
+      "description_en": "Calderón-Zygmund theory, singular integral operators, diffusion and propagation."
+    },
+    {
+      "code": "geometrie",
+      "name_fr": "Analyse harmonique et géométrie",
+      "name_en": "Harmonic analysis and geometry",
+      "description_fr": "Variétés riemanniennes, groupes de Lie, Carleson et géométrie des mesures.",
+      "description_en": "Riemannian manifolds, Lie groups, Carleson and geometry of measures."
+    },
+    {
+      "code": "probabilites",
+      "name_fr": "Analyse harmonique et probabilités",
+      "name_en": "Harmonic analysis and probabilities",
+      "description_fr": "Processus stochastiques, martingales, EDP stochastiques et théorie du potentiel.",
+      "description_en": "Stochastic processes, martingales, stochastic PDEs and potential theory."
+    },
+    {
+      "code": "applications",
+      "name_fr": "Applications interdisciplinaires",
+      "name_en": "Interdisciplinary applications",
+      "description_fr": "Modélisation des données, traitement du signal et traitement d'images numériques.",
+      "description_en": "Data modeling, signal processing and digital image processing."
+    }
+  ],
+  "submission_types": [
+    {
+      "code": "oral",
+      "label_fr": "Communication orale",
+      "label_en": "Oral presentation",
+      "description_fr": "20 minutes de présentation et 10 minutes de discussion. Joindre un court CV en PDF.",
+      "description_en": "20-minute talk followed by 10 minutes of discussion. Attach a short CV as a PDF.",
+      "default_duration_min": 30,
+      "file_policy": "optional",
+      "max_file_mb": 10
+    },
+    {
+      "code": "forum-doctoral",
+      "label_fr": "Forum doctoral (présentation courte)",
+      "label_en": "Doctoral forum (short talk)",
+      "description_fr": "Présentation courte de doctorant. Joindre un court CV en PDF.",
+      "description_en": "Short PhD presentation. Attach a short CV as a PDF.",
+      "default_duration_min": 15,
+      "file_policy": "optional",
+      "max_file_mb": 10
+    }
+  ],
+  "key_dates": [
+    {"code": "call_open", "at_local": "now"},
+    {"code": "call_close", "at_local": "2027-04-22T23:59:00"}
+  ],
+  "registration": {
+    "settings": {"currency": "XOF", "local_countries": ["CI"]},
+    "categories": [
+      {
+        "code": "etudiant",
+        "label_fr": "Étudiant",
+        "label_en": "Student",
+        "description_fr": "Participants locaux : 20 000 FCFA (35 €).",
+        "description_en": "Local participants: 20,000 FCFA (35 euros).",
+        "fees": {"local": "20000", "international": "0"}
+      },
+      {
+        "code": "enseignant",
+        "label_fr": "Enseignant",
+        "label_en": "Teacher",
+        "description_fr": "Participants locaux : 50 000 FCFA (80 €).",
+        "description_en": "Local participants: 50,000 FCFA (80 euros).",
+        "fees": {"local": "50000", "international": "0"}
+      }
+    ],
+    "periods": ["regular", "onsite"]
+  },
+  "sponsor_levels": [
+    {"key": "officiels", "name_fr": "Partenaires officiels", "name_en": "Official sponsors", "logo_size": "large"},
+    {"key": "organisation", "name_fr": "Organisation", "name_en": "Organisers", "logo_size": "medium"}
+  ],
+  "sponsors": [
+    {
+      "level": "officiels",
+      "name": "Société Mathématique de Côte d'Ivoire (SMCI)",
+      "logo": "images/logo-smci.png"
+    },
+    {
+      "level": "officiels",
+      "name": "Afrique France Réseau International de Mathématiques (AFRIMATH)",
+      "logo": "images/logo-afrimath.png"
+    },
+    {
+      "level": "organisation",
+      "name": "GAHAA",
+      "website": "https://gahaa.ci",
+      "description_fr": "Organisateur de la conférence.",
+      "description_en": "Conference organiser.",
+      "logo": "images/logo-gahaa.png"
+    },
+    {
+      "level": "organisation",
+      "name": "Laboratoire de Mathématiques et Applications (LMA)",
+      "description_fr": "La conférence se tient sous ses auspices.",
+      "description_en": "The conference is held under its auspices.",
+      "logo": "images/logo-lma.jpg"
+    },
+    {
+      "level": "organisation",
+      "name": "UFR Mathématiques et Informatique (UFRMI)",
+      "logo": "images/logo-ufrmi.jpg"
+    },
+    {
+      "level": "organisation",
+      "name": "Université Félix Houphouët-Boigny",
+      "logo": "images/logo-ufhb.jpg"
+    }
+  ],
+  "files": {
+    "poster_image": {
+      "path": "images/affiche.png",
+      "title_fr": "Affiche de la conférence",
+      "title_en": "Conference poster"
+    },
+    "poster_document": {
+      "path": "affiche-icha-2027.pdf",
+      "title_fr": "Affiche de la conférence (PDF)",
+      "title_en": "Conference poster (PDF)"
+    },
+    "patron_photo": {
+      "path": "images/parrain-saliou-toure.jpg",
+      "title_fr": "Professeur Saliou Touré",
+      "title_en": "Professor Saliou Touré"
+    }
+  },
+  "sections": [
+    {
+      "page": "home",
+      "code": "presentation",
+      "section_type": "rich_text",
+      "title_fr": "La conférence",
+      "title_en": "About the conference",
+      "body_fr": "<p>Organisée par le <strong>GAHAA</strong> sous les auspices du <strong>Laboratoire de Mathématiques et Applications (LMA)</strong>, la conférence internationale sur l'analyse harmonique se tient du <strong>31 mai au 4 juin 2027</strong> à l'UFR Mathématiques et Informatique de l'Université Félix Houphouët-Boigny, à Abidjan (Côte d'Ivoire).</p><ul><li>Conférences de spécialistes de chaque axe thématique et présentations de travaux de recherche.</li><li>Forum doctoral avec de courtes présentations de doctorants.</li><li>Format hybride : sur place et diffusion internationale en direct.</li><li>Langues : anglais et français.</li><li>Actes indexés et publiés par Springer.</li></ul>",
+      "body_en": "<p>Organised by <strong>GAHAA</strong> under the auspices of the <strong>Laboratory of Mathematics and Applications (LMA)</strong>, the International Conference on Harmonic Analysis takes place from <strong>May 31 to June 4, 2027</strong> at the UFR of Mathematics and Computer Science (UFRMI), Félix Houphouët-Boigny University, Abidjan, Côte d'Ivoire.</p><ul><li>Lectures by specialists in each thematic axis and research presentations.</li><li>Doctoral forum with short PhD presentations.</li><li>Hybrid format: on-site and live international streaming.</li><li>Languages: English and French.</li><li>Proceedings indexed and published by Springer.</li></ul>"
+    },
+    {
+      "page": "home",
+      "code": "parrainage",
+      "section_type": "image_text",
+      "title_fr": "Sous le parrainage du Professeur Saliou Touré",
+      "title_en": "Under the sponsorship of Professor Saliou Touré",
+      "body_fr": "<p>La conférence est placée sous le parrainage du <strong>Professeur Saliou Touré</strong>.</p>",
+      "body_en": "<p>The conference is held under the sponsorship of <strong>Professor Saliou Touré</strong>.</p>",
+      "image": "patron_photo",
+      "config": {"image_position": "right"}
+    },
+    {"page": "home", "code": "tracks", "seeded": true},
+    {"page": "home", "code": "key-dates", "seeded": true},
+    {
+      "page": "home",
+      "code": "appel",
+      "section_type": "cta_banner",
+      "title_fr": "Appel à communications",
+      "title_en": "Call for contributions",
+      "subtitle_fr": "Date limite de soumission : 22 avril 2027",
+      "subtitle_en": "Submission deadline: April 22, 2027",
+      "cta_label_fr": "Soumettre une communication",
+      "cta_label_en": "Submit a contribution",
+      "cta_url": "/compte/soumissions"
+    },
+    {"page": "home", "code": "documents", "seeded": true},
+    {
+      "page": "call",
+      "code": "modalites",
+      "section_type": "rich_text",
+      "title_fr": "Modalités de soumission",
+      "title_en": "How to submit",
+      "body_fr": "<p>Date limite de soumission : <strong>22 avril 2027</strong>.</p><p>Déposez sur la plateforme, depuis votre compte, le titre et le résumé de votre présentation, accompagnés d'un court CV au format PDF, dans l'un des quatre axes thématiques.</p><p>Contacts :</p><ul><li>Justin FEUTO : <a href=\"mailto:justfeuto@yahoo.fr\">justfeuto@yahoo.fr</a></li><li>Bérenger KPATA : <a href=\"mailto:kpata_akon@yahoo.fr\">kpata_akon@yahoo.fr</a></li></ul><p>Les actes seront indexés et publiés par Springer.</p>",
+      "body_en": "<p>Submission deadline: <strong>April 22, 2027</strong>.</p><p>From your account on the platform, submit your presentation title and abstract, together with a short CV as a PDF, in one of the four thematic axes.</p><p>Contacts:</p><ul><li>Justin FEUTO: <a href=\"mailto:justfeuto@yahoo.fr\">justfeuto@yahoo.fr</a></li><li>Bérenger KPATA: <a href=\"mailto:kpata_akon@yahoo.fr\">kpata_akon@yahoo.fr</a></li></ul><p>Proceedings will be indexed and published by Springer.</p>"
+    },
+    {
+      "page": "committees",
+      "code": "composition-comites",
+      "section_type": "rich_text",
+      "title_fr": "Composition des comités",
+      "title_en": "Committee members",
+      "body_fr": "<h3>Comité scientifique</h3><ul><li>Prof. Sandrine GRELLIER, Université d'Orléans (France)</li><li>Prof. Modeste N'ZI, Université Félix Houphouët-Boigny (Côte d'Ivoire)</li><li>Prof. Christophe BERTHON, Nantes Université (France)</li><li>Prof. Moussa KOUROUMA, Université Félix Houphouët-Boigny (Côte d'Ivoire)</li></ul><h3>Comité d'organisation</h3><ul><li>J. FEUTO (UFHB)</li><li>M. ESSOH (UNA)</li><li>B. KPATA (UNA)</li><li>C. BAHI (UFHB)</li><li>D. TUO (UFHB)</li><li>P. COULIBALY (UFHB)</li><li>S. ZEZE (UNA)</li><li>M. DAKOURY (UNA)</li></ul>",
+      "body_en": "<h3>Scientific committee</h3><ul><li>Prof. Sandrine GRELLIER, Orléans University (France)</li><li>Prof. Modeste N'ZI, Félix Houphouët-Boigny University (Côte d'Ivoire)</li><li>Prof. Christophe BERTHON, Nantes University (France)</li><li>Prof. Moussa KOUROUMA, Félix Houphouët-Boigny University (Côte d'Ivoire)</li></ul><h3>Organising committee</h3><ul><li>J. FEUTO (UFHB)</li><li>M. ESSOH (UNA)</li><li>B. KPATA (UNA)</li><li>C. BAHI (UFHB)</li><li>D. TUO (UFHB)</li><li>P. COULIBALY (UFHB)</li><li>S. ZEZE (UNA)</li><li>M. DAKOURY (UNA)</li></ul>"
+    },
+    {
+      "page": "program",
+      "code": "programme-previsionnel",
+      "section_type": "rich_text",
+      "title_fr": "Programme prévisionnel sur cinq jours",
+      "title_en": "Five-day programme (provisional)",
+      "body_fr": "<ul><li><strong>Jour 1</strong> : cérémonie d'ouverture, présentations de l'axe 1, conférence inaugurale.</li><li><strong>Jour 2</strong> : présentations de l'axe 2, exposés courts.</li><li><strong>Jour 3</strong> : présentations de l'axe 3, visite culturelle, excursion.</li><li><strong>Jour 4</strong> : présentations de l'axe 4, exposés courts, table ronde.</li><li><strong>Jour 5</strong> : présentations de l'axe 4, cérémonie de clôture, dîner, remise des attestations.</li></ul><p>Communications orales : 20 minutes de présentation et 10 minutes de discussion.</p>",
+      "body_en": "<ul><li><strong>Day 1</strong>: opening ceremony, Axis 1 presentations, inaugural lecture.</li><li><strong>Day 2</strong>: Axis 2 presentations, short talks.</li><li><strong>Day 3</strong>: Axis 3 presentations, cultural tour, excursion.</li><li><strong>Day 4</strong>: Axis 4 presentations, short talks, roundtable.</li><li><strong>Day 5</strong>: Axis 4 presentations, closing ceremony, dinner, certificates.</li></ul><p>Oral presentations: 20 minutes followed by 10 minutes of discussion.</p>"
+    },
+    {
+      "page": "registration",
+      "code": "tarifs",
+      "section_type": "rich_text",
+      "title_fr": "Frais d'inscription",
+      "title_en": "Registration fees",
+      "body_fr": "<ul><li>Gratuit pour les invités internationaux.</li><li>Participants locaux, étudiants : 20 000 FCFA ou 35 €.</li><li>Participants locaux, enseignants : 50 000 FCFA ou 80 €.</li></ul>",
+      "body_en": "<ul><li>Free for international guests.</li><li>Local participants, students: 20,000 FCFA or 35 euros.</li><li>Local participants, teachers: 50,000 FCFA or 80 euros.</li></ul>"
+    }
+  ]
+}

@@ -3,7 +3,7 @@
 
 | | |
 |---|---|
-| **Version** | 1.11 – document de cadrage, mis à jour après les lots L1 (§17), L2 (§18), L3 (§19), L4 (§20), L5 (§21), L6 (§22), L7 (§23), L8 (§24) et L9 (§25, volet du dépôt), puis 2FA optionnelle (§26) et envoi des e-mails par SMTP (§27) |
+| **Version** | 1.12 – document de cadrage, mis à jour après les lots L1 (§17), L2 (§18), L3 (§19), L4 (§20), L5 (§21), L6 (§22), L7 (§23), L8 (§24) et L9 (§25, volet du dépôt), puis 2FA optionnelle (§26) et envoi des e-mails par SMTP (§27), puis chargement de la première édition réelle (§28) |
 | **Date** | 14 octobre 2026 |
 | **Auteur** | Étude réalisée pour ZDS |
 | **Statut** | Pour validation |
@@ -1963,6 +1963,29 @@ Pour la mise en ligne sur o2switch (17 octobre 2026), le commanditaire retient l
 ### 27.3 Tests
 
 - `tests/test_email_settings.py` : réglages lus dans l'environnement, refus de démarrer dans les cinq cas ci-dessus, fournisseur par API sans réglage SMTP.
+
+## 28. Chargement d'une édition réelle depuis un dossier versionné (version 1.12)
+
+Première édition réelle, le 19 octobre 2026 : la **Conférence internationale sur l'analyse harmonique 2027** (GAHAA / LMA, UFRMI, Université Félix Houphouët-Boigny, Abidjan, du 31 mai au 4 juin 2027), à partir de son affiche. Décision **T3** : les données d'une édition sont versionnées dans un dossier et chargées par une commande, **pas par une migration** (une migration s'appliquerait à toutes les bases, celles des tests comprises, et à toute autre installation).
+
+### 28.1 Décision T3
+
+- Dossier `backend/data/editions/<nom>/` : `edition.json` (conférence, édition, thématiques, types de communication, dates clés, inscription, niveaux et partenaires, fichiers publics, sections du portail et page de destination) et ses fichiers (affiche PNG et PDF, photo, logos). Il part sur l'hébergement avec le code (`deploy.sh`).
+- Commande `load_edition <dossier> [--admin-email …] [--draft]` (`apps/conferences/loader.py`) : tout passe par les **services métier** (audit RG-17, validations, chaînes de dates clés, assainissement du HTML), dans une seule transaction ; refus si le code d'édition existe déjà ; fichiers référencés contrôlés (présents, dans le dossier) ; champs d'édition hors liste refusés.
+- `--admin-email` : comme `create_edition`, rôle `ADMIN` de l'édition si l'adresse est vérifiée, invitation sinon (D1 : aucun rôle global).
+
+### 28.2 Édition ICHA2027 (`data/editions/icha-2027`)
+
+- Conférence `icha`, édition `ICHA2027` (`2027`), **sans double aveugle** (l'affiche demande un CV), langues `en` et `fr`, fuseau `Africa/Abidjan`.
+- Quatre thématiques (EDP ; géométrie ; probabilités ; applications interdisciplinaires), deux types (communication orale 20 + 10 min ; forum doctoral, présentation courte), ouverture de l'appel au chargement, clôture le 22 avril 2027 à 23 h 59.
+- Inscription en **XOF** (une devise par édition, J2) : Étudiant 20 000, Enseignant 50 000 en zone locale (`CI`), 0 en zone internationale (« gratuit pour les invités internationaux ») ; équivalents en euros en texte. Ouverture des inscriptions, mentions de facturation, grille d'évaluation : à paramétrer dans la gestion.
+- Partenaires officiels (SMCI, AFRIMATH) et organisation (GAHAA, LMA, UFRMI, UFHB), logos extraits de l'affiche ; affiche en image d'en-tête et en PDF ; parrainage du Prof. Saliou Touré (image et texte).
+- Comités et programme en **texte** : les sections « comité » ne listent que des comptes ayant consenti à l'annuaire (E), le programme public se publie dans la gestion (L5).
+- Sur l'hébergement, l'édition DEMO de la conférence fictive occupait le portail : elle est repassée en brouillon (`set_edition_status DEMO draft`).
+
+### 28.3 Tests
+
+- `apps/conferences/tests/test_loader.py` : chargement du dossier versionné, devise et tarifs, affiche, partenaires et sections posées, portail public, refus d'un second chargement, tout ou rien, champs et fichiers refusés, `--draft`, administrateur invité ou désigné, coexistence avec la démo.
 
 ---
 
