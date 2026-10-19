@@ -1,7 +1,16 @@
+// Gabarit commun du portail (décision T4, V5). Styles de composant : dans le bundle initial,
+// d'où leur sobriété (budget « initial », V12).
 :host {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+}
+
+.wrap {
+  width: 100%;
+  max-width: var(--pt-wrap);
+  margin-inline: auto;
+  padding-inline: var(--pt-gutter);
 }
 
 .skip-link {
@@ -10,7 +19,7 @@
   top: -3rem;
   padding: 0.5rem 1rem;
   background: var(--gc-surface);
-  color: var(--gc-primary);
+  color: var(--pt-navy);
   z-index: 10;
 
   &:focus {
@@ -18,38 +27,85 @@
   }
 }
 
-.site-header {
-  display: grid;
-  gap: 0.75rem;
-  padding: 1rem clamp(1rem, 4vw, 3rem);
-  background: var(--gc-primary);
-  color: var(--gc-on-primary);
+.site-header,
+.site-footer {
+  background: var(--pt-navy);
+  color: #fff;
+
+  a {
+    color: inherit;
+  }
+
+  :focus-visible {
+    outline-color: var(--pt-gold);
+  }
 }
 
-.header-row {
+.topbar {
+  background: var(--pt-navy-deep);
+  font-size: 0.875rem;
+}
+
+.topbar-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.5rem 1.25rem;
+  padding-block: 0.375rem;
+}
+
+.account-link {
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.mainbar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-}
-
-.header-tools {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.account-link {
-  color: inherit;
-  font-weight: 600;
+  gap: 0.75rem 2rem;
+  padding-block: 1rem;
 }
 
 .brand {
-  color: inherit;
-  font-weight: 700;
-  font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
   text-decoration: none;
+}
+
+.mark {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.625rem;
+  background: var(--pt-gold);
+
+  path {
+    fill: none;
+    stroke: var(--pt-navy);
+    stroke-width: 2.4;
+    stroke-linecap: round;
+  }
+}
+
+.brand-text {
+  display: grid;
+  line-height: 1.15;
+}
+
+.brand-name {
+  font-family: var(--pt-display);
+  font-weight: 800;
+  font-size: 1.25rem;
+}
+
+.brand-sub {
+  font-size: 0.75rem;
+  color: var(--pt-on-dark-muted);
 }
 
 .site-main {
@@ -57,12 +113,55 @@
   width: 100%;
   max-width: 72rem;
   margin: 0 auto;
-  padding: 2rem clamp(1rem, 4vw, 3rem);
+  padding: 2rem var(--pt-gutter);
+
+  // Page publique : chaque bande fixe son conteneur (pleine largeur, V5).
+  &.public {
+    max-width: none;
+    padding: 0;
+  }
 }
 
 .site-footer {
-  padding: 1rem clamp(1rem, 4vw, 3rem);
-  border-top: 1px solid var(--gc-border);
-  color: var(--gc-muted);
-  font-size: 0.875rem;
+  background: var(--pt-navy-deep);
+  color: var(--pt-on-dark);
+  font-size: 0.9375rem;
+
+  p {
+    margin: 0 0 0.5rem;
+  }
+
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 0.375rem;
+  }
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 2rem;
+  padding-block: 3rem 2rem;
+}
+
+.footer-brand {
+  font-family: var(--pt-display);
+  font-weight: 800;
+  font-size: 1.25rem;
+  color: #fff;
+}
+
+.footer-title {
+  font-weight: 600;
+  color: #fff;
+}
+
+.footer-base {
+  padding-block: 1.25rem;
+  border-top: 1px solid rgb(255 255 255 / 10%);
+  font-size: 0.8125rem;
+  color: var(--pt-on-dark-muted);
 }

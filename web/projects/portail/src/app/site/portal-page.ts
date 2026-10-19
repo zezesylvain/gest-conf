@@ -16,6 +16,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { GcApiError, PublicComposition, PublicSite } from '@gestconf/shared';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
+import { HomeSponsors } from './community/home-sponsors';
 import { NewsOverview } from './community/news-overview';
 import { SpeakersOverview } from './community/speakers-overview';
 import { SponsorsOverview } from './community/sponsors-overview';
@@ -69,10 +70,11 @@ const CALL_DATES = ['call_open', 'call_close', 'review_deadline', 'notification'
     SpeakersOverview,
     SponsorsOverview,
     NewsOverview,
+    HomeSponsors,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './portal-page.html',
-  styleUrl: './site.scss',
+  styleUrls: ['./site.scss', './page.scss'],
 })
 export class PortalPage implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
@@ -106,6 +108,8 @@ export class PortalPage implements OnInit, OnDestroy {
     const page = this.composition()?.page ?? this.sitePage();
     return page ? localized(page, 'title', this.lang()) : '';
   });
+  /** Étapes génériques de la page « Appel », valables pour toute édition (T4, V11). */
+  protected readonly callSteps = ['account', 'choose', 'upload', 'follow'] as const;
   protected readonly marker = computed(() =>
     this.state() === 'ready' ? `${this.lang()}:${this.slug()}` : null,
   );

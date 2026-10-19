@@ -1,0 +1,91 @@
+// En-tête de l'édition (décision T4, V4 et V7) : bande bleu nuit, motif d'ondes en fond
+// (fichier décoratif, hors du DOM), affiche à droite.
+:host {
+  display: block;
+}
+
+.hero {
+  background: var(--pt-navy) url('/images/ondes.svg') center / 100% 100% no-repeat;
+  color: #fff;
+}
+
+.hero-grid {
+  max-width: var(--pt-wrap);
+  margin-inline: auto;
+  padding: clamp(3rem, 7vw, 5rem) var(--pt-gutter) clamp(2.5rem, 6vw, 4rem);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 3rem;
+}
+
+.hero-text {
+  flex: 999 1 32rem;
+  min-width: 0;
+  display: grid;
+  gap: 1rem;
+  justify-items: start;
+}
+
+p {
+  margin: 0;
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  font-family: var(--pt-display);
+  font-weight: 800;
+  font-size: 0.875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  &::before {
+    content: '';
+    width: 2.75rem;
+    height: 3px;
+    background: var(--pt-gold);
+  }
+}
+
+h1,
+h2 {
+  margin: 0;
+  max-width: 18ch;
+  font-weight: 900;
+  font-size: clamp(2.25rem, 5.5vw, 4rem);
+  line-height: 1.02;
+  color: #fff;
+}
+
+.theme {
+  max-width: 40rem;
+  font-size: 1.1875rem;
+  color: var(--pt-on-dark);
+}
+
+.when {
+  font-family: var(--pt-display);
+  font-weight: 800;
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  color: var(--pt-gold);
+}
+
+.where {
+  font-weight: 600;
+}
+
+.poster {
+  flex: 1 1 15rem;
+  max-width: 18rem;
+  margin: 0;
+
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 0.25rem;
+    box-shadow: 0 1.5rem 3rem rgb(0 0 0 / 30%);
+  }
+}

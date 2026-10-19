@@ -4,7 +4,11 @@
       "skipToContent": "Skip to content",
       "footer": "Scientific conference management platform",
       "myAccount": "My account",
-      "signIn": "Sign in"
+      "signIn": "Sign in",
+      "yourAccount": "Your account",
+      "mySubmissions": "My submissions",
+      "myRegistration": "My registration",
+      "myDocuments": "My documents"
     },
     "notFound": {
       "title": "Page not found",
@@ -349,6 +353,34 @@
         "website": "Website",
         "scholar": "Google Scholar",
         "linkedin": "LinkedIn"
+      },
+      "toRegistration": "Register",
+      "breadcrumb": "Breadcrumb",
+      "home": "Home",
+      "howToSubmit": "How to submit",
+      "submit": "Submit a contribution",
+      "callSteps": {
+        "account": {
+          "title": "Create your account",
+          "text": "An email address is enough; it is also used for registration and certificates."
+        },
+        "choose": {
+          "title": "Choose a track and a format",
+          "text": "Accepted tracks and formats are described below."
+        },
+        "upload": {
+          "title": "Submit your proposal",
+          "text": "Title, abstract and requested files; you can save a draft and come back to it until the call closes."
+        },
+        "follow": {
+          "title": "Follow the review from your account",
+          "text": "Decision, committee comments and confirmation of your slot in the programme."
+        }
+      },
+      "dateStatus": {
+        "past": "Past",
+        "ongoing": "Open",
+        "upcoming": "Upcoming"
       }
     },
     "submissions": {
@@ -927,7 +959,8 @@
         "service": "Service emails (registration, submission, documents) are still sent.",
         "preferences": "Manage my preferences",
         "invalid": "This unsubscribe link is not valid. Sign in to manage your preferences."
-      }
+      },
+      "sponsorsTitle": "Partners"
     }
   }
 }

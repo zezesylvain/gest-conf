@@ -1,0 +1,59 @@
+/* Page du portail (T4, V7 et V11) : bandeau de titre, fil d'Ariane, étapes de l'appel. Le reste : site.scss. */
+/* Bandeau de titre des pages intérieures (V11). */
+.page-band {
+  background: var(--pt-navy);
+  color: #fff;
+  padding-block: 2.5rem 3rem;
+  h1 {
+    color: #fff;
+  }
+  .lead {
+    margin: 1rem 0 0;
+    max-width: 44rem;
+    color: var(--pt-on-dark);
+  }
+}
+.breadcrumb {
+  margin: 0 0 0.75rem;
+  font-size: 0.875rem;
+  color: var(--pt-on-dark-muted);
+  a {
+    color: var(--pt-on-dark);
+  }
+}
+.page-body {
+  padding-block: 3rem;
+  > h2:not(:first-child) {
+    margin-top: 3rem;
+  }
+}
+/* Étapes de la page « Appel » (V11). */
+.steps {
+  counter-reset: step;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1.5rem;
+  li {
+    counter-increment: step;
+    &::before {
+      content: counter(step);
+      display: grid;
+      place-items: center;
+      width: 2.75rem;
+      height: 2.75rem;
+      margin-bottom: 0.75rem;
+      border-radius: 50%;
+      background: var(--pt-navy);
+      color: #fff;
+      font-family: var(--pt-display);
+      font-weight: 800;
+    }
+  }
+  p {
+    margin: 0;
+    color: var(--pt-text-soft);
+  }
+}

@@ -265,6 +265,12 @@ hr{border:0;border-top:1px solid var(--line);margin:2em 0}
 <li><a href="#28-3-tests">28.3 Tests</a></li>
 </ul>
 </li>
+<li><a href="#29-identite-visuelle-du-portail">29. Identité visuelle du portail (version 1.13)</a><ul>
+<li><a href="#29-1-decisions-v1-a-v13">29.1 Décisions V1 à V13</a></li>
+<li><a href="#29-2-ecarts-avec-la-maquette">29.2 Écarts avec la maquette</a></li>
+<li><a href="#29-3-tests">29.3 Tests</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </nav><main><h1 id="etude-fonctionnelle-et-technique">Étude fonctionnelle et technique</h1>
@@ -279,7 +285,7 @@ hr{border:0;border-top:1px solid var(--line);margin:2em 0}
 <tbody>
 <tr>
 <td><strong>Version</strong></td>
-<td>1.12 – document de cadrage, mis à jour après les lots L1 (§17), L2 (§18), L3 (§19), L4 (§20), L5 (§21), L6 (§22), L7 (§23), L8 (§24) et L9 (§25, volet du dépôt), puis 2FA optionnelle (§26) et envoi des e-mails par SMTP (§27), puis chargement de la première édition réelle (§28)</td>
+<td>1.13 – document de cadrage, mis à jour après les lots L1 (§17), L2 (§18), L3 (§19), L4 (§20), L5 (§21), L6 (§22), L7 (§23), L8 (§24) et L9 (§25, volet du dépôt), puis 2FA optionnelle (§26) et envoi des e-mails par SMTP (§27), puis chargement de la première édition réelle (§28), puis identité visuelle du portail (§29)</td>
 </tr>
 <tr>
 <td><strong>Date</strong></td>
@@ -3844,6 +3850,34 @@ def weighted_score(scores, criteria, scale_min, scale_max):
 <h3 id="28-3-tests">28.3 Tests</h3>
 <ul>
 <li><code>apps/conferences/tests/test_loader.py</code> : chargement du dossier versionné, devise et tarifs, affiche, partenaires et sections posées, portail public, refus d'un second chargement, tout ou rien, champs et fichiers refusés, <code>--draft</code>, administrateur invité ou désigné, coexistence avec la démo.</li>
+</ul>
+<h2 id="29-identite-visuelle-du-portail">29. Identité visuelle du portail (version 1.13)</h2>
+<p>Le 19 octobre 2026, le commanditaire a validé une maquette du portail (canevas Claude Design « GAHAA et ICHA 2027 — Sites web » : accueil, appel et inscription), puis le plan <a href="docs/T4-identite-visuelle-plan.md"><code>docs/T4-identite-visuelle-plan.md</code></a> qui la transpose dans Angular. Décision <strong>T4</strong> : le portail public prend l'identité de l'affiche de la conférence. La gestion n'est pas concernée.</p>
+<h3 id="29-1-decisions-v1-a-v13">29.1 Décisions V1 à V13</h3>
+<ul>
+<li><strong>Portée</strong> : portail seul. Jetons propres <code>--pt-*</code> dans <code>portail/src/styles.scss</code>, qui surcharge aussi <code>--gc-primary</code>, <code>--gc-text</code> et <code>--gc-muted</code> pour que <code>/compte</code> reste cohérent. Les jetons partagés (<code>shared/ui-kit/_tokens.scss</code>) ne changent pas.</li>
+<li><strong>Palette fixe</strong> de l'installation, tirée de l'affiche : bleu nuit, or (jamais en texte sur fond clair), sarcelle. Contrastes AA calculés. Pas encore de couleur par édition.</li>
+<li><strong>Polices auto-hébergées</strong> sous licence OFL (<code>font-src 'self'</code>) : Archivo 800 et 900, IBM Plex Sans 400 et 600, jeu latin seul, préchargées. Motif d'ondes en fichier SVG décoratif.</li>
+<li><strong>Gabarit</strong> : barre utilitaire (compte, langue), marque <code>brandName(code, année)</code> (« ICHA 2027 ») suivie de la ville, menu géré dont la page courante est soulignée d'or, pied de page en colonnes (édition, menu du pied de page, « Votre compte »). Le <code>main</code> des pages publiques est en pleine largeur et chaque bande fixe son conteneur.</li>
+<li><strong>Accueil</strong> :</li>
+<li>héros bleu nuit avec l'affiche (<code>site.poster</code>) ; le portrait du parrain reste dans sa section ;</li>
+<li>dates clés en cartes, avec un état (passée, en cours, à venir) <strong>calculé dans le navigateur</strong> ;</li>
+<li>sections en bandes alternées, thématiques numérotées 01 à 0N ;</li>
+<li>bande des partenaires lue dans la liste blanche publique.</li>
+<li><strong>Pages intérieures</strong> : bandeau de titre avec fil d'Ariane ; page Appel avec quatre étapes génériques traduites.</li>
+<li><strong>Budgets</strong> : le bundle initial passe de 370 à 376 ko ; son budget passe de 375/380 ko à <strong>380/385 ko</strong> (avertissement/erreur). Les styles sont répartis entre <code>site.scss</code>, <code>page.scss</code> et <code>hero.scss</code> pour que chaque feuille de composant reste sous 4 ko.</li>
+</ul>
+<h3 id="29-2-ecarts-avec-la-maquette">29.2 Écarts avec la maquette</h3>
+<ul>
+<li>Le menu ne se replie pas sur téléphone : il passe à la ligne, sans JavaScript. Pas de bande « hybride, langues, Springer » (aucune donnée).</li>
+<li>Programme, comités et tarifs s'affichent à la suite, et non en deux colonnes. Ils sont posés sur l'accueil <strong>dans la gestion</strong>, sans code.</li>
+<li>Le bouton Material de <code>/compte</code> garde le thème de L1 (<code>gc-theme.css</code>).</li>
+</ul>
+<h3 id="29-3-tests">29.3 Tests</h3>
+<ul>
+<li><code>site.spec.ts</code> : marque (V6), état des dates (V8), héros, affiche, boutons et partenaires de l'accueil (V7, V10), bandeau de titre, fil d'Ariane et étapes de l'appel (V11).</li>
+<li>Audit axe, WCAG 2.1 A et AA, à 1440 px et à 390 px sur l'accueil, l'appel, l'inscription, les dates, l'accueil anglais et la connexion : <strong>aucune violation</strong>.</li>
+<li>E2E complet, avec ses audits d'accessibilité.</li>
 </ul>
 <hr />
 <p><em>Fin du document.</em></p></main></div>
