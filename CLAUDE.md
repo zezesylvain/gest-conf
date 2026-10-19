@@ -134,6 +134,7 @@ Les URL Django sont déclarées **sans** le préfixe `/api` (`v1/...`) : `config
 | T1 — 2FA optionnelle | **Livrée en code et testée en local** (demande du commanditaire du 14 octobre 2026, E2E compris) ; [`docs/T1-2fa-optionnelle.md`](docs/T1-2fa-optionnelle.md), fusionnée dans `main` (PR #14). Ouvert : choix de `GESTCONF_MFA_ENFORCED` en production (P-11) |
 | T2 — E-mails par le SMTP de l'hébergement | Réglages `EMAIL_*` lus dans l'environnement, refus de démarrer sans SMTP authentifié et chiffré (décision du 17 octobre 2026, amende D10) ; étude §27. Ouverts : plafond horaire d'o2switch, délivrabilité |
 | T3 — Chargement d'une édition réelle | Commande `load_edition` et dossier versionné `backend/data/editions/<nom>/` (pas de migration de données) ; première édition : `icha-2027` (analyse harmonique 2027, d'après l'affiche) ; étude §28 |
+| T4 — Identité visuelle du portail | **Livrée en code et testée en local** (maquette validée le 19 octobre 2026) ; [`docs/T4-identite-visuelle.md`](docs/T4-identite-visuelle.md), étude §29. Ouverts : publication du portail depuis le Mac (pré-rendu), contenu de l'accueil dans la gestion |
 | L10 et suivants | Non commencés |
 
 ## Décisions du lot L1
@@ -284,6 +285,15 @@ Le 19 octobre 2026 ; reportée dans l'étude, **§28** (version 1.12). Points à
 - une édition réelle se décrit dans `backend/data/editions/<nom>/edition.json` (et ses fichiers) et se charge par `load_edition <dossier> [--admin-email …] [--draft]`, **jamais par une migration** ;
 - le chargement passe par les services métier, dans une transaction, et refuse une édition déjà présente ; il sème le portail (sections posées sur les pages du site), publie et rend courante l'édition sauf `--draft` ;
 - `ICHA2027` : sans double aveugle, XOF (équivalents en euros en texte), comités et programme en texte en attendant les comptes consentants et le programme publié (`apps/conferences/tests/test_loader.py`).
+
+## Décision postérieure au lot L9 : identité visuelle du portail (T4)
+
+Maquette validée le 19 octobre 2026, plan [`docs/T4-identite-visuelle-plan.md`](docs/T4-identite-visuelle-plan.md) (V1 à V13) ; reportée dans l'étude, **§29** (version 1.13). Points à retenir :
+
+- portail seul : jetons `--pt-*` (bleu nuit, or, sarcelle) dans `portail/src/styles.scss`, qui surcharge `--gc-primary`, `--gc-text`, `--gc-muted` et `--gc-font` ; la gestion et `shared/ui-kit/_tokens.scss` sont inchangées ; l'or n'est jamais du texte sur fond clair ;
+- polices **auto-hébergées** (OFL, `public/fonts/`, `font-src 'self'`) : Archivo 800/900 pour les titres, IBM Plex Sans 400/600 pour le texte ; jamais Google Fonts ;
+- pages publiques en pleine largeur (`main.public`) : chaque bande pose son conteneur `.wrap` ; sections en bandes alternées ; tout état qui dépend de la date (compte à rebours, état des dates clés) se calcule **dans le navigateur** ;
+- styles répartis entre `site.scss`, `page.scss` et `hero.scss` : chaque feuille de composant reste sous 4 ko ; budget initial 380/385 ko.
 
 ## Questions ouvertes (étude §15, à ne pas trancher seul)
 

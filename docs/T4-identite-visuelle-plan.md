@@ -1,6 +1,6 @@
 # T4 — Identité visuelle du portail (plan)
 
-Demande du commanditaire du 19 octobre 2026 : appliquer au portail public la maquette « ICHA 2027 — Accueil du portail » et « Appel et inscription », **validée le 19 octobre 2026** (canevas Claude Design « GAHAA et ICHA 2027 — Sites web »). Ce plan est soumis à validation avant tout code (méthode du dépôt). Le site du groupe GAHAA (gahaa.ci) **n'en fait pas partie** : sa maquette est encore en cours.
+Demande du commanditaire du 19 octobre 2026 : appliquer au portail public la maquette « ICHA 2027 — Accueil du portail » et « Appel et inscription », **validée le 19 octobre 2026** (canevas Claude Design « GAHAA et ICHA 2027 — Sites web »). Plan **validé le 19 octobre 2026** ; bilan : [`T4-identite-visuelle.md`](T4-identite-visuelle.md). Le site du groupe GAHAA (gahaa.ci) **n'en fait pas partie** : sa maquette est encore en cours.
 
 ## 1. Constat
 
@@ -45,13 +45,15 @@ Demande du commanditaire du 19 octobre 2026 : appliquer au portail public la maq
 
 | Étape | Contenu |
 |---|---|
-| T4.0 | Ce plan, validé. |
+| T4.0 | Ce plan, validé le 19 octobre 2026. Fait. |
 | T4.1 | Jetons, polices et feuille globale (V1 à V4, V12) ; mesure des budgets. |
 | T4.2 | Gabarit : barre utilitaire, en-tête, marque, menu repliable, pied de page (V5, V6). |
 | T4.3 | Accueil : héros, dates clés en cartes, sections restylées, bande des partenaires (V7 à V10). |
 | T4.4 | Pages intérieures, appel en quatre étapes, inscription (V11). |
 | T4.5 | Tests unitaires (`site.spec.ts` : marque, badge de date, repli du menu), E2E, axe, `check-prerender` ; captures à 1440 px et à 390 px comparées à la maquette. |
 | T4.6 | Bilan, mise à jour de l'étude (§29, Markdown et HTML) et de CLAUDE.md ; PR. |
+
+T4.1 à T4.5 sont livrées (commit `b05efc4`) ; écarts et mesures dans le bilan.
 
 ## 5. Hors périmètre et points ouverts
 

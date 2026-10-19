@@ -3,7 +3,7 @@
 
 | | |
 |---|---|
-| **Version** | 1.12 – document de cadrage, mis à jour après les lots L1 (§17), L2 (§18), L3 (§19), L4 (§20), L5 (§21), L6 (§22), L7 (§23), L8 (§24) et L9 (§25, volet du dépôt), puis 2FA optionnelle (§26) et envoi des e-mails par SMTP (§27), puis chargement de la première édition réelle (§28) |
+| **Version** | 1.13 – document de cadrage, mis à jour après les lots L1 (§17), L2 (§18), L3 (§19), L4 (§20), L5 (§21), L6 (§22), L7 (§23), L8 (§24) et L9 (§25, volet du dépôt), puis 2FA optionnelle (§26) et envoi des e-mails par SMTP (§27), puis chargement de la première édition réelle (§28), puis identité visuelle du portail (§29) |
 | **Date** | 14 octobre 2026 |
 | **Auteur** | Étude réalisée pour ZDS |
 | **Statut** | Pour validation |
@@ -1986,6 +1986,36 @@ Première édition réelle, le 19 octobre 2026 : la **Conférence internationale
 ### 28.3 Tests
 
 - `apps/conferences/tests/test_loader.py` : chargement du dossier versionné, devise et tarifs, affiche, partenaires et sections posées, portail public, refus d'un second chargement, tout ou rien, champs et fichiers refusés, `--draft`, administrateur invité ou désigné, coexistence avec la démo.
+
+## 29. Identité visuelle du portail (version 1.13)
+
+Le 19 octobre 2026, le commanditaire a validé une maquette du portail (canevas Claude Design « GAHAA et ICHA 2027 — Sites web » : accueil, appel et inscription), puis le plan [`docs/T4-identite-visuelle-plan.md`](docs/T4-identite-visuelle-plan.md) qui la transpose dans Angular. Décision **T4** : le portail public prend l'identité de l'affiche de la conférence. La gestion n'est pas concernée.
+
+### 29.1 Décisions V1 à V13
+
+- **Portée** : portail seul. Jetons propres `--pt-*` dans `portail/src/styles.scss`, qui surcharge aussi `--gc-primary`, `--gc-text` et `--gc-muted` pour que `/compte` reste cohérent. Les jetons partagés (`shared/ui-kit/_tokens.scss`) ne changent pas.
+- **Palette fixe** de l'installation, tirée de l'affiche : bleu nuit, or (jamais en texte sur fond clair), sarcelle. Contrastes AA calculés. Pas encore de couleur par édition.
+- **Polices auto-hébergées** sous licence OFL (`font-src 'self'`) : Archivo 800 et 900, IBM Plex Sans 400 et 600, jeu latin seul, préchargées. Motif d'ondes en fichier SVG décoratif.
+- **Gabarit** : barre utilitaire (compte, langue), marque `brandName(code, année)` (« ICHA 2027 ») suivie de la ville, menu géré dont la page courante est soulignée d'or, pied de page en colonnes (édition, menu du pied de page, « Votre compte »). Le `main` des pages publiques est en pleine largeur et chaque bande fixe son conteneur.
+- **Accueil** :
+  - héros bleu nuit avec l'affiche (`site.poster`) ; le portrait du parrain reste dans sa section ;
+  - dates clés en cartes, avec un état (passée, en cours, à venir) **calculé dans le navigateur** ;
+  - sections en bandes alternées, thématiques numérotées 01 à 0N ;
+  - bande des partenaires lue dans la liste blanche publique.
+- **Pages intérieures** : bandeau de titre avec fil d'Ariane ; page Appel avec quatre étapes génériques traduites.
+- **Budgets** : le bundle initial passe de 370 à 376 ko ; son budget passe de 375/380 ko à **380/385 ko** (avertissement/erreur). Les styles sont répartis entre `site.scss`, `page.scss` et `hero.scss` pour que chaque feuille de composant reste sous 4 ko.
+
+### 29.2 Écarts avec la maquette
+
+- Le menu ne se replie pas sur téléphone : il passe à la ligne, sans JavaScript. Pas de bande « hybride, langues, Springer » (aucune donnée).
+- Programme, comités et tarifs s'affichent à la suite, et non en deux colonnes. Ils sont posés sur l'accueil **dans la gestion**, sans code.
+- Le bouton Material de `/compte` garde le thème de L1 (`gc-theme.css`).
+
+### 29.3 Tests
+
+- `site.spec.ts` : marque (V6), état des dates (V8), héros, affiche, boutons et partenaires de l'accueil (V7, V10), bandeau de titre, fil d'Ariane et étapes de l'appel (V11).
+- Audit axe, WCAG 2.1 A et AA, à 1440 px et à 390 px sur l'accueil, l'appel, l'inscription, les dates, l'accueil anglais et la connexion : **aucune violation**.
+- E2E complet, avec ses audits d'accessibilité.
 
 ---
 
