@@ -360,3 +360,11 @@ def test_deploy_publishes_readable_files():
     assert code.index(normalize) < code.index('"$STAGING/public/" "$DEPLOY_SSH:')
     assert 'chmod 644 "$STAGING/htaccess.new"' in code
     assert 'chmod -R u=rwX,go=rX "$ROOT/web/dist/portail/browser"' in code
+
+
+def test_scripts_run_on_the_host_avoid_process_substitution():
+    """Relevé du 17 octobre 2026 : « < <(…) » échoue sur l'hébergement (/dev/fd absent sous
+    CageFS) ; les scripts exécutés sur o2switch passent par des fichiers temporaires."""
+    for script in ("check-o2switch.sh", "cron.sh", "restore.sh"):
+        code = shell_code(REPO_DIR / "deploy" / script)
+        assert "<(" not in code, script

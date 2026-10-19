@@ -532,7 +532,11 @@ main() {
   report V00 INFO "Système" "${os_name:-inconnu} ; noyau $(uname -srm) ; hôte $(hostname)"
 
   local pythons=() python version listing=() best="" best_version="" app_activate app_python=""
-  mapfile -t pythons < <(list_pythons)
+  # Fichiers temporaires plutôt que « < <(…) » : la substitution de processus passe par
+  # /dev/fd, absent sur l'hébergement (CageFS de CloudLinux, constaté le 17 octobre 2026 :
+  # « /dev/fd/62: No such file or directory » et V01 faussement en échec).
+  list_pythons >"$WORK/pythons.txt"
+  mapfile -t pythons <"$WORK/pythons.txt"
   for python in "${pythons[@]}"; do
     version="$(python_version "$python")" || continue
     listing+=("$version ($python)")
@@ -697,11 +701,12 @@ PY
   else
     echo "  (contrôles MariaDB exécutés par $db_python : $db_source)"
     local id status label detail lines=0
+    with_timeout 180 "$db_python" "$WORK/db_checks.py" "$ENV_FILE" "$EXPECTED_SQL_MODE" \
+      "$EXPECTED_COLLATION" >"$WORK/db_checks.out" 2>"$WORK/db.err" || true
     while IFS=$'\t' read -r id status label detail; do
       report "$id" "$status" "$label" "$detail"
       lines=$((lines + 1))
-    done < <(with_timeout 180 "$db_python" "$WORK/db_checks.py" "$ENV_FILE" "$EXPECTED_SQL_MODE" \
-      "$EXPECTED_COLLATION" 2>"$WORK/db.err")
+    done <"$WORK/db_checks.out"
     if ((lines == 0)); then
       report V05 ÉCHEC "Connexion à MariaDB" "programme de contrôle interrompu sans résultat"
     fi
@@ -774,7 +779,8 @@ PY
   # --- Application et cPanel ----------------------------------------------------------
   section "Application et cPanel"
   local all_venvs=()
-  mapfile -t all_venvs < <(find "$HOME/virtualenv" -maxdepth 5 -type f -path '*/bin/activate' 2>/dev/null | sort)
+  find "$HOME/virtualenv" -maxdepth 5 -type f -path '*/bin/activate' 2>/dev/null | sort >"$WORK/venvs.txt"
+  mapfile -t all_venvs <"$WORK/venvs.txt"
   local venv_list="aucun"
   if ((${#all_venvs[@]} > 0)); then venv_list="$(join_by ' , ' "${all_venvs[@]}")"; fi
   if [[ -n "$app_activate" ]]; then
