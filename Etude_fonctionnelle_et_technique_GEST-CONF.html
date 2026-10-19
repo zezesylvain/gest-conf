@@ -259,6 +259,12 @@ hr{border:0;border-top:1px solid var(--line);margin:2em 0}
 <li><a href="#27-3-tests">27.3 Tests</a></li>
 </ul>
 </li>
+<li><a href="#28-chargement-dune-edition-reelle">28. Chargement d'une édition réelle depuis un dossier versionné (version 1.12)</a><ul>
+<li><a href="#28-1-decision-t3">28.1 Décision T3</a></li>
+<li><a href="#28-2-edition-icha2027">28.2 Édition ICHA2027 (`data/editions/icha-2027`)</a></li>
+<li><a href="#28-3-tests">28.3 Tests</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </nav><main><h1 id="etude-fonctionnelle-et-technique">Étude fonctionnelle et technique</h1>
@@ -273,7 +279,7 @@ hr{border:0;border-top:1px solid var(--line);margin:2em 0}
 <tbody>
 <tr>
 <td><strong>Version</strong></td>
-<td>1.11 – document de cadrage, mis à jour après les lots L1 (§17), L2 (§18), L3 (§19), L4 (§20), L5 (§21), L6 (§22), L7 (§23), L8 (§24) et L9 (§25, volet du dépôt), puis 2FA optionnelle (§26) et envoi des e-mails par SMTP (§27)</td>
+<td>1.12 – document de cadrage, mis à jour après les lots L1 (§17), L2 (§18), L3 (§19), L4 (§20), L5 (§21), L6 (§22), L7 (§23), L8 (§24) et L9 (§25, volet du dépôt), puis 2FA optionnelle (§26) et envoi des e-mails par SMTP (§27), puis chargement de la première édition réelle (§28)</td>
 </tr>
 <tr>
 <td><strong>Date</strong></td>
@@ -3817,6 +3823,27 @@ def weighted_score(scores, criteria, scale_min, scale_max):
 <h3 id="27-3-tests">27.3 Tests</h3>
 <ul>
 <li><code>tests/test_email_settings.py</code> : réglages lus dans l'environnement, refus de démarrer dans les cinq cas ci-dessus, fournisseur par API sans réglage SMTP.</li>
+</ul>
+<h2 id="28-chargement-dune-edition-reelle">28. Chargement d'une édition réelle depuis un dossier versionné (version 1.12)</h2>
+<p>Première édition réelle, le 19 octobre 2026 : la <strong>Conférence internationale sur l'analyse harmonique 2027</strong> (GAHAA / LMA, UFRMI, Université Félix Houphouët-Boigny, Abidjan, du 31 mai au 4 juin 2027), à partir de son affiche. Décision <strong>T3</strong> : les données d'une édition sont versionnées dans un dossier et chargées par une commande, <strong>pas par une migration</strong> (une migration s'appliquerait à toutes les bases, celles des tests comprises, et à toute autre installation).</p>
+<h3 id="28-1-decision-t3">28.1 Décision T3</h3>
+<ul>
+<li>Dossier <code>backend/data/editions/&lt;nom&gt;/</code> : <code>edition.json</code> (conférence, édition, thématiques, types de communication, dates clés, inscription, niveaux et partenaires, fichiers publics, sections du portail et page de destination) et ses fichiers (affiche PNG et PDF, photo, logos). Il part sur l'hébergement avec le code (<code>deploy.sh</code>).</li>
+<li>Commande <code>load_edition &lt;dossier&gt; [--admin-email …] [--draft]</code> (<code>apps/conferences/loader.py</code>) : tout passe par les <strong>services métier</strong> (audit RG-17, validations, chaînes de dates clés, assainissement du HTML), dans une seule transaction ; refus si le code d'édition existe déjà ; fichiers référencés contrôlés (présents, dans le dossier) ; champs d'édition hors liste refusés.</li>
+<li><code>--admin-email</code> : comme <code>create_edition</code>, rôle <code>ADMIN</code> de l'édition si l'adresse est vérifiée, invitation sinon (D1 : aucun rôle global).</li>
+</ul>
+<h3 id="28-2-edition-icha2027">28.2 Édition ICHA2027 (<code>data/editions/icha-2027</code>)</h3>
+<ul>
+<li>Conférence <code>icha</code>, édition <code>ICHA2027</code> (<code>2027</code>), <strong>sans double aveugle</strong> (l'affiche demande un CV), langues <code>en</code> et <code>fr</code>, fuseau <code>Africa/Abidjan</code>.</li>
+<li>Quatre thématiques (EDP ; géométrie ; probabilités ; applications interdisciplinaires), deux types (communication orale 20 + 10 min ; forum doctoral, présentation courte), ouverture de l'appel au chargement, clôture le 22 avril 2027 à 23 h 59.</li>
+<li>Inscription en <strong>XOF</strong> (une devise par édition, J2) : Étudiant 20 000, Enseignant 50 000 en zone locale (<code>CI</code>), 0 en zone internationale (« gratuit pour les invités internationaux ») ; équivalents en euros en texte. Ouverture des inscriptions, mentions de facturation, grille d'évaluation : à paramétrer dans la gestion.</li>
+<li>Partenaires officiels (SMCI, AFRIMATH) et organisation (GAHAA, LMA, UFRMI, UFHB), logos extraits de l'affiche ; affiche en image d'en-tête et en PDF ; parrainage du Prof. Saliou Touré (image et texte).</li>
+<li>Comités et programme en <strong>texte</strong> : les sections « comité » ne listent que des comptes ayant consenti à l'annuaire (E), le programme public se publie dans la gestion (L5).</li>
+<li>Sur l'hébergement, l'édition DEMO de la conférence fictive occupait le portail : elle est repassée en brouillon (<code>set_edition_status DEMO draft</code>).</li>
+</ul>
+<h3 id="28-3-tests">28.3 Tests</h3>
+<ul>
+<li><code>apps/conferences/tests/test_loader.py</code> : chargement du dossier versionné, devise et tarifs, affiche, partenaires et sections posées, portail public, refus d'un second chargement, tout ou rien, champs et fichiers refusés, <code>--draft</code>, administrateur invité ou désigné, coexistence avec la démo.</li>
 </ul>
 <hr />
 <p><em>Fin du document.</em></p></main></div>
