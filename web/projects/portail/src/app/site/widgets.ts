@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import {
+  afterNextRender,
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  input,
+  signal,
+} from '@angular/core';
 import {
   formatInZone,
   PublicCommittee,
@@ -11,6 +18,7 @@ import {
 } from '@gestconf/shared';
 import { TranslatePipe } from '@ngx-translate/core';
 
+import { brandName } from './brand';
 import { safeHref } from './sanitize';
 import { localized, SiteLanguage } from './site-pages';
 
@@ -34,7 +42,11 @@ export function countryName(code: string, language: SiteLanguage): string {
   }
 }
 
-/** En-tête de l'édition : titre, thème, dates, lieu ; contenu projeté (compte à rebours). */
+/**
+ * En-tête de l'édition (décision T4, V7) : bande bleu nuit pleine largeur, titre, thème,
+ * dates, lieu et contenu projeté (compte à rebours, boutons) ; l'affiche à droite quand elle
+ * est publiée.
+ */
 @Component({
   selector: 'portail-edition-hero',
   imports: [TranslatePipe],
@@ -42,36 +54,57 @@ export function countryName(code: string, language: SiteLanguage): string {
   template: `
     @let item = edition();
     <section class="hero">
-      <p class="eyebrow">{{ item.code }} · {{ item.year }}</p>
-      <!-- Un seul h1 par page : en section, l'en-tête de l'édition prend un h2. -->
-      @if (level() === 1) {
-        <h1>{{ text(item, 'title') }}</h1>
-      } @else {
-        <h2>{{ text(item, 'title') }}</h2>
-      }
-      @if (text(item, 'theme')) {
-        <p class="theme">{{ text(item, 'theme') }}</p>
-      }
-      @if (item.start_date) {
-        <p class="when">
-          {{
-            'portail.site.datesRange'
-              | translate: { start: day(item.start_date), end: day(item.end_date) }
-          }}
-        </p>
-      }
-      @if (item.venue || item.city) {
-        <p class="where">{{ place(item) }}</p>
-      }
-      <ng-content />
+      <div class="hero-grid">
+        <div class="hero-text">
+          <p class="eyebrow">{{ eyebrow() }}</p>
+          <!-- Un seul h1 par page : en section, l'en-tête de l'édition prend un h2. -->
+          @if (level() === 1) {
+            <h1>{{ text(item, 'title') }}</h1>
+          } @else {
+            <h2>{{ text(item, 'title') }}</h2>
+          }
+          @if (text(item, 'theme')) {
+            <p class="theme">{{ text(item, 'theme') }}</p>
+          }
+          @if (item.start_date) {
+            <p class="when">
+              {{
+                'portail.site.datesRange'
+                  | translate: { start: day(item.start_date), end: day(item.end_date) }
+              }}
+            </p>
+          }
+          @if (item.venue || item.city) {
+            <p class="where">{{ place(item) }}</p>
+          }
+          <ng-content />
+        </div>
+        @if (poster(); as image) {
+          <figure class="poster">
+            <img
+              [src]="image.url"
+              [attr.width]="image.width"
+              [attr.height]="image.height"
+              [alt]="text(image, 'title')"
+            />
+          </figure>
+        }
+      </div>
     </section>
   `,
-  styleUrl: './site.scss',
+  styleUrl: './hero.scss',
 })
 export class EditionHero {
   readonly edition = input.required<PublicEdition>();
   readonly language = input.required<SiteLanguage>();
   readonly level = input<1 | 2>(1);
+  /** Affiche publiée de l'édition (accueil) ; aucune en section. */
+  readonly poster = input<PublicFileRef | null>(null);
+
+  protected readonly eyebrow = computed(() => {
+    const item = this.edition();
+    return [brandName(item.code, item.year), item.city].filter(Boolean).join(' · ');
+  });
 
   protected text(item: object, field: string): string {
     return localized(item, field, this.language());
@@ -88,7 +121,23 @@ export class EditionHero {
   }
 }
 
-/** Dates clés publiques, à l'heure de l'édition (fuseau affiché). */
+/** État d'une date clé, calculé dans le navigateur (une page pré-rendue ne fige rien). */
+export type DateStatus = 'past' | 'ongoing' | 'upcoming';
+
+/**
+ * Passée, à venir, ou en cours pour une ouverture (`…_open`) dont la clôture (`…_close`)
+ * n'est pas encore atteinte (T4, V8).
+ */
+export function dateStatus(item: PublicKeyDate, all: PublicKeyDate[], now: Date): DateStatus {
+  if (Date.parse(item.at) > now.getTime()) return 'upcoming';
+  if (item.code.endsWith('_open')) {
+    const close = all.find((other) => other.code === item.code.replace(/_open$/, '_close'));
+    if (close && Date.parse(close.at) > now.getTime()) return 'ongoing';
+  }
+  return 'past';
+}
+
+/** Dates clés publiques en cartes, à l'heure de l'édition (fuseau affiché ; T4, V8). */
 @Component({
   selector: 'portail-dates-list',
   imports: [TranslatePipe],
@@ -98,8 +147,13 @@ export class EditionHero {
       <ol class="dates">
         @for (item of dates(); track item.code) {
           <li>
+            @if (statuses()[item.code]; as status) {
+              <span class="status" [class]="status">{{
+                'portail.site.dateStatus.' + status | translate
+              }}</span>
+            }
             <time [attr.datetime]="item.at">{{ when(item) }}</time>
-            <span>{{ label(item) | translate }}</span>
+            <span class="label">{{ label(item) | translate }}</span>
           </li>
         }
       </ol>
@@ -116,6 +170,17 @@ export class DatesList {
   readonly dates = input.required<PublicKeyDate[]>();
   readonly language = input.required<SiteLanguage>();
   readonly timezone = input<string>('');
+  protected readonly statuses = signal<Record<string, DateStatus>>({});
+
+  constructor() {
+    afterNextRender(() => {
+      const now = new Date();
+      const all = this.dates();
+      this.statuses.set(
+        Object.fromEntries(all.map((item) => [item.code, dateStatus(item, all, now)])),
+      );
+    });
+  }
 
   protected when(item: PublicKeyDate): string {
     return formatInZone(item.at, this.timezone() || undefined, this.language());
@@ -131,9 +196,10 @@ export class DatesList {
   selector: 'portail-tracks-list',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <ul class="cards">
+    <ul class="cards numbered">
       @for (track of tracks(); track track.code) {
         <li>
+          <span class="number" aria-hidden="true">{{ number($index) }}</span>
           <h3>{{ text(track, 'name') }}</h3>
           @if (text(track, 'description')) {
             <p>{{ text(track, 'description') }}</p>
@@ -147,6 +213,11 @@ export class DatesList {
 export class TracksList {
   readonly tracks = input.required<PublicTrack[]>();
   readonly language = input.required<SiteLanguage>();
+
+  /** Numéro d'axe sur deux chiffres (« 01 »), comme l'affiche (T4, V9). */
+  protected number(index: number): string {
+    return String(index + 1).padStart(2, '0');
+  }
 
   protected text(item: object, field: string): string {
     return localized(item, field, this.language());

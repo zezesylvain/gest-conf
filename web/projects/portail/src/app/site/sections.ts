@@ -35,38 +35,46 @@ import {
     @for (section of sections(); track section.code) {
       @switch (section.section_type) {
         @case ('rich_text') {
-          <section class="block rich" [attr.data-section]="section.code">
-            <ng-container *ngTemplateOutlet="heading; context: { $implicit: section }" />
-            <div class="prose" [innerHTML]="body(section)"></div>
-            <ng-container *ngTemplateOutlet="buttons; context: { $implicit: section }" />
+          <section class="band rich" [attr.data-section]="section.code">
+            <div class="wrap">
+              <ng-container *ngTemplateOutlet="heading; context: { $implicit: section }" />
+              <div class="prose" [innerHTML]="body(section)"></div>
+              <ng-container *ngTemplateOutlet="buttons; context: { $implicit: section }" />
+            </div>
           </section>
         }
         @case ('cta_banner') {
-          <section class="block banner" [attr.data-section]="section.code">
-            <ng-container *ngTemplateOutlet="heading; context: { $implicit: section }" />
-            <div class="prose" [innerHTML]="body(section)"></div>
-            <ng-container *ngTemplateOutlet="buttons; context: { $implicit: section }" />
+          <section class="band banner" [attr.data-section]="section.code">
+            <div class="wrap">
+              <ng-container *ngTemplateOutlet="heading; context: { $implicit: section }" />
+              <div class="prose" [innerHTML]="body(section)"></div>
+              <ng-container
+                *ngTemplateOutlet="buttons; context: { $implicit: section, dark: true }"
+              />
+            </div>
           </section>
         }
         @case ('image_text') {
           <section
-            class="block image-text"
+            class="band image-text"
             [class.right]="section.config?.image_position === 'right'"
             [attr.data-section]="section.code"
           >
-            @if (section.image; as image) {
-              <img
-                [src]="image.url"
-                [attr.width]="image.width"
-                [attr.height]="image.height"
-                [alt]="text(image, 'title')"
-                loading="lazy"
-              />
-            }
-            <div>
-              <ng-container *ngTemplateOutlet="heading; context: { $implicit: section }" />
-              <div class="prose" [innerHTML]="body(section)"></div>
-              <ng-container *ngTemplateOutlet="buttons; context: { $implicit: section }" />
+            <div class="wrap">
+              @if (section.image; as image) {
+                <img
+                  [src]="image.url"
+                  [attr.width]="image.width"
+                  [attr.height]="image.height"
+                  [alt]="text(image, 'title')"
+                  loading="lazy"
+                />
+              }
+              <div>
+                <ng-container *ngTemplateOutlet="heading; context: { $implicit: section }" />
+                <div class="prose" [innerHTML]="body(section)"></div>
+                <ng-container *ngTemplateOutlet="buttons; context: { $implicit: section }" />
+              </div>
             </div>
           </section>
         }
@@ -80,39 +88,49 @@ import {
           }
         }
         @case ('key_dates') {
-          <section class="block" [attr.data-section]="section.code">
-            <ng-container *ngTemplateOutlet="heading; context: { $implicit: section }" />
-            <portail-dates-list
-              [dates]="section.data ?? []"
-              [language]="language()"
-              [timezone]="timezone()"
-            />
+          <section class="band" [attr.data-section]="section.code">
+            <div class="wrap">
+              <ng-container *ngTemplateOutlet="heading; context: { $implicit: section }" />
+              <portail-dates-list
+                [dates]="section.data ?? []"
+                [language]="language()"
+                [timezone]="timezone()"
+              />
+            </div>
           </section>
         }
         @case ('tracks') {
-          <section class="block" [attr.data-section]="section.code">
-            <ng-container *ngTemplateOutlet="heading; context: { $implicit: section }" />
-            <portail-tracks-list [tracks]="section.data ?? []" [language]="language()" />
+          <section class="band" [attr.data-section]="section.code">
+            <div class="wrap">
+              <ng-container *ngTemplateOutlet="heading; context: { $implicit: section }" />
+              <portail-tracks-list [tracks]="section.data ?? []" [language]="language()" />
+            </div>
           </section>
         }
         @case ('submission_types') {
-          <section class="block" [attr.data-section]="section.code">
-            <ng-container *ngTemplateOutlet="heading; context: { $implicit: section }" />
-            <portail-submission-types-list [types]="section.data ?? []" [language]="language()" />
+          <section class="band" [attr.data-section]="section.code">
+            <div class="wrap">
+              <ng-container *ngTemplateOutlet="heading; context: { $implicit: section }" />
+              <portail-submission-types-list [types]="section.data ?? []" [language]="language()" />
+            </div>
           </section>
         }
         @case ('documents') {
-          <section class="block" [attr.data-section]="section.code">
-            <ng-container *ngTemplateOutlet="heading; context: { $implicit: section }" />
-            <portail-documents-list [documents]="section.data ?? []" [language]="language()" />
+          <section class="band" [attr.data-section]="section.code">
+            <div class="wrap">
+              <ng-container *ngTemplateOutlet="heading; context: { $implicit: section }" />
+              <portail-documents-list [documents]="section.data ?? []" [language]="language()" />
+            </div>
           </section>
         }
         @case ('committee') {
-          <section class="block" [attr.data-section]="section.code">
-            <ng-container *ngTemplateOutlet="heading; context: { $implicit: section }" />
-            @if (section.data; as committee) {
-              <portail-committee-list [committee]="committee" [language]="language()" />
-            }
+          <section class="band" [attr.data-section]="section.code">
+            <div class="wrap">
+              <ng-container *ngTemplateOutlet="heading; context: { $implicit: section }" />
+              @if (section.data; as committee) {
+                <portail-committee-list [committee]="committee" [language]="language()" />
+              }
+            </div>
           </section>
         }
         <!-- Type inconnu : rien (catalogue fermé, plan L2 §2.2). -->
@@ -127,17 +145,21 @@ import {
         <p class="subtitle">{{ text(section, 'subtitle') }}</p>
       }
     </ng-template>
-    <ng-template #buttons let-section>
+    <ng-template #buttons let-section let-dark="dark">
       @if (
         (section.cta_url && text(section, 'cta_label')) ||
         (section.cta2_url && text(section, 'cta2_label'))
       ) {
         <p class="buttons">
           @if (section.cta_url && text(section, 'cta_label')) {
-            <a class="button primary" [href]="section.cta_url">{{ text(section, 'cta_label') }}</a>
+            <a class="button primary" [class.on-dark]="dark" [href]="section.cta_url">{{
+              text(section, 'cta_label')
+            }}</a>
           }
           @if (section.cta2_url && text(section, 'cta2_label')) {
-            <a class="button" [href]="section.cta2_url">{{ text(section, 'cta2_label') }}</a>
+            <a class="button" [class.on-dark]="dark" [href]="section.cta2_url">{{
+              text(section, 'cta2_label')
+            }}</a>
           }
         </p>
       }

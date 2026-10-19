@@ -1,6 +1,56 @@
 /* Styles globaux du portail. Jetons --gc-* communs : shared/ui-kit (plan L1 §10.5). Le thème Angular Material est une feuille séparée (gc-theme.css), chargée par /compte. */
 @use '../../shared/src/lib/ui-kit/tokens';
 
+/* Identité visuelle du portail (décision T4, V1 à V3) : polices auto-hébergées (font-src 'self'), jeu latin seul (français, anglais). Licences OFL : public/fonts/. */
+@font-face {
+  font-family: Archivo;
+  font-weight: 800;
+  font-display: swap;
+  src: url('/fonts/archivo-latin-800-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: Archivo;
+  font-weight: 900;
+  font-display: swap;
+  src: url('/fonts/archivo-latin-900-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/ibm-plex-sans-latin-400-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-weight: 600 700;
+  font-display: swap;
+  src: url('/fonts/ibm-plex-sans-latin-600-normal.woff2') format('woff2');
+}
+
+/* Palette de l'affiche ; contrastes vérifiés (plan T4, §3). L'or ne sert jamais de texte sur fond clair (1,9:1). */
+:root {
+  --pt-navy: #092b40;
+  --pt-navy-deep: #061f2f;
+  --pt-navy-soft: #0e3650;
+  --pt-gold: #e8b44a;
+  --pt-teal: #086f6c;
+  --pt-teal-dark: #05524f;
+  --pt-text-soft: #3d5361;
+  --pt-mist: #f3f6f8;
+  --pt-line: #dfe7ec;
+  --pt-on-dark: #c9d6df;
+  --pt-on-dark-muted: #9fb4c2;
+  --pt-display: Archivo, var(--gc-font);
+  --pt-wrap: 75rem;
+  --pt-gutter: clamp(1rem, 4vw, 1.5rem);
+  /* Surcharges limitées au portail : /compte reste cohérent, la gestion garde ses jetons. */
+  --gc-primary: var(--pt-navy);
+  --gc-text: #1b2b36;
+  --gc-muted: #5b7383;
+  --gc-surface-muted: var(--pt-mist);
+  --gc-font: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
 *,
 *::before,
 *::after {
@@ -14,12 +64,29 @@ body {
 
 body {
   font-family: var(--gc-font);
-  line-height: 1.5;
+  line-height: 1.6;
   color: var(--gc-text);
   background: var(--gc-surface);
 }
 
+h1,
+h2,
+h3 {
+  font-family: var(--pt-display);
+  font-weight: 800;
+  line-height: 1.15;
+  color: var(--pt-navy);
+}
+
+a {
+  color: var(--pt-teal);
+}
+
+a:hover {
+  color: var(--pt-teal-dark);
+}
+
 :focus-visible {
-  outline: 3px solid var(--gc-primary);
+  outline: 3px solid var(--pt-teal);
   outline-offset: 2px;
 }

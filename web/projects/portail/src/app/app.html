@@ -4,10 +4,10 @@
      navigateur seulement (voir App). -->
 <ng-container #banner />
 
+<!-- Gabarit commun (décision T4, V5) : barre utilitaire, puis marque et menu géré. -->
 <header class="site-header">
-  <div class="header-row">
-    <a class="brand" [routerLink]="homeLink()">{{ 'shared.appName' | translate }}</a>
-    <div class="header-tools">
+  <div class="topbar">
+    <div class="wrap topbar-row">
       @if (session.authenticated()) {
         <a class="account-link" routerLink="/compte">{{
           'portail.layout.myAccount' | translate
@@ -24,14 +24,57 @@
       }
     </div>
   </div>
-  <portail-site-nav location="header" />
+  <div class="wrap mainbar">
+    <a class="brand" [routerLink]="homeLink()">
+      <span class="mark" aria-hidden="true">
+        <svg width="28" height="16" viewBox="0 0 28 16" focusable="false">
+          <path d="M1 8C4 1 7 1 10 8s6 7 9 0 6-7 8 0" />
+        </svg>
+      </span>
+      @if (brand()) {
+        <span class="brand-text">
+          <span class="brand-name">{{ brand() }}</span>
+          @if (city()) {
+            <span class="brand-sub">{{ city() }}</span>
+          }
+        </span>
+      } @else {
+        <span class="brand-name">{{ 'shared.appName' | translate }}</span>
+      }
+    </a>
+    <portail-site-nav location="header" />
+  </div>
 </header>
 
-<main id="contenu" class="site-main" tabindex="-1">
+<main id="contenu" class="site-main" [class.public]="context.paths()" tabindex="-1">
   <router-outlet />
 </main>
 
 <footer class="site-footer">
-  <portail-site-nav location="footer" />
-  <p>{{ 'portail.layout.footer' | translate }}</p>
+  <div class="wrap footer-grid">
+    <div>
+      <p class="footer-brand">{{ brand() || ('shared.appName' | translate) }}</p>
+      @if (editionTitle()) {
+        <p>{{ editionTitle() }}</p>
+      }
+    </div>
+    <portail-site-nav location="footer" />
+    <div>
+      <p class="footer-title">{{ 'portail.layout.yourAccount' | translate }}</p>
+      <ul>
+        <li>
+          <a routerLink="/compte/soumissions">{{ 'portail.layout.mySubmissions' | translate }}</a>
+        </li>
+        <li>
+          <a routerLink="/compte/mon-inscription">{{
+            'portail.layout.myRegistration' | translate
+          }}</a>
+        </li>
+        <li>
+          <a routerLink="/compte/mes-documents">{{ 'portail.layout.myDocuments' | translate }}</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="wrap footer-base">{{ 'portail.layout.footer' | translate }}</div>
 </footer>

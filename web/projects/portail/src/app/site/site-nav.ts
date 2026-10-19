@@ -64,13 +64,28 @@ interface NavLink {
     ul {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.25rem 1.25rem;
+      gap: 0.25rem 1.375rem;
       margin: 0;
       padding: 0;
       list-style: none;
     }
     a {
+      display: inline-block;
+      padding-block: 0.375rem;
       color: inherit;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    /* Page courante : soulignée d'or (T4, V5). */
+    a[aria-current='page'] {
+      font-weight: 600;
+      box-shadow: inset 0 -2px var(--pt-gold);
+    }
+    :host([location='footer']) ul {
+      flex-direction: column;
+      gap: 0;
     }
   `,
 })
@@ -141,7 +156,7 @@ export class SiteNav {
     }
     a {
       color: inherit;
-      padding: 0.25rem 0.6rem;
+      padding: 0.125rem 0.5rem;
       border: 1px solid currentColor;
       border-radius: 0.25rem;
       text-decoration: none;

@@ -34,7 +34,12 @@ export function daysUntil(startDate: string, timeZone: string, now: Date): numbe
       </p>
     }
   `,
-  styleUrl: './site.scss',
+  styles: `
+    .countdown {
+      margin: 0;
+      font-weight: 700;
+    }
+  `,
 })
 export class Countdown {
   readonly edition = input.required<PublicEdition>();

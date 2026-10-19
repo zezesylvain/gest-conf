@@ -4,7 +4,11 @@
       "skipToContent": "Aller au contenu",
       "footer": "Plateforme de gestion de conférences scientifiques",
       "myAccount": "Mon compte",
-      "signIn": "Connexion"
+      "signIn": "Connexion",
+      "yourAccount": "Votre compte",
+      "mySubmissions": "Mes soumissions",
+      "myRegistration": "Mon inscription",
+      "myDocuments": "Mes documents"
     },
     "notFound": {
       "title": "Page introuvable",
@@ -349,6 +353,34 @@
         "website": "Site web",
         "scholar": "Google Scholar",
         "linkedin": "LinkedIn"
+      },
+      "toRegistration": "S'inscrire",
+      "breadcrumb": "Fil d'Ariane",
+      "home": "Accueil",
+      "howToSubmit": "Comment soumettre",
+      "submit": "Soumettre une communication",
+      "callSteps": {
+        "account": {
+          "title": "Créez votre compte",
+          "text": "Une adresse e-mail suffit ; elle sert aussi à l'inscription et aux attestations."
+        },
+        "choose": {
+          "title": "Choisissez une thématique et un format",
+          "text": "Les thématiques et les formats acceptés sont décrits ci-dessous."
+        },
+        "upload": {
+          "title": "Déposez votre proposition",
+          "text": "Titre, résumé et fichiers demandés ; vous pouvez enregistrer un brouillon et y revenir jusqu'à la clôture de l'appel."
+        },
+        "follow": {
+          "title": "Suivez l'évaluation depuis votre compte",
+          "text": "Décision, commentaires du comité et confirmation de votre passage au programme."
+        }
+      },
+      "dateStatus": {
+        "past": "Passée",
+        "ongoing": "En cours",
+        "upcoming": "À venir"
       }
     },
     "submissions": {
@@ -927,7 +959,8 @@
         "service": "Les e-mails de service (inscription, soumission, documents) restent envoyés.",
         "preferences": "Gérer mes préférences",
         "invalid": "Ce lien de désabonnement n'est pas valide. Connectez-vous pour gérer vos préférences."
-      }
+      },
+      "sponsorsTitle": "Partenaires"
     }
   }
 }
